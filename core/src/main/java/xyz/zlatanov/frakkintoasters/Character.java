@@ -11,4 +11,5 @@ public enum Character {
     SHARON_BOOMER_VALERII,
     TOM_ZAREK,
     WILLIAM_ADAMA
+
 }
