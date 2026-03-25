@@ -1,4 +1,5 @@
 package xyz.zlatanov.frakkintoasters;
 
-public class Board {
+public enum BoardType {
+    GALACTICA
 }
