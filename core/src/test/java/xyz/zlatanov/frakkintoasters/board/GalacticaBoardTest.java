@@ -1,7 +1,8 @@
-package xyz.zlatanov.frakkintoasters;
+package xyz.zlatanov.frakkintoasters.board;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
+import xyz.zlatanov.frakkintoasters.Location;
 
 import java.util.HashSet;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static xyz.zlatanov.frakkintoasters.Character.GAIUS_BALTAR;
 import static xyz.zlatanov.frakkintoasters.Location.*;
 
 class GalacticaBoardTest {
@@ -24,6 +26,13 @@ class GalacticaBoardTest {
         board.destroyColonialOne();
         assertEquals(noColonialOneLocations(), board.locations());
         assertTrue(board.colonialOneDestroyed());
+    }
+
+    @Test
+    void shouldSendCharactersFromDestroyedColonialOneToSickbay() {
+        board.moveTo(PRESIDENTS_OFFICE, GAIUS_BALTAR); //hehe
+        board.destroyColonialOne(); //oops
+        assertEquals(SICKBAY, board.locate(GAIUS_BALTAR)); // poor Gaius
     }
 
     private Set<Location> startingLocations() {
