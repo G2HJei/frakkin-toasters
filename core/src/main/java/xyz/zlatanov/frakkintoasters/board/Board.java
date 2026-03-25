@@ -4,49 +4,62 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.Character;
 import xyz.zlatanov.frakkintoasters.Location;
+import xyz.zlatanov.frakkintoasters.exception.InvalidMoveLocationException;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public abstract class Board {
-    private final Set<Location> locations;
+
+    private final Set<Location>            locations;
     private final Map<Character, Location> characters = new HashMap<>();
 
     public Set<Location> locations() {
         return new HashSet<>(locations);
     }
 
-
-    public void moveTo(Location location, Set<Character> characterToPlace) {
-        moveTo(location, characterToPlace.toArray(new Character[]{}));
+    public void moveTo(Location location, Character... characterToPlace) {
+        moveTo(location, Set.of(characterToPlace));
     }
 
-    public void moveTo(Location location, Character... characterToPlace) {
-        Arrays.stream(characterToPlace).forEach(c -> characters.put(c, location));
+    public void moveTo(Location location, Set<Character> characterToPlace) {
+        if (!locations.contains(location)) {
+            throw new InvalidMoveLocationException();
+        }
+        characterToPlace.forEach(c -> characters.put(c, location));
     }
 
     public Location locate(Character character) {
         return characters.get(character);
     }
 
+    public void remove(Character... charactersToRemove) {
+        remove(Set.of(charactersToRemove));
+    }
+
+    public void remove(Set<Character> charactersToRemove) {
+        charactersToRemove.forEach(characters::remove);
+    }
+
+    public Set<Character> charactersIn(Location... lookupLocations) {
+        return charactersIn(Set.of(lookupLocations));
+    }
+
+    public Set<Character> charactersIn(Set<Location> lookupLocations) {
+        return characters.entrySet()
+                .stream()
+                .filter(es -> lookupLocations.contains(es.getValue()))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+    }
+
     protected void removeLocations(Location... locationsToRemove) {
         for (val loc : locationsToRemove) {
             locations.remove(loc);
         }
-    }
-
-    protected Set<Character> charactersIn(Set<Location> lookupLocations) {
-        return charactersIn(lookupLocations.toArray(new Location[]{}));
-    }
-
-
-    protected Set<Character> charactersIn(Location... lookupLocations) {
-        val lookupLocationsList = Arrays.asList(lookupLocations);
-        return characters.entrySet()
-                .stream()
-                .filter(es -> lookupLocationsList.contains(es.getValue()))
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toSet());
     }
 }

@@ -8,8 +8,9 @@ import static xyz.zlatanov.frakkintoasters.Character.CHIEF_GALEN_TYROL;
 
 public class Player {
 
-    private final Character character;
-    private final List<SkillCard> skillCards = new ArrayList<>();
+    private final Character       character;
+    private final List<SkillCard> skillCards      = new ArrayList<>();
+    private       boolean         hasMiracleToken = true;
 
     public Player(Character character) {
         this.character = character;
@@ -25,5 +26,17 @@ public class Player {
 
     public int handLimit() {
         return character == CHIEF_GALEN_TYROL ? 8 : 10;
+    }
+
+    public void exhaustMiracleToken() {
+        hasMiracleToken = false;
+    }
+
+    public void gainMiracleToken() {
+        hasMiracleToken = true;
+    }
+
+    public boolean hasMiracleToken() {
+        return hasMiracleToken;
     }
 }
