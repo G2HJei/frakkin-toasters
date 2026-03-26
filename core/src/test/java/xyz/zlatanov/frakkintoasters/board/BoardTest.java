@@ -22,7 +22,7 @@ class BoardTest {
 
     @Test
     void shouldRemoveCharacterFromBoard() {
-        board.moveTo(PRESIDENTS_OFFICE, GAIUS_BALTAR);
+        board.moveTo(BRIG, GAIUS_BALTAR);
         board.remove(GAIUS_BALTAR);
         assertNull(board.locate(GAIUS_BALTAR));
     }
