@@ -1,31 +1,26 @@
 package xyz.zlatanov.frakkintoasters;
 
 import org.junit.jupiter.api.Test;
+import xyz.zlatanov.frakkintoasters.board.GalacticaBoard;
+import xyz.zlatanov.frakkintoasters.exception.FrakCallTheAdmiralException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static xyz.zlatanov.frakkintoasters.ObjectiveCard.EARTH;
 import static xyz.zlatanov.frakkintoasters.ObjectiveCard.KOBOL;
 
 class GameTest {
 
-    Game game = new Game(KOBOL);
+    Game game = new Game();
 
     @Test
-    void shouldStartWithKobol() {
-        assertEquals(KOBOL, game.objective());
+    void shouldSetObjectiveOnlyOnce() {
+        game.objective(KOBOL);
+        assertThrows(FrakCallTheAdmiralException.class, () -> game.objective(EARTH));
     }
 
     @Test
-    void shouldStartWithFood() {
-        assertEquals(8, game.food());
-    }
-
-    @Test
-    void shouldStartWithMorale() {
-        assertEquals(10, game.morale());
-    }
-
-    @Test
-    void shouldStartWithPopulation() {
-        assertEquals(12, game.population());
+    void shouldStartWithMandatoryBoards() {
+        assertEquals(new GalacticaBoard(), game.galacticaBoard());
     }
 }

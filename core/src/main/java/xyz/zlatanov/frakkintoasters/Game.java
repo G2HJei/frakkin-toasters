@@ -1,16 +1,21 @@
 package xyz.zlatanov.frakkintoasters;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
+import xyz.zlatanov.frakkintoasters.board.GalacticaBoard;
+import xyz.zlatanov.frakkintoasters.exception.FrakCallTheAdmiralException;
 
-@RequiredArgsConstructor
 @Getter
 @Accessors(fluent = true)
 public class Game {
-    private final ObjectiveCard objective;
-    private int food = 8;
-    private int morale = 10;
-    private int population = 12;
+    private ObjectiveCard  objective;
+    private GalacticaBoard galacticaBoard;
+
+    public void objective(ObjectiveCard objective) {
+        if (objective != null) {
+            throw new FrakCallTheAdmiralException();
+        }
+        this.objective = objective;
+    }
 
 }

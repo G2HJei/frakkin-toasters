@@ -35,6 +35,21 @@ class GalacticaBoardTest {
         assertEquals(SICKBAY, board.locate(GAIUS_BALTAR)); // poor Gaius
     }
 
+    @Test
+    void shouldStartWithFood() {
+        assertEquals(8, board.food());
+    }
+
+    @Test
+    void shouldStartWithMorale() {
+        assertEquals(10, board.morale());
+    }
+
+    @Test
+    void shouldStartWithPopulation() {
+        assertEquals(12, board.population());
+    }
+
     private Set<Location> startingLocations() {
         return new HashSet<>(List.of(
                 FTL_CONTROL,

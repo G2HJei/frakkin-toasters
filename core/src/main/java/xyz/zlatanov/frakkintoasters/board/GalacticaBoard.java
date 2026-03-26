@@ -1,5 +1,7 @@
 package xyz.zlatanov.frakkintoasters.board;
 
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import xyz.zlatanov.frakkintoasters.Location;
 
 import java.util.HashSet;
@@ -7,8 +9,12 @@ import java.util.Set;
 
 import static xyz.zlatanov.frakkintoasters.Location.*;
 
+@Getter
+@Accessors(fluent = true)
 public class GalacticaBoard extends Board {
-
+    private int     food                 = 8;
+    private int     morale               = 10;
+    private int     population           = 12;
     private boolean colonialOneDestroyed = false;
 
     public GalacticaBoard() {
@@ -30,10 +36,6 @@ public class GalacticaBoard extends Board {
         removeLocations(PRESS_ROOM, PRESIDENTS_OFFICE, ADMINISTRATION);
         moveTo(SICKBAY, charactersIn(PRESS_ROOM, PRESIDENTS_OFFICE, ADMINISTRATION));
         colonialOneDestroyed = true;
-    }
-
-    public boolean colonialOneDestroyed() {
-        return colonialOneDestroyed;
     }
 
 }
