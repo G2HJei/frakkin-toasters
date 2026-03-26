@@ -4,8 +4,7 @@ import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.board.GalacticaBoard;
 import xyz.zlatanov.frakkintoasters.exception.FrakCallTheAdmiralException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.ObjectiveCard.EARTH;
 import static xyz.zlatanov.frakkintoasters.ObjectiveCard.KOBOL;
 
@@ -23,4 +22,5 @@ class GameTest {
     void shouldStartWithMandatoryBoards() {
         assertEquals(new GalacticaBoard(), game.galacticaBoard());
     }
+
 }
