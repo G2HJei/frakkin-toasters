@@ -22,15 +22,15 @@ public abstract class Board {
         return new HashSet<>(locations);
     }
 
-    public void moveTo(Location location, Character... characterToPlace) {
-        moveTo(location, Set.of(characterToPlace));
+    public void move(Location to, Character... characterToPlace) {
+        move(to, Set.of(characterToPlace));
     }
 
-    public void moveTo(Location location, Set<Character> characterToPlace) {
-        if (!locations.contains(location) || location.isSpaceLocation() || location.isHazardousLocation()) {
+    public void move(Location to, Set<Character> characterToPlace) {
+        if (!locations.contains(to) || to.isSpaceLocation()) {
             throw new InvalidMoveLocationException();
         }
-        characterToPlace.forEach(c -> characters.put(c, location));
+        characterToPlace.forEach(c -> characters.put(c, to));
     }
 
     public Location locate(Character character) {

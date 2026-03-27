@@ -1,4 +1,4 @@
 package xyz.zlatanov.frakkintoasters.ship;
 
-public abstract class FighterShip extends Ship {
+public interface FighterShip extends Ship {
 }

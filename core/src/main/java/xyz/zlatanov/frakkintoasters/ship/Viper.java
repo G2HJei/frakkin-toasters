@@ -1,4 +1,13 @@
 package xyz.zlatanov.frakkintoasters.ship;
 
-public class Viper extends FighterShip {
+import lombok.Data;
+import lombok.experimental.Accessors;
+
+import static xyz.zlatanov.frakkintoasters.ship.ShipType.VIPER;
+
+@Data
+@Accessors(fluent = true)
+public class Viper implements FighterShip {
+    private final ShipType type = VIPER;
+
 }

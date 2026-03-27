@@ -12,6 +12,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static xyz.zlatanov.frakkintoasters.Character.GAIUS_BALTAR;
 import static xyz.zlatanov.frakkintoasters.Location.*;
+import static xyz.zlatanov.frakkintoasters.ship.ShipType.VIPER;
+import static xyz.zlatanov.frakkintoasters.ship.ShipType.VIPER_MARK_VII;
 
 class GalacticaBoardTest {
     GalacticaBoard board = new GalacticaBoard();
@@ -30,24 +32,35 @@ class GalacticaBoardTest {
 
     @Test
     void shouldSendCharactersFromDestroyedColonialOneToSickbay() {
-        board.moveTo(PRESIDENTS_OFFICE, GAIUS_BALTAR); //hehe
+        board.move(PRESIDENTS_OFFICE, GAIUS_BALTAR); //hehe
         board.destroyColonialOne(); //oops
         assertEquals(SICKBAY, board.locate(GAIUS_BALTAR)); // poor Gaius
     }
 
     @Test
-    void shouldStartWithFood() {
+    void shouldStartWithAllResources() {
         assertEquals(8, board.food());
-    }
-
-    @Test
-    void shouldStartWithMorale() {
         assertEquals(10, board.morale());
+        assertEquals(12, board.population());
     }
 
     @Test
-    void shouldStartWithPopulation() {
-        assertEquals(12, board.population());
+    void shouldRemoveFromReserves() {
+        board.removeFromReserve(VIPER);
+        assertEquals(3, board.reserves().stream().filter(s -> s.type() == VIPER).count());
+    }
+
+    @Test
+    void shouldRemoveFromDamagedShips() {
+        board.removeFromDamagedShips(VIPER_MARK_VII);
+        assertEquals(3, board.damagedShips().stream().filter(s -> s.type() == VIPER_MARK_VII).count());
+    }
+
+    @Test
+    void shouldTrackFighterShips() {
+        //val viperToMove = board.reserves()
+        //        .stream().findFirst().orElseThrow();
+        //board.move(new Viper(), GALACTICA_SPACE_6_OCLOCK);
     }
 
     private Set<Location> startingLocations() {

@@ -1,4 +1,5 @@
 package xyz.zlatanov.frakkintoasters.ship;
 
-public abstract class Ship {
+public interface Ship {
+    ShipType type();
 }
