@@ -1,0 +1,25 @@
+package xyz.zlatanov.frakkintoasters;
+
+public enum DestinationCard {
+    RADIOACTIVE_CLOUD,
+    LIONS_HEAD_NEBULA,
+    GAS_GIANT,
+    DYING_STAR,
+    DERELICT_BASESTAR,
+    CYLON_RAIDERS,
+    ALGAE_PLANET,
+    MISJUMP,
+    GAS_CLOUD,
+    BINARY_STAR,
+    A_CIVILIAN_CONVOY,
+    TYLIUM_PLANET,
+    REMOTE_PLANET,
+    RAGNAR_ARCHORAGE,
+    ICY_MOON,
+    DESOLATE_MOON,
+    DEEP_SPACE,
+    CYLON_ReFINERY,
+    CYLON_AMBUSH,
+    BARREN_PLANET,
+    ASTEROID_FIELD
+}
