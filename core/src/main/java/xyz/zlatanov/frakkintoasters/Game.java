@@ -8,15 +8,16 @@ import xyz.zlatanov.frakkintoasters.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.ship.*;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static xyz.zlatanov.frakkintoasters.Location.*;
 
 @Getter
 @Accessors(fluent = true)
 public class Game {
-    private ObjectiveCard objective;
-    private GalacticaBoard galacticaBoard = new GalacticaBoard();
-    private PegasusBoard pegasusBoard = new PegasusBoard();
+    private ObjectiveCard      objective;
+    private GalacticaBoard     galacticaBoard    = new GalacticaBoard();
+    private PegasusBoard       pegasusBoard      = new PegasusBoard();
     private Deck<CivilianShip> civilianShipsDeck = new Deck<>();
 
     public void objective(ObjectiveCard objective) {
@@ -27,19 +28,12 @@ public class Game {
     }
 
     public void setupCivilianShipsDeck() {
-        civilianShipsDeck.add(List.of(
-                new CivilianShip(0, 0, 0),
-                new CivilianShip(0, 0, 0),
-                new CivilianShip(0, 0, 1),
-                new CivilianShip(0, 0, 1),
-                new CivilianShip(0, 0, 1),
-                new CivilianShip(0, 0, 1),
-                new CivilianShip(0, 0, 1),
-                new CivilianShip(0, 0, 1),
-                new CivilianShip(0, 0, 2),
-                new CivilianShip(0, 0, 2),
-                new CivilianShip(0, 1, 1),
-                new CivilianShip(1, 0, 1)));
+        IntStream.range(0, 2).forEach(i -> civilianShipsDeck.add(new CivilianShip(0, 0, 0)));
+        IntStream.range(0, 2).forEach(i -> civilianShipsDeck.add(new CivilianShip(0, 0, 2)));
+        IntStream.range(0, 6).forEach(i -> civilianShipsDeck.add(new CivilianShip(0, 0, 1)));
+        civilianShipsDeck.add(new CivilianShip(0, 1, 1));
+        civilianShipsDeck.add(new CivilianShip(1, 0, 1));
+        civilianShipsDeck.shuffle();
     }
 
     public void setupGalacticaBoard() {
