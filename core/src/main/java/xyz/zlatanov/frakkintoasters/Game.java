@@ -5,9 +5,13 @@ import lombok.experimental.Accessors;
 import xyz.zlatanov.frakkintoasters.board.CylonFleetBoard;
 import xyz.zlatanov.frakkintoasters.board.GalacticaBoard;
 import xyz.zlatanov.frakkintoasters.board.PegasusBoard;
+import xyz.zlatanov.frakkintoasters.damage.BasestarDamage;
+import xyz.zlatanov.frakkintoasters.damage.GalacticaDamage;
+import xyz.zlatanov.frakkintoasters.damage.PegasusDamage;
 import xyz.zlatanov.frakkintoasters.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.ship.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -16,12 +20,15 @@ import static xyz.zlatanov.frakkintoasters.Location.*;
 @Getter
 @Accessors(fluent = true)
 public class Game {
-    private ObjectiveCard      objective;
-    private GalacticaBoard     galacticaBoard    = new GalacticaBoard();
-    private PegasusBoard       pegasusBoard      = new PegasusBoard();
-    private CylonFleetBoard    cylonFleetBoard   = new CylonFleetBoard();
-    private Deck<CivilianShip> civilianShipsDeck = new Deck<>();
-    private int                nukes             = 3;
+    private ObjectiveCard         objective;
+    private GalacticaBoard        galacticaBoard          = new GalacticaBoard();
+    private PegasusBoard          pegasusBoard            = new PegasusBoard();
+    private CylonFleetBoard       cylonFleetBoard         = new CylonFleetBoard();
+    private Deck<CivilianShip>    civilianShipsDeck       = new Deck<>();
+    private Deck<BasestarDamage>  basestarDamageTokenDeck = new Deck<>();
+    private Deck<PegasusDamage>   pegasusDamageDeck       = new Deck<>();
+    private Deck<GalacticaDamage> galacticaDamageDeck     = new Deck<>();
+    private int                   nukes                   = 3;
 
     public void objective(ObjectiveCard objective) {
         if (this.objective != null) {
@@ -50,6 +57,12 @@ public class Game {
     }
 
     public void setupExtraTokens() {
+        basestarDamageTokenDeck.add(Arrays.stream(BasestarDamage.values()).toList());
+        basestarDamageTokenDeck.shuffle();
+        pegasusDamageDeck.add(Arrays.stream(PegasusDamage.values()).toList());
+        pegasusDamageDeck.shuffle();
+        galacticaDamageDeck.add(Arrays.stream(GalacticaDamage.values()).toList());
+        galacticaDamageDeck.shuffle();
     }
 
 }
