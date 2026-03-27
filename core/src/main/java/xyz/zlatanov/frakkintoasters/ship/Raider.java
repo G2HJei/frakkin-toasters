@@ -7,7 +7,7 @@ import static xyz.zlatanov.frakkintoasters.ship.ShipType.RAIDER;
 
 @Data
 @Accessors(fluent = true)
-public class Raider implements FighterShip {
+public class Raider implements Ship {
     private final ShipType type = RAIDER;
 
 }

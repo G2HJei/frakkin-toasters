@@ -58,9 +58,9 @@ class GalacticaBoardTest {
 
     @Test
     void shouldTrackFighterShips() {
-        //val viperToMove = board.reserves()
-        //        .stream().findFirst().orElseThrow();
-        //board.move(new Viper(), GALACTICA_SPACE_6_OCLOCK);
+        val viper = board.removeFromReserve(VIPER);
+        board.move(GALACTICA_SPACE_12_OCLOCK, viper);
+        assertEquals(List.of(viper), board.shipsIn(GALACTICA_SPACE_12_OCLOCK));
     }
 
     private Set<Location> startingLocations() {

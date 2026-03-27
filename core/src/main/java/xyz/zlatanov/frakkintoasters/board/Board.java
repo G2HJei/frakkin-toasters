@@ -6,10 +6,7 @@ import xyz.zlatanov.frakkintoasters.Character;
 import xyz.zlatanov.frakkintoasters.Location;
 import xyz.zlatanov.frakkintoasters.exception.InvalidMoveLocationException;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -23,39 +20,34 @@ public abstract class Board {
     }
 
     public void move(Location to, Character... characterToPlace) {
-        move(to, Set.of(characterToPlace));
-    }
-
-    public void move(Location to, Set<Character> characterToPlace) {
         if (!locations.contains(to) || to.isSpaceLocation()) {
             throw new InvalidMoveLocationException();
         }
-        characterToPlace.forEach(c -> characters.put(c, to));
+        for (val c : characterToPlace) {
+            characters.put(c, to);
+        }
     }
 
     public Location locate(Character character) {
         return characters.get(character);
     }
 
-    public void remove(Character... charactersToRemove) {
-        remove(Set.of(charactersToRemove));
+    public void remove(Character character) {
+        remove(List.of(character));
     }
 
-    public void remove(Set<Character> charactersToRemove) {
+    public void remove(List<Character> charactersToRemove) {
         charactersToRemove.forEach(characters::remove);
     }
 
-    public Set<Character> charactersIn(Location... lookupLocations) {
-        return charactersIn(Set.of(lookupLocations));
-    }
-
-    public Set<Character> charactersIn(Set<Location> lookupLocations) {
+    public List<Character> charactersIn(Location location) {
         return characters.entrySet()
                 .stream()
-                .filter(es -> lookupLocations.contains(es.getValue()))
+                .filter(es -> es.getValue() == location)
                 .map(Map.Entry::getKey)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
+
 
     protected void removeLocations(Location... locationsToRemove) {
         for (val loc : locationsToRemove) {

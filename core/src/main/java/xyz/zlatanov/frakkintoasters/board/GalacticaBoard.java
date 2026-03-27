@@ -5,6 +5,7 @@ import lombok.experimental.Accessors;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.Location;
 import xyz.zlatanov.frakkintoasters.exception.FrakCallTheAdmiralException;
+import xyz.zlatanov.frakkintoasters.exception.InvalidMoveLocationException;
 import xyz.zlatanov.frakkintoasters.ship.*;
 
 import java.util.*;
@@ -21,7 +22,7 @@ public class GalacticaBoard extends Board {
     private       boolean             colonialOneDestroyed = false;
     private       Set<Ship>           reserves             = newSetFromMap(new IdentityHashMap<>());
     private       Set<Ship>           damagedShips         = newSetFromMap(new IdentityHashMap<>());
-    private final Map<Ship, Location> launchedFighters     = new IdentityHashMap<>();
+    private final Map<Ship, Location> shipsInSpace         = new IdentityHashMap<>();
 
 
     public GalacticaBoard() {
@@ -50,24 +51,43 @@ public class GalacticaBoard extends Board {
     public void destroyColonialOne() {
         //todo move this to crisis card
         removeLocations(PRESS_ROOM, PRESIDENTS_OFFICE, ADMINISTRATION);
-        move(SICKBAY, charactersIn(PRESS_ROOM, PRESIDENTS_OFFICE, ADMINISTRATION));
+        charactersIn(PRESS_ROOM).forEach(c -> move(SICKBAY, c));
+        charactersIn(PRESIDENTS_OFFICE).forEach(c -> move(SICKBAY, c));
+        charactersIn(ADMINISTRATION).forEach(c -> move(SICKBAY, c));
         colonialOneDestroyed = true;
     }
 
     public Ship removeFromReserve(ShipType shipType) {
-        return popFrom(reserves, shipType);
+        return removeFrom(reserves, shipType);
     }
 
     public Ship removeFromDamagedShips(ShipType shipType) {
-        return popFrom(damagedShips, shipType);
+        return removeFrom(damagedShips, shipType);
     }
 
-    private static Ship popFrom(Set<Ship> source, ShipType shipType) {
+    private static <T extends Ship> T removeFrom(Set<T> source, ShipType shipType) {
         val ship = source.stream()
                 .filter(s -> s.type() == shipType)
                 .findFirst()
                 .orElseThrow(FrakCallTheAdmiralException::new);
         source.remove(ship);
         return ship;
+    }
+
+    public void move(Location to, Ship... ships) {
+        if (!locations().contains(to) || !to.isSpaceLocation()) {
+            throw new InvalidMoveLocationException();
+        }
+        for (val s : ships) {
+            shipsInSpace.put(s, to);
+        }
+    }
+
+    public List<Ship> shipsIn(Location location) {
+        return shipsInSpace.entrySet()
+                .stream()
+                .filter(e -> e.getValue() == location)
+                .map(Map.Entry::getKey)
+                .toList();
     }
 }
