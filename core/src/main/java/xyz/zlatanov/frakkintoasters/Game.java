@@ -10,9 +10,9 @@ import xyz.zlatanov.frakkintoasters.exception.FrakCallTheAdmiralException;
 @Getter
 @Accessors(fluent = true)
 public class Game {
-    private ObjectiveCard objective;
-    private GalacticaBoard galacticaBoard = new GalacticaBoard();
-    private PegasusBoard pegasusBoard = new PegasusBoard();
+    private ObjectiveCard   objective;
+    private GalacticaBoard  galacticaBoard  = new GalacticaBoard();
+    private PegasusBoard    pegasusBoard    = new PegasusBoard();
     private CylonFleetBoard cylonFleetBoard = new CylonFleetBoard();
 
     public void objective(ObjectiveCard objective) {
