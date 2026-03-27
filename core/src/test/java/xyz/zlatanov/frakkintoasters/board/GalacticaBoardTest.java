@@ -32,7 +32,7 @@ class GalacticaBoardTest {
 
     @Test
     void shouldSendCharactersFromDestroyedColonialOneToSickbay() {
-        board.move(PRESIDENTS_OFFICE, GAIUS_BALTAR); //hehe
+        board.place(PRESIDENTS_OFFICE, GAIUS_BALTAR); //hehe
         board.destroyColonialOne(); //oops
         assertEquals(SICKBAY, board.locate(GAIUS_BALTAR)); // poor Gaius
     }
@@ -59,7 +59,7 @@ class GalacticaBoardTest {
     @Test
     void shouldTrackFighterShips() {
         val viper = board.removeFromReserve(VIPER);
-        board.move(GALACTICA_SPACE_12_OCLOCK, viper);
+        board.place(GALACTICA_SPACE_12_OCLOCK, viper);
         assertEquals(List.of(viper), board.shipsIn(GALACTICA_SPACE_12_OCLOCK));
     }
 

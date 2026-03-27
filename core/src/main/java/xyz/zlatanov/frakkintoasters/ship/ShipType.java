@@ -7,5 +7,6 @@ public enum ShipType {
     RAIDER,
     RAPTOR,
     VIPER,
-    VIPER_MARK_VII
+    VIPER_MARK_VII,
+    CIVILIAN
 }

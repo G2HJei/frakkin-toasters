@@ -19,7 +19,7 @@ public abstract class Board {
         return new HashSet<>(locations);
     }
 
-    public void move(Location to, Character... characterToPlace) {
+    public void place(Location to, Character... characterToPlace) {
         if (!locations.contains(to) || to.isSpaceLocation()) {
             throw new InvalidMoveLocationException();
         }
@@ -49,9 +49,7 @@ public abstract class Board {
     }
 
 
-    protected void removeLocations(Location... locationsToRemove) {
-        for (val loc : locationsToRemove) {
-            locations.remove(loc);
-        }
+    protected void remove(Location location) {
+        locations.remove(location);
     }
 }

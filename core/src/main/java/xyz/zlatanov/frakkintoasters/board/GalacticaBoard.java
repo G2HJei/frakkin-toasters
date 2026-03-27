@@ -35,6 +35,11 @@ public class GalacticaBoard extends Board {
         damagedShips.addAll(List.of(
                 new ViperMarkVII(), new ViperMarkVII(), new ViperMarkVII(), new ViperMarkVII()
         ));
+        //todo setup civilian ships in Game, move this setup there too?
+        place(GALACTICA_SPACE_4_OCLOCK, new Viper());
+        place(GALACTICA_SPACE_6_OCLOCK, new Viper());
+        place(GALACTICA_SPACE_8_OCLOCK, new Basestar());
+        place(GALACTICA_SPACE_8_OCLOCK, List.of(new Raider(), new Raider(), new Raider()));
     }
 
 
@@ -50,10 +55,12 @@ public class GalacticaBoard extends Board {
 
     public void destroyColonialOne() {
         //todo move this to crisis card
-        removeLocations(PRESS_ROOM, PRESIDENTS_OFFICE, ADMINISTRATION);
-        charactersIn(PRESS_ROOM).forEach(c -> move(SICKBAY, c));
-        charactersIn(PRESIDENTS_OFFICE).forEach(c -> move(SICKBAY, c));
-        charactersIn(ADMINISTRATION).forEach(c -> move(SICKBAY, c));
+        remove(PRESS_ROOM);
+        remove(PRESIDENTS_OFFICE);
+        remove(ADMINISTRATION);
+        charactersIn(PRESS_ROOM).forEach(c -> place(SICKBAY, c));
+        charactersIn(PRESIDENTS_OFFICE).forEach(c -> place(SICKBAY, c));
+        charactersIn(ADMINISTRATION).forEach(c -> place(SICKBAY, c));
         colonialOneDestroyed = true;
     }
 
@@ -74,13 +81,15 @@ public class GalacticaBoard extends Board {
         return ship;
     }
 
-    public void move(Location to, Ship... ships) {
-        if (!locations().contains(to) || !to.isSpaceLocation()) {
+    public void place(Location in, Ship ship) {
+        place(in, List.of(ship));
+    }
+
+    public void place(Location in, List<Ship> ships) {
+        if (!locations().contains(in) || !in.isSpaceLocation()) {
             throw new InvalidMoveLocationException();
         }
-        for (val s : ships) {
-            shipsInSpace.put(s, to);
-        }
+        ships.forEach(s -> shipsInSpace.put(s, in));
     }
 
     public List<Ship> shipsIn(Location location) {

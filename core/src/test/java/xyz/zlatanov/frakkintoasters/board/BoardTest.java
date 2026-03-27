@@ -16,32 +16,32 @@ class BoardTest {
 
     @Test
     void shouldTrackCharacterLocation() {
-        board.move(COMMAND, KARA_STARBUCK_THRACE);
+        board.place(COMMAND, KARA_STARBUCK_THRACE);
         assertEquals(COMMAND, board.locate(KARA_STARBUCK_THRACE));
     }
 
     @Test
     void shouldRemoveCharacterFromBoard() {
-        board.move(COMMAND, GAIUS_BALTAR);
+        board.place(COMMAND, GAIUS_BALTAR);
         board.remove(GAIUS_BALTAR);
         assertNull(board.locate(GAIUS_BALTAR));
     }
 
     @Test
     void shouldRemoveCharacterFromPreviousLocation() {
-        board.move(COMMAND, WILLIAM_ADAMA);
-        board.move(BRIG, WILLIAM_ADAMA);
+        board.place(COMMAND, WILLIAM_ADAMA);
+        board.place(BRIG, WILLIAM_ADAMA);
         assertTrue(board.charactersIn(COMMAND).isEmpty());
     }
 
     @Test
     void shouldNotAllowMovingToInvalidLocation() {
-        assertThrows(InvalidMoveLocationException.class, () -> board.move(WEAPONS_CONTROL, SAUL_TIGH));
+        assertThrows(InvalidMoveLocationException.class, () -> board.place(WEAPONS_CONTROL, SAUL_TIGH));
     }
 
     @Test
-    void shouldNotAllowCharactersToMoveSpaceLocations() {
-        assertThrows(InvalidMoveLocationException.class, () -> board.move(GALACTICA_SPACE_2_OCLOCK, LEE_APOLLO_ADAMA));
+    void shouldNotAllowCharactersToPlaceSpaceLocations() {
+        assertThrows(InvalidMoveLocationException.class, () -> board.place(GALACTICA_SPACE_2_OCLOCK, LEE_APOLLO_ADAMA));
     }
 
 
