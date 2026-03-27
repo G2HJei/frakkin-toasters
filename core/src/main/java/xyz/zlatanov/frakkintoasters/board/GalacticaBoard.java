@@ -6,7 +6,8 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.Location;
 import xyz.zlatanov.frakkintoasters.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.exception.InvalidMoveLocationException;
-import xyz.zlatanov.frakkintoasters.ship.*;
+import xyz.zlatanov.frakkintoasters.ship.Ship;
+import xyz.zlatanov.frakkintoasters.ship.ShipType;
 
 import java.util.*;
 
@@ -27,19 +28,6 @@ public class GalacticaBoard extends Board {
 
     public GalacticaBoard() {
         super(galacticaLocations());
-        reserves.addAll(List.of(
-                new Viper(), new Viper(), new Viper(), new Viper(),
-                new Raptor(), new Raptor(), new Raptor(), new Raptor(),
-                new AssaultRaptor()
-        ));
-        damagedShips.addAll(List.of(
-                new ViperMarkVII(), new ViperMarkVII(), new ViperMarkVII(), new ViperMarkVII()
-        ));
-        //todo setup civilian ships in Game, move this setup there too?
-        place(GALACTICA_SPACE_4_OCLOCK, new Viper());
-        place(GALACTICA_SPACE_6_OCLOCK, new Viper());
-        place(GALACTICA_SPACE_8_OCLOCK, new Basestar());
-        place(GALACTICA_SPACE_8_OCLOCK, List.of(new Raider(), new Raider(), new Raider()));
     }
 
 
@@ -62,6 +50,22 @@ public class GalacticaBoard extends Board {
         charactersIn(PRESIDENTS_OFFICE).forEach(c -> place(SICKBAY, c));
         charactersIn(ADMINISTRATION).forEach(c -> place(SICKBAY, c));
         colonialOneDestroyed = true;
+    }
+
+    public void addToReserves(Ship ship) {
+        addToReserves(List.of(ship));
+    }
+
+    public void addToReserves(List<Ship> ships) {
+        reserves.addAll(ships);
+    }
+
+    public void addToDamagedShips(Ship ship) {
+        addToDamagedShips(List.of(ship));
+    }
+
+    public void addToDamagedShips(List<Ship> ships) {
+        damagedShips.addAll(ships);
     }
 
     public Ship removeFromReserve(ShipType shipType) {

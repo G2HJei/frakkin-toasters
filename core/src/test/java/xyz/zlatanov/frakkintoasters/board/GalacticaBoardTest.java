@@ -3,6 +3,8 @@ package xyz.zlatanov.frakkintoasters.board;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.Location;
+import xyz.zlatanov.frakkintoasters.ship.Raptor;
+import xyz.zlatanov.frakkintoasters.ship.Viper;
 
 import java.util.HashSet;
 import java.util.List;
@@ -12,8 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static xyz.zlatanov.frakkintoasters.Character.GAIUS_BALTAR;
 import static xyz.zlatanov.frakkintoasters.Location.*;
+import static xyz.zlatanov.frakkintoasters.ship.ShipType.RAPTOR;
 import static xyz.zlatanov.frakkintoasters.ship.ShipType.VIPER;
-import static xyz.zlatanov.frakkintoasters.ship.ShipType.VIPER_MARK_VII;
 
 class GalacticaBoardTest {
     GalacticaBoard board = new GalacticaBoard();
@@ -45,20 +47,22 @@ class GalacticaBoardTest {
     }
 
     @Test
-    void shouldRemoveFromReserves() {
-        board.removeFromReserve(VIPER);
-        assertEquals(3, board.reserves().stream().filter(s -> s.type() == VIPER).count());
+    void shouldManageReserves() {
+        val viper = new Viper();
+        board.addToReserves(viper);
+        assertEquals(viper, board.removeFromReserve(VIPER));
     }
 
     @Test
-    void shouldRemoveFromDamagedShips() {
-        board.removeFromDamagedShips(VIPER_MARK_VII);
-        assertEquals(3, board.damagedShips().stream().filter(s -> s.type() == VIPER_MARK_VII).count());
+    void shouldManageDamagedShips() {
+        val raptor = new Raptor();
+        board.addToDamagedShips(raptor);
+        assertEquals(raptor, board.removeFromDamagedShips(RAPTOR));
     }
 
     @Test
-    void shouldTrackFighterShips() {
-        val viper = board.removeFromReserve(VIPER);
+    void shouldPlaceFighterShips() {
+        val viper = new Viper();
         board.place(GALACTICA_SPACE_12_OCLOCK, viper);
         assertEquals(List.of(viper), board.shipsIn(GALACTICA_SPACE_12_OCLOCK));
     }
