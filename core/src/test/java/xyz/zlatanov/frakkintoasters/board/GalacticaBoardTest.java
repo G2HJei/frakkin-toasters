@@ -12,6 +12,8 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.Character.GAIUS_BALTAR;
+import static xyz.zlatanov.frakkintoasters.JumpPreparation.POSITION_1;
+import static xyz.zlatanov.frakkintoasters.JumpPreparation.START;
 import static xyz.zlatanov.frakkintoasters.Location.*;
 import static xyz.zlatanov.frakkintoasters.ship.ShipType.RAPTOR;
 import static xyz.zlatanov.frakkintoasters.ship.ShipType.VIPER;
@@ -72,6 +74,17 @@ class GalacticaBoardTest {
         val viper = new Viper();
         board.place(GALACTICA_SPACE_12_OCLOCK, viper);
         assertEquals(List.of(viper), board.shipsIn(GALACTICA_SPACE_12_OCLOCK));
+    }
+
+    @Test
+    void shouldTrackJumpPreparation() {
+        board.advanceJumpPreparation();
+        assertEquals(POSITION_1, board.jumpPreparation());
+        board.advanceJumpPreparation();
+        board.advanceJumpPreparation();
+        board.advanceJumpPreparation();
+        board.advanceJumpPreparation();
+        assertEquals(START, board.jumpPreparation());
     }
 
     private Set<Location> startingLocations() {

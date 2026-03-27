@@ -3,6 +3,7 @@ package xyz.zlatanov.frakkintoasters.board;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.JumpPreparation;
 import xyz.zlatanov.frakkintoasters.Location;
 import xyz.zlatanov.frakkintoasters.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.exception.InvalidMoveLocationException;
@@ -12,6 +13,7 @@ import xyz.zlatanov.frakkintoasters.ship.ShipType;
 import java.util.*;
 
 import static java.util.Collections.newSetFromMap;
+import static xyz.zlatanov.frakkintoasters.JumpPreparation.START;
 import static xyz.zlatanov.frakkintoasters.Location.*;
 
 @Getter
@@ -20,6 +22,7 @@ public class GalacticaBoard extends Board {
     private       int                 food                 = 8;
     private       int                 morale               = 10;
     private       int                 population           = 12;
+    private       JumpPreparation     jumpPreparation      = START;
     private       boolean             colonialOneDestroyed = false;
     private       boolean             hubDestroyed         = false;
     private       Set<Ship>           reserves             = newSetFromMap(new IdentityHashMap<>());
@@ -46,7 +49,6 @@ public class GalacticaBoard extends Board {
         locations.remove(PRESS_ROOM);
         locations.remove(PRESIDENTS_OFFICE);
         locations.remove(ADMINISTRATION);
-        //todo move this to crisis card ?
         charactersIn(PRESS_ROOM).forEach(c -> place(SICKBAY, c));
         charactersIn(PRESIDENTS_OFFICE).forEach(c -> place(SICKBAY, c));
         charactersIn(ADMINISTRATION).forEach(c -> place(SICKBAY, c));
@@ -56,7 +58,8 @@ public class GalacticaBoard extends Board {
     public void destroyResurrectionShip() {
         locations.remove(RESURRECTION_SHIP);
         locations.add(HUB_DESTROYED);
-
+        charactersIn(RESURRECTION_SHIP).forEach(c -> place(HUB_DESTROYED, c));
+        hubDestroyed = true;
     }
 
     public void addToReserves(Ship ship) {
@@ -109,5 +112,12 @@ public class GalacticaBoard extends Board {
                 .filter(e -> e.getValue() == location)
                 .map(Map.Entry::getKey)
                 .toList();
+    }
+
+    public void advanceJumpPreparation() {
+        val current = jumpPreparation.ordinal();
+        val autoJump = JumpPreparation.values().length - 1;
+        val next = current == autoJump ? 0 : current + 1;
+        jumpPreparation = JumpPreparation.values()[next];
     }
 }
