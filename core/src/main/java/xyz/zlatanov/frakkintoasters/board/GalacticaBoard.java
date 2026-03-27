@@ -21,6 +21,7 @@ public class GalacticaBoard extends Board {
     private       int                 morale               = 10;
     private       int                 population           = 12;
     private       boolean             colonialOneDestroyed = false;
+    private       boolean             hubDestroyed         = false;
     private       Set<Ship>           reserves             = newSetFromMap(new IdentityHashMap<>());
     private       Set<Ship>           damagedShips         = newSetFromMap(new IdentityHashMap<>());
     private final Map<Ship, Location> shipsInSpace         = new IdentityHashMap<>();
@@ -42,14 +43,20 @@ public class GalacticaBoard extends Board {
     }
 
     public void destroyColonialOne() {
-        //todo move this to crisis card
-        remove(PRESS_ROOM);
-        remove(PRESIDENTS_OFFICE);
-        remove(ADMINISTRATION);
+        locations.remove(PRESS_ROOM);
+        locations.remove(PRESIDENTS_OFFICE);
+        locations.remove(ADMINISTRATION);
+        //todo move this to crisis card ?
         charactersIn(PRESS_ROOM).forEach(c -> place(SICKBAY, c));
         charactersIn(PRESIDENTS_OFFICE).forEach(c -> place(SICKBAY, c));
         charactersIn(ADMINISTRATION).forEach(c -> place(SICKBAY, c));
         colonialOneDestroyed = true;
+    }
+
+    public void destroyResurrectionShip() {
+        locations.remove(RESURRECTION_SHIP);
+        locations.add(HUB_DESTROYED);
+
     }
 
     public void addToReserves(Ship ship) {

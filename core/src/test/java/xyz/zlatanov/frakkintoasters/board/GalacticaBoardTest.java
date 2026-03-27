@@ -10,8 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.Character.GAIUS_BALTAR;
 import static xyz.zlatanov.frakkintoasters.Location.*;
 import static xyz.zlatanov.frakkintoasters.ship.ShipType.RAPTOR;
@@ -30,6 +29,14 @@ class GalacticaBoardTest {
         board.destroyColonialOne();
         assertEquals(noColonialOneLocations(), board.locations());
         assertTrue(board.colonialOneDestroyed());
+    }
+
+    @Test
+    void shouldDestroyResurrectionShip() {
+        board.destroyResurrectionShip();
+        assertFalse(board.locations().contains(RESURRECTION_SHIP));
+        assertTrue(board.locations().contains(HUB_DESTROYED));
+        assertTrue(board.hubDestroyed());
     }
 
     @Test

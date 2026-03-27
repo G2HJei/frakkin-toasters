@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public abstract class Board {
 
-    private final Set<Location>            locations;
-    private final Map<Character, Location> characters = new HashMap<>();
+    protected final Set<Location>            locations;
+    private final   Map<Character, Location> characters = new HashMap<>();
 
     public Set<Location> locations() {
         return new HashSet<>(locations);
@@ -48,8 +48,4 @@ public abstract class Board {
                 .collect(Collectors.toList());
     }
 
-
-    protected void remove(Location location) {
-        locations.remove(location);
-    }
 }

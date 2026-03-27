@@ -25,6 +25,7 @@ public enum Location {
     CYLON_FLEET,
     HUMAN_FLEET,
     RESURRECTION_SHIP,
+    HUB_DESTROYED,
 
     //galactica space
     GALACTICA_SPACE_12_OCLOCK,
