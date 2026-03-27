@@ -21,6 +21,7 @@ public class Game {
     private PegasusBoard       pegasusBoard      = new PegasusBoard();
     private CylonFleetBoard    cylonFleetBoard   = new CylonFleetBoard();
     private Deck<CivilianShip> civilianShipsDeck = new Deck<>();
+    private int                nukes             = 3;
 
     public void objective(ObjectiveCard objective) {
         if (this.objective != null) {
@@ -46,6 +47,9 @@ public class Game {
         galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, List.of(civilianShipsDeck.draw(), civilianShipsDeck.draw()));
         galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, new Basestar());
         galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, List.of(new Raider(), new Raider(), new Raider()));
+    }
+
+    public void setupExtraTokens() {
     }
 
 }
