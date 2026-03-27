@@ -12,17 +12,17 @@ import static xyz.zlatanov.frakkintoasters.Location.*;
 
 class BoardTest {
 
-    Board board = new TestBoard(Set.of(BRIG));
+    Board board = new TestBoard(Set.of(COMMAND, GALACTICA_SPACE_2_OCLOCK, BRIG));
 
     @Test
     void shouldTrackCharacterLocation() {
-        board.moveTo(BRIG, KARA_STARBUCK_THRACE);
-        assertEquals(BRIG, board.locate(KARA_STARBUCK_THRACE));
+        board.moveTo(COMMAND, KARA_STARBUCK_THRACE);
+        assertEquals(COMMAND, board.locate(KARA_STARBUCK_THRACE));
     }
 
     @Test
     void shouldRemoveCharacterFromBoard() {
-        board.moveTo(BRIG, GAIUS_BALTAR);
+        board.moveTo(COMMAND, GAIUS_BALTAR);
         board.remove(GAIUS_BALTAR);
         assertNull(board.locate(GAIUS_BALTAR));
     }
@@ -33,8 +33,13 @@ class BoardTest {
     }
 
     @Test
-    void shouldAllowOnlyPilotsToMoveToSpaceLocations() {
-        //todo
+    void shouldNotAllowCharactersToMoveToSpaceLocations() {
+        assertThrows(InvalidMoveLocationException.class, () -> board.moveTo(GALACTICA_SPACE_2_OCLOCK, LEE_APOLLO_ADAMA));
+    }
+
+    @Test
+    void shouldNotAllowCharactersToMoveToHazardousLocations() {
+        assertThrows(InvalidMoveLocationException.class, () -> board.moveTo(BRIG, TOM_ZAREK));
     }
 
     static class TestBoard extends Board {

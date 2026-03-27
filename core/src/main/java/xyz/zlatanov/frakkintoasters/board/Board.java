@@ -27,7 +27,7 @@ public abstract class Board {
     }
 
     public void moveTo(Location location, Set<Character> characterToPlace) {
-        if (!locations.contains(location)) {
+        if (!locations.contains(location) || location.isSpaceLocation() || location.isHazardousLocation()) {
             throw new InvalidMoveLocationException();
         }
         characterToPlace.forEach(c -> characters.put(c, location));

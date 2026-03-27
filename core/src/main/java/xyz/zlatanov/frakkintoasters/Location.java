@@ -1,5 +1,7 @@
 package xyz.zlatanov.frakkintoasters;
 
+import java.util.Set;
+
 public enum Location {
     //galactica
     FTL_CONTROL,
@@ -40,22 +42,36 @@ public enum Location {
     //demetrius
     BRIDGE,
     TACTICAL_PLOT,
-    CAPTAINS_CABIN,
+    CAPTAINS_CABIN;
 
     //cylon fleet
-    BASESTAR_BRIDGE,
-    CYLON_FLEET_SPACE_1,
-    CYLON_FLEET_SPACE_2,
-    CYLON_FLEET_SPACE_3,
-    CYLON_FLEET_SPACE_4,
-    CYLON_FLEET_SPACE_5_6,
-    CYLON_FLEET_SPACE_7_8,
+    //BASESTAR_BRIDGE,
+    //CYLON_FLEET_SPACE_1,
+    //CYLON_FLEET_SPACE_2,
+    //CYLON_FLEET_SPACE_3,
+    //CYLON_FLEET_SPACE_4,
+    //CYLON_FLEET_SPACE_5_6,
+    //CYLON_FLEET_SPACE_7_8,
 
     //new caprica
-    MEDICAL_CENTER,
-    RESISTANCE_HQ,
-    DETENTION,
-    OCCUPATION_AUTHORITY,
-    BREEDERS_CANYON,
-    SHIPYARD
+    //MEDICAL_CENTER,
+    //RESISTANCE_HQ,
+    //DETENTION,
+    //OCCUPATION_AUTHORITY,
+    //BREEDERS_CANYON,
+    //SHIPYARD;
+
+    private static final Set<Location> spaceLocations     = Set.of(
+            GALACTICA_SPACE_12_OCLOCK, GALACTICA_SPACE_2_OCLOCK, GALACTICA_SPACE_4_OCLOCK, GALACTICA_SPACE_6_OCLOCK, GALACTICA_SPACE_8_OCLOCK);
+    private static final Set<Location> hazardousLocations = Set.of(
+            SICKBAY, BRIG, RESURRECTION_SHIP
+    );
+
+    public boolean isSpaceLocation() {
+        return spaceLocations.contains(this);
+    }
+
+    public boolean isHazardousLocation() {
+        return hazardousLocations.contains(this);
+    }
 }

@@ -13,12 +13,12 @@ import static xyz.zlatanov.frakkintoasters.Location.*;
 @Getter
 @Accessors(fluent = true)
 public class GalacticaBoard extends Board {
-    private int food = 8;
-    private int morale = 10;
-    private int population = 12;
-    private boolean colonialOneDestroyed = false;
-    private Set<Ship> reserves = new HashSet<>();
-    private Set<FighterShip> damagedShips = new HashSet<>();
+    private int              food                 = 8;
+    private int              morale               = 10;
+    private int              population           = 12;
+    private boolean          colonialOneDestroyed = false;
+    private Set<Ship>        reserves             = new HashSet<>();
+    private Set<FighterShip> damagedShips         = new HashSet<>();
 
     public GalacticaBoard() {
         super(galacticaLocations());
