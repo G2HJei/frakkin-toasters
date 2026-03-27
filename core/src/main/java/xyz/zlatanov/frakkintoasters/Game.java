@@ -25,6 +25,10 @@ public class Game {
         this.objective = objective;
     }
 
+    public void setupCivilianShipsDeck() {
+        //todo
+    }
+
     public void setupGalacticaBoard() {
         galacticaBoard.addToReserves(List.of(
                 new Viper(), new Viper(), new Viper(), new Viper(),
@@ -37,4 +41,5 @@ public class Game {
         galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, new Basestar());
         galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, List.of(new Raider(), new Raider(), new Raider()));
     }
+
 }
