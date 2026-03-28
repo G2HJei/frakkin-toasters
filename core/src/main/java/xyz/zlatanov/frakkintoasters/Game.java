@@ -28,32 +28,35 @@ import static xyz.zlatanov.frakkintoasters.skill.SkillCardType.*;
 @Getter
 @Accessors(fluent = true)
 public class Game {
+    // todo inject boards, decks and counters for testing purposes?
+    // todo separate decks and counters in own classes?
+    // todo add players, current player, turns
     private ObjectiveCard         objective;
-    private GalacticaBoard        galacticaBoard          = new GalacticaBoard();
-    private PegasusBoard          pegasusBoard            = new PegasusBoard();
-    private CylonFleetBoard       cylonFleetBoard         = new CylonFleetBoard();
-    private Deck<CivilianShip>    civilianShipsDeck       = new Deck<>();
-    private Deck<BasestarDamage>  basestarDamageTokenDeck = new Deck<>();
-    private Deck<PegasusDamage>   pegasusDamageDeck       = new Deck<>();
-    private Deck<GalacticaDamage> galacticaDamageDeck     = new Deck<>();
-    private Deck<DestinationCard> destinationDeck         = new Deck<>();
-    private Deck<SkillCard>       politicsDeck            = new Deck<>();
-    private Deck<SkillCard>       leadershipDeck          = new Deck<>();
-    private Deck<SkillCard>       tacticsDeck             = new Deck<>();
-    private Deck<SkillCard>       pilotingDeck            = new Deck<>();
-    private Deck<SkillCard>       engineeringsDeck        = new Deck<>();
-    private Deck<SkillCard>       treacheryDeck           = new Deck<>();
-    private Deck<QuorumCard>      quorumDeck              = new Deck<>();
-    private Deck<CrisisCard>      crisisDeck              = new Deck<>();
-    private Deck<SuperCrisisCard> superCrisisDeck         = new Deck<>();
-    private Deck<LoyaltyCard>     loyaltyDeck             = new Deck<>();
-    private Deck<MutinyCard>      mutinyDeck              = new Deck<>();
-    private Deck<MotiveCard>      motiveDeck              = new Deck<>();
-    private int                   nukes                   = 3;
-    private int                   basestars               = 2;
-    private int                   raiders                 = 20;
-    private int                   heavyRaiders            = 4;
-    private int                   centurions              = 4;
+    private GalacticaBoard        galacticaBoard      = new GalacticaBoard();
+    private PegasusBoard          pegasusBoard        = new PegasusBoard();
+    private CylonFleetBoard       cylonFleetBoard     = new CylonFleetBoard();
+    private Deck<CivilianShip>    civilianShipsDeck   = new Deck<>();
+    private Deck<BasestarDamage>  basestarDamageDeck  = new Deck<>();
+    private Deck<PegasusDamage>   pegasusDamageDeck   = new Deck<>();
+    private Deck<GalacticaDamage> galacticaDamageDeck = new Deck<>();
+    private Deck<DestinationCard> destinationDeck     = new Deck<>();
+    private Deck<SkillCard>       politicsDeck        = new Deck<>();
+    private Deck<SkillCard>       leadershipDeck      = new Deck<>();
+    private Deck<SkillCard>       tacticsDeck         = new Deck<>();
+    private Deck<SkillCard>       pilotingDeck        = new Deck<>();
+    private Deck<SkillCard>       engineeringsDeck    = new Deck<>();
+    private Deck<SkillCard>       treacheryDeck       = new Deck<>();
+    private Deck<QuorumCard>      quorumDeck          = new Deck<>();
+    private Deck<CrisisCard>      crisisDeck          = new Deck<>();
+    private Deck<SuperCrisisCard> superCrisisDeck     = new Deck<>();
+    private Deck<LoyaltyCard>     loyaltyDeck         = new Deck<>();
+    private Deck<MutinyCard>      mutinyDeck          = new Deck<>();
+    private Deck<MotiveCard>      motiveDeck          = new Deck<>();
+    private int                   nukes               = 3;
+    private int                   basestars           = 2;
+    private int                   raiders             = 20;
+    private int                   heavyRaiders        = 4;
+    private int                   centurions          = 4;
     @Setter
     private Character             president;
     @Setter
@@ -91,8 +94,8 @@ public class Game {
     }
 
     public void setupExtraTokens() {
-        basestarDamageTokenDeck.add(Arrays.asList(BasestarDamage.values()));
-        basestarDamageTokenDeck.shuffle();
+        basestarDamageDeck.add(Arrays.asList(BasestarDamage.values()));
+        basestarDamageDeck.shuffle();
         pegasusDamageDeck.add(Arrays.asList(PegasusDamage.values()));
         pegasusDamageDeck.shuffle();
         galacticaDamageDeck.add(Arrays.asList(GalacticaDamage.values()));
