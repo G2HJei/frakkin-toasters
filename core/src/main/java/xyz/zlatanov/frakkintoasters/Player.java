@@ -8,20 +8,20 @@ import static xyz.zlatanov.frakkintoasters.Character.CHIEF_GALEN_TYROL;
 
 public class Player {
 
-    private final Character       character;
-    private final List<SkillCard> skillCards      = new ArrayList<>();
-    private       boolean         hasMiracleToken = true;
+    private final Character           character;
+    private final List<SkillCardType> skillCardTypes  = new ArrayList<>();
+    private       boolean             hasMiracleToken = true;
 
     public Player(Character character) {
         this.character = character;
     }
 
-    public void addSkillCards(SkillCard... skillCard) {
-        skillCards.addAll(Arrays.stream(skillCard).toList());
+    public void addSkillCards(SkillCardType... skillCardType) {
+        skillCardTypes.addAll(Arrays.stream(skillCardType).toList());
     }
 
-    public List<SkillCard> skillCards() {
-        return skillCards.stream().toList();
+    public List<SkillCardType> skillCards() {
+        return skillCardTypes.stream().toList();
     }
 
     public int handLimit() {

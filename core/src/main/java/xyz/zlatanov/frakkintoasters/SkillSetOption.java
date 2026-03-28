@@ -7,9 +7,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static xyz.zlatanov.frakkintoasters.SkillCardType.*;
+import static xyz.zlatanov.frakkintoasters.SkillCardColor.*;
 
-public record SkillSetOption(int count, Set<SkillCardType> availableTypes) {
+public record SkillSetOption(int count, Set<SkillCardColor> availableTypes) {
     public static Set<SkillSetOption> skills(String skillSet) {
         val skillSetOptions = new HashSet<SkillSetOption>();
         for (var option : skillSet.split(",")) {
