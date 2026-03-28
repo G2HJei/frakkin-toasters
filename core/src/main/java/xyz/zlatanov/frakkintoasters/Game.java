@@ -1,6 +1,7 @@
 package xyz.zlatanov.frakkintoasters;
 
 import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 import xyz.zlatanov.frakkintoasters.board.CylonFleetBoard;
 import xyz.zlatanov.frakkintoasters.board.GalacticaBoard;
@@ -37,9 +38,16 @@ public class Game {
     private Deck<SkillCard>       pilotingDeck            = new Deck<>();
     private Deck<SkillCard>       engineeringsDeck        = new Deck<>();
     private Deck<SkillCard>       treacheryDeck           = new Deck<>();
+    private Deck<QuorumCard>      quorumDeck              = new Deck<>();
     private int                   nukes                   = 3;
     private int                   basestars               = 2;
     private int                   centurions              = 4;
+    @Setter
+    private Character             president;
+    @Setter
+    private Character             admiral;
+    @Setter
+    private Character             cag;
 
 
     public void objective(ObjectiveCard objective) {
@@ -70,16 +78,18 @@ public class Game {
     }
 
     public void setupExtraTokens() {
-        basestarDamageTokenDeck.add(Arrays.stream(BasestarDamage.values()).toList());
+        basestarDamageTokenDeck.add(Arrays.asList(BasestarDamage.values()));
         basestarDamageTokenDeck.shuffle();
-        pegasusDamageDeck.add(Arrays.stream(PegasusDamage.values()).toList());
+        pegasusDamageDeck.add(Arrays.asList(PegasusDamage.values()));
         pegasusDamageDeck.shuffle();
-        galacticaDamageDeck.add(Arrays.stream(GalacticaDamage.values()).toList());
+        galacticaDamageDeck.add(Arrays.asList(GalacticaDamage.values()));
         galacticaDamageDeck.shuffle();
-        destinationDeck.add(Arrays.stream(DestinationCard.values()).toList());
+        destinationDeck.add(Arrays.asList(DestinationCard.values()));
         //add repeated cards. todo: DOUBLE CHECK!!!
         destinationDeck.add(List.of(REMOTE_PLANET, ICY_MOON, BARREN_PLANET, TYLIUM_PLANET, TYLIUM_PLANET, TYLIUM_PLANET));
         destinationDeck.shuffle();
+        quorumDeck.add(Arrays.asList(QuorumCard.values()));
+        quorumDeck.shuffle();
     }
 
     public void setupSkillCards() {
