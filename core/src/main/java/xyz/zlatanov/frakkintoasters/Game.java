@@ -47,6 +47,7 @@ public class Game {
     private Deck<CrisisCard>      crisisDeck              = new Deck<>();
     private Deck<SuperCrisisCard> superCrisisDeck         = new Deck<>();
     private Deck<LoyaltyCard>     loyaltyDeck             = new Deck<>();
+    private Deck<MutinyCard>      mutinyDeck              = new Deck<>();
     private int                   nukes                   = 3;
     private int                   basestars               = 2;
     private int                   centurions              = 4;
@@ -103,11 +104,13 @@ public class Game {
         superCrisisDeck.add(Arrays.asList(SuperCrisisCard.values()));
         superCrisisDeck.shuffle();
         //todo check correct card quantities
-        loyaltyDeck.add(NOT_CYLON);
+        loyaltyDeck.add(Arrays.asList(LoyaltyCard.values()));
         for (int i = 0; i < 11; i++) {
-            loyaltyDeck.add(Arrays.asList(LoyaltyCard.values()));
+            loyaltyDeck.add(NOT_CYLON);
         }
         loyaltyDeck.shuffle();
+        mutinyDeck.add(Arrays.asList(MutinyCard.values()));
+        mutinyDeck.shuffle();
     }
 
     public void setupSkillCards() {
