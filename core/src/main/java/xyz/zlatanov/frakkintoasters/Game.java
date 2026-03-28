@@ -51,6 +51,8 @@ public class Game {
     private Deck<MotiveCard>      motiveDeck              = new Deck<>();
     private int                   nukes                   = 3;
     private int                   basestars               = 2;
+    private int                   raiders                 = 20;
+    private int                   heavyRaiders            = 4;
     private int                   centurions              = 4;
     @Setter
     private Character             president;
@@ -84,6 +86,7 @@ public class Game {
         galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, List.of(civilianShipsDeck.draw(), civilianShipsDeck.draw()));
         basestars--;
         galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, new Basestar());
+        raiders = raiders - 4;
         galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, List.of(new Raider(), new Raider(), new Raider()));
     }
 
