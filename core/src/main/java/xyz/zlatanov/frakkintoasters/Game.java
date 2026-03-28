@@ -39,6 +39,7 @@ public class Game {
     private Deck<SkillCard>       engineeringsDeck        = new Deck<>();
     private Deck<SkillCard>       treacheryDeck           = new Deck<>();
     private Deck<QuorumCard>      quorumDeck              = new Deck<>();
+    private Deck<CrisisCard>      crisisDeck              = new Deck<>();
     private int                   nukes                   = 3;
     private int                   basestars               = 2;
     private int                   centurions              = 4;
@@ -90,6 +91,8 @@ public class Game {
         destinationDeck.shuffle();
         quorumDeck.add(Arrays.asList(QuorumCard.values()));
         quorumDeck.shuffle();
+        crisisDeck.add(Arrays.asList(CrisisCard.values()));
+        crisisDeck.shuffle();
     }
 
     public void setupSkillCards() {
