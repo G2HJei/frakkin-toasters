@@ -1,4 +1,4 @@
-package xyz.zlatanov.frakkintoasters;
+package xyz.zlatanov.frakkintoasters.skill;
 
 import lombok.val;
 
@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static xyz.zlatanov.frakkintoasters.SkillCardColor.*;
+import static xyz.zlatanov.frakkintoasters.skill.SkillCardColor.*;
 
 public record SkillSetOption(int count, Set<SkillCardColor> availableTypes) {
     public static Set<SkillSetOption> skills(String skillSet) {

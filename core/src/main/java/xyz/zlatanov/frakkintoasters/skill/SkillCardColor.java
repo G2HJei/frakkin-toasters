@@ -1,4 +1,4 @@
-package xyz.zlatanov.frakkintoasters;
+package xyz.zlatanov.frakkintoasters.skill;
 
 public enum SkillCardColor {
     POLITICS,

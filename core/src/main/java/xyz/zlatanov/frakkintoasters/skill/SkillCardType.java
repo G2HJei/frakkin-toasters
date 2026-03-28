@@ -1,10 +1,10 @@
-package xyz.zlatanov.frakkintoasters;
+package xyz.zlatanov.frakkintoasters.skill;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
 
-import static xyz.zlatanov.frakkintoasters.SkillCardColor.*;
+import static xyz.zlatanov.frakkintoasters.skill.SkillCardColor.*;
 
 @Getter
 @Accessors(fluent = true)

@@ -6,11 +6,15 @@ import lombok.experimental.Accessors;
 import xyz.zlatanov.frakkintoasters.board.CylonFleetBoard;
 import xyz.zlatanov.frakkintoasters.board.GalacticaBoard;
 import xyz.zlatanov.frakkintoasters.board.PegasusBoard;
+import xyz.zlatanov.frakkintoasters.crisis.CrisisCard;
+import xyz.zlatanov.frakkintoasters.crisis.SuperCrisisCard;
 import xyz.zlatanov.frakkintoasters.damage.BasestarDamage;
 import xyz.zlatanov.frakkintoasters.damage.GalacticaDamage;
 import xyz.zlatanov.frakkintoasters.damage.PegasusDamage;
 import xyz.zlatanov.frakkintoasters.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.ship.*;
+import xyz.zlatanov.frakkintoasters.skill.SkillCard;
+import xyz.zlatanov.frakkintoasters.skill.SkillCardType;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,7 +22,8 @@ import java.util.stream.IntStream;
 
 import static xyz.zlatanov.frakkintoasters.DestinationCard.*;
 import static xyz.zlatanov.frakkintoasters.Location.*;
-import static xyz.zlatanov.frakkintoasters.SkillCardType.*;
+import static xyz.zlatanov.frakkintoasters.LoyaltyCard.NOT_CYLON;
+import static xyz.zlatanov.frakkintoasters.skill.SkillCardType.*;
 
 @Getter
 @Accessors(fluent = true)
@@ -40,6 +45,8 @@ public class Game {
     private Deck<SkillCard>       treacheryDeck           = new Deck<>();
     private Deck<QuorumCard>      quorumDeck              = new Deck<>();
     private Deck<CrisisCard>      crisisDeck              = new Deck<>();
+    private Deck<SuperCrisisCard> superCrisisDeck         = new Deck<>();
+    private Deck<LoyaltyCard>     loyaltyDeck             = new Deck<>();
     private int                   nukes                   = 3;
     private int                   basestars               = 2;
     private int                   centurions              = 4;
@@ -93,6 +100,14 @@ public class Game {
         quorumDeck.shuffle();
         crisisDeck.add(Arrays.asList(CrisisCard.values()));
         crisisDeck.shuffle();
+        superCrisisDeck.add(Arrays.asList(SuperCrisisCard.values()));
+        superCrisisDeck.shuffle();
+        //todo check correct card quantities
+        loyaltyDeck.add(NOT_CYLON);
+        for (int i = 0; i < 11; i++) {
+            loyaltyDeck.add(Arrays.asList(LoyaltyCard.values()));
+        }
+        loyaltyDeck.shuffle();
     }
 
     public void setupSkillCards() {

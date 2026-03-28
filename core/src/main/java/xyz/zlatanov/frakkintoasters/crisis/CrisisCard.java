@@ -1,4 +1,4 @@
-package xyz.zlatanov.frakkintoasters;
+package xyz.zlatanov.frakkintoasters.crisis;
 
 public enum CrisisCard {
     DETENTE,

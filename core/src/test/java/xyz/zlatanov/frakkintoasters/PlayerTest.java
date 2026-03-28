@@ -7,7 +7,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.Character.CHIEF_GALEN_TYROL;
 import static xyz.zlatanov.frakkintoasters.Character.SAUL_TIGH;
-import static xyz.zlatanov.frakkintoasters.SkillCardType.REPAIR;
+import static xyz.zlatanov.frakkintoasters.skill.SkillCardType.REPAIR;
 
 class PlayerTest {
 

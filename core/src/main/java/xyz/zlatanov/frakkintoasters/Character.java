@@ -3,11 +3,12 @@ package xyz.zlatanov.frakkintoasters;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
+import xyz.zlatanov.frakkintoasters.skill.SkillSetOption;
 
 import java.util.Set;
 
 import static xyz.zlatanov.frakkintoasters.CharacterType.*;
-import static xyz.zlatanov.frakkintoasters.SkillSetOption.skills;
+import static xyz.zlatanov.frakkintoasters.skill.SkillSetOption.skills;
 
 @RequiredArgsConstructor
 @Getter
