@@ -1,4 +1,4 @@
-package xyz.zlatanov.frakkintoasters;
+package xyz.zlatanov.frakkintoasters.card;
 
 public enum QuorumCard {
     ESTABLISH_DOGSVILLE,

@@ -1,4 +1,4 @@
-package xyz.zlatanov.frakkintoasters;
+package xyz.zlatanov.frakkintoasters.deck;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -6,7 +6,7 @@ import java.util.List;
 
 public class Deck<T> {
 
-    private final List<T> cards = new ArrayList<>();
+    private final List<T> cards          = new ArrayList<>();
     private final List<T> discardedCards = new ArrayList<>();
 
     public void add(T card) {

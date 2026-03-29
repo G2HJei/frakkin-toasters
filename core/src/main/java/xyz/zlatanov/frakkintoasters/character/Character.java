@@ -1,4 +1,4 @@
-package xyz.zlatanov.frakkintoasters;
+package xyz.zlatanov.frakkintoasters.character;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -7,7 +7,7 @@ import xyz.zlatanov.frakkintoasters.skill.SkillSetOption;
 
 import java.util.Set;
 
-import static xyz.zlatanov.frakkintoasters.CharacterType.*;
+import static xyz.zlatanov.frakkintoasters.character.CharacterType.*;
 
 @RequiredArgsConstructor
 @Getter

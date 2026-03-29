@@ -3,18 +3,17 @@ package xyz.zlatanov.frakkintoasters.board;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.val;
-import xyz.zlatanov.frakkintoasters.JumpPreparation;
-import xyz.zlatanov.frakkintoasters.Location;
 import xyz.zlatanov.frakkintoasters.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.exception.InvalidMoveLocationException;
 import xyz.zlatanov.frakkintoasters.ship.Ship;
 import xyz.zlatanov.frakkintoasters.ship.ShipType;
+import xyz.zlatanov.frakkintoasters.track.JumpPreparation;
 
 import java.util.*;
 
 import static java.util.Collections.newSetFromMap;
-import static xyz.zlatanov.frakkintoasters.JumpPreparation.START;
-import static xyz.zlatanov.frakkintoasters.Location.*;
+import static xyz.zlatanov.frakkintoasters.board.Location.*;
+import static xyz.zlatanov.frakkintoasters.track.JumpPreparation.START;
 
 @Getter
 @Accessors(fluent = true)
@@ -62,20 +61,24 @@ public class GalacticaBoard extends Board {
         hubDestroyed = true;
     }
 
-    public void addToReserves(Ship ship) {
+    public GalacticaBoard addToReserves(Ship ship) {
         addToReserves(List.of(ship));
+        return this;
     }
 
-    public void addToReserves(List<Ship> ships) {
+    public GalacticaBoard addToReserves(List<Ship> ships) {
         reserves.addAll(ships);
+        return this;
     }
 
-    public void addToDamagedShips(Ship ship) {
+    public GalacticaBoard addToDamagedShips(Ship ship) {
         addToDamagedShips(List.of(ship));
+        return this;
     }
 
-    public void addToDamagedShips(List<Ship> ships) {
+    public GalacticaBoard addToDamagedShips(List<Ship> ships) {
         damagedShips.addAll(ships);
+        return this;
     }
 
     public Ship removeFromReserve(ShipType shipType) {
@@ -95,15 +98,16 @@ public class GalacticaBoard extends Board {
         return ship;
     }
 
-    public void place(Location in, Ship ship) {
-        place(in, List.of(ship));
+    public GalacticaBoard place(Location in, Ship ship) {
+        return place(in, List.of(ship));
     }
 
-    public void place(Location in, List<Ship> ships) {
+    public GalacticaBoard place(Location in, List<Ship> ships) {
         if (!locations().contains(in) || !in.isSpaceLocation()) {
             throw new InvalidMoveLocationException();
         }
         ships.forEach(s -> shipsInSpace.put(s, in));
+        return this;
     }
 
     public List<Ship> shipsIn(Location location) {

@@ -2,7 +2,7 @@ package xyz.zlatanov.frakkintoasters.board;
 
 import java.util.Set;
 
-import static xyz.zlatanov.frakkintoasters.Location.*;
+import static xyz.zlatanov.frakkintoasters.board.Location.*;
 
 public class PegasusBoard extends Board {
     public PegasusBoard() {

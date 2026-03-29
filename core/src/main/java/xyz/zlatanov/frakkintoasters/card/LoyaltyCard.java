@@ -1,4 +1,4 @@
-package xyz.zlatanov.frakkintoasters;
+package xyz.zlatanov.frakkintoasters.card;
 
 public enum LoyaltyCard {
     NOT_CYLON,

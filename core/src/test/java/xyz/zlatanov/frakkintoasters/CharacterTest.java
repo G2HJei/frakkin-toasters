@@ -4,9 +4,9 @@ import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.skill.SkillSetOption;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static xyz.zlatanov.frakkintoasters.Character.CHIEF_GALEN_TYROL;
-import static xyz.zlatanov.frakkintoasters.Character.LEE_APOLLO_ADAMA;
-import static xyz.zlatanov.frakkintoasters.CharacterType.SUPPORT;
+import static xyz.zlatanov.frakkintoasters.character.Character.CHIEF_GALEN_TYROL;
+import static xyz.zlatanov.frakkintoasters.character.Character.LEE_APOLLO_ADAMA;
+import static xyz.zlatanov.frakkintoasters.character.CharacterType.SUPPORT;
 
 class CharacterTest {
 

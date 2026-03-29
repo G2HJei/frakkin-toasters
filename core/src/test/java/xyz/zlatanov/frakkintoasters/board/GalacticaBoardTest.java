@@ -2,7 +2,6 @@ package xyz.zlatanov.frakkintoasters.board;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.Location;
 import xyz.zlatanov.frakkintoasters.ship.Raptor;
 import xyz.zlatanov.frakkintoasters.ship.Viper;
 
@@ -11,12 +10,12 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static xyz.zlatanov.frakkintoasters.Character.GAIUS_BALTAR;
-import static xyz.zlatanov.frakkintoasters.JumpPreparation.POSITION_1;
-import static xyz.zlatanov.frakkintoasters.JumpPreparation.START;
-import static xyz.zlatanov.frakkintoasters.Location.*;
+import static xyz.zlatanov.frakkintoasters.board.Location.*;
+import static xyz.zlatanov.frakkintoasters.character.Character.GAIUS_BALTAR;
 import static xyz.zlatanov.frakkintoasters.ship.ShipType.RAPTOR;
 import static xyz.zlatanov.frakkintoasters.ship.ShipType.VIPER;
+import static xyz.zlatanov.frakkintoasters.track.JumpPreparation.POSITION_1;
+import static xyz.zlatanov.frakkintoasters.track.JumpPreparation.START;
 
 class GalacticaBoardTest {
     GalacticaBoard board = new GalacticaBoard();

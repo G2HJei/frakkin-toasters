@@ -3,12 +3,12 @@ package xyz.zlatanov.frakkintoasters.board;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.val;
-import xyz.zlatanov.frakkintoasters.Pursuit;
+import xyz.zlatanov.frakkintoasters.track.Pursuit;
 
 import java.util.Set;
 
-import static xyz.zlatanov.frakkintoasters.Location.*;
-import static xyz.zlatanov.frakkintoasters.Pursuit.START;
+import static xyz.zlatanov.frakkintoasters.board.Location.*;
+import static xyz.zlatanov.frakkintoasters.track.Pursuit.START;
 
 @Getter
 @Accessors(fluent = true)

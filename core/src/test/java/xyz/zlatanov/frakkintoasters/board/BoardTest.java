@@ -1,14 +1,13 @@
 package xyz.zlatanov.frakkintoasters.board;
 
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.Location;
 import xyz.zlatanov.frakkintoasters.exception.InvalidMoveLocationException;
 
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static xyz.zlatanov.frakkintoasters.Character.*;
-import static xyz.zlatanov.frakkintoasters.Location.*;
+import static xyz.zlatanov.frakkintoasters.board.Location.*;
+import static xyz.zlatanov.frakkintoasters.character.Character.*;
 
 class BoardTest {
 

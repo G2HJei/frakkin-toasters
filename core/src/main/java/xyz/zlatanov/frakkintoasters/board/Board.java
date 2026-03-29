@@ -2,8 +2,7 @@ package xyz.zlatanov.frakkintoasters.board;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import xyz.zlatanov.frakkintoasters.Character;
-import xyz.zlatanov.frakkintoasters.Location;
+import xyz.zlatanov.frakkintoasters.character.Character;
 import xyz.zlatanov.frakkintoasters.exception.InvalidMoveLocationException;
 
 import java.util.*;

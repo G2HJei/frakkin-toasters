@@ -2,6 +2,7 @@ package xyz.zlatanov.frakkintoasters;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import xyz.zlatanov.frakkintoasters.deck.Deck;
 
 import java.util.List;
 
@@ -10,13 +11,13 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 
 class DeckTest {
     Deck<Card> deck = new Deck<>();
-    Card card = new Card();
+    Card       card = new Card();
 
     @BeforeEach
     void setUp() {
         deck.add(List.of(new Card()));
     }
- 
+
     @Test
     void shouldAddCardToBottomOfDeck() {
         deck.add(card);

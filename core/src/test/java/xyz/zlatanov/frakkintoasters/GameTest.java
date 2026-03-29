@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.exception.FrakCallTheAdmiralException;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static xyz.zlatanov.frakkintoasters.ObjectiveCard.EARTH;
-import static xyz.zlatanov.frakkintoasters.ObjectiveCard.KOBOL;
+import static xyz.zlatanov.frakkintoasters.card.ObjectiveCard.EARTH;
+import static xyz.zlatanov.frakkintoasters.card.ObjectiveCard.KOBOL;
 
 class GameTest {
 
