@@ -17,6 +17,6 @@ class CharacterTest {
 
     @Test
     void shouldProvideSkillSet() {
-        assertEquals(SkillSetOption.skills("1xTa, 2xPi, 2xL/Po"), LEE_APOLLO_ADAMA.skillSet());
+        assertEquals(SkillSetOption.skillSet("1xTa, 2xPi, 2xL/Po"), LEE_APOLLO_ADAMA.skillSet());
     }
 }
