@@ -5,18 +5,37 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 import xyz.zlatanov.frakkintoasters.exception.FrakCallTheAdmiralException;
 
-@Builder
 @Getter
 @Accessors(fluent = true)
 public class ShipsHolder {
-    @Builder.Default
-    private int basestars    = 2;
-    @Builder.Default
-    private int raiders      = 20;
-    @Builder.Default
-    private int heavyRaiders = 4;
-    @Builder.Default
-    private int centurions   = 4;
+    private int basestars;
+    private int raiders;
+    private int heavyRaiders;
+    private int centurions;
+
+    private final int basestarsLimit;
+    private final int raidersLimit;
+    private final int heavyRaidersLimit;
+    private final int centurionsLimit;
+
+    @Builder
+    private ShipsHolder(int basestars, int raiders, int heavyRaiders, int centurions) {
+        this.basestars = basestars;
+        this.raiders = raiders;
+        this.heavyRaiders = heavyRaiders;
+        this.centurions = centurions;
+        basestarsLimit = basestars;
+        raidersLimit = raiders;
+        heavyRaidersLimit = heavyRaiders;
+        centurionsLimit = centurions;
+    }
+
+    public static class ShipsHolderBuilder {
+        private int basestars    = 2;
+        private int raiders      = 20;
+        private int heavyRaiders = 4;
+        private int centurions   = 4;
+    }
 
     public Basestar basestar() {
         if (basestars == 0) {
@@ -52,16 +71,32 @@ public class ShipsHolder {
 
     public void removed(ShipType shipType) {
         switch (shipType) {
-            case BASESTAR -> basestars++;
-            case HEAVY_RAIDER -> heavyRaiders++;
-            case RAIDER -> raiders++;
+            case BASESTAR -> {
+                if (basestars >= basestarsLimit) {
+                    throw new FrakCallTheAdmiralException();
+                }
+                basestars++;
+            }
+            case HEAVY_RAIDER -> {
+                if (heavyRaiders >= heavyRaidersLimit) {
+                    throw new FrakCallTheAdmiralException();
+                }
+                heavyRaiders++;
+            }
+            case RAIDER -> {
+                if (raiders >= raidersLimit) {
+                    throw new FrakCallTheAdmiralException();
+                }
+                raiders++;
+            }
             default -> throw new FrakCallTheAdmiralException();
         }
-        assert basestars < 3 && raiders < 21 && heavyRaiders < 4;
     }
 
     public void removedCenturion() {
+        if (centurions >= centurionsLimit) {
+            throw new FrakCallTheAdmiralException();
+        }
         centurions++;
-        assert centurions < 4;
     }
 }
