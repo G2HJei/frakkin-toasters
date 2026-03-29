@@ -1,8 +1,9 @@
 package xyz.zlatanov.frakkintoasters;
 
+import lombok.val;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
+import xyz.zlatanov.frakkintoasters.exception.FrakCallTheAdmiralException;
+import xyz.zlatanov.frakkintoasters.skill.SkillCard;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.character.Character.CHIEF_GALEN_TYROL;
@@ -11,13 +12,14 @@ import static xyz.zlatanov.frakkintoasters.skill.SkillCardType.REPAIR;
 
 class PlayerTest {
 
-    Player xo    = new Player(SAUL_TIGH);
-    Player chief = new Player(CHIEF_GALEN_TYROL);
+    Player xo    = new Player(1).selectCharacter(SAUL_TIGH);
+    Player chief = new Player(2).selectCharacter(CHIEF_GALEN_TYROL);
 
     @Test
     void shouldTrackSkillCards() {
-        xo.addSkillCards(REPAIR);
-        assertEquals(List.of(REPAIR), xo.skillCards());
+        val cardToAdd = new SkillCard(1, REPAIR);
+        xo.gainSkillCards(cardToAdd);
+        assertTrue(xo.skillCards().contains(cardToAdd));
     }
 
     @Test
@@ -32,6 +34,12 @@ class PlayerTest {
         assertFalse(xo.hasMiracleToken());
         xo.gainMiracleToken();
         assertTrue(xo.hasMiracleToken());
+    }
+
+    @Test
+    void shouldNotAllowExhaustingMiracleTokenIfNoneAvailable() {
+        chief.exhaustMiracleToken();
+        assertThrows(FrakCallTheAdmiralException.class, () -> chief.exhaustMiracleToken());
     }
 
 }

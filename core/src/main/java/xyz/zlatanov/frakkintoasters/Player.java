@@ -1,7 +1,10 @@
 package xyz.zlatanov.frakkintoasters;
 
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import xyz.zlatanov.frakkintoasters.character.Character;
-import xyz.zlatanov.frakkintoasters.skill.SkillCardType;
+import xyz.zlatanov.frakkintoasters.exception.FrakCallTheAdmiralException;
+import xyz.zlatanov.frakkintoasters.skill.SkillCard;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,22 +12,27 @@ import java.util.List;
 
 import static xyz.zlatanov.frakkintoasters.character.Character.CHIEF_GALEN_TYROL;
 
+@Getter
+@Accessors(fluent = true)
 public class Player {
 
-    private final xyz.zlatanov.frakkintoasters.character.Character character;
-    private final List<SkillCardType>                              skillCardTypes  = new ArrayList<>();
-    private       boolean                                          hasMiracleToken = true;
+    private int             number;
+    private Character       character;
+    private List<SkillCard> skillCards      = new ArrayList<>();
+    private boolean         hasMiracleToken = true;
 
-    public Player(Character character) {
-        this.character = character;
+    public Player(int number) {
+        this.number = number;
     }
 
-    public void addSkillCards(SkillCardType... skillCardType) {
-        skillCardTypes.addAll(Arrays.stream(skillCardType).toList());
+    public Player selectCharacter(Character selection) {
+        assert character == null; //todo use asserts in core to avoid throwing FrakCallTheAdmiralException(s) everywhere
+        character = selection;
+        return this;
     }
 
-    public List<SkillCardType> skillCards() {
-        return skillCardTypes.stream().toList();
+    public void gainSkillCards(SkillCard... cardsToAdd) {
+        skillCards.addAll(Arrays.asList(cardsToAdd));
     }
 
     public int handLimit() {
@@ -32,6 +40,9 @@ public class Player {
     }
 
     public void exhaustMiracleToken() {
+        if (!hasMiracleToken) {
+            throw new FrakCallTheAdmiralException();
+        }
         hasMiracleToken = false;
     }
 
