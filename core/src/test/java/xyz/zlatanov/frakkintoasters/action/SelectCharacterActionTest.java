@@ -24,7 +24,18 @@ class SelectCharacterActionTest {
     void shouldSelectCharacter() {
         select(KARA_STARBUCK_THRACE).execute(game);
         assertEquals(KARA_STARBUCK_THRACE, game.player(1).character());
-        assertEquals(HANGAR_DECK, game.locate(KARA_STARBUCK_THRACE));
+    }
+
+    @Test
+    void shouldPlaceInSetupLocation() {
+        select(LOUANNE_KAT_KATRAINE).execute(game);
+        assertEquals(HANGAR_DECK, game.locate(LOUANNE_KAT_KATRAINE));
+    }
+
+    @Test
+    void shouldReceiveMiracleToken() {
+        select(CHIEF_GALEN_TYROL).execute(game);
+        assertTrue(game.player(1).hasMiracleToken());
     }
 
     @Test
