@@ -1,0 +1,50 @@
+package xyz.zlatanov.frakkintoasters.deck;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import xyz.zlatanov.frakkintoasters.state.deck.Deck;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+
+class DeckTest {
+    Deck<Card> deck = new Deck<>();
+    Card       card = new Card();
+
+    @BeforeEach
+    void setUp() {
+        deck.add(List.of(new Card()));
+    }
+
+    @Test
+    void shouldAddCardToBottomOfDeck() {
+        deck.add(card);
+        assertEquals(2, deck.size());
+    }
+
+    @Test
+    void shouldDrawCardFromTopOfDeck() {
+        deck.add(card);
+        assertNotSame(card, deck.draw());
+    }
+
+    @Test
+    void shouldDiscardCard() {
+        deck.discard(card);
+        assertEquals(1, deck.discardSize());
+    }
+
+    @Test
+    void shouldShuffleDeck() {
+        deck.discard(card);
+        deck.shuffle();
+        assertEquals(2, deck.size());
+        assertEquals(0, deck.discardSize());
+    }
+
+    static class Card {
+
+    }
+}

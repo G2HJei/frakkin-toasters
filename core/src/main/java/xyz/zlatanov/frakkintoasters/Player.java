@@ -2,15 +2,15 @@ package xyz.zlatanov.frakkintoasters;
 
 import lombok.Getter;
 import lombok.experimental.Accessors;
-import xyz.zlatanov.frakkintoasters.character.Character;
-import xyz.zlatanov.frakkintoasters.exception.FrakCallTheAdmiralException;
-import xyz.zlatanov.frakkintoasters.skill.SkillCard;
+import xyz.zlatanov.frakkintoasters.state.character.Character;
+import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static xyz.zlatanov.frakkintoasters.character.Character.CHIEF_GALEN_TYROL;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.CHIEF_GALEN_TYROL;
 
 @Getter
 @Accessors(fluent = true)

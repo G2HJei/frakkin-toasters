@@ -1,0 +1,15 @@
+package xyz.zlatanov.frakkintoasters.state.crisis;
+
+public enum SuperCrisisCard {
+    FIGHTING_BLIND,
+    HUMAN_PRISONER,
+    FIRE_ALL_MISSILES,
+    THE_FARM,
+    PSYCHOLOGICAL_WARFARE,
+    FOOTAGE_TRANSMITTED,
+    DEMAND_PEACE_MANIFESTO,
+    INBOUND_NUKES,
+    FLEET_MOBILIZATION,
+    CYLON_INTRUDERS,
+    BOMB_ON_COLONIAL_1
+}

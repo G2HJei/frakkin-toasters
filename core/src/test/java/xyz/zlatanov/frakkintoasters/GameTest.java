@@ -1,11 +1,11 @@
 package xyz.zlatanov.frakkintoasters;
 
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.exception.FrakCallTheAdmiralException;
+import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static xyz.zlatanov.frakkintoasters.card.ObjectiveCard.EARTH;
-import static xyz.zlatanov.frakkintoasters.card.ObjectiveCard.KOBOL;
+import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.EARTH;
+import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
 
 class GameTest {
 

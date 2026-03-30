@@ -3,16 +3,16 @@ package xyz.zlatanov.frakkintoasters;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import xyz.zlatanov.frakkintoasters.board.BoardsHolder;
-import xyz.zlatanov.frakkintoasters.card.ObjectiveCard;
-import xyz.zlatanov.frakkintoasters.character.Character;
-import xyz.zlatanov.frakkintoasters.deck.DecksHolder;
-import xyz.zlatanov.frakkintoasters.exception.FrakCallTheAdmiralException;
-import xyz.zlatanov.frakkintoasters.ship.*;
+import xyz.zlatanov.frakkintoasters.state.board.BoardsHolder;
+import xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard;
+import xyz.zlatanov.frakkintoasters.state.character.Character;
+import xyz.zlatanov.frakkintoasters.state.deck.DecksHolder;
+import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
+import xyz.zlatanov.frakkintoasters.state.ship.*;
 
 import java.util.List;
 
-import static xyz.zlatanov.frakkintoasters.board.Location.*;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 
 @Getter
 @Accessors(fluent = true)

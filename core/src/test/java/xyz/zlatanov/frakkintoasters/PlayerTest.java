@@ -2,13 +2,13 @@ package xyz.zlatanov.frakkintoasters;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.exception.FrakCallTheAdmiralException;
-import xyz.zlatanov.frakkintoasters.skill.SkillCard;
+import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static xyz.zlatanov.frakkintoasters.character.Character.CHIEF_GALEN_TYROL;
-import static xyz.zlatanov.frakkintoasters.character.Character.SAUL_TIGH;
-import static xyz.zlatanov.frakkintoasters.skill.SkillCardType.REPAIR;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.CHIEF_GALEN_TYROL;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.SAUL_TIGH;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.REPAIR;
 
 class PlayerTest {
 
