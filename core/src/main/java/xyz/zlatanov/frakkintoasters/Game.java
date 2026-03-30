@@ -9,11 +9,13 @@ import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.deck.DecksHolder;
+import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 
@@ -62,12 +64,19 @@ public class Game {
     }
 
     public Location locate(Character character) {
-        for (val board : List.of(boards.galactica(), boards.pegasus(), boards.cylonFleet())) {
-            val location = board.locate(character);
-            if (location != null) {
-                return location;
-            }
-        }
-        return null;
+        return boards.all().stream()
+                .map(board -> board.locate(character))
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElseThrow(FrakCallTheAdmiralException::new);
+    }
+
+    public void moveTo(Location location, Character character) {
+        boards.all().forEach(b -> b.remove(character));
+        boards.all().stream()
+                .filter(b -> b.locations().contains(location))
+                .findFirst()
+                .orElseThrow(FrakCallTheAdmiralException::new)
+                .place(location, character);
     }
 }

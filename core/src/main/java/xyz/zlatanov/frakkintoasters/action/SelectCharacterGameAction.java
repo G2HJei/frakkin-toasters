@@ -18,6 +18,6 @@ public class SelectCharacterGameAction implements GameAction {
     @Override
     public void apply(Game game) {
         game.player(playerNumber).selectCharacter(selectedCharacter);
-        game.boards().galactica().place(COMMAND, selectedCharacter);
+        game.moveTo(COMMAND, selectedCharacter);
     }
 }
