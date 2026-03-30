@@ -27,12 +27,6 @@ class SelectCharacterActionTest {
     }
 
     @Test
-    void shouldNotPlaceVanillaHelo() {
-        select(KARL_HELO_AGATHON).apply(game);
-        assertThrows(FrakCallTheAdmiralException.class, () -> game.locate(KARL_HELO_AGATHON));
-    }
-
-    @Test
     void shouldFollowupWithSetupOptions() {
         val followup = select(HELENA_CAIN).apply(game);
 
@@ -40,6 +34,18 @@ class SelectCharacterActionTest {
                 new MoveAction(1, PEGASUS_CIC),
                 new MoveAction(1, COMMAND));
         assertEquals(expected, followup);
+    }
+
+    @Test
+    void shouldNotPlaceVanillaHelo() {
+        select(KARL_HELO_AGATHON).apply(game);
+        assertThrows(FrakCallTheAdmiralException.class, () -> game.locate(KARL_HELO_AGATHON));
+    }
+
+    @Test
+    void shouldFollowupForApollo() {
+        select(LEE_APOLLO_ADAMA).apply(game);
+        //expect LaunchViperActions
     }
 
     static SelectCharacterAction select(Character character) {
