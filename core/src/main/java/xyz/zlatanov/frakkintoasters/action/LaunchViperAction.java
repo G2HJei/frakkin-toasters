@@ -8,7 +8,7 @@ import java.util.List;
 
 public record LaunchViperAction(int playerNumber, ShipType shipType, Location location) implements Action {
     @Override
-    public List<Action> apply(Game game) {
+    public List<Action> execute(Game game) {
         return List.of();
     }
 }

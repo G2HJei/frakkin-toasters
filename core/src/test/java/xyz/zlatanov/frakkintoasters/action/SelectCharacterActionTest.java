@@ -23,14 +23,14 @@ class SelectCharacterActionTest {
 
     @Test
     void shouldSelectCharacter() {
-        select(SAUL_TIGH).apply(game);
+        select(SAUL_TIGH).execute(game);
         assertEquals(SAUL_TIGH, game.player(1).character());
         assertEquals(COMMAND, game.locate(SAUL_TIGH));
     }
 
     @Test
     void shouldFollowupWithSetupOptions() {
-        val followup = select(HELENA_CAIN).apply(game);
+        val followup = select(HELENA_CAIN).execute(game);
 
         val expected = List.of(
                 new MoveAction(1, PEGASUS_CIC),
@@ -40,13 +40,13 @@ class SelectCharacterActionTest {
 
     @Test
     void shouldNotPlaceVanillaHelo() {
-        select(KARL_HELO_AGATHON).apply(game);
+        select(KARL_HELO_AGATHON).execute(game);
         assertThrows(FrakCallTheAdmiralException.class, () -> game.locate(KARL_HELO_AGATHON));
     }
 
     @Test
     void shouldFollowupForApollo() {
-        val followup = select(LEE_APOLLO_ADAMA).apply(game);
+        val followup = select(LEE_APOLLO_ADAMA).execute(game);
         val expected = List.of(
                 new LaunchViperAction(1, VIPER, GALACTICA_SPACE_4_OCLOCK),
                 new LaunchViperAction(1, VIPER, GALACTICA_SPACE_6_OCLOCK),
@@ -58,16 +58,16 @@ class SelectCharacterActionTest {
 
     @Test
     void shouldNotAllowDoubleSelection() {
-        select(KARA_STARBUCK_THRACE).apply(game);
+        select(KARA_STARBUCK_THRACE).execute(game);
         val invalidAction = new SelectCharacterAction(2, KARA_STARBUCK_THRACE);
-        assertThrows(InvalidActionException.class, () -> invalidAction.apply(game));
+        assertThrows(InvalidActionException.class, () -> invalidAction.execute(game));
     }
 
     @Test
     void shouldNotAllowDoubleSelectionOfAlternateVersion() {
-        select(GAIUS_BALTAR).apply(game);
+        select(GAIUS_BALTAR).execute(game);
         val invalidAction = new SelectCharacterAction(2, GAIUS_BALTAR_ALT);
-        assertThrows(InvalidActionException.class, () -> invalidAction.apply(game));
+        assertThrows(InvalidActionException.class, () -> invalidAction.execute(game));
     }
 
     static SelectCharacterAction select(Character character) {

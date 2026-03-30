@@ -5,7 +5,6 @@ import xyz.zlatanov.frakkintoasters.Game;
 import xyz.zlatanov.frakkintoasters.Player;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
-import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -20,22 +19,7 @@ import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.VIPER;
 public record SelectCharacterAction(int playerNumber, Character selectedCharacter) implements Action {
 
     @Override
-    public List<Action> apply(Game game) {
-        if (characterAlreadySelected(game)) {
-            throw new InvalidActionException("%s already selected.".formatted(selectedCharacter));
-        }
-        game.player(playerNumber).selectCharacter(selectedCharacter);
-        val setup = selectedCharacter.setup();
-        if (setup.length == 1) {
-            return moveToSetup(game);
-        } else if (setup.length > 1) {
-            return multipleSetupOptionsFollowup();
-        } else {
-            return specialSetupFollowup();
-        }
-    }
-
-    private boolean characterAlreadySelected(Game game) {
+    public boolean isValid(Game game) {
         val allSelections = game.players().values().stream()
                 .map(Player::character)
                 .toList();
@@ -51,7 +35,24 @@ public record SelectCharacterAction(int playerNumber, Character selectedCharacte
                         (allSelections.contains(pair[0]) && selectedCharacter == pair[1]) ||
                                 (allSelections.contains(pair[1]) && selectedCharacter == pair[0]));
 
-        return exactlyTheSame || alternateAlreadySelected;
+        return !(exactlyTheSame || alternateAlreadySelected);
+    }
+
+    @Override
+    public void apply(Game game) {
+        game.player(playerNumber).selectCharacter(selectedCharacter);
+    }
+
+    @Override
+    public List<Action> followup(Game game) {
+        val setup = selectedCharacter.setup();
+        if (setup.length == 1) {
+            return moveToSetup(game);
+        } else if (setup.length > 1) {
+            return multipleSetupOptionsFollowup();
+        } else {
+            return specialSetupFollowup();
+        }
     }
 
     private List<Action> moveToSetup(Game game) {
