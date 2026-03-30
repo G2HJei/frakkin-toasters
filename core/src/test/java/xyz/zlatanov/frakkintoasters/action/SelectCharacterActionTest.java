@@ -65,9 +65,8 @@ class SelectCharacterActionTest {
 
     @Test
     void shouldNotAllowDoubleSelectionOfAlternateVersion() {
-        select(GAIUS_BALTAR).execute(game);
-        val invalidAction = new SelectCharacterAction(2, GAIUS_BALTAR_ALT);
-        assertThrows(InvalidActionException.class, () -> invalidAction.execute(game));
+        game.player(2).selectCharacter(GAIUS_BALTAR);
+        assertThrows(InvalidActionException.class, () -> select(GAIUS_BALTAR_ALT).execute(game));
     }
 
     static SelectCharacterAction select(Character character) {
