@@ -3,14 +3,17 @@ package xyz.zlatanov.frakkintoasters;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.board.BoardsHolder;
+import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.deck.DecksHolder;
-import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 
@@ -19,25 +22,31 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 public class Game {
     // todo inject boards, decks and counters for testing purposes?
     // todo separate decks and counters in own classes?
-    // todo add players, current player, turns
-    private ObjectiveCard objective;
-    private BoardsHolder  boards;
-    private DecksHolder   decks;
-    private ShipsHolder   ships;
-    private int           nukes;
+    // todo add current player, turns
+    private final Map<Integer, Player> players;
+    private final ObjectiveCard        objective;
+    private final BoardsHolder         boards = new BoardsHolder();
+    private       DecksHolder          decks;
+    private       ShipsHolder          ships;
+    private       int                  nukes;
     @Setter
-    private Character     president;
+    private       Character            president;
     @Setter
-    private Character     admiral;
+    private       Character            admiral;
     @Setter
-    private Character     cag;
+    private       Character            cag;
 
-
-    public void objective(ObjectiveCard objective) {
-        if (this.objective != null) {
-            throw new FrakCallTheAdmiralException();
-        }
+    public Game(ObjectiveCard objective, int numberOfPlayers) {
         this.objective = objective;
+        val playersMap = new LinkedHashMap<Integer, Player>();
+        for (int i = 1; i <= numberOfPlayers; i++) {
+            playersMap.put(i, new Player());
+        }
+        players = Map.copyOf(playersMap);
+    }
+
+    public Player player(int playerNumber) {
+        return players.get(playerNumber);
     }
 
     public void setupGalacticaBoard() {
@@ -52,5 +61,13 @@ public class Game {
                 .place(GALACTICA_SPACE_8_OCLOCK, List.of(ships.raider(), ships.raider(), ships.raider(), ships.raider()));
     }
 
-
+    public Location locate(Character character) {
+        for (val board : List.of(boards.galactica(), boards.pegasus(), boards.cylonFleet())) {
+            val location = board.locate(character);
+            if (location != null) {
+                return location;
+            }
+        }
+        return null;
+    }
 }

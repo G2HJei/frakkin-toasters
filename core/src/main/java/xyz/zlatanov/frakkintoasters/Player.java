@@ -16,14 +16,9 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.CHIEF_GALEN
 @Accessors(fluent = true)
 public class Player {
 
-    private int             number;
     private Character       character;
     private List<SkillCard> skillCards      = new ArrayList<>();
     private boolean         hasMiracleToken = true;
-
-    public Player(int number) {
-        this.number = number;
-    }
 
     public Player selectCharacter(Character selection) {
         assert character == null; //todo use asserts in core to avoid throwing FrakCallTheAdmiralException(s) everywhere

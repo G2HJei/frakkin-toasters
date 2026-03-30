@@ -1,8 +1,7 @@
-package xyz.zlatanov.frakkintoasters.deck;
+package xyz.zlatanov.frakkintoasters.state.deck;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package xyz.zlatanov.frakkintoasters.character;
+package xyz.zlatanov.frakkintoasters.state.character;
 
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillSetOption;
