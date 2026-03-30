@@ -2,18 +2,28 @@ package xyz.zlatanov.frakkintoasters.action;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.Game;
+import xyz.zlatanov.frakkintoasters.Player;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
+import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
-import static xyz.zlatanov.frakkintoasters.state.character.Character.KARL_HELO_AGATHON;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_4_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_6_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
+import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.ASSAULT_RAPTOR;
+import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.VIPER;
 
 public record SelectCharacterAction(int playerNumber, Character selectedCharacter) implements Action {
 
     @Override
     public List<Action> apply(Game game) {
+        if (characterAlreadySelected(game)) {
+            throw new InvalidActionException("%s already selected.".formatted(selectedCharacter));
+        }
         game.player(playerNumber).selectCharacter(selectedCharacter);
         val setup = selectedCharacter.setup();
         if (setup.length == 1) {
@@ -23,6 +33,25 @@ public record SelectCharacterAction(int playerNumber, Character selectedCharacte
         } else {
             return specialSetupFollowup();
         }
+    }
+
+    private boolean characterAlreadySelected(Game game) {
+        val allSelections = game.players().values().stream()
+                .map(Player::character)
+                .toList();
+        val exactlyTheSame = allSelections.stream()
+                .anyMatch(c -> c == selectedCharacter);
+        val alternateAlreadySelected = Stream.of(
+                        new Character[]{GAIUS_BALTAR, GAIUS_BALTAR_ALT},
+                        new Character[]{KARL_HELO_AGATHON, KARL_HELO_AGATHON_ALT},
+                        new Character[]{TOM_ZAREK, TOM_ZAREK_ALT},
+                        new Character[]{SHARON_BOOMER_VALERII, SHARON_ATHENA_AGATHON},
+                        new Character[]{LEE_APOLLO_ADAMA, LEE_ADAMA})
+                .anyMatch(pair ->
+                        (allSelections.contains(pair[0]) && selectedCharacter == pair[1]) ||
+                                (allSelections.contains(pair[1]) && selectedCharacter == pair[0]));
+
+        return exactlyTheSame || alternateAlreadySelected;
     }
 
     private List<Action> moveToSetup(Game game) {
@@ -37,9 +66,15 @@ public record SelectCharacterAction(int playerNumber, Character selectedCharacte
     }
 
     private List<Action> specialSetupFollowup() {
-        if (selectedCharacter == KARL_HELO_AGATHON) {
-            return List.of();
-        }
-        throw new FrakCallTheAdmiralException();
+        return switch (selectedCharacter) {
+            case KARL_HELO_AGATHON -> List.of();
+            case LEE_APOLLO_ADAMA -> List.of(
+                    new LaunchViperAction(playerNumber, VIPER, GALACTICA_SPACE_4_OCLOCK),
+                    new LaunchViperAction(playerNumber, VIPER, GALACTICA_SPACE_6_OCLOCK),
+                    new LaunchViperAction(playerNumber, ASSAULT_RAPTOR, GALACTICA_SPACE_4_OCLOCK),
+                    new LaunchViperAction(playerNumber, ASSAULT_RAPTOR, GALACTICA_SPACE_6_OCLOCK)
+            );
+            default -> throw new FrakCallTheAdmiralException();
+        };
     }
 }

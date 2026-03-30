@@ -5,15 +5,17 @@ import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.Game;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
+import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.COMMAND;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.PEGASUS_CIC;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
+import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.ASSAULT_RAPTOR;
+import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.VIPER;
 
 
 class SelectCharacterActionTest {
@@ -44,8 +46,28 @@ class SelectCharacterActionTest {
 
     @Test
     void shouldFollowupForApollo() {
-        select(LEE_APOLLO_ADAMA).apply(game);
-        //expect LaunchViperActions
+        val followup = select(LEE_APOLLO_ADAMA).apply(game);
+        val expected = List.of(
+                new LaunchViperAction(1, VIPER, GALACTICA_SPACE_4_OCLOCK),
+                new LaunchViperAction(1, VIPER, GALACTICA_SPACE_6_OCLOCK),
+                new LaunchViperAction(1, ASSAULT_RAPTOR, GALACTICA_SPACE_4_OCLOCK),
+                new LaunchViperAction(1, ASSAULT_RAPTOR, GALACTICA_SPACE_6_OCLOCK)
+        );
+        assertEquals(expected, followup);
+    }
+
+    @Test
+    void shouldNotAllowDoubleSelection() {
+        select(KARA_STARBUCK_THRACE).apply(game);
+        val invalidAction = new SelectCharacterAction(2, KARA_STARBUCK_THRACE);
+        assertThrows(InvalidActionException.class, () -> invalidAction.apply(game));
+    }
+
+    @Test
+    void shouldNotAllowDoubleSelectionOfAlternateVersion() {
+        select(GAIUS_BALTAR).apply(game);
+        val invalidAction = new SelectCharacterAction(2, GAIUS_BALTAR_ALT);
+        assertThrows(InvalidActionException.class, () -> invalidAction.apply(game));
     }
 
     static SelectCharacterAction select(Character character) {

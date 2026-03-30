@@ -112,7 +112,8 @@ class GalacticaBoardTest {
                 GALACTICA_SPACE_2_OCLOCK,
                 GALACTICA_SPACE_4_OCLOCK,
                 GALACTICA_SPACE_6_OCLOCK,
-                GALACTICA_SPACE_8_OCLOCK));
+                GALACTICA_SPACE_8_OCLOCK,
+                GALACTICA_SPACE_10_OCLOCK));
     }
 
     private Set<Location> noColonialOneLocations() {
