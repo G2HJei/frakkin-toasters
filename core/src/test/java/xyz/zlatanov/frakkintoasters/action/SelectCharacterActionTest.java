@@ -9,8 +9,7 @@ import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
@@ -66,7 +65,7 @@ class SelectCharacterActionTest {
     @Test
     void shouldNotAllowDoubleSelectionOfAlternateVersion() {
         game.player(2).selectCharacter(GAIUS_BALTAR);
-        assertThrows(InvalidActionException.class, () -> select(GAIUS_BALTAR_ALT).execute(game));
+        assertFalse(select(GAIUS_BALTAR_ALT).isValid(game));
     }
 
     static SelectCharacterAction select(Character character) {
