@@ -1,10 +1,5 @@
 package xyz.zlatanov.frakkintoasters.action;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
-import lombok.experimental.Accessors;
-import lombok.experimental.SuperBuilder;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.Game;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
@@ -15,13 +10,7 @@ import java.util.List;
 
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARL_HELO_AGATHON;
 
-@SuperBuilder
-@Getter
-@Accessors(fluent = true)
-@ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
-public class SelectCharacterAction extends PlayerAction {
-    private final Character selectedCharacter;
+public record SelectCharacterAction(int playerNumber, Character selectedCharacter) implements Action {
 
     @Override
     public List<Action> apply(Game game) {
@@ -43,10 +32,7 @@ public class SelectCharacterAction extends PlayerAction {
 
     private List<Action> multipleSetupOptionsFollowup() {
         return Arrays.stream(selectedCharacter.setup())
-                .map(loc -> (Action) MoveAction.builder()
-                        .playerNumber(playerNumber)
-                        .location(loc)
-                        .build())
+                .map(loc -> (Action) new MoveAction(playerNumber, loc))
                 .toList();
     }
 

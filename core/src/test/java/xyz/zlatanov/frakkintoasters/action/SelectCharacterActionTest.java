@@ -3,6 +3,7 @@ package xyz.zlatanov.frakkintoasters.action;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.Game;
+import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 
 import java.util.List;
@@ -36,17 +37,13 @@ class SelectCharacterActionTest {
         val followup = select(HELENA_CAIN).apply(game);
 
         val expected = List.of(
-                MoveAction.builder().playerNumber(1).location(PEGASUS_CIC).build(),
-                MoveAction.builder().playerNumber(1).location(COMMAND).build()
-        );
+                new MoveAction(1, PEGASUS_CIC),
+                new MoveAction(1, COMMAND));
         assertEquals(expected, followup);
     }
 
-    static SelectCharacterAction select(xyz.zlatanov.frakkintoasters.state.character.Character saulTigh) {
-        return SelectCharacterAction.builder()
-                .playerNumber(1)
-                .selectedCharacter(saulTigh)
-                .build();
+    static SelectCharacterAction select(Character character) {
+        return new SelectCharacterAction(1, character);
     }
 
 }
