@@ -20,22 +20,8 @@ public record SelectCharacterAction(int playerNumber, Character selectedCharacte
 
     @Override
     public boolean isValid(Game game) {
-        val allSelections = game.players().values().stream()
-                .map(Player::character)
-                .toList();
-        val exactlyTheSame = allSelections.stream()
-                .anyMatch(c -> c == selectedCharacter);
-        val alternateAlreadySelected = Stream.of(
-                        new Character[]{GAIUS_BALTAR, GAIUS_BALTAR_ALT},
-                        new Character[]{KARL_HELO_AGATHON, KARL_HELO_AGATHON_ALT},
-                        new Character[]{TOM_ZAREK, TOM_ZAREK_ALT},
-                        new Character[]{SHARON_BOOMER_VALERII, SHARON_ATHENA_AGATHON},
-                        new Character[]{LEE_APOLLO_ADAMA, LEE_ADAMA})
-                .anyMatch(pair ->
-                        (allSelections.contains(pair[0]) && selectedCharacter == pair[1]) ||
-                                (allSelections.contains(pair[1]) && selectedCharacter == pair[0]));
-
-        return !(exactlyTheSame || alternateAlreadySelected);
+        return !characterAlreadySelected(game)
+                && !altAlreadySelected(game);
     }
 
     @Override
@@ -53,6 +39,27 @@ public record SelectCharacterAction(int playerNumber, Character selectedCharacte
         } else {
             return specialSetupFollowup();
         }
+    }
+
+    private boolean characterAlreadySelected(Game game) {
+        return game.players().values().stream()
+                .map(Player::character)
+                .anyMatch(c -> c == selectedCharacter);
+    }
+
+    private boolean altAlreadySelected(Game game) {
+        val currentSelections = game.players().values().stream()
+                .map(Player::character)
+                .toList();
+        val alternateAlreadySelected = Stream.of(
+                        new Character[]{GAIUS_BALTAR, GAIUS_BALTAR_ALT},
+                        new Character[]{KARL_HELO_AGATHON, KARL_HELO_AGATHON_ALT},
+                        new Character[]{TOM_ZAREK, TOM_ZAREK_ALT},
+                        new Character[]{SHARON_BOOMER_VALERII, SHARON_ATHENA_AGATHON},
+                        new Character[]{LEE_APOLLO_ADAMA, LEE_ADAMA})
+                .anyMatch(pair ->
+                        (currentSelections.contains(pair[0]) && selectedCharacter == pair[1]) ||
+                                (currentSelections.contains(pair[1]) && selectedCharacter == pair[0]));
     }
 
     private List<Action> moveToSetup(Game game) {
