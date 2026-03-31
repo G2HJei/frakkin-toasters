@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import static xyz.zlatanov.frakkintoasters.state.card.DestinationCard.*;
-import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.NOT_CYLON;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 
 @Getter
@@ -38,6 +37,7 @@ public class DecksHolder {
     private final Deck<CrisisCard>      crisis          = new Deck<>();
     private final Deck<SuperCrisisCard> superCrisis     = new Deck<>();
     private final Deck<LoyaltyCard>     loyalty         = new Deck<>();
+    private final Deck<LoyaltyCard>     loyaltyNotCylon = new Deck<>();
     private final Deck<MutinyCard>      mutiny          = new Deck<>();
     private final Deck<MotiveCard>      motive          = new Deck<>();
 
@@ -73,12 +73,6 @@ public class DecksHolder {
         crisis.shuffle();
         superCrisis.add(Arrays.asList(SuperCrisisCard.values()));
         superCrisis.shuffle();
-        //todo check correct card quantities
-        loyalty.add(Arrays.asList(LoyaltyCard.values()));
-        for (int i = 0; i < 11; i++) {
-            loyalty.add(NOT_CYLON);
-        }
-        loyalty.shuffle();
         mutiny.add(Arrays.asList(MutinyCard.values()));
         mutiny.shuffle();
         motive.add(Arrays.asList(MotiveCard.values()));

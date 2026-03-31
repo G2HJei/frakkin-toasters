@@ -1,9 +1,14 @@
 package xyz.zlatanov.frakkintoasters.state.deck;
 
+import lombok.Getter;
+import lombok.experimental.Accessors;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@Getter
+@Accessors(fluent = true)
 public class Deck<T> {
 
     private final List<T> cards          = new ArrayList<>();

@@ -2,7 +2,6 @@ package xyz.zlatanov.frakkintoasters.state.card;
 
 public enum LoyaltyCard {
     NOT_CYLON,
-    NOT_CYLON_MUTINEER,
     NOT_CYLON_USE_CAUTION,
     NOT_CYLON_STAND_AND_FIGHT,
     NOT_CYLON_SELFISH,
@@ -16,11 +15,19 @@ public enum LoyaltyCard {
     FINAL_FIVE_THEY_ARE_EXECUTED,
     FINAL_FIVE_DAMAGE_GALACTICA_TWICE,
     FINAL_FIVE_CYLON_SHIPS_ACTIVATE,
+
+    MUTINEER,
+
     CYLON_CAN_PLACE_CENTURION,
     CYLON_DECREASE_JUMP_TRACK,
     CYLON_DRAW_TREACHERY_CARDS,
     CYLON_SEND_TO_BRIG,
     CYLON_DAMAGE_GALACTICA,
     CYLON_REDUCE_MORALE,
-    CYLON_SEND_TO_SICKBAY
+    CYLON_SEND_TO_SICKBAY;
+
+    public boolean isCylon() {
+        return ordinal() > MUTINEER.ordinal();
+    }
+
 }

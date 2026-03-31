@@ -19,8 +19,7 @@ public interface Action {
         return true;
     }
 
-    default void apply(Game game) {
-    }
+    void apply(Game game);
 
     default List<Action> followup(Game game) {
         return List.of();
