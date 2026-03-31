@@ -28,7 +28,7 @@ public class Game {
     private final BoardsHolder         boards        = new BoardsHolder();
     private       DecksHolder          decks         = new DecksHolder();
     private       ShipsHolder          ships;
-    private       int                  nukes;
+    private       int                  nukes         = 2;
     @Setter
     private       Character            president;
     private final List<QuorumCard>     presidentHand = new ArrayList<>();

@@ -1,23 +1,20 @@
-package xyz.zlatanov.frakkintoasters;
+package xyz.zlatanov.frakkintoasters.action.officials;
 
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.Game;
 import xyz.zlatanov.frakkintoasters.action.Action;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface SelectNextOfficialAction extends Action {
 
-    List<Character> lineOfSuccession();
+    List<Character> lineOfSuccession(Game game);
 
-    @Override
-    default void apply(Game game) {
-        val president = calcNextInLine(game, lineOfSuccession());
-        game.president(president);
-    }
-
-    private Character calcNextInLine(Game game, List<Character> lineOfSuccession) {
+    default Character calcNextInLine(Game game) {
+        val lineOfSuccession = lineOfSuccession(game);
         Character nextInLine = null;
         var nextRank = 99;
         for (val player : game.players().values()) {
@@ -28,9 +25,11 @@ public interface SelectNextOfficialAction extends Action {
                 nextInLine = character;
             }
         }
-        if (nextInLine == null) {
-            throw new FrakCallTheAdmiralException();
-        }
-        return nextInLine;
+        return Optional.ofNullable(nextInLine)
+                .orElseGet(this::noNextInLine);
+    }
+
+    default Character noNextInLine() {
+        throw new FrakCallTheAdmiralException();
     }
 }

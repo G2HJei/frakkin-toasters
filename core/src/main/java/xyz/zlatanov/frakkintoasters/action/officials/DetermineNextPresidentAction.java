@@ -1,8 +1,7 @@
-package xyz.zlatanov.frakkintoasters.action;
+package xyz.zlatanov.frakkintoasters.action.officials;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.Game;
-import xyz.zlatanov.frakkintoasters.SelectNextOfficialAction;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 
 import java.util.List;
@@ -12,7 +11,7 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 public record DetermineNextPresidentAction() implements SelectNextOfficialAction {
 
     @Override
-    public List<Character> lineOfSuccession() {
+    public List<Character> lineOfSuccession(Game game) {
         return List.of(
                 LAURA_ROSLIN,
                 GAIUS_BALTAR,
@@ -48,7 +47,7 @@ public record DetermineNextPresidentAction() implements SelectNextOfficialAction
             val quorumCard = game.decks().quorum().draw();
             game.presidentHand().add(quorumCard);
         }
-        SelectNextOfficialAction.super.apply(game);
+        game.president(calcNextInLine(game));
     }
 
     private boolean firstPresident(Game game) {
