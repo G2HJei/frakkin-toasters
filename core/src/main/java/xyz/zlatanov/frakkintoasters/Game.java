@@ -7,15 +7,13 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.board.BoardsHolder;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard;
+import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.deck.DecksHolder;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 
@@ -27,12 +25,13 @@ public class Game {
     // todo add current player, turns
     private final Map<Integer, Player> players;
     private final ObjectiveCard        objective;
-    private final BoardsHolder         boards = new BoardsHolder();
-    private       DecksHolder          decks;
+    private final BoardsHolder         boards        = new BoardsHolder();
+    private       DecksHolder          decks         = new DecksHolder();
     private       ShipsHolder          ships;
     private       int                  nukes;
     @Setter
     private       Character            president;
+    private final List<QuorumCard>     presidentHand = new ArrayList<>();
     @Setter
     private       Character            admiral;
     @Setter

@@ -1,6 +1,5 @@
 package xyz.zlatanov.frakkintoasters.state.deck;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import xyz.zlatanov.frakkintoasters.state.card.*;
@@ -23,25 +22,30 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 
 @Getter
 @Accessors(fluent = true)
-@Builder
 public class DecksHolder {
-    private Deck<CivilianShip>    civilianShips;
-    private Deck<BasestarDamage>  basestarDamage;
-    private Deck<PegasusDamage>   pegasusDamage;
-    private Deck<GalacticaDamage> galacticaDamage;
-    private Deck<DestinationCard> destination;
-    private Deck<SkillCard>       politics;
-    private Deck<SkillCard>       leadership;
-    private Deck<SkillCard>       tactics;
-    private Deck<SkillCard>       piloting;
-    private Deck<SkillCard>       engineering;
-    private Deck<SkillCard>       treachery;
-    private Deck<QuorumCard>      quorum;
-    private Deck<CrisisCard>      crisis;
-    private Deck<SuperCrisisCard> superCrisis;
-    private Deck<LoyaltyCard>     loyalty;
-    private Deck<MutinyCard>      mutiny;
-    private Deck<MotiveCard>      motive;
+    private final Deck<CivilianShip>    civilianShips   = new Deck<>();
+    private final Deck<BasestarDamage>  basestarDamage  = new Deck<>();
+    private final Deck<PegasusDamage>   pegasusDamage   = new Deck<>();
+    private final Deck<GalacticaDamage> galacticaDamage = new Deck<>();
+    private final Deck<DestinationCard> destination     = new Deck<>();
+    private final Deck<SkillCard>       politics        = new Deck<>();
+    private final Deck<SkillCard>       leadership      = new Deck<>();
+    private final Deck<SkillCard>       tactics         = new Deck<>();
+    private final Deck<SkillCard>       piloting        = new Deck<>();
+    private final Deck<SkillCard>       engineering     = new Deck<>();
+    private final Deck<SkillCard>       treachery       = new Deck<>();
+    private final Deck<QuorumCard>      quorum          = new Deck<>();
+    private final Deck<CrisisCard>      crisis          = new Deck<>();
+    private final Deck<SuperCrisisCard> superCrisis     = new Deck<>();
+    private final Deck<LoyaltyCard>     loyalty         = new Deck<>();
+    private final Deck<MutinyCard>      mutiny          = new Deck<>();
+    private final Deck<MotiveCard>      motive          = new Deck<>();
+
+    public DecksHolder() {
+        setupCivilianShipsDeck();
+        setupExtraTokens();
+        setupSkillCards();
+    }
 
     public void setupCivilianShipsDeck() {
         IntStream.range(0, 2).forEach(i -> civilianShips.add(new CivilianShip(0, 0, 0)));
