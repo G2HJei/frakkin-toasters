@@ -8,9 +8,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 import xyz.zlatanov.frakkintoasters.Game;
 import xyz.zlatanov.frakkintoasters.Player;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
+import xyz.zlatanov.frakkintoasters.state.deck.DecksHolder;
+import xyz.zlatanov.frakkintoasters.state.deck.FakeDeck;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -85,7 +88,17 @@ class CreateLoyaltyDeckActionTest {
 
     @Test
     void shouldFollowUpWithRevealMutineerAction() {
-        //todo
+        val loyaltyDeck = new FakeDeck<LoyaltyCard>();
+        loyaltyDeck.nextCard = MUTINEER;
+        val game = new Game(KOBOL, 4,
+                DecksHolder.builder()
+                        .loyalty(loyaltyDeck)
+                        .build());
+        pickCharacters(game, false);
+
+        val followup = new CreateLoyaltyDeckAction().execute(game);
+
+        assertEquals(List.of(new RevealMutineerAction()), followup);
     }
 
     private static void pickCharacters(Game game, boolean pickCylonLeader) {

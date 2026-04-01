@@ -41,6 +41,7 @@ public class Game {
         this(objective, numberOfPlayers, DecksHolder.builder().build());
     }
 
+    //todo use builder
     public Game(ObjectiveCard objective, int numberOfPlayers, DecksHolder decks) {
         this.objective = objective;
         this.decks = decks;
@@ -48,7 +49,7 @@ public class Game {
         for (int i = 1; i <= numberOfPlayers; i++) {
             playersMap.put(i, new Player());
         }
-        players = Map.copyOf(playersMap);
+        players = new TreeMap<>(playersMap);
     }
 
     public Player player(int playerNumber) {

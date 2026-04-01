@@ -2,7 +2,7 @@ package xyz.zlatanov.frakkintoasters.state.deck;
 
 public class FakeDeck<T> extends Deck<T> {
 
-    T nextCard = null;
+    public T nextCard = null;
 
     @Override
     public T draw() {

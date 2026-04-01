@@ -9,6 +9,7 @@ import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.*;
@@ -32,6 +33,19 @@ public record CreateLoyaltyDeckAction() implements Action {
 
         dealLoyaltyCards(game);
         dealMotiveCards(game);
+    }
+
+    @Override
+    public List<Action> followup(Game game) {
+        val hasMutineer = game.players()
+                .values()
+                .stream()
+                .map(Player::loyaltyCards)
+                .flatMap(Collection::stream)
+                .anyMatch(MUTINEER::equals);
+        return hasMutineer
+                ? List.of(new RevealMutineerAction())
+                : List.of();
     }
 
     private static void setupLoyaltyNotCylonDeck(Game game) {
