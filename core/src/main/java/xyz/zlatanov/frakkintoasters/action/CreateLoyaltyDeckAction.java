@@ -6,6 +6,7 @@ import xyz.zlatanov.frakkintoasters.Player;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
+import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -31,6 +32,9 @@ public record CreateLoyaltyDeckAction() implements Action {
         createLoyaltyDeck(playerCount, hasCylonLeader, loyaltyDeck, notCylonDeck, cylonDeck);
         if (addMutineer(playerCount, hasCylonLeader)) {
             loyaltyDeck.add(MUTINEER);
+        }
+        if (hasCylonLeader) {
+            dealMotiveCards(game);
         }
         addExtraCards(loyaltyDeck, notCylonDeck, selectedCharacters);
         loyaltyDeck.shuffle();
@@ -63,6 +67,16 @@ public record CreateLoyaltyDeckAction() implements Action {
                         FINAL_FIVE_CYLON_SHIPS_ACTIVATE)
         );
         return deck;
+    }
+
+    private void dealMotiveCards(Game game) {
+        val cylonPlayer = game.players().values()
+                .stream()
+                .filter(p -> p.character().type() == CYLON_LEADER)
+                .findFirst()
+                .orElseThrow(FrakCallTheAdmiralException::new);
+        val motiveCards = game.decks().motive().draw(2);
+        cylonPlayer.motiveCards().addAll(motiveCards);
     }
 
     private void addExtraCards(Deck<LoyaltyCard> loyaltyDeck, Deck<LoyaltyCard> notACylonDeck, List<Character> selectedCharacters) {

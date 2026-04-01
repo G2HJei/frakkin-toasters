@@ -2,6 +2,7 @@ package xyz.zlatanov.frakkintoasters.state.deck;
 
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import lombok.val;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,6 +25,14 @@ public class Deck<T> {
 
     public T draw() {
         return cards.removeFirst();
+    }
+
+    public List<T> draw(int cards) {
+        val result = new ArrayList<T>();
+        while (cards-- > 0) {
+            result.add(draw());
+        }
+        return result;
     }
 
     public int size() {

@@ -56,6 +56,16 @@ class CreateLoyaltyDeckActionTest {
         assertDeckComposition(8, 1, false, game);
     }
 
+    @Test
+    void shouldDistributeMotiveCardsToCylonLeader() {
+        val game = game(4);
+        pickCharacters(game, true);
+
+        new CreateLoyaltyDeckAction().execute(game);
+
+        assertEquals(2, game.player(4).motiveCards().size());
+    }
+
     private static void pickCharacters(Game game, boolean pickCylonLeader) {
         game.player(1).selectCharacter(KARA_STARBUCK_THRACE);
         game.player(2).selectCharacter(WILLIAM_ADAMA);
