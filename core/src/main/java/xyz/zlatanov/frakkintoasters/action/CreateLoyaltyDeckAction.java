@@ -38,6 +38,7 @@ public record CreateLoyaltyDeckAction() implements Action {
         }
         addExtraCards(loyaltyDeck, notCylonDeck, selectedCharacters);
         loyaltyDeck.shuffle();
+        dealLoyaltyCards(game);
     }
 
     private List<Character> getSelectedCharacters(Game game) {
@@ -85,6 +86,14 @@ public record CreateLoyaltyDeckAction() implements Action {
         }
         if (selectedCharacters.contains(GAIUS_BALTAR)) {
             loyaltyDeck.add(notACylonDeck.draw());
+        }
+    }
+
+    private void dealLoyaltyCards(Game game) {
+        for (val player : game.players().values()) {
+            val cardsToDraw = player.character() == GAIUS_BALTAR ? 2 : 1;
+            val loyaltyCards = game.decks().loyalty().draw(cardsToDraw);
+            player.loyaltyCards().addAll(loyaltyCards);
         }
     }
 

@@ -44,11 +44,11 @@ class CreateLoyaltyDeckActionTest {
     void shouldCreateSimpleLoyaltyDeck(Game game, boolean pickCylonLeader, int youAreACylonCount, int notACylonCount, boolean hasMutineer) {
         pickCharacters(game, pickCylonLeader);
         new CreateLoyaltyDeckAction().execute(game);
-        assertDeckComposition(notACylonCount, youAreACylonCount, hasMutineer, game);
+        assertLoyalties(notACylonCount, youAreACylonCount, hasMutineer, game);
     }
 
     @Test
-    void shouldAddNotCylonCardsForBoomerAndGaius() {
+    void shouldAddExtraNotCylonCardsForBoomerAndGaius() {
         val game = game(3);
         game.player(1).selectCharacter(KARA_STARBUCK_THRACE);
         game.player(2).selectCharacter(GAIUS_BALTAR);
@@ -56,11 +56,11 @@ class CreateLoyaltyDeckActionTest {
 
         new CreateLoyaltyDeckAction().execute(game);
 
-        assertDeckComposition(8, 1, false, game);
+        assertLoyalties(8, 1, false, game);
     }
 
     @Test
-    void shouldDistributeMotiveCardsToCylonLeader() {
+    void shouldDealMotiveCardsToCylonLeader() {
         val game = game(4);
         pickCharacters(game, true);
 
@@ -70,8 +70,17 @@ class CreateLoyaltyDeckActionTest {
     }
 
     @Test
-    void shouldDistributeLoyaltyCards() {
+    void shouldDealLoyaltyCards() {
+        val game = game(3);
+        game.player(1).selectCharacter(GAIUS_BALTAR);
+        game.player(2).selectCharacter(KARL_HELO_AGATHON);
+        game.player(3).selectCharacter(SHARON_BOOMER_VALERII);
 
+        new CreateLoyaltyDeckAction().execute(game);
+
+        assertEquals(2, game.player(1).loyaltyCards().size());
+        assertEquals(1, game.player(2).loyaltyCards().size());
+        assertEquals(1, game.player(3).loyaltyCards().size());
     }
 
     private static void pickCharacters(Game game, boolean pickCylonLeader) {
@@ -93,7 +102,7 @@ class CreateLoyaltyDeckActionTest {
         }
     }
 
-    private static void assertDeckComposition(int notACylonCount, int youAreACylonCount, boolean mutineer, Game game) {
+    private static void assertLoyalties(int notACylonCount, int youAreACylonCount, boolean mutineer, Game game) {
         val loyaltyCards = new ArrayList<>(game.decks().loyalty().cards());
         loyaltyCards.addAll(
                 game.players().values()
