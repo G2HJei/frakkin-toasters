@@ -11,6 +11,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.*;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.GAIUS_BALTAR;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.SHARON_BOOMER_VALERII;
 import static xyz.zlatanov.frakkintoasters.state.character.CharacterType.CYLON_LEADER;
 
 public record CreateLoyaltyDeckAction() implements Action {
@@ -23,7 +25,6 @@ public record CreateLoyaltyDeckAction() implements Action {
         val hasCylonLeader = selectedCharacters.stream().anyMatch(c -> c.type() == CYLON_LEADER);
         val notCylonDeck = setupLoyaltyNotCylonDeck(game);
         val cylonDeck = setupCylonDeck();
-        //todo handle gaius and boomer
         notCylonDeck.shuffle();
         cylonDeck.shuffle();
         val loyaltyDeck = game.decks().loyalty();
@@ -31,6 +32,7 @@ public record CreateLoyaltyDeckAction() implements Action {
         if (addMutineer(playerCount, hasCylonLeader)) {
             loyaltyDeck.add(MUTINEER);
         }
+        addExtraCards(loyaltyDeck, notCylonDeck, selectedCharacters);
         loyaltyDeck.shuffle();
     }
 
@@ -61,6 +63,15 @@ public record CreateLoyaltyDeckAction() implements Action {
                         FINAL_FIVE_CYLON_SHIPS_ACTIVATE)
         );
         return deck;
+    }
+
+    private void addExtraCards(Deck<LoyaltyCard> loyaltyDeck, Deck<LoyaltyCard> notACylonDeck, List<Character> selectedCharacters) {
+        if (selectedCharacters.contains(SHARON_BOOMER_VALERII)) {
+            loyaltyDeck.add(notACylonDeck.draw());
+        }
+        if (selectedCharacters.contains(GAIUS_BALTAR)) {
+            loyaltyDeck.add(notACylonDeck.draw());
+        }
     }
 
     private Deck<LoyaltyCard> setupCylonDeck() {

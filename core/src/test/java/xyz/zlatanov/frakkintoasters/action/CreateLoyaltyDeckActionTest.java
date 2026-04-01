@@ -1,17 +1,17 @@
 package xyz.zlatanov.frakkintoasters.action;
 
 import lombok.val;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import xyz.zlatanov.frakkintoasters.Game;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.MUTINEER;
 import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
@@ -20,24 +20,20 @@ class CreateLoyaltyDeckActionTest {
 
 
     private static Stream<Arguments> simpleLoyaltyDeckParams() {
-        val threePlayerGame = new Game(KOBOL, 3);
-        val fourPlayerGame = new Game(KOBOL, 4);
-        val fourPlayerGameWithCylonLeader = new Game(KOBOL, 4);
-        val fivePlayerGame = new Game(KOBOL, 5);
-        val fivePlayerGameWithCylonLeader = new Game(KOBOL, 5);
-        val sixPlayerGame = new Game(KOBOL, 6);
-        val sixPlayerGameWithCylonLeader = new Game(KOBOL, 6);
-        val sevenPlayerGame = new Game(KOBOL, 7);
         return Stream.of(
-                arguments(threePlayerGame, false, 1, 6, false),
-                arguments(fourPlayerGame, false, 1, 8, true),
-                arguments(fourPlayerGameWithCylonLeader, true, 1, 6, false),
-                arguments(fivePlayerGame, false, 2, 9, false),
-                arguments(fivePlayerGameWithCylonLeader, true, 1, 8, true),
-                arguments(sixPlayerGame, false, 2, 11, true),
-                arguments(sixPlayerGameWithCylonLeader, true, 2, 9, false),
-                arguments(sevenPlayerGame, true, 2, 11, true)
+                argumentSet("3p              ", game(3), false, 1, 6, false),
+                argumentSet("4p              ", game(4), false, 1, 8, true),
+                argumentSet("4p, cylon leader", game(4), true, 1, 6, false),
+                argumentSet("5p              ", game(5), false, 2, 9, false),
+                argumentSet("5p, cylon leader", game(5), true, 1, 8, true),
+                argumentSet("6p              ", game(6), false, 2, 11, true),
+                argumentSet("6p, cylon leader", game(6), true, 2, 9, false),
+                argumentSet("7p              ", game(7), true, 2, 11, true)
         );
+    }
+
+    private static Game game(int players) {
+        return new Game(KOBOL, players);
     }
 
     @ParameterizedTest
@@ -45,8 +41,19 @@ class CreateLoyaltyDeckActionTest {
     void shouldCreateSimpleLoyaltyDeck(Game game, boolean pickCylonLeader, int youAreACylonCount, int notACylonCount, boolean hasMutineer) {
         pickCharacters(game, pickCylonLeader);
         new CreateLoyaltyDeckAction().execute(game);
-        val loyaltyCards = game.decks().loyalty().cards();
-        assertDeckComposition(notACylonCount, youAreACylonCount, hasMutineer, loyaltyCards);
+        assertDeckComposition(notACylonCount, youAreACylonCount, hasMutineer, game);
+    }
+
+    @Test
+    void shouldAddNotCylonCardsForBoomerAndGaius() {
+        val game = game(3);
+        game.player(1).selectCharacter(KARA_STARBUCK_THRACE);
+        game.player(2).selectCharacter(GAIUS_BALTAR);
+        game.player(3).selectCharacter(SHARON_BOOMER_VALERII);
+
+        new CreateLoyaltyDeckAction().execute(game);
+
+        assertDeckComposition(8, 1, false, game);
     }
 
     private static void pickCharacters(Game game, boolean pickCylonLeader) {
@@ -68,7 +75,8 @@ class CreateLoyaltyDeckActionTest {
         }
     }
 
-    private static void assertDeckComposition(int notACylonCount, int youAreACylonCount, boolean mutineer, List<LoyaltyCard> loyaltyCards) {
+    private static void assertDeckComposition(int notACylonCount, int youAreACylonCount, boolean mutineer, Game game) {
+        val loyaltyCards = game.decks().loyalty().cards();
         assertEquals(mutineer, loyaltyCards.contains(MUTINEER));
         assertEquals(notACylonCount,
                 loyaltyCards.stream()
