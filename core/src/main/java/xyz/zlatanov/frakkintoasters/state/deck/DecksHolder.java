@@ -39,7 +39,7 @@ public class DecksHolder {
     private final Deck<LoyaltyCard>     loyalty         = new Deck<>();
     private final Deck<LoyaltyCard>     loyaltyNotCylon = new Deck<>();
     private final Deck<MutinyCard>      mutiny          = new Deck<>();
-    private final Deck<MotiveCard>      motive          = new Deck<>();
+    private final Deck<MotiveCard>      motive          = new Deck<>(); //todo dereference this and create the deck during setup
 
     public DecksHolder() {
         setupCivilianShipsDeck();

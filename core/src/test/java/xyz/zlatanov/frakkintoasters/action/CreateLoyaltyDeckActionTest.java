@@ -6,8 +6,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import xyz.zlatanov.frakkintoasters.Game;
+import xyz.zlatanov.frakkintoasters.Player;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -66,6 +69,11 @@ class CreateLoyaltyDeckActionTest {
         assertEquals(2, game.player(4).motiveCards().size());
     }
 
+    @Test
+    void shouldDistributeLoyaltyCards() {
+
+    }
+
     private static void pickCharacters(Game game, boolean pickCylonLeader) {
         game.player(1).selectCharacter(KARA_STARBUCK_THRACE);
         game.player(2).selectCharacter(WILLIAM_ADAMA);
@@ -86,7 +94,13 @@ class CreateLoyaltyDeckActionTest {
     }
 
     private static void assertDeckComposition(int notACylonCount, int youAreACylonCount, boolean mutineer, Game game) {
-        val loyaltyCards = game.decks().loyalty().cards();
+        val loyaltyCards = new ArrayList<>(game.decks().loyalty().cards());
+        loyaltyCards.addAll(
+                game.players().values()
+                        .stream()
+                        .map(Player::loyaltyCards)
+                        .flatMap(Collection::stream)
+                        .toList());
         assertEquals(mutineer, loyaltyCards.contains(MUTINEER));
         assertEquals(notACylonCount,
                 loyaltyCards.stream()
