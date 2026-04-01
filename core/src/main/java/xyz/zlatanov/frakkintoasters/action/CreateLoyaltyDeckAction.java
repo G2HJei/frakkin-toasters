@@ -40,7 +40,6 @@ public record CreateLoyaltyDeckAction() implements Action {
     @Override
     public List<Action> followup(Game game) {
         val hasMutineer = game.players()
-                .values()
                 .stream()
                 .map(Player::loyaltyCards)
                 .flatMap(Collection::stream)
