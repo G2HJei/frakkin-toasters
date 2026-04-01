@@ -123,7 +123,7 @@ class CreateLoyaltyDeckActionTest {
     static void assertLoyalties(int notACylonCount, int youAreACylonCount, boolean mutineer, Game game) {
         val loyaltyCards = new ArrayList<>(game.decks().loyalty().cards());
         loyaltyCards.addAll(
-                game.players().values()
+                game.players()
                         .stream()
                         .map(Player::loyaltyCards)
                         .flatMap(Collection::stream)

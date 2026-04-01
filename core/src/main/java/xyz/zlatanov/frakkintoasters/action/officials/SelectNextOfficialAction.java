@@ -17,7 +17,7 @@ public interface SelectNextOfficialAction extends Action {
         val lineOfSuccession = lineOfSuccession(game);
         Character nextInLine = null;
         var nextRank = 99;
-        for (val player : game.players().values()) {
+        for (val player : game.players()) {
             val character = player.character();
             val rank = lineOfSuccession.indexOf(character);
             if (rank > -1 && rank < nextRank) {

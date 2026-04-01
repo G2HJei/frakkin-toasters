@@ -103,7 +103,8 @@ public record SelectCharacterAction(int playerNumber, Character selectedCharacte
     }
 
     private List<Character> currentlySelectedCharacters(Game game) {
-        return game.players().values().stream()
+        return game.players()
+                .stream()
                 .map(Player::character)
                 .filter(Objects::nonNull)
                 .toList();

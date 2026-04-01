@@ -119,7 +119,7 @@ public record CreateLoyaltyDeckAction() implements Action {
     }
 
     private static void dealLoyaltyCards(Game game) {
-        for (val player : game.players().values()) {
+        for (val player : game.players()) {
             val cardsToDraw = player.character() == GAIUS_BALTAR ? 2 : 1;
             val loyaltyCards = game.decks().loyalty().draw(cardsToDraw);
             player.loyaltyCards().addAll(loyaltyCards);
@@ -130,7 +130,7 @@ public record CreateLoyaltyDeckAction() implements Action {
         if (!hasCylonLeader(game)) {
             return;
         }
-        val cylonPlayer = game.players().values()
+        val cylonPlayer = game.players()
                 .stream()
                 .filter(p -> p.character().type() == CYLON_LEADER)
                 .findFirst()
@@ -140,7 +140,7 @@ public record CreateLoyaltyDeckAction() implements Action {
     }
 
     private static List<Character> getSelectedCharacters(Game game) {
-        return game.players().values()
+        return game.players()
                 .stream()
                 .map(Player::character)
                 .toList();

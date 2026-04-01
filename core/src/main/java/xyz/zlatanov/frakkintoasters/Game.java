@@ -52,6 +52,10 @@ public class Game {
         players = new TreeMap<>(playersMap);
     }
 
+    public List<Player> players() {
+        return new ArrayList<>(players.values());
+    }
+
     public Player player(int playerNumber) {
         return players.get(playerNumber);
     }
