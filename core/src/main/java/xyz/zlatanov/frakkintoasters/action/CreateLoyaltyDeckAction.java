@@ -4,6 +4,7 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.Game;
 import xyz.zlatanov.frakkintoasters.Player;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
+import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
@@ -16,6 +17,7 @@ import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.GAIUS_BALTAR;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.SHARON_BOOMER_VALERII;
 import static xyz.zlatanov.frakkintoasters.state.character.CharacterType.CYLON_LEADER;
+import static xyz.zlatanov.frakkintoasters.state.util.AllCardsProvider.setupGenericDeck;
 
 public record CreateLoyaltyDeckAction() implements Action {
 
@@ -133,7 +135,7 @@ public record CreateLoyaltyDeckAction() implements Action {
                 .filter(p -> p.character().type() == CYLON_LEADER)
                 .findFirst()
                 .orElseThrow(FrakCallTheAdmiralException::new);
-        val motiveCards = game.decks().motive().draw(2);
+        val motiveCards = setupGenericDeck(MotiveCard.class).draw(2);
         cylonPlayer.motiveCards().addAll(motiveCards);
     }
 

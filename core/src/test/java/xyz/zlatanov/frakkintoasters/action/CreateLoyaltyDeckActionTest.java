@@ -25,7 +25,7 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 class CreateLoyaltyDeckActionTest {
 
 
-    private static Stream<Arguments> simpleLoyaltyDeckParams() {
+    static Stream<Arguments> simpleLoyaltyDeckParams() {
         return Stream.of(
                 argumentSet("3p              ", game(3), false, 1, 6, false),
                 argumentSet("4p              ", game(4), false, 1, 8, true),
@@ -38,7 +38,7 @@ class CreateLoyaltyDeckActionTest {
         );
     }
 
-    private static Game game(int players) {
+    static Game game(int players) {
         return new Game(KOBOL, players);
     }
 
@@ -101,7 +101,7 @@ class CreateLoyaltyDeckActionTest {
         assertEquals(List.of(new RevealMutineerAction()), followup);
     }
 
-    private static void pickCharacters(Game game, boolean pickCylonLeader) {
+    static void pickCharacters(Game game, boolean pickCylonLeader) {
         game.player(1).selectCharacter(KARA_STARBUCK_THRACE);
         game.player(2).selectCharacter(WILLIAM_ADAMA);
         game.player(3).selectCharacter(LAURA_ROSLIN);
@@ -120,7 +120,7 @@ class CreateLoyaltyDeckActionTest {
         }
     }
 
-    private static void assertLoyalties(int notACylonCount, int youAreACylonCount, boolean mutineer, Game game) {
+    static void assertLoyalties(int notACylonCount, int youAreACylonCount, boolean mutineer, Game game) {
         val loyaltyCards = new ArrayList<>(game.decks().loyalty().cards());
         loyaltyCards.addAll(
                 game.players().values()

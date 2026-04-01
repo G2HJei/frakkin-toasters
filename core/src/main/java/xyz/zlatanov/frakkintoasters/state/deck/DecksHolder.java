@@ -3,7 +3,10 @@ package xyz.zlatanov.frakkintoasters.state.deck;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.experimental.Accessors;
-import xyz.zlatanov.frakkintoasters.state.card.*;
+import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
+import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
+import xyz.zlatanov.frakkintoasters.state.card.MutinyCard;
+import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.crisis.SuperCrisisCard;
 import xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage;
@@ -53,7 +56,5 @@ public class DecksHolder {
     private final Deck<LoyaltyCard>     loyaltyNotCylon = new Deck<>();
     @Builder.Default
     private final Deck<MutinyCard>      mutiny          = setupGenericDeck(MutinyCard.class);
-    @Builder.Default
-    private final Deck<MotiveCard>      motive          = setupGenericDeck(MotiveCard.class); //todo dereference this and create the deck during setup
 
 }
