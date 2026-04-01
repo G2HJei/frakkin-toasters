@@ -26,7 +26,7 @@ public class Game {
     private final Map<Integer, Player> players;
     private final ObjectiveCard        objective;
     private final BoardsHolder         boards        = new BoardsHolder();
-    private       DecksHolder          decks         = new DecksHolder();
+    private final DecksHolder          decks;
     private       ShipsHolder          ships;
     private       int                  nukes         = 2;
     @Setter
@@ -38,7 +38,12 @@ public class Game {
     private       Character            cag;
 
     public Game(ObjectiveCard objective, int numberOfPlayers) {
+        this(objective, numberOfPlayers, DecksHolder.builder().build());
+    }
+
+    public Game(ObjectiveCard objective, int numberOfPlayers, DecksHolder decks) {
         this.objective = objective;
+        this.decks = decks;
         val playersMap = new LinkedHashMap<Integer, Player>();
         for (int i = 1; i <= numberOfPlayers; i++) {
             playersMap.put(i, new Player());

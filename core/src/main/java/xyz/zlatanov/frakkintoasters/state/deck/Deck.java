@@ -12,15 +12,17 @@ import java.util.List;
 @Accessors(fluent = true)
 public class Deck<T> {
 
-    private final List<T> cards          = new ArrayList<>();
-    private final List<T> discardedCards = new ArrayList<>();
+    protected final List<T> cards          = new ArrayList<>();
+    private final   List<T> discardedCards = new ArrayList<>();
 
-    public void add(T card) {
+    public Deck<T> add(T card) {
         add(List.of(card));
+        return this;
     }
 
-    public void add(List<T> toAdd) {
+    public Deck<T> add(List<T> toAdd) {
         cards.addAll(toAdd);
+        return this;
     }
 
     public T draw() {
@@ -43,13 +45,15 @@ public class Deck<T> {
         return discardedCards.size();
     }
 
-    public void discard(T card) {
+    public Deck<T> discard(T card) {
         discardedCards.add(card);
+        return this;
     }
 
-    public void shuffle() {
+    public Deck<T> shuffle() {
         cards.addAll(discardedCards);
         discardedCards.clear();
         Collections.shuffle(cards);
+        return this;
     }
 }

@@ -83,6 +83,11 @@ class CreateLoyaltyDeckActionTest {
         assertEquals(1, game.player(3).loyaltyCards().size());
     }
 
+    @Test
+    void shouldFollowUpWithRevealMutineerAction() {
+        //todo
+    }
+
     private static void pickCharacters(Game game, boolean pickCylonLeader) {
         game.player(1).selectCharacter(KARA_STARBUCK_THRACE);
         game.player(2).selectCharacter(WILLIAM_ADAMA);
