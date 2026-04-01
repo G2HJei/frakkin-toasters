@@ -18,37 +18,23 @@ import static xyz.zlatanov.frakkintoasters.state.character.CharacterType.CYLON_L
 
 public record CreateLoyaltyDeckAction() implements Action {
 
-
     @Override
     public void apply(Game game) {
-        val playerCount = game.players().size();
-        val selectedCharacters = getSelectedCharacters(game);
-        val hasCylonLeader = selectedCharacters.stream().anyMatch(c -> c.type() == CYLON_LEADER);
-        val notCylonDeck = setupLoyaltyNotCylonDeck(game);
+        setupLoyaltyNotCylonDeck(game);
+
         val cylonDeck = setupCylonDeck();
-        notCylonDeck.shuffle();
-        cylonDeck.shuffle();
-        val loyaltyDeck = game.decks().loyalty();
-        createLoyaltyDeck(playerCount, hasCylonLeader, loyaltyDeck, notCylonDeck, cylonDeck);
-        if (addMutineer(playerCount, hasCylonLeader)) {
-            loyaltyDeck.add(MUTINEER);
-        }
-        if (hasCylonLeader) {
-            dealMotiveCards(game);
-        }
-        addExtraCards(loyaltyDeck, notCylonDeck, selectedCharacters);
-        loyaltyDeck.shuffle();
+        createLoyaltyDeck(game, cylonDeck);
+
+        addMutineer(game);
+        addExtraCards(game);
+
+        game.decks().loyalty().shuffle();
+
         dealLoyaltyCards(game);
+        dealMotiveCards(game);
     }
 
-    private List<Character> getSelectedCharacters(Game game) {
-        return game.players().values()
-                .stream()
-                .map(Player::character)
-                .toList();
-    }
-
-    private Deck<LoyaltyCard> setupLoyaltyNotCylonDeck(Game game) {
+    private static void setupLoyaltyNotCylonDeck(Game game) {
         val deck = game.decks().loyaltyNotCylon();
         deck.add(
                 //todo check correct vanilla non-cylon cards count
@@ -67,10 +53,67 @@ public record CreateLoyaltyDeckAction() implements Action {
                         FINAL_FIVE_DAMAGE_GALACTICA_TWICE,
                         FINAL_FIVE_CYLON_SHIPS_ACTIVATE)
         );
+        deck.shuffle();
+    }
+
+    private static Deck<LoyaltyCard> setupCylonDeck() {
+        val deck = new Deck<LoyaltyCard>();
+        val cylonLoyalties = Arrays.stream(values())
+                .filter(LoyaltyCard::isCylon)
+                .toList();
+        deck.add(cylonLoyalties);
+        deck.shuffle();
         return deck;
     }
 
-    private void dealMotiveCards(Game game) {
+    private static void createLoyaltyDeck(Game game, Deck<LoyaltyCard> cylonDeck) {
+        val playerCount = game.players().size();
+        val hasCylonLeader = hasCylonLeader(game);
+        val loyaltyDeck = game.decks().loyalty();
+        for (int i = 0; i < notCylonDraws(playerCount, hasCylonLeader); i++) {
+            loyaltyDeck.add(game.decks().loyaltyNotCylon().draw());
+        }
+        for (int i = 0; i < cylonDraws(playerCount, hasCylonLeader); i++) {
+            loyaltyDeck.add(cylonDeck.draw());
+        }
+    }
+
+    private static void addMutineer(Game game) {
+        val playerCount = game.players().size();
+        val hasCylonLeader = hasCylonLeader(game);
+        val shouldAddMutineer = playerCount == 4 && !hasCylonLeader ||
+                playerCount == 5 && hasCylonLeader ||
+                playerCount == 6 && !hasCylonLeader ||
+                playerCount == 7;
+        if (shouldAddMutineer) {
+            game.decks().loyalty().add(MUTINEER);
+        }
+    }
+
+    private static void addExtraCards(Game game) {
+        val selectedCharacters = getSelectedCharacters(game);
+        val loyaltyDeck = game.decks().loyalty();
+        val notACylonDeck = game.decks().loyaltyNotCylon();
+        if (selectedCharacters.contains(SHARON_BOOMER_VALERII)) {
+            loyaltyDeck.add(notACylonDeck.draw());
+        }
+        if (selectedCharacters.contains(GAIUS_BALTAR)) {
+            loyaltyDeck.add(notACylonDeck.draw());
+        }
+    }
+
+    private static void dealLoyaltyCards(Game game) {
+        for (val player : game.players().values()) {
+            val cardsToDraw = player.character() == GAIUS_BALTAR ? 2 : 1;
+            val loyaltyCards = game.decks().loyalty().draw(cardsToDraw);
+            player.loyaltyCards().addAll(loyaltyCards);
+        }
+    }
+
+    private static void dealMotiveCards(Game game) {
+        if (!hasCylonLeader(game)) {
+            return;
+        }
         val cylonPlayer = game.players().values()
                 .stream()
                 .filter(p -> p.character().type() == CYLON_LEADER)
@@ -80,49 +123,20 @@ public record CreateLoyaltyDeckAction() implements Action {
         cylonPlayer.motiveCards().addAll(motiveCards);
     }
 
-    private void addExtraCards(Deck<LoyaltyCard> loyaltyDeck, Deck<LoyaltyCard> notACylonDeck, List<Character> selectedCharacters) {
-        if (selectedCharacters.contains(SHARON_BOOMER_VALERII)) {
-            loyaltyDeck.add(notACylonDeck.draw());
-        }
-        if (selectedCharacters.contains(GAIUS_BALTAR)) {
-            loyaltyDeck.add(notACylonDeck.draw());
-        }
-    }
-
-    private void dealLoyaltyCards(Game game) {
-        for (val player : game.players().values()) {
-            val cardsToDraw = player.character() == GAIUS_BALTAR ? 2 : 1;
-            val loyaltyCards = game.decks().loyalty().draw(cardsToDraw);
-            player.loyaltyCards().addAll(loyaltyCards);
-        }
-    }
-
-    private Deck<LoyaltyCard> setupCylonDeck() {
-        val deck = new Deck<LoyaltyCard>();
-        val cylonLoyalties = Arrays.stream(values())
-                .filter(LoyaltyCard::isCylon)
+    private static List<Character> getSelectedCharacters(Game game) {
+        return game.players().values()
+                .stream()
+                .map(Player::character)
                 .toList();
-        deck.add(cylonLoyalties);
-        return deck;
     }
 
-    private boolean addMutineer(int playerCount, boolean hasCylonLeader) {
-        return playerCount == 4 && !hasCylonLeader ||
-                playerCount == 5 && hasCylonLeader ||
-                playerCount == 6 && !hasCylonLeader ||
-                playerCount == 7;
+    private static boolean hasCylonLeader(Game game) {
+        return getSelectedCharacters(game)
+                .stream()
+                .anyMatch(c -> c.type() == CYLON_LEADER);
     }
 
-    private void createLoyaltyDeck(int playerCount, boolean hasCylonLeader, Deck<LoyaltyCard> loyaltyDeck, Deck<LoyaltyCard> notCylonDeck, Deck<LoyaltyCard> cylonDeck) {
-        for (int i = 0; i < notCylonDraws(playerCount, hasCylonLeader); i++) {
-            loyaltyDeck.add(notCylonDeck.draw());
-        }
-        for (int i = 0; i < cylonDraws(playerCount, hasCylonLeader); i++) {
-            loyaltyDeck.add(cylonDeck.draw());
-        }
-    }
-
-    private int notCylonDraws(int playerCount, boolean hasCylonLeader) {
+    private static int notCylonDraws(int playerCount, boolean hasCylonLeader) {
         if (playerCount == 3
                 || playerCount == 4 && hasCylonLeader) {
             return 6;
@@ -137,7 +151,7 @@ public record CreateLoyaltyDeckAction() implements Action {
         }
     }
 
-    private int cylonDraws(int playerCount, boolean hasCylonLeader) {
+    private static int cylonDraws(int playerCount, boolean hasCylonLeader) {
         if (playerCount == 5 && hasCylonLeader
                 || playerCount < 5) {
             return 1;
