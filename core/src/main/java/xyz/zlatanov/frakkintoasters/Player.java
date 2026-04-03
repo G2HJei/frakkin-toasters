@@ -7,7 +7,7 @@ import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
-import xyz.zlatanov.frakkintoasters.state.skill.LoCa;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import java.util.Arrays;
 
@@ -18,7 +18,7 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.CHIEF_GALEN
 public class Player {
 
     private       Character         character;
-    private final Deck<LoCa>        skillCards      = new Deck<>();
+    private final Deck<SkillCard>   skillCards      = new Deck<>();
     private final Deck<MotiveCard>  motiveCards     = new Deck<>();
     private final Deck<LoyaltyCard> loyaltyCards    = new Deck<>();
     private       boolean           hasMiracleToken = true;
@@ -29,7 +29,7 @@ public class Player {
         return this;
     }
 
-    public void gainSkillCards(LoCa... cardsToAdd) {
+    public void gainSkillCards(SkillCard... cardsToAdd) {
         skillCards.add(Arrays.asList(cardsToAdd));
     }
 
@@ -52,4 +52,9 @@ public class Player {
         return hasMiracleToken;
     }
 
+    public boolean isRevealedCylon() {
+        return loyaltyCards.revealedCards()
+                .stream()
+                .anyMatch(LoyaltyCard::isCylon);
+    }
 }

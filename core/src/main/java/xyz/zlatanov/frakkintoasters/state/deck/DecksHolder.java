@@ -13,7 +13,7 @@ import xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage;
 import xyz.zlatanov.frakkintoasters.state.damage.GalacticaDamage;
 import xyz.zlatanov.frakkintoasters.state.damage.PegasusDamage;
 import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
-import xyz.zlatanov.frakkintoasters.state.skill.LoCa;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import static xyz.zlatanov.frakkintoasters.state.card.DestinationCard.*;
 import static xyz.zlatanov.frakkintoasters.state.util.AllCardsProvider.*;
@@ -33,17 +33,17 @@ public class DecksHolder {
     @Builder.Default
     private final Deck<DestinationCard> destination     = genericDeck(DestinationCard.class, REMOTE_PLANET, ICY_MOON, BARREN_PLANET, TYLIUM_PLANET, TYLIUM_PLANET, TYLIUM_PLANET);
     @Builder.Default
-    private final Deck<LoCa>            politics        = politicsCards();
+    private final Deck<SkillCard>       politics        = politicsCards();
     @Builder.Default
-    private final Deck<LoCa>            leadership      = leadershipCards();
+    private final Deck<SkillCard>       leadership      = leadershipCards();
     @Builder.Default
-    private final Deck<LoCa>            tactics         = tacticsCards();
+    private final Deck<SkillCard>       tactics         = tacticsCards();
     @Builder.Default
-    private final Deck<LoCa>            piloting        = pilotingCards();
+    private final Deck<SkillCard>       piloting        = pilotingCards();
     @Builder.Default
-    private final Deck<LoCa>            engineering     = engineeringCards();
+    private final Deck<SkillCard>       engineering     = engineeringCards();
     @Builder.Default
-    private final Deck<LoCa>            treachery       = treacheryCards();
+    private final Deck<SkillCard>       treachery       = treacheryCards();
     @Builder.Default
     private final Deck<QuorumCard>      quorum          = genericDeck(QuorumCard.class);
     @Builder.Default

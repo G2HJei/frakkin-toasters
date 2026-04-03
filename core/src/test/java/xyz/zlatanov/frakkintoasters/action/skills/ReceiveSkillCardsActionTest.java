@@ -8,7 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import xyz.zlatanov.frakkintoasters.Game;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 import xyz.zlatanov.frakkintoasters.state.deck.DecksHolder;
-import xyz.zlatanov.frakkintoasters.state.skill.LoCa;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import java.util.List;
 
@@ -19,7 +19,7 @@ import static org.mockito.Mockito.when;
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.CYLON_SEND_TO_BRIG;
 import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
-import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.TACTICS;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.LEADERSHIP;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.TREACHERY;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.AT_ANY_COST;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.BAIT;
@@ -27,11 +27,11 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.BAIT;
 @ExtendWith(MockitoExtension.class)
 class ReceiveSkillCardsActionTest {
 
-    Deck<LoCa> leadershipDeck = mock(Deck.class);
-    Deck<LoCa> treacheryDeck  = mock(Deck.class);
-    LoCa       leadershipCard = new LoCa(0, AT_ANY_COST);
-    LoCa       treacheryCard  = new LoCa(0, BAIT);
-    Game       game           = new Game(KOBOL, 4,
+    Deck<SkillCard> leadershipDeck = mock(Deck.class);
+    Deck<SkillCard> treacheryDeck  = mock(Deck.class);
+    SkillCard       leadershipCard = new SkillCard(0, AT_ANY_COST);
+    SkillCard       treacheryCard  = new SkillCard(0, BAIT);
+    Game            game           = new Game(KOBOL, 4,
             DecksHolder.builder()
                     .leadership(leadershipDeck)
                     .treachery(treacheryDeck)
@@ -45,7 +45,7 @@ class ReceiveSkillCardsActionTest {
     @Test
     void shouldReceiveCardsWithinSkillSet() {
         when(leadershipDeck.draw()).thenReturn(leadershipCard);
-        new ReceiveSkillsAction(1, List.of(new SkillSelection(1, TACTICS))).execute(game);
+        new ReceiveSkillsAction(1, List.of(new SkillSelection(1, LEADERSHIP))).execute(game);
         assertEquals(List.of(leadershipCard), game.player(1).skillCards().cards());
     }
 
@@ -61,8 +61,12 @@ class ReceiveSkillCardsActionTest {
         when(leadershipDeck.draw()).thenReturn(leadershipCard);
         when(treacheryDeck.draw()).thenReturn(treacheryCard);
         game.player(1).loyaltyCards().add(CYLON_SEND_TO_BRIG);
-        //game.player(1).revealLoyaltyCard(CYLON_SEND_TO_BRIG);
-        //todo
+        game.player(1).loyaltyCards().reveal(CYLON_SEND_TO_BRIG);
+
+        val skillCardSelection = List.of(new SkillSelection(1, LEADERSHIP), new SkillSelection(1, TREACHERY));
+        new ReceiveSkillsAction(1, skillCardSelection).execute(game);
+
+        assertEquals(List.of(leadershipCard, treacheryCard), game.player(1).skillCards().cards());
     }
 
 }

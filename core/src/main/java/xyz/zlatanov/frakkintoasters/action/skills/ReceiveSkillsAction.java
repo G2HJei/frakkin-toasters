@@ -2,6 +2,7 @@ package xyz.zlatanov.frakkintoasters.action.skills;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.Game;
+import xyz.zlatanov.frakkintoasters.Player;
 import xyz.zlatanov.frakkintoasters.action.Action;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillSetOption;
 
@@ -13,17 +14,41 @@ public record ReceiveSkillsAction(int player, List<SkillSelection> selection) im
 
     @Override
     public boolean isValid(Game game) {
-        val skillSet = game.player(player).character().skillSet();
+        val player = game.player(this.player);
+        val skillSet = player.character().skillSet();
         val availableTypes = skillSet.stream()
                 .map(SkillSetOption::availableTypes)
                 .flatMap(Collection::stream)
                 .toList();
-        return selection.stream()
-                .allMatch(selection -> availableTypes.contains(selection.color()));
+        return player.isRevealedCylon()
+                ? validateRevealedCylonSelection(player)
+                : selection.stream()
+                  .allMatch(selection -> availableTypes.contains(selection.color()));
     }
 
     @Override
     public void apply(Game game) {
-        game.player(player).skillCards().add(game.decks().leadership().draw());
+        for (val select : selection) {
+            val deck = switch (select.color()) {
+                case POLITICS -> game.decks().politics();
+                case LEADERSHIP -> game.decks().leadership();
+                case TACTICS -> game.decks().tactics();
+                case PILOTING -> game.decks().piloting();
+                case ENGINEERING -> game.decks().engineering();
+                case TREACHERY -> game.decks().treachery();
+            };
+            for (int i = 0; i < select.count(); i++) {
+                game.player(player)
+                        .skillCards()
+                        .add(deck.draw());
+            }
+        }
+    }
+
+    private boolean validateRevealedCylonSelection(Player player) {
+        val totalCards = selection.stream()
+                .map(SkillSelection::count)
+                .reduce(0, Integer::sum);
+        return totalCards == 2;
     }
 }

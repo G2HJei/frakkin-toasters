@@ -3,7 +3,7 @@ package xyz.zlatanov.frakkintoasters;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
-import xyz.zlatanov.frakkintoasters.state.skill.LoCa;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.CHIEF_GALEN_TYROL;
@@ -17,7 +17,7 @@ class PlayerTest {
 
     @Test
     void shouldTrackSkillCards() {
-        val cardToAdd = new LoCa(1, REPAIR);
+        val cardToAdd = new SkillCard(1, REPAIR);
         xo.gainSkillCards(cardToAdd);
         assertTrue(xo.skillCards().cards().contains(cardToAdd));
     }
