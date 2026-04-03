@@ -45,6 +45,8 @@ public class DecksHolder {
     @Builder.Default
     private final Deck<SkillCard>       treachery       = treacheryCards();
     @Builder.Default
+    private final Deck<SkillCard>       destiny         = new Deck<>();
+    @Builder.Default
     private final Deck<QuorumCard>      quorum          = genericDeck(QuorumCard.class);
     @Builder.Default
     private final Deck<CrisisCard>      crisis          = genericDeck(CrisisCard.class);

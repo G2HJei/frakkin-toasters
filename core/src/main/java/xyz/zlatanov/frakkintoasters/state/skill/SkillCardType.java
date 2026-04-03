@@ -67,5 +67,5 @@ public enum SkillCardType {
     VIOLENT_OUTBURSTS(TREACHERY),
     EXPLOIT_A_WEAKNESS(TREACHERY);
 
-    private final SkillCardColor type;
+    private final SkillCardColor color;
 }
