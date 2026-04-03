@@ -4,12 +4,10 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.Game;
 import xyz.zlatanov.frakkintoasters.Player;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
-import xyz.zlatanov.frakkintoasters.state.skill.SkillSetOption;
 
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 public record ReceiveSkillsAction(int player, Map<SkillCardColor, Integer> selection) implements Action {
 
@@ -53,10 +51,32 @@ public record ReceiveSkillsAction(int player, Map<SkillCardColor, Integer> selec
 
     private boolean validateHumanSelection(Player player) {
         val skillSet = player.character().skillSet();
-        val availableTypes = skillSet.stream()
-                .map(SkillSetOption::availableTypes)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
-        return availableTypes.containsAll(selection.keySet());
+        val limits = new HashMap<SkillCardColor, Integer>();
+        for (val option : skillSet) {
+            for (val color : option.colors()) {
+                limits.put(color, option.count());
+            }
+        }
+        for (val entry : selection.entrySet()) {
+            val color = entry.getKey();
+            val count = entry.getValue();
+
+            for (int i = 0; i < count; i++) {
+                val canUse = skillSet.stream()
+                        .anyMatch(option -> option.colors().contains(color));
+
+                if (!canUse) {
+                    return false;
+                }
+                skillSet.stream()
+                        .filter(option -> option.colors().contains(color))
+                        .forEach(option -> {
+                            for (val c : option.colors()) {
+                                limits.merge(c, -1, Integer::sum);
+                            }
+                        });
+            }
+        }
+        return limits.values().stream().allMatch(uses -> uses >= 0);
     }
 }

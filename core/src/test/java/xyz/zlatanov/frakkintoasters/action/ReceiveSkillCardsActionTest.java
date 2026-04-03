@@ -58,9 +58,10 @@ class ReceiveSkillCardsActionTest {
 
     @Test
     void shouldReceiveAnyColorWhenRevealedCylon() {
+        revealCylon();
         when(leadershipDeck.draw()).thenReturn(leadershipCard);
         when(treacheryDeck.draw()).thenReturn(treacheryCard);
-        revealCylon();
+        
         new ReceiveSkillsAction(1, Map.of(LEADERSHIP, 1, TREACHERY, 1)).execute(game);
 
         assertEquals(List.of(leadershipCard, treacheryCard), game.player(1).skillCards().cards());
