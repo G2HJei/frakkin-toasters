@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.*;
 
 public record SkillSetOption(int count, Set<SkillCardColor> availableTypes) {
+
     public static Set<SkillSetOption> skillSet(String skillSet) {
         val skillSetOptions = new HashSet<SkillSetOption>();
         for (var option : skillSet.split(",")) {

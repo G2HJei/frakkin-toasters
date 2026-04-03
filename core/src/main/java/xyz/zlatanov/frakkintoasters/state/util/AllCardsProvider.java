@@ -15,7 +15,7 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 
 public class AllCardsProvider {
 
-    public static Deck<CivilianShip> setupCivilianShipsDeck() {
+    public static Deck<CivilianShip> civilianShipsDeck() {
         val deck = new Deck<CivilianShip>();
         IntStream.range(0, 2).forEach(i -> deck.add(new CivilianShip(0, 0, 0)));
         IntStream.range(0, 2).forEach(i -> deck.add(new CivilianShip(0, 0, 2)));
@@ -27,14 +27,14 @@ public class AllCardsProvider {
     }
 
     @SafeVarargs
-    public static <T extends Enum<T>> Deck<T> setupGenericDeck(Class<T> clazz, T... repeatedCards) {
+    public static <T extends Enum<T>> Deck<T> genericDeck(Class<T> clazz, T... repeatedCards) {
         return new Deck<T>()
                 .add(Arrays.asList(clazz.getEnumConstants()))
                 .add(Arrays.asList(repeatedCards))
                 .shuffle();
     }
 
-    public static Deck<SkillCard> allPoliticsCards() {
+    public static Deck<SkillCard> politicsCards() {
         return new Deck<SkillCard>()
                 .add(skills(8, 1, CONSOLIDATE_POWER))
                 .add(skills(6, 2, CONSOLIDATE_POWER))
@@ -54,7 +54,7 @@ public class AllCardsProvider {
                 .shuffle();
     }
 
-    public static Deck<SkillCard> allLeadershipCards() {
+    public static Deck<SkillCard> leadershipCards() {
         return new Deck<SkillCard>()
                 .add(skills(8, 1, EXECUTIVE_ORDER))
                 .add(skills(6, 2, EXECUTIVE_ORDER))
@@ -75,7 +75,7 @@ public class AllCardsProvider {
                 .shuffle();
     }
 
-    public static Deck<SkillCard> allTacticsCards() {
+    public static Deck<SkillCard> tacticsCards() {
         return new Deck<SkillCard>()
                 .add(skills(8, 1, LAUNCH_SCOUT))
                 .add(skills(6, 2, LAUNCH_SCOUT))
@@ -96,7 +96,7 @@ public class AllCardsProvider {
                 .shuffle();
     }
 
-    public static Deck<SkillCard> allPilotingCards() {
+    public static Deck<SkillCard> pilotingCards() {
         return new Deck<SkillCard>()
                 .add(skills(8, 1, EVASIVE_MANOEUVRES))
                 .add(skills(6, 2, EVASIVE_MANOEUVRES))
@@ -117,7 +117,7 @@ public class AllCardsProvider {
                 .shuffle();
     }
 
-    public static Deck<SkillCard> allEngineeringCards() {
+    public static Deck<SkillCard> engineeringCards() {
         val deck = new Deck<SkillCard>()
                 .add(skills(8, 1, REPAIR))
                 .add(skills(6, 2, REPAIR))
@@ -139,7 +139,7 @@ public class AllCardsProvider {
         return deck;
     }
 
-    public static Deck<SkillCard> allTreacheryCards() {
+    public static Deck<SkillCard> treacheryCards() {
         return new Deck<SkillCard>()
                 //todo check quantities below
                 .add(skills(1, 0, DRAIDIS_CONTACT))

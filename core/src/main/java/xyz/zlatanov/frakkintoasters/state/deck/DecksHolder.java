@@ -23,38 +23,38 @@ import static xyz.zlatanov.frakkintoasters.state.util.AllCardsProvider.*;
 @Accessors(fluent = true)
 public class DecksHolder {
     @Builder.Default
-    private       Deck<CivilianShip>    civilianShips   = setupCivilianShipsDeck();
+    private       Deck<CivilianShip>    civilianShips   = civilianShipsDeck();
     @Builder.Default
-    private final Deck<GalacticaDamage> galacticaDamage = setupGenericDeck(GalacticaDamage.class);
+    private final Deck<GalacticaDamage> galacticaDamage = genericDeck(GalacticaDamage.class);
     @Builder.Default
-    private final Deck<PegasusDamage>   pegasusDamage   = setupGenericDeck(PegasusDamage.class);
+    private final Deck<PegasusDamage>   pegasusDamage   = genericDeck(PegasusDamage.class);
     @Builder.Default
-    private final Deck<BasestarDamage>  basestarDamage  = setupGenericDeck(BasestarDamage.class);
+    private final Deck<BasestarDamage>  basestarDamage  = genericDeck(BasestarDamage.class);
     @Builder.Default
-    private final Deck<DestinationCard> destination     = setupGenericDeck(DestinationCard.class, REMOTE_PLANET, ICY_MOON, BARREN_PLANET, TYLIUM_PLANET, TYLIUM_PLANET, TYLIUM_PLANET);
+    private final Deck<DestinationCard> destination     = genericDeck(DestinationCard.class, REMOTE_PLANET, ICY_MOON, BARREN_PLANET, TYLIUM_PLANET, TYLIUM_PLANET, TYLIUM_PLANET);
     @Builder.Default
-    private final Deck<SkillCard>       politics        = allPoliticsCards();
+    private final Deck<SkillCard>       politics        = politicsCards();
     @Builder.Default
-    private final Deck<SkillCard>       leadership      = allLeadershipCards();
+    private final Deck<SkillCard>       leadership      = leadershipCards();
     @Builder.Default
-    private final Deck<SkillCard>       tactics         = allTacticsCards();
+    private final Deck<SkillCard>       tactics         = tacticsCards();
     @Builder.Default
-    private final Deck<SkillCard>       piloting        = allPilotingCards();
+    private final Deck<SkillCard>       piloting        = pilotingCards();
     @Builder.Default
-    private final Deck<SkillCard>       engineering     = allEngineeringCards();
+    private final Deck<SkillCard>       engineering     = engineeringCards();
     @Builder.Default
-    private final Deck<SkillCard>       treachery       = allTreacheryCards();
+    private final Deck<SkillCard>       treachery       = treacheryCards();
     @Builder.Default
-    private final Deck<QuorumCard>      quorum          = setupGenericDeck(QuorumCard.class);
+    private final Deck<QuorumCard>      quorum          = genericDeck(QuorumCard.class);
     @Builder.Default
-    private final Deck<CrisisCard>      crisis          = setupGenericDeck(CrisisCard.class);
+    private final Deck<CrisisCard>      crisis          = genericDeck(CrisisCard.class);
     @Builder.Default
-    private final Deck<SuperCrisisCard> superCrisis     = setupGenericDeck(SuperCrisisCard.class);
+    private final Deck<SuperCrisisCard> superCrisis     = genericDeck(SuperCrisisCard.class);
     @Builder.Default
     private final Deck<LoyaltyCard>     loyalty         = new Deck<>();
     @Builder.Default
     private final Deck<LoyaltyCard>     loyaltyNotCylon = new Deck<>();
     @Builder.Default
-    private final Deck<MutinyCard>      mutiny          = setupGenericDeck(MutinyCard.class);
+    private final Deck<MutinyCard>      mutiny          = genericDeck(MutinyCard.class);
 
 }
