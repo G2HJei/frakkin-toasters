@@ -8,7 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import xyz.zlatanov.frakkintoasters.Game;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 import xyz.zlatanov.frakkintoasters.state.deck.DecksHolder;
-import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
+import xyz.zlatanov.frakkintoasters.state.skill.LoCa;
 
 import java.util.List;
 
@@ -27,11 +27,11 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.BAIT;
 @ExtendWith(MockitoExtension.class)
 class ReceiveSkillCardsActionTest {
 
-    Deck<SkillCard> leadershipDeck = mock(Deck.class);
-    Deck<SkillCard> treacheryDeck  = mock(Deck.class);
-    SkillCard       leadershipCard = new SkillCard(0, AT_ANY_COST);
-    SkillCard       treacheryCard  = new SkillCard(0, BAIT);
-    Game            game           = new Game(KOBOL, 4,
+    Deck<LoCa> leadershipDeck = mock(Deck.class);
+    Deck<LoCa> treacheryDeck  = mock(Deck.class);
+    LoCa       leadershipCard = new LoCa(0, AT_ANY_COST);
+    LoCa       treacheryCard  = new LoCa(0, BAIT);
+    Game       game           = new Game(KOBOL, 4,
             DecksHolder.builder()
                     .leadership(leadershipDeck)
                     .treachery(treacheryDeck)
@@ -46,7 +46,7 @@ class ReceiveSkillCardsActionTest {
     void shouldReceiveCardsWithinSkillSet() {
         when(leadershipDeck.draw()).thenReturn(leadershipCard);
         new ReceiveSkillsAction(1, List.of(new SkillSelection(1, TACTICS))).execute(game);
-        assertEquals(List.of(leadershipCard), game.player(1).skillCards());
+        assertEquals(List.of(leadershipCard), game.player(1).skillCards().cards());
     }
 
     @Test

@@ -3,7 +3,7 @@ package xyz.zlatanov.frakkintoasters.state.util;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
-import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
+import xyz.zlatanov.frakkintoasters.state.skill.LoCa;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 
 import java.util.ArrayList;
@@ -34,8 +34,8 @@ public class AllCardsProvider {
                 .shuffle();
     }
 
-    public static Deck<SkillCard> politicsCards() {
-        return new Deck<SkillCard>()
+    public static Deck<LoCa> politicsCards() {
+        return new Deck<LoCa>()
                 .add(skills(8, 1, CONSOLIDATE_POWER))
                 .add(skills(6, 2, CONSOLIDATE_POWER))
                 .add(skills(4, 3, INVESTIGATIVE_COMMITTEE))
@@ -54,8 +54,8 @@ public class AllCardsProvider {
                 .shuffle();
     }
 
-    public static Deck<SkillCard> leadershipCards() {
-        return new Deck<SkillCard>()
+    public static Deck<LoCa> leadershipCards() {
+        return new Deck<LoCa>()
                 .add(skills(8, 1, EXECUTIVE_ORDER))
                 .add(skills(6, 2, EXECUTIVE_ORDER))
                 .add(skills(4, 3, DECLARE_EMERGENCY))
@@ -75,8 +75,8 @@ public class AllCardsProvider {
                 .shuffle();
     }
 
-    public static Deck<SkillCard> tacticsCards() {
-        return new Deck<SkillCard>()
+    public static Deck<LoCa> tacticsCards() {
+        return new Deck<LoCa>()
                 .add(skills(8, 1, LAUNCH_SCOUT))
                 .add(skills(6, 2, LAUNCH_SCOUT))
                 .add(skills(4, 3, STRATEGIC_PLANNING))
@@ -96,8 +96,8 @@ public class AllCardsProvider {
                 .shuffle();
     }
 
-    public static Deck<SkillCard> pilotingCards() {
-        return new Deck<SkillCard>()
+    public static Deck<LoCa> pilotingCards() {
+        return new Deck<LoCa>()
                 .add(skills(8, 1, EVASIVE_MANOEUVRES))
                 .add(skills(6, 2, EVASIVE_MANOEUVRES))
                 .add(skills(4, 3, MAXIMUM_FIREPOWER))
@@ -117,8 +117,8 @@ public class AllCardsProvider {
                 .shuffle();
     }
 
-    public static Deck<SkillCard> engineeringCards() {
-        val deck = new Deck<SkillCard>()
+    public static Deck<LoCa> engineeringCards() {
+        return new Deck<LoCa>()
                 .add(skills(8, 1, REPAIR))
                 .add(skills(6, 2, REPAIR))
                 .add(skills(4, 3, SCIENTIFIC_RESEARCH))
@@ -136,11 +136,10 @@ public class AllCardsProvider {
                 .add(skills(1, 3, RAPTOR_SPECIALIST))
                 .add(skills(1, 5, TEST_THE_LIMITS))
                 .shuffle();
-        return deck;
     }
 
-    public static Deck<SkillCard> treacheryCards() {
-        return new Deck<SkillCard>()
+    public static Deck<LoCa> treacheryCards() {
+        return new Deck<LoCa>()
                 //todo check quantities below
                 .add(skills(1, 0, DRAIDIS_CONTACT))
                 .add(skills(1, 0, BAIT))
@@ -151,10 +150,10 @@ public class AllCardsProvider {
                 .shuffle();
     }
 
-    private static List<SkillCard> skills(int quantity, int value, SkillCardType type) {
-        val result = new ArrayList<SkillCard>();
+    private static List<LoCa> skills(int quantity, int value, SkillCardType type) {
+        val result = new ArrayList<LoCa>();
         for (int i = 0; i < quantity; i++) {
-            result.add(new SkillCard(value, type));
+            result.add(new LoCa(value, type));
         }
         return result;
     }

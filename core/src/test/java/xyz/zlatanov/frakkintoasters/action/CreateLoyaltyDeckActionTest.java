@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import xyz.zlatanov.frakkintoasters.Game;
 import xyz.zlatanov.frakkintoasters.Player;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
+import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 import xyz.zlatanov.frakkintoasters.state.deck.DecksHolder;
 import xyz.zlatanov.frakkintoasters.state.deck.FakeDeck;
 
@@ -126,6 +127,7 @@ class CreateLoyaltyDeckActionTest {
                 game.players()
                         .stream()
                         .map(Player::loyaltyCards)
+                        .map(Deck::cards)
                         .flatMap(Collection::stream)
                         .toList());
         assertEquals(mutineer, loyaltyCards.contains(MUTINEER));

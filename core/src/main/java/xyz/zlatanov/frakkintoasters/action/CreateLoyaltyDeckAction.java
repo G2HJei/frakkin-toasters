@@ -42,6 +42,7 @@ public record CreateLoyaltyDeckAction() implements Action {
         val hasMutineer = game.players()
                 .stream()
                 .map(Player::loyaltyCards)
+                .map(Deck::cards)
                 .flatMap(Collection::stream)
                 .anyMatch(MUTINEER::equals);
         return hasMutineer
@@ -121,7 +122,7 @@ public record CreateLoyaltyDeckAction() implements Action {
         for (val player : game.players()) {
             val cardsToDraw = player.character() == GAIUS_BALTAR ? 2 : 1;
             val loyaltyCards = game.decks().loyalty().draw(cardsToDraw);
-            player.loyaltyCards().addAll(loyaltyCards);
+            player.loyaltyCards().add(loyaltyCards);
         }
     }
 
@@ -135,7 +136,7 @@ public record CreateLoyaltyDeckAction() implements Action {
                 .findFirst()
                 .orElseThrow(FrakCallTheAdmiralException::new);
         val motiveCards = genericDeck(MotiveCard.class).draw(2);
-        cylonPlayer.motiveCards().addAll(motiveCards);
+        cylonPlayer.motiveCards().add(motiveCards);
     }
 
     private static List<Character> getSelectedCharacters(Game game) {

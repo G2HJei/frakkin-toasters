@@ -5,12 +5,11 @@ import lombok.experimental.Accessors;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
+import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
-import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
+import xyz.zlatanov.frakkintoasters.state.skill.LoCa;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import static xyz.zlatanov.frakkintoasters.state.character.Character.CHIEF_GALEN_TYROL;
 
@@ -19,9 +18,9 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.CHIEF_GALEN
 public class Player {
 
     private       Character         character;
-    private final List<SkillCard>   skillCards      = new ArrayList<>();
-    private final List<MotiveCard>  motiveCards     = new ArrayList<>();
-    private final List<LoyaltyCard> loyaltyCards    = new ArrayList<>();
+    private final Deck<LoCa>        skillCards      = new Deck<>();
+    private final Deck<MotiveCard>  motiveCards     = new Deck<>();
+    private final Deck<LoyaltyCard> loyaltyCards    = new Deck<>();
     private       boolean           hasMiracleToken = true;
 
     public Player selectCharacter(Character selection) {
@@ -30,8 +29,8 @@ public class Player {
         return this;
     }
 
-    public void gainSkillCards(SkillCard... cardsToAdd) {
-        skillCards.addAll(Arrays.asList(cardsToAdd));
+    public void gainSkillCards(LoCa... cardsToAdd) {
+        skillCards.add(Arrays.asList(cardsToAdd));
     }
 
     public int handLimit() {
@@ -52,4 +51,5 @@ public class Player {
     public boolean hasMiracleToken() {
         return hasMiracleToken;
     }
+
 }
