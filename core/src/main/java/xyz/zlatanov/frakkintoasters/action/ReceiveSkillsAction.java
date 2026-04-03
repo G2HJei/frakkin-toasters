@@ -42,10 +42,13 @@ public record ReceiveSkillsAction(int player, Map<SkillCardColor, Integer> selec
     }
 
     private boolean validateRevealedCylonSelection() {
-        val totalCards = selection.values()
+        val selectionCount = selection.values()
                 .stream()
                 .reduce(0, Integer::sum);
-        return totalCards == 2;
+        val singleSelectionPerColor = selection.values()
+                .stream()
+                .anyMatch(e -> e == 1);
+        return selectionCount == 2 && singleSelectionPerColor;
     }
 
     private boolean validateHumanSelection(Player player) {

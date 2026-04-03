@@ -60,11 +60,20 @@ class ReceiveSkillCardsActionTest {
     void shouldReceiveAnyColorWhenRevealedCylon() {
         when(leadershipDeck.draw()).thenReturn(leadershipCard);
         when(treacheryDeck.draw()).thenReturn(treacheryCard);
-        game.player(1).loyaltyCards().add(CYLON_SEND_TO_BRIG);
-        game.player(1).loyaltyCards().reveal(CYLON_SEND_TO_BRIG);
+        revealCylon();
         new ReceiveSkillsAction(1, Map.of(LEADERSHIP, 1, TREACHERY, 1)).execute(game);
 
         assertEquals(List.of(leadershipCard, treacheryCard), game.player(1).skillCards().cards());
     }
 
+    @Test
+    void shouldNotAllowDoubleSelectionForRevealedCylon() {
+        revealCylon();
+        assertFalse(new ReceiveSkillsAction(1, Map.of(TREACHERY, 2)).isValid(game));
+    }
+
+    private void revealCylon() {
+        game.player(1).loyaltyCards().add(CYLON_SEND_TO_BRIG);
+        game.player(1).loyaltyCards().reveal(CYLON_SEND_TO_BRIG);
+    }
 }
