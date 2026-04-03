@@ -13,15 +13,11 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_4_OCLOCK;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_6_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.character.CharacterType.CYLON_LEADER;
 import static xyz.zlatanov.frakkintoasters.state.character.CharacterType.SUPPORT;
-import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.ASSAULT_RAPTOR;
-import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.VIPER;
 
-public record SelectCharacterAction(int playerNumber, Character selectedCharacter) implements Action {
+public record SelectCharacterAction(int player, Character selectedCharacter) implements Action {
 
     @Override
     public boolean isValid(Game game) {
@@ -33,7 +29,7 @@ public record SelectCharacterAction(int playerNumber, Character selectedCharacte
 
     @Override
     public void apply(Game game) {
-        game.player(playerNumber).selectCharacter(selectedCharacter);
+        game.player(player).selectCharacter(selectedCharacter);
     }
 
     @Override
@@ -117,19 +113,14 @@ public record SelectCharacterAction(int playerNumber, Character selectedCharacte
 
     private List<Action> multipleSetupOptionsFollowup() {
         return Arrays.stream(selectedCharacter.setup())
-                .map(loc -> (Action) new MoveAction(playerNumber, loc))
+                .map(loc -> (Action) new MoveAction(player, loc))
                 .toList();
     }
 
     private List<Action> specialSetupFollowup() {
         return switch (selectedCharacter) {
             case KARL_HELO_AGATHON -> List.of();
-            case LEE_APOLLO_ADAMA -> List.of(
-                    new LaunchViperAction(playerNumber, VIPER, GALACTICA_SPACE_4_OCLOCK),
-                    new LaunchViperAction(playerNumber, VIPER, GALACTICA_SPACE_6_OCLOCK),
-                    new LaunchViperAction(playerNumber, ASSAULT_RAPTOR, GALACTICA_SPACE_4_OCLOCK),
-                    new LaunchViperAction(playerNumber, ASSAULT_RAPTOR, GALACTICA_SPACE_6_OCLOCK)
-            );
+            case LEE_APOLLO_ADAMA -> List.of(new PlayerDecisionAction(player, LaunchViperAction.class));
             default -> throw new FrakCallTheAdmiralException();
         };
     }

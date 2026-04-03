@@ -13,8 +13,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
-import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.ASSAULT_RAPTOR;
-import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.VIPER;
 
 
 class SelectCharacterActionTest {
@@ -61,12 +59,7 @@ class SelectCharacterActionTest {
     @Test
     void shouldFollowupForApollo() {
         val followup = select(LEE_APOLLO_ADAMA).execute(game);
-        val expected = List.of(
-                new LaunchViperAction(1, VIPER, GALACTICA_SPACE_4_OCLOCK),
-                new LaunchViperAction(1, VIPER, GALACTICA_SPACE_6_OCLOCK),
-                new LaunchViperAction(1, ASSAULT_RAPTOR, GALACTICA_SPACE_4_OCLOCK),
-                new LaunchViperAction(1, ASSAULT_RAPTOR, GALACTICA_SPACE_6_OCLOCK)
-        );
+        val expected = List.of(new PlayerDecisionAction(1, LaunchViperAction.class));
         assertEquals(expected, followup);
     }
 
