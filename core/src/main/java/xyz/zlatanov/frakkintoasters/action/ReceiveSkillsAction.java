@@ -1,15 +1,17 @@
-package xyz.zlatanov.frakkintoasters.action.skills;
+package xyz.zlatanov.frakkintoasters.action;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.Game;
 import xyz.zlatanov.frakkintoasters.Player;
-import xyz.zlatanov.frakkintoasters.action.Action;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillSetOption;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
-public record ReceiveSkillsAction(int player, List<SkillSelection> selection) implements Action {
+public record ReceiveSkillsAction(int player, Map<SkillCardColor, Integer> selection) implements Action {
 
 
     @Override
@@ -22,8 +24,8 @@ public record ReceiveSkillsAction(int player, List<SkillSelection> selection) im
 
     @Override
     public void apply(Game game) {
-        for (val select : selection) {
-            val deck = switch (select.color()) {
+        for (val entry : new TreeMap<>(selection).entrySet()) {
+            val deck = switch (entry.getKey()) {
                 case POLITICS -> game.decks().politics();
                 case LEADERSHIP -> game.decks().leadership();
                 case TACTICS -> game.decks().tactics();
@@ -31,7 +33,7 @@ public record ReceiveSkillsAction(int player, List<SkillSelection> selection) im
                 case ENGINEERING -> game.decks().engineering();
                 case TREACHERY -> game.decks().treachery();
             };
-            for (int i = 0; i < select.count(); i++) {
+            for (int i = 0; i < entry.getValue(); i++) {
                 game.player(player)
                         .skillCards()
                         .add(deck.draw());
@@ -40,8 +42,8 @@ public record ReceiveSkillsAction(int player, List<SkillSelection> selection) im
     }
 
     private boolean validateRevealedCylonSelection() {
-        val totalCards = selection.stream()
-                .map(SkillSelection::count)
+        val totalCards = selection.values()
+                .stream()
                 .reduce(0, Integer::sum);
         return totalCards == 2;
     }
@@ -51,8 +53,7 @@ public record ReceiveSkillsAction(int player, List<SkillSelection> selection) im
         val availableTypes = skillSet.stream()
                 .map(SkillSetOption::availableTypes)
                 .flatMap(Collection::stream)
-                .toList();
-        return selection.stream()
-                .allMatch(selection -> availableTypes.contains(selection.color()));
+                .collect(Collectors.toSet());
+        return availableTypes.containsAll(selection.keySet());
     }
 }
