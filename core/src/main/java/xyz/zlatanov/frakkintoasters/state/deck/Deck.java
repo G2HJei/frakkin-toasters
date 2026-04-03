@@ -1,18 +1,15 @@
 package xyz.zlatanov.frakkintoasters.state.deck;
 
-import lombok.Getter;
-import lombok.experimental.Accessors;
 import lombok.val;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@Getter
-@Accessors(fluent = true)
 public class Deck<T> {
 
     protected final List<T> cards          = new ArrayList<>();
+    private final   List<T> revealedCards  = new ArrayList<>();
     private final   List<T> discardedCards = new ArrayList<>();
 
     public Deck<T> add(T card) {
@@ -37,17 +34,36 @@ public class Deck<T> {
         return result;
     }
 
+    public List<T> cards() {
+        return Collections.unmodifiableList(cards);
+    }
+
     public int size() {
         return cards.size();
+    }
+
+    public Deck<T> discard(T card) {
+        discardedCards.add(card);
+        return this;
     }
 
     public int discardSize() {
         return discardedCards.size();
     }
 
-    public Deck<T> discard(T card) {
-        discardedCards.add(card);
+    public T lastDiscarded() {
+        return discardedCards.isEmpty() ? null : discardedCards.getLast();
+    }
+
+    public Deck<T> reveal(T card) {
+        assert cards.contains(card);
+        cards.remove(card);
+        revealedCards.add(card);
         return this;
+    }
+
+    public List<T> revealedCards() {
+        return Collections.unmodifiableList(revealedCards);
     }
 
     public Deck<T> shuffle() {
