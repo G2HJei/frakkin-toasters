@@ -15,15 +15,9 @@ public record ReceiveSkillsAction(int player, List<SkillSelection> selection) im
     @Override
     public boolean isValid(Game game) {
         val player = game.player(this.player);
-        val skillSet = player.character().skillSet();
-        val availableTypes = skillSet.stream()
-                .map(SkillSetOption::availableTypes)
-                .flatMap(Collection::stream)
-                .toList();
         return player.isRevealedCylon()
-                ? validateRevealedCylonSelection(player)
-                : selection.stream()
-                  .allMatch(selection -> availableTypes.contains(selection.color()));
+                ? validateRevealedCylonSelection()
+                : validateHumanSelection(player);
     }
 
     @Override
@@ -45,10 +39,20 @@ public record ReceiveSkillsAction(int player, List<SkillSelection> selection) im
         }
     }
 
-    private boolean validateRevealedCylonSelection(Player player) {
+    private boolean validateRevealedCylonSelection() {
         val totalCards = selection.stream()
                 .map(SkillSelection::count)
                 .reduce(0, Integer::sum);
         return totalCards == 2;
+    }
+
+    private boolean validateHumanSelection(Player player) {
+        val skillSet = player.character().skillSet();
+        val availableTypes = skillSet.stream()
+                .map(SkillSetOption::availableTypes)
+                .flatMap(Collection::stream)
+                .toList();
+        return selection.stream()
+                .allMatch(selection -> availableTypes.contains(selection.color()));
     }
 }
