@@ -3,6 +3,7 @@ package xyz.zlatanov.frakkintoasters.state.deck;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.card.MutinyCard;
@@ -12,6 +13,7 @@ import xyz.zlatanov.frakkintoasters.state.crisis.SuperCrisisCard;
 import xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage;
 import xyz.zlatanov.frakkintoasters.state.damage.GalacticaDamage;
 import xyz.zlatanov.frakkintoasters.state.damage.PegasusDamage;
+import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
@@ -59,4 +61,20 @@ public class DecksHolder {
     @Builder.Default
     private final Deck<MutinyCard>      mutiny          = genericDeck(MutinyCard.class);
 
+    public void discard(Object card) {
+        if (card instanceof SkillCard) {
+            val deck = switch (((SkillCard) card).type().color()) {
+                case POLITICS -> politics;
+                case LEADERSHIP -> leadership;
+                case TACTICS -> tactics;
+                case PILOTING -> piloting;
+                case ENGINEERING -> engineering;
+                case TREACHERY -> treachery;
+            };
+            deck.discard((SkillCard) card);
+        } else {
+            //todo
+            throw new FrakCallTheAdmiralException();
+        }
+    }
 }

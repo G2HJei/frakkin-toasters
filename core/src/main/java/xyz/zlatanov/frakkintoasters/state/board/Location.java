@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.state.board;
 
+import java.util.List;
 import java.util.Set;
 
 public enum Location {
@@ -63,9 +64,23 @@ public enum Location {
     //BREEDERS_CANYON,
     //SHIPYARD;
 
-    private static final Set<Location> spaceLocations     = Set.of(
+    public static final  List<List<Location>> LOCATIONS_BY_SHIP  = List.of(
+            // galactica
+            List.of(FTL_CONTROL, WEAPONS_CONTROL, COMMUNICATIONS, RESEARCH_LAB, ARMORY, COMMAND, ADMIRALS_QUARTERS, HANGAR_DECK, SICKBAY, BRIG),
+            // colonial one
+            List.of(PRESS_ROOM, PRESIDENTS_OFFICE, ADMINISTRATION),
+            // cylon
+            List.of(CAPRICA, CYLON_FLEET, HUMAN_FLEET, RESURRECTION_SHIP, HUB_DESTROYED),
+            // pegasus
+            List.of(PEGASUS_CIC, AIRLOCK, MAIN_BATTERIES, ENGINE_ROOM),
+            // demetrius
+            List.of(BRIDGE, TACTICAL_PLOT, CAPTAINS_CABIN),
+            // cylon fleet
+            List.of(BASESTAR_BRIDGE)
+    );
+    private static final Set<Location>        spaceLocations     = Set.of(
             GALACTICA_SPACE_12_OCLOCK, GALACTICA_SPACE_2_OCLOCK, GALACTICA_SPACE_4_OCLOCK, GALACTICA_SPACE_6_OCLOCK, GALACTICA_SPACE_8_OCLOCK, GALACTICA_SPACE_10_OCLOCK);
-    private static final Set<Location> hazardousLocations = Set.of(
+    private static final Set<Location>        hazardousLocations = Set.of(
             SICKBAY, BRIG, RESURRECTION_SHIP
     );
 

@@ -77,7 +77,7 @@ public class Game {
                 .map(board -> board.locate(character))
                 .filter(Objects::nonNull)
                 .findFirst()
-                .orElseThrow(FrakCallTheAdmiralException::new);
+                .orElse(null);
     }
 
     public void moveTo(Location location, Character character) {

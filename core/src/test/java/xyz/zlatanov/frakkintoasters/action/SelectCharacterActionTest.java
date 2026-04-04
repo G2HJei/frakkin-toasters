@@ -4,7 +4,6 @@ import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.Game;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
-import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
 
 import java.util.List;
@@ -45,15 +44,15 @@ class SelectCharacterActionTest {
         val followup = select(HELENA_CAIN).execute(game);
 
         val expected = List.of(
-                new MoveAction(1, PEGASUS_CIC),
-                new MoveAction(1, COMMAND));
+                new MoveAction(1, PEGASUS_CIC, null),
+                new MoveAction(1, COMMAND, null));
         assertEquals(expected, followup);
     }
 
     @Test
     void shouldNotPlaceVanillaHelo() {
         select(KARL_HELO_AGATHON).execute(game);
-        assertThrows(FrakCallTheAdmiralException.class, () -> game.locate(KARL_HELO_AGATHON));
+        assertNull(game.locate(KARL_HELO_AGATHON));
     }
 
     @Test

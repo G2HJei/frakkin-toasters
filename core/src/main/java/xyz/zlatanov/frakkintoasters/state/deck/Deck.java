@@ -22,6 +22,12 @@ public class Deck<T> {
         return this;
     }
 
+    public Deck<T> remove(T card) {
+        assert cards.contains(card);
+        cards.remove(card);
+        return this;
+    }
+
     public T draw() {
         return cards.removeFirst();
     }
