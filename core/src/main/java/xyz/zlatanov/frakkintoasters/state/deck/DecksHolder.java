@@ -62,8 +62,8 @@ public class DecksHolder {
     private final Deck<MutinyCard>      mutiny          = genericDeck(MutinyCard.class);
 
     public void discard(Object card) {
-        if (card instanceof SkillCard) {
-            val deck = switch (((SkillCard) card).type().color()) {
+        if (card instanceof SkillCard skillCard) {
+            val deck = switch (skillCard.type().color()) {
                 case POLITICS -> politics;
                 case LEADERSHIP -> leadership;
                 case TACTICS -> tactics;
@@ -71,7 +71,16 @@ public class DecksHolder {
                 case ENGINEERING -> engineering;
                 case TREACHERY -> treachery;
             };
-            deck.discard((SkillCard) card);
+            deck.discard(skillCard);
+        } else if (card instanceof GalacticaDamage dmg) {
+            galacticaDamage.add(dmg);
+            galacticaDamage.shuffle();
+        } else if (card instanceof BasestarDamage dmg) {
+            basestarDamage.add(dmg);
+            basestarDamage.shuffle();
+        } else if (card instanceof PegasusDamage dmg) {
+            pegasusDamage.add(dmg);
+            pegasusDamage.shuffle();
         } else {
             //todo
             throw new FrakCallTheAdmiralException();
