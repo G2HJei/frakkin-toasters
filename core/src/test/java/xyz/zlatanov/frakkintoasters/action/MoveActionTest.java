@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.Game;
 import xyz.zlatanov.frakkintoasters.state.ship.AssaultRaptor;
+import xyz.zlatanov.frakkintoasters.state.ship.Viper;
 import xyz.zlatanov.frakkintoasters.state.ship.ViperMarkVII;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
@@ -61,7 +62,7 @@ class MoveActionTest {
 
     @Test
     void shouldLandWhilePiloting() {
-        val viper = new ViperMarkVII().pilot(KARA_STARBUCK_THRACE);
+        val viper = new Viper().pilot(KARA_STARBUCK_THRACE);
         val skillCard = new SkillCard(0, ALL_HANDS_ON_DECK);
         game.boards().galactica().place(GALACTICA_SPACE_2_OCLOCK, viper);
         game.player(1).skillCards().add(skillCard);
@@ -71,5 +72,27 @@ class MoveActionTest {
         assertEquals(PRESIDENTS_OFFICE, game.locate(KARA_STARBUCK_THRACE));
         assertTrue(game.boards().galactica().reserves().contains(viper));
         assertNull(viper.pilot());
+    }
+
+    @Test
+    void shouldValidateMovementAdjacency() {
+        //todo do for ass raptor too
+        //todo merge bottom test with this one and make parameterized
+        // test all variants - it is simple
+        val viper = new Viper().pilot(KARA_STARBUCK_THRACE);
+        game.boards().galactica().place(GALACTICA_SPACE_2_OCLOCK, viper);
+        assertFalse(new MoveAction(1, GALACTICA_SPACE_6_OCLOCK, null).isValid(game));
+        assertFalse(new MoveAction(1, GALACTICA_SPACE_8_OCLOCK, null).isValid(game));
+        assertFalse(new MoveAction(1, GALACTICA_SPACE_10_OCLOCK, null).isValid(game));
+    }
+
+    @Test
+    void shouldAllowDoubleMovementForViperMarkVii() {
+        val viper = new ViperMarkVII().pilot(KARA_STARBUCK_THRACE);
+        game.boards().galactica().place(GALACTICA_SPACE_2_OCLOCK, viper);
+
+        new MoveAction(1, GALACTICA_SPACE_6_OCLOCK, null).execute(game);
+
+        assertEquals(GALACTICA_SPACE_6_OCLOCK, game.locate(KARA_STARBUCK_THRACE));
     }
 }
