@@ -3,8 +3,10 @@ package xyz.zlatanov.frakkintoasters.state.board;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.exception.InvalidMoveLocationException;
+import xyz.zlatanov.frakkintoasters.state.ship.Pilotable;
 import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 import xyz.zlatanov.frakkintoasters.state.ship.ShipType;
 import xyz.zlatanov.frakkintoasters.track.JumpPreparation;
@@ -33,6 +35,17 @@ public class GalacticaBoard extends Board {
         super(galacticaLocations());
     }
 
+    @Override
+    public Location locate(Character character) {
+        return Optional.ofNullable(super.locate(character))
+                .orElseGet(() -> shipsInSpace.entrySet()
+                        .stream()
+                        .filter(es -> es.getKey() instanceof Pilotable
+                                && ((Pilotable) es.getKey()).pilot() == character)
+                        .findFirst()
+                        .map(Map.Entry::getValue)
+                        .orElse(null));
+    }
 
     private static Set<Location> galacticaLocations() {
         return new HashSet<>(Set.of(FTL_CONTROL, WEAPONS_CONTROL, COMMUNICATIONS, RESEARCH_LAB, ARMORY, COMMAND, ADMIRALS_QUARTERS, HANGAR_DECK, SICKBAY, BRIG,
