@@ -4,6 +4,7 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.Game;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
+import xyz.zlatanov.frakkintoasters.state.ship.Pilotable;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import java.util.Map;
@@ -28,7 +29,19 @@ public record MoveAction(int player, Location location, SkillCard discardCard) i
             game.player(player).skillCards().remove(discardCard);
             game.decks().discard(discardCard);
         }
-        game.moveTo(location, game.player(player).character());
+        val playerCharacter = game.player(player).character();
+        if (location.isSpaceLocation()) {
+            val currentSpace = game.locate(playerCharacter);
+            val ship = game.boards().galactica().shipsIn(currentSpace)
+                    .stream()
+                    .filter(s -> s instanceof Pilotable
+                            && ((Pilotable) s).pilot() == playerCharacter)
+                    .findFirst()
+                    .orElseThrow();
+            game.moveTo(location, ship);
+        } else {
+            game.moveTo(location, playerCharacter);
+        }
     }
 
     private boolean isEligibleLocation(Game game) {

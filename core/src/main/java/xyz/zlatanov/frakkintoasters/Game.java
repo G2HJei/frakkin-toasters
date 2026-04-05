@@ -81,11 +81,19 @@ public class Game {
     }
 
     public void moveTo(Location location, Character character) {
+        assert !location.isSpaceLocation();
         boards.all().forEach(b -> b.remove(character));
         boards.all().stream()
                 .filter(b -> b.locations().contains(location))
                 .findFirst()
                 .orElseThrow(FrakCallTheAdmiralException::new)
                 .place(location, character);
+    }
+
+    public void moveTo(Location location, Ship ship) {
+        assert LOCATION_AREAS.get("Galactica space").contains(location);
+        boards.galactica()
+                .remove(ship)
+                .place(location, ship);
     }
 }
