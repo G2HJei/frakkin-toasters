@@ -12,11 +12,19 @@ public record MoveAction(int player, Location location, SkillCard discardCard) i
 
     @Override
     public boolean isValid(Game game) {
-        val validLocation = !location.isHazardousLocation();
+        val validLocation = isEligibleLocation(game);
         val shouldDiscardCard = startingShipIndex(game) != targetShipIndex();
         val isDiscardingCard = discardCard != null;
         return validLocation &&
                 shouldDiscardCard == isDiscardingCard;
+    }
+
+    private boolean isEligibleLocation(Game game) {
+        val revealedCylon = game.player(player).isRevealedCylon();
+        val cylonLocation = location.isCylonLocation();
+        val hazardousLocation = location.isHazardousLocation();
+        return !hazardousLocation
+                && (revealedCylon == cylonLocation);
     }
 
     @Override

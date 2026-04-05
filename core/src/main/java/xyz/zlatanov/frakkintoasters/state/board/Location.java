@@ -21,13 +21,6 @@ public enum Location {
     PRESIDENTS_OFFICE,
     ADMINISTRATION,
 
-    //cylon
-    CAPRICA,
-    CYLON_FLEET,
-    HUMAN_FLEET,
-    RESURRECTION_SHIP,
-    HUB_DESTROYED,
-
     //galactica space
     GALACTICA_SPACE_12_OCLOCK,
     GALACTICA_SPACE_2_OCLOCK,
@@ -46,6 +39,13 @@ public enum Location {
     BRIDGE,
     TACTICAL_PLOT,
     CAPTAINS_CABIN,
+
+    //cylon
+    CAPRICA,
+    CYLON_FLEET,
+    HUMAN_FLEET,
+    RESURRECTION_SHIP,
+    HUB_DESTROYED,
 
     //cylon fleet
     BASESTAR_BRIDGE,
@@ -90,5 +90,9 @@ public enum Location {
 
     public boolean isHazardousLocation() {
         return hazardousLocations.contains(this);
+    }
+
+    public boolean isCylonLocation() {
+        return ordinal() >= CAPRICA.ordinal();
     }
 }

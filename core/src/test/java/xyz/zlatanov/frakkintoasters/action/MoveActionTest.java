@@ -44,4 +44,9 @@ class MoveActionTest {
     void shouldNotBeAbleToHazardousLocation() {
         assertFalse(new MoveAction(1, BRIG, null).isValid(game));
     }
+
+    @Test
+    void shouldNotAllowHumansMoveToCylonLocations() {
+        assertFalse(new MoveAction(1, CAPRICA, new SkillCard(0, ALL_HANDS_ON_DECK)).isValid(game));
+    }
 }
