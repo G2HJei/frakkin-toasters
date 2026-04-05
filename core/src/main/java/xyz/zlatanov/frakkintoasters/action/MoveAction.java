@@ -5,6 +5,7 @@ import xyz.zlatanov.frakkintoasters.Game;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.Pilotable;
+import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import java.util.Map;
@@ -33,25 +34,16 @@ public record MoveAction(int player, Location location, SkillCard discardCard) i
         val currentLocation = game.locate(playerCharacter);
         val isPiloting = currentLocation.isSpaceLocation();
         val isStayingInSpace = location.isSpaceLocation();
-        if (isPiloting && isStayingInSpace) {
-            val ship = game.boards().galactica().shipsIn(currentLocation)
-                    .stream()
-                    .filter(s -> s instanceof Pilotable
-                            && ((Pilotable) s).pilot() == playerCharacter)
-                    .findFirst()
-                    .orElseThrow();
-            game.moveTo(location, ship);
-        } else {
-            if (isPiloting) {
-                val ship = game.boards().galactica().shipsIn(currentLocation)
-                        .stream()
-                        .filter(s -> s instanceof Pilotable
-                                && ((Pilotable) s).pilot() == playerCharacter)
-                        .findFirst()
-                        .orElseThrow();
+        if (isPiloting) {
+            val ship = getShip(game);
+            if (isStayingInSpace) {
+                game.moveTo(location, ship);
+            } else {
                 game.boards().galactica().addToReserves(ship);
                 ((Pilotable) ship).pilot(null);
+                game.moveTo(location, playerCharacter);
             }
+        } else {
             game.moveTo(location, playerCharacter);
         }
     }
@@ -83,5 +75,16 @@ public record MoveAction(int player, Location location, SkillCard discardCard) i
                 .findFirst()
                 .map(Map.Entry::getKey)
                 .orElseThrow(FrakCallTheAdmiralException::new);
+    }
+
+    private Ship getShip(Game game) {
+        val playerCharacter = game.player(player).character();
+        val currentLocation = game.locate(playerCharacter);
+        return game.boards().galactica().shipsIn(currentLocation)
+                .stream()
+                .filter(s -> s instanceof Pilotable
+                        && ((Pilotable) s).pilot() == playerCharacter)
+                .findFirst()
+                .orElseThrow();
     }
 }
