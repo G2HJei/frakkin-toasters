@@ -3,7 +3,6 @@ package xyz.zlatanov.frakkintoasters.state.board;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
-import xyz.zlatanov.frakkintoasters.state.exception.InvalidMoveLocationException;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,9 +18,7 @@ public abstract class Board {
     }
 
     public void place(Location to, Character... characterToPlace) {
-        if (!locations.contains(to) || to.isSpaceLocation()) {
-            throw new InvalidMoveLocationException();
-        }
+        assert locations.contains(to) && !to.isSpaceLocation();
         for (val c : characterToPlace) {
             characters.put(c, to);
         }

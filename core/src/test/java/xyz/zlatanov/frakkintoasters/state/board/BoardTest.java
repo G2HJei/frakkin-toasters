@@ -1,7 +1,6 @@
 package xyz.zlatanov.frakkintoasters.state.board;
 
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.state.exception.InvalidMoveLocationException;
 
 import java.util.Set;
 
@@ -32,17 +31,6 @@ class BoardTest {
         board.place(BRIG, WILLIAM_ADAMA);
         assertTrue(board.charactersIn(COMMAND).isEmpty());
     }
-
-    @Test
-    void shouldNotAllowMovingToInvalidLocation() {
-        assertThrows(InvalidMoveLocationException.class, () -> board.place(WEAPONS_CONTROL, SAUL_TIGH));
-    }
-
-    @Test
-    void shouldNotAllowCharactersToPlaceSpaceLocations() {
-        assertThrows(InvalidMoveLocationException.class, () -> board.place(GALACTICA_SPACE_2_OCLOCK, LEE_APOLLO_ADAMA));
-    }
-
 
     static class TestBoard extends Board {
 

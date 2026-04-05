@@ -5,7 +5,6 @@ import lombok.experimental.Accessors;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
-import xyz.zlatanov.frakkintoasters.state.exception.InvalidMoveLocationException;
 import xyz.zlatanov.frakkintoasters.state.ship.Pilotable;
 import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 import xyz.zlatanov.frakkintoasters.state.ship.ShipType;
@@ -116,9 +115,7 @@ public class GalacticaBoard extends Board {
     }
 
     public GalacticaBoard place(Location in, List<Ship> ships) {
-        if (!locations().contains(in) || !in.isSpaceLocation()) {
-            throw new InvalidMoveLocationException();
-        }
+        assert locations().contains(in) && in.isSpaceLocation();
         ships.forEach(s -> shipsInSpace.put(s, in));
         return this;
     }
