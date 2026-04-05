@@ -30,9 +30,11 @@ public record MoveAction(int player, Location location, SkillCard discardCard) i
             game.decks().discard(discardCard);
         }
         val playerCharacter = game.player(player).character();
-        if (location.isSpaceLocation()) {
-            val currentSpace = game.locate(playerCharacter);
-            val ship = game.boards().galactica().shipsIn(currentSpace)
+        val currentLocation = game.locate(playerCharacter);
+        val isPiloting = currentLocation.isSpaceLocation();
+        val isStayingInSpace = location.isSpaceLocation();
+        if (isPiloting && isStayingInSpace) {
+            val ship = game.boards().galactica().shipsIn(currentLocation)
                     .stream()
                     .filter(s -> s instanceof Pilotable
                             && ((Pilotable) s).pilot() == playerCharacter)
@@ -40,6 +42,16 @@ public record MoveAction(int player, Location location, SkillCard discardCard) i
                     .orElseThrow();
             game.moveTo(location, ship);
         } else {
+            if (isPiloting) {
+                val ship = game.boards().galactica().shipsIn(currentLocation)
+                        .stream()
+                        .filter(s -> s instanceof Pilotable
+                                && ((Pilotable) s).pilot() == playerCharacter)
+                        .findFirst()
+                        .orElseThrow();
+                game.boards().galactica().addToReserves(ship);
+                ((Pilotable) ship).pilot(null);
+            }
             game.moveTo(location, playerCharacter);
         }
     }
