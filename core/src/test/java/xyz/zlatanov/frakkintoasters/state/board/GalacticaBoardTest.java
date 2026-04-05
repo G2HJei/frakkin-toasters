@@ -4,6 +4,7 @@ import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.state.ship.Raptor;
 import xyz.zlatanov.frakkintoasters.state.ship.Viper;
+import xyz.zlatanov.frakkintoasters.state.ship.ViperMarkVII;
 
 import java.util.HashSet;
 import java.util.List;
@@ -63,24 +64,34 @@ class GalacticaBoardTest {
     }
 
     @Test
-    void shouldManageDamagedShips() {
+    void shouldManageDamagedShip() {
         val raptor = new Raptor();
         board.addToDamagedShips(raptor);
         assertEquals(raptor, board.removeFromDamagedShips(RAPTOR));
     }
 
     @Test
-    void shouldPlaceFighterShips() {
+    void shouldPlaceFighterShip() {
         val viper = new Viper();
         board.place(GALACTICA_SPACE_12_OCLOCK, viper);
         assertEquals(List.of(viper), board.shipsIn(GALACTICA_SPACE_12_OCLOCK));
     }
 
     @Test
-    void shouldPlacePilotedShips() {
+    void shouldPlacePilotedShip() {
         val pilotedViper = new Viper().pilot(KARL_HELO_AGATHON);
         board.place(GALACTICA_SPACE_4_OCLOCK, pilotedViper);
         assertEquals(GALACTICA_SPACE_4_OCLOCK, board.locate(KARL_HELO_AGATHON));
+    }
+
+    @Test
+    void shouldRemoveShip() {
+        val viperMarkVii = new ViperMarkVII();
+        board.place(GALACTICA_SPACE_12_OCLOCK, viperMarkVii);
+
+        board.remove(viperMarkVii);
+
+        assertEquals(List.of(), board.shipsIn(GALACTICA_SPACE_12_OCLOCK));
     }
 
     @Test

@@ -74,8 +74,7 @@ public class GalacticaBoard extends Board {
     }
 
     public GalacticaBoard addToReserves(Ship ship) {
-        addToReserves(List.of(ship));
-        return this;
+        return addToReserves(List.of(ship));
     }
 
     public GalacticaBoard addToReserves(List<Ship> ships) {
@@ -84,8 +83,7 @@ public class GalacticaBoard extends Board {
     }
 
     public GalacticaBoard addToDamagedShips(Ship ship) {
-        addToDamagedShips(List.of(ship));
-        return this;
+        return addToDamagedShips(List.of(ship));
     }
 
     public GalacticaBoard addToDamagedShips(List<Ship> ships) {
@@ -117,6 +115,18 @@ public class GalacticaBoard extends Board {
     public GalacticaBoard place(Location in, List<Ship> ships) {
         assert locations().contains(in) && in.isSpaceLocation();
         ships.forEach(s -> shipsInSpace.put(s, in));
+        ships.stream()
+                .filter(s -> s instanceof Pilotable)
+                .map(Pilotable.class::cast)
+                .map(Pilotable::pilot)
+                .filter(Objects::nonNull)
+                .forEach(this::remove);
+        return this;
+    }
+
+    public GalacticaBoard remove(Ship ship) {
+        assert shipsInSpace.containsKey(ship);
+        shipsInSpace.remove(ship);
         return this;
     }
 
