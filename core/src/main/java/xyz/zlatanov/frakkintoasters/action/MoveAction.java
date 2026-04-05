@@ -6,25 +6,20 @@ import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
-import static xyz.zlatanov.frakkintoasters.state.board.Location.LOCATIONS_BY_SHIP;
+import java.util.Map;
+import java.util.Objects;
+
+import static xyz.zlatanov.frakkintoasters.state.board.Location.LOCATION_AREAS;
 
 public record MoveAction(int player, Location location, SkillCard discardCard) implements Action {
 
     @Override
     public boolean isValid(Game game) {
         val validLocation = isEligibleLocation(game);
-        val shouldDiscardCard = startingShipIndex(game) != targetShipIndex();
+        val shouldDiscardCard = !Objects.equals(startingArea(game), targetArea());
         val isDiscardingCard = discardCard != null;
         return validLocation &&
                 shouldDiscardCard == isDiscardingCard;
-    }
-
-    private boolean isEligibleLocation(Game game) {
-        val revealedCylon = game.player(player).isRevealedCylon();
-        val cylonLocation = location.isCylonLocation();
-        val hazardousLocation = location.isHazardousLocation();
-        return !hazardousLocation
-                && (revealedCylon == cylonLocation);
     }
 
     @Override
@@ -36,25 +31,32 @@ public record MoveAction(int player, Location location, SkillCard discardCard) i
         game.moveTo(location, game.player(player).character());
     }
 
-    private int startingShipIndex(Game game) {
+    private boolean isEligibleLocation(Game game) {
+        val revealedCylon = game.player(player).isRevealedCylon();
+        val cylonLocation = location.isCylonLocation();
+        val hazardousLocation = location.isHazardousLocation();
+        return !hazardousLocation
+                && (revealedCylon == cylonLocation);
+    }
+
+    private String startingArea(Game game) {
         val location = game.locate(game.player(player).character());
         if (location == null) {
-            return -1;
+            return "Hi, Helo!";
         }
-        return getShipIndex(location);
+        return getLocationArea(location);
     }
 
-    private int targetShipIndex() {
-        return getShipIndex(location);
+    private String targetArea() {
+        return getLocationArea(location);
     }
 
-    private int getShipIndex(Location location) {
-        for (int shipIndex = 0; shipIndex < LOCATIONS_BY_SHIP.size(); shipIndex++) {
-            var shipLocations = LOCATIONS_BY_SHIP.get(shipIndex);
-            if (shipLocations.contains(location)) {
-                return shipIndex;
-            }
-        }
-        throw new FrakCallTheAdmiralException();
+    private String getLocationArea(Location location) {
+        return LOCATION_AREAS.entrySet()
+                .stream()
+                .filter(es -> es.getValue().contains(location))
+                .findFirst()
+                .map(Map.Entry::getKey)
+                .orElseThrow(FrakCallTheAdmiralException::new);
     }
 }
