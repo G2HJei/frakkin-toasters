@@ -8,13 +8,13 @@ import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.PilotableShip;
 import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 import xyz.zlatanov.frakkintoasters.state.ship.ShipType;
-import xyz.zlatanov.frakkintoasters.track.JumpPreparation;
+import xyz.zlatanov.frakkintoasters.state.track.JumpPreparation;
 
 import java.util.*;
 
 import static java.util.Collections.newSetFromMap;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
-import static xyz.zlatanov.frakkintoasters.track.JumpPreparation.START;
+import static xyz.zlatanov.frakkintoasters.state.track.JumpPreparation.START;
 
 @Getter
 @Accessors(fluent = true)

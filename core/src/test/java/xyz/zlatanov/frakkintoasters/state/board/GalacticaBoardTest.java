@@ -16,8 +16,8 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.GAIUS_BALTA
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARL_HELO_AGATHON;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.RAPTOR;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.VIPER;
-import static xyz.zlatanov.frakkintoasters.track.JumpPreparation.POSITION_1;
-import static xyz.zlatanov.frakkintoasters.track.JumpPreparation.START;
+import static xyz.zlatanov.frakkintoasters.state.track.JumpPreparation.POSITION_1;
+import static xyz.zlatanov.frakkintoasters.state.track.JumpPreparation.START;
 
 class GalacticaBoardTest {
     GalacticaBoard board = new GalacticaBoard();
