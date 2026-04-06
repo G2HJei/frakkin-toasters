@@ -52,7 +52,7 @@ class MoveActionTest {
     }
 
     @Test
-    void shouldNotBeAbleToHazardousLocation() {
+    void shouldNotBeAbleToHazardousLocations() {
         assertFalse(new MoveAction(1, BRIG, null).isValid(game));
     }
 
@@ -84,17 +84,19 @@ class MoveActionTest {
 
     public static Stream<Arguments> adjacencyTests() {
         return Stream.of(
-                //todo disallow moving to same loc
+                argumentSet("viper to same space", new Viper(), GALACTICA_SPACE_2_OCLOCK, false),
                 argumentSet("viper to space 4", new Viper(), GALACTICA_SPACE_4_OCLOCK, true),
                 argumentSet("viper to space 6", new Viper(), GALACTICA_SPACE_6_OCLOCK, false),
                 argumentSet("viper to space 8", new Viper(), GALACTICA_SPACE_8_OCLOCK, false),
                 argumentSet("viper to space 10", new Viper(), GALACTICA_SPACE_10_OCLOCK, false),
                 argumentSet("viper to space 12", new Viper(), GALACTICA_SPACE_12_OCLOCK, true),
+                argumentSet("Assault raptor to same space", new AssaultRaptor(), GALACTICA_SPACE_2_OCLOCK, false),
                 argumentSet("Assault raptor to space 4", new AssaultRaptor(), GALACTICA_SPACE_4_OCLOCK, true),
                 argumentSet("Assault raptor to space 6", new AssaultRaptor(), GALACTICA_SPACE_6_OCLOCK, false),
                 argumentSet("Assault raptor to space 8", new AssaultRaptor(), GALACTICA_SPACE_8_OCLOCK, false),
                 argumentSet("Assault raptor to space 10", new AssaultRaptor(), GALACTICA_SPACE_10_OCLOCK, false),
                 argumentSet("Assault raptor to space 12", new AssaultRaptor(), GALACTICA_SPACE_12_OCLOCK, true),
+                argumentSet("Viper Mk7 to same space", new ViperMarkVII(), GALACTICA_SPACE_2_OCLOCK, false),
                 argumentSet("Viper Mk7 to space 4", new ViperMarkVII(), GALACTICA_SPACE_4_OCLOCK, true),
                 argumentSet("Viper Mk7 to space 6", new ViperMarkVII(), GALACTICA_SPACE_6_OCLOCK, true),
                 argumentSet("Viper Mk7 to space 8", new ViperMarkVII(), GALACTICA_SPACE_8_OCLOCK, false),
@@ -106,21 +108,8 @@ class MoveActionTest {
     @ParameterizedTest
     @MethodSource("adjacencyTests")
     void shouldValidateMovementAdjacency(PilotableShip ship, Location destination, boolean isValid) {
-        //todo do for ass raptor too
-        //todo merge bottom test with this one and make parameterized
-        // test all variants - it is simple
         ship.pilot(KARA_STARBUCK_THRACE);
         game.boards().galactica().place(GALACTICA_SPACE_2_OCLOCK, ship);
         assertEquals(isValid, new MoveAction(1, destination, null).isValid(game));
-    }
-
-    @Test
-    void shouldAllowDoubleMovementForViperMarkVii() {
-        val viper = new ViperMarkVII().pilot(KARA_STARBUCK_THRACE);
-        game.boards().galactica().place(GALACTICA_SPACE_2_OCLOCK, viper);
-
-        new MoveAction(1, GALACTICA_SPACE_6_OCLOCK, null).execute(game);
-
-        assertEquals(GALACTICA_SPACE_6_OCLOCK, game.locate(KARA_STARBUCK_THRACE));
     }
 }
