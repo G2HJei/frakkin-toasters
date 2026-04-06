@@ -2,6 +2,7 @@ package xyz.zlatanov.frakkintoasters.event.player;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.event.Event;
+import xyz.zlatanov.frakkintoasters.event.EventFollowup;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Player;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
@@ -34,10 +35,11 @@ public record SelectCharacterEvent(int player, Character selectedCharacter) impl
     }
 
     @Override
-    public List<Event> followup(Game game) {
+    public EventFollowup followup(Game game) {
         val setup = selectedCharacter.setup();
         if (setup.length == 1) {
-            return moveToSetup(game);
+            moveToSetup(game);
+            return null;
         } else if (setup.length > 1) {
             return multipleSetupOptionsFollowup();
         } else {
@@ -107,21 +109,22 @@ public record SelectCharacterEvent(int player, Character selectedCharacter) impl
                 .toList();
     }
 
-    private List<Event> moveToSetup(Game game) {
+    private void moveToSetup(Game game) {
         game.moveTo(selectedCharacter.setup()[0], selectedCharacter);
-        return List.of();
     }
 
-    private List<Event> multipleSetupOptionsFollowup() {
-        return Arrays.stream(selectedCharacter.setup())
-                .map(loc -> (Event) new MoveEvent(player, loc, null))
-                .toList();
+    private EventFollowup multipleSetupOptionsFollowup() {
+
+        return EventFollowup.followupOptions(
+                Arrays.stream(selectedCharacter.setup())
+                        .map(loc -> (Event) new MoveEvent(player, loc, null))
+                        .toArray(Event[]::new));
     }
 
-    private List<Event> specialSetupFollowup() {
+    private EventFollowup specialSetupFollowup() {
         return switch (selectedCharacter) {
-            case KARL_HELO_AGATHON -> List.of();
-            case LEE_APOLLO_ADAMA -> List.of(new PlayerDecisionEvent(player, LaunchViperEvent.class));
+            case KARL_HELO_AGATHON -> null;
+            case LEE_APOLLO_ADAMA -> EventFollowup.followup(new PlayerDecisionEvent(player, LaunchViperEvent.class));
             default -> throw new FrakCallTheAdmiralException();
         };
     }

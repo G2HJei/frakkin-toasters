@@ -2,6 +2,7 @@ package xyz.zlatanov.frakkintoasters.event.loyalty;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.event.Event;
+import xyz.zlatanov.frakkintoasters.event.EventFollowup;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Player;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
@@ -39,7 +40,7 @@ public record CreateLoyaltyDeckEvent() implements Event {
     }
 
     @Override
-    public List<Event> followup(Game game) {
+    public EventFollowup followup(Game game) {
         val hasMutineer = game.players()
                 .stream()
                 .map(Player::loyaltyCards)
@@ -47,8 +48,8 @@ public record CreateLoyaltyDeckEvent() implements Event {
                 .flatMap(Collection::stream)
                 .anyMatch(MUTINEER::equals);
         return hasMutineer
-                ? List.of(new RevealMutineerEvent())
-                : List.of();
+                ? EventFollowup.followup(new RevealMutineerEvent())
+                : null;
     }
 
     private static void setupLoyaltyNotCylonDeck(Game game) {

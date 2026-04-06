@@ -14,11 +14,11 @@ import xyz.zlatanov.frakkintoasters.state.deck.FakeDeck;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
+import static xyz.zlatanov.frakkintoasters.event.EventFollowup.followup;
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.MUTINEER;
 import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
@@ -99,7 +99,7 @@ class CreateLoyaltyDeckEventTest {
 
         val followup = new CreateLoyaltyDeckEvent().execute(game);
 
-        assertEquals(List.of(new RevealMutineerEvent()), followup);
+        assertEquals(followup(new RevealMutineerEvent()), followup);
     }
 
     static void pickCharacters(Game game, boolean pickCylonLeader) {
