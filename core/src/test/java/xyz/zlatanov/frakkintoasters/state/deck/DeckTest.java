@@ -58,6 +58,11 @@ class DeckTest {
         assertTrue(deck.revealedCards().contains(card));
     }
 
+    @Test
+    void shouldShuffleWhenEmptyAfterDraw() {
+        //todo
+    }
+
     static class Card {
 
     }

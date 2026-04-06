@@ -19,9 +19,10 @@ public interface Event {
         return true;
     }
 
-    void apply(Game game);
+    default void apply(Game game) {
+    }
 
     default List<Followup> followup(Game game) {
-        return null;
+        return List.of();
     }
 }
