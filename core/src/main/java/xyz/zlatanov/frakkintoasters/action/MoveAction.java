@@ -8,9 +8,9 @@ import xyz.zlatanov.frakkintoasters.Game;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.PilotableShip;
-import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 
@@ -40,17 +40,16 @@ public class MoveAction implements PlayerAction {
             game.player(playerNumber).skillCards().remove(discardCard);
             game.decks().discard(discardCard);
         }
-        val playerCharacter = game.player(playerNumber).character();
-        val currentLocation = game.locate(playerCharacter);
-        val isPiloting = currentLocation.isSpaceLocation();
+        val playerCharacter = playerCharacter(game);
+        val isPiloting = currentLocation(game).isSpaceLocation();
         val isStayingInSpace = destination.isSpaceLocation();
         if (isPiloting) {
-            val ship = getShip(game);
+            val ship = pilotedShip(game);
             if (isStayingInSpace) {
                 game.moveTo(destination, ship);
             } else {
                 game.boards().galactica().addToReserves(ship);
-                ((PilotableShip) ship).pilot(null);
+                ship.pilot(null);
                 game.moveTo(destination, playerCharacter);
             }
         } else {
@@ -62,8 +61,7 @@ public class MoveAction implements PlayerAction {
         val revealedCylon = game.player(playerNumber).isRevealedCylon();
         val cylonLocation = destination.isCylonLocation();
         val hazardousLocation = destination.isHazardousLocation();
-        val playerCharacter = game.player(playerNumber).character();
-        val currentLocation = game.locate(playerCharacter);
+        val currentLocation = game.locate(playerCharacter(game));
         val isMovingToDifferentLocation = currentLocation != destination;
         val shipToSpaceMovement = !currentLocation.isSpaceLocation() && destination.isSpaceLocation();
         return isMovingToDifferentLocation
@@ -78,7 +76,7 @@ public class MoveAction implements PlayerAction {
         val isStayingInSpace = destination.isSpaceLocation();
         if (isPiloting && isStayingInSpace) {
             val distance = distanceLookupTable.get(currentLocation).get(destination);
-            val maxDistance = 1 + (getShip(game).type() == VIPER_MARK_VII ? 1 : 0);
+            val maxDistance = 1 + (pilotedShip(game).type() == VIPER_MARK_VII ? 1 : 0);
             return distance <= maxDistance;
         } else {
             return true;
@@ -86,15 +84,30 @@ public class MoveAction implements PlayerAction {
     }
 
     private String startingArea(Game game) {
-        val location = game.locate(game.player(playerNumber).character());
-        if (location == null) {
+        val currLocation = currentLocation(game);
+        if (currLocation == null) {
             return "Hi, Helo!";
         }
-        return getLocationArea(location);
+        return getLocationArea(currLocation);
     }
 
     private String targetArea() {
         return getLocationArea(destination);
+    }
+
+
+    private PilotableShip pilotedShip(Game game) {
+        val playerCharacter = playerCharacter(game);
+        val galacticaBoard = game.boards().galactica();
+        return LOCATION_AREAS.get("Galactica space")
+                .stream()
+                .map(galacticaBoard::shipsIn)
+                .flatMap(Collection::stream)
+                .filter(s -> s instanceof PilotableShip
+                        && ((PilotableShip) s).pilot() == playerCharacter)
+                .map(PilotableShip.class::cast)
+                .findFirst()
+                .orElseThrow();
     }
 
     private String getLocationArea(Location location) {
@@ -104,17 +117,6 @@ public class MoveAction implements PlayerAction {
                 .findFirst()
                 .map(Map.Entry::getKey)
                 .orElseThrow(FrakCallTheAdmiralException::new);
-    }
-
-    private Ship getShip(Game game) {
-        val playerCharacter = game.player(playerNumber).character();
-        val currentLocation = game.locate(playerCharacter);
-        return game.boards().galactica().shipsIn(currentLocation)
-                .stream()
-                .filter(s -> s instanceof PilotableShip
-                        && ((PilotableShip) s).pilot() == playerCharacter)
-                .findFirst()
-                .orElseThrow();
     }
 
     private static final Map<Location, Map<Location, Integer>> distanceLookupTable = Map.of(
