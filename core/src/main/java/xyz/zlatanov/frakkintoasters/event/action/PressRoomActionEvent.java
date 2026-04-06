@@ -2,7 +2,7 @@ package xyz.zlatanov.frakkintoasters.event.action;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.event.*;
-import xyz.zlatanov.frakkintoasters.event.player.PlayerDecisionEvent;
+import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.state.Game;
 
 import java.util.List;

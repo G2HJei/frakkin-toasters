@@ -1,0 +1,39 @@
+package xyz.zlatanov.frakkintoasters.event.action;
+
+import lombok.val;
+import org.junit.jupiter.api.Test;
+import xyz.zlatanov.frakkintoasters.event.DrawQuorumCardEvent;
+import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.placeholder.PlayQuorumCardEvent;
+import xyz.zlatanov.frakkintoasters.state.Game;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static xyz.zlatanov.frakkintoasters.event.Followup.followWith;
+import static xyz.zlatanov.frakkintoasters.event.Followup.oneOf;
+import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.LAURA_ROSLIN;
+
+class QuorumChamberActionEventTest {
+
+    @Test
+    void shouldDrawQuorumCardAndFollowup() {
+        val game = new Game(KOBOL, 3);
+        game.player(1).selectCharacter(LAURA_ROSLIN);
+        game.president(LAURA_ROSLIN);
+
+        val followup = new QuorumChamberActionEvent(1).execute(game);
+
+        assertEquals(1, game.presidentHand().cards().size());
+        assertEquals(expectedFollowup(), followup);
+    }
+
+    private List<Followup> expectedFollowup() {
+        return followWith(
+                oneOf(
+                        new DrawQuorumCardEvent(),
+                        new PlayQuorumCardEvent()
+                ));
+    }
+}

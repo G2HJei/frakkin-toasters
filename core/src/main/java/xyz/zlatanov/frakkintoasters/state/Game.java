@@ -9,6 +9,7 @@ import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard;
 import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
+import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 import xyz.zlatanov.frakkintoasters.state.deck.DecksHolder;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
@@ -31,7 +32,7 @@ public class Game {
     private       int                  nukes         = 2;
     @Setter
     private       Character            president;
-    private final List<QuorumCard>     presidentHand = new ArrayList<>();
+    private final Deck<QuorumCard>     presidentHand = new Deck<>();
     @Setter
     private       Character            admiral;
     @Setter
