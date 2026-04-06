@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.LOCATION_AREAS;
+import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.VIPER_MARK_VII;
 
 public record MoveAction(int player, Location location, SkillCard discardCard) implements Action {
 
@@ -52,8 +53,19 @@ public record MoveAction(int player, Location location, SkillCard discardCard) i
         val revealedCylon = game.player(player).isRevealedCylon();
         val cylonLocation = location.isCylonLocation();
         val hazardousLocation = location.isHazardousLocation();
-        return !hazardousLocation
+        val validDistance = validDistance(game);
+        return !hazardousLocation && validDistance
                 && (revealedCylon == cylonLocation);
+    }
+
+    private boolean validDistance(Game game) {
+        val playerCharacter = game.player(player).character();
+        val currentLocation = game.locate(playerCharacter);
+        val isPiloting = currentLocation.isSpaceLocation();
+        val isStayingInSpace = location.isSpaceLocation();
+        val distance = Math.abs(currentLocation.ordinal() - location.ordinal());
+        return isPiloting && isStayingInSpace
+                && distance < 2 + (getShip(game).type() == VIPER_MARK_VII ? 1 : 0);
     }
 
     private String startingArea(Game game) {
