@@ -1,4 +1,4 @@
-package xyz.zlatanov.frakkintoasters;
+package xyz.zlatanov.frakkintoasters.state;
 
 import lombok.Getter;
 import lombok.experimental.Accessors;

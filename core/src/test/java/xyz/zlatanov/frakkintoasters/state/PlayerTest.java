@@ -1,4 +1,4 @@
-package xyz.zlatanov.frakkintoasters;
+package xyz.zlatanov.frakkintoasters.state;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;

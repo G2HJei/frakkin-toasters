@@ -1,9 +1,9 @@
 package xyz.zlatanov.frakkintoasters.event.player;
 
 import lombok.val;
-import xyz.zlatanov.frakkintoasters.Game;
-import xyz.zlatanov.frakkintoasters.Player;
 import xyz.zlatanov.frakkintoasters.event.Event;
+import xyz.zlatanov.frakkintoasters.state.Game;
+import xyz.zlatanov.frakkintoasters.state.Player;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 

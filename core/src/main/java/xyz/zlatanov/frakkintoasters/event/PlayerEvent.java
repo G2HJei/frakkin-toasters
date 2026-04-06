@@ -1,7 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event;
 
-import xyz.zlatanov.frakkintoasters.Game;
-import xyz.zlatanov.frakkintoasters.Player;
+import xyz.zlatanov.frakkintoasters.state.Game;
+import xyz.zlatanov.frakkintoasters.state.Player;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 

@@ -2,9 +2,9 @@ package xyz.zlatanov.frakkintoasters.event.player;
 
 import lombok.experimental.Accessors;
 import lombok.val;
-import xyz.zlatanov.frakkintoasters.Game;
-import xyz.zlatanov.frakkintoasters.Player;
 import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
+import xyz.zlatanov.frakkintoasters.state.Game;
+import xyz.zlatanov.frakkintoasters.state.Player;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 
 import java.util.HashMap;
