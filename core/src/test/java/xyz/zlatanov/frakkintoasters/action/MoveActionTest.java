@@ -62,6 +62,11 @@ class MoveActionTest {
     }
 
     @Test
+    void shouldNotAllowMovingToSpace() {
+        assertFalse(new MoveAction(1, GALACTICA_SPACE_6_OCLOCK, new SkillCard(0, ALL_HANDS_ON_DECK)).isValid(game));
+    }
+
+    @Test
     void shouldMoveInSpaceWhilePiloting() {
         game.boards().galactica().place(GALACTICA_SPACE_2_OCLOCK, new AssaultRaptor().pilot(KARA_STARBUCK_THRACE));
         new MoveAction(1, GALACTICA_SPACE_4_OCLOCK, null).execute(game);

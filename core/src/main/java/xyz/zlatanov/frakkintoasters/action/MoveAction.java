@@ -56,7 +56,9 @@ public record MoveAction(int player, Location destination, SkillCard discardCard
         val playerCharacter = game.player(player).character();
         val currentLocation = game.locate(playerCharacter);
         val isMovingToDifferentLocation = currentLocation != destination;
+        val shipToSpaceMovement = !currentLocation.isSpaceLocation() && destination.isSpaceLocation();
         return isMovingToDifferentLocation
+                && !shipToSpaceMovement
                 && !hazardousLocation
                 && validDistance(game, currentLocation)
                 && (revealedCylon == cylonLocation);
