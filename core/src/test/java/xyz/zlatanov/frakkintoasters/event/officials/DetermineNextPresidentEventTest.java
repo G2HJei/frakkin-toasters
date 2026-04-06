@@ -1,4 +1,4 @@
-package xyz.zlatanov.frakkintoasters.action.officials;
+package xyz.zlatanov.frakkintoasters.event.officials;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,7 +9,7 @@ import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.GAIUS_BALTAR;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.LAURA_ROSLIN;
 
-class DetermineNextPresidentActionTest {
+class DetermineNextPresidentEventTest {
 
     Game game = new Game(KOBOL, 2);
 
@@ -18,7 +18,7 @@ class DetermineNextPresidentActionTest {
         game.player(1).selectCharacter(GAIUS_BALTAR);
         game.player(2).selectCharacter(LAURA_ROSLIN);
 
-        new DetermineNextPresidentAction().execute(game);
+        new DetermineNextPresidentEvent().execute(game);
     }
 
     @Test

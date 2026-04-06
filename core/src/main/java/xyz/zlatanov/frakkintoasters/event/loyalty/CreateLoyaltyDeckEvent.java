@@ -1,8 +1,9 @@
-package xyz.zlatanov.frakkintoasters.action;
+package xyz.zlatanov.frakkintoasters.event.loyalty;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.Game;
 import xyz.zlatanov.frakkintoasters.Player;
+import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
@@ -19,7 +20,7 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.SHARON_BOOM
 import static xyz.zlatanov.frakkintoasters.state.character.CharacterType.CYLON_LEADER;
 import static xyz.zlatanov.frakkintoasters.state.util.AllCardsProvider.genericDeck;
 
-public record CreateLoyaltyDeckAction() implements Action {
+public record CreateLoyaltyDeckEvent() implements Event {
 
     @Override
     public void apply(Game game) {
@@ -38,7 +39,7 @@ public record CreateLoyaltyDeckAction() implements Action {
     }
 
     @Override
-    public List<Action> followup(Game game) {
+    public List<Event> followup(Game game) {
         val hasMutineer = game.players()
                 .stream()
                 .map(Player::loyaltyCards)
@@ -46,7 +47,7 @@ public record CreateLoyaltyDeckAction() implements Action {
                 .flatMap(Collection::stream)
                 .anyMatch(MUTINEER::equals);
         return hasMutineer
-                ? List.of(new RevealMutineerAction())
+                ? List.of(new RevealMutineerEvent())
                 : List.of();
     }
 

@@ -1,8 +1,9 @@
-package xyz.zlatanov.frakkintoasters.action;
+package xyz.zlatanov.frakkintoasters.event.player;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.Game;
 import xyz.zlatanov.frakkintoasters.Player;
+import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 
@@ -17,7 +18,7 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.character.CharacterType.CYLON_LEADER;
 import static xyz.zlatanov.frakkintoasters.state.character.CharacterType.SUPPORT;
 
-public record SelectCharacterAction(int player, Character selectedCharacter) implements Action {
+public record SelectCharacterEvent(int player, Character selectedCharacter) implements Event {
 
     @Override
     public boolean isValid(Game game) {
@@ -33,7 +34,7 @@ public record SelectCharacterAction(int player, Character selectedCharacter) imp
     }
 
     @Override
-    public List<Action> followup(Game game) {
+    public List<Event> followup(Game game) {
         val setup = selectedCharacter.setup();
         if (setup.length == 1) {
             return moveToSetup(game);
@@ -106,21 +107,21 @@ public record SelectCharacterAction(int player, Character selectedCharacter) imp
                 .toList();
     }
 
-    private List<Action> moveToSetup(Game game) {
+    private List<Event> moveToSetup(Game game) {
         game.moveTo(selectedCharacter.setup()[0], selectedCharacter);
         return List.of();
     }
 
-    private List<Action> multipleSetupOptionsFollowup() {
+    private List<Event> multipleSetupOptionsFollowup() {
         return Arrays.stream(selectedCharacter.setup())
-                .map(loc -> (Action) new MoveAction(player, loc))
+                .map(loc -> (Event) new MoveEvent(player, loc, null))
                 .toList();
     }
 
-    private List<Action> specialSetupFollowup() {
+    private List<Event> specialSetupFollowup() {
         return switch (selectedCharacter) {
             case KARL_HELO_AGATHON -> List.of();
-            case LEE_APOLLO_ADAMA -> List.of(new PlayerDecisionAction(player, LaunchViperAction.class));
+            case LEE_APOLLO_ADAMA -> List.of(new PlayerDecisionEvent(player, LaunchViperEvent.class));
             default -> throw new FrakCallTheAdmiralException();
         };
     }

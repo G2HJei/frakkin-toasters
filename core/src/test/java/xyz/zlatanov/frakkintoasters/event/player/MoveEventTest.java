@@ -1,4 +1,4 @@
-package xyz.zlatanov.frakkintoasters.action;
+package xyz.zlatanov.frakkintoasters.event.player;
 
 import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,7 +23,7 @@ import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.ALL_HANDS_ON_DECK;
 
-class MoveActionTest {
+class MoveEventTest {
 
     Game      game      = new Game(KOBOL, 3);
     SkillCard skillCard = new SkillCard(0, ALL_HANDS_ON_DECK);
@@ -36,7 +36,7 @@ class MoveActionTest {
 
     @Test
     void shouldMoveWithinSameShip() {
-        new MoveAction(1, RESEARCH_LAB).execute(game);
+        new MoveEvent(1, RESEARCH_LAB, null).execute(game);
         assertEquals(RESEARCH_LAB, game.locate(KARA_STARBUCK_THRACE));
     }
 
@@ -44,7 +44,7 @@ class MoveActionTest {
     void shouldDiscardToMoveBetweenShips() {
         game.player(1).skillCards().add(skillCard);
 
-        new MoveAction(1, PRESIDENTS_OFFICE).discardCard(skillCard).execute(game);
+        new MoveEvent(1, PRESIDENTS_OFFICE, skillCard).execute(game);
 
         assertEquals(PRESIDENTS_OFFICE, game.locate(KARA_STARBUCK_THRACE));
         assertTrue(game.player(1).skillCards().cards().isEmpty());
@@ -53,23 +53,23 @@ class MoveActionTest {
 
     @Test
     void shouldNotBeAbleToHazardousLocations() {
-        assertFalse(new MoveAction(1, BRIG).isValid(game));
+        assertFalse(new MoveEvent(1, BRIG, null).isValid(game));
     }
 
     @Test
     void shouldNotAllowHumansMoveToCylonLocations() {
-        assertFalse(new MoveAction(1, CAPRICA).discardCard(skillCard).isValid(game));
+        assertFalse(new MoveEvent(1, CAPRICA, skillCard).isValid(game));
     }
 
     @Test
     void shouldNotAllowMovingToSpace() {
-        assertFalse(new MoveAction(1, GALACTICA_SPACE_6_OCLOCK).discardCard(skillCard).isValid(game));
+        assertFalse(new MoveEvent(1, GALACTICA_SPACE_6_OCLOCK, skillCard).isValid(game));
     }
 
     @Test
     void shouldMoveInSpaceWhilePiloting() {
         game.boards().galactica().place(GALACTICA_SPACE_2_OCLOCK, new AssaultRaptor().pilot(KARA_STARBUCK_THRACE));
-        new MoveAction(1, GALACTICA_SPACE_4_OCLOCK).execute(game);
+        new MoveEvent(1, GALACTICA_SPACE_4_OCLOCK, null).execute(game);
         assertEquals(GALACTICA_SPACE_4_OCLOCK, game.locate(KARA_STARBUCK_THRACE));
     }
 
@@ -79,7 +79,7 @@ class MoveActionTest {
         game.boards().galactica().place(GALACTICA_SPACE_2_OCLOCK, viper);
         game.player(1).skillCards().add(skillCard);
 
-        new MoveAction(1, PRESIDENTS_OFFICE).discardCard(skillCard).execute(game);
+        new MoveEvent(1, PRESIDENTS_OFFICE, skillCard).execute(game);
 
         assertEquals(PRESIDENTS_OFFICE, game.locate(KARA_STARBUCK_THRACE));
         assertTrue(game.boards().galactica().reserves().contains(viper));
@@ -114,6 +114,6 @@ class MoveActionTest {
     void shouldValidateMovementAdjacency(PilotableShip ship, Location destination, boolean isValid) {
         ship.pilot(KARA_STARBUCK_THRACE);
         game.boards().galactica().place(GALACTICA_SPACE_2_OCLOCK, ship);
-        assertEquals(isValid, new MoveAction(1, destination).isValid(game));
+        assertEquals(isValid, new MoveEvent(1, destination, null).isValid(game));
     }
 }

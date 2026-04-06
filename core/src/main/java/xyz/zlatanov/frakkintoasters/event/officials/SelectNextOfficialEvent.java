@@ -1,15 +1,15 @@
-package xyz.zlatanov.frakkintoasters.action.officials;
+package xyz.zlatanov.frakkintoasters.event.officials;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.Game;
-import xyz.zlatanov.frakkintoasters.action.Action;
+import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface SelectNextOfficialAction extends Action {
+public interface SelectNextOfficialEvent extends Event {
 
     List<Character> lineOfSuccession(Game game);
 

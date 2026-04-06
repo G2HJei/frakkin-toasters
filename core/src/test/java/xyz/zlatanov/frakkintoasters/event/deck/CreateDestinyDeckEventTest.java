@@ -1,4 +1,4 @@
-package xyz.zlatanov.frakkintoasters.action;
+package xyz.zlatanov.frakkintoasters.event.deck;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
@@ -12,12 +12,12 @@ import static java.util.stream.Collectors.summingInt;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.*;
 
-class CreateDestinyDeckActionTest {
+class CreateDestinyDeckEventTest {
 
     @Test
     void shouldCreateValidDeck() {
         val game = new Game(ObjectiveCard.KOBOL, 3);
-        new CreateDestinyDeckAction().execute(game);
+        new CreateDestinyDeckEvent().execute(game);
         assertDestinyDeckComposition(game);
     }
 

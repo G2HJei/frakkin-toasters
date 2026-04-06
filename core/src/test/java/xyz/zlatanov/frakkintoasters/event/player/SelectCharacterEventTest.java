@@ -1,4 +1,4 @@
-package xyz.zlatanov.frakkintoasters.action;
+package xyz.zlatanov.frakkintoasters.event.player;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
@@ -14,7 +14,7 @@ import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 
 
-class SelectCharacterActionTest {
+class SelectCharacterEventTest {
     Game game = new Game(KOBOL, 4);
 
     @Test
@@ -44,8 +44,8 @@ class SelectCharacterActionTest {
         val followup = select(HELENA_CAIN).execute(game);
 
         val expected = List.of(
-                new MoveAction(1, PEGASUS_CIC),
-                new MoveAction(1, COMMAND));
+                new MoveEvent(1, PEGASUS_CIC, null),
+                new MoveEvent(1, COMMAND, null));
         assertEquals(expected, followup);
     }
 
@@ -58,14 +58,14 @@ class SelectCharacterActionTest {
     @Test
     void shouldFollowupForApollo() {
         val followup = select(LEE_APOLLO_ADAMA).execute(game);
-        val expected = List.of(new PlayerDecisionAction(1, LaunchViperAction.class));
+        val expected = List.of(new PlayerDecisionEvent(1, LaunchViperEvent.class));
         assertEquals(expected, followup);
     }
 
     @Test
     void shouldNotAllowDoubleSelection() {
         select(KARA_STARBUCK_THRACE).execute(game);
-        val invalidAction = new SelectCharacterAction(2, KARA_STARBUCK_THRACE);
+        val invalidAction = new SelectCharacterEvent(2, KARA_STARBUCK_THRACE);
         assertThrows(InvalidActionException.class, () -> invalidAction.execute(game));
     }
 
@@ -108,8 +108,8 @@ class SelectCharacterActionTest {
         assertTrue(select(DANNA_BIERS).isValid(sevenPlayerGame));
     }
 
-    static SelectCharacterAction select(Character character) {
-        return new SelectCharacterAction(1, character);
+    static SelectCharacterEvent select(Character character) {
+        return new SelectCharacterEvent(1, character);
     }
 
 }

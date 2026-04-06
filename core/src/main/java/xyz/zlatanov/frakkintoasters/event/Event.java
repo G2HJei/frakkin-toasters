@@ -1,13 +1,13 @@
-package xyz.zlatanov.frakkintoasters.action;
+package xyz.zlatanov.frakkintoasters.event;
 
 import xyz.zlatanov.frakkintoasters.Game;
 import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
 
 import java.util.List;
 
-public interface Action {
+public interface Event {
 
-    default List<Action> execute(Game game) {
+    default List<Event> execute(Game game) {
         if (!isValid(game)) {
             throw new InvalidActionException("Invalid action!");
         }
@@ -21,7 +21,7 @@ public interface Action {
 
     void apply(Game game);
 
-    default List<Action> followup(Game game) {
+    default List<Event> followup(Game game) {
         return List.of();
     }
 }

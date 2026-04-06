@@ -1,10 +1,9 @@
-package xyz.zlatanov.frakkintoasters.action;
+package xyz.zlatanov.frakkintoasters.event.player;
 
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.Game;
+import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.PilotableShip;
@@ -17,13 +16,8 @@ import java.util.Objects;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.VIPER_MARK_VII;
 
-@Data
-@RequiredArgsConstructor
 @Accessors(fluent = true)
-public class MoveAction implements PlayerAction {
-    private final int       playerNumber;
-    private final Location  destination;
-    private       SkillCard discardCard;
+public record MoveEvent(int playerNumber, Location destination, SkillCard discardCard) implements PlayerEvent {
 
     @Override
     public boolean isValid(Game game) {

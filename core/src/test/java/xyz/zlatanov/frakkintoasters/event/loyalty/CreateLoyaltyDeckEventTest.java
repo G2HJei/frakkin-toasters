@@ -1,4 +1,4 @@
-package xyz.zlatanov.frakkintoasters.action;
+package xyz.zlatanov.frakkintoasters.event.loyalty;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.MUTINEER;
 import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 
-class CreateLoyaltyDeckActionTest {
+class CreateLoyaltyDeckEventTest {
 
 
     static Stream<Arguments> simpleLoyaltyDeckParams() {
@@ -47,7 +47,7 @@ class CreateLoyaltyDeckActionTest {
     @MethodSource("simpleLoyaltyDeckParams")
     void shouldCreateSimpleLoyaltyDeck(Game game, boolean pickCylonLeader, int youAreACylonCount, int notACylonCount, boolean hasMutineer) {
         pickCharacters(game, pickCylonLeader);
-        new CreateLoyaltyDeckAction().execute(game);
+        new CreateLoyaltyDeckEvent().execute(game);
         assertLoyalties(notACylonCount, youAreACylonCount, hasMutineer, game);
     }
 
@@ -58,7 +58,7 @@ class CreateLoyaltyDeckActionTest {
         game.player(2).selectCharacter(GAIUS_BALTAR);
         game.player(3).selectCharacter(SHARON_BOOMER_VALERII);
 
-        new CreateLoyaltyDeckAction().execute(game);
+        new CreateLoyaltyDeckEvent().execute(game);
 
         assertLoyalties(8, 1, false, game);
     }
@@ -68,7 +68,7 @@ class CreateLoyaltyDeckActionTest {
         val game = game(4);
         pickCharacters(game, true);
 
-        new CreateLoyaltyDeckAction().execute(game);
+        new CreateLoyaltyDeckEvent().execute(game);
 
         assertEquals(2, game.player(4).motiveCards().size());
     }
@@ -80,7 +80,7 @@ class CreateLoyaltyDeckActionTest {
         game.player(2).selectCharacter(KARL_HELO_AGATHON);
         game.player(3).selectCharacter(SHARON_BOOMER_VALERII);
 
-        new CreateLoyaltyDeckAction().execute(game);
+        new CreateLoyaltyDeckEvent().execute(game);
 
         assertEquals(2, game.player(1).loyaltyCards().size());
         assertEquals(1, game.player(2).loyaltyCards().size());
@@ -97,9 +97,9 @@ class CreateLoyaltyDeckActionTest {
                         .build());
         pickCharacters(game, false);
 
-        val followup = new CreateLoyaltyDeckAction().execute(game);
+        val followup = new CreateLoyaltyDeckEvent().execute(game);
 
-        assertEquals(List.of(new RevealMutineerAction()), followup);
+        assertEquals(List.of(new RevealMutineerEvent()), followup);
     }
 
     static void pickCharacters(Game game, boolean pickCylonLeader) {

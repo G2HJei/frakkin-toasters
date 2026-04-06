@@ -1,11 +1,11 @@
-package xyz.zlatanov.frakkintoasters.action;
+package xyz.zlatanov.frakkintoasters.event;
 
 import xyz.zlatanov.frakkintoasters.Game;
 import xyz.zlatanov.frakkintoasters.Player;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 
-public interface PlayerAction extends Action {
+public interface PlayerEvent extends Event {
 
     int playerNumber();
 

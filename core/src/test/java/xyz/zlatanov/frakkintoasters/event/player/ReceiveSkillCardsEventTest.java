@@ -1,4 +1,4 @@
-package xyz.zlatanov.frakkintoasters.action;
+package xyz.zlatanov.frakkintoasters.event.player;
 
 import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,13 +26,15 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.AT_ANY_COST
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.BAIT;
 
 @ExtendWith(MockitoExtension.class)
-class ReceiveSkillCardsActionTest {
+class ReceiveSkillCardsEventTest {
 
+    @SuppressWarnings("unchecked")
     Deck<SkillCard> leadershipDeck = mock(Deck.class);
+    @SuppressWarnings("unchecked")
     Deck<SkillCard> treacheryDeck  = mock(Deck.class);
-    SkillCard       leadershipCard = new SkillCard(0, AT_ANY_COST);
-    SkillCard       treacheryCard  = new SkillCard(0, BAIT);
-    Game            game           = new Game(KOBOL, 4,
+    SkillCard leadershipCard = new SkillCard(0, AT_ANY_COST);
+    SkillCard treacheryCard  = new SkillCard(0, BAIT);
+    Game      game           = new Game(KOBOL, 4,
             DecksHolder.builder()
                     .leadership(leadershipDeck)
                     .treachery(treacheryDeck)
@@ -46,13 +48,13 @@ class ReceiveSkillCardsActionTest {
     @Test
     void shouldReceiveCardsWithinSkillSet() {
         when(leadershipDeck.draw()).thenReturn(leadershipCard);
-        new ReceiveSkillsAction(1, Map.of(LEADERSHIP, 1)).execute(game);
+        new ReceiveSkillsEvent(1, Map.of(LEADERSHIP, 1)).execute(game);
         assertEquals(List.of(leadershipCard), game.player(1).skillCards().cards());
     }
 
     @Test
     void shouldNotReceiveOutsideOfSkillSet() {
-        val action = new ReceiveSkillsAction(1, Map.of(TREACHERY, 1));
+        val action = new ReceiveSkillsEvent(1, Map.of(TREACHERY, 1));
         assertFalse(action.isValid(game));
     }
 
@@ -61,8 +63,8 @@ class ReceiveSkillCardsActionTest {
         revealCylon();
         when(leadershipDeck.draw()).thenReturn(leadershipCard);
         when(treacheryDeck.draw()).thenReturn(treacheryCard);
-        
-        new ReceiveSkillsAction(1, Map.of(LEADERSHIP, 1, TREACHERY, 1)).execute(game);
+
+        new ReceiveSkillsEvent(1, Map.of(LEADERSHIP, 1, TREACHERY, 1)).execute(game);
 
         assertEquals(List.of(leadershipCard, treacheryCard), game.player(1).skillCards().cards());
     }
@@ -70,7 +72,7 @@ class ReceiveSkillCardsActionTest {
     @Test
     void shouldNotAllowDoubleSelectionForRevealedCylon() {
         revealCylon();
-        assertFalse(new ReceiveSkillsAction(1, Map.of(TREACHERY, 2)).isValid(game));
+        assertFalse(new ReceiveSkillsEvent(1, Map.of(TREACHERY, 2)).isValid(game));
     }
 
     private void revealCylon() {

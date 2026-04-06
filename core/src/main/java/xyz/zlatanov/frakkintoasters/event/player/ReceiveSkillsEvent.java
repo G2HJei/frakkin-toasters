@@ -1,20 +1,21 @@
-package xyz.zlatanov.frakkintoasters.action;
+package xyz.zlatanov.frakkintoasters.event.player;
 
+import lombok.experimental.Accessors;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.Game;
 import xyz.zlatanov.frakkintoasters.Player;
+import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-public record ReceiveSkillsAction(int player, Map<SkillCardColor, Integer> selection) implements Action {
-
-
+@Accessors(fluent = true)
+public record ReceiveSkillsEvent(int playerNumber, Map<SkillCardColor, Integer> selection) implements PlayerEvent {
     @Override
     public boolean isValid(Game game) {
-        val player = game.player(this.player);
+        val player = player(game);
         return player.isRevealedCylon()
                 ? validateRevealedCylonSelection()
                 : validateHumanSelection(player);
@@ -32,7 +33,7 @@ public record ReceiveSkillsAction(int player, Map<SkillCardColor, Integer> selec
                 case TREACHERY -> game.decks().treachery();
             };
             for (int i = 0; i < entry.getValue(); i++) {
-                game.player(player)
+                player(game)
                         .skillCards()
                         .add(deck.draw());
             }

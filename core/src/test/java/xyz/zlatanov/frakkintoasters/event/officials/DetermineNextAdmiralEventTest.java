@@ -1,4 +1,4 @@
-package xyz.zlatanov.frakkintoasters.action.officials;
+package xyz.zlatanov.frakkintoasters.event.officials;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,7 +11,7 @@ import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.HELENA_CAIN;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.WILLIAM_ADAMA;
 
-class DetermineNextAdmiralActionTest {
+class DetermineNextAdmiralEventTest {
     Game game = new Game(KOBOL, 2);
 
     @BeforeEach
@@ -19,7 +19,7 @@ class DetermineNextAdmiralActionTest {
         game.player(1).selectCharacter(WILLIAM_ADAMA);
         game.player(2).selectCharacter(HELENA_CAIN);
 
-        new DetermineNextAdmiralAction().execute(game);
+        new DetermineNextAdmiralEvent().execute(game);
     }
 
     @Test
@@ -35,7 +35,7 @@ class DetermineNextAdmiralActionTest {
     @Test
     void shouldIgnoreCharactersInBrig() {
         game.moveTo(BRIG, HELENA_CAIN);
-        new DetermineNextAdmiralAction().execute(game);
+        new DetermineNextAdmiralEvent().execute(game);
         assertEquals(WILLIAM_ADAMA, game.admiral());
     }
 
@@ -43,7 +43,7 @@ class DetermineNextAdmiralActionTest {
     void shouldElectNoOneWhenAllAreInBrig() {
         game.moveTo(BRIG, HELENA_CAIN);
         game.moveTo(BRIG, WILLIAM_ADAMA);
-        new DetermineNextAdmiralAction().execute(game);
+        new DetermineNextAdmiralEvent().execute(game);
         assertNull(game.admiral());
     }
 }

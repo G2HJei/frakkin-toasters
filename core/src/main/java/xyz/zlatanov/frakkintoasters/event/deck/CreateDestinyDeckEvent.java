@@ -1,9 +1,10 @@
-package xyz.zlatanov.frakkintoasters.action;
+package xyz.zlatanov.frakkintoasters.event.deck;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.Game;
+import xyz.zlatanov.frakkintoasters.event.Event;
 
-public record CreateDestinyDeckAction() implements Action {
+public record CreateDestinyDeckEvent() implements Event {
     @Override
     public void apply(Game game) {
         val decks = game.decks();
