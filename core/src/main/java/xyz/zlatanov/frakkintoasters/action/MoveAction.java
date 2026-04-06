@@ -4,17 +4,17 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.Game;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
-import xyz.zlatanov.frakkintoasters.state.ship.Pilotable;
+import xyz.zlatanov.frakkintoasters.state.ship.PilotableShip;
 import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import java.util.Map;
 import java.util.Objects;
 
-import static xyz.zlatanov.frakkintoasters.state.board.Location.LOCATION_AREAS;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.VIPER_MARK_VII;
 
-public record MoveAction(int player, Location location, SkillCard discardCard) implements Action {
+public record MoveAction(int player, Location destination, SkillCard discardCard) implements Action {
 
     @Override
     public boolean isValid(Game game) {
@@ -34,25 +34,25 @@ public record MoveAction(int player, Location location, SkillCard discardCard) i
         val playerCharacter = game.player(player).character();
         val currentLocation = game.locate(playerCharacter);
         val isPiloting = currentLocation.isSpaceLocation();
-        val isStayingInSpace = location.isSpaceLocation();
+        val isStayingInSpace = destination.isSpaceLocation();
         if (isPiloting) {
             val ship = getShip(game);
             if (isStayingInSpace) {
-                game.moveTo(location, ship);
+                game.moveTo(destination, ship);
             } else {
                 game.boards().galactica().addToReserves(ship);
-                ((Pilotable) ship).pilot(null);
-                game.moveTo(location, playerCharacter);
+                ((PilotableShip) ship).pilot(null);
+                game.moveTo(destination, playerCharacter);
             }
         } else {
-            game.moveTo(location, playerCharacter);
+            game.moveTo(destination, playerCharacter);
         }
     }
 
     private boolean isEligibleLocation(Game game) {
         val revealedCylon = game.player(player).isRevealedCylon();
-        val cylonLocation = location.isCylonLocation();
-        val hazardousLocation = location.isHazardousLocation();
+        val cylonLocation = destination.isCylonLocation();
+        val hazardousLocation = destination.isHazardousLocation();
         val validDistance = validDistance(game);
         return !hazardousLocation && validDistance
                 && (revealedCylon == cylonLocation);
@@ -62,10 +62,14 @@ public record MoveAction(int player, Location location, SkillCard discardCard) i
         val playerCharacter = game.player(player).character();
         val currentLocation = game.locate(playerCharacter);
         val isPiloting = currentLocation.isSpaceLocation();
-        val isStayingInSpace = location.isSpaceLocation();
-        val distance = Math.abs(currentLocation.ordinal() - location.ordinal());
-        return isPiloting && isStayingInSpace
-                && distance < 2 + (getShip(game).type() == VIPER_MARK_VII ? 1 : 0);
+        val isStayingInSpace = destination.isSpaceLocation();
+        if (isPiloting && isStayingInSpace) {
+            val distance = distanceLookupTable.get(currentLocation).get(destination);
+            val maxDistance = 1 + (getShip(game).type() == VIPER_MARK_VII ? 1 : 0);
+            return distance <= maxDistance;
+        } else {
+            return true;
+        }
     }
 
     private String startingArea(Game game) {
@@ -77,7 +81,7 @@ public record MoveAction(int player, Location location, SkillCard discardCard) i
     }
 
     private String targetArea() {
-        return getLocationArea(location);
+        return getLocationArea(destination);
     }
 
     private String getLocationArea(Location location) {
@@ -94,9 +98,48 @@ public record MoveAction(int player, Location location, SkillCard discardCard) i
         val currentLocation = game.locate(playerCharacter);
         return game.boards().galactica().shipsIn(currentLocation)
                 .stream()
-                .filter(s -> s instanceof Pilotable
-                        && ((Pilotable) s).pilot() == playerCharacter)
+                .filter(s -> s instanceof PilotableShip
+                        && ((PilotableShip) s).pilot() == playerCharacter)
                 .findFirst()
                 .orElseThrow();
     }
+
+    private static final Map<Location, Map<Location, Integer>> distanceLookupTable = Map.of(
+            GALACTICA_SPACE_2_OCLOCK, Map.of(
+                    GALACTICA_SPACE_4_OCLOCK, 1,
+                    GALACTICA_SPACE_6_OCLOCK, 2,
+                    GALACTICA_SPACE_8_OCLOCK, 3,
+                    GALACTICA_SPACE_10_OCLOCK, 2,
+                    GALACTICA_SPACE_12_OCLOCK, 1),
+            GALACTICA_SPACE_4_OCLOCK, Map.of(
+                    GALACTICA_SPACE_6_OCLOCK, 1,
+                    GALACTICA_SPACE_8_OCLOCK, 2,
+                    GALACTICA_SPACE_10_OCLOCK, 3,
+                    GALACTICA_SPACE_12_OCLOCK, 2,
+                    GALACTICA_SPACE_2_OCLOCK, 1),
+            GALACTICA_SPACE_6_OCLOCK, Map.of(
+                    GALACTICA_SPACE_8_OCLOCK, 1,
+                    GALACTICA_SPACE_10_OCLOCK, 2,
+                    GALACTICA_SPACE_12_OCLOCK, 3,
+                    GALACTICA_SPACE_2_OCLOCK, 2,
+                    GALACTICA_SPACE_4_OCLOCK, 1),
+            GALACTICA_SPACE_8_OCLOCK, Map.of(
+                    GALACTICA_SPACE_10_OCLOCK, 1,
+                    GALACTICA_SPACE_12_OCLOCK, 2,
+                    GALACTICA_SPACE_2_OCLOCK, 3,
+                    GALACTICA_SPACE_4_OCLOCK, 2,
+                    GALACTICA_SPACE_6_OCLOCK, 1),
+            GALACTICA_SPACE_10_OCLOCK, Map.of(
+                    GALACTICA_SPACE_12_OCLOCK, 1,
+                    GALACTICA_SPACE_2_OCLOCK, 2,
+                    GALACTICA_SPACE_4_OCLOCK, 3,
+                    GALACTICA_SPACE_6_OCLOCK, 2,
+                    GALACTICA_SPACE_8_OCLOCK, 1),
+            GALACTICA_SPACE_12_OCLOCK, Map.of(
+                    GALACTICA_SPACE_2_OCLOCK, 1,
+                    GALACTICA_SPACE_4_OCLOCK, 2,
+                    GALACTICA_SPACE_6_OCLOCK, 3,
+                    GALACTICA_SPACE_8_OCLOCK, 2,
+                    GALACTICA_SPACE_10_OCLOCK, 1)
+    );
 }

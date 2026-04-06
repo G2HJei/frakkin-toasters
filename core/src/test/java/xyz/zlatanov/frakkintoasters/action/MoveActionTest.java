@@ -3,13 +3,21 @@ package xyz.zlatanov.frakkintoasters.action;
 import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import xyz.zlatanov.frakkintoasters.Game;
+import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.ship.AssaultRaptor;
+import xyz.zlatanov.frakkintoasters.state.ship.PilotableShip;
 import xyz.zlatanov.frakkintoasters.state.ship.Viper;
 import xyz.zlatanov.frakkintoasters.state.ship.ViperMarkVII;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
+import java.util.stream.Stream;
+
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
@@ -74,16 +82,36 @@ class MoveActionTest {
         assertNull(viper.pilot());
     }
 
-    @Test
-    void shouldValidateMovementAdjacency() {
+    public static Stream<Arguments> adjacencyTests() {
+        return Stream.of(
+                //todo disallow moving to same loc
+                argumentSet("viper to space 4", new Viper(), GALACTICA_SPACE_4_OCLOCK, true),
+                argumentSet("viper to space 6", new Viper(), GALACTICA_SPACE_6_OCLOCK, false),
+                argumentSet("viper to space 8", new Viper(), GALACTICA_SPACE_8_OCLOCK, false),
+                argumentSet("viper to space 10", new Viper(), GALACTICA_SPACE_10_OCLOCK, false),
+                argumentSet("viper to space 12", new Viper(), GALACTICA_SPACE_12_OCLOCK, true),
+                argumentSet("Assault raptor to space 4", new AssaultRaptor(), GALACTICA_SPACE_4_OCLOCK, true),
+                argumentSet("Assault raptor to space 6", new AssaultRaptor(), GALACTICA_SPACE_6_OCLOCK, false),
+                argumentSet("Assault raptor to space 8", new AssaultRaptor(), GALACTICA_SPACE_8_OCLOCK, false),
+                argumentSet("Assault raptor to space 10", new AssaultRaptor(), GALACTICA_SPACE_10_OCLOCK, false),
+                argumentSet("Assault raptor to space 12", new AssaultRaptor(), GALACTICA_SPACE_12_OCLOCK, true),
+                argumentSet("Viper Mk7 to space 4", new ViperMarkVII(), GALACTICA_SPACE_4_OCLOCK, true),
+                argumentSet("Viper Mk7 to space 6", new ViperMarkVII(), GALACTICA_SPACE_6_OCLOCK, true),
+                argumentSet("Viper Mk7 to space 8", new ViperMarkVII(), GALACTICA_SPACE_8_OCLOCK, false),
+                argumentSet("Viper Mk7 to space 10", new ViperMarkVII(), GALACTICA_SPACE_10_OCLOCK, true),
+                argumentSet("Viper Mk7 to space 12", new ViperMarkVII(), GALACTICA_SPACE_12_OCLOCK, true)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("adjacencyTests")
+    void shouldValidateMovementAdjacency(PilotableShip ship, Location destination, boolean isValid) {
         //todo do for ass raptor too
         //todo merge bottom test with this one and make parameterized
         // test all variants - it is simple
-        val viper = new Viper().pilot(KARA_STARBUCK_THRACE);
-        game.boards().galactica().place(GALACTICA_SPACE_2_OCLOCK, viper);
-        assertFalse(new MoveAction(1, GALACTICA_SPACE_6_OCLOCK, null).isValid(game));
-        assertFalse(new MoveAction(1, GALACTICA_SPACE_8_OCLOCK, null).isValid(game));
-        assertFalse(new MoveAction(1, GALACTICA_SPACE_10_OCLOCK, null).isValid(game));
+        ship.pilot(KARA_STARBUCK_THRACE);
+        game.boards().galactica().place(GALACTICA_SPACE_2_OCLOCK, ship);
+        assertEquals(isValid, new MoveAction(1, destination, null).isValid(game));
     }
 
     @Test

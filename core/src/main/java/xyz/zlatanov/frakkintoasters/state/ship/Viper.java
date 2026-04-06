@@ -8,7 +8,7 @@ import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.VIPER;
 
 @Data
 @Accessors(fluent = true)
-public class Viper implements Ship, Pilotable {
+public class Viper implements PilotableShip {
     private final ShipType  type = VIPER;
     private       Character pilot;
 }

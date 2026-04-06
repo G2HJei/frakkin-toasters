@@ -5,7 +5,7 @@ import lombok.experimental.Accessors;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
-import xyz.zlatanov.frakkintoasters.state.ship.Pilotable;
+import xyz.zlatanov.frakkintoasters.state.ship.PilotableShip;
 import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 import xyz.zlatanov.frakkintoasters.state.ship.ShipType;
 import xyz.zlatanov.frakkintoasters.track.JumpPreparation;
@@ -39,8 +39,8 @@ public class GalacticaBoard extends Board {
         return Optional.ofNullable(super.locate(character))
                 .orElseGet(() -> shipsInSpace.entrySet()
                         .stream()
-                        .filter(es -> es.getKey() instanceof Pilotable
-                                && ((Pilotable) es.getKey()).pilot() == character)
+                        .filter(es -> es.getKey() instanceof PilotableShip
+                                && ((PilotableShip) es.getKey()).pilot() == character)
                         .findFirst()
                         .map(Map.Entry::getValue)
                         .orElse(null));
@@ -116,9 +116,9 @@ public class GalacticaBoard extends Board {
         assert locations().contains(in) && in.isSpaceLocation();
         ships.forEach(s -> shipsInSpace.put(s, in));
         ships.stream()
-                .filter(s -> s instanceof Pilotable)
-                .map(Pilotable.class::cast)
-                .map(Pilotable::pilot)
+                .filter(s -> s instanceof PilotableShip)
+                .map(PilotableShip.class::cast)
+                .map(PilotableShip::pilot)
                 .filter(Objects::nonNull)
                 .forEach(this::remove);
         return this;

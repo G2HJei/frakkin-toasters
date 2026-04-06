@@ -8,7 +8,7 @@ import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.ASSAULT_RAPTOR;
 
 @Data
 @Accessors(fluent = true)
-public class AssaultRaptor implements Ship, Pilotable {
+public class AssaultRaptor implements PilotableShip {
 
     private final ShipType  type = ASSAULT_RAPTOR;
     private       Character pilot;
