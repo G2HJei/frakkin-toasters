@@ -2,9 +2,7 @@ package xyz.zlatanov.frakkintoasters.state.deck;
 
 import lombok.val;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class Deck<T> {
 
@@ -17,14 +15,23 @@ public class Deck<T> {
         return this;
     }
 
+    @SafeVarargs
+    public final Deck<T> add(T... toAdd) {
+        return add(Arrays.stream(toAdd).toList());
+    }
+
     public Deck<T> add(List<T> toAdd) {
         cards.addAll(toAdd);
         return this;
     }
 
-    public Deck<T> remove(T card) {
-        assert cards.contains(card);
-        cards.remove(card);
+    public Deck<T> remove(T cardToRemove) {
+        return remove(List.of(cardToRemove));
+    }
+
+    public Deck<T> remove(List<T> cardsToRemove) {
+        assert new HashSet<>(cards).containsAll(cardsToRemove);
+        cards.removeAll(cardsToRemove);
         return this;
     }
 
@@ -44,12 +51,20 @@ public class Deck<T> {
         return Collections.unmodifiableList(cards);
     }
 
+    public List<T> discardedCards() {
+        return Collections.unmodifiableList(discardedCards);
+    }
+
     public int size() {
         return cards.size();
     }
 
-    public Deck<T> discard(T card) {
-        discardedCards.add(card);
+    public Deck<T> discard(T cardToDiscard) {
+        return discard(List.of(cardToDiscard));
+    }
+
+    public Deck<T> discard(List<T> cardsToDiscard) {
+        discardedCards.addAll(cardsToDiscard);
         return this;
     }
 
