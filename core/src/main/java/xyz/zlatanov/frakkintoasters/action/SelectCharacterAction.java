@@ -113,7 +113,7 @@ public record SelectCharacterAction(int player, Character selectedCharacter) imp
 
     private List<Action> multipleSetupOptionsFollowup() {
         return Arrays.stream(selectedCharacter.setup())
-                .map(loc -> (Action) new MoveAction(player, loc, null))
+                .map(loc -> (Action) new MoveAction(player, loc))
                 .toList();
     }
 

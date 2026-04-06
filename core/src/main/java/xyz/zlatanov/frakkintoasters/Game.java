@@ -22,7 +22,7 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 public class Game {
     // todo inject boards, decks and counters for testing purposes?
     // todo separate decks and counters in own classes?
-    // todo add current player, turns
+    // todo add current playerNumber, turns
     private final Map<Integer, Player> players;
     private final ObjectiveCard        objective;
     private final BoardsHolder         boards        = new BoardsHolder();

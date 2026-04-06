@@ -44,8 +44,8 @@ class SelectCharacterActionTest {
         val followup = select(HELENA_CAIN).execute(game);
 
         val expected = List.of(
-                new MoveAction(1, PEGASUS_CIC, null),
-                new MoveAction(1, COMMAND, null));
+                new MoveAction(1, PEGASUS_CIC),
+                new MoveAction(1, COMMAND));
         assertEquals(expected, followup);
     }
 

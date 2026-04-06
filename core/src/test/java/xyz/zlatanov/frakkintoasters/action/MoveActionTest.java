@@ -25,7 +25,8 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.ALL_HANDS_O
 
 class MoveActionTest {
 
-    Game game = new Game(KOBOL, 3);
+    Game      game      = new Game(KOBOL, 3);
+    SkillCard skillCard = new SkillCard(0, ALL_HANDS_ON_DECK);
 
     @BeforeEach
     void setUp() {
@@ -35,16 +36,15 @@ class MoveActionTest {
 
     @Test
     void shouldMoveWithinSameShip() {
-        new MoveAction(1, RESEARCH_LAB, null).execute(game);
+        new MoveAction(1, RESEARCH_LAB).execute(game);
         assertEquals(RESEARCH_LAB, game.locate(KARA_STARBUCK_THRACE));
     }
 
     @Test
     void shouldDiscardToMoveBetweenShips() {
-        val skillCard = new SkillCard(0, ALL_HANDS_ON_DECK);
         game.player(1).skillCards().add(skillCard);
 
-        new MoveAction(1, PRESIDENTS_OFFICE, skillCard).execute(game);
+        new MoveAction(1, PRESIDENTS_OFFICE).discardCard(skillCard).execute(game);
 
         assertEquals(PRESIDENTS_OFFICE, game.locate(KARA_STARBUCK_THRACE));
         assertTrue(game.player(1).skillCards().cards().isEmpty());
@@ -53,34 +53,33 @@ class MoveActionTest {
 
     @Test
     void shouldNotBeAbleToHazardousLocations() {
-        assertFalse(new MoveAction(1, BRIG, null).isValid(game));
+        assertFalse(new MoveAction(1, BRIG).isValid(game));
     }
 
     @Test
     void shouldNotAllowHumansMoveToCylonLocations() {
-        assertFalse(new MoveAction(1, CAPRICA, new SkillCard(0, ALL_HANDS_ON_DECK)).isValid(game));
+        assertFalse(new MoveAction(1, CAPRICA).discardCard(skillCard).isValid(game));
     }
 
     @Test
     void shouldNotAllowMovingToSpace() {
-        assertFalse(new MoveAction(1, GALACTICA_SPACE_6_OCLOCK, new SkillCard(0, ALL_HANDS_ON_DECK)).isValid(game));
+        assertFalse(new MoveAction(1, GALACTICA_SPACE_6_OCLOCK).discardCard(skillCard).isValid(game));
     }
 
     @Test
     void shouldMoveInSpaceWhilePiloting() {
         game.boards().galactica().place(GALACTICA_SPACE_2_OCLOCK, new AssaultRaptor().pilot(KARA_STARBUCK_THRACE));
-        new MoveAction(1, GALACTICA_SPACE_4_OCLOCK, null).execute(game);
+        new MoveAction(1, GALACTICA_SPACE_4_OCLOCK).execute(game);
         assertEquals(GALACTICA_SPACE_4_OCLOCK, game.locate(KARA_STARBUCK_THRACE));
     }
 
     @Test
     void shouldLandWhilePiloting() {
         val viper = new Viper().pilot(KARA_STARBUCK_THRACE);
-        val skillCard = new SkillCard(0, ALL_HANDS_ON_DECK);
         game.boards().galactica().place(GALACTICA_SPACE_2_OCLOCK, viper);
         game.player(1).skillCards().add(skillCard);
 
-        new MoveAction(1, PRESIDENTS_OFFICE, skillCard).execute(game);
+        new MoveAction(1, PRESIDENTS_OFFICE).discardCard(skillCard).execute(game);
 
         assertEquals(PRESIDENTS_OFFICE, game.locate(KARA_STARBUCK_THRACE));
         assertTrue(game.boards().galactica().reserves().contains(viper));
@@ -115,6 +114,6 @@ class MoveActionTest {
     void shouldValidateMovementAdjacency(PilotableShip ship, Location destination, boolean isValid) {
         ship.pilot(KARA_STARBUCK_THRACE);
         game.boards().galactica().place(GALACTICA_SPACE_2_OCLOCK, ship);
-        assertEquals(isValid, new MoveAction(1, destination, null).isValid(game));
+        assertEquals(isValid, new MoveAction(1, destination).isValid(game));
     }
 }

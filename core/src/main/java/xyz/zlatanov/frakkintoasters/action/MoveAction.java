@@ -1,5 +1,8 @@
 package xyz.zlatanov.frakkintoasters.action;
 
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.Accessors;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.Game;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
@@ -14,24 +17,30 @@ import java.util.Objects;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.VIPER_MARK_VII;
 
-public record MoveAction(int player, Location destination, SkillCard discardCard) implements Action {
+@Data
+@RequiredArgsConstructor
+@Accessors(fluent = true)
+public class MoveAction implements PlayerAction {
+    private final int       playerNumber;
+    private final Location  destination;
+    private       SkillCard discardCard;
 
     @Override
     public boolean isValid(Game game) {
-        val validLocation = isEligibleLocation(game);
+        val isEligibleLocation = isEligibleLocation(game);
         val shouldDiscardCard = !Objects.equals(startingArea(game), targetArea());
         val isDiscardingCard = discardCard != null;
-        return validLocation &&
+        return isEligibleLocation &&
                 shouldDiscardCard == isDiscardingCard;
     }
 
     @Override
     public void apply(Game game) {
         if (discardCard != null) {
-            game.player(player).skillCards().remove(discardCard);
+            game.player(playerNumber).skillCards().remove(discardCard);
             game.decks().discard(discardCard);
         }
-        val playerCharacter = game.player(player).character();
+        val playerCharacter = game.player(playerNumber).character();
         val currentLocation = game.locate(playerCharacter);
         val isPiloting = currentLocation.isSpaceLocation();
         val isStayingInSpace = destination.isSpaceLocation();
@@ -50,10 +59,10 @@ public record MoveAction(int player, Location destination, SkillCard discardCard
     }
 
     private boolean isEligibleLocation(Game game) {
-        val revealedCylon = game.player(player).isRevealedCylon();
+        val revealedCylon = game.player(playerNumber).isRevealedCylon();
         val cylonLocation = destination.isCylonLocation();
         val hazardousLocation = destination.isHazardousLocation();
-        val playerCharacter = game.player(player).character();
+        val playerCharacter = game.player(playerNumber).character();
         val currentLocation = game.locate(playerCharacter);
         val isMovingToDifferentLocation = currentLocation != destination;
         val shipToSpaceMovement = !currentLocation.isSpaceLocation() && destination.isSpaceLocation();
@@ -77,7 +86,7 @@ public record MoveAction(int player, Location destination, SkillCard discardCard
     }
 
     private String startingArea(Game game) {
-        val location = game.locate(game.player(player).character());
+        val location = game.locate(game.player(playerNumber).character());
         if (location == null) {
             return "Hi, Helo!";
         }
@@ -98,7 +107,7 @@ public record MoveAction(int player, Location destination, SkillCard discardCard
     }
 
     private Ship getShip(Game game) {
-        val playerCharacter = game.player(player).character();
+        val playerCharacter = game.player(playerNumber).character();
         val currentLocation = game.locate(playerCharacter);
         return game.boards().galactica().shipsIn(currentLocation)
                 .stream()
