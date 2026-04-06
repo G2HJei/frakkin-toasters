@@ -1,8 +1,9 @@
-package xyz.zlatanov.frakkintoasters.event;
+package xyz.zlatanov.frakkintoasters.event.action;
 
 import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import xyz.zlatanov.frakkintoasters.event.ActionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.LaunchViperEvent;
 import xyz.zlatanov.frakkintoasters.event.player.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.state.Game;
