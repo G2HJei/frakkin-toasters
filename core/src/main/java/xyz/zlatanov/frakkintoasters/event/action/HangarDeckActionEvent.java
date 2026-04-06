@@ -1,10 +1,15 @@
 package xyz.zlatanov.frakkintoasters.event.action;
 
 import xyz.zlatanov.frakkintoasters.event.ActionEvent;
-import xyz.zlatanov.frakkintoasters.event.EventFollowup;
+import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.player.LaunchViperEvent;
 import xyz.zlatanov.frakkintoasters.event.player.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.state.Game;
+
+import java.util.List;
+
+import static xyz.zlatanov.frakkintoasters.event.Followup.allOf;
+import static xyz.zlatanov.frakkintoasters.event.Followup.followWith;
 
 public record HangarDeckActionEvent(int playerNumber) implements ActionEvent {
 
@@ -14,10 +19,10 @@ public record HangarDeckActionEvent(int playerNumber) implements ActionEvent {
     }
 
     @Override
-    public EventFollowup followup(Game game) {
-        return EventFollowup.followup(
+    public List<Followup> followup(Game game) {
+        return followWith(allOf(
                 new PlayerDecisionEvent(playerNumber, LaunchViperEvent.class),
-                new PlayerDecisionEvent(playerNumber, ActionEvent.class));
+                new PlayerDecisionEvent(playerNumber, ActionEvent.class)));
     }
 
 }
