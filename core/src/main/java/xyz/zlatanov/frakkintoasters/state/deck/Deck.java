@@ -78,4 +78,8 @@ public class Deck<T> {
         Collections.shuffle(cards);
         return this;
     }
+
+    public boolean isEmpty() {
+        return cards.isEmpty();
+    }
 }
