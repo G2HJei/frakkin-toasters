@@ -28,7 +28,8 @@ public class GalacticaBoard extends Board {
     private       Set<Ship>           reserves             = newSetFromMap(new IdentityHashMap<>());
     private       Set<Ship>           damagedShips         = newSetFromMap(new IdentityHashMap<>());
     private final Map<Ship, Location> shipsInSpace         = new IdentityHashMap<>();
-
+    private final Set<Location>       damagedLocations     = new HashSet<>();
+    
 
     public GalacticaBoard() {
         super(galacticaLocations());

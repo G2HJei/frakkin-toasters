@@ -25,6 +25,7 @@ public class Game {
     // todo separate decks and counters in own classes?
     // todo add current playerNumber, turns
     private final Map<Integer, Player> players;
+    private final Die                  die           = new Die();
     private final ObjectiveCard        objective;
     private final BoardsHolder         boards        = new BoardsHolder();
     private final DecksHolder          decks;
