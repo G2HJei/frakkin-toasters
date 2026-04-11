@@ -114,7 +114,9 @@ public class Game {
                 : boards.pegasus();
         val affectedCharacters = board
                 .damage(location)
-                .charactersIn(location).toArray(new Character[0]);
-        board.place(SICKBAY, affectedCharacters);
+                .charactersIn(location);
+        if (!affectedCharacters.isEmpty()) {
+            board.place(SICKBAY, affectedCharacters.toArray(new Character[0]));
+        }
     }
 }

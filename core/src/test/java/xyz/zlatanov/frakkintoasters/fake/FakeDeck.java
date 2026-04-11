@@ -1,4 +1,6 @@
-package xyz.zlatanov.frakkintoasters.state.deck;
+package xyz.zlatanov.frakkintoasters.fake;
+
+import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 
 public class FakeDeck<T> extends Deck<T> {
 
