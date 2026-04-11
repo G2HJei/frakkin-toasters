@@ -2,6 +2,7 @@ package xyz.zlatanov.frakkintoasters.event.player;
 
 import lombok.experimental.Accessors;
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
@@ -10,6 +11,7 @@ import xyz.zlatanov.frakkintoasters.state.ship.PilotableShip;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -29,7 +31,7 @@ public record MoveEvent(int playerNumber, Location destination, SkillCard discar
     }
 
     @Override
-    public void apply(Game game) {
+    public List<Followup> apply(Game game) {
         if (discardCard != null) {
             game.player(playerNumber).skillCards().remove(discardCard);
             game.decks().discard(discardCard);
@@ -49,6 +51,7 @@ public record MoveEvent(int playerNumber, Location destination, SkillCard discar
         } else {
             game.moveTo(destination, playerCharacter);
         }
+        return List.of();
     }
 
     private boolean isEligibleLocation(Game game) {

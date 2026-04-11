@@ -1,6 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event.officials;
 
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 
@@ -42,12 +43,13 @@ public record DetermineNextPresidentEvent() implements SelectNextOfficialEvent {
     }
 
     @Override
-    public void apply(Game game) {
+    public List<Followup> apply(Game game) {
         if (firstPresident(game)) {
             val quorumCard = game.decks().quorum().draw();
             game.presidentHand().add(quorumCard);
         }
         game.president(calcNextInLine(game));
+        return List.of();
     }
 
     private boolean firstPresident(Game game) {

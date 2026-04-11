@@ -15,17 +15,12 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.oneOf;
 public record QuorumChamberActionEvent(int playerNumber) implements ActionEvent {
 
     @Override
-    public void apply(Game game) {
+    public List<Followup> apply(Game game) {
         val drawnCard = game.decks().quorum().draw();
         game.presidentHand().add(drawnCard);
-    }
 
-    @Override
-    public List<Followup> followup(Game game) {
-        return followWith(
-                oneOf(
-                        new DrawQuorumCardEvent(),
-                        new PlayQuorumCardEvent()
-                ));
+        return followWith(oneOf(
+                new DrawQuorumCardEvent(),
+                new PlayQuorumCardEvent()));
     }
 }

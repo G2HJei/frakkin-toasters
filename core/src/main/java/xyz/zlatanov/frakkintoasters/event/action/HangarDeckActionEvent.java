@@ -14,12 +14,7 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.followWith;
 public record HangarDeckActionEvent(int playerNumber) implements ActionEvent {
 
     @Override
-    public void apply(Game game) {
-        //do nothing
-    }
-
-    @Override
-    public List<Followup> followup(Game game) {
+    public List<Followup> apply(Game game) {
         return followWith(allOf(
                 new PlayerDecisionEvent(playerNumber, LaunchViperEvent.class),
                 new PlayerDecisionEvent(playerNumber, ActionEvent.class)));

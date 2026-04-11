@@ -12,19 +12,14 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.*;
 public record PressRoomActionEvent(int playerNumber, int targetPlayer) implements ActionEvent {
 
     @Override
-    public void apply(Game game) {
+    public List<Followup> apply(Game game) {
         val cardDrawn = game.decks().mutiny().draw();
         game.player(targetPlayer).mutinyCards().add(cardDrawn);
-    }
-
-    @Override
-    public List<Followup> followup(Game game) {
         return followWith(
-                allOf(
-                        new PlayerDecisionEvent(targetPlayer, DiscardDownTo1MutinyCardEvent.class)),
-                oneOf(
-                        new PlayerDecisionEvent(playerNumber, Discard1MutinyCardEvent.class),
+                allOf(new PlayerDecisionEvent(targetPlayer, DiscardDownTo1MutinyCardEvent.class)),
+                oneOf(new PlayerDecisionEvent(playerNumber, Discard1MutinyCardEvent.class),
                         new NoOpEvent(playerNumber))
         );
     }
+
 }

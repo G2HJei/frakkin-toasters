@@ -33,12 +33,8 @@ public record SelectCharacterEvent(int player, Character selectedCharacter) impl
     }
 
     @Override
-    public void apply(Game game) {
+    public List<Followup> apply(Game game) {
         game.player(player).selectCharacter(selectedCharacter);
-    }
-
-    @Override
-    public List<Followup> followup(Game game) {
         val setup = selectedCharacter.setup();
         if (setup.length == 1) {
             moveToSetup(game);

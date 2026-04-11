@@ -11,18 +11,14 @@ public interface Event {
         if (!isValid(game)) {
             throw new InvalidActionException("Invalid action!");
         }
-        apply(game);
-        return followup(game);
+        return apply(game);
     }
 
     default boolean isValid(Game game) {
         return true;
     }
 
-    default void apply(Game game) {
-    }
-
-    default List<Followup> followup(Game game) {
+    default List<Followup> apply(Game game) {
         return List.of();
     }
 }

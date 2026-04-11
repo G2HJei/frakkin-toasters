@@ -25,7 +25,7 @@ import static xyz.zlatanov.frakkintoasters.state.util.AllCardsProvider.genericDe
 public record CreateLoyaltyDeckEvent() implements Event {
 
     @Override
-    public void apply(Game game) {
+    public List<Followup> apply(Game game) {
         setupLoyaltyNotCylonDeck(game);
 
         val cylonDeck = setupCylonDeck();
@@ -38,10 +38,11 @@ public record CreateLoyaltyDeckEvent() implements Event {
 
         dealLoyaltyCards(game);
         dealMotiveCards(game);
+
+        return followup(game);
     }
 
-    @Override
-    public List<Followup> followup(Game game) {
+    private List<Followup> followup(Game game) {
         val hasMutineer = game.players()
                 .stream()
                 .map(Player::loyaltyCards)

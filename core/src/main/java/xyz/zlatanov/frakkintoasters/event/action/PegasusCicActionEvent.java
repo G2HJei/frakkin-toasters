@@ -2,8 +2,11 @@ package xyz.zlatanov.frakkintoasters.event.action;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.event.Event;
+import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
+
+import java.util.List;
 
 import static xyz.zlatanov.frakkintoasters.state.damage.GalacticaDamage.FOOD;
 import static xyz.zlatanov.frakkintoasters.state.damage.GalacticaDamage.FUEL;
@@ -11,7 +14,7 @@ import static xyz.zlatanov.frakkintoasters.state.damage.GalacticaDamage.FUEL;
 public record PegasusCicActionEvent() implements Event {
 
     @Override
-    public void apply(Game game) {
+    public List<Followup> apply(Game game) {
         val roll = game.die().roll();
         if (roll <= 3) {
             damagePegasus(game);
@@ -20,6 +23,7 @@ public record PegasusCicActionEvent() implements Event {
         } else {
             //damage basestar
         }
+        return List.of();
     }
 
     private static void damagePegasus(Game game) {

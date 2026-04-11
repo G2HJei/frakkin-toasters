@@ -1,6 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event.officials;
 
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 
@@ -46,8 +47,9 @@ public record DetermineNextAdmiralEvent() implements SelectNextOfficialEvent {
     }
 
     @Override
-    public void apply(Game game) {
+    public List<Followup> apply(Game game) {
         game.admiral(calcNextInLine(game));
+        return List.of();
     }
 
     @Override
