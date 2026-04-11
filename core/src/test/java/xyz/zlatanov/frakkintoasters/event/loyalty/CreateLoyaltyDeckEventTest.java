@@ -89,7 +89,7 @@ class CreateLoyaltyDeckEventTest {
     @Test
     void shouldFollowUpWithRevealMutineerAction() {
         val loyaltyDeck = new FakeDeck<LoyaltyCard>();
-        loyaltyDeck.nextCard = MUTINEER;
+        loyaltyDeck.nextCard(MUTINEER);
         val game = Game.builder(4)
                 .decks(DecksHolder.builder()
                         .loyalty(loyaltyDeck)

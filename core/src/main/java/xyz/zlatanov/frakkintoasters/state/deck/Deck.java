@@ -25,6 +25,11 @@ public class Deck<T> {
         return this;
     }
 
+    public Deck<T> addToBottom(T card) {
+        cards.addLast(card);
+        return this;
+    }
+
     public Deck<T> remove(T cardToRemove) {
         return remove(List.of(cardToRemove));
     }
