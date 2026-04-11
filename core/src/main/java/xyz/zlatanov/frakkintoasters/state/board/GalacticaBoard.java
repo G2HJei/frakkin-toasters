@@ -19,6 +19,7 @@ import static xyz.zlatanov.frakkintoasters.state.track.JumpPreparation.START;
 @Getter
 @Accessors(fluent = true)
 public class GalacticaBoard extends BattlestarBoard {
+    private       int                 fuel                 = 8;
     private       int                 food                 = 8;
     private       int                 morale               = 10;
     private       int                 population           = 12;
@@ -143,5 +144,25 @@ public class GalacticaBoard extends BattlestarBoard {
         val autoJump = JumpPreparation.values().length - 1;
         val next = current == autoJump ? 0 : current + 1;
         jumpPreparation = JumpPreparation.values()[next];
+    }
+
+    public GalacticaBoard decreaseFood() {
+        food--;
+        return this;
+    }
+
+    public GalacticaBoard increaseFood() {
+        food++;
+        return this;
+    }
+
+    public GalacticaBoard decreaseFuel() {
+        fuel--;
+        return this;
+    }
+
+    public GalacticaBoard increaseFuel() {
+        fuel++;
+        return this;
     }
 }
