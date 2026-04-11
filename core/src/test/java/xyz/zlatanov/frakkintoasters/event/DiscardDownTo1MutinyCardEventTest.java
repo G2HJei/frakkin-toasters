@@ -3,7 +3,6 @@ package xyz.zlatanov.frakkintoasters.event;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.state.Game;
-import xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard;
 
 import java.util.List;
 
@@ -14,7 +13,7 @@ class DiscardDownTo1MutinyCardEventTest {
 
     @Test
     void shouldDiscardAllButSelectedCard() {
-        val game = new Game(ObjectiveCard.KOBOL, 3);
+        val game = Game.builder().build();
         val player = game.player(1);
         player.mutinyCards().add(PANIC, ASSUME_COMMAND, FEED_THE_PEOPLE);
 

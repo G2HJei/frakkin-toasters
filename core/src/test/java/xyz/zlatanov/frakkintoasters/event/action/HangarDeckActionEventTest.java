@@ -12,12 +12,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.event.Followup.allOf;
 import static xyz.zlatanov.frakkintoasters.event.Followup.followWith;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.HANGAR_DECK;
-import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.LOUIS_HOSHI;
 
 class HangarDeckActionEventTest {
 
-    Game game = new Game(KOBOL, 3);
+    Game game = Game.builder().build();
 
     @BeforeEach
     void setUp() {

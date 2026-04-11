@@ -3,7 +3,6 @@ package xyz.zlatanov.frakkintoasters.event.deck;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.state.Game;
-import xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard;
 
 import java.util.Map;
 
@@ -16,7 +15,7 @@ class CreateDestinyDeckEventTest {
 
     @Test
     void shouldCreateValidDeck() {
-        val game = new Game(ObjectiveCard.KOBOL, 3);
+        val game = Game.builder().build();
         new CreateDestinyDeckEvent().execute(game);
         assertDestinyDeckComposition(game);
     }

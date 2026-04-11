@@ -5,13 +5,12 @@ import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.state.Game;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.GAIUS_BALTAR;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.LAURA_ROSLIN;
 
 class DetermineNextPresidentEventTest {
 
-    Game game = new Game(KOBOL, 2);
+    Game game = Game.builder(2).build();
 
     @BeforeEach
     void setUp() {

@@ -19,13 +19,12 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
-import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.ALL_HANDS_ON_DECK;
 
 class MoveEventTest {
 
-    Game      game      = new Game(KOBOL, 3);
+    Game      game      = Game.builder().build();
     SkillCard skillCard = new SkillCard(0, ALL_HANDS_ON_DECK);
 
     @BeforeEach

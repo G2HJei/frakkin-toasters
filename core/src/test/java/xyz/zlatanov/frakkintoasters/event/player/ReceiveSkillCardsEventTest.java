@@ -18,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.CYLON_SEND_TO_BRIG;
-import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.LEADERSHIP;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.TREACHERY;
@@ -34,11 +33,11 @@ class ReceiveSkillCardsEventTest {
     Deck<SkillCard> treacheryDeck  = mock(Deck.class);
     SkillCard leadershipCard = new SkillCard(0, AT_ANY_COST);
     SkillCard treacheryCard  = new SkillCard(0, BAIT);
-    Game      game           = new Game(KOBOL, 4,
-            DecksHolder.builder()
+    Game      game           = Game.builder(4)
+            .decks(DecksHolder.builder()
                     .leadership(leadershipDeck)
                     .treachery(treacheryDeck)
-                    .build());
+                    .build()).build();
 
     @BeforeEach
     void setUp() {

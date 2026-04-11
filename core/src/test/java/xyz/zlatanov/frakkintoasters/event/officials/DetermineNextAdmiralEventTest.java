@@ -7,12 +7,11 @@ import xyz.zlatanov.frakkintoasters.state.Game;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.BRIG;
-import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.HELENA_CAIN;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.WILLIAM_ADAMA;
 
 class DetermineNextAdmiralEventTest {
-    Game game = new Game(KOBOL, 2);
+    Game game = Game.builder().build();
 
     @BeforeEach
     void setUp() {

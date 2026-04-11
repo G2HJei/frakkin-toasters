@@ -13,13 +13,12 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
-import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
 
 class PressRoomActionEventTest {
 
     @Test
     void shouldDraw1MutinyAndFollowup() {
-        val game = new Game(KOBOL, 3);
+        val game = Game.builder().build();
         val followup = new PressRoomActionEvent(1, 2).execute(game);
         assertEquals(1, game.player(2).mutinyCards().size());
         assertEquals(expectedFollowUp(), followup);

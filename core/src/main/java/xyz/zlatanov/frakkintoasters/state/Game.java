@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.state;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -17,41 +18,48 @@ import xyz.zlatanov.frakkintoasters.state.ship.*;
 import java.util.*;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
+import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
 
+@Builder
 @Getter
 @Accessors(fluent = true)
 public class Game {
-    // todo inject boards, decks and counters for testing purposes?
     // todo separate decks and counters in own classes?
     // todo add current playerNumber, turns
-    private final Map<Integer, Player> players;
-    private final Die                  die           = new Die();
-    private final ObjectiveCard        objective;
-    private final BoardsHolder         boards        = new BoardsHolder();
-    private final DecksHolder          decks;
-    private       ShipsHolder          ships;
-    private       int                  nukes         = 2;
+    @Builder.Default
+    private Map<Integer, Player> players       = Map.of(1, new Player(), 2, new Player(), 3, new Player());
+    @Builder.Default
+    private Die                  die           = new Die();
+    @Builder.Default
+    private ObjectiveCard        objective     = KOBOL;
+    @Builder.Default
+    private BoardsHolder         boards        = new BoardsHolder();
+    @Builder.Default
+    private DecksHolder          decks         = DecksHolder.builder().build();
+    @Builder.Default
+    private ShipsHolder          ships         = ShipsHolder.builder().build();
+    @Builder.Default
+    private int                  nukes         = 2;
     @Setter
-    private       Character            president;
-    private final Deck<QuorumCard>     presidentHand = new Deck<>();
+    private Character            president;
+    @Builder.Default
+    private Deck<QuorumCard>     presidentHand = new Deck<>();
     @Setter
-    private       Character            admiral;
+    private Character            admiral;
     @Setter
-    private       Character            cag;
+    private Character            cag;
 
-    public Game(ObjectiveCard objective, int numberOfPlayers) {
-        this(objective, numberOfPlayers, DecksHolder.builder().build());
+    public static GameBuilder builder() {
+        return builder(3);
     }
 
-    //todo use builder
-    public Game(ObjectiveCard objective, int numberOfPlayers, DecksHolder decks) {
-        this.objective = objective;
-        this.decks = decks;
-        val playersMap = new LinkedHashMap<Integer, Player>();
+    public static GameBuilder builder(int numberOfPlayers) {
+        val playersMap = new TreeMap<Integer, Player>();
         for (int i = 1; i <= numberOfPlayers; i++) {
             playersMap.put(i, new Player());
         }
-        players = new TreeMap<>(playersMap);
+        return new GameBuilder()
+                .players(playersMap);
     }
 
     public List<Player> players() {

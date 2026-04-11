@@ -11,7 +11,7 @@ class GameTest {
 
     @Test
     void shouldCreateGame() {
-        val game = new Game(KOBOL, 2);
+        val game = Game.builder(2).build();
         assertEquals(KOBOL, game.objective());
         assertEquals(2, game.players().size());
     }

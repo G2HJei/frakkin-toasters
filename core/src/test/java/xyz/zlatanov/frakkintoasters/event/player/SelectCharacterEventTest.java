@@ -11,12 +11,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.event.Followup.followWith;
 import static xyz.zlatanov.frakkintoasters.event.Followup.oneOf;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
-import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 
 
 class SelectCharacterEventTest {
-    Game game = new Game(KOBOL, 4);
+    Game game = Game.builder(4).build();
 
     @Test
     void shouldSelectCharacter() {
@@ -93,12 +92,12 @@ class SelectCharacterEventTest {
 
     @Test
     void shouldNotAllowCylonLeaderIn3PlayerGame() {
-        assertFalse(select(SHARON_ATHENA_AGATHON).isValid(new Game(KOBOL, 3)));
+        assertFalse(select(SHARON_ATHENA_AGATHON).isValid(Game.builder().build()));
     }
 
     @Test
     void shouldRequireCylonLeaderIn7PlayerGame() {
-        val sevenPlayerGame = new Game(KOBOL, 7);
+        val sevenPlayerGame = Game.builder(7).build();
         sevenPlayerGame.player(2).selectCharacter(CHIEF_GALEN_TYROL);
         sevenPlayerGame.player(3).selectCharacter(ANASTASIA_DEE_DUALLA);
         sevenPlayerGame.player(4).selectCharacter(CALLANDRA_CALLY_TYROL);

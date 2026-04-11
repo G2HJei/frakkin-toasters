@@ -20,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 import static xyz.zlatanov.frakkintoasters.event.Followup.followWith;
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.MUTINEER;
-import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 
 class CreateLoyaltyDeckEventTest {
@@ -40,7 +39,7 @@ class CreateLoyaltyDeckEventTest {
     }
 
     static Game game(int players) {
-        return new Game(KOBOL, players);
+        return Game.builder(players).build();
     }
 
     @ParameterizedTest
@@ -91,10 +90,11 @@ class CreateLoyaltyDeckEventTest {
     void shouldFollowUpWithRevealMutineerAction() {
         val loyaltyDeck = new FakeDeck<LoyaltyCard>();
         loyaltyDeck.nextCard = MUTINEER;
-        val game = new Game(KOBOL, 4,
-                DecksHolder.builder()
+        val game = Game.builder(4)
+                .decks(DecksHolder.builder()
                         .loyalty(loyaltyDeck)
-                        .build());
+                        .build())
+                .build();
         pickCharacters(game, false);
 
         val followup = new CreateLoyaltyDeckEvent().execute(game);
