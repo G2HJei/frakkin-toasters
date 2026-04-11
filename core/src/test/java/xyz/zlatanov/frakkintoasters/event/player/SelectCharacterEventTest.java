@@ -9,7 +9,7 @@ import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.event.Followup.followWith;
-import static xyz.zlatanov.frakkintoasters.event.Followup.oneOf;
+import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 
@@ -43,7 +43,7 @@ class SelectCharacterEventTest {
 
         val followup = select(HELENA_CAIN).execute(game);
 
-        val expected = followWith(oneOf(
+        val expected = followWith(one(
                 new MoveEvent(1, PEGASUS_CIC, null),
                 new MoveEvent(1, COMMAND, null)));
         assertEquals(expected, followup);

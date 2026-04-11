@@ -9,18 +9,18 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.FollowupType.ONE_OF;
 public record Followup(FollowupType type, List<Event> events) {
 
     public static List<Followup> followWith(Event event) {
-        return followWith(allOf(event));
+        return followWith(all(event));
     }
 
     public static List<Followup> followWith(Followup... followups) {
         return Arrays.stream(followups).toList();
     }
 
-    public static Followup allOf(Event... events) {
+    public static Followup all(Event... events) {
         return new Followup(ALL_OF, Arrays.stream(events).toList());
     }
 
-    public static Followup oneOf(Event... events) {
+    public static Followup one(Event... events) {
         return new Followup(ONE_OF, Arrays.stream(events).toList());
     }
 

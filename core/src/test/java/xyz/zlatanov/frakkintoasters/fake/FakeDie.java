@@ -5,7 +5,11 @@ import xyz.zlatanov.frakkintoasters.state.Die;
 
 public class FakeDie extends Die {
 
-    public int nextRoll = 0;
+    private int nextRoll = 0;
+
+    public void nextRoll(int next) {
+        nextRoll = next;
+    }
 
     @Override
     public int roll() {

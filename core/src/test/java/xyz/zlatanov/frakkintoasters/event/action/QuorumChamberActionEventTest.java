@@ -11,7 +11,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.event.Followup.followWith;
-import static xyz.zlatanov.frakkintoasters.event.Followup.oneOf;
+import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.LAURA_ROSLIN;
 
 class QuorumChamberActionEventTest {
@@ -30,7 +30,7 @@ class QuorumChamberActionEventTest {
 
     private List<Followup> expectedFollowup() {
         return followWith(
-                oneOf(
+                one(
                         new DrawQuorumCardEvent(),
                         new PlayQuorumCardEvent()
                 ));

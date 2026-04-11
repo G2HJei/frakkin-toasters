@@ -10,7 +10,7 @@ import xyz.zlatanov.frakkintoasters.state.Game;
 import java.util.List;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.followWith;
-import static xyz.zlatanov.frakkintoasters.event.Followup.oneOf;
+import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 
 public record QuorumChamberActionEvent(int playerNumber) implements ActionEvent {
 
@@ -19,7 +19,7 @@ public record QuorumChamberActionEvent(int playerNumber) implements ActionEvent 
         val drawnCard = game.decks().quorum().draw();
         game.presidentHand().add(drawnCard);
 
-        return followWith(oneOf(
+        return followWith(one(
                 new DrawQuorumCardEvent(),
                 new PlayQuorumCardEvent()));
     }

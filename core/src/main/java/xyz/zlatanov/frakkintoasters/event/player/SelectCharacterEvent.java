@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.followWith;
-import static xyz.zlatanov.frakkintoasters.event.Followup.oneOf;
+import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.character.CharacterType.CYLON_LEADER;
 import static xyz.zlatanov.frakkintoasters.state.character.CharacterType.SUPPORT;
@@ -114,7 +114,7 @@ public record SelectCharacterEvent(int player, Character selectedCharacter) impl
 
     private List<Followup> multipleSetupOptionsFollowup() {
 
-        return followWith(oneOf(
+        return followWith(one(
                 Arrays.stream(selectedCharacter.setup())
                         .map(loc -> (Event) new MoveEvent(player, loc, null))
                         .toArray(Event[]::new)));
