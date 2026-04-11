@@ -60,7 +60,7 @@ class PegasusCicActionEventTest {
         new PegasusCicActionEvent().execute(game);
 
         assertEquals(7, game.boards().galactica().food());
-        assertEquals(8, game.decks().galacticaDamage().size());
+        assertEquals(7, game.decks().galacticaDamage().size());
     }
 
     @Test
@@ -71,6 +71,6 @@ class PegasusCicActionEventTest {
         new PegasusCicActionEvent().execute(game);
 
         assertEquals(7, game.boards().galactica().fuel());
-        assertEquals(8, game.decks().galacticaDamage().size());
+        assertEquals(7, game.decks().galacticaDamage().size());
     }
 }

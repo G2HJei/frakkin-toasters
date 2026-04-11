@@ -33,10 +33,8 @@ public record PegasusCicActionEvent() implements Event {
         val dmgDeck = game.decks().galacticaDamage();
         val galacticaDamage = dmgDeck.draw();
         if (FUEL == galacticaDamage) {
-            dmgDeck.add(galacticaDamage).shuffle();
             game.boards().galactica().decreaseFuel();
         } else if (FOOD == galacticaDamage) {
-            dmgDeck.add(galacticaDamage).shuffle();
             game.boards().galactica().decreaseFood();
         } else {
             val damagedLocation = Location.valueOf(galacticaDamage.name());
