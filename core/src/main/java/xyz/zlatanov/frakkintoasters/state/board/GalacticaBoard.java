@@ -18,7 +18,7 @@ import static xyz.zlatanov.frakkintoasters.state.track.JumpPreparation.START;
 
 @Getter
 @Accessors(fluent = true)
-public class GalacticaBoard extends Board {
+public class GalacticaBoard extends BattlestarBoard {
     private       int                 food                 = 8;
     private       int                 morale               = 10;
     private       int                 population           = 12;
@@ -28,8 +28,7 @@ public class GalacticaBoard extends Board {
     private       Set<Ship>           reserves             = newSetFromMap(new IdentityHashMap<>());
     private       Set<Ship>           damagedShips         = newSetFromMap(new IdentityHashMap<>());
     private final Map<Ship, Location> shipsInSpace         = new IdentityHashMap<>();
-    private final Set<Location>       damagedLocations     = new HashSet<>();
-    
+
 
     public GalacticaBoard() {
         super(galacticaLocations());

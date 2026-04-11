@@ -92,10 +92,21 @@ public class Game {
                 .place(location, character);
     }
 
+
     public void moveTo(Location location, Ship ship) {
         assert LOCATION_AREAS.get("Galactica space").contains(location);
         boards.galactica()
                 .remove(ship)
                 .place(location, ship);
+    }
+
+    public void damage(Location location) {
+        val board = LOCATION_AREAS.get("Galactica").contains(location)
+                ? boards.galactica()
+                : boards.pegasus();
+        val affectedCharacters = board
+                .damage(location)
+                .charactersIn(location).toArray(new Character[0]);
+        board.place(SICKBAY, affectedCharacters);
     }
 }
