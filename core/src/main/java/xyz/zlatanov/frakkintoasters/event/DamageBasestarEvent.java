@@ -10,6 +10,7 @@ import xyz.zlatanov.frakkintoasters.state.ship.ShipType;
 import java.util.List;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.followWith;
+import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.BASESTAR;
 
 public record DamageBasestarEvent() implements Event {
 
@@ -18,23 +19,27 @@ public record DamageBasestarEvent() implements Event {
         val dmgDeck = game.decks().basestarDamage();
         val damage = dmgDeck.draw();
 
-        val basestars = game.boards().galactica().shipsInSpace().keySet().stream()
-                .filter(s -> s.type() == ShipType.BASESTAR)
-                .map(Basestar.class::cast)
-                .toList();
+        val basestars = getBasestars(game);
 
         if (basestars.size() == 1) {
             val basestar = basestars.getFirst();
             basestar.damage(damage);
-            if (countHits(basestar) >= 3) {
-                destroyBasestar(game, basestar, damage);
+            if (countHits(basestar) > 2) {
+                destroyBasestar(game, basestar);
             }
-        } else {
+        } else if (basestars.size() > 1) {
             return followWith(
                     new DistributeBasestarDamageEvent(game.currentPlayer(), damage));
         }
 
         return List.of();
+    }
+
+    private List<Basestar> getBasestars(Game game) {
+        return game.boards().galactica().shipsInSpace().keySet().stream()
+                .filter(s -> s.type() == BASESTAR)
+                .map(Basestar.class::cast)
+                .toList();
     }
 
     private int countHits(Basestar basestar) {
@@ -45,10 +50,9 @@ public record DamageBasestarEvent() implements Event {
         return hits;
     }
 
-    private void destroyBasestar(Game game, Basestar basestar, BasestarDamage drawnDamage) {
+    private void destroyBasestar(Game game, Basestar basestar) {
         game.boards().galactica().remove(basestar);
-        game.cylonShips().removed(ShipType.BASESTAR);
-        game.decks().discard(drawnDamage);
+        game.cylonShips().removed(BASESTAR);
         basestar.damage().forEach(d -> game.decks().discard(d));
     }
 }
