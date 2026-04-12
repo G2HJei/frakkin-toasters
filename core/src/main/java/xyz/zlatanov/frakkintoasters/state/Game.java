@@ -28,6 +28,9 @@ public class Game {
     // todo add current playerNumber, turns
     @Builder.Default
     private Map<Integer, Player> players       = Map.of(1, new Player(), 2, new Player(), 3, new Player());
+    @Setter
+    @Builder.Default
+    private int                  currentPlayer = 1;
     @Builder.Default
     private Die                  die           = new Die();
     @Builder.Default
@@ -37,7 +40,7 @@ public class Game {
     @Builder.Default
     private DecksHolder          decks         = DecksHolder.builder().build();
     @Builder.Default
-    private CylonShips           ships         = CylonShips.builder().build();
+    private CylonShips           cylonShips    = CylonShips.builder().build();
     @Builder.Default
     private int                  nukes         = 2;
     @Setter
@@ -48,6 +51,7 @@ public class Game {
     private Character            admiral;
     @Setter
     private Character            cag;
+
 
     public static GameBuilder builder() {
         return builder(3);
@@ -78,8 +82,8 @@ public class Game {
                 .place(GALACTICA_SPACE_4_OCLOCK, new Viper())
                 .place(GALACTICA_SPACE_6_OCLOCK, new Viper())
                 .place(GALACTICA_SPACE_2_OCLOCK, List.of(decks.civilianShips().draw(), decks.civilianShips().draw()))
-                .place(GALACTICA_SPACE_8_OCLOCK, ships.basestar())
-                .place(GALACTICA_SPACE_8_OCLOCK, List.of(ships.raider(), ships.raider(), ships.raider(), ships.raider()));
+                .place(GALACTICA_SPACE_8_OCLOCK, cylonShips.basestar())
+                .place(GALACTICA_SPACE_8_OCLOCK, List.of(cylonShips.raider(), cylonShips.raider(), cylonShips.raider(), cylonShips.raider()));
     }
 
     public Location locate(Character character) {
