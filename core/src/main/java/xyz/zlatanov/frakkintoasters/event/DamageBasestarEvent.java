@@ -5,7 +5,6 @@ import xyz.zlatanov.frakkintoasters.event.player.DistributeBasestarDamageEvent;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage;
 import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
-import xyz.zlatanov.frakkintoasters.state.ship.ShipType;
 
 import java.util.List;
 
@@ -25,7 +24,7 @@ public record DamageBasestarEvent() implements Event {
             val basestar = basestars.getFirst();
             basestar.damage(damage);
             if (countHits(basestar) > 2) {
-                destroyBasestar(game, basestar);
+                game.destroy(basestar);
             }
         } else if (basestars.size() > 1) {
             return followWith(
@@ -48,11 +47,5 @@ public record DamageBasestarEvent() implements Event {
             hits += dmg == BasestarDamage.CRITICAL_HIT ? 2 : 1;
         }
         return hits;
-    }
-
-    private void destroyBasestar(Game game, Basestar basestar) {
-        game.boards().galactica().remove(basestar);
-        game.cylonShips().removed(BASESTAR);
-        basestar.damage().forEach(d -> game.decks().discard(d));
     }
 }
