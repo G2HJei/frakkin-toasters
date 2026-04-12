@@ -18,10 +18,11 @@ public class FakeDeck<T> extends Deck<T> {
 
     @Override
     public T draw() {
-        if (nextCard != null && cards.contains(nextCard)) {
-            cards.remove(nextCard);
-            cards.addFirst(nextCard);
+        if (nextCard != null) {
+            T card = nextCard;
             nextCard = null;
+            cards.remove(card);
+            return card;
         }
         return super.draw();
     }
