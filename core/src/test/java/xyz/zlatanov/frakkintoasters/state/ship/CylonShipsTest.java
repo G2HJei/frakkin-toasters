@@ -2,16 +2,15 @@ package xyz.zlatanov.frakkintoasters.state.ship;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.*;
 
-class ShipsHolderTest {
+class CylonShipsTest {
 
     @Test
     void shouldCreateAndRemoveBasestar() {
-        val ships = ShipsHolder.builder().basestars(1).build();
+        val ships = CylonShips.builder().basestars(1).build();
 
         val basestar = ships.basestar();
         assertNotNull(basestar);
@@ -23,19 +22,19 @@ class ShipsHolderTest {
 
     @Test
     void shouldThrowExceptionWhenNoBasestarsLeft() {
-        val ships = ShipsHolder.builder().basestars(0).build();
-        assertThrows(FrakCallTheAdmiralException.class, ships::basestar);
+        val ships = CylonShips.builder().basestars(0).build();
+        assertThrows(AssertionError.class, ships::basestar);
     }
 
     @Test
     void shouldThrowExceptionWhenRemovingBasestarBeyondLimit() {
-        val ships = ShipsHolder.builder().basestars(1).build();
-        assertThrows(FrakCallTheAdmiralException.class, () -> ships.removed(BASESTAR));
+        val ships = CylonShips.builder().build();
+        assertThrows(AssertionError.class, () -> ships.removed(BASESTAR));
     }
 
     @Test
     void shouldCreateAndRemoveRaider() {
-        val ships = ShipsHolder.builder().raiders(1).build();
+        val ships = CylonShips.builder().raiders(1).build();
 
         val raider = ships.raider();
         assertNotNull(raider);
@@ -47,19 +46,19 @@ class ShipsHolderTest {
 
     @Test
     void shouldThrowExceptionWhenNoRaidersLeft() {
-        val ships = ShipsHolder.builder().raiders(0).build();
-        assertThrows(FrakCallTheAdmiralException.class, ships::raider);
+        val ships = CylonShips.builder().raiders(0).build();
+        assertThrows(AssertionError.class, ships::raider);
     }
 
     @Test
     void shouldThrowExceptionWhenRemovingRaiderBeyondLimit() {
-        val ships = ShipsHolder.builder().raiders(1).build();
-        assertThrows(FrakCallTheAdmiralException.class, () -> ships.removed(RAIDER));
+        val ships = CylonShips.builder().build();
+        assertThrows(AssertionError.class, () -> ships.removed(RAIDER));
     }
 
     @Test
     void shouldCreateAndRemoveHeavyRaider() {
-        val ships = ShipsHolder.builder().heavyRaiders(1).build();
+        val ships = CylonShips.builder().heavyRaiders(1).build();
 
         val heavyRaider = ships.heavyRaider();
         assertNotNull(heavyRaider);
@@ -71,19 +70,19 @@ class ShipsHolderTest {
 
     @Test
     void shouldThrowExceptionWhenNoHeavyRaidersLeft() {
-        val ships = ShipsHolder.builder().heavyRaiders(0).build();
-        assertThrows(FrakCallTheAdmiralException.class, ships::heavyRaider);
+        val ships = CylonShips.builder().heavyRaiders(0).build();
+        assertThrows(AssertionError.class, ships::heavyRaider);
     }
 
     @Test
     void shouldThrowExceptionWhenRemovingHeavyRaiderBeyondLimit() {
-        val ships = ShipsHolder.builder().heavyRaiders(1).build();
-        assertThrows(FrakCallTheAdmiralException.class, () -> ships.removed(HEAVY_RAIDER));
+        val ships = CylonShips.builder().build();
+        assertThrows(AssertionError.class, () -> ships.removed(HEAVY_RAIDER));
     }
 
     @Test
     void shouldCreateAndRemoveCenturion() {
-        val ships = ShipsHolder.builder().centurions(1).build();
+        val ships = CylonShips.builder().centurions(1).build();
 
         val centurion = ships.centurion();
         assertNotNull(centurion);
@@ -95,13 +94,13 @@ class ShipsHolderTest {
 
     @Test
     void shouldThrowExceptionWhenNoCenturionsLeft() {
-        val ships = ShipsHolder.builder().centurions(0).build();
-        assertThrows(FrakCallTheAdmiralException.class, ships::centurion);
+        val ships = CylonShips.builder().centurions(0).build();
+        assertThrows(AssertionError.class, ships::centurion);
     }
 
     @Test
     void shouldThrowExceptionWhenRemovingCenturionBeyondLimit() {
-        val ships = ShipsHolder.builder().centurions(1).build();
-        assertThrows(FrakCallTheAdmiralException.class, ships::removedCenturion);
+        val ships = CylonShips.builder().build();
+        assertThrows(AssertionError.class, ships::removedCenturion);
     }
 }

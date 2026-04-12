@@ -37,7 +37,7 @@ public class Game {
     @Builder.Default
     private DecksHolder          decks         = DecksHolder.builder().build();
     @Builder.Default
-    private ShipsHolder          ships         = ShipsHolder.builder().build();
+    private CylonShips           ships         = CylonShips.builder().build();
     @Builder.Default
     private int                  nukes         = 2;
     @Setter
