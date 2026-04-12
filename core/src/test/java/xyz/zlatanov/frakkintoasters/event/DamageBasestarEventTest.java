@@ -75,7 +75,7 @@ class DamageBasestarEventTest {
 
         assertEquals(
                 followWith(
-                        new DistributeBasestarDamageEvent(1, DISABLED_HANGAR_BAY)),
+                        new DistributeBasestarDamageEvent(1, DISABLED_WEAPONS)),
                 followup);
     }
 }
