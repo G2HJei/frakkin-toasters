@@ -67,14 +67,14 @@ class MoveEventTest {
 
     @Test
     void shouldMoveInSpaceWhilePiloting() {
-        game.boards().galactica().place(GALACTICA_SPACE_2_OCLOCK, new AssaultRaptor().pilot(KARA_STARBUCK_THRACE));
+        game.boards().galactica().place(GALACTICA_SPACE_2_OCLOCK, new AssaultRaptor(1).pilot(KARA_STARBUCK_THRACE));
         new MoveEvent(1, GALACTICA_SPACE_4_OCLOCK, null).execute(game);
         assertEquals(GALACTICA_SPACE_4_OCLOCK, game.locate(KARA_STARBUCK_THRACE));
     }
 
     @Test
     void shouldLandWhilePiloting() {
-        val viper = new Viper().pilot(KARA_STARBUCK_THRACE);
+        val viper = new Viper(1).pilot(KARA_STARBUCK_THRACE);
         game.boards().galactica().place(GALACTICA_SPACE_2_OCLOCK, viper);
         game.player(1).skillCards().add(skillCard);
 
@@ -87,24 +87,24 @@ class MoveEventTest {
 
     public static Stream<Arguments> adjacencyTests() {
         return Stream.of(
-                argumentSet("viper to same space", new Viper(), GALACTICA_SPACE_2_OCLOCK, false),
-                argumentSet("viper to space 4", new Viper(), GALACTICA_SPACE_4_OCLOCK, true),
-                argumentSet("viper to space 6", new Viper(), GALACTICA_SPACE_6_OCLOCK, false),
-                argumentSet("viper to space 8", new Viper(), GALACTICA_SPACE_8_OCLOCK, false),
-                argumentSet("viper to space 10", new Viper(), GALACTICA_SPACE_10_OCLOCK, false),
-                argumentSet("viper to space 12", new Viper(), GALACTICA_SPACE_12_OCLOCK, true),
-                argumentSet("Assault raptor to same space", new AssaultRaptor(), GALACTICA_SPACE_2_OCLOCK, false),
-                argumentSet("Assault raptor to space 4", new AssaultRaptor(), GALACTICA_SPACE_4_OCLOCK, true),
-                argumentSet("Assault raptor to space 6", new AssaultRaptor(), GALACTICA_SPACE_6_OCLOCK, false),
-                argumentSet("Assault raptor to space 8", new AssaultRaptor(), GALACTICA_SPACE_8_OCLOCK, false),
-                argumentSet("Assault raptor to space 10", new AssaultRaptor(), GALACTICA_SPACE_10_OCLOCK, false),
-                argumentSet("Assault raptor to space 12", new AssaultRaptor(), GALACTICA_SPACE_12_OCLOCK, true),
-                argumentSet("Viper Mk7 to same space", new ViperMarkVII(), GALACTICA_SPACE_2_OCLOCK, false),
-                argumentSet("Viper Mk7 to space 4", new ViperMarkVII(), GALACTICA_SPACE_4_OCLOCK, true),
-                argumentSet("Viper Mk7 to space 6", new ViperMarkVII(), GALACTICA_SPACE_6_OCLOCK, true),
-                argumentSet("Viper Mk7 to space 8", new ViperMarkVII(), GALACTICA_SPACE_8_OCLOCK, false),
-                argumentSet("Viper Mk7 to space 10", new ViperMarkVII(), GALACTICA_SPACE_10_OCLOCK, true),
-                argumentSet("Viper Mk7 to space 12", new ViperMarkVII(), GALACTICA_SPACE_12_OCLOCK, true)
+                argumentSet("viper to same space", new Viper(1), GALACTICA_SPACE_2_OCLOCK, false),
+                argumentSet("viper to space 4", new Viper(2), GALACTICA_SPACE_4_OCLOCK, true),
+                argumentSet("viper to space 6", new Viper(3), GALACTICA_SPACE_6_OCLOCK, false),
+                argumentSet("viper to space 8", new Viper(4), GALACTICA_SPACE_8_OCLOCK, false),
+                argumentSet("viper to space 10", new Viper(5), GALACTICA_SPACE_10_OCLOCK, false),
+                argumentSet("viper to space 12", new Viper(6), GALACTICA_SPACE_12_OCLOCK, true),
+                argumentSet("Assault raptor to same space", new AssaultRaptor(7), GALACTICA_SPACE_2_OCLOCK, false),
+                argumentSet("Assault raptor to space 4", new AssaultRaptor(8), GALACTICA_SPACE_4_OCLOCK, true),
+                argumentSet("Assault raptor to space 6", new AssaultRaptor(9), GALACTICA_SPACE_6_OCLOCK, false),
+                argumentSet("Assault raptor to space 8", new AssaultRaptor(10), GALACTICA_SPACE_8_OCLOCK, false),
+                argumentSet("Assault raptor to space 10", new AssaultRaptor(11), GALACTICA_SPACE_10_OCLOCK, false),
+                argumentSet("Assault raptor to space 12", new AssaultRaptor(12), GALACTICA_SPACE_12_OCLOCK, true),
+                argumentSet("Viper Mk7 to same space", new ViperMarkVII(13), GALACTICA_SPACE_2_OCLOCK, false),
+                argumentSet("Viper Mk7 to space 4", new ViperMarkVII(14), GALACTICA_SPACE_4_OCLOCK, true),
+                argumentSet("Viper Mk7 to space 6", new ViperMarkVII(15), GALACTICA_SPACE_6_OCLOCK, true),
+                argumentSet("Viper Mk7 to space 8", new ViperMarkVII(16), GALACTICA_SPACE_8_OCLOCK, false),
+                argumentSet("Viper Mk7 to space 10", new ViperMarkVII(17), GALACTICA_SPACE_10_OCLOCK, true),
+                argumentSet("Viper Mk7 to space 12", new ViperMarkVII(18), GALACTICA_SPACE_12_OCLOCK, true)
         );
     }
 

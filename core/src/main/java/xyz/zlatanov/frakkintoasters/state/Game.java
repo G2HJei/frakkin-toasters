@@ -19,7 +19,6 @@ import java.util.*;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
-import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.BASESTAR;
 
 @Builder
 @Getter
@@ -76,12 +75,13 @@ public class Game {
     }
 
     public void setupGalacticaBoard() {
+        int id = 1;
         boards.galactica()
                 //todo improve raptor - assault raptor handling
-                .addToReserves(List.of(new Viper(), new Viper(), new Viper(), new Viper(), new Raptor(), new Raptor(), new Raptor(), new Raptor(), new AssaultRaptor()))
-                .addToDamagedShips(List.of(new ViperMarkVII(), new ViperMarkVII(), new ViperMarkVII(), new ViperMarkVII()))
-                .place(GALACTICA_SPACE_4_OCLOCK, new Viper())
-                .place(GALACTICA_SPACE_6_OCLOCK, new Viper())
+                .addToReserves(List.of(new Viper(id++), new Viper(id++), new Viper(id++), new Viper(id++), new Raptor(id++), new Raptor(id++), new Raptor(id++), new Raptor(id++), new AssaultRaptor(id++)))
+                .addToDamagedShips(List.of(new ViperMarkVII(id++), new ViperMarkVII(id++), new ViperMarkVII(id++), new ViperMarkVII(id++)))
+                .place(GALACTICA_SPACE_4_OCLOCK, new Viper(id++))
+                .place(GALACTICA_SPACE_6_OCLOCK, new Viper(id++))
                 .place(GALACTICA_SPACE_2_OCLOCK, List.of(decks.civilianShips().draw(), decks.civilianShips().draw()))
                 .place(GALACTICA_SPACE_8_OCLOCK, cylonShips.basestar())
                 .place(GALACTICA_SPACE_8_OCLOCK, List.of(cylonShips.raider(), cylonShips.raider(), cylonShips.raider(), cylonShips.raider()));
@@ -126,12 +126,15 @@ public class Game {
     }
 
     public void destroy(Ship ship) {
-        if (ship instanceof Basestar basestar) {
-            decks.discard(basestar.damage());
-            boards.galactica().remove(basestar);
-            cylonShips.removed(BASESTAR);
-        } else {
-            throw new FrakCallTheAdmiralException("todo: not implemented");
+        boards.galactica().remove(ship);
+        switch (ship) {
+            case Basestar basestar -> {
+                decks.discard(basestar.damage());
+                cylonShips.returned(basestar);
+            }
+            case Raider r -> cylonShips.returned(r);
+            case HeavyRaider h -> cylonShips.returned(h);
+            default -> throw new FrakCallTheAdmiralException("todo: not implemented");
         }
     }
 }

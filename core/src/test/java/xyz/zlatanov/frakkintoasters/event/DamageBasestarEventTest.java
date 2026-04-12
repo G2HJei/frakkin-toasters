@@ -7,7 +7,6 @@ import xyz.zlatanov.frakkintoasters.fake.FakeDeck;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage;
 import xyz.zlatanov.frakkintoasters.state.deck.DecksHolder;
-import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 
 import java.util.List;
 
@@ -26,7 +25,7 @@ class DamageBasestarEventTest {
 
     @Test
     void shouldAutoDamageSingleBasestar() {
-        val basestar = new Basestar();
+        val basestar = game.cylonShips().basestar();
         basestarDmgDeck.nextCard(CRITICAL_HIT);
         val galacticaBoard = game.boards().galactica();
         galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, basestar);
@@ -51,7 +50,7 @@ class DamageBasestarEventTest {
 
         assertTrue(galacticaBoard.shipsIn(GALACTICA_SPACE_2_OCLOCK).isEmpty());
         assertEquals(4, game.decks().basestarDamage().cards().size());
-        assertEquals(2, game.cylonShips().basestars());
+        assertEquals(2, game.cylonShips().basestars().size());
     }
 
     @Test
