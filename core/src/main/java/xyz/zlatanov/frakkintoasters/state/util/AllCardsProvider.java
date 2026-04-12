@@ -9,7 +9,6 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.IntStream;
 
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 
@@ -17,11 +16,12 @@ public class AllCardsProvider {
 
     public static Deck<CivilianShip> civilianShipsDeck() {
         val deck = new Deck<CivilianShip>();
-        IntStream.range(0, 2).forEach(i -> deck.add(new CivilianShip(0, 0, 0)));
-        IntStream.range(0, 2).forEach(i -> deck.add(new CivilianShip(0, 0, 2)));
-        IntStream.range(0, 6).forEach(i -> deck.add(new CivilianShip(0, 0, 1)));
-        deck.add(new CivilianShip(0, 1, 1));
-        deck.add(new CivilianShip(1, 0, 1));
+        int id = 2000;
+        for (int i = 0; i < 2; i++) { deck.add(new CivilianShip(id++, 0, 0, 0)); }
+        for (int i = 0; i < 2; i++) { deck.add(new CivilianShip(id++, 0, 0, 2)); }
+        for (int i = 0; i < 6; i++) { deck.add(new CivilianShip(id++, 0, 0, 1)); }
+        deck.add(new CivilianShip(id++, 0, 1, 1));
+        deck.add(new CivilianShip(id++, 1, 0, 1));
         deck.shuffle();
         return deck;
     }

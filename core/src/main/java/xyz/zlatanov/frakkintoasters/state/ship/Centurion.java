@@ -1,4 +1,4 @@
 package xyz.zlatanov.frakkintoasters.state.ship;
 
-public record Centurion() {
+public record Centurion(int id) {
 }

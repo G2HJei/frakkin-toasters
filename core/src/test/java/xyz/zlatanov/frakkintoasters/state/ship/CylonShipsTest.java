@@ -4,20 +4,21 @@ import lombok.val;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.*;
+import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.STRUCTURAL_DAMAGE;
 
 class CylonShipsTest {
 
     @Test
-    void shouldCreateAndRemoveBasestar() {
+    void shouldCreateAndReturnBasestar() {
         val ships = CylonShips.builder().basestars(1).build();
 
         val basestar = ships.basestar();
         assertNotNull(basestar);
-        assertEquals(0, ships.basestars());
+        assertTrue(ships.basestars().isEmpty());
 
-        ships.removed(BASESTAR);
-        assertEquals(1, ships.basestars());
+        ships.returned(basestar);
+        assertEquals(1, ships.basestars().size());
+        assertSame(basestar, ships.basestars().getFirst());
     }
 
     @Test
@@ -27,21 +28,16 @@ class CylonShipsTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenRemovingBasestarBeyondLimit() {
-        val ships = CylonShips.builder().build();
-        assertThrows(AssertionError.class, () -> ships.removed(BASESTAR));
-    }
-
-    @Test
-    void shouldCreateAndRemoveRaider() {
+    void shouldCreateAndReturnRaider() {
         val ships = CylonShips.builder().raiders(1).build();
 
         val raider = ships.raider();
         assertNotNull(raider);
-        assertEquals(0, ships.raiders());
+        assertTrue(ships.raiders().isEmpty());
 
-        ships.removed(RAIDER);
-        assertEquals(1, ships.raiders());
+        ships.returned(raider);
+        assertEquals(1, ships.raiders().size());
+        assertSame(raider, ships.raiders().getFirst());
     }
 
     @Test
@@ -51,21 +47,16 @@ class CylonShipsTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenRemovingRaiderBeyondLimit() {
-        val ships = CylonShips.builder().build();
-        assertThrows(AssertionError.class, () -> ships.removed(RAIDER));
-    }
-
-    @Test
-    void shouldCreateAndRemoveHeavyRaider() {
+    void shouldCreateAndReturnHeavyRaider() {
         val ships = CylonShips.builder().heavyRaiders(1).build();
 
         val heavyRaider = ships.heavyRaider();
         assertNotNull(heavyRaider);
-        assertEquals(0, ships.heavyRaiders());
+        assertTrue(ships.heavyRaiders().isEmpty());
 
-        ships.removed(HEAVY_RAIDER);
-        assertEquals(1, ships.heavyRaiders());
+        ships.returned(heavyRaider);
+        assertEquals(1, ships.heavyRaiders().size());
+        assertSame(heavyRaider, ships.heavyRaiders().getFirst());
     }
 
     @Test
@@ -75,21 +66,16 @@ class CylonShipsTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenRemovingHeavyRaiderBeyondLimit() {
-        val ships = CylonShips.builder().build();
-        assertThrows(AssertionError.class, () -> ships.removed(HEAVY_RAIDER));
-    }
-
-    @Test
-    void shouldCreateAndRemoveCenturion() {
+    void shouldCreateAndReturnCenturion() {
         val ships = CylonShips.builder().centurions(1).build();
 
         val centurion = ships.centurion();
         assertNotNull(centurion);
-        assertEquals(0, ships.centurions());
+        assertTrue(ships.centurions().isEmpty());
 
-        ships.removedCenturion();
-        assertEquals(1, ships.centurions());
+        ships.returnedCenturion(centurion);
+        assertEquals(1, ships.centurions().size());
+        assertSame(centurion, ships.centurions().getFirst());
     }
 
     @Test
@@ -99,8 +85,36 @@ class CylonShipsTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenRemovingCenturionBeyondLimit() {
-        val ships = CylonShips.builder().build();
-        assertThrows(AssertionError.class, ships::removedCenturion);
+    void shouldAssignUniqueIds() {
+        val ships = CylonShips.builder().basestars(2).raiders(2).heavyRaiders(2).centurions(2).build();
+
+        val b1 = ships.basestar();
+        val b2 = ships.basestar();
+        assertNotEquals(b1.id(), b2.id());
+
+        val r1 = ships.raider();
+        val r2 = ships.raider();
+        assertNotEquals(r1.id(), r2.id());
+
+        val h1 = ships.heavyRaider();
+        val h2 = ships.heavyRaider();
+        assertNotEquals(h1.id(), h2.id());
+
+        val c1 = ships.centurion();
+        val c2 = ships.centurion();
+        assertNotEquals(c1.id(), c2.id());
+    }
+
+    @Test
+    void shouldClearBasestarDamageOnReturn() {
+        val ships = CylonShips.builder().basestars(1).build();
+        val basestar = ships.basestar();
+        basestar.damage(STRUCTURAL_DAMAGE);
+        assertFalse(basestar.damage().isEmpty());
+
+        ships.returned(basestar);
+        val returned = ships.basestar();
+        assertTrue(returned.damage().isEmpty());
+        assertSame(basestar, returned);
     }
 }

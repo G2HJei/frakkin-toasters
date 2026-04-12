@@ -12,7 +12,6 @@ import xyz.zlatanov.frakkintoasters.state.track.JumpPreparation;
 
 import java.util.*;
 
-import static java.util.Collections.newSetFromMap;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.track.JumpPreparation.START;
 
@@ -26,9 +25,9 @@ public class GalacticaBoard extends BattlestarBoard {
     private       JumpPreparation     jumpPreparation      = START;
     private       boolean             colonialOneDestroyed = false;
     private       boolean             hubDestroyed         = false;
-    private       Set<Ship>           reserves             = newSetFromMap(new IdentityHashMap<>());
-    private       Set<Ship>           damagedShips         = newSetFromMap(new IdentityHashMap<>());
-    private final Map<Ship, Location> shipsInSpace         = new IdentityHashMap<>();
+    private       Set<Ship>           reserves             = new HashSet<>();
+    private       Set<Ship>           damagedShips         = new HashSet<>();
+    private final Map<Ship, Location> shipsInSpace         = new HashMap<>();
 
 
     public GalacticaBoard() {

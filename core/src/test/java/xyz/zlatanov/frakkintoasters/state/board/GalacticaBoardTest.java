@@ -58,35 +58,35 @@ class GalacticaBoardTest {
 
     @Test
     void shouldManageReserves() {
-        val viper = new Viper();
+        val viper = new Viper(1);
         board.addToReserves(viper);
         assertEquals(viper, board.removeFromReserve(VIPER));
     }
 
     @Test
     void shouldManageDamagedShip() {
-        val raptor = new Raptor();
+        val raptor = new Raptor(2);
         board.addToDamagedShips(raptor);
         assertEquals(raptor, board.removeFromDamagedShips(RAPTOR));
     }
 
     @Test
     void shouldPlaceFighterShip() {
-        val viper = new Viper();
+        val viper = new Viper(3);
         board.place(GALACTICA_SPACE_12_OCLOCK, viper);
         assertEquals(List.of(viper), board.shipsIn(GALACTICA_SPACE_12_OCLOCK));
     }
 
     @Test
     void shouldPlacePilotedShip() {
-        val pilotedViper = new Viper().pilot(KARL_HELO_AGATHON);
+        val pilotedViper = new Viper(4).pilot(KARL_HELO_AGATHON);
         board.place(GALACTICA_SPACE_4_OCLOCK, pilotedViper);
         assertEquals(GALACTICA_SPACE_4_OCLOCK, board.locate(KARL_HELO_AGATHON));
     }
 
     @Test
     void shouldRemoveShip() {
-        val viperMarkVii = new ViperMarkVII();
+        val viperMarkVii = new ViperMarkVII(5);
         board.place(GALACTICA_SPACE_12_OCLOCK, viperMarkVii);
 
         board.remove(viperMarkVii);
