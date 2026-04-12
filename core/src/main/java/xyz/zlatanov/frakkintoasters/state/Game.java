@@ -19,13 +19,14 @@ import java.util.*;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
+import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.BASESTAR;
 
 @Builder
 @Getter
 @Accessors(fluent = true)
 public class Game {
-    // todo separate decks and counters in own classes?
-    // todo add current playerNumber, turns
+    // todo separate counters in own classes?
+    // todo add turns
     @Builder.Default
     private Map<Integer, Player> players       = Map.of(1, new Player(), 2, new Player(), 3, new Player());
     @Setter
@@ -121,6 +122,16 @@ public class Game {
                 .charactersIn(location);
         if (!affectedCharacters.isEmpty()) {
             board.place(SICKBAY, affectedCharacters.toArray(new Character[0]));
+        }
+    }
+
+    public void destroy(Ship ship) {
+        if (ship instanceof Basestar basestar) {
+            decks.discard(basestar.damage());
+            boards.galactica().remove(basestar);
+            cylonShips.removed(BASESTAR);
+        } else {
+            throw new FrakCallTheAdmiralException("todo: not implemented");
         }
     }
 }
