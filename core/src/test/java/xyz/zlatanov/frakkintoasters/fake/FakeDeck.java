@@ -12,17 +12,17 @@ public class FakeDeck<T> extends Deck<T> {
         add(delegate.cards());
     }
 
-    public void nextCard(T card) {
+    public FakeDeck<T> nextCard(T card) {
         nextCard = card;
+        return this;
     }
 
     @Override
     public T draw() {
-        if (nextCard != null) {
-            T card = nextCard;
+        if (nextCard != null && cards.contains(nextCard)) {
+            cards.remove(nextCard);
+            cards.addFirst(nextCard);
             nextCard = null;
-            cards.remove(card);
-            return card;
         }
         return super.draw();
     }
