@@ -16,12 +16,19 @@ public class AllCardsProvider {
 
     public static Deck<CivilianShip> civilianShipsDeck() {
         val deck = new Deck<CivilianShip>();
-        int id = 2000;
-        for (int i = 0; i < 2; i++) { deck.add(new CivilianShip(id++, 0, 0, 0)); }
-        for (int i = 0; i < 2; i++) { deck.add(new CivilianShip(id++, 0, 0, 2)); }
-        for (int i = 0; i < 6; i++) { deck.add(new CivilianShip(id++, 0, 0, 1)); }
-        deck.add(new CivilianShip(id++, 0, 1, 1));
-        deck.add(new CivilianShip(id++, 1, 0, 1));
+        //todo randomize civ ship ids to avoid frontend cheating
+        deck.add(new CivilianShip(2001, 0, 0, 0));
+        deck.add(new CivilianShip(2002, 0, 0, 0));
+        deck.add(new CivilianShip(2003, 0, 0, 2));
+        deck.add(new CivilianShip(2004, 0, 0, 2));
+        deck.add(new CivilianShip(2005, 0, 0, 1));
+        deck.add(new CivilianShip(2006, 0, 0, 1));
+        deck.add(new CivilianShip(2007, 0, 0, 1));
+        deck.add(new CivilianShip(2008, 0, 0, 1));
+        deck.add(new CivilianShip(2009, 0, 0, 1));
+        deck.add(new CivilianShip(2010, 0, 0, 1));
+        deck.add(new CivilianShip(2011, 0, 1, 1));
+        deck.add(new CivilianShip(2012, 1, 0, 1));
         deck.shuffle();
         return deck;
     }

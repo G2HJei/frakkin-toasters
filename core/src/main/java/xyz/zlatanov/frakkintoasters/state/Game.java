@@ -19,6 +19,7 @@ import java.util.*;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
+import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.VIPER;
 
 @Builder
 @Getter
@@ -75,13 +76,10 @@ public class Game {
     }
 
     public void setupGalacticaBoard() {
-        int id = 1;
+        val galacticaBoard = boards.galactica();
         boards.galactica()
-                //todo improve raptor - assault raptor handling
-                .addToReserves(List.of(new Viper(id++), new Viper(id++), new Viper(id++), new Viper(id++), new Raptor(id++), new Raptor(id++), new Raptor(id++), new Raptor(id++), new AssaultRaptor(id++)))
-                .addToDamagedShips(List.of(new ViperMarkVII(id++), new ViperMarkVII(id++), new ViperMarkVII(id++), new ViperMarkVII(id++)))
-                .place(GALACTICA_SPACE_4_OCLOCK, new Viper(id++))
-                .place(GALACTICA_SPACE_6_OCLOCK, new Viper(id++))
+                .place(GALACTICA_SPACE_4_OCLOCK, galacticaBoard.removeFromReserves(VIPER))
+                .place(GALACTICA_SPACE_6_OCLOCK, galacticaBoard.removeFromReserves(VIPER))
                 .place(GALACTICA_SPACE_2_OCLOCK, List.of(decks.civilianShips().draw(), decks.civilianShips().draw()))
                 .place(GALACTICA_SPACE_8_OCLOCK, cylonShips.basestar())
                 .place(GALACTICA_SPACE_8_OCLOCK, List.of(cylonShips.raider(), cylonShips.raider(), cylonShips.raider(), cylonShips.raider()));

@@ -5,9 +5,7 @@ import lombok.experimental.Accessors;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
-import xyz.zlatanov.frakkintoasters.state.ship.PilotableShip;
-import xyz.zlatanov.frakkintoasters.state.ship.Ship;
-import xyz.zlatanov.frakkintoasters.state.ship.ShipType;
+import xyz.zlatanov.frakkintoasters.state.ship.*;
 import xyz.zlatanov.frakkintoasters.state.track.JumpPreparation;
 
 import java.util.*;
@@ -32,6 +30,11 @@ public class GalacticaBoard extends BattlestarBoard {
 
     public GalacticaBoard() {
         super(galacticaLocations());
+        addToReserves(List.of(
+                new Viper(1), new Viper(2), new Viper(3), new Viper(4), new Viper(5), new Viper(6), new Raptor(11),
+                new Raptor(12), new Raptor(13), new Raptor(14),
+                new AssaultRaptor(21)));
+        addToDamagedShips(List.of(new ViperMarkVII(71), new ViperMarkVII(72), new ViperMarkVII(73), new ViperMarkVII(74)));
     }
 
     @Override
@@ -91,7 +94,7 @@ public class GalacticaBoard extends BattlestarBoard {
         return this;
     }
 
-    public Ship removeFromReserve(ShipType shipType) {
+    public Ship removeFromReserves(ShipType shipType) {
         return removeFrom(reserves, shipType);
     }
 
