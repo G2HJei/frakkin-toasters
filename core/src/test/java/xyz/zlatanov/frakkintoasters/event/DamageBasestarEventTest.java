@@ -2,7 +2,7 @@ package xyz.zlatanov.frakkintoasters.event;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.event.player.DistributeBasestarDamageEvent;
+import xyz.zlatanov.frakkintoasters.event.player.AssignBasestarDamage;
 import xyz.zlatanov.frakkintoasters.fake.FakeDeck;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage;
@@ -77,9 +77,11 @@ class DamageBasestarEventTest {
 
         val followup = new DamageBasestarEvent().execute(game);
 
-        assertEquals(
-                followWith(
-                        new DistributeBasestarDamageEvent(1, DISABLED_WEAPONS)),
-                followup);
+        assertEquals(1, followup.size());
+        assertTrue(followup.getFirst().events()
+                .containsAll(List.of(
+                        new AssignBasestarDamage(1, DISABLED_WEAPONS, basestar1.id()),
+                        new AssignBasestarDamage(1, DISABLED_WEAPONS, basestar2.id()))
+                ));
     }
 }

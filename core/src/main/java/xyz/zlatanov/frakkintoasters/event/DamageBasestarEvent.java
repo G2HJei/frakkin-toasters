@@ -1,13 +1,15 @@
 package xyz.zlatanov.frakkintoasters.event;
 
 import lombok.val;
-import xyz.zlatanov.frakkintoasters.event.player.DistributeBasestarDamageEvent;
+import xyz.zlatanov.frakkintoasters.event.player.AssignBasestarDamage;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage;
 import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 
 import java.util.List;
 
+import static java.util.Comparator.comparing;
+import static xyz.zlatanov.frakkintoasters.event.Followup.FollowupType.ONE_OF;
 import static xyz.zlatanov.frakkintoasters.event.Followup.followWith;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.BASESTAR;
 
@@ -27,8 +29,13 @@ public record DamageBasestarEvent() implements Event {
                 game.destroy(basestar);
             }
         } else if (basestars.size() > 1) {
-            return followWith(
-                    new DistributeBasestarDamageEvent(game.currentPlayer(), damage));
+            return followWith(new Followup(ONE_OF,
+                            basestars.stream()
+                                    .map(bs -> new AssignBasestarDamage(game.currentPlayer(), damage, bs.id()))
+                                    .map(Event.class::cast)
+                                    .toList()
+                    )
+            );
         }
 
         return List.of();
@@ -42,7 +49,7 @@ public record DamageBasestarEvent() implements Event {
     }
 
     private int countHits(Basestar basestar) {
-        int hits = 0;
+        var hits = 0;
         for (var dmg : basestar.damage()) {
             hits += dmg == BasestarDamage.CRITICAL_HIT ? 2 : 1;
         }
