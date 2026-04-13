@@ -1,0 +1,56 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+Web version of the Battlestar Galactica board game. Java implementation modeling the game's state, events, and mechanics.
+
+## Build Commands
+
+```bash
+./gradlew build          # Build the project
+./gradlew test           # Run all tests
+./gradlew :core:test     # Run tests in the core module
+./gradlew :core:test --tests "xyz.zlatanov.frakkintoasters.event.player.MoveEventTest"  # Run a single test class
+```
+
+## Project Structure
+
+Multi-module Gradle project with a single `core` module. Package root: `xyz.zlatanov.frakkintoasters`.
+
+### Key Packages
+
+- `state/` - Game state model: `Game` (top-level), `Player`, `Die` (d8)
+- `state/board/` - Board hierarchy: `Board` (base, tracks characters by location) -> `BattlestarBoard` (adds damage tracking) -> `GalacticaBoard`/`PegasusBoard`. Also `CylonFleetBoard` and `BoardsHolder` (aggregates all boards). `Location` enum defines all 57 board spaces.
+- `state/ship/` - `Ship` interface with implementations: `Viper`, `Raptor`, `Basestar`, `Raider`, etc. `CylonShips` manages the Cylon ship supply pool. Ships have unique integer IDs.
+- `state/deck/` - Generic `Deck<T>` (draw/discard/shuffle). `DecksHolder` manages all game decks and routes discards to the correct deck.
+- `state/skill/` - `SkillCard` (record), `SkillCardType` enum, `SkillCardColor` enum (6 colors)
+- `state/card/` - Card enums: `LoyaltyCard`, `QuorumCard`, `MutinyCard`, `ObjectiveCard`, `DestinationCard`, `MotiveCard`
+- `state/damage/` - Damage card enums: `GalacticaDamage`, `PegasusDamage`, `BasestarDamage`
+- `state/character/` - `Character` enum (32 BSG characters), `CharacterType` enum
+- `event/` - Event-driven game actions (see architecture below)
+
+## Architecture
+
+### Event System
+
+Game actions are modeled as events implementing the `Event` interface:
+- `execute(Game)` validates then applies the event, returning `List<Followup>`
+- `isValid(Game)` checks preconditions (default: true)
+- `apply(Game)` mutates game state and returns followup events
+
+Event hierarchy: `Event` -> `PlayerEvent` (adds player context) -> `ActionEvent` (location-based board actions)
+
+**Followups** chain events: `Followup.all(events...)` means execute all; `Followup.one(events...)` means player picks one. Events return followups to express multi-step game logic.
+
+### Lombok Usage
+
+Uses Lombok extensively: `@Builder`, `@Getter`, `@Accessors(fluent = true)`, `@RequiredArgsConstructor`, `val`. Accessors are fluent style (no `get`/`set` prefix) - e.g., `game.players()` not `game.getPlayers()`.
+
+### Testing Patterns
+
+- JUnit 5 + Mockito
+- `FakeDie` - test double for `Die` with `nextRoll(int)` to control randomness
+- `FakeDeck<T>` - test double for `Deck<T>` with `nextCard(T)` to control draws
+- Tests follow the pattern: set up `Game` via builder, execute event, assert state changes and followups

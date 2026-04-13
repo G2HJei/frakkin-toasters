@@ -13,3 +13,4 @@ build/
 
 # Claude
 .claude/
+/gradle/
