@@ -115,6 +115,10 @@ public class GalacticaBoard extends BattlestarBoard {
         return place(in, List.of(ship));
     }
 
+    public GalacticaBoard place(Location in, Ship... ships) {
+        return place(in, Arrays.stream(ships).toList());
+    }
+
     public GalacticaBoard place(Location in, List<Ship> ships) {
         assert locations().contains(in) && in.isSpaceLocation();
         ships.forEach(s -> shipsInSpace.put(s, in));
