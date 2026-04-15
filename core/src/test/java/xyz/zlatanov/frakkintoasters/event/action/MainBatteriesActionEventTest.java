@@ -13,7 +13,6 @@ import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
 import xyz.zlatanov.frakkintoasters.state.ship.CylonShips;
 import xyz.zlatanov.frakkintoasters.state.ship.Viper;
 
-import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -68,7 +67,7 @@ class MainBatteriesActionEventTest {
 
         val followups = new MainBatteriesActionEvent(1, GALACTICA_SPACE_4_OCLOCK).execute(game);
 
-        assertEquals(followWith(new DamageVipersEvent(List.of(viper.id()))), followups);
+        assertEquals(followWith(new DamageVipersEvent(Set.of(viper.id()))), followups);
     }
 
     @Test
