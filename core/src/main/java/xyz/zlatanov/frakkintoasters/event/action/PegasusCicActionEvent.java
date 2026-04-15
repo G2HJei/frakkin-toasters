@@ -11,6 +11,7 @@ import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 import java.util.List;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.followWith;
+import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.BASESTAR;
 
 public record PegasusCicActionEvent(int basestarId) implements Event {
 
@@ -42,7 +43,8 @@ public record PegasusCicActionEvent(int basestarId) implements Event {
     }
 
     private Basestar findBasestar(Game game) {
-        return (Basestar) game.boards().galactica().shipsInSpace().keySet().stream()
+        return (Basestar) game.boards().galactica().shipsInSpace(BASESTAR)
+                .stream()
                 .filter(s -> s.id() == basestarId)
                 .findFirst()
                 .orElse(null);
