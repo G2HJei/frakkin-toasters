@@ -145,6 +145,16 @@ public class GalacticaBoard extends BattlestarBoard {
                 .toList();
     }
 
+    public List<Ship> shipsIn(Location location, ShipType... ofType) {
+        val constraint = Arrays.stream(ofType).toList();
+        return shipsInSpace.entrySet()
+                .stream()
+                .filter(e -> e.getValue() == location)
+                .map(Map.Entry::getKey)
+                .filter(s -> constraint.contains(s.type()))
+                .toList();
+    }
+
     public void advanceJumpPreparation() {
         val current = jumpPreparation.ordinal();
         val autoJump = JumpPreparation.values().length - 1;

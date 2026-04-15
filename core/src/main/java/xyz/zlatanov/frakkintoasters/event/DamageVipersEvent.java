@@ -1,6 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event;
 
-import java.util.List;
+import java.util.Set;
 
-public record DamageVipersEvent(List<Integer> shipIds) implements Event {
+public record DamageVipersEvent(Set<Integer> shipIds) implements Event {
 }
