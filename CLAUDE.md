@@ -4,7 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Web version of the Battlestar Galactica board game. Java implementation modeling the game's state, events, and mechanics.
+Web version of the Battlestar Galactica board game. Java implementation modeling the game's state, events, and
+mechanics.
 
 ## Build Commands
 
@@ -22,13 +23,18 @@ Multi-module Gradle project with a single `core` module. Package root: `xyz.zlat
 ### Key Packages
 
 - `state/` - Game state model: `Game` (top-level), `Player`, `Die` (d8)
-- `state/board/` - Board hierarchy: `Board` (base, tracks characters by location) -> `BattlestarBoard` (adds damage tracking) -> `GalacticaBoard`/`PegasusBoard`. Also `CylonFleetBoard` and `BoardsHolder` (aggregates all boards). `Location` enum defines all 57 board spaces.
-- `state/ship/` - `Ship` interface with implementations: `Viper`, `Raptor`, `Basestar`, `Raider`, etc. `CylonShips` manages the Cylon ship supply pool. Ships have unique integer IDs.
-- `state/deck/` - Generic `Deck<T>` (draw/discard/shuffle). `DecksHolder` manages all game decks and routes discards to the correct deck.
+- `state/board/` - Board hierarchy: `Board` (base, tracks characters by location) -> `BattlestarBoard` (adds damage
+  tracking) -> `GalacticaBoard`/`PegasusBoard`. Also `CylonFleetBoard` and `BoardsHolder` (aggregates all boards).
+  `Location` enum defines all 38 board spaces.
+- `state/ship/` - `Ship` interface with implementations: `Viper`, `Raptor`, `Basestar`, `Raider`, etc. `CylonShips`
+  manages the Cylon ship supply pool. Ships have unique integer IDs.
+- `state/deck/` - Generic `Deck<T>` (draw/discard/shuffle). `DecksHolder` manages all game decks and routes discards to
+  the correct deck.
 - `state/skill/` - `SkillCard` (record), `SkillCardType` enum, `SkillCardColor` enum (6 colors)
-- `state/card/` - Card enums: `LoyaltyCard`, `QuorumCard`, `MutinyCard`, `ObjectiveCard`, `DestinationCard`, `MotiveCard`
+- `state/card/` - Card enums: `LoyaltyCard`, `QuorumCard`, `MutinyCard`, `ObjectiveCard`, `DestinationCard`,
+  `MotiveCard`
 - `state/damage/` - Damage card enums: `GalacticaDamage`, `PegasusDamage`, `BasestarDamage`
-- `state/character/` - `Character` enum (32 BSG characters), `CharacterType` enum
+- `state/character/` - `Character` enum (33 BSG characters), `CharacterType` enum
 - `event/` - Event-driven game actions (see architecture below)
 
 ## Architecture
@@ -36,17 +42,23 @@ Multi-module Gradle project with a single `core` module. Package root: `xyz.zlat
 ### Event System
 
 Game actions are modeled as events implementing the `Event` interface:
-- `execute(Game)` validates then applies the event, returning `List<Followup>`
+
+- `execute(Game)` validates then applies the event, returning `List<Followup>`. Followup can contain concrete events
+  ready for execution or placeholder events (in the package `xyz.zlatanov.frakkintoasters.event.placeholder`) that need
+  further interaction with the players to continue.
 - `isValid(Game)` checks preconditions (default: true)
 - `apply(Game)` mutates game state and returns followup events
 
 Event hierarchy: `Event` -> `PlayerEvent` (adds player context) -> `ActionEvent` (location-based board actions)
 
-**Followups** chain events: `Followup.all(events...)` means execute all; `Followup.one(events...)` means player picks one. Events return followups to express multi-step game logic.
+**Followups** chain events: `Followup.all(events...)` means execute all; `Followup.one(events...)` means current player
+picks one. Events return followups to express multi-step game logic.
 
 ### Lombok Usage
 
-Uses Lombok extensively: `@Builder`, `@Getter`, `@Accessors(fluent = true)`, `@RequiredArgsConstructor`, `val`. Accessors are fluent style (no `get`/`set` prefix) - e.g., `game.players()` not `game.getPlayers()`.
+Uses Lombok extensively: `@Builder`, `@Getter`, `@Accessors(fluent = true)`, `@RequiredArgsConstructor`, `val`.
+Accessors are fluent style (no `get`/`set` prefix) - e.g., `game.players()` not `game.getPlayers()`. Lombok `val` is
+preferred when possible.
 
 ### Testing Patterns
 
