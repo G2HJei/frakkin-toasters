@@ -3,29 +3,42 @@ package xyz.zlatanov.frakkintoasters.event;
 import java.util.Arrays;
 import java.util.List;
 
-import static xyz.zlatanov.frakkintoasters.event.Followup.FollowupType.ALL_OF;
-import static xyz.zlatanov.frakkintoasters.event.Followup.FollowupType.ONE_OF;
+public sealed interface Followup permits Followup.Single, Followup.AllOf, Followup.OneOf {
 
-public record Followup(FollowupType type, List<Event> events) {
-
-    public static List<Followup> followWith(Event event) {
-        return followWith(all(event));
+    record Single(Event event) implements Followup {
     }
 
-    public static List<Followup> followWith(Followup... followups) {
+    record AllOf(List<Followup> followups) implements Followup {
+    }
+
+    record OneOf(List<Followup> options) implements Followup {
+    }
+
+    static Single single(Event event) {
+        return new Single(event);
+    }
+
+    static AllOf all(Event... events) {
+        return new AllOf(Arrays.stream(events).<Followup>map(Single::new).toList());
+    }
+
+    static OneOf one(Event... events) {
+        return new OneOf(Arrays.stream(events).<Followup>map(Single::new).toList());
+    }
+
+    static AllOf all(Followup... followups) {
+        return new AllOf(Arrays.stream(followups).toList());
+    }
+
+    static OneOf one(Followup... followups) {
+        return new OneOf(Arrays.stream(followups).toList());
+    }
+
+    static List<Followup> followWith(Event event) {
+        return followWith(single(event));
+    }
+
+    static List<Followup> followWith(Followup... followups) {
         return Arrays.stream(followups).toList();
-    }
-
-    public static Followup all(Event... events) {
-        return new Followup(ALL_OF, Arrays.stream(events).toList());
-    }
-
-    public static Followup one(Event... events) {
-        return new Followup(ONE_OF, Arrays.stream(events).toList());
-    }
-
-    public enum FollowupType {
-        ONE_OF,
-        ALL_OF
     }
 }
