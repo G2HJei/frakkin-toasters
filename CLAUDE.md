@@ -51,8 +51,22 @@ Game actions are modeled as events implementing the `Event` interface:
 
 Event hierarchy: `Event` -> `PlayerEvent` (adds player context) -> `ActionEvent` (location-based board actions)
 
-**Followups** chain events: `Followup.all(events...)` means execute all; `Followup.one(events...)` means current player
-picks one. Events return followups to express multi-step game logic.
+**Followups** chain events using a recursive sealed interface with three variants:
+
+- `Followup.Single(Event)` - wraps a single event (leaf node)
+- `Followup.AllOf(List<Followup>)` - execute all children in order (sequence)
+- `Followup.OneOf(List<Followup>)` - current player picks exactly one (choice)
+
+Factory methods: `single(event)`, `all(events...)`, `one(events...)`, `followWith(...)`. Because the structure is
+recursive, `all(...)` and `one(...)` accept either plain `Event` varargs (auto-wrapped in `Single`) or nested `Followup`
+varargs — enabling patterns like "choose between a single event or a sequence of events":
+
+```java
+return followWith(one(
+        single(new PlaySuperCrisisCardEvent(playerNumber)),
+        all(new DrawCrisisCardsEvent(playerNumber),
+                new ResolveCapricaCrisisEvent(playerNumber))));
+```
 
 ### Lombok Usage
 
