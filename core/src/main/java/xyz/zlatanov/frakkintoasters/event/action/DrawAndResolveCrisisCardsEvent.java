@@ -11,7 +11,7 @@ import java.util.List;
 import static xyz.zlatanov.frakkintoasters.event.Followup.followWith;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 
-public record CapricaActionOption2Event(int playerNumber) implements PlayerEvent {
+public record DrawAndResolveCrisisCardsEvent(int playerNumber) implements PlayerEvent {
 
     @Override
     public List<Followup> apply(Game game) {
