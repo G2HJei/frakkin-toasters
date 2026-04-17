@@ -7,15 +7,12 @@ import xyz.zlatanov.frakkintoasters.event.DamagePegasusEvent;
 import xyz.zlatanov.frakkintoasters.fake.FakeDeck;
 import xyz.zlatanov.frakkintoasters.fake.FakeDie;
 import xyz.zlatanov.frakkintoasters.state.Game;
-import xyz.zlatanov.frakkintoasters.state.board.GalacticaBoard;
 import xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage;
 import xyz.zlatanov.frakkintoasters.state.deck.DecksHolder;
 import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
-import xyz.zlatanov.frakkintoasters.state.ship.CylonShips;
 
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static xyz.zlatanov.frakkintoasters.event.Followup.followWith;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.*;
@@ -33,7 +30,7 @@ class PegasusCicActionEventTest {
     Basestar                 basestar        = game.cylonShips().basestar();
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         game.boards()
                 .galactica()
                 .place(GALACTICA_SPACE_2_OCLOCK, basestar);
@@ -61,7 +58,7 @@ class PegasusCicActionEventTest {
 
     @Test
     void shouldDamageBasestarTwice() {
-        basestarDmgDeck.nextCard(DISABLED_WEAPONS);
+        basestarDmgDeck.nextCard(DISABLED_WEAPONS).nextCard(STRUCTURAL_DAMAGE);
         die.nextRoll(8);
 
         new PegasusCicActionEvent(basestar.id()).execute(game);

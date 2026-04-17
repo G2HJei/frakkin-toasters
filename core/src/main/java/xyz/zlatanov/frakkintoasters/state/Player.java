@@ -13,6 +13,7 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import java.util.Arrays;
 
 import static xyz.zlatanov.frakkintoasters.state.character.Character.CHIEF_GALEN_TYROL;
+import static xyz.zlatanov.frakkintoasters.state.character.CharacterType.CYLON_LEADER;
 
 @Getter
 @Accessors(fluent = true)
@@ -24,6 +25,7 @@ public class Player {
     private final Deck<LoyaltyCard> loyaltyCards    = new Deck<>();
     private final Deck<MutinyCard>  mutinyCards     = new Deck<>();
     private       boolean           hasMiracleToken = true;
+    private       boolean           isInfiltrating  = false;
 
     public Player selectCharacter(Character selection) {
         assert character == null; //todo use asserts in core to avoid throwing FrakCallTheAdmiralException(s) everywhere
@@ -58,5 +60,15 @@ public class Player {
         return loyaltyCards.revealedCards()
                 .stream()
                 .anyMatch(LoyaltyCard::isCylon);
+    }
+
+    public void infiltrateGalactica() {
+        assert character.type() == CYLON_LEADER;
+        isInfiltrating = true;
+    }
+
+    public void endInfiltration() {
+        assert character.type() == CYLON_LEADER;
+        isInfiltrating = false;
     }
 }
