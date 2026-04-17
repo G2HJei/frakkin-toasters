@@ -8,19 +8,16 @@ import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Player;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 @Accessors(fluent = true)
 public record ReceiveSkillCardsEvent(int playerNumber, Map<SkillCardColor, Integer> selection) implements PlayerEvent {
     @Override
     public boolean isValid(Game game) {
         val player = player(game);
-        return player.isRevealedCylon()
-                ? validateRevealedCylonSelection()
-                : validateHumanSelection(player);
+        return player.isHuman()
+                ? validateHumanSelection(player)
+                : validateRevealedCylonSelection();
     }
 
     @Override
@@ -80,6 +77,11 @@ public record ReceiveSkillCardsEvent(int playerNumber, Map<SkillCardColor, Integ
                             }
                         });
             }
+        }
+        if (player.isInfiltrating()) {
+            //cylon players can select one extra card from within their skill set
+            return new HashSet<>(limits.values())
+                    .equals(Set.of(0, -1));
         }
         return limits.values().stream().allMatch(uses -> uses >= 0);
     }

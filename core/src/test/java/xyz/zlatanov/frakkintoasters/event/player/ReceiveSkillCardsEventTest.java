@@ -4,23 +4,28 @@ import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import xyz.zlatanov.frakkintoasters.state.Game;
+import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 import xyz.zlatanov.frakkintoasters.state.deck.DecksHolder;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.CYLON_SEND_TO_BRIG;
-import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
-import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.LEADERSHIP;
-import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.TREACHERY;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.AT_ANY_COST;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.BAIT;
 
@@ -72,6 +77,47 @@ class ReceiveSkillCardsEventTest {
     void shouldNotAllowDoubleSelectionForRevealedCylon() {
         revealCylon();
         assertFalse(new ReceiveSkillCardsEvent(1, Map.of(TREACHERY, 2)).isValid(game));
+    }
+
+    @ParameterizedTest
+    @MethodSource("cylonLeaderSelection")
+    void shouldValidateCylonLeaderSelection(Character cylonLeader, Map<SkillCardColor, Integer> selection) {
+        game.player(2).selectCharacter(cylonLeader);
+        assertTrue(new ReceiveSkillCardsEvent(2, selection).isValid(game));
+    }
+
+    public static Stream<Arguments> cylonLeaderSelection() {
+        return Stream.of(
+                arguments(CAPRICA_SIX, Map.of(LEADERSHIP, 1, ENGINEERING, 1)),
+                arguments(CAPRICA_SIX, Map.of(LEADERSHIP, 1, TREACHERY, 1)),
+
+                arguments(DANNA_BIERS, Map.of(LEADERSHIP, 1, TREACHERY, 1)),
+                arguments(DANNA_BIERS, Map.of(POLITICS, 1, TREACHERY, 1)),
+                arguments(DANNA_BIERS, Map.of(POLITICS, 1, ENGINEERING, 1)),
+                arguments(DANNA_BIERS, Map.of(POLITICS, 1, ENGINEERING, 1))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("infiltratingCylonLeaderSelection")
+    void shouldAllowExtraCardForInfiltratingCylonLeader(Character cylonLeader, Map<SkillCardColor, Integer> selection) {
+        game.player(2)
+                .selectCharacter(cylonLeader)
+                .infiltrateGalactica();
+        assertTrue(new ReceiveSkillCardsEvent(2, selection).isValid(game));
+    }
+
+    public static Stream<Arguments> infiltratingCylonLeaderSelection() {
+        return Stream.of(
+                arguments(CAPRICA_SIX, Map.of(LEADERSHIP, 1, TREACHERY, 1, ENGINEERING, 1)),
+                arguments(CAPRICA_SIX, Map.of(LEADERSHIP, 2, ENGINEERING, 1)),
+                arguments(CAPRICA_SIX, Map.of(LEADERSHIP, 2, TREACHERY, 1)),
+
+                arguments(DANNA_BIERS, Map.of(LEADERSHIP, 1, TREACHERY, 1, ENGINEERING, 1)),
+                arguments(DANNA_BIERS, Map.of(POLITICS, 1, TREACHERY, 1, ENGINEERING, 1)),
+                arguments(DANNA_BIERS, Map.of(LEADERSHIP, 1, POLITICS, 1, ENGINEERING, 1)),
+                arguments(DANNA_BIERS, Map.of(LEADERSHIP, 1, POLITICS, 1, TREACHERY, 1))
+        );
     }
 
     private void revealCylon() {

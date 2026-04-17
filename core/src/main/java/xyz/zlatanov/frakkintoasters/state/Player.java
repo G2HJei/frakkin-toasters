@@ -2,6 +2,7 @@ package xyz.zlatanov.frakkintoasters.state;
 
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
 import xyz.zlatanov.frakkintoasters.state.card.MutinyCard;
@@ -56,10 +57,13 @@ public class Player {
         return hasMiracleToken;
     }
 
-    public boolean isRevealedCylon() {
-        return loyaltyCards.revealedCards()
+    public boolean isHuman() {
+        val isCylonLeader = character.type() == CYLON_LEADER;
+        val hasNotRevealedCylonLoyalty = loyaltyCards.revealedCards()
                 .stream()
-                .anyMatch(LoyaltyCard::isCylon);
+                .noneMatch(LoyaltyCard::isCylon);
+        return isCylonLeader && isInfiltrating
+                || hasNotRevealedCylonLoyalty;
     }
 
     public void infiltrateGalactica() {
