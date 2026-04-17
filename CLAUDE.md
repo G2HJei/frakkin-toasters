@@ -68,6 +68,17 @@ return followWith(one(
                 new ResolveCapricaCrisisEvent(playerNumber))));
 ```
 
+### Decision Constraints
+
+`DecisionConstraint<T>` is a generic interface that validates constraints on placeholder events, allowing rules to be
+enforced on player decisions. When a `PlayerDecisionEvent` references a `DecisionConstraint`, the constraint validates
+that the player's action meets specific criteria before execution.
+
+- `DecisionConstraint<T extends Event>` - interface with single method `validConstraint(T event)` returning boolean
+- Used with `PlayerDecisionEvent` to optionally specify validation logic
+- Example: `Draw2SkillCards` implements `DecisionConstraint<ReceiveSkillCardsEvent>` to enforce exactly 2 cards drawn
+- Constraints are checked during event execution before `isValid()` and `apply()` are called
+
 ### Lombok Usage
 
 Uses Lombok extensively: `@Builder`, `@Getter`, `@Accessors(fluent = true)`, `@RequiredArgsConstructor`, `val`.
