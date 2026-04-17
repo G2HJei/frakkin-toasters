@@ -2,7 +2,7 @@ package xyz.zlatanov.frakkintoasters.event.action;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.event.placeholder.ResolveCapricaCrisisCardEvent;
+import xyz.zlatanov.frakkintoasters.event.ResolveCapricaCrisisCardEvent;
 import xyz.zlatanov.frakkintoasters.fake.FakeDeck;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;

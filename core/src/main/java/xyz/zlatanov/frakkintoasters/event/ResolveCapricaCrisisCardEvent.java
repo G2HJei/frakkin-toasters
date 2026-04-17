@@ -1,6 +1,5 @@
-package xyz.zlatanov.frakkintoasters.event.placeholder;
+package xyz.zlatanov.frakkintoasters.event;
 
-import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 
 public record ResolveCapricaCrisisCardEvent(int playerNumber,
