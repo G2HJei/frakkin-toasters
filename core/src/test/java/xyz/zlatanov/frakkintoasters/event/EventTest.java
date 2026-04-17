@@ -1,7 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event;
 
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.event.placeholder.decisionconstraint.DecisionConstraint;
+import xyz.zlatanov.frakkintoasters.event.decisionconstraint.DecisionConstraint;
 import xyz.zlatanov.frakkintoasters.state.Game;
 
 import java.util.ArrayList;

@@ -2,6 +2,7 @@ package xyz.zlatanov.frakkintoasters.event.placeholder.decisionconstraint;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
+import xyz.zlatanov.frakkintoasters.event.decisionconstraint.Draw2SkillCards;
 import xyz.zlatanov.frakkintoasters.event.player.ReceiveSkillCardsEvent;
 
 import java.util.Map;

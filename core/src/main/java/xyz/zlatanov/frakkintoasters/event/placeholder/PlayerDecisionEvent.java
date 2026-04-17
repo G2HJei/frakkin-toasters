@@ -2,7 +2,7 @@ package xyz.zlatanov.frakkintoasters.event.placeholder;
 
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
-import xyz.zlatanov.frakkintoasters.event.placeholder.decisionconstraint.DecisionConstraint;
+import xyz.zlatanov.frakkintoasters.event.decisionconstraint.DecisionConstraint;
 
 public record PlayerDecisionEvent<T extends Event<T>>(
         int playerNumber,

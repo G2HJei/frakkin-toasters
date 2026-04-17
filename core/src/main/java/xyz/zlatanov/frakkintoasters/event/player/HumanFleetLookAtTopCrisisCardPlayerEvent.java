@@ -3,8 +3,8 @@ package xyz.zlatanov.frakkintoasters.event.player;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
+import xyz.zlatanov.frakkintoasters.event.decisionconstraint.Draw2SkillCards;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
-import xyz.zlatanov.frakkintoasters.event.placeholder.decisionconstraint.Draw2SkillCards;
 import xyz.zlatanov.frakkintoasters.state.Game;
 
 import java.util.List;
