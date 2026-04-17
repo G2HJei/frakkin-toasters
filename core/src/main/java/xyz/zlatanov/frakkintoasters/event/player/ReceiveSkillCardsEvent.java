@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 @Accessors(fluent = true)
-public record ReceiveSkillsEvent(int playerNumber, Map<SkillCardColor, Integer> selection) implements PlayerEvent {
+public record ReceiveSkillCardsEvent(int playerNumber, Map<SkillCardColor, Integer> selection) implements PlayerEvent {
     @Override
     public boolean isValid(Game game) {
         val player = player(game);

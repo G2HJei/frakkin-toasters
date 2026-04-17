@@ -12,8 +12,6 @@ import java.util.List;
 import static xyz.zlatanov.frakkintoasters.event.Followup.followWith;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 
-;
-
 public record QuorumChamberActionEvent(int playerNumber) implements ActionEvent {
 
     @Override

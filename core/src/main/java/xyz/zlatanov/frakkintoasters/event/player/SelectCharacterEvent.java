@@ -123,7 +123,7 @@ public record SelectCharacterEvent(int player, Character selectedCharacter) impl
     private List<Followup> specialSetupFollowup() {
         return switch (selectedCharacter) {
             case KARL_HELO_AGATHON -> null;
-            case LEE_APOLLO_ADAMA -> followWith(new PlayerDecisionEvent(player, LaunchViperEvent.class));
+            case LEE_APOLLO_ADAMA -> followWith(new PlayerDecisionEvent<>(player, LaunchViperEvent.class));
             default -> throw new FrakCallTheAdmiralException();
         };
     }

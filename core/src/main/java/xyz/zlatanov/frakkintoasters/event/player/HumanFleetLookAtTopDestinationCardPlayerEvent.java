@@ -4,6 +4,7 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
+import xyz.zlatanov.frakkintoasters.event.placeholder.decisionconstraint.Draw2SkillCards;
 import xyz.zlatanov.frakkintoasters.state.Game;
 
 import java.util.List;
@@ -18,7 +19,7 @@ public record HumanFleetLookAtTopDestinationCardPlayerEvent(int playerNumber) im
         return followWith(
                 one(new PlaceDestinationCardOnTopEvent(playerNumber, card),
                         new PlaceDestinationCardOnBottomEvent(playerNumber, card)),
-                single(new PlayerDecisionEvent(playerNumber, ReceiveSkillsEvent.class)) //todo same as in look at top crisis cardevent
+                single(new PlayerDecisionEvent<>(playerNumber, ReceiveSkillCardsEvent.class, Draw2SkillCards.class))
         );
     }
 }
