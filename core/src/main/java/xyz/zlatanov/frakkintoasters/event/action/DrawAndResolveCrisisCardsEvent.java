@@ -3,7 +3,7 @@ package xyz.zlatanov.frakkintoasters.event.action;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
-import xyz.zlatanov.frakkintoasters.event.placeholder.ResolveCapricaCrisisCardEvent;
+import xyz.zlatanov.frakkintoasters.event.ResolveCapricaCrisisCardEvent;
 import xyz.zlatanov.frakkintoasters.state.Game;
 
 import java.util.List;
