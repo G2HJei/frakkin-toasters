@@ -27,9 +27,9 @@ class PressRoomActionEventTest {
     List<Followup> expectedFollowUp() {
         return followWith(
                 all(
-                        new PlayerDecisionEvent(2, DiscardDownTo1MutinyCardEvent.class)),
+                        new PlayerDecisionEvent<>(2, DiscardDownTo1MutinyCardEvent.class)),
                 one(
-                        new PlayerDecisionEvent(1, Discard1MutinyCardEvent.class),
+                        new PlayerDecisionEvent<>(1, Discard1MutinyCardEvent.class),
                         new NoOpEvent(1))
         );
     }

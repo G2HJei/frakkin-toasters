@@ -49,7 +49,7 @@ class MainBatteriesActionEventTest {
 
         val followups = new MainBatteriesActionEvent(1, GALACTICA_SPACE_2_OCLOCK).execute(game);
 
-        assertEquals(followWith(new PlayerDecisionEvent(1, DestroyCivilianShipEvent.class)), followups);
+        assertEquals(followWith(new PlayerDecisionEvent<>(1, DestroyCivilianShipEvent.class)), followups);
     }
 
     @Test
@@ -79,7 +79,7 @@ class MainBatteriesActionEventTest {
 
         val followups = new MainBatteriesActionEvent(1, GALACTICA_SPACE_4_OCLOCK).execute(game);
 
-        assertEquals(followWith(new PlayerDecisionEvent(1, DamageVipersEvent.class)), followups);
+        assertEquals(followWith(new PlayerDecisionEvent<>(1, DamageVipersEvent.class)), followups);
     }
 
     @Test
@@ -136,7 +136,7 @@ class MainBatteriesActionEventTest {
 
         val followups = new MainBatteriesActionEvent(1, GALACTICA_SPACE_6_OCLOCK).execute(game);
 
-        assertEquals(followWith(new PlayerDecisionEvent(1, DestroyRaidersEvent.class)), followups);
+        assertEquals(followWith(new PlayerDecisionEvent<>(1, DestroyRaidersEvent.class)), followups);
     }
 
     @Test
@@ -166,7 +166,7 @@ class MainBatteriesActionEventTest {
 
         val followups = new MainBatteriesActionEvent(1, GALACTICA_SPACE_8_OCLOCK).execute(game);
 
-        assertEquals(followWith(new PlayerDecisionEvent(1, DestroyRaidersEvent.class)), followups);
+        assertEquals(followWith(new PlayerDecisionEvent<>(1, DestroyRaidersEvent.class)), followups);
     }
 
     @Test

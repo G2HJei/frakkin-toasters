@@ -16,8 +16,8 @@ public record HangarDeckActionEvent(int playerNumber) implements ActionEvent {
     @Override
     public List<Followup> apply(Game game) {
         return followWith(all(
-                new PlayerDecisionEvent(playerNumber, LaunchViperEvent.class),
-                new PlayerDecisionEvent(playerNumber, ActionEvent.class)));
+                new PlayerDecisionEvent<>(playerNumber, LaunchViperEvent.class),
+                new PlayerDecisionEvent<>(playerNumber, ActionEvent.class)));
     }
 
 }

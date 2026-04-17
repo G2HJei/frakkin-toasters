@@ -58,7 +58,7 @@ class SelectCharacterEventTest {
     @Test
     void shouldFollowupForApollo() {
         val followup = select(LEE_APOLLO_ADAMA).execute(game);
-        val expected = followWith(new PlayerDecisionEvent(1, LaunchViperEvent.class));
+        val expected = followWith(new PlayerDecisionEvent<>(1, LaunchViperEvent.class));
         assertEquals(expected, followup);
     }
 

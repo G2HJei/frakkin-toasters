@@ -16,8 +16,8 @@ public record PressRoomActionEvent(int playerNumber, int targetPlayer) implement
         val cardDrawn = game.decks().mutiny().draw();
         game.player(targetPlayer).mutinyCards().add(cardDrawn);
         return followWith(
-                all(new PlayerDecisionEvent(targetPlayer, DiscardDownTo1MutinyCardEvent.class)),
-                one(new PlayerDecisionEvent(playerNumber, Discard1MutinyCardEvent.class),
+                all(new PlayerDecisionEvent<>(targetPlayer, DiscardDownTo1MutinyCardEvent.class)),
+                one(new PlayerDecisionEvent<>(playerNumber, Discard1MutinyCardEvent.class),
                         new NoOpEvent(playerNumber))
         );
     }

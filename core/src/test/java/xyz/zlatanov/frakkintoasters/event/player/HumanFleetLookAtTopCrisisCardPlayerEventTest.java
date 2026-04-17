@@ -3,6 +3,7 @@ package xyz.zlatanov.frakkintoasters.event.player;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
+import xyz.zlatanov.frakkintoasters.event.placeholder.decisionconstraint.Draw2SkillCards;
 import xyz.zlatanov.frakkintoasters.fake.FakeDeck;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
@@ -33,7 +34,7 @@ class HumanFleetLookAtTopCrisisCardPlayerEventTest {
         assertEquals(followWith(
                         one(new PlaceCrisisCardOnTopEvent(1, DETENTE),
                                 new PlaceCrisisCardOnBottomEvent(1, DETENTE)),
-                        single(new PlayerDecisionEvent(1, ReceiveSkillsEvent.class))
+                        single(new PlayerDecisionEvent<>(1, ReceiveSkillCardsEvent.class, Draw2SkillCards.class))
                 ),
                 followups);
     }

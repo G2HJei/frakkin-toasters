@@ -29,8 +29,8 @@ class HangarDeckActionEventTest {
         val followup = new HangarDeckActionEvent(1).execute(game);
 
         val expectedFollowUp = followWith(all(
-                new PlayerDecisionEvent(1, LaunchViperEvent.class),
-                new PlayerDecisionEvent(1, ActionEvent.class)
+                new PlayerDecisionEvent<>(1, LaunchViperEvent.class),
+                new PlayerDecisionEvent<>(1, ActionEvent.class)
         ));
         assertEquals(expectedFollowUp, followup);
     }

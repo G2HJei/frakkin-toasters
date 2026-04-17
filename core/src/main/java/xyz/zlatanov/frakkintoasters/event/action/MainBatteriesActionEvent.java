@@ -38,7 +38,7 @@ public record MainBatteriesActionEvent(int playerNumber, Location spaceLocation)
         if (civilians.size() == 1) {
             return followWith(new DestroyCivilianShipEvent(civilians.getFirst().id()));
         }
-        return followWith(new PlayerDecisionEvent(playerNumber, DestroyCivilianShipEvent.class));
+        return followWith(new PlayerDecisionEvent<>(playerNumber, DestroyCivilianShipEvent.class));
     }
 
     private List<Followup> damageViper(Game game) {
@@ -49,7 +49,7 @@ public record MainBatteriesActionEvent(int playerNumber, Location spaceLocation)
         if (vipers.size() == 1) {
             return followWith(new DamageVipersEvent(Set.of(vipers.getFirst().id())));
         }
-        return followWith(new PlayerDecisionEvent(playerNumber, DamageVipersEvent.class));
+        return followWith(new PlayerDecisionEvent<>(playerNumber, DamageVipersEvent.class));
     }
 
     private List<Followup> destroyRaiders(Game game, int count) {
@@ -60,6 +60,6 @@ public record MainBatteriesActionEvent(int playerNumber, Location spaceLocation)
         if (raiders.size() <= count) {
             return followWith(new DestroyRaidersEvent(raiders.stream().map(Ship::id).collect(toSet())));
         }
-        return followWith(new PlayerDecisionEvent(playerNumber, DestroyRaidersEvent.class));
+        return followWith(new PlayerDecisionEvent<>(playerNumber, DestroyRaidersEvent.class));
     }
 }

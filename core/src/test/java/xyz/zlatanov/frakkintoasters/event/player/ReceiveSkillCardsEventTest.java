@@ -47,13 +47,13 @@ class ReceiveSkillCardsEventTest {
     @Test
     void shouldReceiveCardsWithinSkillSet() {
         when(leadershipDeck.draw()).thenReturn(leadershipCard);
-        new ReceiveSkillsEvent(1, Map.of(LEADERSHIP, 1)).execute(game);
+        new ReceiveSkillCardsEvent(1, Map.of(LEADERSHIP, 1)).execute(game);
         assertEquals(List.of(leadershipCard), game.player(1).skillCards().cards());
     }
 
     @Test
     void shouldNotReceiveOutsideOfSkillSet() {
-        val action = new ReceiveSkillsEvent(1, Map.of(TREACHERY, 1));
+        val action = new ReceiveSkillCardsEvent(1, Map.of(TREACHERY, 1));
         assertFalse(action.isValid(game));
     }
 
@@ -63,7 +63,7 @@ class ReceiveSkillCardsEventTest {
         when(leadershipDeck.draw()).thenReturn(leadershipCard);
         when(treacheryDeck.draw()).thenReturn(treacheryCard);
 
-        new ReceiveSkillsEvent(1, Map.of(LEADERSHIP, 1, TREACHERY, 1)).execute(game);
+        new ReceiveSkillCardsEvent(1, Map.of(LEADERSHIP, 1, TREACHERY, 1)).execute(game);
 
         assertEquals(List.of(leadershipCard, treacheryCard), game.player(1).skillCards().cards());
     }
@@ -71,7 +71,7 @@ class ReceiveSkillCardsEventTest {
     @Test
     void shouldNotAllowDoubleSelectionForRevealedCylon() {
         revealCylon();
-        assertFalse(new ReceiveSkillsEvent(1, Map.of(TREACHERY, 2)).isValid(game));
+        assertFalse(new ReceiveSkillCardsEvent(1, Map.of(TREACHERY, 2)).isValid(game));
     }
 
     private void revealCylon() {
