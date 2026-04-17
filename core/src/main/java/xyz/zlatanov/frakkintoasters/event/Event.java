@@ -1,6 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event;
 
-import xyz.zlatanov.frakkintoasters.event.placeholder.decisionconstraint.DecisionConstraint;
+import xyz.zlatanov.frakkintoasters.event.decisionconstraint.DecisionConstraint;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
 

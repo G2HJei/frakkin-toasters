@@ -1,4 +1,4 @@
-package xyz.zlatanov.frakkintoasters.event.placeholder.decisionconstraint;
+package xyz.zlatanov.frakkintoasters.event.decisionconstraint;
 
 import xyz.zlatanov.frakkintoasters.event.player.ReceiveSkillCardsEvent;
 

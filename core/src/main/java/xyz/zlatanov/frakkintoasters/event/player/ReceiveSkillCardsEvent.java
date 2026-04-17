@@ -79,7 +79,7 @@ public record ReceiveSkillCardsEvent(int playerNumber, Map<SkillCardColor, Integ
             }
         }
         if (player.isInfiltrating()) {
-            //cylon players can select one extra card from within their skill set
+            //cylon leader can select one extra card from within their skill set
             return new HashSet<>(limits.values())
                     .equals(Set.of(0, -1));
         }
