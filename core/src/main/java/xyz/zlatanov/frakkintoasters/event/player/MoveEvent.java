@@ -55,7 +55,7 @@ public record MoveEvent(int playerNumber, Location destination, SkillCard discar
     }
 
     private boolean isEligibleLocation(Game game) {
-        val revealedCylon = game.player(playerNumber).isRevealedCylon();
+        val isHuman = game.player(playerNumber).isHuman();
         val cylonLocation = destination.isCylonLocation();
         val hazardousLocation = destination.isHazardousLocation();
         val currentLocation = game.locate(playerCharacter(game));
@@ -64,11 +64,11 @@ public record MoveEvent(int playerNumber, Location destination, SkillCard discar
         return isMovingToDifferentLocation
                 && !shipToSpaceMovement
                 && !hazardousLocation
-                && validDistance(game, currentLocation)
-                && (revealedCylon == cylonLocation);
+                && validSpaceDistance(game, currentLocation)
+                && isHuman != cylonLocation;
     }
 
-    private boolean validDistance(Game game, Location currentLocation) {
+    private boolean validSpaceDistance(Game game, Location currentLocation) {
         val isPiloting = currentLocation.isSpaceLocation();
         val isStayingInSpace = destination.isSpaceLocation();
         if (isPiloting && isStayingInSpace) {
