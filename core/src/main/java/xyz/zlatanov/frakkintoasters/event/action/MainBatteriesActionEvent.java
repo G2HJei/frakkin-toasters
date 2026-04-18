@@ -7,17 +7,16 @@ import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 
-import java.util.List;
 import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;
-import static xyz.zlatanov.frakkintoasters.event.Followup.followWith;
+import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.*;
 
 public record MainBatteriesActionEvent(int playerNumber, Location spaceLocation) implements ActionEvent {
 
     @Override
-    public List<Followup> apply(Game game) {
+    public Followup apply(Game game) {
         val roll = game.die().roll();
         if (roll == 1) {
             return destroyCivilianShip(game);
@@ -30,36 +29,36 @@ public record MainBatteriesActionEvent(int playerNumber, Location spaceLocation)
         }
     }
 
-    private List<Followup> destroyCivilianShip(Game game) {
+    private Followup destroyCivilianShip(Game game) {
         val civilians = game.boards().galactica().shipsIn(spaceLocation, CIVILIAN);
         if (civilians.isEmpty()) {
-            return List.of();
+            return Followup.NONE;
         }
         if (civilians.size() == 1) {
-            return followWith(new DestroyCivilianShipEvent(civilians.getFirst().id()));
+            return single(new DestroyCivilianShipEvent(civilians.getFirst().id()));
         }
-        return followWith(new PlayerDecisionEvent<>(playerNumber, DestroyCivilianShipEvent.class));
+        return single(new PlayerDecisionEvent<>(playerNumber, DestroyCivilianShipEvent.class));
     }
 
-    private List<Followup> damageViper(Game game) {
+    private Followup damageViper(Game game) {
         val vipers = game.boards().galactica().shipsIn(spaceLocation, VIPER, VIPER_MARK_VII);
         if (vipers.isEmpty()) {
-            return List.of();
+            return Followup.NONE;
         }
         if (vipers.size() == 1) {
-            return followWith(new DamageVipersEvent(Set.of(vipers.getFirst().id())));
+            return single(new DamageVipersEvent(Set.of(vipers.getFirst().id())));
         }
-        return followWith(new PlayerDecisionEvent<>(playerNumber, DamageVipersEvent.class));
+        return single(new PlayerDecisionEvent<>(playerNumber, DamageVipersEvent.class));
     }
 
-    private List<Followup> destroyRaiders(Game game, int count) {
+    private Followup destroyRaiders(Game game, int count) {
         val raiders = game.boards().galactica().shipsIn(spaceLocation, RAIDER);
         if (raiders.isEmpty()) {
-            return List.of();
+            return Followup.NONE;
         }
         if (raiders.size() <= count) {
-            return followWith(new DestroyRaidersEvent(raiders.stream().map(Ship::id).collect(toSet())));
+            return single(new DestroyRaidersEvent(raiders.stream().map(Ship::id).collect(toSet())));
         }
-        return followWith(new PlayerDecisionEvent<>(playerNumber, DestroyRaidersEvent.class));
+        return single(new PlayerDecisionEvent<>(playerNumber, DestroyRaidersEvent.class));
     }
 }

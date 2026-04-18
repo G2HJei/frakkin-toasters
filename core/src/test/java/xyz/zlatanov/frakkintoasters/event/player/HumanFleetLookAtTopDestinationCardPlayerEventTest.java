@@ -31,7 +31,7 @@ class HumanFleetLookAtTopDestinationCardPlayerEventTest {
         val followups = new HumanFleetLookAtTopDestinationCardPlayerEvent(1).execute(game);
 
         assertEquals(initialSize - 1, destinationDeck.size());
-        assertEquals(followWith(
+        assertEquals(all(
                         one(new PlaceDestinationCardOnTopEvent(1, LIONS_HEAD_NEBULA),
                                 new PlaceDestinationCardOnBottomEvent(1, LIONS_HEAD_NEBULA)),
                         single(new PlayerDecisionEvent<>(1, ReceiveSkillCardsEvent.class, DRAW_EXACTLY_2))

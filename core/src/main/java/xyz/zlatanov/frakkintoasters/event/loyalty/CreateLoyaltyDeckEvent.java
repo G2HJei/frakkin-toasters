@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import static xyz.zlatanov.frakkintoasters.event.Followup.followWith;
+import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.GAIUS_BALTAR;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.SHARON_BOOMER_VALERII;
@@ -25,7 +25,7 @@ import static xyz.zlatanov.frakkintoasters.state.util.AllCardsProvider.genericDe
 public record CreateLoyaltyDeckEvent() implements Event {
 
     @Override
-    public List<Followup> apply(Game game) {
+    public Followup apply(Game game) {
         setupLoyaltyNotCylonDeck(game);
 
         val cylonDeck = setupCylonDeck();
@@ -42,7 +42,7 @@ public record CreateLoyaltyDeckEvent() implements Event {
         return followup(game);
     }
 
-    private List<Followup> followup(Game game) {
+    private Followup followup(Game game) {
         val hasMutineer = game.players()
                 .stream()
                 .map(Player::loyaltyCards)
@@ -50,8 +50,8 @@ public record CreateLoyaltyDeckEvent() implements Event {
                 .flatMap(Collection::stream)
                 .anyMatch(MUTINEER::equals);
         return hasMutineer
-                ? followWith(new RevealMutineerEvent())
-                : followWith();
+                ? single(new RevealMutineerEvent())
+                : Followup.NONE;
     }
 
     private static void setupLoyaltyNotCylonDeck(Game game) {

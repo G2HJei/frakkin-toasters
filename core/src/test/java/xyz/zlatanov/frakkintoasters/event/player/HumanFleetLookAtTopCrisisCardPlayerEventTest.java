@@ -31,7 +31,7 @@ class HumanFleetLookAtTopCrisisCardPlayerEventTest {
         val followups = new HumanFleetLookAtTopCrisisCardPlayerEvent(1).execute(game);
 
         assertEquals(initialSize - 1, crisisDeck.size());
-        assertEquals(followWith(
+        assertEquals(all(
                         one(new PlaceCrisisCardOnTopEvent(1, DETENTE),
                                 new PlaceCrisisCardOnBottomEvent(1, DETENTE)),
                         single(new PlayerDecisionEvent<>(1, ReceiveSkillCardsEvent.class, DRAW_EXACTLY_2))

@@ -7,12 +7,10 @@ import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.ship.ShipType;
 
-import java.util.List;
-
 @Accessors(fluent = true)
 public record LaunchViperEvent(int playerNumber, ShipType shipType, Location location) implements PlayerEvent {
     @Override
-    public List<Followup> apply(Game game) {
-        return List.of();
+    public Followup apply(Game game) {
+        return Followup.NONE;
     }
 }

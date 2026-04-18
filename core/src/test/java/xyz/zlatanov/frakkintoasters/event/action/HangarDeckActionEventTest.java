@@ -10,7 +10,6 @@ import xyz.zlatanov.frakkintoasters.state.Game;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
-import static xyz.zlatanov.frakkintoasters.event.Followup.followWith;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.HANGAR_DECK;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.LOUIS_HOSHI;
 
@@ -28,10 +27,10 @@ class HangarDeckActionEventTest {
     void shouldLaunchViperWithExtraAction() {
         val followup = new HangarDeckActionEvent(1).execute(game);
 
-        val expectedFollowUp = followWith(all(
+        val expectedFollowUp = all(
                 new PlayerDecisionEvent<>(1, LaunchViperEvent.class),
                 new PlayerDecisionEvent<>(1, ActionEvent.class)
-        ));
+        );
         assertEquals(expectedFollowUp, followup);
     }
 }

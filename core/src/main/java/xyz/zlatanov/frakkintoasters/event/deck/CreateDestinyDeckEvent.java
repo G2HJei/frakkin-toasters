@@ -5,11 +5,9 @@ import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.state.Game;
 
-import java.util.List;
-
 public record CreateDestinyDeckEvent() implements Event {
     @Override
-    public List<Followup> apply(Game game) {
+    public Followup apply(Game game) {
         val decks = game.decks();
         decks.destiny().add(decks.politics().draw(2));
         decks.destiny().add(decks.leadership().draw(2));
@@ -17,6 +15,6 @@ public record CreateDestinyDeckEvent() implements Event {
         decks.destiny().add(decks.piloting().draw(2));
         decks.destiny().add(decks.engineering().draw(2));
         decks.destiny().add(decks.treachery().draw(2));
-        return List.of();
+        return Followup.NONE;
     }
 }

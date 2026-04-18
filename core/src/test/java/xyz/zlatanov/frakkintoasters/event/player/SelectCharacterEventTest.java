@@ -8,8 +8,8 @@ import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static xyz.zlatanov.frakkintoasters.event.Followup.followWith;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
+import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 
@@ -43,9 +43,9 @@ class SelectCharacterEventTest {
 
         val followup = select(HELENA_CAIN).execute(game);
 
-        val expected = followWith(one(
+        val expected = one(
                 new MoveEvent(1, PEGASUS_CIC, null),
-                new MoveEvent(1, COMMAND, null)));
+                new MoveEvent(1, COMMAND, null));
         assertEquals(expected, followup);
     }
 
@@ -58,7 +58,7 @@ class SelectCharacterEventTest {
     @Test
     void shouldFollowupForApollo() {
         val followup = select(LEE_APOLLO_ADAMA).execute(game);
-        val expected = followWith(new PlayerDecisionEvent<>(1, LaunchViperEvent.class));
+        val expected = single(new PlayerDecisionEvent<>(1, LaunchViperEvent.class));
         assertEquals(expected, followup);
     }
 

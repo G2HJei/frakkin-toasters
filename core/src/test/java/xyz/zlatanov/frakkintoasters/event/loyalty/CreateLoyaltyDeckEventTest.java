@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
-import static xyz.zlatanov.frakkintoasters.event.Followup.followWith;
+import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.MUTINEER;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 
@@ -99,7 +99,7 @@ class CreateLoyaltyDeckEventTest {
 
         val followup = new CreateLoyaltyDeckEvent().execute(game);
 
-        assertEquals(followWith(new RevealMutineerEvent()), followup);
+        assertEquals(single(new RevealMutineerEvent()), followup);
     }
 
     static void pickCharacters(Game game, boolean pickCylonLeader) {

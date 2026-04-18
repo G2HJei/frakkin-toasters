@@ -43,29 +43,31 @@ Multi-module Gradle project with a single `core` module. Package root: `xyz.zlat
 
 Game actions are modeled as events implementing the `Event` interface:
 
-- `execute(Game)` validates then applies the event, returning `List<Followup>`. Followup can contain concrete events
+- `execute(Game)` validates then applies the event, returning a single `Followup`. Followup can contain concrete events
   ready for execution or placeholder events (in the package `xyz.zlatanov.frakkintoasters.event.placeholder`) that need
   further interaction with the players to continue.
 - `isValid(Game)` checks preconditions (default: true)
-- `apply(Game)` mutates game state and returns followup events
+- `apply(Game)` mutates game state and returns a `Followup` (use `Followup.NONE` when there is nothing to follow up
+  with; that is also the default)
 
 Event hierarchy: `Event` -> `PlayerEvent` (adds player context) -> `ActionEvent` (location-based board actions)
 
-**Followups** chain events using a recursive sealed interface with three variants:
+**Followups** chain events using a recursive sealed interface with four variants:
 
+- `Followup.None` - no further events (singleton `Followup.NONE`)
 - `Followup.Single(Event)` - wraps a single event (leaf node)
 - `Followup.AllOf(List<Followup>)` - execute all children in order (sequence)
 - `Followup.OneOf(List<Followup>)` - current player picks exactly one (choice)
 
-Factory methods: `single(event)`, `all(events...)`, `one(events...)`, `followWith(...)`. Because the structure is
-recursive, `all(...)` and `one(...)` accept either plain `Event` varargs (auto-wrapped in `Single`) or nested `Followup`
-varargs — enabling patterns like "choose between a single event or a sequence of events":
+Factory methods: `single(event)`, `all(events...)`, `one(events...)`. Because the structure is recursive, `all(...)`
+and `one(...)` accept either plain `Event` varargs (auto-wrapped in `Single`) or nested `Followup` varargs — enabling
+patterns like "choose between a single event or a sequence of events":
 
 ```java
-return followWith(one(
+return one(
         single(new PlaySuperCrisisCardEvent(playerNumber)),
         all(new DrawCrisisCardsEvent(playerNumber),
-                new ResolveCapricaCrisisEvent(playerNumber))));
+                new ResolveCapricaCrisisEvent(playerNumber)));
 ```
 
 ### Event Constraints
@@ -73,19 +75,18 @@ return followWith(one(
 `EventConstraint` is a plain enum listing optional rules that can be attached to events (e.g. `DRAW_EXACTLY_2`). It lets
 `PlayerDecisionEvent` (or any other caller) pin extra rules onto a concrete event without new classes or generics.
 
-- `Event` declares `default List<EventConstraint> eventConstraints() { return List.of(); }` and
-  `default List<EventConstraint> supportedConstraints() { return List.of(); }`. Events that opt in add a
-  `List<EventConstraint>` record component — the record's generated accessor overrides the default — and override
-  `supportedConstraints()` with the values they accept.
-- `Event.execute(Game)` checks each passed constraint appears in `supportedConstraints()` (throwing
-  `FrakCallTheAdmiralException` otherwise) and calls `validConstraint(Game, EventConstraint)` on it; `isValid(Game)`
-  runs afterwards for the remaining preconditions.
-- Events that support constraints interpret each one inside `validConstraint(Game, EventConstraint)` — one constraint
+- `Event` declares `default List<EventConstraint> eventConstraints() { return List.of(); }`. Events that opt in add a
+  `List<EventConstraint>` record component — the record's generated accessor overrides the default.
+- `Event.execute(Game)` calls `isValidConstraint(Game, EventConstraint)` on each passed constraint (throwing
+  `InvalidActionException` if any returns false); `isValid(Game)` runs afterwards for the remaining preconditions. The
+  default `isValidConstraint` throws `FrakCallTheAdmiralException`, so an event that receives a constraint it does not
+  handle fails loudly.
+- Events that support constraints interpret each one inside `isValidConstraint(Game, EventConstraint)` — one constraint
   at a time, separate from the core `isValid(Game)` preconditions.
-- `PlayerDecisionEvent` stores `List<EventConstraint>` directly (no reflection / no `Class<?>`). When the decision is
-  resolved, the constraints are forwarded to the concrete event.
-- Example: `ReceiveSkillCardsEvent` has an `eventConstraints` component and declares `DRAW_EXACTLY_2` as supported;
-  passing it enforces that the selection sums to exactly 2 alongside the existing human/cylon validation.
+- `PlayerDecisionEvent<T>` holds `Class<T> action` plus a `List<EventConstraint>`. When the decision is resolved, the
+  constraints are forwarded to the concrete event.
+- Example: `ReceiveSkillCardsEvent` has an `eventConstraints` component; passing `DRAW_EXACTLY_2` enforces that the
+  selection sums to exactly 2 alongside the existing human/cylon validation.
 
 ### Lombok Usage
 

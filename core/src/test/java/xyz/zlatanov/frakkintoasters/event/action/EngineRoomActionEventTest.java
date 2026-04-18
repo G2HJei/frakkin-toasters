@@ -3,6 +3,7 @@ package xyz.zlatanov.frakkintoasters.event.action;
 import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
@@ -27,7 +28,7 @@ class EngineRoomActionEventTest {
     void shouldDiscardTwoSkillCardsAndActivateEngineRoom() {
         val followups = new EngineRoomActionEvent(1, card1, card2).execute(game);
 
-        assertTrue(followups.isEmpty());
+        assertEquals(Followup.NONE, followups);
         assertEquals(List.of(card3), game.player(1).skillCards().cards());
         assertTrue(game.boards().galactica().engineRoomActivated());
     }

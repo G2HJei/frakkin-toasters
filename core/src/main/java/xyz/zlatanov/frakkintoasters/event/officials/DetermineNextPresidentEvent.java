@@ -43,13 +43,13 @@ public record DetermineNextPresidentEvent() implements SelectNextOfficialEvent {
     }
 
     @Override
-    public List<Followup> apply(Game game) {
+    public Followup apply(Game game) {
         if (firstPresident(game)) {
             val quorumCard = game.decks().quorum().draw();
             game.presidentHand().add(quorumCard);
         }
         game.president(calcNextInLine(game));
-        return List.of();
+        return Followup.NONE;
     }
 
     private boolean firstPresident(Game game) {

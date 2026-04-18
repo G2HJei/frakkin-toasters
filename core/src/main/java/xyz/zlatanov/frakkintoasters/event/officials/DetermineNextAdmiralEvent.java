@@ -47,9 +47,9 @@ public record DetermineNextAdmiralEvent() implements SelectNextOfficialEvent {
     }
 
     @Override
-    public List<Followup> apply(Game game) {
+    public Followup apply(Game game) {
         game.admiral(calcNextInLine(game));
-        return List.of();
+        return Followup.NONE;
     }
 
     @Override
