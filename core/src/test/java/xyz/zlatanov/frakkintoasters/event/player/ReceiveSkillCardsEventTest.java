@@ -125,13 +125,13 @@ class ReceiveSkillCardsEventTest {
     void shouldValidateDrawExactly2ConstraintWhenTotalIs2() {
         revealCylon();
         val action = new ReceiveSkillCardsEvent(1, Map.of(LEADERSHIP, 1, TREACHERY, 1), DRAW_EXACTLY_2);
-        assertTrue(action.isValid(game));
+        assertTrue(action.validConstraint(game, DRAW_EXACTLY_2));
     }
 
     @Test
     void shouldFailDrawExactly2ConstraintWhenTotalIsNot2() {
         val action = new ReceiveSkillCardsEvent(1, Map.of(LEADERSHIP, 1), DRAW_EXACTLY_2);
-        assertFalse(action.isValid(game));
+        assertFalse(action.validConstraint(game, DRAW_EXACTLY_2));
     }
 
     private void revealCylon() {

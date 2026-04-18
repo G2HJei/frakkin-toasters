@@ -7,34 +7,40 @@ import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
 import xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Player;
-import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 
 import java.util.*;
 
+import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DRAW_EXACTLY_2;
+
 @Accessors(fluent = true)
 public record ReceiveSkillCardsEvent(int playerNumber,
                                      Map<SkillCardColor, Integer> selection,
-                                     EventConstraint eventConstraint) implements PlayerEvent {
+                                     List<EventConstraint> eventConstraints) implements PlayerEvent {
 
     public ReceiveSkillCardsEvent(int playerNumber, Map<SkillCardColor, Integer> selection) {
-        this(playerNumber, selection, null);
+        this(playerNumber, selection, List.of());
+    }
+
+    public ReceiveSkillCardsEvent(int playerNumber, Map<SkillCardColor, Integer> selection,
+                                  EventConstraint... eventConstraints) {
+        this(playerNumber, selection, List.of(eventConstraints));
+    }
+
+    @Override
+    public List<EventConstraint> supportedConstraints() {
+        return List.of(DRAW_EXACTLY_2);
+    }
+
+    @Override
+    public boolean validConstraint(Game game, EventConstraint constraint) {
+        return switch (constraint) {
+            case DRAW_EXACTLY_2 -> selection.values().stream().mapToInt(Integer::intValue).sum() == 2;
+        };
     }
 
     @Override
     public boolean isValid(Game game) {
-        if (eventConstraint != null) {
-            val total = selection.values().stream().mapToInt(Integer::intValue).sum();
-            switch (eventConstraint) {
-                case DRAW_EXACTLY_2 -> {
-                    if (total != 2) {
-                        return false;
-                    }
-                }
-                default -> throw new FrakCallTheAdmiralException(
-                        "Unsupported constraint for ReceiveSkillCardsEvent: " + eventConstraint);
-            }
-        }
         val player = player(game);
         return player.isHuman()
                 ? validateHumanSelection(player)
