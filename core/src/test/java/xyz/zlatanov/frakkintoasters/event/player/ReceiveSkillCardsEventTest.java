@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DRAW_EXACTLY_2;
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.CYLON_SEND_TO_BRIG;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.*;
@@ -118,6 +119,19 @@ class ReceiveSkillCardsEventTest {
                 arguments(DANNA_BIERS, Map.of(LEADERSHIP, 1, POLITICS, 1, ENGINEERING, 1)),
                 arguments(DANNA_BIERS, Map.of(LEADERSHIP, 1, POLITICS, 1, TREACHERY, 1))
         );
+    }
+
+    @Test
+    void shouldValidateDrawExactly2ConstraintWhenTotalIs2() {
+        revealCylon();
+        val action = new ReceiveSkillCardsEvent(1, Map.of(LEADERSHIP, 1, TREACHERY, 1), DRAW_EXACTLY_2);
+        assertTrue(action.isValid(game));
+    }
+
+    @Test
+    void shouldFailDrawExactly2ConstraintWhenTotalIsNot2() {
+        val action = new ReceiveSkillCardsEvent(1, Map.of(LEADERSHIP, 1), DRAW_EXACTLY_2);
+        assertFalse(action.isValid(game));
     }
 
     private void revealCylon() {

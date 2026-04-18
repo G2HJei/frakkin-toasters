@@ -2,7 +2,6 @@ package xyz.zlatanov.frakkintoasters.event.player;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.event.decisionconstraint.Draw2SkillCards;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.fake.FakeDeck;
 import xyz.zlatanov.frakkintoasters.state.Game;
@@ -11,6 +10,7 @@ import xyz.zlatanov.frakkintoasters.state.deck.DecksHolder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
+import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DRAW_EXACTLY_2;
 import static xyz.zlatanov.frakkintoasters.state.card.DestinationCard.LIONS_HEAD_NEBULA;
 import static xyz.zlatanov.frakkintoasters.state.util.AllCardsProvider.genericDeck;
 
@@ -34,7 +34,7 @@ class HumanFleetLookAtTopDestinationCardPlayerEventTest {
         assertEquals(followWith(
                         one(new PlaceDestinationCardOnTopEvent(1, LIONS_HEAD_NEBULA),
                                 new PlaceDestinationCardOnBottomEvent(1, LIONS_HEAD_NEBULA)),
-                        single(new PlayerDecisionEvent<>(1, ReceiveSkillCardsEvent.class, Draw2SkillCards.class))
+                        single(new PlayerDecisionEvent<>(1, ReceiveSkillCardsEvent.class, DRAW_EXACTLY_2))
                 ),
                 followups);
     }

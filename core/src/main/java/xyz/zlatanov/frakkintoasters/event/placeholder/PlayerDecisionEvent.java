@@ -2,21 +2,15 @@ package xyz.zlatanov.frakkintoasters.event.placeholder;
 
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
-import xyz.zlatanov.frakkintoasters.event.decisionconstraint.DecisionConstraint;
+import xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint;
 
-public record PlayerDecisionEvent<T extends Event<T>>(
+public record PlayerDecisionEvent<T extends Event>(
         int playerNumber,
         Class<T> action,
-        Class<? extends DecisionConstraint<T>> decisionConstraint
+        EventConstraint eventConstraint
 ) implements PlayerEvent {
 
     public PlayerDecisionEvent(int playerNumber, Class<T> action) {
         this(playerNumber, action, null);
-    }
-
-    public PlayerDecisionEvent(int playerNumber, Class<T> action, Class<? extends DecisionConstraint<T>> decisionConstraint) {
-        this.playerNumber = playerNumber;
-        this.action = action;
-        this.decisionConstraint = decisionConstraint;
     }
 }

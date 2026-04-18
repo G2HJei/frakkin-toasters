@@ -4,16 +4,37 @@ import lombok.experimental.Accessors;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
+import xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Player;
+import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 
 import java.util.*;
 
 @Accessors(fluent = true)
-public record ReceiveSkillCardsEvent(int playerNumber, Map<SkillCardColor, Integer> selection) implements PlayerEvent {
+public record ReceiveSkillCardsEvent(int playerNumber,
+                                     Map<SkillCardColor, Integer> selection,
+                                     EventConstraint eventConstraint) implements PlayerEvent {
+
+    public ReceiveSkillCardsEvent(int playerNumber, Map<SkillCardColor, Integer> selection) {
+        this(playerNumber, selection, null);
+    }
+
     @Override
     public boolean isValid(Game game) {
+        if (eventConstraint != null) {
+            val total = selection.values().stream().mapToInt(Integer::intValue).sum();
+            switch (eventConstraint) {
+                case DRAW_EXACTLY_2 -> {
+                    if (total != 2) {
+                        return false;
+                    }
+                }
+                default -> throw new FrakCallTheAdmiralException(
+                        "Unsupported constraint for ReceiveSkillCardsEvent: " + eventConstraint);
+            }
+        }
         val player = player(game);
         return player.isHuman()
                 ? validateHumanSelection(player)
