@@ -11,8 +11,6 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 
 import java.util.*;
 
-import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DRAW_EXACTLY_2;
-
 @Accessors(fluent = true)
 public record ReceiveSkillCardsEvent(int playerNumber,
                                      Map<SkillCardColor, Integer> selection,
@@ -28,14 +26,10 @@ public record ReceiveSkillCardsEvent(int playerNumber,
     }
 
     @Override
-    public List<EventConstraint> supportedConstraints() {
-        return List.of(DRAW_EXACTLY_2);
-    }
-
-    @Override
-    public boolean validConstraint(Game game, EventConstraint constraint) {
+    public boolean validateConstraint(Game game, EventConstraint constraint) {
         return switch (constraint) {
             case DRAW_EXACTLY_2 -> selection.values().stream().mapToInt(Integer::intValue).sum() == 2;
+            case DRAW_EXACTLY_3 -> selection.values().stream().mapToInt(Integer::intValue).sum() == 3;
         };
     }
 
