@@ -10,18 +10,8 @@ import java.util.List;
 public interface Event {
 
     default List<Followup> execute(Game game) {
-        for (var constraint : eventConstraints()) {
-            if (!supportedConstraints().contains(constraint)) {
-                throw new FrakCallTheAdmiralException(
-                        "Unsupported constraint " + constraint + " for " + getClass().getSimpleName());
-            }
-            if (!validConstraint(game, constraint)) {
-                throw new InvalidActionException("Invalid action!");
-            }
-        }
-        if (!isValid(game)) {
-            throw new InvalidActionException("Invalid action!");
-        }
+        validateConstraints(game);
+        validateEvent(game);
         return apply(game);
     }
 
@@ -29,8 +19,8 @@ public interface Event {
         return true;
     }
 
-    default boolean validConstraint(Game game, EventConstraint constraint) {
-        return true;
+    default boolean validateConstraint(Game game, EventConstraint constraint) {
+        throw new FrakCallTheAdmiralException();
     }
 
     default List<Followup> apply(Game game) {
@@ -41,7 +31,17 @@ public interface Event {
         return List.of();
     }
 
-    default List<EventConstraint> supportedConstraints() {
-        return List.of();
+    private void validateConstraints(Game game) {
+        for (var constraint : eventConstraints()) {
+            if (!validateConstraint(game, constraint)) {
+                throw new InvalidActionException("Invalid action!");
+            }
+        }
+    }
+
+    private void validateEvent(Game game) {
+        if (!isValid(game)) {
+            throw new InvalidActionException("Invalid action!");
+        }
     }
 }
