@@ -68,16 +68,19 @@ return followWith(one(
                 new ResolveCapricaCrisisEvent(playerNumber))));
 ```
 
-### Decision Constraints
+### Event Constraints
 
-`DecisionConstraint<T>` is a generic interface that validates constraints on placeholder events, allowing rules to be
-enforced on player decisions. When a `PlayerDecisionEvent` references a `DecisionConstraint`, the constraint validates
-that the player's action meets specific criteria before execution.
+`EventConstraint` is a plain enum listing optional rules that can be attached to events (e.g. `DRAW_EXACTLY_2`). It lets
+`PlayerDecisionEvent` (or any other caller) pin extra rules onto a concrete event without new classes or generics.
 
-- `DecisionConstraint<T extends Event>` - interface with single method `validConstraint(T event)` returning boolean
-- Used with `PlayerDecisionEvent` to optionally specify validation logic
-- Example: `Draw2SkillCards` implements `DecisionConstraint<ReceiveSkillCardsEvent>` to enforce exactly 2 cards drawn
-- Constraints are checked during event execution before `isValid()` and `apply()` are called
+- `Event` declares `default EventConstraint eventConstraint() { return null; }`. Events that opt in add an
+  `EventConstraint` record component — the record's generated accessor overrides the default.
+- Events that support constraints interpret them inside `isValid(Game)`. Unsupported values must throw
+  `FrakCallTheAdmiralException`.
+- `PlayerDecisionEvent` stores an `EventConstraint` directly (no reflection / no `Class<?>`). When the decision is
+  resolved, the constraint is forwarded to the concrete event.
+- Example: `ReceiveSkillCardsEvent` has an `eventConstraint` component; passing `DRAW_EXACTLY_2` enforces that the
+  selection sums to exactly 2 before the existing human/cylon validation runs.
 
 ### Lombok Usage
 
