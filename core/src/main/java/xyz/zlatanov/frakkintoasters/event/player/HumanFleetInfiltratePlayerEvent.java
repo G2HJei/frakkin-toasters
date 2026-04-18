@@ -5,8 +5,6 @@ import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 
-import java.util.List;
-
 import static xyz.zlatanov.frakkintoasters.state.board.Location.LOCATION_AREAS;
 import static xyz.zlatanov.frakkintoasters.state.character.CharacterType.CYLON_LEADER;
 
@@ -20,9 +18,9 @@ public record HumanFleetInfiltratePlayerEvent(int playerNumber, Location galacti
     }
 
     @Override
-    public List<Followup> apply(Game game) {
+    public Followup apply(Game game) {
         player(game).infiltrateGalactica();
         game.moveTo(galacticaLocation, player(game).character());
-        return List.of();
+        return Followup.NONE;
     }
 }

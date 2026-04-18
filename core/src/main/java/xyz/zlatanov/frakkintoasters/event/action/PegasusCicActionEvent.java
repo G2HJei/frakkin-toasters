@@ -8,25 +8,23 @@ import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage;
 import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 
-import java.util.List;
-
-import static xyz.zlatanov.frakkintoasters.event.Followup.followWith;
+import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.BASESTAR;
 
 public record PegasusCicActionEvent(int basestarId) implements Event {
 
     @Override
-    public List<Followup> apply(Game game) {
+    public Followup apply(Game game) {
         val roll = game.die().roll();
         if (roll <= 3) {
-            return followWith(new DamagePegasusEvent());
+            return single(new DamagePegasusEvent());
         } else if (roll <= 6) {
             damageBasestar(game);
-            return List.of();
+            return Followup.NONE;
         } else {
             damageBasestar(game);
             damageBasestar(game);
-            return List.of();
+            return Followup.NONE;
         }
     }
 

@@ -7,10 +7,7 @@ import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayQuorumCardEvent;
 import xyz.zlatanov.frakkintoasters.state.Game;
 
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static xyz.zlatanov.frakkintoasters.event.Followup.followWith;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.LAURA_ROSLIN;
 
@@ -28,11 +25,9 @@ class QuorumChamberActionEventTest {
         assertEquals(expectedFollowup(), followup);
     }
 
-    private List<Followup> expectedFollowup() {
-        return followWith(
-                one(
-                        new DrawQuorumCardEvent(),
-                        new PlayQuorumCardEvent()
-                ));
+    private Followup expectedFollowup() {
+        return one(
+                new DrawQuorumCardEvent(),
+                new PlayQuorumCardEvent());
     }
 }

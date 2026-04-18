@@ -3,7 +3,12 @@ package xyz.zlatanov.frakkintoasters.event;
 import java.util.Arrays;
 import java.util.List;
 
-public sealed interface Followup permits Followup.Single, Followup.AllOf, Followup.OneOf {
+public sealed interface Followup permits Followup.None, Followup.Single, Followup.AllOf, Followup.OneOf {
+
+    Followup NONE = new None();
+
+    record None() implements Followup {
+    }
 
     record Single(Event event) implements Followup {
     }
@@ -32,13 +37,5 @@ public sealed interface Followup permits Followup.Single, Followup.AllOf, Follow
 
     static OneOf one(Followup... followups) {
         return new OneOf(Arrays.stream(followups).toList());
-    }
-
-    static List<Followup> followWith(Event event) {
-        return followWith(single(event));
-    }
-
-    static List<Followup> followWith(Followup... followups) {
-        return Arrays.stream(followups).toList();
     }
 }

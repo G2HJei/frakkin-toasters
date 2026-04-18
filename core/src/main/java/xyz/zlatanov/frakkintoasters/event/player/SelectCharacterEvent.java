@@ -16,8 +16,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static xyz.zlatanov.frakkintoasters.event.Followup.followWith;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
+import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.character.CharacterType.CYLON_LEADER;
 import static xyz.zlatanov.frakkintoasters.state.character.CharacterType.SUPPORT;
@@ -33,12 +33,12 @@ public record SelectCharacterEvent(int player, Character selectedCharacter) impl
     }
 
     @Override
-    public List<Followup> apply(Game game) {
+    public Followup apply(Game game) {
         game.player(player).selectCharacter(selectedCharacter);
         val setup = selectedCharacter.setup();
         if (setup.length == 1) {
             moveToSetup(game);
-            return null;
+            return Followup.NONE;
         } else if (setup.length > 1) {
             return multipleSetupOptionsFollowup();
         } else {
@@ -112,18 +112,16 @@ public record SelectCharacterEvent(int player, Character selectedCharacter) impl
         game.moveTo(selectedCharacter.setup()[0], selectedCharacter);
     }
 
-    private List<Followup> multipleSetupOptionsFollowup() {
-
-        return followWith(one(
-                Arrays.stream(selectedCharacter.setup())
-                        .map(loc -> (Event) new MoveEvent(player, loc, null))
-                        .toArray(Event[]::new)));
+    private Followup multipleSetupOptionsFollowup() {
+        return one(Arrays.stream(selectedCharacter.setup())
+                .map(loc -> (Event) new MoveEvent(player, loc, null))
+                .toArray(Event[]::new));
     }
 
-    private List<Followup> specialSetupFollowup() {
+    private Followup specialSetupFollowup() {
         return switch (selectedCharacter) {
-            case KARL_HELO_AGATHON -> null;
-            case LEE_APOLLO_ADAMA -> followWith(new PlayerDecisionEvent<>(player, LaunchViperEvent.class));
+            case KARL_HELO_AGATHON -> Followup.NONE;
+            case LEE_APOLLO_ADAMA -> single(new PlayerDecisionEvent<>(player, LaunchViperEvent.class));
             default -> throw new FrakCallTheAdmiralException();
         };
     }

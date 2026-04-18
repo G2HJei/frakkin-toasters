@@ -9,7 +9,6 @@ import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.deck.DecksHolder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static xyz.zlatanov.frakkintoasters.event.Followup.followWith;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard.AIRLOCK_LEAK;
 import static xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard.DETENTE;
@@ -28,10 +27,9 @@ class DrawAndResolveCrisisCardsEventTest {
     void shouldFollowUpWithOneOfTheCrisisCards() {
         crisisCardFakeDeck.nextCard(DETENTE).nextCard(AIRLOCK_LEAK);
         val followup = new DrawAndResolveCrisisCardsEvent(1).execute(game);
-        assertEquals(followWith(one(
-                                new ResolveCapricaCrisisCardEvent(1, DETENTE, AIRLOCK_LEAK),
-                                new ResolveCapricaCrisisCardEvent(1, AIRLOCK_LEAK, DETENTE)
-                        )
+        assertEquals(one(
+                        new ResolveCapricaCrisisCardEvent(1, DETENTE, AIRLOCK_LEAK),
+                        new ResolveCapricaCrisisCardEvent(1, AIRLOCK_LEAK, DETENTE)
                 ),
                 followup);
     }

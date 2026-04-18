@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface Event {
 
-    default List<Followup> execute(Game game) {
+    default Followup execute(Game game) {
         validateConstraints(game);
         validateEvent(game);
         return apply(game);
@@ -19,12 +19,12 @@ public interface Event {
         return true;
     }
 
-    default boolean validateConstraint(Game game, EventConstraint constraint) {
+    default boolean isValidConstraint(Game game, EventConstraint constraint) {
         throw new FrakCallTheAdmiralException();
     }
 
-    default List<Followup> apply(Game game) {
-        return List.of();
+    default Followup apply(Game game) {
+        return Followup.NONE;
     }
 
     default List<EventConstraint> eventConstraints() {
@@ -33,7 +33,7 @@ public interface Event {
 
     private void validateConstraints(Game game) {
         for (var constraint : eventConstraints()) {
-            if (!validateConstraint(game, constraint)) {
+            if (!isValidConstraint(game, constraint)) {
                 throw new InvalidActionException("Invalid action!");
             }
         }

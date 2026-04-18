@@ -13,7 +13,7 @@ import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static xyz.zlatanov.frakkintoasters.event.Followup.followWith;
+import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.*;
 import static xyz.zlatanov.frakkintoasters.state.util.AllCardsProvider.genericDeck;
@@ -40,7 +40,7 @@ class PegasusCicActionEventTest {
     void shouldDamagePegasus() {
         die.nextRoll(3);
         val followup = new PegasusCicActionEvent(basestar.id()).execute(game);
-        assertEquals(followWith(new DamagePegasusEvent()), followup);
+        assertEquals(single(new DamagePegasusEvent()), followup);
     }
 
     @Test

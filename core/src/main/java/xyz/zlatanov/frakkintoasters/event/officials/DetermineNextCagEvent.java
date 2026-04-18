@@ -47,9 +47,9 @@ public record DetermineNextCagEvent() implements SelectNextOfficialEvent {
     }
 
     @Override
-    public List<Followup> apply(Game game) {
+    public Followup apply(Game game) {
         game.cag(calcNextInLine(game));
-        return List.of();
+        return Followup.NONE;
     }
 
     @Override

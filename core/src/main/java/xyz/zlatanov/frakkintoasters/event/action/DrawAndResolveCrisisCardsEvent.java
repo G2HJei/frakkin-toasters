@@ -6,21 +6,17 @@ import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
 import xyz.zlatanov.frakkintoasters.event.ResolveCapricaCrisisCardEvent;
 import xyz.zlatanov.frakkintoasters.state.Game;
 
-import java.util.List;
-
-import static xyz.zlatanov.frakkintoasters.event.Followup.followWith;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 
 public record DrawAndResolveCrisisCardsEvent(int playerNumber) implements PlayerEvent {
 
     @Override
-    public List<Followup> apply(Game game) {
+    public Followup apply(Game game) {
         val firstCrisis = game.decks().crisis().draw();
         val secondCrisis = game.decks().crisis().draw();
-        return followWith(one(
-                        new ResolveCapricaCrisisCardEvent(playerNumber, firstCrisis, secondCrisis),
-                        new ResolveCapricaCrisisCardEvent(playerNumber, secondCrisis, firstCrisis)
-                )
+        return one(
+                new ResolveCapricaCrisisCardEvent(playerNumber, firstCrisis, secondCrisis),
+                new ResolveCapricaCrisisCardEvent(playerNumber, secondCrisis, firstCrisis)
         );
     }
 }

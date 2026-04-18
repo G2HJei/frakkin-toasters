@@ -16,17 +16,13 @@ public record ReceiveSkillCardsEvent(int playerNumber,
                                      Map<SkillCardColor, Integer> selection,
                                      List<EventConstraint> eventConstraints) implements PlayerEvent {
 
-    public ReceiveSkillCardsEvent(int playerNumber, Map<SkillCardColor, Integer> selection) {
-        this(playerNumber, selection, List.of());
-    }
-
     public ReceiveSkillCardsEvent(int playerNumber, Map<SkillCardColor, Integer> selection,
                                   EventConstraint... eventConstraints) {
         this(playerNumber, selection, List.of(eventConstraints));
     }
 
     @Override
-    public boolean validateConstraint(Game game, EventConstraint constraint) {
+    public boolean isValidConstraint(Game game, EventConstraint constraint) {
         return switch (constraint) {
             case DRAW_EXACTLY_2 -> selection.values().stream().mapToInt(Integer::intValue).sum() == 2;
             case DRAW_EXACTLY_3 -> selection.values().stream().mapToInt(Integer::intValue).sum() == 3;
@@ -42,7 +38,7 @@ public record ReceiveSkillCardsEvent(int playerNumber,
     }
 
     @Override
-    public List<Followup> apply(Game game) {
+    public Followup apply(Game game) {
         for (val entry : new TreeMap<>(selection).entrySet()) {
             val deck = switch (entry.getKey()) {
                 case POLITICS -> game.decks().politics();
@@ -58,7 +54,7 @@ public record ReceiveSkillCardsEvent(int playerNumber,
                         .add(deck.draw());
             }
         }
-        return List.of();
+        return Followup.NONE;
     }
 
     private boolean validateRevealedCylonSelection() {

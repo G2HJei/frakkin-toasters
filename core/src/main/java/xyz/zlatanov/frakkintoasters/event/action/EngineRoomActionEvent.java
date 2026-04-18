@@ -19,12 +19,12 @@ public record EngineRoomActionEvent(int playerNumber, SkillCard discardCard1,
 	}
 
 	@Override
-	public List<Followup> apply(Game game) {
+	public Followup apply(Game game) {
 		val player = player(game);
 		player.skillCards().remove(List.of(discardCard1, discardCard2));
 		game.decks().discard(discardCard1);
 		game.decks().discard(discardCard2);
 		game.boards().galactica().engineRoomActivated(true);
-		return List.of();
+		return Followup.NONE;
 	}
 }

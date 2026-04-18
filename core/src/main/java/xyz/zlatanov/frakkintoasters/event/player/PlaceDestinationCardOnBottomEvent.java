@@ -5,13 +5,11 @@ import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
 
-import java.util.List;
-
 public record PlaceDestinationCardOnBottomEvent(int playerNumber, DestinationCard card) implements PlayerEvent {
 
 	@Override
-	public List<Followup> apply(Game game) {
+	public Followup apply(Game game) {
 		game.decks().destination().addToBottom(card);
-		return List.of();
+		return Followup.NONE;
 	}
 }
