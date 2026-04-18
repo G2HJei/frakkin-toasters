@@ -73,14 +73,19 @@ return followWith(one(
 `EventConstraint` is a plain enum listing optional rules that can be attached to events (e.g. `DRAW_EXACTLY_2`). It lets
 `PlayerDecisionEvent` (or any other caller) pin extra rules onto a concrete event without new classes or generics.
 
-- `Event` declares `default EventConstraint eventConstraint() { return null; }`. Events that opt in add an
-  `EventConstraint` record component — the record's generated accessor overrides the default.
-- Events that support constraints interpret them inside `isValid(Game)`. Unsupported values must throw
-  `FrakCallTheAdmiralException`.
-- `PlayerDecisionEvent` stores an `EventConstraint` directly (no reflection / no `Class<?>`). When the decision is
-  resolved, the constraint is forwarded to the concrete event.
-- Example: `ReceiveSkillCardsEvent` has an `eventConstraint` component; passing `DRAW_EXACTLY_2` enforces that the
-  selection sums to exactly 2 before the existing human/cylon validation runs.
+- `Event` declares `default List<EventConstraint> eventConstraints() { return List.of(); }` and
+  `default List<EventConstraint> supportedConstraints() { return List.of(); }`. Events that opt in add a
+  `List<EventConstraint>` record component — the record's generated accessor overrides the default — and override
+  `supportedConstraints()` with the values they accept.
+- `Event.execute(Game)` checks each passed constraint appears in `supportedConstraints()` (throwing
+  `FrakCallTheAdmiralException` otherwise) and calls `validConstraint(Game, EventConstraint)` on it; `isValid(Game)`
+  runs afterwards for the remaining preconditions.
+- Events that support constraints interpret each one inside `validConstraint(Game, EventConstraint)` — one constraint
+  at a time, separate from the core `isValid(Game)` preconditions.
+- `PlayerDecisionEvent` stores `List<EventConstraint>` directly (no reflection / no `Class<?>`). When the decision is
+  resolved, the constraints are forwarded to the concrete event.
+- Example: `ReceiveSkillCardsEvent` has an `eventConstraints` component and declares `DRAW_EXACTLY_2` as supported;
+  passing it enforces that the selection sums to exactly 2 alongside the existing human/cylon validation.
 
 ### Lombok Usage
 
