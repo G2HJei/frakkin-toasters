@@ -7,28 +7,31 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
+import xyz.zlatanov.frakkintoasters.state.track.BoardingParty;
 import xyz.zlatanov.frakkintoasters.state.track.JumpPreparation;
 
 import java.util.*;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
-import static xyz.zlatanov.frakkintoasters.state.track.JumpPreparation.START;
+import static xyz.zlatanov.frakkintoasters.state.track.BoardingParty.HUMANS_LOSE;
+import static xyz.zlatanov.frakkintoasters.state.track.BoardingParty.START;
 
 @Getter
 @Accessors(fluent = true)
 public class GalacticaBoard extends BattlestarBoard {
-    private       int                 fuel                 = 8;
-    private       int                 food                 = 8;
-    private       int                 morale               = 10;
-    private       int                 population           = 12;
-    private       JumpPreparation     jumpPreparation      = START;
+    private       int                           fuel                 = 8;
+    private       int                           food                 = 8;
+    private       int                           morale               = 10;
+    private       int                           population           = 12;
+    private       JumpPreparation               jumpPreparation      = JumpPreparation.START;
     @Setter
-    private       boolean             engineRoomActivated  = false;
-    private       boolean             colonialOneDestroyed = false;
-    private       boolean             hubDestroyed         = false;
-    private       Set<Ship>           reserves             = new HashSet<>();
-    private       Set<Ship>           damagedShips         = new HashSet<>();
-    private final Map<Ship, Location> shipsInSpace         = new HashMap<>();
+    private       boolean                       engineRoomActivated  = false;
+    private       boolean                       colonialOneDestroyed = false;
+    private       boolean                       hubDestroyed         = false;
+    private       Set<Ship>                     reserves             = new HashSet<>();
+    private       Set<Ship>                     damagedShips         = new HashSet<>();
+    private final Map<Ship, Location>           shipsInSpace         = new HashMap<>();
+    private final Map<Centurion, BoardingParty> boardingPartyTrack   = new HashMap<>();
 
 
     public GalacticaBoard() {
@@ -152,6 +155,23 @@ public class GalacticaBoard extends BattlestarBoard {
                 .map(Map.Entry::getKey)
                 .filter(s -> constraint.contains(s.type()))
                 .toList();
+    }
+
+    public Location locate(Ship ship) {
+        return shipsInSpace.get(ship);
+    }
+
+    public GalacticaBoard boardGalactica(Centurion centurion) {
+        boardingPartyTrack.put(centurion, START);
+        return this;
+    }
+
+    public GalacticaBoard advanceBoardingParty() {
+        assert !boardingPartyTrack.containsValue(HUMANS_LOSE);
+        boardingPartyTrack.replaceAll(
+                (c, pos) ->
+                        BoardingParty.values()[pos.ordinal() + 1]);
+        return this;
     }
 
     public List<Ship> shipsInSpace(ShipType... ofType) {

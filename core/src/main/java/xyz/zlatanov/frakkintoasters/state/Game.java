@@ -109,7 +109,7 @@ public class Game {
         return this;
     }
 
-
+    
     public Game moveTo(Location location, Ship ship) {
         assert LOCATION_AREAS.get("Galactica space").contains(location);
         boards.galactica()
