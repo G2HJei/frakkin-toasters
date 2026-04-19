@@ -17,7 +17,7 @@ public record HumanFleetLookAtTopCrisisCardPlayerEvent(int playerNumber) impleme
         return all(
                 one(new PlaceCrisisCardOnTopEvent(playerNumber, card),
                         new PlaceCrisisCardOnBottomEvent(playerNumber, card)),
-                single(new PlayerDecisionEvent<>(playerNumber, ReceiveSkillCardsEvent.class, DRAW_EXACTLY_2))
+                single(new PlayerDecisionEvent<>(playerNumber, DrawSkillCardsEvent.class, DRAW_EXACTLY_2))
         );
     }
 }

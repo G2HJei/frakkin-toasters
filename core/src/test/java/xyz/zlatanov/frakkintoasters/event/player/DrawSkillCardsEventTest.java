@@ -24,7 +24,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DRAW_EXACTLY_2;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.SICKBAY;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.CYLON_SEND_TO_BRIG;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.*;
@@ -32,7 +32,7 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.AT_ANY_COST
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.BAIT;
 
 @ExtendWith(MockitoExtension.class)
-class ReceiveSkillCardsEventTest {
+class DrawSkillCardsEventTest {
 
     @SuppressWarnings("unchecked")
     Deck<SkillCard> leadershipDeck = mock(Deck.class);
@@ -54,13 +54,13 @@ class ReceiveSkillCardsEventTest {
     @Test
     void shouldReceiveCardsWithinSkillSet() {
         when(leadershipDeck.draw()).thenReturn(leadershipCard);
-        new ReceiveSkillCardsEvent(1, Map.of(LEADERSHIP, 1)).execute(game);
+        new DrawSkillCardsEvent(1, Map.of(LEADERSHIP, 1)).execute(game);
         assertEquals(List.of(leadershipCard), game.player(1).skillCards().cards());
     }
 
     @Test
     void shouldNotReceiveOutsideOfSkillSet() {
-        val action = new ReceiveSkillCardsEvent(1, Map.of(TREACHERY, 1));
+        val action = new DrawSkillCardsEvent(1, Map.of(TREACHERY, 1));
         assertFalse(action.isValid(game));
     }
 
@@ -70,7 +70,7 @@ class ReceiveSkillCardsEventTest {
         when(leadershipDeck.draw()).thenReturn(leadershipCard);
         when(treacheryDeck.draw()).thenReturn(treacheryCard);
 
-        new ReceiveSkillCardsEvent(1, Map.of(LEADERSHIP, 1, TREACHERY, 1)).execute(game);
+        new DrawSkillCardsEvent(1, Map.of(LEADERSHIP, 1, TREACHERY, 1)).execute(game);
 
         assertEquals(List.of(leadershipCard, treacheryCard), game.player(1).skillCards().cards());
     }
@@ -78,14 +78,14 @@ class ReceiveSkillCardsEventTest {
     @Test
     void shouldNotAllowDoubleSelectionForRevealedCylon() {
         revealCylon();
-        assertFalse(new ReceiveSkillCardsEvent(1, Map.of(TREACHERY, 2)).isValid(game));
+        assertFalse(new DrawSkillCardsEvent(1, Map.of(TREACHERY, 2)).isValid(game));
     }
 
     @ParameterizedTest
     @MethodSource("cylonLeaderSelection")
     void shouldValidateCylonLeaderSelection(Character cylonLeader, Map<SkillCardColor, Integer> selection) {
         game.player(2).selectCharacter(cylonLeader);
-        assertTrue(new ReceiveSkillCardsEvent(2, selection).isValid(game));
+        assertTrue(new DrawSkillCardsEvent(2, selection).isValid(game));
     }
 
     public static Stream<Arguments> cylonLeaderSelection() {
@@ -106,7 +106,7 @@ class ReceiveSkillCardsEventTest {
         game.player(2)
                 .selectCharacter(cylonLeader)
                 .infiltrateGalactica();
-        assertTrue(new ReceiveSkillCardsEvent(2, selection).isValid(game));
+        assertTrue(new DrawSkillCardsEvent(2, selection).isValid(game));
     }
 
     public static Stream<Arguments> infiltratingCylonLeaderSelection() {
@@ -125,20 +125,36 @@ class ReceiveSkillCardsEventTest {
     @Test
     void shouldValidateDrawExactly2ConstraintWhenTotalIs2() {
         revealCylon();
-        val action = new ReceiveSkillCardsEvent(1, Map.of(LEADERSHIP, 1, TREACHERY, 1), DRAW_EXACTLY_2);
+        val action = new DrawSkillCardsEvent(1, Map.of(LEADERSHIP, 1, TREACHERY, 1), DRAW_EXACTLY_2);
         assertTrue(action.isValidConstraint(game, DRAW_EXACTLY_2));
     }
 
     @Test
     void shouldFailDrawExactly2ConstraintWhenTotalIsNot2() {
-        val action = new ReceiveSkillCardsEvent(1, Map.of(LEADERSHIP, 1), DRAW_EXACTLY_2);
+        val action = new DrawSkillCardsEvent(1, Map.of(LEADERSHIP, 1), DRAW_EXACTLY_2);
         assertFalse(action.isValidConstraint(game, DRAW_EXACTLY_2));
     }
 
     @Test
     void shouldDrawOnly1CardWhenInSickbay() {
         game.moveTo(SICKBAY, KARA_STARBUCK_THRACE);
-        //todo
+        assertTrue(new DrawSkillCardsEvent(1, Map.of(TACTICS, 1)).isValid(game));
+        assertFalse(new DrawSkillCardsEvent(1, Map.of(TACTICS, 2)).isValid(game));
+    }
+
+    @Test
+    void shouldDrawOnly1CardWhenInResurrectionShip() {
+        game.moveTo(RESURRECTION_SHIP, KARA_STARBUCK_THRACE);
+        assertTrue(new DrawSkillCardsEvent(1, Map.of(TACTICS, 1)).isValid(game));
+        assertFalse(new DrawSkillCardsEvent(1, Map.of(TACTICS, 2)).isValid(game));
+    }
+
+    @Test
+    void shouldNotDrawWhenInHubDestroyed() {
+        game.boards().galactica().destroyResurrectionShip();
+        game.moveTo(HUB_DESTROYED, KARA_STARBUCK_THRACE);
+        assertTrue(new DrawSkillCardsEvent(1, Map.of()).isValid(game));
+        assertFalse(new DrawSkillCardsEvent(1, Map.of(TACTICS, 1)).isValid(game));
     }
 
     private void revealCylon() {

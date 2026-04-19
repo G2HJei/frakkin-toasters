@@ -17,7 +17,7 @@ public record HumanFleetLookAtTopDestinationCardPlayerEvent(int playerNumber) im
         return all(
                 one(new PlaceDestinationCardOnTopEvent(playerNumber, card),
                         new PlaceDestinationCardOnBottomEvent(playerNumber, card)),
-                single(new PlayerDecisionEvent<>(playerNumber, ReceiveSkillCardsEvent.class, DRAW_EXACTLY_2))
+                single(new PlayerDecisionEvent<>(playerNumber, DrawSkillCardsEvent.class, DRAW_EXACTLY_2))
         );
     }
 }

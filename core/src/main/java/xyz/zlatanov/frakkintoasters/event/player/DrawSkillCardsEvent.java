@@ -11,27 +11,40 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 
 import java.util.*;
 
-@Accessors(fluent = true)
-public record ReceiveSkillCardsEvent(int playerNumber,
-                                     Map<SkillCardColor, Integer> selection,
-                                     List<EventConstraint> eventConstraints) implements PlayerEvent {
+import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 
-    public ReceiveSkillCardsEvent(int playerNumber, Map<SkillCardColor, Integer> selection,
-                                  EventConstraint... eventConstraints) {
+@Accessors(fluent = true)
+public record DrawSkillCardsEvent(int playerNumber,
+                                  Map<SkillCardColor, Integer> selection,
+                                  List<EventConstraint> eventConstraints) implements PlayerEvent {
+
+    public DrawSkillCardsEvent(int playerNumber, Map<SkillCardColor, Integer> selection,
+                               EventConstraint... eventConstraints) {
         this(playerNumber, selection, List.of(eventConstraints));
     }
 
     @Override
     public boolean isValidConstraint(Game game, EventConstraint constraint) {
         return switch (constraint) {
-            case DRAW_EXACTLY_2 -> selection.values().stream().mapToInt(Integer::intValue).sum() == 2;
-            case DRAW_EXACTLY_3 -> selection.values().stream().mapToInt(Integer::intValue).sum() == 3;
+            case DRAW_EXACTLY_2 -> totalCardsToReceive() == 2;
+            case DRAW_EXACTLY_3 -> totalCardsToReceive() == 3;
         };
     }
 
     @Override
     public boolean isValid(Game game) {
         val player = player(game);
+        val playerLocation = game.locate(player(game).character());
+        //todo single/no draw applies only during players' receive skill cards step
+        val singleDraw = playerLocation == SICKBAY || playerLocation == RESURRECTION_SHIP;
+        val noDraw = playerLocation == HUB_DESTROYED;
+        val totalCardsToReceive = totalCardsToReceive();
+        if (singleDraw && totalCardsToReceive != 1) {
+            return false;
+        }
+        if (noDraw && totalCardsToReceive > 0) {
+            return false;
+        }
         return player.isHuman()
                 ? validateHumanSelection(player)
                 : validateRevealedCylonSelection();
@@ -55,6 +68,10 @@ public record ReceiveSkillCardsEvent(int playerNumber,
             }
         }
         return Followup.NONE;
+    }
+
+    private int totalCardsToReceive() {
+        return selection.values().stream().mapToInt(Integer::intValue).sum();
     }
 
     private boolean validateRevealedCylonSelection() {
