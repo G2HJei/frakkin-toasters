@@ -12,7 +12,6 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 import java.util.*;
 
 import static xyz.zlatanov.frakkintoasters.state.GameStep.RECEIVE_SKILLS;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 
 @Accessors(fluent = true)
 public record DrawSkillCardsEvent(int playerNumber,
@@ -34,27 +33,13 @@ public record DrawSkillCardsEvent(int playerNumber,
 
     @Override
     public boolean isValid(Game game) {
-        val player = player(game);
-        return meetsReceiveSkillsStepRestriction(game)
-                && (player.isHuman()
-                ? validateHumanSelection(player)
-                : validateRevealedCylonSelection());
-    }
-
-    private boolean meetsReceiveSkillsStepRestriction(Game game) {
-        val playerLocation = game.locate(player(game).character());
-        if (game.step() == RECEIVE_SKILLS) {
-            val singleDraw = playerLocation == SICKBAY || playerLocation == RESURRECTION_SHIP;
-            val noDraw = playerLocation == HUB_DESTROYED;
-            val totalCardsToReceive = totalCardsToReceive();
-            if (singleDraw && totalCardsToReceive != 1) {
-                return false;
-            }
-            if (noDraw && totalCardsToReceive > 0) {
-                return false;
-            }
+        if (!meetsHazardousLocationRestrictions(game)) {
+            return false;
         }
-        return true;
+        val player = player(game);
+        return player.isHuman()
+                ? validateHumanSelection(player)
+                : validateRevealedCylonSelection();
     }
 
     @Override
@@ -75,6 +60,19 @@ public record DrawSkillCardsEvent(int playerNumber,
             }
         }
         return Followup.NONE;
+    }
+
+    private boolean meetsHazardousLocationRestrictions(Game game) {
+        if (game.step() != RECEIVE_SKILLS) {
+            return true;
+        }
+        val location = game.locate(player(game).character());
+        val cardsToReceive = totalCardsToReceive();
+        return switch (location) {
+            case SICKBAY, RESURRECTION_SHIP -> cardsToReceive == 1;
+            case HUB_DESTROYED -> cardsToReceive == 0;
+            default -> true;
+        };
     }
 
     private int totalCardsToReceive() {
