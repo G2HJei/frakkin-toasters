@@ -17,6 +17,7 @@ import xyz.zlatanov.frakkintoasters.state.ship.*;
 
 import java.util.*;
 
+import static xyz.zlatanov.frakkintoasters.state.GameStep.SETUP;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.VIPER;
@@ -32,6 +33,9 @@ public class Game {
     @Setter
     @Builder.Default
     private int                  currentPlayer = 1;
+    @Setter
+    @Builder.Default
+    private GameStep             step          = SETUP;
     @Builder.Default
     private Die                  die           = new Die();
     @Builder.Default
@@ -75,7 +79,7 @@ public class Game {
         return players.get(playerNumber);
     }
 
-    public void setupGalacticaBoard() {
+    public Game setupGalacticaBoard() {
         val galacticaBoard = boards.galactica();
         boards.galactica()
                 .place(GALACTICA_SPACE_4_OCLOCK, galacticaBoard.removeFromReserves(VIPER))
@@ -83,6 +87,7 @@ public class Game {
                 .place(GALACTICA_SPACE_2_OCLOCK, List.of(decks.civilianShips().draw(), decks.civilianShips().draw()))
                 .place(GALACTICA_SPACE_8_OCLOCK, cylonShips.basestar())
                 .place(GALACTICA_SPACE_8_OCLOCK, List.of(cylonShips.raider(), cylonShips.raider(), cylonShips.raider(), cylonShips.raider()));
+        return this;
     }
 
     public Location locate(Character character) {
@@ -93,7 +98,7 @@ public class Game {
                 .orElse(null);
     }
 
-    public void moveTo(Location location, Character character) {
+    public Game moveTo(Location location, Character character) {
         assert !location.isSpaceLocation();
         boards.all().forEach(b -> b.remove(character));
         boards.all().stream()
@@ -101,17 +106,19 @@ public class Game {
                 .findFirst()
                 .orElseThrow(FrakCallTheAdmiralException::new)
                 .place(location, character);
+        return this;
     }
 
 
-    public void moveTo(Location location, Ship ship) {
+    public Game moveTo(Location location, Ship ship) {
         assert LOCATION_AREAS.get("Galactica space").contains(location);
         boards.galactica()
                 .remove(ship)
                 .place(location, ship);
+        return this;
     }
 
-    public void damage(Location location) {
+    public Game damage(Location location) {
         val board = LOCATION_AREAS.get("Galactica").contains(location)
                 ? boards.galactica()
                 : boards.pegasus();
@@ -121,9 +128,10 @@ public class Game {
         if (!affectedCharacters.isEmpty()) {
             board.place(SICKBAY, affectedCharacters.toArray(new Character[0]));
         }
+        return this;
     }
 
-    public void destroy(Ship ship) {
+    public Game destroy(Ship ship) {
         boards.galactica().remove(ship);
         switch (ship) {
             case Basestar basestar -> {
@@ -134,5 +142,6 @@ public class Game {
             case HeavyRaider h -> cylonShips.returned(h);
             default -> throw new FrakCallTheAdmiralException("todo: not implemented");
         }
+        return this;
     }
 }
