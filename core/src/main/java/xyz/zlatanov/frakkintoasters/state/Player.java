@@ -7,6 +7,7 @@ import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
 import xyz.zlatanov.frakkintoasters.state.card.MutinyCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
+import xyz.zlatanov.frakkintoasters.state.crisis.SuperCrisisCard;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
@@ -20,13 +21,14 @@ import static xyz.zlatanov.frakkintoasters.state.character.CharacterType.CYLON_L
 @Accessors(fluent = true)
 public class Player {
 
-    private       Character         character;
-    private final Deck<SkillCard>   skillCards      = new Deck<>();
-    private final Deck<MotiveCard>  motiveCards     = new Deck<>();
-    private final Deck<LoyaltyCard> loyaltyCards    = new Deck<>();
-    private final Deck<MutinyCard>  mutinyCards     = new Deck<>();
-    private       boolean           hasMiracleToken = true;
-    private       boolean           isInfiltrating  = false;
+    private       Character             character;
+    private final Deck<SkillCard>       skillCards       = new Deck<>();
+    private final Deck<MotiveCard>      motiveCards      = new Deck<>();
+    private final Deck<LoyaltyCard>     loyaltyCards     = new Deck<>();
+    private final Deck<MutinyCard>      mutinyCards      = new Deck<>();
+    private final Deck<SuperCrisisCard> superCrisisCards = new Deck<>();
+    private       boolean               hasMiracleToken  = true;
+    private       boolean               isInfiltrating   = false;
 
     public Player selectCharacter(Character selection) {
         assert character == null; //todo use asserts in core to avoid throwing FrakCallTheAdmiralException(s) everywhere
