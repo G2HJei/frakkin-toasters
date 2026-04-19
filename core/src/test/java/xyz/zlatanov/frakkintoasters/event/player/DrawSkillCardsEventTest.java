@@ -24,6 +24,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DRAW_EXACTLY_2;
+import static xyz.zlatanov.frakkintoasters.state.GameStep.RECEIVE_SKILLS;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.CYLON_SEND_TO_BRIG;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
@@ -137,14 +138,16 @@ class DrawSkillCardsEventTest {
 
     @Test
     void shouldDrawOnly1CardWhenInSickbay() {
-        game.moveTo(SICKBAY, KARA_STARBUCK_THRACE);
+        game.moveTo(SICKBAY, KARA_STARBUCK_THRACE)
+                .step(RECEIVE_SKILLS);
         assertTrue(new DrawSkillCardsEvent(1, Map.of(TACTICS, 1)).isValid(game));
         assertFalse(new DrawSkillCardsEvent(1, Map.of(TACTICS, 2)).isValid(game));
     }
 
     @Test
     void shouldDrawOnly1CardWhenInResurrectionShip() {
-        game.moveTo(RESURRECTION_SHIP, KARA_STARBUCK_THRACE);
+        game.moveTo(RESURRECTION_SHIP, KARA_STARBUCK_THRACE)
+                .step(RECEIVE_SKILLS);
         assertTrue(new DrawSkillCardsEvent(1, Map.of(TACTICS, 1)).isValid(game));
         assertFalse(new DrawSkillCardsEvent(1, Map.of(TACTICS, 2)).isValid(game));
     }
@@ -152,9 +155,17 @@ class DrawSkillCardsEventTest {
     @Test
     void shouldNotDrawWhenInHubDestroyed() {
         game.boards().galactica().destroyResurrectionShip();
-        game.moveTo(HUB_DESTROYED, KARA_STARBUCK_THRACE);
+        game.moveTo(HUB_DESTROYED, KARA_STARBUCK_THRACE)
+                .step(RECEIVE_SKILLS);
         assertTrue(new DrawSkillCardsEvent(1, Map.of()).isValid(game));
         assertFalse(new DrawSkillCardsEvent(1, Map.of(TACTICS, 1)).isValid(game));
+    }
+
+    @Test
+    void shouldNotApplyReceiveSkillGameStepRestrictionOnOtherSteps() {
+        game.moveTo(SICKBAY, KARA_STARBUCK_THRACE);
+        assertTrue(new DrawSkillCardsEvent(1, Map.of(TACTICS, 2)).isValid(game));
+
     }
 
     private void revealCylon() {

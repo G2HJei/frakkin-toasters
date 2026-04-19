@@ -11,6 +11,7 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 
 import java.util.*;
 
+import static xyz.zlatanov.frakkintoasters.state.GameStep.RECEIVE_SKILLS;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 
 @Accessors(fluent = true)
@@ -34,20 +35,26 @@ public record DrawSkillCardsEvent(int playerNumber,
     @Override
     public boolean isValid(Game game) {
         val player = player(game);
-        val playerLocation = game.locate(player(game).character());
-        //todo single/no draw applies only during players' receive skill cards step
-        val singleDraw = playerLocation == SICKBAY || playerLocation == RESURRECTION_SHIP;
-        val noDraw = playerLocation == HUB_DESTROYED;
-        val totalCardsToReceive = totalCardsToReceive();
-        if (singleDraw && totalCardsToReceive != 1) {
-            return false;
-        }
-        if (noDraw && totalCardsToReceive > 0) {
-            return false;
-        }
-        return player.isHuman()
+        return meetsReceiveSkillsStepRestriction(game)
+                && (player.isHuman()
                 ? validateHumanSelection(player)
-                : validateRevealedCylonSelection();
+                : validateRevealedCylonSelection());
+    }
+
+    private boolean meetsReceiveSkillsStepRestriction(Game game) {
+        val playerLocation = game.locate(player(game).character());
+        if (game.step() == RECEIVE_SKILLS) {
+            val singleDraw = playerLocation == SICKBAY || playerLocation == RESURRECTION_SHIP;
+            val noDraw = playerLocation == HUB_DESTROYED;
+            val totalCardsToReceive = totalCardsToReceive();
+            if (singleDraw && totalCardsToReceive != 1) {
+                return false;
+            }
+            if (noDraw && totalCardsToReceive > 0) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
