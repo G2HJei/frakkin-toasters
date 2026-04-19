@@ -34,7 +34,7 @@ class HumanFleetLookAtTopCrisisCardPlayerEventTest {
         assertEquals(all(
                         one(new PlaceCrisisCardOnTopEvent(1, DETENTE),
                                 new PlaceCrisisCardOnBottomEvent(1, DETENTE)),
-                        single(new PlayerDecisionEvent<>(1, ReceiveSkillCardsEvent.class, DRAW_EXACTLY_2))
+                        single(new PlayerDecisionEvent<>(1, DrawSkillCardsEvent.class, DRAW_EXACTLY_2))
                 ),
                 followups);
     }
