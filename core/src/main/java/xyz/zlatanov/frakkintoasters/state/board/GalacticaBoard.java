@@ -33,6 +33,8 @@ public class GalacticaBoard extends BattlestarBoard {
     private final Map<Ship, Location>           shipsInSpace         = new HashMap<>();
     private final Map<Centurion, BoardingParty> boardingPartyTrack   = new HashMap<>();
 
+    public static final List<Location> VIPER_LAUNCH_SPACES = List.of(GALACTICA_SPACE_4_OCLOCK, GALACTICA_SPACE_6_OCLOCK);
+
 
     public GalacticaBoard() {
         super(galacticaLocations());
@@ -174,11 +176,11 @@ public class GalacticaBoard extends BattlestarBoard {
         return this;
     }
 
-    public List<Ship> shipsInSpace(ShipType... ofType) {
-        val constraint = Arrays.stream(ofType).toList();
+    public <T extends Ship> List<T> shipsInSpace(Class<T> shipClass) {
         return shipsInSpace.keySet()
                 .stream()
-                .filter(s -> constraint.contains(s.type()))
+                .filter(shipClass::isInstance)
+                .map(shipClass::cast)
                 .toList();
     }
 
