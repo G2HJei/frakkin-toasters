@@ -2,6 +2,7 @@ package xyz.zlatanov.frakkintoasters.event;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
+import xyz.zlatanov.frakkintoasters.event.endgame.CylonsWinEvent;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.ship.Centurion;
@@ -10,6 +11,7 @@ import xyz.zlatanov.frakkintoasters.state.ship.HeavyRaider;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
+import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.HEAVY_RAIDER;
 import static xyz.zlatanov.frakkintoasters.state.track.BoardingParty.POSITION_1;
@@ -85,6 +87,18 @@ class ActivateHeavyRaidersAndCenturionsActionTest {
                         new PlaceShipOnCylonFleetBoardEvent(HEAVY_RAIDER),
                         new AdvancePursuitTrackEvent()),
                 followup);
+    }
+
+    @Test
+    void shouldEndGameIfBoardingPartyReachEnd() {
+        game.boards().galactica().boardGalactica(centurion)
+                .advanceBoardingParty()
+                .advanceBoardingParty()
+                .advanceBoardingParty();
+
+        val followup = executeAction(game);
+
+        assertEquals(one(new CylonsWinEvent()), followup);
     }
 
     void placeHeavyRaider(Location location, HeavyRaider heavyRaider) {
