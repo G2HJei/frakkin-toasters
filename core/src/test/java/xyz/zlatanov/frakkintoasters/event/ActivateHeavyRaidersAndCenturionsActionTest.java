@@ -1,4 +1,4 @@
-package xyz.zlatanov.frakkintoasters.event.action;
+package xyz.zlatanov.frakkintoasters.event;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
@@ -9,6 +9,7 @@ import xyz.zlatanov.frakkintoasters.state.ship.HeavyRaider;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.HEAVY_RAIDER;
 import static xyz.zlatanov.frakkintoasters.state.track.BoardingParty.POSITION_1;
@@ -77,6 +78,15 @@ class ActivateHeavyRaidersAndCenturionsActionTest {
         assertEquals(GALACTICA_SPACE_6_OCLOCK, game.boards().galactica().locate(heavyRaider));
     }
 
+    @Test
+    void shouldFollowWithPlaceHeavyRaiderOnCylonFleetBoardAndAdvancePursuitTrack() {
+        val followup = executeAction(Game.builder().build());
+        assertEquals(all(
+                        new PlaceShipOnCylonFleetBoardEvent(HEAVY_RAIDER),
+                        new AdvancePursuitTrackEvent()),
+                followup);
+    }
+
     void placeHeavyRaider(Location location, HeavyRaider heavyRaider) {
         game.boards().galactica().place(location, heavyRaider);
     }
@@ -85,7 +95,7 @@ class ActivateHeavyRaidersAndCenturionsActionTest {
         game.boards().galactica().boardGalactica(centurion);
     }
 
-    void executeAction(Game game) {
-        new ActivateHeavyRaidersAndCenturionsAction().execute(game);
+    Followup executeAction(Game game) {
+        return new ActivateHeavyRaidersAndCenturionsAction().execute(game);
     }
 }
