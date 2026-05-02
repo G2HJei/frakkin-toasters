@@ -1,9 +1,8 @@
-package xyz.zlatanov.frakkintoasters.event.action;
+package xyz.zlatanov.frakkintoasters.event;
 
 import lombok.val;
-import xyz.zlatanov.frakkintoasters.event.Event;
-import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.state.Game;
+import xyz.zlatanov.frakkintoasters.state.board.CylonFleetBoard;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 import xyz.zlatanov.frakkintoasters.state.ship.HeavyRaider;
@@ -11,8 +10,10 @@ import xyz.zlatanov.frakkintoasters.state.ship.HeavyRaider;
 import java.util.List;
 import java.util.Map;
 
+import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.state.board.GalacticaBoard.VIPER_LAUNCH_SPACES;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
+import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.HEAVY_RAIDER;
 
 public record ActivateHeavyRaidersAndCenturionsAction() implements Event {
 
@@ -31,7 +32,9 @@ public record ActivateHeavyRaidersAndCenturionsAction() implements Event {
 
         galactica.advanceBoardingParty();
         if (heavyRaiders.isEmpty() && basestars.isEmpty() && noCenturionsInPlay) {
-            return placeOnCylonFleetBoard(game);
+            return all(
+                    new PlaceShipOnCylonFleetBoardEvent(HEAVY_RAIDER),
+                    new AdvancePursuitTrackEvent());
         }
         if (heavyRaiders.isEmpty()) {
             return launchHeavyRaiders(game, basestars);
@@ -47,9 +50,35 @@ public record ActivateHeavyRaidersAndCenturionsAction() implements Event {
         return Followup.NONE;
     }
 
+    //todo move in PlaceShipOnCylonFleetBoardEvent
     private static Followup placeOnCylonFleetBoard(Game game) {
-        game.boards().cylonFleet().advancePursuit();
+        val cylonFleet = game.boards().cylonFleet();
+        cylonFleet.advancePursuit();
+        val target = CylonFleetBoard.spaceFromRoll(game.die().roll());
+        if (!game.cylonShips().heavyRaiders().isEmpty()) {
+            cylonFleet.place(target, game.cylonShips().heavyRaider());
+        } else {
+            spillOutOfShips(game);
+        }
         return Followup.NONE;
+    }
+
+    //todo move in separate event to follow PlaceShipOnCylonFleetBoardEvent
+    private static void spillOutOfShips(Game game) {
+        val cylonFleet = game.boards().cylonFleet();
+        val galactica = game.boards().galactica();
+        for (int i = CylonFleetBoard.SPACE_AREAS.size() - 1; i >= 0; i--) {
+            val space = CylonFleetBoard.SPACE_AREAS.get(i);
+            val heavyRaiders = cylonFleet.shipsIn(space, HeavyRaider.class);
+            if (!heavyRaiders.isEmpty()) {
+                val destination = CylonFleetBoard.SPACE_TO_GALACTICA.get(space);
+                for (val hr : heavyRaiders) {
+                    cylonFleet.remove(hr);
+                    galactica.place(destination, hr);
+                }
+                return;
+            }
+        }
     }
 
     private static Followup launchHeavyRaiders(Game game, List<Basestar> basestars) {
