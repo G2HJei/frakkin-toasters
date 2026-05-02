@@ -1,6 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event;
 
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.event.endgame.CylonsWinEvent;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.CylonFleetBoard;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
@@ -11,9 +12,11 @@ import java.util.List;
 import java.util.Map;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
+import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.board.GalacticaBoard.VIPER_LAUNCH_SPACES;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.HEAVY_RAIDER;
+import static xyz.zlatanov.frakkintoasters.state.track.BoardingParty.HUMANS_LOSE;
 
 public record ActivateHeavyRaidersAndCenturionsAction() implements Event {
 
@@ -31,6 +34,9 @@ public record ActivateHeavyRaidersAndCenturionsAction() implements Event {
         val noCenturionsInPlay = galactica.boardingPartyTrack().isEmpty();
 
         galactica.advanceBoardingParty();
+        if (galactica.boardingPartyTrack().containsValue(HUMANS_LOSE)) {
+            return one(new CylonsWinEvent());
+        }
         if (heavyRaiders.isEmpty() && basestars.isEmpty() && noCenturionsInPlay) {
             return all(
                     new PlaceShipOnCylonFleetBoardEvent(HEAVY_RAIDER),
