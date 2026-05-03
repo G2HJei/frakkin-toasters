@@ -102,6 +102,7 @@ public class GalacticaBoard extends BattlestarBoard {
         return this;
     }
 
+    //todo usee Class instead of enum for type safety
     public Ship removeFromReserves(ShipType shipType) {
         return removeFrom(reserves, shipType);
     }
