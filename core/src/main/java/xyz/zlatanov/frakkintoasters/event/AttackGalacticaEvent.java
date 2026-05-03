@@ -1,4 +1,4 @@
 package xyz.zlatanov.frakkintoasters.event;
 
-public record AttackGalacticaEvent() implements Event {
+public record AttackGalacticaEvent(int cylonShipId) implements Event {
 }
