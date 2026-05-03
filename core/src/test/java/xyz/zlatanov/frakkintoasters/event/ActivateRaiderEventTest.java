@@ -31,7 +31,7 @@ class ActivateRaiderEventTest {
     @Test
     void shouldAttackGalacticaWhenNoCivilianShipsOnBoard() {
         galacticaBoard.place(GALACTICA_SPACE_4_OCLOCK, raider);
-        val followup = new ActivateRaidersEvent().execute(game);
+        val followup = executeEvent();
         assertEquals(single(new AttackGalacticaEvent(raider.id())), followup);
     }
 
