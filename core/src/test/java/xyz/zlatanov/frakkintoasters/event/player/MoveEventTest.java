@@ -9,7 +9,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.ship.AssaultRaptor;
-import xyz.zlatanov.frakkintoasters.state.ship.PilotableShip;
+import xyz.zlatanov.frakkintoasters.state.ship.HumanFighter;
 import xyz.zlatanov.frakkintoasters.state.ship.Viper;
 import xyz.zlatanov.frakkintoasters.state.ship.ViperMarkVII;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
@@ -110,7 +110,7 @@ class MoveEventTest {
 
     @ParameterizedTest
     @MethodSource("adjacencyTests")
-    void shouldValidateMovementAdjacency(PilotableShip ship, Location destination, boolean isValid) {
+    void shouldValidateMovementAdjacency(HumanFighter ship, Location destination, boolean isValid) {
         ship.pilot(KARA_STARBUCK_THRACE);
         game.boards().galactica().place(GALACTICA_SPACE_2_OCLOCK, ship);
         assertEquals(isValid, new MoveEvent(1, destination, null).isValid(game));

@@ -5,6 +5,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
+import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
 import xyz.zlatanov.frakkintoasters.state.track.BoardingParty;
 import xyz.zlatanov.frakkintoasters.state.track.JumpPreparation;
@@ -49,8 +50,8 @@ public class GalacticaBoard extends BattlestarBoard {
         return Optional.ofNullable(super.locate(character))
                 .orElseGet(() -> shipsInSpace.entrySet()
                         .stream()
-                        .filter(es -> es.getKey() instanceof PilotableShip
-                                && ((PilotableShip) es.getKey()).pilot() == character)
+                        .filter(es -> es.getKey() instanceof HumanFighter
+                                && ((HumanFighter) es.getKey()).pilot() == character)
                         .findFirst()
                         .map(Map.Entry::getValue)
                         .orElse(null));
@@ -119,9 +120,9 @@ public class GalacticaBoard extends BattlestarBoard {
         assert locations().contains(in) && in.isSpaceLocation();
         ships.forEach(s -> shipsInSpace.put(s, in));
         ships.stream()
-                .filter(s -> s instanceof PilotableShip)
-                .map(PilotableShip.class::cast)
-                .map(PilotableShip::pilot)
+                .filter(s -> s instanceof HumanFighter)
+                .map(HumanFighter.class::cast)
+                .map(HumanFighter::pilot)
                 .filter(Objects::nonNull)
                 .forEach(this::remove);
         return this;
@@ -137,7 +138,15 @@ public class GalacticaBoard extends BattlestarBoard {
         return shipsIn(location, ShipType.values());
     }
 
-    //todo add utility method using generic
+    public <T extends Ship> List<T> shipsIn(Location location, Class<T> shipClass) {
+        return shipsInSpace.entrySet()
+                .stream()
+                .filter(e -> e.getValue() == location)
+                .map(Map.Entry::getKey)
+                .filter(s -> shipClass.equals(s.getClass()))
+                .map(shipClass::cast)
+                .toList();
+    }
 
     public List<Ship> shipsIn(Location location, ShipType... ofType) {
         val constraint = Arrays.stream(ofType).toList();
@@ -146,6 +155,28 @@ public class GalacticaBoard extends BattlestarBoard {
                 .filter(e -> e.getValue() == location)
                 .map(Map.Entry::getKey)
                 .filter(s -> constraint.contains(s.type()))
+                .toList();
+    }
+
+    public <T extends Ship> T shipInSpace(int shipId, Class<T> shipClass) {
+        return shipsInSpace(shipClass).stream()
+                .filter(r -> r.id() == shipId)
+                .findFirst()
+                .orElseThrow(FrakCallTheAdmiralException::new);
+    }
+
+    public <T extends Ship> List<T> shipsInSpace(Class<T> shipClass) {
+        return shipsInSpace.keySet()
+                .stream()
+                .filter(s -> shipClass.equals(s.getClass()))
+                .map(shipClass::cast)
+                .toList();
+    }
+
+    public List<HumanFighter> humanFightersIn(Location location) {
+        return shipsIn(location).stream()
+                .filter(HumanFighter.class::isInstance)
+                .map(HumanFighter.class::cast)
                 .toList();
     }
 
@@ -164,14 +195,6 @@ public class GalacticaBoard extends BattlestarBoard {
                 (c, pos) ->
                         BoardingParty.values()[pos.ordinal() + 1]);
         return this;
-    }
-
-    public <T extends Ship> List<T> shipsInSpace(Class<T> shipClass) {
-        return shipsInSpace.keySet()
-                .stream()
-                .filter(shipClass::isInstance)
-                .map(shipClass::cast)
-                .toList();
     }
 
     public void advanceJumpPreparation() {

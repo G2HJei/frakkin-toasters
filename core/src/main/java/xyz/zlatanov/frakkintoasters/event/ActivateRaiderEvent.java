@@ -3,11 +3,9 @@ package xyz.zlatanov.frakkintoasters.event;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
-import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
-import xyz.zlatanov.frakkintoasters.state.ship.PilotableShip;
+import xyz.zlatanov.frakkintoasters.state.ship.HumanFighter;
 import xyz.zlatanov.frakkintoasters.state.ship.Raider;
-import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 
 import java.util.Comparator;
 import java.util.List;
@@ -15,7 +13,6 @@ import java.util.List;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.LOCATION_AREAS;
-import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.CIVILIAN;
 
 public record ActivateRaiderEvent(int raiderShipId) implements Event {
 
@@ -23,30 +20,22 @@ public record ActivateRaiderEvent(int raiderShipId) implements Event {
 
     @Override
     public Followup apply(Game game) {
-        val galactica = game.boards().galactica();
+        val galacticaBoard = game.boards().galactica();
 
-        //todo find ship by id utility method
-        val raider = galactica.shipsInSpace(Raider.class).stream()
-                .filter(r -> r.id() == raiderShipId)
-                .findFirst()
-                .orElseThrow(FrakCallTheAdmiralException::new);
-        val location = galactica.locate(raider);
+        val raider = galacticaBoard.shipInSpace(raiderShipId, Raider.class);
+        val location = galacticaBoard.locate(raider);
 
-        val pilotables = galactica.shipsIn(location).stream()
-                .filter(PilotableShip.class::isInstance)
-                .map(PilotableShip.class::cast)
-                .toList();
-        if (!pilotables.isEmpty()) {
-            return attackViper(raider, pilotables);
+        val humanFighters = galacticaBoard.humanFightersIn(location);
+        if (!humanFighters.isEmpty()) {
+            return attackViper(raider, humanFighters);
         }
 
-        //todo replace ENUM param with Class param for type safety?
-        val civiliansHere = galactica.shipsIn(location, CIVILIAN);
+        val civiliansHere = galacticaBoard.shipsIn(location, CivilianShip.class);
         if (!civiliansHere.isEmpty()) {
             return destroyCivilianShip(civiliansHere);
         }
 
-        val allCivilians = galactica.shipsInSpace(CivilianShip.class);
+        val allCivilians = galacticaBoard.shipsInSpace(CivilianShip.class);
         if (!allCivilians.isEmpty()) {
             moveTowardNearestCivilian(game, raider, location, allCivilians);
             return Followup.NONE;
@@ -55,19 +44,19 @@ public record ActivateRaiderEvent(int raiderShipId) implements Event {
         return single(new AttackGalacticaEvent(raider.id()));
     }
 
-    private Followup attackViper(Raider raider, List<PilotableShip> pilotables) {
+    private Followup attackViper(Raider raider, List<HumanFighter> pilotables) {
         val unmanned = pilotables.stream().filter(s -> s.pilot() == null).toList();
         val targets = !unmanned.isEmpty() ? unmanned : pilotables;
         if (targets.size() == 1) {
             return single(new AttackViperEvent(raider.id(), targets.getFirst().id()));
         }
         return one(targets.stream()
-                .sorted(Comparator.comparingInt(PilotableShip::id))
+                .sorted(Comparator.comparingInt(HumanFighter::id))
                 .map(s -> new AttackViperEvent(raider.id(), s.id()))
                 .toArray(Event[]::new));
     }
 
-    private Followup destroyCivilianShip(List<Ship> civilians) {
+    private Followup destroyCivilianShip(List<CivilianShip> civilians) {
         if (civilians.size() == 1) {
             return single(new DestroyCivilianShipEvent(civilians.getFirst().id()));
         }
