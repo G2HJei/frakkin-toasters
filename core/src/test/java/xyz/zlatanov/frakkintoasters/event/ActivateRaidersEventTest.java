@@ -4,6 +4,7 @@ import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.GalacticaBoard;
+import xyz.zlatanov.frakkintoasters.state.ship.Raider;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.event.Followup.NONE;
@@ -33,7 +34,7 @@ class ActivateRaidersEventTest {
 
         val followup = executeEvent();
 
-        val raiders = galacticaBoard.shipsIn(GALACTICA_SPACE_8_OCLOCK, RAIDER);
+        val raiders = galacticaBoard.shipsIn(GALACTICA_SPACE_8_OCLOCK, Raider.class);
         assertEquals(2, raiders.size());
         assertEquals(NONE, followup);
     }
@@ -47,8 +48,8 @@ class ActivateRaidersEventTest {
 
         executeEvent();
 
-        assertEquals(2, galacticaBoard.shipsIn(GALACTICA_SPACE_8_OCLOCK, RAIDER).size());
-        assertEquals(2, galacticaBoard.shipsIn(GALACTICA_SPACE_2_OCLOCK, RAIDER).size());
+        assertEquals(2, galacticaBoard.shipsIn(GALACTICA_SPACE_8_OCLOCK, Raider.class).size());
+        assertEquals(2, galacticaBoard.shipsIn(GALACTICA_SPACE_2_OCLOCK, Raider.class).size());
     }
 
     @Test

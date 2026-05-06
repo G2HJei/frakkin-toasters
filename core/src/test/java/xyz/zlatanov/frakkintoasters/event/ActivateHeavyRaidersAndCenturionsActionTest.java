@@ -40,7 +40,7 @@ class ActivateHeavyRaidersAndCenturionsActionTest {
     @Test
     void shouldSpawnNewHeavyRaiderIfNoneOnBoard() {
         executeAction(game);
-        assertEquals(1, game.boards().galactica().shipsIn(GALACTICA_SPACE_8_OCLOCK, HEAVY_RAIDER).size());
+        assertEquals(1, game.boards().galactica().shipsIn(GALACTICA_SPACE_8_OCLOCK, HeavyRaider.class).size());
     }
 
     @Test

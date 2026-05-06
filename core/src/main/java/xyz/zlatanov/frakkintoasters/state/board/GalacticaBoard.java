@@ -135,7 +135,11 @@ public class GalacticaBoard extends BattlestarBoard {
     }
 
     public List<Ship> shipsIn(Location location) {
-        return shipsIn(location, ShipType.values());
+        return shipsInSpace.entrySet()
+                .stream()
+                .filter(e -> e.getValue() == location)
+                .map(Map.Entry::getKey)
+                .toList();
     }
 
     public <T extends Ship> List<T> shipsIn(Location location, Class<T> shipClass) {
@@ -148,13 +152,12 @@ public class GalacticaBoard extends BattlestarBoard {
                 .toList();
     }
 
-    public List<Ship> shipsIn(Location location, ShipType... ofType) {
-        val constraint = Arrays.stream(ofType).toList();
+    public <T extends Ship> List<Ship> shipsIn(Location location, List<Class<T>> shipClasses) {
         return shipsInSpace.entrySet()
                 .stream()
                 .filter(e -> e.getValue() == location)
                 .map(Map.Entry::getKey)
-                .filter(s -> constraint.contains(s.type()))
+                .filter(s -> shipClasses.contains(s.getClass()))
                 .toList();
     }
 

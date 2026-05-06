@@ -2,7 +2,7 @@ package xyz.zlatanov.frakkintoasters.event.action;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.event.DamageVipersEvent;
+import xyz.zlatanov.frakkintoasters.event.DamageHumanFighterEvent;
 import xyz.zlatanov.frakkintoasters.event.DestroyCivilianShipEvent;
 import xyz.zlatanov.frakkintoasters.event.DestroyRaidersEvent;
 import xyz.zlatanov.frakkintoasters.event.Followup;
@@ -67,7 +67,7 @@ class MainBatteriesActionEventTest {
 
         val followups = new MainBatteriesActionEvent(1, GALACTICA_SPACE_4_OCLOCK).execute(game);
 
-        assertEquals(single(new DamageVipersEvent(Set.of(viper.id()))), followups);
+        assertEquals(single(new DamageHumanFighterEvent(Set.of(viper.id()))), followups);
     }
 
     @Test
@@ -79,7 +79,7 @@ class MainBatteriesActionEventTest {
 
         val followups = new MainBatteriesActionEvent(1, GALACTICA_SPACE_4_OCLOCK).execute(game);
 
-        assertEquals(single(new PlayerDecisionEvent<>(1, DamageVipersEvent.class)), followups);
+        assertEquals(single(new PlayerDecisionEvent<>(1, DamageHumanFighterEvent.class)), followups);
     }
 
     @Test

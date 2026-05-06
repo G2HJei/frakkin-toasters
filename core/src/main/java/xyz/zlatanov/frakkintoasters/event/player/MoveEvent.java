@@ -39,7 +39,7 @@ public record MoveEvent(int playerNumber, Location destination, SkillCard discar
         val isPiloting = currentLocation(game).isSpaceLocation();
         val isStayingInSpace = destination.isSpaceLocation();
         if (isPiloting) {
-            val ship = pilotedShip(game);
+            val ship = humanFighter(game);
             if (isStayingInSpace) {
                 game.moveTo(destination, ship);
             } else {
@@ -72,7 +72,7 @@ public record MoveEvent(int playerNumber, Location destination, SkillCard discar
         val isStayingInSpace = destination.isSpaceLocation();
         if (isPiloting && isStayingInSpace) {
             val distance = distanceLookupTable.get(currentLocation).get(destination);
-            val maxDistance = 1 + (pilotedShip(game).type() == VIPER_MARK_VII ? 1 : 0);
+            val maxDistance = 1 + (humanFighter(game).type() == VIPER_MARK_VII ? 1 : 0);
             return distance <= maxDistance;
         } else {
             return true;
@@ -92,7 +92,7 @@ public record MoveEvent(int playerNumber, Location destination, SkillCard discar
     }
 
 
-    private HumanFighter pilotedShip(Game game) {
+    private HumanFighter humanFighter(Game game) {
         val playerCharacter = playerCharacter(game);
         val galacticaBoard = game.boards().galactica();
         return LOCATION_AREAS.get("Galactica space")
