@@ -20,7 +20,6 @@ import java.util.*;
 import static xyz.zlatanov.frakkintoasters.state.GameStep.SETUP;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
-import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.VIPER;
 
 @Builder
 @Getter
@@ -82,8 +81,8 @@ public class Game {
     public Game setupGalacticaBoard() {
         val galacticaBoard = boards.galactica();
         boards.galactica()
-                .place(GALACTICA_SPACE_4_OCLOCK, galacticaBoard.removeFromReserves(VIPER))
-                .place(GALACTICA_SPACE_6_OCLOCK, galacticaBoard.removeFromReserves(VIPER))
+                .place(GALACTICA_SPACE_4_OCLOCK, galacticaBoard.removeFromReserves(Viper.class))
+                .place(GALACTICA_SPACE_6_OCLOCK, galacticaBoard.removeFromReserves(Viper.class))
                 .place(GALACTICA_SPACE_2_OCLOCK, List.of(decks.civilianShips().draw(), decks.civilianShips().draw()))
                 .place(GALACTICA_SPACE_8_OCLOCK, cylonShips.basestar())
                 .place(GALACTICA_SPACE_8_OCLOCK, List.of(cylonShips.raider(), cylonShips.raider(), cylonShips.raider(), cylonShips.raider()));
@@ -109,7 +108,7 @@ public class Game {
         return this;
     }
 
-    
+
     public Game moveTo(Location location, Ship ship) {
         assert LOCATION_AREAS.get("Galactica space").contains(location);
         boards.galactica()

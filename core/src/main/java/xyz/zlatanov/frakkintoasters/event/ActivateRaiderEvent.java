@@ -24,6 +24,8 @@ public record ActivateRaiderEvent(int raiderShipId) implements Event {
     @Override
     public Followup apply(Game game) {
         val galactica = game.boards().galactica();
+
+        //todo find ship by id utility method
         val raider = galactica.shipsInSpace(Raider.class).stream()
                 .filter(r -> r.id() == raiderShipId)
                 .findFirst()
@@ -38,6 +40,7 @@ public record ActivateRaiderEvent(int raiderShipId) implements Event {
             return attackViper(raider, pilotables);
         }
 
+        //todo replace ENUM param with Class param for type safety?
         val civiliansHere = galactica.shipsIn(location, CIVILIAN);
         if (!civiliansHere.isEmpty()) {
             return destroyCivilianShip(civiliansHere);

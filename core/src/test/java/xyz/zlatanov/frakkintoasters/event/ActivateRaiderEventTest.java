@@ -15,8 +15,6 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.LOUANNE_KAT_KATRAINE;
-import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.ASSAULT_RAPTOR;
-import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.VIPER;
 
 class ActivateRaiderEventTest {
 
@@ -24,9 +22,9 @@ class ActivateRaiderEventTest {
     GalacticaBoard galacticaBoard       = game.boards().galactica();
     Raider         raider               = game.cylonShips().raider();
     CivilianShip   civilianShip         = game.decks().civilianShips().draw();
-    Viper          unmannedViper        = (Viper) galacticaBoard.removeFromReserves(VIPER);
-    Viper          pilotedViper         = ((Viper) galacticaBoard.removeFromReserves(VIPER)).pilot(KARA_STARBUCK_THRACE);
-    AssaultRaptor  pilotedAssaultRaptor = ((AssaultRaptor) galacticaBoard.removeFromReserves(ASSAULT_RAPTOR)).pilot(LOUANNE_KAT_KATRAINE);
+    Viper          unmannedViper        = galacticaBoard.removeFromReserves(Viper.class);
+    Viper          pilotedViper         = galacticaBoard.removeFromReserves(Viper.class).pilot(KARA_STARBUCK_THRACE);
+    AssaultRaptor  pilotedAssaultRaptor = galacticaBoard.removeFromReserves(AssaultRaptor.class).pilot(LOUANNE_KAT_KATRAINE);
 
     @Test
     void shouldAttackGalacticaWhenNoCivilianShipsOnBoard() {
