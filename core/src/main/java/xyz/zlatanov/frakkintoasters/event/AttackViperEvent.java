@@ -1,4 +1,4 @@
 package xyz.zlatanov.frakkintoasters.event;
 
-public record AttackViperEvent(int raiderId, int pilotableShipId) implements Event {
+public record AttackViperEvent(int raiderId, int humanFighterId) implements Event {
 }

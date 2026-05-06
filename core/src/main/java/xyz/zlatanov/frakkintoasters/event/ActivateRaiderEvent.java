@@ -44,12 +44,9 @@ public record ActivateRaiderEvent(int raiderShipId) implements Event {
         return single(new AttackGalacticaEvent(raider.id()));
     }
 
-    private Followup attackViper(Raider raider, List<HumanFighter> pilotables) {
-        val unmanned = pilotables.stream().filter(s -> s.pilot() == null).toList();
-        val targets = !unmanned.isEmpty() ? unmanned : pilotables;
-        if (targets.size() == 1) {
-            return single(new AttackViperEvent(raider.id(), targets.getFirst().id()));
-        }
+    private Followup attackViper(Raider raider, List<HumanFighter> humanFighters) {
+        val unmanned = humanFighters.stream().filter(s -> s.pilot() == null).toList();
+        val targets = !unmanned.isEmpty() ? unmanned : humanFighters;
         return one(targets.stream()
                 .sorted(Comparator.comparingInt(HumanFighter::id))
                 .map(s -> new AttackViperEvent(raider.id(), s.id()))
@@ -57,9 +54,6 @@ public record ActivateRaiderEvent(int raiderShipId) implements Event {
     }
 
     private Followup destroyCivilianShip(List<CivilianShip> civilians) {
-        if (civilians.size() == 1) {
-            return single(new DestroyCivilianShipEvent(civilians.getFirst().id()));
-        }
         return one(civilians.stream()
                 .map(c -> new DestroyCivilianShipEvent(c.id()))
                 .toArray(Event[]::new));
