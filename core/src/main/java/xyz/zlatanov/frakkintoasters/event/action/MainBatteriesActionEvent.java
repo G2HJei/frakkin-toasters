@@ -5,13 +5,14 @@ import xyz.zlatanov.frakkintoasters.event.*;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
+import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
+import xyz.zlatanov.frakkintoasters.state.ship.Raider;
 import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 
 import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
-import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.*;
 
 public record MainBatteriesActionEvent(int playerNumber, Location spaceLocation) implements ActionEvent {
 
@@ -30,7 +31,7 @@ public record MainBatteriesActionEvent(int playerNumber, Location spaceLocation)
     }
 
     private Followup destroyCivilianShip(Game game) {
-        val civilians = game.boards().galactica().shipsIn(spaceLocation, CIVILIAN);
+        val civilians = game.boards().galactica().shipsIn(spaceLocation, CivilianShip.class);
         if (civilians.isEmpty()) {
             return Followup.NONE;
         }
@@ -42,18 +43,18 @@ public record MainBatteriesActionEvent(int playerNumber, Location spaceLocation)
 
     private Followup damageViper(Game game) {
         //todo include assault raptor here?
-        val vipers = game.boards().galactica().shipsIn(spaceLocation, VIPER, VIPER_MARK_VII);
-        if (vipers.isEmpty()) {
+        val humanFighters = game.boards().galactica().humanFightersIn(spaceLocation);
+        if (humanFighters.isEmpty()) {
             return Followup.NONE;
         }
-        if (vipers.size() == 1) {
-            return single(new DamageVipersEvent(Set.of(vipers.getFirst().id())));
+        if (humanFighters.size() == 1) {
+            return single(new DamageHumanFighterEvent(Set.of(humanFighters.getFirst().id())));
         }
-        return single(new PlayerDecisionEvent<>(playerNumber, DamageVipersEvent.class));
+        return single(new PlayerDecisionEvent<>(playerNumber, DamageHumanFighterEvent.class));
     }
 
     private Followup destroyRaiders(Game game, int count) {
-        val raiders = game.boards().galactica().shipsIn(spaceLocation, RAIDER);
+        val raiders = game.boards().galactica().shipsIn(spaceLocation, Raider.class);
         if (raiders.isEmpty()) {
             return Followup.NONE;
         }
