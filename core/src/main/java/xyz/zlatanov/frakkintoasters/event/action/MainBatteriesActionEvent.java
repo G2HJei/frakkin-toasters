@@ -41,6 +41,7 @@ public record MainBatteriesActionEvent(int playerNumber, Location spaceLocation)
     }
 
     private Followup damageViper(Game game) {
+        //todo include assault raptor here?
         val vipers = game.boards().galactica().shipsIn(spaceLocation, VIPER, VIPER_MARK_VII);
         if (vipers.isEmpty()) {
             return Followup.NONE;

@@ -2,9 +2,9 @@ package xyz.zlatanov.frakkintoasters.state.ship;
 
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 
-public interface PilotableShip extends Ship {
+public interface HumanFighter extends Ship {
 
-    PilotableShip pilot(Character o);
+    HumanFighter pilot(Character o);
 
     Character pilot();
 

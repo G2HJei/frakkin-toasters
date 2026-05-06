@@ -10,7 +10,7 @@ import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.ASSAULT_RAPTOR;
 @Data
 @Accessors(fluent = true)
 @EqualsAndHashCode(of = "id")
-public class AssaultRaptor implements PilotableShip {
+public class AssaultRaptor implements HumanFighter {
 
     private final int       id;
     private final ShipType  type = ASSAULT_RAPTOR;

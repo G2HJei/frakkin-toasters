@@ -10,7 +10,7 @@ import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.VIPER;
 @Data
 @Accessors(fluent = true)
 @EqualsAndHashCode(of = "id")
-public class Viper implements PilotableShip {
+public class Viper implements HumanFighter {
     private final int       id;
     private final ShipType  type = VIPER;
     private       Character pilot;

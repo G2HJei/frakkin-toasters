@@ -7,7 +7,7 @@ import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
-import xyz.zlatanov.frakkintoasters.state.ship.PilotableShip;
+import xyz.zlatanov.frakkintoasters.state.ship.HumanFighter;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import java.util.Collection;
@@ -92,16 +92,16 @@ public record MoveEvent(int playerNumber, Location destination, SkillCard discar
     }
 
 
-    private PilotableShip pilotedShip(Game game) {
+    private HumanFighter pilotedShip(Game game) {
         val playerCharacter = playerCharacter(game);
         val galacticaBoard = game.boards().galactica();
         return LOCATION_AREAS.get("Galactica space")
                 .stream()
                 .map(galacticaBoard::shipsIn)
                 .flatMap(Collection::stream)
-                .filter(s -> s instanceof PilotableShip
-                        && ((PilotableShip) s).pilot() == playerCharacter)
-                .map(PilotableShip.class::cast)
+                .filter(s -> s instanceof HumanFighter
+                        && ((HumanFighter) s).pilot() == playerCharacter)
+                .map(HumanFighter.class::cast)
                 .findFirst()
                 .orElseThrow();
     }
