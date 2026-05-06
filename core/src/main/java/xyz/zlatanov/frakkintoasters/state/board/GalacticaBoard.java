@@ -5,7 +5,6 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
-import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
 import xyz.zlatanov.frakkintoasters.state.track.BoardingParty;
 import xyz.zlatanov.frakkintoasters.state.track.JumpPreparation;
@@ -103,25 +102,13 @@ public class GalacticaBoard extends BattlestarBoard {
     }
 
     //todo usee Class instead of enum for type safety
-    public Ship removeFromReserves(ShipType shipType) {
-        return removeFrom(reserves, shipType);
+
+    public <T extends Ship> T removeFromReserves(Class<T> shipClass) {
+        return removeFrom(reserves, shipClass);
     }
 
-    public Ship removeFromDamagedShips(ShipType shipType) {
-        return removeFrom(damagedShips, shipType);
-    }
-
-    private static <T extends Ship> T removeFrom(Set<T> source, ShipType shipType) {
-        val ship = source.stream()
-                .filter(s -> s.type() == shipType)
-                .findFirst()
-                .orElseThrow(FrakCallTheAdmiralException::new);
-        source.remove(ship);
-        return ship;
-    }
-
-    public GalacticaBoard place(Location in, Ship ship) {
-        return place(in, List.of(ship));
+    public <T extends Ship> T removeFromDamagedShips(Class<T> shipClass) {
+        return removeFrom(damagedShips, shipClass);
     }
 
     public GalacticaBoard place(Location in, Ship... ships) {
@@ -149,6 +136,8 @@ public class GalacticaBoard extends BattlestarBoard {
     public List<Ship> shipsIn(Location location) {
         return shipsIn(location, ShipType.values());
     }
+
+    //todo add utility method using generic
 
     public List<Ship> shipsIn(Location location, ShipType... ofType) {
         val constraint = Arrays.stream(ofType).toList();
@@ -210,5 +199,15 @@ public class GalacticaBoard extends BattlestarBoard {
     public GalacticaBoard increaseFuel() {
         fuel++;
         return this;
+    }
+
+    private <T extends Ship> T removeFrom(Set<Ship> source, Class<T> shipClass) {
+        val ship = source.stream()
+                .filter(s -> shipClass.equals(s.getClass()))
+                .findFirst()
+                .map(shipClass::cast)
+                .orElse(null);
+        source.remove(ship);
+        return ship;
     }
 }

@@ -14,8 +14,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.GAIUS_BALTAR;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARL_HELO_AGATHON;
-import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.RAPTOR;
-import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.VIPER;
 import static xyz.zlatanov.frakkintoasters.state.track.JumpPreparation.POSITION_1;
 import static xyz.zlatanov.frakkintoasters.state.track.JumpPreparation.START;
 
@@ -58,14 +56,14 @@ class GalacticaBoardTest {
 
     @Test
     void shouldManageReserves() {
-        assertDoesNotThrow(() -> board.removeFromReserves(VIPER));
+        assertDoesNotThrow(() -> board.removeFromReserves(Viper.class));
     }
 
     @Test
     void shouldManageDamagedShip() {
         val raptor = new Raptor(2);
         board.addToDamagedShips(raptor);
-        assertEquals(raptor, board.removeFromDamagedShips(RAPTOR));
+        assertEquals(raptor, board.removeFromDamagedShips(Raptor.class));
     }
 
     @Test
