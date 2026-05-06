@@ -1,7 +1,10 @@
 package xyz.zlatanov.frakkintoasters.event;
 
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public sealed interface Followup permits Followup.None, Followup.Single, Followup.AllOf, Followup.OneOf {
 
@@ -16,7 +19,7 @@ public sealed interface Followup permits Followup.None, Followup.Single, Followu
     record AllOf(List<Followup> followups) implements Followup {
     }
 
-    record OneOf(List<Followup> options) implements Followup {
+    record OneOf(Set<Followup> options) implements Followup {
     }
 
     static Single single(Event event) {
@@ -28,7 +31,7 @@ public sealed interface Followup permits Followup.None, Followup.Single, Followu
     }
 
     static OneOf one(Event... events) {
-        return new OneOf(Arrays.stream(events).<Followup>map(Single::new).toList());
+        return new OneOf(Arrays.stream(events).<Followup>map(Single::new).collect(Collectors.toCollection(LinkedHashSet::new)));
     }
 
     static AllOf all(Followup... followups) {
@@ -36,6 +39,6 @@ public sealed interface Followup permits Followup.None, Followup.Single, Followu
     }
 
     static OneOf one(Followup... followups) {
-        return new OneOf(Arrays.stream(followups).toList());
+        return new OneOf(Arrays.stream(followups).collect(Collectors.toCollection(LinkedHashSet::new)));
     }
 }
