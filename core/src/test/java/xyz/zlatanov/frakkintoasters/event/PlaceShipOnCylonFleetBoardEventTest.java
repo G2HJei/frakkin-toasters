@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event;
 
+import lombok.val;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -9,9 +10,11 @@ import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.*;
 
@@ -28,6 +31,19 @@ class PlaceShipOnCylonFleetBoardEventTest {
         assertEquals(1, game.boards().cylonFleet().shipsIn(placementLocation, shipClass).size());
     }
 
+    // todo uncomment after cylonShips refactor to return Optional @Test
+    void shouldTransferShipsToMainBoard() {
+        val cylonShips = game.cylonShips();
+        val basestarToMove = cylonShips.basestar();
+        game.boards().cylonFleet().place(CYLON_FLEET_SPACE_7_8, basestarToMove);
+        game.boards().cylonFleet().place(CYLON_FLEET_SPACE_1, cylonShips.basestar());
+
+        val followup = executeEvent(BASESTAR);
+
+        assertEquals(single(new MoveCylonShipsToMainBoard(List.of(basestarToMove.id()))), followup);
+    }
+
+
     static Stream<Arguments> shouldPlaceShipOnCorrespondingSpaceAreaArgs() {
         return Stream.of(
                 Arguments.arguments(Basestar.class, 1, CYLON_FLEET_SPACE_1),
@@ -41,10 +57,6 @@ class PlaceShipOnCylonFleetBoardEventTest {
         );
     }
 
-    void executeEvent(ShipType shipType) {
-        new PlaceShipOnCylonFleetBoardEvent(shipType).execute(game);
-    }
-
     <T extends Ship> ShipType shipTypeFor(Class<T> shipClass) {
         if (shipClass.equals(Raider.class)) {
             return RAIDER;
@@ -54,5 +66,9 @@ class PlaceShipOnCylonFleetBoardEventTest {
             return BASESTAR;
         }
         throw new FrakCallTheAdmiralException();
+    }
+
+    Followup executeEvent(ShipType shipType) {
+        return new PlaceShipOnCylonFleetBoardEvent(shipType).execute(game);
     }
 }
