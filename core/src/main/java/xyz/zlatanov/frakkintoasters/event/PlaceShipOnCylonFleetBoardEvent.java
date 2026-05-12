@@ -24,8 +24,8 @@ public record PlaceShipOnCylonFleetBoardEvent(ShipType cylonShipType) implements
     private Ship getShip(Game game) {
         val cylonShips = game.cylonShips();
         return switch (cylonShipType) {
-            case RAIDER -> cylonShips.raider();
-            case HEAVY_RAIDER -> cylonShips.heavyRaider();
+            case RAIDER -> cylonShips.raider().orElseThrow();
+            case HEAVY_RAIDER -> cylonShips.heavyRaider().orElseThrow();
             case BASESTAR -> cylonShips.basestar();
             default -> throw new FrakCallTheAdmiralException();
         };

@@ -53,10 +53,8 @@ public record ActivateRaidersEvent() implements Event {
         for (val basestar : basestars) {
             val basestarLocation = galactica.locate(basestar);
             for (int i = 0; i < 2; i++) {
-                if (game.cylonShips().raiders().isEmpty()) {
-                    break;
-                }
-                galactica.place(basestarLocation, game.cylonShips().raider());
+                game.cylonShips().raider()
+                        .ifPresent(r -> galactica.place(basestarLocation, r));
             }
         }
         return Followup.NONE;

@@ -20,7 +20,7 @@ class ActivateRaiderEventTest {
 
     Game           game                 = Game.builder().build();
     GalacticaBoard galacticaBoard       = game.boards().galactica();
-    Raider         raider               = game.cylonShips().raider();
+    Raider         raider               = game.cylonShips().raider().orElseThrow();
     CivilianShip   civilianShip         = game.decks().civilianShips().draw();
     Viper          unmannedViper        = galacticaBoard.removeFromReserves(Viper.class);
     Viper          pilotedViper         = galacticaBoard.removeFromReserves(Viper.class).pilot(KARA_STARBUCK_THRACE);

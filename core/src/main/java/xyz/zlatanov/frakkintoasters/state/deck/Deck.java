@@ -40,7 +40,7 @@ public class Deck<T> {
         return this;
     }
 
-    public T draw() {
+    public T draw() {//todo what if empty??
         return cards.removeFirst();
     }
 

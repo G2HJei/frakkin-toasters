@@ -19,10 +19,10 @@ import static xyz.zlatanov.frakkintoasters.state.track.Pursuit.START;
 @Accessors(fluent = true)
 public class CylonFleetBoard extends Board {
 
-    public static final List<Location>          SPACE_AREAS        = List.of(
+    public static final List<Location>          SPACE_AREAS           = List.of(
             CYLON_FLEET_SPACE_1, CYLON_FLEET_SPACE_2, CYLON_FLEET_SPACE_3,
             CYLON_FLEET_SPACE_4, CYLON_FLEET_SPACE_5_6, CYLON_FLEET_SPACE_7_8);
-    public static final Map<Location, Location> SPACE_TO_GALACTICA = Map.of(
+    public static final Map<Location, Location> MOVE_TO_GALACTICA_MAP = Map.of(
             CYLON_FLEET_SPACE_1, GALACTICA_SPACE_2_OCLOCK,
             CYLON_FLEET_SPACE_2, GALACTICA_SPACE_4_OCLOCK,
             CYLON_FLEET_SPACE_3, GALACTICA_SPACE_6_OCLOCK,

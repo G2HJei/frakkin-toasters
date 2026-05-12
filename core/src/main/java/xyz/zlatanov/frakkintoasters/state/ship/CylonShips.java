@@ -6,7 +6,7 @@ import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.IntStream;
+import java.util.Optional;
 
 @Getter
 @Accessors(fluent = true)
@@ -48,19 +48,25 @@ public class CylonShips {
         return basestars.removeLast();
     }
 
-    public Raider raider() {
-        assert !raiders.isEmpty();
-        return raiders.removeLast();
+    public Optional<Raider> raider() {
+        if (raiders.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(raiders.removeLast());
     }
 
-    public HeavyRaider heavyRaider() {
-        assert !heavyRaiders.isEmpty();
-        return heavyRaiders.removeLast();
+    public Optional<HeavyRaider> heavyRaider() {
+        if (heavyRaiders.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(heavyRaiders.removeLast());
     }
 
-    public Centurion centurion() {
-        assert !centurions.isEmpty();
-        return centurions.removeLast();
+    public Optional<Centurion> centurion() {
+        if (centurions.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(centurions.removeLast());
     }
 
     public void returned(Ship ship) {
