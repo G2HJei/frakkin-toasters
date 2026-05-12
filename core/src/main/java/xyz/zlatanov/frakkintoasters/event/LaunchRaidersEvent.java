@@ -38,12 +38,10 @@ public record LaunchRaidersEvent() implements Event {
         val galacticaBoard = game.boards().galactica();
         val basestarLocation = galacticaBoard.locate(basestar);
         int raidersLaunched = 0;
-        while (raidersLaunched++ < 3 && raidersAvailable(game)) {
-            galacticaBoard.place(basestarLocation, game.cylonShips().raider());
+        while (raidersLaunched++ < 3) {
+            game.cylonShips().raider()
+                    .ifPresent(r -> galacticaBoard.place(basestarLocation, r));
         }
     }
 
-    private boolean raidersAvailable(Game game) {
-        return !game.cylonShips().raiders().isEmpty();
-    }
 }

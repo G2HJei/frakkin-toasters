@@ -54,8 +54,8 @@ class ActivateRaidersEventTest {
 
     @Test
     void shouldActivateRaidersOneByOne() {
-        val raider1 = game.cylonShips().raider();
-        val raider2 = game.cylonShips().raider();
+        val raider1 = game.cylonShips().raider().orElseThrow();
+        val raider2 = game.cylonShips().raider().orElseThrow();
 
         galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, raider1);
         galacticaBoard.place(GALACTICA_SPACE_6_OCLOCK, raider2);

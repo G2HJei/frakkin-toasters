@@ -20,8 +20,8 @@ import static xyz.zlatanov.frakkintoasters.state.track.BoardingParty.START;
 class ActivateHeavyRaidersAndCenturionsActionTest {
 
     Game        game        = Game.builder().build().setupGalacticaBoard();
-    HeavyRaider heavyRaider = game.cylonShips().heavyRaider();
-    Centurion   centurion   = game.cylonShips().centurion();
+    HeavyRaider heavyRaider = game.cylonShips().heavyRaider().orElseThrow();
+    Centurion   centurion   = game.cylonShips().centurion().orElseThrow();
 
     @Test
     void shouldMoveHeavyRaiderTowardsNearestLaunchIcon() {
@@ -71,7 +71,7 @@ class ActivateHeavyRaidersAndCenturionsActionTest {
     @Test
     void shouldKeepHeavyRaidersIfAlLCenturionsAreOnBoards() {
         while (!game.cylonShips().centurions().isEmpty()) {
-            boardGalactica(game.cylonShips().centurion());
+            boardGalactica(game.cylonShips().centurion().orElseThrow());
         }
         placeHeavyRaider(GALACTICA_SPACE_6_OCLOCK, heavyRaider);
 

@@ -31,7 +31,7 @@ class CylonShipsTest {
     void shouldCreateAndReturnRaider() {
         val ships = CylonShips.builder().raiders(1).build();
 
-        val raider = ships.raider();
+        val raider = ships.raider().orElseThrow();
         assertNotNull(raider);
         assertTrue(ships.raiders().isEmpty());
 
@@ -42,15 +42,17 @@ class CylonShipsTest {
 
     @Test
     void shouldThrowExceptionWhenNoRaidersLeft() {
-        val ships = CylonShips.builder().raiders(0).build();
-        assertThrows(AssertionError.class, ships::raider);
+        assertTrue(CylonShips.builder()
+                .raiders(0).build()
+                .raider()
+                .isEmpty());
     }
 
     @Test
     void shouldCreateAndReturnHeavyRaider() {
         val ships = CylonShips.builder().heavyRaiders(1).build();
 
-        val heavyRaider = ships.heavyRaider();
+        val heavyRaider = ships.heavyRaider().orElseThrow();
         assertNotNull(heavyRaider);
         assertTrue(ships.heavyRaiders().isEmpty());
 
@@ -61,15 +63,17 @@ class CylonShipsTest {
 
     @Test
     void shouldThrowExceptionWhenNoHeavyRaidersLeft() {
-        val ships = CylonShips.builder().heavyRaiders(0).build();
-        assertThrows(AssertionError.class, ships::heavyRaider);
+        assertTrue(CylonShips.builder()
+                .heavyRaiders(0).build()
+                .heavyRaider()
+                .isEmpty());
     }
 
     @Test
     void shouldCreateAndReturnCenturion() {
         val ships = CylonShips.builder().centurions(1).build();
 
-        val centurion = ships.centurion();
+        val centurion = ships.centurion().orElseThrow();
         assertNotNull(centurion);
         assertTrue(ships.centurions().isEmpty());
 
@@ -79,9 +83,11 @@ class CylonShipsTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenNoCenturionsLeft() {
-        val ships = CylonShips.builder().centurions(0).build();
-        assertThrows(AssertionError.class, ships::centurion);
+    void shouldReturnEmptyWhenNoCenturionsLeft() {
+        assertTrue(CylonShips.builder()
+                .centurions(0).build()
+                .centurion()
+                .isEmpty());
     }
 
     @Test
@@ -92,16 +98,16 @@ class CylonShipsTest {
         val b2 = ships.basestar();
         assertNotEquals(b1.id(), b2.id());
 
-        val r1 = ships.raider();
-        val r2 = ships.raider();
+        val r1 = ships.raider().orElseThrow();
+        val r2 = ships.raider().orElseThrow();
         assertNotEquals(r1.id(), r2.id());
 
-        val h1 = ships.heavyRaider();
-        val h2 = ships.heavyRaider();
+        val h1 = ships.heavyRaider().orElseThrow();
+        val h2 = ships.heavyRaider().orElseThrow();
         assertNotEquals(h1.id(), h2.id());
 
-        val c1 = ships.centurion();
-        val c2 = ships.centurion();
+        val c1 = ships.centurion().orElseThrow();
+        val c2 = ships.centurion().orElseThrow();
         assertNotEquals(c1.id(), c2.id());
     }
 
