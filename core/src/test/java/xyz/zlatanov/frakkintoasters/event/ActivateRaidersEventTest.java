@@ -29,7 +29,7 @@ class ActivateRaidersEventTest {
 
     @Test
     void shouldLaunchTwoRaidersFromEachBasestarWhenNoRaidersOnBoard() {
-        val basestar = game.cylonShips().basestar();
+        val basestar = game.cylonShips().basestar().orElseThrow();
         galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar);
 
         val followup = executeEvent();
@@ -41,8 +41,8 @@ class ActivateRaidersEventTest {
 
     @Test
     void shouldLaunchTwoRaidersFromEachOfMultipleBasestars() {
-        val basestar1 = game.cylonShips().basestar();
-        val basestar2 = game.cylonShips().basestar();
+        val basestar1 = game.cylonShips().basestar().orElseThrow();
+        val basestar2 = game.cylonShips().basestar().orElseThrow();
         galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar1);
         galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, basestar2);
 

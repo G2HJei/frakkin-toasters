@@ -86,7 +86,7 @@ public class Game {
                 .place(GALACTICA_SPACE_4_OCLOCK, galacticaBoard.removeFromReserves(Viper.class))
                 .place(GALACTICA_SPACE_6_OCLOCK, galacticaBoard.removeFromReserves(Viper.class))
                 .place(GALACTICA_SPACE_2_OCLOCK, List.of(decks.civilianShips().draw(), decks.civilianShips().draw()))
-                .place(GALACTICA_SPACE_8_OCLOCK, cylonShips.basestar())
+                .place(GALACTICA_SPACE_8_OCLOCK, cylonShips.basestar().orElseThrow())
                 .place(GALACTICA_SPACE_8_OCLOCK, raiders);
         return this;
     }

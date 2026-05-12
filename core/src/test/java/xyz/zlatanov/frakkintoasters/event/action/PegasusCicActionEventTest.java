@@ -27,7 +27,7 @@ class PegasusCicActionEventTest {
                     .basestarDamage(basestarDmgDeck)
                     .build())
             .build();
-    Basestar                 basestar        = game.cylonShips().basestar();
+    Basestar                 basestar        = game.cylonShips().basestar().orElseThrow();
 
     @BeforeEach
     void setUp() {
