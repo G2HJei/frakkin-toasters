@@ -29,7 +29,7 @@ class ActivateCylonBasestarsEventTest {
 
     @Test
     void shouldFollowupWithSingleBasestarActivation() {
-        val basestar = game.cylonShips().basestar();
+        val basestar = game.cylonShips().basestar().orElseThrow();
         galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar);
 
         val followup = executeEvent();
@@ -39,8 +39,8 @@ class ActivateCylonBasestarsEventTest {
 
     @Test
     void shouldActivateBasestarsOneByOne() {
-        val basestar1 = game.cylonShips().basestar();
-        val basestar2 = game.cylonShips().basestar();
+        val basestar1 = game.cylonShips().basestar().orElseThrow();
+        val basestar2 = game.cylonShips().basestar().orElseThrow();
         galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, basestar1);
         galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar2);
 
@@ -53,7 +53,7 @@ class ActivateCylonBasestarsEventTest {
 
     @Test
     void shouldDelegateToBasestarActivationWhenOnlyBasestarHasDisabledWeapons() {
-        val basestar = game.cylonShips().basestar();
+        val basestar = game.cylonShips().basestar().orElseThrow();
         basestar.damage(DISABLED_WEAPONS);
         galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar);
 

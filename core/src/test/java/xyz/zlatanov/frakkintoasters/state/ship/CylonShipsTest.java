@@ -12,7 +12,7 @@ class CylonShipsTest {
     void shouldCreateAndReturnBasestar() {
         val ships = CylonShips.builder().basestars(1).build();
 
-        val basestar = ships.basestar();
+        val basestar = ships.basestar().orElseThrow();
         assertNotNull(basestar);
         assertTrue(ships.basestars().isEmpty());
 
@@ -22,9 +22,11 @@ class CylonShipsTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenNoBasestarsLeft() {
-        val ships = CylonShips.builder().basestars(0).build();
-        assertThrows(AssertionError.class, ships::basestar);
+    void shouldReturnEmptyWhenNoBasestarsLeft() {
+        assertTrue(CylonShips.builder()
+                .basestars(0).build()
+                .basestar()
+                .isEmpty());
     }
 
     @Test
@@ -41,7 +43,7 @@ class CylonShipsTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenNoRaidersLeft() {
+    void shouldReturnEmptyWhenNoRaidersLeft() {
         assertTrue(CylonShips.builder()
                 .raiders(0).build()
                 .raider()
@@ -62,7 +64,7 @@ class CylonShipsTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenNoHeavyRaidersLeft() {
+    void shouldReturnEmptyWhenNoHeavyRaidersLeft() {
         assertTrue(CylonShips.builder()
                 .heavyRaiders(0).build()
                 .heavyRaider()
@@ -94,8 +96,8 @@ class CylonShipsTest {
     void shouldAssignUniqueIds() {
         val ships = CylonShips.builder().basestars(2).raiders(2).heavyRaiders(2).centurions(2).build();
 
-        val b1 = ships.basestar();
-        val b2 = ships.basestar();
+        val b1 = ships.basestar().orElseThrow();
+        val b2 = ships.basestar().orElseThrow();
         assertNotEquals(b1.id(), b2.id());
 
         val r1 = ships.raider().orElseThrow();
@@ -114,12 +116,12 @@ class CylonShipsTest {
     @Test
     void shouldClearBasestarDamageOnReturn() {
         val ships = CylonShips.builder().basestars(1).build();
-        val basestar = ships.basestar();
+        val basestar = ships.basestar().orElseThrow();
         basestar.damage(STRUCTURAL_DAMAGE);
         assertFalse(basestar.damage().isEmpty());
 
         ships.returned(basestar);
-        val returned = ships.basestar();
+        val returned = ships.basestar().orElseThrow();
         assertTrue(returned.damage().isEmpty());
         assertSame(basestar, returned);
     }

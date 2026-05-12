@@ -34,9 +34,9 @@ class PlaceShipOnCylonFleetBoardEventTest {
     // todo uncomment after cylonShips refactor to return Optional @Test
     void shouldTransferShipsToMainBoard() {
         val cylonShips = game.cylonShips();
-        val basestarToMove = cylonShips.basestar();
+        val basestarToMove = cylonShips.basestar().orElseThrow();
         game.boards().cylonFleet().place(CYLON_FLEET_SPACE_7_8, basestarToMove);
-        game.boards().cylonFleet().place(CYLON_FLEET_SPACE_1, cylonShips.basestar());
+        game.boards().cylonFleet().place(CYLON_FLEET_SPACE_1, cylonShips.basestar().orElseThrow());
 
         val followup = executeEvent(BASESTAR);
 

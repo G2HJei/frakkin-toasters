@@ -21,7 +21,7 @@ class ActivateCylonBasestarEventTest {
 
     @Test
     void shouldDoNothingOnLowRoll() {
-        val basestar = game.cylonShips().basestar();
+        val basestar = game.cylonShips().basestar().orElseThrow();
         galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar);
         die.nextRoll(3);
 
@@ -32,7 +32,7 @@ class ActivateCylonBasestarEventTest {
 
     @Test
     void shouldFollowupWithDamageDecisionOnHighRoll() {
-        val basestar = game.cylonShips().basestar();
+        val basestar = game.cylonShips().basestar().orElseThrow();
         galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar);
         die.nextRoll(4);
 
@@ -43,7 +43,7 @@ class ActivateCylonBasestarEventTest {
 
     @Test
     void shouldNotAttackWhenBasestarHasDisabledWeapons() {
-        val basestar = game.cylonShips().basestar();
+        val basestar = game.cylonShips().basestar().orElseThrow();
         basestar.damage(DISABLED_WEAPONS);
         galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar);
 
@@ -54,7 +54,7 @@ class ActivateCylonBasestarEventTest {
 
     @Test
     void shouldStillAttackWhenBasestarHasNonDisabledWeaponsDamage() {
-        val basestar = game.cylonShips().basestar();
+        val basestar = game.cylonShips().basestar().orElseThrow();
         basestar.damage(STRUCTURAL_DAMAGE);
         galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar);
         die.nextRoll(5);

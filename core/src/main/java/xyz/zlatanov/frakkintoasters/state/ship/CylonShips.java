@@ -43,9 +43,11 @@ public class CylonShips {
         return new CylonShipsBuilder();
     }
 
-    public Basestar basestar() {
-        assert !basestars.isEmpty();
-        return basestars.removeLast();
+    public Optional<Basestar> basestar() {
+        if (basestars.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(basestars.removeLast());
     }
 
     public Optional<Raider> raider() {

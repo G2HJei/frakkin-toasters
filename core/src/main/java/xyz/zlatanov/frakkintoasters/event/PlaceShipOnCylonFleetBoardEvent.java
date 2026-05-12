@@ -26,7 +26,7 @@ public record PlaceShipOnCylonFleetBoardEvent(ShipType cylonShipType) implements
         return switch (cylonShipType) {
             case RAIDER -> cylonShips.raider().orElseThrow();
             case HEAVY_RAIDER -> cylonShips.heavyRaider().orElseThrow();
-            case BASESTAR -> cylonShips.basestar();
+            case BASESTAR -> cylonShips.basestar().orElseThrow();
             default -> throw new FrakCallTheAdmiralException();
         };
     }

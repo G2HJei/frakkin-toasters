@@ -32,7 +32,7 @@ class LaunchRaidersEventTest {
 
     @Test
     void shouldLaunchThreeRaidersFromBasestar() {
-        val basestar = game.cylonShips().basestar();
+        val basestar = game.cylonShips().basestar().orElseThrow();
         galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar);
 
         val followup = executeEvent();
@@ -43,8 +43,8 @@ class LaunchRaidersEventTest {
 
     @Test
     void shouldLaunchThreeRaidersFromEachOfMultipleBasestars() {
-        val basestar1 = game.cylonShips().basestar();
-        val basestar2 = game.cylonShips().basestar();
+        val basestar1 = game.cylonShips().basestar().orElseThrow();
+        val basestar2 = game.cylonShips().basestar().orElseThrow();
         galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar1);
         galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, basestar2);
 
@@ -61,7 +61,7 @@ class LaunchRaidersEventTest {
                 .cylonShips(CylonShips.builder().raiders(2).build())
                 .build();
         val galacticaBoard = game.boards().galactica();
-        val basestar = game.cylonShips().basestar();
+        val basestar = game.cylonShips().basestar().orElseThrow();
         galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar);
 
         val followup = new LaunchRaidersEvent().execute(game);
@@ -72,7 +72,7 @@ class LaunchRaidersEventTest {
 
     @Test
     void shouldDoNothingWhenOnlyBasestarHasDisabledHangarBay() {
-        val basestar = game.cylonShips().basestar();
+        val basestar = game.cylonShips().basestar().orElseThrow();
         basestar.damage(DISABLED_HANGAR_BAY);
         galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar);
 
@@ -84,8 +84,8 @@ class LaunchRaidersEventTest {
 
     @Test
     void shouldLaunchFromHealthyBasestarButNotFromHangarDisabledOne() {
-        val healthy = game.cylonShips().basestar();
-        val disabled = game.cylonShips().basestar();
+        val healthy = game.cylonShips().basestar().orElseThrow();
+        val disabled = game.cylonShips().basestar().orElseThrow();
         disabled.damage(DISABLED_HANGAR_BAY);
         galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, healthy);
         galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, disabled);
@@ -99,7 +99,7 @@ class LaunchRaidersEventTest {
 
     @Test
     void shouldLaunchRaidersWhenBasestarHasOtherDamageButHangarIsFunctional() {
-        val basestar = game.cylonShips().basestar();
+        val basestar = game.cylonShips().basestar().orElseThrow();
         basestar.damage(STRUCTURAL_DAMAGE);
         galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar);
 
