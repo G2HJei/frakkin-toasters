@@ -1,9 +1,10 @@
 package xyz.zlatanov.frakkintoasters.fake;
 
-import java.util.Deque;
-import java.util.LinkedList;
 import lombok.NoArgsConstructor;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
+
+import java.util.Deque;
+import java.util.LinkedList;
 
 @NoArgsConstructor
 public class FakeDeck<T> extends Deck<T> {
@@ -23,10 +24,8 @@ public class FakeDeck<T> extends Deck<T> {
     public T draw() {
         if (!nextCards.isEmpty()) {
             T nextCard = nextCards.removeFirst();
-            if (cards.contains(nextCard)) {
-                cards.remove(nextCard);
-                cards.addFirst(nextCard);
-            }
+            cards.remove(nextCard);
+            cards.addFirst(nextCard);
         }
         return super.draw();
     }

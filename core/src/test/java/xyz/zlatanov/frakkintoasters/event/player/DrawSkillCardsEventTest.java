@@ -8,10 +8,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
+import xyz.zlatanov.frakkintoasters.event.EventTest;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
-import xyz.zlatanov.frakkintoasters.state.deck.Deck;
-import xyz.zlatanov.frakkintoasters.state.deck.DecksHolder;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 
@@ -21,8 +20,6 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DRAW_EXACTLY_2;
 import static xyz.zlatanov.frakkintoasters.state.GameStep.RECEIVE_SKILLS;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
@@ -33,30 +30,23 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.AT_ANY_COST
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.BAIT;
 
 @ExtendWith(MockitoExtension.class)
-class DrawSkillCardsEventTest {
+class DrawSkillCardsEventTest extends EventTest {
 
-    @SuppressWarnings("unchecked")
-    Deck<SkillCard> leadershipDeck = mock(Deck.class);
-    @SuppressWarnings("unchecked")
-    Deck<SkillCard> treacheryDeck  = mock(Deck.class);
     SkillCard leadershipCard = new SkillCard(0, AT_ANY_COST);
     SkillCard treacheryCard  = new SkillCard(0, BAIT);
-    Game      game           = Game.builder(4)
-            .decks(DecksHolder.builder()
-                    .leadership(leadershipDeck)
-                    .treachery(treacheryDeck)
-                    .build()).build();
+
 
     @BeforeEach
     void setUp() {
+        setUpGame(Game.builder(4).build());
         game.player(1).selectCharacter(KARA_STARBUCK_THRACE);
     }
 
     @Test
     void shouldReceiveCardsWithinSkillSet() {
-        when(leadershipDeck.draw()).thenReturn(leadershipCard);
-        new DrawSkillCardsEvent(1, Map.of(LEADERSHIP, 1)).execute(game);
-        assertEquals(List.of(leadershipCard), game.player(1).skillCards().cards());
+        leadershipDeck.nextCard(leadershipCard);
+        execute(new DrawSkillCardsEvent(1, Map.of(LEADERSHIP, 1)));
+        assertEquals(List.of(leadershipCard), player(1).skillCards().cards());
     }
 
     @Test
@@ -68,25 +58,25 @@ class DrawSkillCardsEventTest {
     @Test
     void shouldReceiveAnyColorWhenRevealedCylon() {
         revealCylon();
-        when(leadershipDeck.draw()).thenReturn(leadershipCard);
-        when(treacheryDeck.draw()).thenReturn(treacheryCard);
+        leadershipDeck.nextCard(leadershipCard);
+        treacheryDeck.nextCard(treacheryCard);
 
-        new DrawSkillCardsEvent(1, Map.of(LEADERSHIP, 1, TREACHERY, 1)).execute(game);
+        execute(new DrawSkillCardsEvent(1, Map.of(LEADERSHIP, 1, TREACHERY, 1)));
 
-        assertEquals(List.of(leadershipCard, treacheryCard), game.player(1).skillCards().cards());
+        assertEquals(List.of(leadershipCard, treacheryCard), player(1).skillCards().cards());
     }
 
     @Test
     void shouldNotAllowDoubleSelectionForRevealedCylon() {
         revealCylon();
-        assertFalse(new DrawSkillCardsEvent(1, Map.of(TREACHERY, 2)).isValid(game));
+        assertFalse(isValid(new DrawSkillCardsEvent(1, Map.of(TREACHERY, 2))));
     }
 
     @ParameterizedTest
     @MethodSource("cylonLeaderSelection")
     void shouldValidateCylonLeaderSelection(Character cylonLeader, Map<SkillCardColor, Integer> selection) {
-        game.player(2).selectCharacter(cylonLeader);
-        assertTrue(new DrawSkillCardsEvent(2, selection).isValid(game));
+        player(2).selectCharacter(cylonLeader);
+        assertTrue(isValid(new DrawSkillCardsEvent(2, selection)));
     }
 
     public static Stream<Arguments> cylonLeaderSelection() {
@@ -104,10 +94,10 @@ class DrawSkillCardsEventTest {
     @ParameterizedTest
     @MethodSource("infiltratingCylonLeaderSelection")
     void shouldAllowExtraCardForInfiltratingCylonLeader(Character cylonLeader, Map<SkillCardColor, Integer> selection) {
-        game.player(2)
+        player(2)
                 .selectCharacter(cylonLeader)
                 .infiltrateGalactica();
-        assertTrue(new DrawSkillCardsEvent(2, selection).isValid(game));
+        assertTrue(isValid(new DrawSkillCardsEvent(2, selection)));
     }
 
     public static Stream<Arguments> infiltratingCylonLeaderSelection() {
@@ -140,36 +130,36 @@ class DrawSkillCardsEventTest {
     void shouldDrawOnly1CardWhenInSickbay() {
         game.moveTo(SICKBAY, KARA_STARBUCK_THRACE)
                 .step(RECEIVE_SKILLS);
-        assertTrue(new DrawSkillCardsEvent(1, Map.of(TACTICS, 1)).isValid(game));
-        assertFalse(new DrawSkillCardsEvent(1, Map.of(TACTICS, 2)).isValid(game));
+        assertTrue(isValid(new DrawSkillCardsEvent(1, Map.of(TACTICS, 1))));
+        assertFalse(isValid(new DrawSkillCardsEvent(1, Map.of(TACTICS, 2))));
     }
 
     @Test
     void shouldDrawOnly1CardWhenInResurrectionShip() {
         game.moveTo(RESURRECTION_SHIP, KARA_STARBUCK_THRACE)
                 .step(RECEIVE_SKILLS);
-        assertTrue(new DrawSkillCardsEvent(1, Map.of(TACTICS, 1)).isValid(game));
-        assertFalse(new DrawSkillCardsEvent(1, Map.of(TACTICS, 2)).isValid(game));
+        assertTrue(isValid(new DrawSkillCardsEvent(1, Map.of(TACTICS, 1))));
+        assertFalse(isValid(new DrawSkillCardsEvent(1, Map.of(TACTICS, 2))));
     }
 
     @Test
     void shouldNotDrawWhenInHubDestroyed() {
-        game.boards().galactica().destroyResurrectionShip();
+        galacticaBoard.destroyResurrectionShip();
         game.moveTo(HUB_DESTROYED, KARA_STARBUCK_THRACE)
                 .step(RECEIVE_SKILLS);
-        assertTrue(new DrawSkillCardsEvent(1, Map.of()).isValid(game));
-        assertFalse(new DrawSkillCardsEvent(1, Map.of(TACTICS, 1)).isValid(game));
+        assertTrue(isValid(new DrawSkillCardsEvent(1, Map.of())));
+        assertFalse(isValid(new DrawSkillCardsEvent(1, Map.of(TACTICS, 1))));
     }
 
     @Test
     void shouldNotApplyReceiveSkillGameStepRestrictionOnOtherSteps() {
         game.moveTo(SICKBAY, KARA_STARBUCK_THRACE);
-        assertTrue(new DrawSkillCardsEvent(1, Map.of(TACTICS, 2)).isValid(game));
+        assertTrue(isValid(new DrawSkillCardsEvent(1, Map.of(TACTICS, 2))));
 
     }
 
     private void revealCylon() {
-        game.player(1).loyaltyCards().add(CYLON_SEND_TO_BRIG);
-        game.player(1).loyaltyCards().reveal(CYLON_SEND_TO_BRIG);
+        player(1).loyaltyCards().add(CYLON_SEND_TO_BRIG);
+        player(1).loyaltyCards().reveal(CYLON_SEND_TO_BRIG);
     }
 }
