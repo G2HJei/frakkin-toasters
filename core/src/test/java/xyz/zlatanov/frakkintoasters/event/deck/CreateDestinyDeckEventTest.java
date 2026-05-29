@@ -2,7 +2,7 @@ package xyz.zlatanov.frakkintoasters.event.deck;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.state.Game;
+import xyz.zlatanov.frakkintoasters.event.EventTest;
 
 import java.util.Map;
 
@@ -11,16 +11,15 @@ import static java.util.stream.Collectors.summingInt;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.*;
 
-class CreateDestinyDeckEventTest {
+class CreateDestinyDeckEventTest extends EventTest {
 
     @Test
     void shouldCreateValidDeck() {
-        val game = Game.builder().build();
-        new CreateDestinyDeckEvent().execute(game);
-        assertDestinyDeckComposition(game);
+        execute(new CreateDestinyDeckEvent());
+        assertDestinyDeckComposition();
     }
 
-    private static void assertDestinyDeckComposition(Game game) {
+    private void assertDestinyDeckComposition() {
         val expectedDistribution = Map.of(
                 POLITICS, 2,
                 LEADERSHIP, 2,
@@ -28,7 +27,7 @@ class CreateDestinyDeckEventTest {
                 PILOTING, 2,
                 ENGINEERING, 2,
                 TREACHERY, 2);
-        val actualDistribution = game.decks().destiny().cards()
+        val actualDistribution = destinyDeck.cards()
                 .stream()
                 .collect(groupingBy(
                         card -> card.type().color(),

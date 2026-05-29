@@ -28,8 +28,8 @@ public class GalacticaBoard extends BattlestarBoard {
     private       boolean                       engineRoomActivated  = false;
     private       boolean                       colonialOneDestroyed = false;
     private       boolean                       hubDestroyed         = false;
-    private       Set<Ship>                     reserves             = new HashSet<>();
-    private       Set<Ship>                     damagedShips         = new HashSet<>();
+    private final Set<Ship>                     reserves             = new HashSet<>();
+    private final Set<Ship>                     damagedShips         = new HashSet<>();
     private final Map<Ship, Location>           shipsInSpace         = new HashMap<>();
     private final Map<Centurion, BoardingParty> boardingPartyTrack   = new HashMap<>();
 
