@@ -170,6 +170,10 @@ public class EventTest {
         return galacticaBoard.removeFromReserves(Viper.class);
     }
 
+    protected AssaultRaptor assaultRaptor() {
+        return galacticaBoard.removeFromReserves(AssaultRaptor.class);
+    }
+
     protected Player player(int num) {
         return game.player(num);
     }

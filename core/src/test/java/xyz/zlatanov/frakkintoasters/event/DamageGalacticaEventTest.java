@@ -1,53 +1,45 @@
 package xyz.zlatanov.frakkintoasters.event;
 
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.fake.FakeDeck;
-import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
-import xyz.zlatanov.frakkintoasters.state.damage.GalacticaDamage;
-import xyz.zlatanov.frakkintoasters.state.deck.DecksHolder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static xyz.zlatanov.frakkintoasters.state.damage.GalacticaDamage.*;
-import static xyz.zlatanov.frakkintoasters.state.util.AllCardsProvider.genericDeck;
 
-class DamageGalacticaEventTest {
-
-    FakeDeck<GalacticaDamage> galacticaDamageDeck = new FakeDeck<>(genericDeck(GalacticaDamage.class));
-    Game                      game                = Game.builder()
-            .decks(DecksHolder.builder()
-                    .galacticaDamage(galacticaDamageDeck)
-                    .build())
-            .build();
+class DamageGalacticaEventTest extends EventTest {
 
     @Test
     void shouldDamageGalactica() {
-        galacticaDamageDeck.nextCard(WEAPONS_CONTROL);
+        galacticaDamage.nextCard(WEAPONS_CONTROL);
 
-        new DamageGalacticaEvent().execute(game);
+        executeEvent();
 
-        assertTrue(game.boards().galactica().damagedLocations().contains(Location.WEAPONS_CONTROL));
-        assertEquals(7, game.decks().galacticaDamage().size());
+        assertTrue(galacticaBoard.damagedLocations().contains(Location.WEAPONS_CONTROL));
+        assertEquals(7, galacticaDamage.size());
     }
 
     @Test
     void shouldDamageGalacticaFood() {
-        galacticaDamageDeck.nextCard(FOOD);
+        galacticaDamage.nextCard(FOOD);
 
-        new DamageGalacticaEvent().execute(game);
+        executeEvent();
 
-        assertEquals(7, game.boards().galactica().food());
-        assertEquals(7, game.decks().galacticaDamage().size());
+        assertEquals(7, galacticaBoard.food());
+        assertEquals(7, galacticaDamage.size());
     }
 
     @Test
     void shouldDamageGalacticaFuel() {
-        galacticaDamageDeck.nextCard(FUEL);
+        galacticaDamage.nextCard(FUEL);
 
-        new DamageGalacticaEvent().execute(game);
+        executeEvent();
 
-        assertEquals(7, game.boards().galactica().fuel());
-        assertEquals(7, game.decks().galacticaDamage().size());
+        assertEquals(7, galacticaBoard.fuel());
+        assertEquals(7, galacticaDamage.size());
+    }
+
+    void executeEvent() {
+        execute(new DamageGalacticaEvent());
     }
 }

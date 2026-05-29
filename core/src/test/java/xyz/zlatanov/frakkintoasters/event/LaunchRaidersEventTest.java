@@ -3,7 +3,6 @@ package xyz.zlatanov.frakkintoasters.event;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.state.Game;
-import xyz.zlatanov.frakkintoasters.state.board.GalacticaBoard;
 import xyz.zlatanov.frakkintoasters.state.ship.CylonShips;
 import xyz.zlatanov.frakkintoasters.state.ship.Raider;
 
@@ -16,10 +15,7 @@ import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.DISABLED_
 import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.STRUCTURAL_DAMAGE;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.BASESTAR;
 
-class LaunchRaidersEventTest {
-
-    Game           game           = Game.builder().build();
-    GalacticaBoard galacticaBoard = game.boards().galactica();
+class LaunchRaidersEventTest extends EventTest {
 
     @Test
     void shouldPlaceBasestarOnCylonFleetBoardWhenNoBasestarsOnMainBoard() {
@@ -32,8 +28,7 @@ class LaunchRaidersEventTest {
 
     @Test
     void shouldLaunchThreeRaidersFromBasestar() {
-        val basestar = game.cylonShips().basestar().orElseThrow();
-        galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar);
+        galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar());
 
         val followup = executeEvent();
 
@@ -43,10 +38,8 @@ class LaunchRaidersEventTest {
 
     @Test
     void shouldLaunchThreeRaidersFromEachOfMultipleBasestars() {
-        val basestar1 = game.cylonShips().basestar().orElseThrow();
-        val basestar2 = game.cylonShips().basestar().orElseThrow();
-        galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar1);
-        galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, basestar2);
+        galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar());
+        galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, basestar());
 
         val followup = executeEvent();
 
@@ -57,14 +50,12 @@ class LaunchRaidersEventTest {
 
     @Test
     void shouldStopLaunchingWhenRaiderSupplyIsExhausted() {
-        val game = Game.builder()
+        setUpGame(Game.builder()
                 .cylonShips(CylonShips.builder().raiders(2).build())
-                .build();
-        val galacticaBoard = game.boards().galactica();
-        val basestar = game.cylonShips().basestar().orElseThrow();
-        galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar);
+                .build());
+        galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar());
 
-        val followup = new LaunchRaidersEvent().execute(game);
+        val followup = executeEvent();
 
         assertEquals(2, galacticaBoard.shipsIn(GALACTICA_SPACE_8_OCLOCK, Raider.class).size());
         assertEquals(NONE, followup);
@@ -72,7 +63,7 @@ class LaunchRaidersEventTest {
 
     @Test
     void shouldDoNothingWhenOnlyBasestarHasDisabledHangarBay() {
-        val basestar = game.cylonShips().basestar().orElseThrow();
+        val basestar = basestar();
         basestar.damage(DISABLED_HANGAR_BAY);
         galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar);
 
@@ -84,8 +75,8 @@ class LaunchRaidersEventTest {
 
     @Test
     void shouldLaunchFromHealthyBasestarButNotFromHangarDisabledOne() {
-        val healthy = game.cylonShips().basestar().orElseThrow();
-        val disabled = game.cylonShips().basestar().orElseThrow();
+        val healthy = basestar();
+        val disabled = basestar();
         disabled.damage(DISABLED_HANGAR_BAY);
         galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, healthy);
         galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, disabled);
@@ -99,7 +90,7 @@ class LaunchRaidersEventTest {
 
     @Test
     void shouldLaunchRaidersWhenBasestarHasOtherDamageButHangarIsFunctional() {
-        val basestar = game.cylonShips().basestar().orElseThrow();
+        val basestar = basestar();
         basestar.damage(STRUCTURAL_DAMAGE);
         galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar);
 
@@ -110,6 +101,6 @@ class LaunchRaidersEventTest {
     }
 
     Followup executeEvent() {
-        return new LaunchRaidersEvent().execute(game);
+        return execute(new LaunchRaidersEvent());
     }
 }

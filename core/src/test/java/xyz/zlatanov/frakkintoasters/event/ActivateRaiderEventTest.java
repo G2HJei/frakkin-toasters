@@ -1,9 +1,8 @@
 package xyz.zlatanov.frakkintoasters.event;
 
 import lombok.val;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.state.Game;
-import xyz.zlatanov.frakkintoasters.state.board.GalacticaBoard;
 import xyz.zlatanov.frakkintoasters.state.ship.AssaultRaptor;
 import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
 import xyz.zlatanov.frakkintoasters.state.ship.Raider;
@@ -16,15 +15,24 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.LOUANNE_KAT_KATRAINE;
 
-class ActivateRaiderEventTest {
+class ActivateRaiderEventTest extends EventTest {
 
-    Game           game                 = Game.builder().build();
-    GalacticaBoard galacticaBoard       = game.boards().galactica();
-    Raider         raider               = game.cylonShips().raider().orElseThrow();
-    CivilianShip   civilianShip         = game.decks().civilianShips().draw();
-    Viper          unmannedViper        = galacticaBoard.removeFromReserves(Viper.class);
-    Viper          pilotedViper         = galacticaBoard.removeFromReserves(Viper.class).pilot(KARA_STARBUCK_THRACE);
-    AssaultRaptor  pilotedAssaultRaptor = galacticaBoard.removeFromReserves(AssaultRaptor.class).pilot(LOUANNE_KAT_KATRAINE);
+    Raider        raider;
+    CivilianShip  civilianShip;
+    CivilianShip  secondCivilianShip;
+    Viper         unmannedViper;
+    Viper         pilotedViper;
+    AssaultRaptor pilotedAssaultRaptor;
+
+    @BeforeEach
+    void setUp() {
+        raider = raider();
+        civilianShip = civilianShips.draw();
+        secondCivilianShip = civilianShips.draw();
+        unmannedViper = viper();
+        pilotedViper = viper().pilot(KARA_STARBUCK_THRACE);
+        pilotedAssaultRaptor = assaultRaptor().pilot(LOUANNE_KAT_KATRAINE);
+    }
 
     @Test
     void shouldAttackGalacticaWhenNoCivilianShipsOnBoard() {
@@ -44,7 +52,6 @@ class ActivateRaiderEventTest {
 
     @Test
     void shouldMoveClockwiseWhenEquidistantCivilianShips() {
-        val secondCivilianShip = game.decks().civilianShips().draw();
         galacticaBoard
                 .place(GALACTICA_SPACE_12_OCLOCK, raider)
                 .place(GALACTICA_SPACE_2_OCLOCK, civilianShip)
@@ -74,16 +81,15 @@ class ActivateRaiderEventTest {
 
     @Test
     void shouldLetPlayerChooseWhenMultipleCivilianShipsInArea() {
-        val secondCivilian = game.decks().civilianShips().draw();
         galacticaBoard
                 .place(GALACTICA_SPACE_4_OCLOCK, raider)
                 .place(GALACTICA_SPACE_4_OCLOCK, civilianShip)
-                .place(GALACTICA_SPACE_4_OCLOCK, secondCivilian);
+                .place(GALACTICA_SPACE_4_OCLOCK, secondCivilianShip);
         val followup = executeEvent();
         assertEquals(
                 one(
                         new DestroyCivilianShipEvent(civilianShip.id()),
-                        new DestroyCivilianShipEvent(secondCivilian.id())),
+                        new DestroyCivilianShipEvent(secondCivilianShip.id())),
                 followup);
     }
 
@@ -133,6 +139,6 @@ class ActivateRaiderEventTest {
     }
 
     Followup executeEvent() {
-        return new ActivateRaiderEvent(raider.id()).execute(game);
+        return execute(new ActivateRaiderEvent(raider.id()));
     }
 }

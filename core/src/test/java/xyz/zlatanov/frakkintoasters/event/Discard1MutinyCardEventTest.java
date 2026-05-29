@@ -1,23 +1,20 @@
 package xyz.zlatanov.frakkintoasters.event;
 
-import lombok.val;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.state.Game;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static xyz.zlatanov.frakkintoasters.state.card.MutinyCard.PANIC;
 
-class Discard1MutinyCardEventTest {
+class Discard1MutinyCardEventTest extends EventTest {
 
     @Test
     void shouldDiscardSelectedCard() {
-        val game = Game.builder().build();
-        game.player(1).mutinyCards().add(PANIC);
+        player(1).mutinyCards().add(PANIC);
 
-        new Discard1MutinyCardEvent(1, PANIC).execute(game);
+        execute(new Discard1MutinyCardEvent(1, PANIC));
 
-        assertTrue(game.player(1).mutinyCards().isEmpty());
-        assertEquals(PANIC, game.player(1).mutinyCards().lastDiscarded());
+        assertTrue(player(1).mutinyCards().isEmpty());
+        assertEquals(PANIC, player(1).mutinyCards().lastDiscarded());
     }
 }

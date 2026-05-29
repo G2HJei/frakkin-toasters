@@ -2,24 +2,22 @@ package xyz.zlatanov.frakkintoasters.event;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.state.Game;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.state.card.MutinyCard.*;
 
-class DiscardDownTo1MutinyCardEventTest {
+class DiscardDownTo1MutinyCardEventTest extends EventTest {
 
     @Test
     void shouldDiscardAllButSelectedCard() {
-        val game = Game.builder().build();
-        val player = game.player(1);
-        player.mutinyCards().add(PANIC, ASSUME_COMMAND, FEED_THE_PEOPLE);
+        val player1MutinyCards = player(1).mutinyCards();
+        player1MutinyCards.add(PANIC, ASSUME_COMMAND, FEED_THE_PEOPLE);
 
-        new DiscardDownTo1MutinyCardEvent(1, PANIC).execute(game);
+        execute(new DiscardDownTo1MutinyCardEvent(1, PANIC));
 
-        assertEquals(List.of(PANIC), player.mutinyCards().cards());
-        assertEquals(List.of(ASSUME_COMMAND, FEED_THE_PEOPLE), player.mutinyCards().discardedCards());
+        assertEquals(List.of(PANIC), player1MutinyCards.cards());
+        assertEquals(List.of(ASSUME_COMMAND, FEED_THE_PEOPLE), player1MutinyCards.discardedCards());
     }
 }

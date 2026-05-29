@@ -1,6 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event;
 
 import lombok.val;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.event.endgame.CylonsWinEvent;
 import xyz.zlatanov.frakkintoasters.state.Game;
@@ -17,30 +18,36 @@ import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.HEAVY_RAIDER;
 import static xyz.zlatanov.frakkintoasters.state.track.BoardingParty.POSITION_1;
 import static xyz.zlatanov.frakkintoasters.state.track.BoardingParty.START;
 
-class ActivateHeavyRaidersAndCenturionsActionTest {
+class ActivateHeavyRaidersAndCenturionsActionTest extends EventTest {
 
-    Game        game        = Game.builder().build().setupGalacticaBoard();
-    HeavyRaider heavyRaider = game.cylonShips().heavyRaider().orElseThrow();
-    Centurion   centurion   = game.cylonShips().centurion().orElseThrow();
+    HeavyRaider heavyRaider;
+    Centurion   centurion;
+
+    @BeforeEach
+    void setUp() {
+        game.setupGalacticaBoard();
+        heavyRaider = heavyRaider();
+        centurion = centurion();
+    }
 
     @Test
     void shouldMoveHeavyRaiderTowardsNearestLaunchIcon() {
         placeHeavyRaider(GALACTICA_SPACE_2_OCLOCK, heavyRaider);
-        executeAction(game);
-        assertEquals(GALACTICA_SPACE_4_OCLOCK, game.boards().galactica().locate(heavyRaider));
+        executeAction();
+        assertEquals(GALACTICA_SPACE_4_OCLOCK, galacticaBoard.locate(heavyRaider));
     }
 
     @Test
     void shouldAdvanceCenturionsOnBoardingPartyTrack() {
         boardGalactica(centurion);
-        executeAction(game);
-        assertEquals(POSITION_1, game.boards().galactica().boardingPartyTrack().get(centurion));
+        executeAction();
+        assertEquals(POSITION_1, galacticaBoard.boardingPartyTrack().get(centurion));
     }
 
     @Test
     void shouldSpawnNewHeavyRaiderIfNoneOnBoard() {
-        executeAction(game);
-        assertEquals(1, game.boards().galactica().shipsIn(GALACTICA_SPACE_8_OCLOCK, HeavyRaider.class).size());
+        executeAction();
+        assertEquals(1, galacticaBoard.shipsIn(GALACTICA_SPACE_8_OCLOCK, HeavyRaider.class).size());
     }
 
     @Test
@@ -48,41 +55,42 @@ class ActivateHeavyRaidersAndCenturionsActionTest {
         placeHeavyRaider(GALACTICA_SPACE_2_OCLOCK, heavyRaider);
         boardGalactica(centurion);
 
-        executeAction(game);
+        executeAction();
 
-        assertEquals(GALACTICA_SPACE_4_OCLOCK, game.boards().galactica().locate(heavyRaider));
-        assertEquals(POSITION_1, game.boards().galactica().boardingPartyTrack().get(centurion));
+        assertEquals(GALACTICA_SPACE_4_OCLOCK, galacticaBoard.locate(heavyRaider));
+        assertEquals(POSITION_1, galacticaBoard.boardingPartyTrack().get(centurion));
     }
 
     @Test
     void shouldConvertHeavyRaiderAtLaunchIconIntoCenturion() {
         placeHeavyRaider(GALACTICA_SPACE_4_OCLOCK, heavyRaider);
-        val centurionsAvailable = game.cylonShips().centurions().size();
+        val centurionsAvailable = cylonShips.centurions().size();
 
-        executeAction(game);
+        executeAction();
 
-        assertNull(game.boards().galactica().locate(heavyRaider));
-        val track = game.boards().galactica().boardingPartyTrack();
+        assertNull(galacticaBoard.locate(heavyRaider));
+        val track = galacticaBoard.boardingPartyTrack();
         assertEquals(1, track.size());
         assertEquals(START, track.values().iterator().next());
-        assertEquals(centurionsAvailable - 1, game.cylonShips().centurions().size());
+        assertEquals(centurionsAvailable - 1, cylonShips.centurions().size());
     }
 
     @Test
     void shouldKeepHeavyRaidersIfAlLCenturionsAreOnBoards() {
-        while (!game.cylonShips().centurions().isEmpty()) {
-            boardGalactica(game.cylonShips().centurion().orElseThrow());
+        while (!cylonShips.centurions().isEmpty()) {
+            boardGalactica(cylonShips.centurion().orElseThrow());
         }
         placeHeavyRaider(GALACTICA_SPACE_6_OCLOCK, heavyRaider);
 
-        executeAction(game);
+        executeAction();
 
-        assertEquals(GALACTICA_SPACE_6_OCLOCK, game.boards().galactica().locate(heavyRaider));
+        assertEquals(GALACTICA_SPACE_6_OCLOCK, galacticaBoard.locate(heavyRaider));
     }
 
     @Test
     void shouldFollowWithPlaceHeavyRaiderOnCylonFleetBoardAndAdvancePursuitTrack() {
-        val followup = executeAction(Game.builder().build());
+        setUpGame(Game.builder().build());
+        val followup = executeAction();
         assertEquals(all(
                         new PlaceShipOnCylonFleetBoardEvent(HEAVY_RAIDER),
                         new AdvancePursuitTrackEvent()),
@@ -91,25 +99,25 @@ class ActivateHeavyRaidersAndCenturionsActionTest {
 
     @Test
     void shouldEndGameIfBoardingPartyReachEnd() {
-        game.boards().galactica().boardGalactica(centurion)
+        galacticaBoard.boardGalactica(centurion)
                 .advanceBoardingParty()
                 .advanceBoardingParty()
                 .advanceBoardingParty();
 
-        val followup = executeAction(game);
+        val followup = executeAction();
 
         assertEquals(one(new CylonsWinEvent()), followup);
     }
 
     void placeHeavyRaider(Location location, HeavyRaider heavyRaider) {
-        game.boards().galactica().place(location, heavyRaider);
+        galacticaBoard.place(location, heavyRaider);
     }
 
     void boardGalactica(Centurion centurion) {
-        game.boards().galactica().boardGalactica(centurion);
+        galacticaBoard.boardGalactica(centurion);
     }
 
-    Followup executeAction(Game game) {
-        return new ActivateHeavyRaidersAndCenturionsAction().execute(game);
+    Followup executeAction() {
+        return execute(new ActivateHeavyRaidersAndCenturionsAction());
     }
 }

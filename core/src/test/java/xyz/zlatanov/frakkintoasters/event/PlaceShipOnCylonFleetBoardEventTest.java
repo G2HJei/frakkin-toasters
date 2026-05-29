@@ -4,8 +4,6 @@ import lombok.val;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import xyz.zlatanov.frakkintoasters.fake.FakeDie;
-import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
@@ -18,25 +16,21 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.*;
 
-class PlaceShipOnCylonFleetBoardEventTest {
-
-    FakeDie fakeDie = new FakeDie();
-    Game    game    = Game.builder().die(fakeDie).build();
+class PlaceShipOnCylonFleetBoardEventTest extends EventTest {
 
     @ParameterizedTest
     @MethodSource("shouldPlaceShipOnCorrespondingSpaceAreaArgs")
     void shouldPlaceShipOnCorrespondingSpaceArea(Class<Ship> shipClass, int nextDieRoll, Location placementLocation) {
-        fakeDie.nextRoll(nextDieRoll);
+        die.nextRoll(nextDieRoll);
         executeEvent(shipTypeFor(shipClass));
-        assertEquals(1, game.boards().cylonFleet().shipsIn(placementLocation, shipClass).size());
+        assertEquals(1, cylonFleetBoard.shipsIn(placementLocation, shipClass).size());
     }
 
     // todo uncomment after cylonShips refactor to return Optional @Test
     void shouldTransferShipsToMainBoard() {
-        val cylonShips = game.cylonShips();
-        val basestarToMove = cylonShips.basestar().orElseThrow();
+        val basestarToMove = basestar();
         game.boards().cylonFleet().place(CYLON_FLEET_SPACE_7_8, basestarToMove);
-        game.boards().cylonFleet().place(CYLON_FLEET_SPACE_1, cylonShips.basestar().orElseThrow());
+        game.boards().cylonFleet().place(CYLON_FLEET_SPACE_1, basestar());
 
         val followup = executeEvent(BASESTAR);
 
@@ -69,6 +63,6 @@ class PlaceShipOnCylonFleetBoardEventTest {
     }
 
     Followup executeEvent(ShipType shipType) {
-        return new PlaceShipOnCylonFleetBoardEvent(shipType).execute(game);
+        return execute(new PlaceShipOnCylonFleetBoardEvent(shipType));
     }
 }
