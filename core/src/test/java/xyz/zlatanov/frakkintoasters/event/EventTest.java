@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event;
 
+import org.junit.jupiter.api.BeforeEach;
 import xyz.zlatanov.frakkintoasters.fake.FakeDeck;
 import xyz.zlatanov.frakkintoasters.fake.FakeDie;
 import xyz.zlatanov.frakkintoasters.fake.NotTestableDie;
@@ -32,8 +33,8 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
  * with a game template. All deck implementations and the die are automatically replaced with fake versions
  * that allow precise control over randomness during testing.
  *
- * @see FakeDie
- * @see FakeDeck
+ * @see xyz.zlatanov.frakkintoasters.fake.FakeDie
+ * @see xyz.zlatanov.frakkintoasters.fake.FakeDeck
  */
 public class EventTest {
     /**
@@ -76,7 +77,8 @@ public class EventTest {
      *
      * @see #setUpGame(Game)
      */
-    public void setUpGame() {
+    @BeforeEach
+    public void setUp() {
         setUpGame(Game.builder().build());
     }
 
