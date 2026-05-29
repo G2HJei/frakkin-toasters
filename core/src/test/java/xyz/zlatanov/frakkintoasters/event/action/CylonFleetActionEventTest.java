@@ -4,9 +4,8 @@ import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.event.ActivateHeavyRaidersAndCenturionsAction;
 import xyz.zlatanov.frakkintoasters.event.ActivateRaidersEvent;
+import xyz.zlatanov.frakkintoasters.event.EventTest;
 import xyz.zlatanov.frakkintoasters.event.Followup;
-import xyz.zlatanov.frakkintoasters.state.Game;
-import xyz.zlatanov.frakkintoasters.state.board.GalacticaBoard;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.ship.HeavyRaider;
 import xyz.zlatanov.frakkintoasters.state.ship.Raider;
@@ -22,22 +21,19 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.HEAVY_RAIDER;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.RAIDER;
 
-class CylonFleetActionEventTest {
-
-    Game           game           = Game.builder().build();
-    GalacticaBoard galacticaBoard = game.boards().galactica();
+class CylonFleetActionEventTest extends EventTest {
 
     @Test
     void shouldLaunch2RaidersAndHeavyRaiderFromSingleBasestar() {
-        galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, game.cylonShips().basestar().orElseThrow());
+        galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, basestar());
         executeAction(null);
         assertCylonShips(GALACTICA_SPACE_2_OCLOCK);
     }
 
     @Test
     void shouldLaunch2RaidersAndHeavyRaiderFromEachBasestar() {
-        galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, game.cylonShips().basestar().orElseThrow());
-        galacticaBoard.place(GALACTICA_SPACE_4_OCLOCK, game.cylonShips().basestar().orElseThrow());
+        galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, basestar());
+        galacticaBoard.place(GALACTICA_SPACE_4_OCLOCK, basestar());
         executeAction(null);
         assertCylonShips(GALACTICA_SPACE_2_OCLOCK, GALACTICA_SPACE_4_OCLOCK);
     }
