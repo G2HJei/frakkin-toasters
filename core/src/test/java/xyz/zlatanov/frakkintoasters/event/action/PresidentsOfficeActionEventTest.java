@@ -2,24 +2,23 @@ package xyz.zlatanov.frakkintoasters.event.action;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.state.Game;
+import xyz.zlatanov.frakkintoasters.event.EventTest;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.POLITICS;
 
-class PresidentsOfficeActionEventTest {
+class PresidentsOfficeActionEventTest extends EventTest {
 
     @Test
     void shouldDraw2PoliticsCards() {
-        val game = Game.builder().build();
-        new PresidentsOfficeActionEvent(1).apply(game);
-        assertHas2PoliticsCards(game);
+        new PresidentsOfficeActionEvent(1).execute(game);
+        assertHas2PoliticsCards();
     }
 
-    private void assertHas2PoliticsCards(Game game) {
-        val colorOfCards = game.player(1)
+    private void assertHas2PoliticsCards() {
+        val colorOfCards = player(1)
                 .skillCards().cards()
                 .stream()
                 .map(c -> c.type().color())

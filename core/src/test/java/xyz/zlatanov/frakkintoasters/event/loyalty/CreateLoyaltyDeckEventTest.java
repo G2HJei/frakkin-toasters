@@ -5,12 +5,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import xyz.zlatanov.frakkintoasters.fake.FakeDeck;
+import xyz.zlatanov.frakkintoasters.event.EventTest;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Player;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
-import xyz.zlatanov.frakkintoasters.state.deck.DecksHolder;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,64 +21,64 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.MUTINEER;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 
-class CreateLoyaltyDeckEventTest {
+class CreateLoyaltyDeckEventTest extends EventTest {
 
 
     static Stream<Arguments> simpleLoyaltyDeckParams() {
         return Stream.of(
-                argumentSet("3p              ", game(3), false, 1, 6, false),
-                argumentSet("4p              ", game(4), false, 1, 8, true),
-                argumentSet("4p, cylon leader", game(4), true, 1, 6, false),
-                argumentSet("5p              ", game(5), false, 2, 9, false),
-                argumentSet("5p, cylon leader", game(5), true, 1, 8, true),
-                argumentSet("6p              ", game(6), false, 2, 11, true),
-                argumentSet("6p, cylon leader", game(6), true, 2, 9, false),
-                argumentSet("7p              ", game(7), true, 2, 11, true)
+                argumentSet("3p              ", 3, false, 1, 6, false),
+                argumentSet("4p              ", 4, false, 1, 8, true),
+                argumentSet("4p, cylon leader", 4, true, 1, 6, false),
+                argumentSet("5p              ", 5, false, 2, 9, false),
+                argumentSet("5p, cylon leader", 5, true, 1, 8, true),
+                argumentSet("6p              ", 6, false, 2, 11, true),
+                argumentSet("6p, cylon leader", 6, true, 2, 9, false),
+                argumentSet("7p              ", 7, true, 2, 11, true)
         );
     }
 
-    static Game game(int players) {
-        return Game.builder(players).build();
+    static Game withPlayers(int playerCount) {
+        return Game.builder(playerCount).build();
     }
 
     @ParameterizedTest
     @MethodSource("simpleLoyaltyDeckParams")
-    void shouldCreateSimpleLoyaltyDeck(Game game, boolean pickCylonLeader, int youAreACylonCount, int notACylonCount, boolean hasMutineer) {
-        pickCharacters(game, pickCylonLeader);
-        new CreateLoyaltyDeckEvent().execute(game);
-        assertLoyalties(notACylonCount, youAreACylonCount, hasMutineer, game);
+    void shouldCreateSimpleLoyaltyDeck(int playerCount, boolean pickCylonLeader, int youAreACylonCount, int notACylonCount, boolean hasMutineer) {
+        setUpGame(withPlayers(playerCount));
+        pickCharacters(pickCylonLeader);
+        execute(new CreateLoyaltyDeckEvent());
+        assertLoyalties(notACylonCount, youAreACylonCount, hasMutineer);
     }
 
     @Test
     void shouldAddExtraNotCylonCardsForBoomerAndGaius() {
-        val game = game(3);
         game.player(1).selectCharacter(KARA_STARBUCK_THRACE);
         game.player(2).selectCharacter(GAIUS_BALTAR);
         game.player(3).selectCharacter(SHARON_BOOMER_VALERII);
 
-        new CreateLoyaltyDeckEvent().execute(game);
+        execute(new CreateLoyaltyDeckEvent());
 
-        assertLoyalties(8, 1, false, game);
+        assertLoyalties(8, 1, false);
     }
 
     @Test
     void shouldDealMotiveCardsToCylonLeader() {
-        val game = game(4);
-        pickCharacters(game, true);
+        setUpGame(withPlayers(4));
+        pickCharacters(true);
 
-        new CreateLoyaltyDeckEvent().execute(game);
+        execute(new CreateLoyaltyDeckEvent());
 
         assertEquals(2, game.player(4).motiveCards().size());
     }
 
     @Test
     void shouldDealLoyaltyCards() {
-        val game = game(3);
+        setUpGame(withPlayers(3));
         game.player(1).selectCharacter(GAIUS_BALTAR);
         game.player(2).selectCharacter(KARL_HELO_AGATHON);
         game.player(3).selectCharacter(SHARON_BOOMER_VALERII);
 
-        new CreateLoyaltyDeckEvent().execute(game);
+        execute(new CreateLoyaltyDeckEvent());
 
         assertEquals(2, game.player(1).loyaltyCards().size());
         assertEquals(1, game.player(2).loyaltyCards().size());
@@ -88,41 +87,36 @@ class CreateLoyaltyDeckEventTest {
 
     @Test
     void shouldFollowUpWithRevealMutineerAction() {
-        val loyaltyDeck = new FakeDeck<LoyaltyCard>();
+        setUpGame(withPlayers(4));
         loyaltyDeck.nextCard(MUTINEER);
-        val game = Game.builder(4)
-                .decks(DecksHolder.builder()
-                        .loyalty(loyaltyDeck)
-                        .build())
-                .build();
-        pickCharacters(game, false);
+        pickCharacters(false);
 
-        val followup = new CreateLoyaltyDeckEvent().execute(game);
+        val followup = execute(new CreateLoyaltyDeckEvent());
 
         assertEquals(single(new RevealMutineerEvent()), followup);
     }
 
-    static void pickCharacters(Game game, boolean pickCylonLeader) {
-        game.player(1).selectCharacter(KARA_STARBUCK_THRACE);
-        game.player(2).selectCharacter(WILLIAM_ADAMA);
-        game.player(3).selectCharacter(LAURA_ROSLIN);
+    void pickCharacters(boolean pickCylonLeader) {
+        player(1).selectCharacter(KARA_STARBUCK_THRACE);
+        player(2).selectCharacter(WILLIAM_ADAMA);
+        player(3).selectCharacter(LAURA_ROSLIN);
         val playerCount = game.players().size();
         if (playerCount > 3) {
-            game.player(4).selectCharacter(pickCylonLeader ? CAVIL : CHIEF_GALEN_TYROL);
+            player(4).selectCharacter(pickCylonLeader ? CAVIL : CHIEF_GALEN_TYROL);
         }
         if (playerCount > 4) {
-            game.player(5).selectCharacter(CALLANDRA_CALLY_TYROL);
+            player(5).selectCharacter(CALLANDRA_CALLY_TYROL);
         }
         if (playerCount > 5) {
-            game.player(6).selectCharacter(ANASTASIA_DEE_DUALLA);
+            player(6).selectCharacter(ANASTASIA_DEE_DUALLA);
         }
         if (playerCount == 7) {
-            game.player(7).selectCharacter(SHERMAN_DOC_COTTLE);
+            player(7).selectCharacter(SHERMAN_DOC_COTTLE);
         }
     }
 
-    static void assertLoyalties(int notACylonCount, int youAreACylonCount, boolean mutineer, Game game) {
-        val loyaltyCards = new ArrayList<>(game.decks().loyalty().cards());
+    void assertLoyalties(int notACylonCount, int youAreACylonCount, boolean mutineer) {
+        val loyaltyCards = new ArrayList<>(loyaltyDeck.cards());
         loyaltyCards.addAll(
                 game.players()
                         .stream()

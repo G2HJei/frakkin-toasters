@@ -1,17 +1,15 @@
 package xyz.zlatanov.frakkintoasters.event.officials;
 
-import lombok.val;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.state.Game;
+import xyz.zlatanov.frakkintoasters.event.EventTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.SAUL_TIGH;
 
-class MakeAdmiralEventTest {
+class MakeAdmiralEventTest extends EventTest {
     @Test
     void shouldChangeTheAdmiral() {
-        val game = Game.builder().build();
-        new MakeAdmiralEvent(SAUL_TIGH).execute(game);
+        execute(new MakeAdmiralEvent(SAUL_TIGH));
         assertEquals(SAUL_TIGH, game.admiral());
     }
 }

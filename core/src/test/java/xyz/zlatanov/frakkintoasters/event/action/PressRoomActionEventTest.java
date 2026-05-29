@@ -2,23 +2,18 @@ package xyz.zlatanov.frakkintoasters.event.action;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.event.Discard1MutinyCardEvent;
-import xyz.zlatanov.frakkintoasters.event.DiscardDownTo1MutinyCardEvent;
-import xyz.zlatanov.frakkintoasters.event.Followup;
-import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
+import xyz.zlatanov.frakkintoasters.event.*;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
-import xyz.zlatanov.frakkintoasters.state.Game;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
 
-class PressRoomActionEventTest {
+class PressRoomActionEventTest extends EventTest {
 
     @Test
     void shouldDraw1MutinyAndFollowup() {
-        val game = Game.builder().build();
         val followup = new PressRoomActionEvent(1, 2).execute(game);
-        assertEquals(1, game.player(2).mutinyCards().size());
+        assertEquals(1, player(2).mutinyCards().size());
         assertEquals(expectedFollowUp(), followup);
     }
 

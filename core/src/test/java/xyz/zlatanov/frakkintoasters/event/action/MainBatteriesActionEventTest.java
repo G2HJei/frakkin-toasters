@@ -1,18 +1,12 @@
 package xyz.zlatanov.frakkintoasters.event.action;
 
 import lombok.val;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.event.DamageHumanFighterEvent;
-import xyz.zlatanov.frakkintoasters.event.DestroyCivilianShipEvent;
-import xyz.zlatanov.frakkintoasters.event.DestroyRaidersEvent;
-import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.*;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
-import xyz.zlatanov.frakkintoasters.fake.FakeDie;
-import xyz.zlatanov.frakkintoasters.state.Game;
-import xyz.zlatanov.frakkintoasters.state.board.GalacticaBoard;
 import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
-import xyz.zlatanov.frakkintoasters.state.ship.CylonShips;
-import xyz.zlatanov.frakkintoasters.state.ship.Viper;
+import xyz.zlatanov.frakkintoasters.state.ship.Raider;
 
 import java.util.Set;
 
@@ -20,14 +14,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 
-class MainBatteriesActionEventTest {
+class MainBatteriesActionEventTest extends EventTest {
+    Raider raider1;
+    Raider raider2;
+    Raider raider3;
+    Raider raider4;
 
-    FakeDie        die            = new FakeDie();
-    Game           game           = Game.builder()
-            .die(die)
-            .build();
-    CylonShips     cylonShips     = game.cylonShips();
-    GalacticaBoard galacticaBoard = game.boards().galactica();
+    @BeforeEach
+    void setUp() {
+        raider1 = raider();
+        raider2 = raider();
+        raider3 = raider();
+        raider4 = raider();
+    }
 
     @Test
     void shouldFollowupWithCivilianShipDestruction() {
@@ -61,20 +60,18 @@ class MainBatteriesActionEventTest {
 
     @Test
     void shouldDestroyOnlyViperPresent() {
-        val viper = new Viper(50);
-        galacticaBoard.place(GALACTICA_SPACE_4_OCLOCK, viper);
+        val testViper = viper();
+        galacticaBoard.place(GALACTICA_SPACE_4_OCLOCK, testViper);
         die.nextRoll(2);
 
         val followups = new MainBatteriesActionEvent(1, GALACTICA_SPACE_4_OCLOCK).execute(game);
 
-        assertEquals(single(new DamageHumanFighterEvent(Set.of(viper.id()))), followups);
+        assertEquals(single(new DamageHumanFighterEvent(Set.of(testViper.id()))), followups);
     }
 
     @Test
     void shouldFollowWithDamageViperDecisionWhenMultipleVipersArePresent() {
-        val viper1 = new Viper(50);
-        val viper2 = new Viper(51);
-        galacticaBoard.place(GALACTICA_SPACE_4_OCLOCK, viper1, viper2);
+        galacticaBoard.place(GALACTICA_SPACE_4_OCLOCK, viper(), viper());
         die.nextRoll(3);
 
         val followups = new MainBatteriesActionEvent(1, GALACTICA_SPACE_4_OCLOCK).execute(game);
@@ -105,8 +102,6 @@ class MainBatteriesActionEventTest {
 
     @Test
     void shouldFollowupWithDestroy2RaidersEvent() {
-        val raider1 = cylonShips.raider().orElseThrow();
-        val raider2 = cylonShips.raider().orElseThrow();
         galacticaBoard.place(GALACTICA_SPACE_6_OCLOCK, raider1, raider2);
         die.nextRoll(4);
 
@@ -117,20 +112,16 @@ class MainBatteriesActionEventTest {
 
     @Test
     void shouldFollowupWithDestroyRaidersEventWhenOnlyOneIsPresent() {
-        val raider = cylonShips.raider().orElseThrow();
-        galacticaBoard.place(GALACTICA_SPACE_6_OCLOCK, raider);
+        galacticaBoard.place(GALACTICA_SPACE_6_OCLOCK, raider1);
         die.nextRoll(5);
 
         val followups = new MainBatteriesActionEvent(1, GALACTICA_SPACE_6_OCLOCK).execute(game);
 
-        assertEquals(single(new DestroyRaidersEvent(Set.of(raider.id()))), followups);
+        assertEquals(single(new DestroyRaidersEvent(Set.of(raider1.id()))), followups);
     }
 
     @Test
     void shouldFollowWithPlayerDecisionWhen3RaidersArePresent() {
-        val raider1 = cylonShips.raider().orElseThrow();
-        val raider2 = cylonShips.raider().orElseThrow();
-        val raider3 = cylonShips.raider().orElseThrow();
         galacticaBoard.place(GALACTICA_SPACE_6_OCLOCK, raider1, raider2, raider3);
         die.nextRoll(6);
 
@@ -141,10 +132,6 @@ class MainBatteriesActionEventTest {
 
     @Test
     void shouldFollowupWithDestroy4RaidersEvent() {
-        val raider1 = cylonShips.raider().orElseThrow();
-        val raider2 = cylonShips.raider().orElseThrow();
-        val raider3 = cylonShips.raider().orElseThrow();
-        val raider4 = cylonShips.raider().orElseThrow();
         galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, raider1, raider2, raider3, raider4);
         die.nextRoll(7);
 
@@ -156,12 +143,7 @@ class MainBatteriesActionEventTest {
 
     @Test
     void shouldFollowWithPlayerDecisionWhen5RaidersArePresent() {
-        galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK,
-                cylonShips.raider().orElseThrow(),
-                cylonShips.raider().orElseThrow(),
-                cylonShips.raider().orElseThrow(),
-                cylonShips.raider().orElseThrow(),
-                cylonShips.raider().orElseThrow());
+        galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, raider1, raider2, raider3, raider4, raider());
         die.nextRoll(8);
 
         val followups = new MainBatteriesActionEvent(1, GALACTICA_SPACE_8_OCLOCK).execute(game);
@@ -171,8 +153,6 @@ class MainBatteriesActionEventTest {
 
     @Test
     void shouldFollowWithDestroyRaidersEventWithTwoRaiders() {
-        val raider1 = cylonShips.raider().orElseThrow();
-        val raider2 = cylonShips.raider().orElseThrow();
         galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, raider1, raider2);
         die.nextRoll(7);
 

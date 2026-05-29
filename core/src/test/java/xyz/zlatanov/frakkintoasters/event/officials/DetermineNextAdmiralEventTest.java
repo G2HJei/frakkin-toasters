@@ -2,7 +2,7 @@ package xyz.zlatanov.frakkintoasters.event.officials;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.state.Game;
+import xyz.zlatanov.frakkintoasters.event.EventTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -10,15 +10,14 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.BRIG;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.HELENA_CAIN;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.WILLIAM_ADAMA;
 
-class DetermineNextAdmiralEventTest {
-    Game game = Game.builder().build();
+class DetermineNextAdmiralEventTest extends EventTest {
 
     @BeforeEach
     void setUp() {
-        game.player(1).selectCharacter(WILLIAM_ADAMA);
-        game.player(2).selectCharacter(HELENA_CAIN);
+        player(1).selectCharacter(WILLIAM_ADAMA);
+        player(2).selectCharacter(HELENA_CAIN);
 
-        new DetermineNextAdmiralEvent().execute(game);
+        executeEvent();
     }
 
     @Test
@@ -34,7 +33,7 @@ class DetermineNextAdmiralEventTest {
     @Test
     void shouldIgnoreCharactersInBrig() {
         game.moveTo(BRIG, HELENA_CAIN);
-        new DetermineNextAdmiralEvent().execute(game);
+        executeEvent();
         assertEquals(WILLIAM_ADAMA, game.admiral());
     }
 
@@ -42,7 +41,11 @@ class DetermineNextAdmiralEventTest {
     void shouldElectNoOneWhenAllAreInBrig() {
         game.moveTo(BRIG, HELENA_CAIN);
         game.moveTo(BRIG, WILLIAM_ADAMA);
-        new DetermineNextAdmiralEvent().execute(game);
+        executeEvent();
         assertNull(game.admiral());
+    }
+
+    void executeEvent() {
+        execute(new DetermineNextAdmiralEvent());
     }
 }

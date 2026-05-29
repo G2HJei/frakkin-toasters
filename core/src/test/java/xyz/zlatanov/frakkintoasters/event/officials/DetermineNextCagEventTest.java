@@ -2,7 +2,7 @@ package xyz.zlatanov.frakkintoasters.event.officials;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.state.Game;
+import xyz.zlatanov.frakkintoasters.event.EventTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -10,15 +10,14 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.BRIG;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.LEE_APOLLO_ADAMA;
 
-class DetermineNextCagEventTest {
-    Game game = Game.builder().build();
+class DetermineNextCagEventTest extends EventTest {
 
     @BeforeEach
     void setUp() {
-        game.player(1).selectCharacter(KARA_STARBUCK_THRACE);
-        game.player(2).selectCharacter(LEE_APOLLO_ADAMA);
+        player(1).selectCharacter(KARA_STARBUCK_THRACE);
+        player(2).selectCharacter(LEE_APOLLO_ADAMA);
 
-        new DetermineNextCagEvent().execute(game);
+        executeEvent();
     }
 
     @Test
@@ -29,7 +28,7 @@ class DetermineNextCagEventTest {
     @Test
     void shouldIgnoreCharactersInBrig() {
         game.moveTo(BRIG, LEE_APOLLO_ADAMA);
-        new DetermineNextCagEvent().execute(game);
+        executeEvent();
         assertEquals(KARA_STARBUCK_THRACE, game.cag());
     }
 
@@ -37,7 +36,11 @@ class DetermineNextCagEventTest {
     void shouldElectNoOneWhenAllAreInBrig() {
         game.moveTo(BRIG, KARA_STARBUCK_THRACE);
         game.moveTo(BRIG, LEE_APOLLO_ADAMA);
-        new DetermineNextCagEvent().execute(game);
+        executeEvent();
         assertNull(game.cag());
+    }
+
+    void executeEvent() {
+        execute(new DetermineNextCagEvent());
     }
 }

@@ -3,8 +3,8 @@ package xyz.zlatanov.frakkintoasters.event;
 import org.junit.jupiter.api.BeforeEach;
 import xyz.zlatanov.frakkintoasters.fake.FakeDeck;
 import xyz.zlatanov.frakkintoasters.fake.FakeDie;
-import xyz.zlatanov.frakkintoasters.fake.NotTestableDie;
 import xyz.zlatanov.frakkintoasters.state.Game;
+import xyz.zlatanov.frakkintoasters.state.Player;
 import xyz.zlatanov.frakkintoasters.state.board.CylonFleetBoard;
 import xyz.zlatanov.frakkintoasters.state.board.GalacticaBoard;
 import xyz.zlatanov.frakkintoasters.state.board.PegasusBoard;
@@ -40,33 +40,33 @@ public class EventTest {
     /**
      * the game under test
      */
-    public Game game;
+    protected Game game;
 
-    public GalacticaBoard   galacticaBoard;
-    public PegasusBoard     pegasusBoard;
-    public CylonFleetBoard  cylonFleetBoard;
-    public CylonShips       cylonShips;
-    public Deck<QuorumCard> presidentHand;
+    protected GalacticaBoard   galacticaBoard;
+    protected PegasusBoard     pegasusBoard;
+    protected CylonFleetBoard  cylonFleetBoard;
+    protected CylonShips       cylonShips;
+    protected Deck<QuorumCard> presidentHand;
 
-    public FakeDie                   die;
-    public FakeDeck<CivilianShip>    civilianShips;
-    public FakeDeck<GalacticaDamage> galacticaDamage;
-    public FakeDeck<PegasusDamage>   pegasusDamage;
-    public FakeDeck<BasestarDamage>  basestarDamage;
-    public FakeDeck<DestinationCard> destinationDeck;
-    public FakeDeck<SkillCard>       politicsDeck;
-    public FakeDeck<SkillCard>       leadershipDeck;
-    public FakeDeck<SkillCard>       tacticsDeck;
-    public FakeDeck<SkillCard>       pilotingDeck;
-    public FakeDeck<SkillCard>       engineeringDeck;
-    public FakeDeck<SkillCard>       treacheryDeck;
-    public FakeDeck<SkillCard>       destinyDeck;
-    public FakeDeck<QuorumCard>      quorumDeck;
-    public FakeDeck<CrisisCard>      crisisDeck;
-    public FakeDeck<SuperCrisisCard> superCrisisDeck;
-    public FakeDeck<LoyaltyCard>     loyaltyDeck;
-    public FakeDeck<LoyaltyCard>     loyaltyNotCylonDeck;
-    public FakeDeck<MutinyCard>      mutinyDeck;
+    protected FakeDie                   die;
+    protected FakeDeck<CivilianShip>    civilianShips;
+    protected FakeDeck<GalacticaDamage> galacticaDamage;
+    protected FakeDeck<PegasusDamage>   pegasusDamage;
+    protected FakeDeck<BasestarDamage>  basestarDamageDeck;
+    protected FakeDeck<DestinationCard> destinationDeck;
+    protected FakeDeck<SkillCard>       politicsDeck;
+    protected FakeDeck<SkillCard>       leadershipDeck;
+    protected FakeDeck<SkillCard>       tacticsDeck;
+    protected FakeDeck<SkillCard>       pilotingDeck;
+    protected FakeDeck<SkillCard>       engineeringDeck;
+    protected FakeDeck<SkillCard>       treacheryDeck;
+    protected FakeDeck<SkillCard>       destinyDeck;
+    protected FakeDeck<QuorumCard>      quorumDeck;
+    protected FakeDeck<CrisisCard>      crisisDeck;
+    protected FakeDeck<SuperCrisisCard> superCrisisDeck;
+    protected FakeDeck<LoyaltyCard>     loyaltyDeck;
+    protected FakeDeck<LoyaltyCard>     loyaltyNotCylonDeck;
+    protected FakeDeck<MutinyCard>      mutinyDeck;
 
 
     /**
@@ -78,7 +78,7 @@ public class EventTest {
      * @see #setUpGame(Game)
      */
     @BeforeEach
-    public void setUp() {
+    protected void setUpGame() {
         setUpGame(Game.builder().build());
     }
 
@@ -88,18 +88,18 @@ public class EventTest {
      *
      * @param template the game instance to use as a template for initializing the test game
      */
-    public void setUpGame(Game template) {
+    protected void setUpGame(Game template) {
         this.galacticaBoard = template.boards().galactica();
         this.pegasusBoard = template.boards().pegasus();
         this.cylonFleetBoard = template.boards().cylonFleet();
         this.cylonShips = template.cylonShips();
         this.presidentHand = template.presidentHand();
 
-        this.die = template.die() instanceof FakeDie ? (FakeDie) template.die() : new NotTestableDie();
+        this.die = new FakeDie();
         this.civilianShips = new FakeDeck<>(template.decks().civilianShips());
         this.galacticaDamage = new FakeDeck<>(template.decks().galacticaDamage());
         this.pegasusDamage = new FakeDeck<>(template.decks().pegasusDamage());
-        this.basestarDamage = new FakeDeck<>(template.decks().basestarDamage());
+        this.basestarDamageDeck = new FakeDeck<>(template.decks().basestarDamage());
         this.destinationDeck = new FakeDeck<>(template.decks().destination());
         this.politicsDeck = new FakeDeck<>(template.decks().politics());
         this.leadershipDeck = new FakeDeck<>(template.decks().leadership());
@@ -131,7 +131,7 @@ public class EventTest {
                         .civilianShips(civilianShips)
                         .galacticaDamage(galacticaDamage)
                         .pegasusDamage(pegasusDamage)
-                        .basestarDamage(basestarDamage)
+                        .basestarDamage(basestarDamageDeck)
                         .destination(destinationDeck)
                         .politics(politicsDeck)
                         .leadership(leadershipDeck)
@@ -150,19 +150,31 @@ public class EventTest {
                 .build();
     }
 
-    public Basestar basestar() {
+    protected Basestar basestar() {
         return cylonShips.basestar().orElseThrow();
     }
 
-    public Raider raider() {
+    protected Raider raider() {
         return cylonShips.raider().orElseThrow();
     }
 
-    public HeavyRaider heavyRaider() {
+    protected HeavyRaider heavyRaider() {
         return cylonShips.heavyRaider().orElseThrow();
     }
 
-    public Centurion centurion() {
+    protected Centurion centurion() {
         return cylonShips.centurion().orElseThrow();
+    }
+
+    protected Viper viper() {
+        return galacticaBoard.removeFromReserves(Viper.class);
+    }
+
+    protected Player player(int num) {
+        return game.player(num);
+    }
+
+    protected Followup execute(Event event) {
+        return event.execute(game);
     }
 }
