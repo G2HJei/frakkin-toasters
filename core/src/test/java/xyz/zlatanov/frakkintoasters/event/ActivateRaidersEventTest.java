@@ -2,8 +2,6 @@ package xyz.zlatanov.frakkintoasters.event;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.state.Game;
-import xyz.zlatanov.frakkintoasters.state.board.GalacticaBoard;
 import xyz.zlatanov.frakkintoasters.state.ship.Raider;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -12,11 +10,7 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.RAIDER;
 
-class ActivateRaidersEventTest {
-
-    Game           game           = Game.builder().build();
-    GalacticaBoard galacticaBoard = game.boards().galactica();
-
+class ActivateRaidersEventTest extends EventTest {
 
     @Test
     void shouldPlaceRaiderOnCylonFleetBoardWhenNoRaidersOrBasestarsOnMainBoard() {
@@ -29,8 +23,7 @@ class ActivateRaidersEventTest {
 
     @Test
     void shouldLaunchTwoRaidersFromEachBasestarWhenNoRaidersOnBoard() {
-        val basestar = game.cylonShips().basestar().orElseThrow();
-        galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar);
+        galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar());
 
         val followup = executeEvent();
 
@@ -41,10 +34,8 @@ class ActivateRaidersEventTest {
 
     @Test
     void shouldLaunchTwoRaidersFromEachOfMultipleBasestars() {
-        val basestar1 = game.cylonShips().basestar().orElseThrow();
-        val basestar2 = game.cylonShips().basestar().orElseThrow();
-        galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar1);
-        galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, basestar2);
+        galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar());
+        galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, basestar());
 
         executeEvent();
 
@@ -54,9 +45,8 @@ class ActivateRaidersEventTest {
 
     @Test
     void shouldActivateRaidersOneByOne() {
-        val raider1 = game.cylonShips().raider().orElseThrow();
-        val raider2 = game.cylonShips().raider().orElseThrow();
-
+        val raider1 = raider();
+        val raider2 = raider();
         galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, raider1);
         galacticaBoard.place(GALACTICA_SPACE_6_OCLOCK, raider2);
 
@@ -69,6 +59,6 @@ class ActivateRaidersEventTest {
     }
 
     Followup executeEvent() {
-        return new ActivateRaidersEvent().execute(game);
+        return execute(new ActivateRaidersEvent());
     }
 }

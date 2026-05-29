@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event;
 
+import lombok.val;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -9,32 +10,32 @@ class FollowupTest {
 
     @Test
     void shouldReturnSingleWhenAllOfWithOneEvent() {
-        Event event = mock(Event.class);
-        Followup result = Followup.all(event);
+        val event = mock(Event.class);
+        val result = Followup.all(event);
 
         assertInstanceOf(Followup.Single.class, result);
     }
 
     @Test
     void shouldReturnSingleWhenOneOfWithOneEvent() {
-        Event event = mock(Event.class);
-        Followup result = Followup.one(event);
+        val event = mock(Event.class);
+        val result = Followup.one(event);
 
         assertInstanceOf(Followup.Single.class, result);
     }
 
     @Test
     void shouldReturnOriginalWhenAllOfWithOneFollowup() {
-        Followup followup = new Followup.Single(mock(Event.class));
-        Followup result = Followup.all(followup);
+        val followup = new Followup.Single(mock(Event.class));
+        val result = Followup.all(followup);
 
         assertInstanceOf(Followup.Single.class, result);
     }
 
     @Test
     void shouldReturnOriginalWhenOneOfWithOneFollowup() {
-        Followup followup = new Followup.Single(mock(Event.class));
-        Followup result = Followup.one(followup);
+        val followup = new Followup.Single(mock(Event.class));
+        val result = Followup.one(followup);
 
         assertInstanceOf(Followup.Single.class, result);
     }
