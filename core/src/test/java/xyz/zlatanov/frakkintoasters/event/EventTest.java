@@ -177,4 +177,8 @@ public class EventTest {
     protected Followup execute(Event event) {
         return event.execute(game);
     }
+
+    protected boolean isValid(Event event) {
+        return event.isValid(game);
+    }
 }

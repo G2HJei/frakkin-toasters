@@ -1,7 +1,9 @@
 package xyz.zlatanov.frakkintoasters.event.player;
 
 import lombok.val;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import xyz.zlatanov.frakkintoasters.event.EventTest;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
@@ -14,34 +16,38 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 
 
-class SelectCharacterEventTest {
-    Game game = Game.builder(4).build();
+class SelectCharacterEventTest extends EventTest {
+
+    @BeforeEach
+    void setUp() {
+        setUpGame(Game.builder(4).build());
+    }
 
     @Test
     void shouldSelectCharacter() {
-        select(KARA_STARBUCK_THRACE).execute(game);
-        assertEquals(KARA_STARBUCK_THRACE, game.player(1).character());
+        execute(select(KARA_STARBUCK_THRACE));
+        assertEquals(KARA_STARBUCK_THRACE, player(1).character());
     }
 
     @Test
     void shouldPlaceInSetupLocation() {
-        select(LOUANNE_KAT_KATRAINE).execute(game);
+        execute(select(LOUANNE_KAT_KATRAINE));
         assertEquals(HANGAR_DECK, game.locate(LOUANNE_KAT_KATRAINE));
     }
 
     @Test
     void shouldReceiveMiracleToken() {
-        select(CHIEF_GALEN_TYROL).execute(game);
-        assertTrue(game.player(1).hasMiracleToken());
+        execute(select(CHIEF_GALEN_TYROL));
+        assertTrue(player(1).hasMiracleToken());
     }
 
     @Test
     void shouldFollowupWithSetupOptions() {
-        game.player(4).selectCharacter(LOUANNE_KAT_KATRAINE);
-        game.player(3).selectCharacter(KARA_STARBUCK_THRACE);
-        game.player(2).selectCharacter(TOM_ZAREK);
+        player(4).selectCharacter(LOUANNE_KAT_KATRAINE);
+        player(3).selectCharacter(KARA_STARBUCK_THRACE);
+        player(2).selectCharacter(TOM_ZAREK);
 
-        val followup = select(HELENA_CAIN).execute(game);
+        val followup = execute(select(HELENA_CAIN));
 
         val expected = one(
                 new MoveEvent(1, PEGASUS_CIC, null),
@@ -51,61 +57,62 @@ class SelectCharacterEventTest {
 
     @Test
     void shouldNotPlaceVanillaHelo() {
-        select(KARL_HELO_AGATHON).execute(game);
+        execute(select(KARL_HELO_AGATHON));
         assertNull(game.locate(KARL_HELO_AGATHON));
     }
 
     @Test
     void shouldFollowupForApollo() {
-        val followup = select(LEE_APOLLO_ADAMA).execute(game);
+        val followup = execute(select(LEE_APOLLO_ADAMA));
         val expected = single(new PlayerDecisionEvent<>(1, LaunchViperEvent.class));
         assertEquals(expected, followup);
     }
 
     @Test
     void shouldNotAllowDoubleSelection() {
-        select(KARA_STARBUCK_THRACE).execute(game);
+        execute(select(KARA_STARBUCK_THRACE));
         val invalidAction = new SelectCharacterEvent(2, KARA_STARBUCK_THRACE);
         assertThrows(InvalidActionException.class, () -> invalidAction.execute(game));
     }
 
     @Test
     void shouldNotAllowDoubleSelectionOfAlternateVersion() {
-        game.player(2).selectCharacter(GAIUS_BALTAR);
-        assertFalse(select(GAIUS_BALTAR_ALT).isValid(game));
+        player(2).selectCharacter(GAIUS_BALTAR);
+        assertFalse(isValid(select(GAIUS_BALTAR_ALT)));
     }
 
     @Test
     void shouldObserveCharacterTypeLimits() {
-        assertFalse(select(LAURA_ROSLIN).isValid(game));
-        assertFalse(select(HELENA_CAIN).isValid(game));
-        assertTrue(select(BRENDAN_HOTDOG_COSTANZA).isValid(game));
-        assertTrue(select(GAIUS_BALTAR_ALT).isValid(game));
-        assertTrue(select(CAVIL).isValid(game));
+        assertFalse(isValid(select(LAURA_ROSLIN)));
+        assertFalse(isValid(select(HELENA_CAIN)));
+        assertTrue(isValid(select(BRENDAN_HOTDOG_COSTANZA)));
+        assertTrue(isValid(select(GAIUS_BALTAR_ALT)));
+        assertTrue(isValid(select(CAVIL)));
     }
 
     @Test
     void shouldAllowOnlyOneCylonLeader() {
-        game.player(2).selectCharacter(CAPRICA_SIX);
-        assertFalse(select(SIMON_ONEIL).isValid(game));
+        player(2).selectCharacter(CAPRICA_SIX);
+        assertFalse(isValid(select(SIMON_ONEIL)));
     }
 
     @Test
     void shouldNotAllowCylonLeaderIn3PlayerGame() {
-        assertFalse(select(SHARON_ATHENA_AGATHON).isValid(Game.builder().build()));
+        setUpGame();
+        assertFalse(isValid(select(SHARON_ATHENA_AGATHON)));
     }
 
     @Test
     void shouldRequireCylonLeaderIn7PlayerGame() {
-        val sevenPlayerGame = Game.builder(7).build();
-        sevenPlayerGame.player(2).selectCharacter(CHIEF_GALEN_TYROL);
-        sevenPlayerGame.player(3).selectCharacter(ANASTASIA_DEE_DUALLA);
-        sevenPlayerGame.player(4).selectCharacter(CALLANDRA_CALLY_TYROL);
-        sevenPlayerGame.player(5).selectCharacter(GAIUS_BALTAR_ALT);
-        sevenPlayerGame.player(6).selectCharacter(SHERMAN_DOC_COTTLE);
-        sevenPlayerGame.player(7).selectCharacter(SAMUEL_T_ANDERS);
-        assertFalse(select(WILLIAM_ADAMA).isValid(sevenPlayerGame));
-        assertTrue(select(DANNA_BIERS).isValid(sevenPlayerGame));
+        setUpGame(Game.builder(7).build());
+        player(2).selectCharacter(CHIEF_GALEN_TYROL);
+        player(3).selectCharacter(ANASTASIA_DEE_DUALLA);
+        player(4).selectCharacter(CALLANDRA_CALLY_TYROL);
+        player(5).selectCharacter(GAIUS_BALTAR_ALT);
+        player(6).selectCharacter(SHERMAN_DOC_COTTLE);
+        player(7).selectCharacter(SAMUEL_T_ANDERS);
+        assertFalse(isValid(select(WILLIAM_ADAMA)));
+        assertTrue(isValid(select(DANNA_BIERS)));
     }
 
     static SelectCharacterEvent select(Character character) {
