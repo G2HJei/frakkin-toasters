@@ -207,8 +207,8 @@ public class GalacticaBoard extends BattlestarBoard {
         jumpPreparation = JumpPreparation.values()[next];
     }
 
-    public GalacticaBoard decreaseFood() {
-        food--;
+    public GalacticaBoard decreaseFood(int amount) {
+        food = Math.max(0, food - amount);
         return this;
     }
 
@@ -217,13 +217,23 @@ public class GalacticaBoard extends BattlestarBoard {
         return this;
     }
 
-    public GalacticaBoard decreaseFuel() {
-        fuel--;
+    public GalacticaBoard decreaseFuel(int amount) {
+        fuel = Math.max(0, fuel - amount);
         return this;
     }
 
     public GalacticaBoard increaseFuel() {
         fuel++;
+        return this;
+    }
+
+    public GalacticaBoard decreaseMorale(int amount) {
+        morale = Math.max(0, morale - amount);
+        return this;
+    }
+
+    public GalacticaBoard decreasePopulation(int amount) {
+        population = Math.max(0, population - amount);
         return this;
     }
 
