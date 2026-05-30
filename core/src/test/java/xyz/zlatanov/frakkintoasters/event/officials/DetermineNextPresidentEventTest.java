@@ -15,19 +15,19 @@ class DetermineNextPresidentEventTest extends EventTest {
     @BeforeEach
     void setUp() {
         setUpGame(Game.builder(2).build());
-        player(1).selectCharacter(GAIUS_BALTAR);
-        player(2).selectCharacter(LAURA_ROSLIN);
+        selectCharacter(1, GAIUS_BALTAR);
+        selectCharacter(2, LAURA_ROSLIN);
 
-        execute(new DetermineNextPresidentEvent());
+        executeAndAssertNoFollowup(new DetermineNextPresidentEvent());
     }
 
     @Test
     void shouldRespectLineOfSuccession() {
-        assertEquals(LAURA_ROSLIN, game.president());
+        assertEquals(LAURA_ROSLIN, president());
     }
 
     @Test
     void shouldDistributeQuorumCard() {
-        assertEquals(1, game.presidentHand().size());
+        assertEquals(1, presidentHand.size());
     }
 }

@@ -5,7 +5,6 @@ import xyz.zlatanov.frakkintoasters.event.EventTest;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.CYLON_FLEET;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.HUB_DESTROYED;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.TOM_ZAREK;
@@ -20,14 +19,14 @@ class HubDestroyedActionEventTest extends EventTest {
     @Test
     void shouldDiscard3SkillCardsDrawSuperCrisisAndMoveToCylonFleet() {
         galacticaBoard.destroyResurrectionShip();
-        player(1).selectCharacter(TOM_ZAREK)
-                .gainSkillCards(card1, card2, card3);
-        game.moveTo(HUB_DESTROYED, TOM_ZAREK);
+        selectCharacter(1, TOM_ZAREK);
+        giveSkillCards(1, card1, card2, card3);
+        moveTo(HUB_DESTROYED, TOM_ZAREK);
 
-        execute(new HubDestroyedActionEvent(1, card1, card2, card3));
+        executeAndAssertNoFollowup(new HubDestroyedActionEvent(1, card1, card2, card3));
 
-        assertTrue(player(1).skillCards().cards().isEmpty());
+        assertNoSkillCards(1);
         assertEquals(1, player(1).superCrisisCards().cards().size());
-        assertEquals(CYLON_FLEET, game.locate(TOM_ZAREK));
+        assertEquals(CYLON_FLEET, locate(TOM_ZAREK));
     }
 }

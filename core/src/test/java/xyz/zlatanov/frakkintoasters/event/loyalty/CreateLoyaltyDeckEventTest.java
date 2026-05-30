@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.EventTest;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Player;
@@ -23,6 +24,7 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 
 class CreateLoyaltyDeckEventTest extends EventTest {
 
+    Event event = new CreateLoyaltyDeckEvent();
 
     static Stream<Arguments> simpleLoyaltyDeckParams() {
         return Stream.of(
@@ -46,17 +48,17 @@ class CreateLoyaltyDeckEventTest extends EventTest {
     void shouldCreateSimpleLoyaltyDeck(int playerCount, boolean pickCylonLeader, int youAreACylonCount, int notACylonCount, boolean hasMutineer) {
         setUpGame(withPlayers(playerCount));
         pickCharacters(pickCylonLeader);
-        execute(new CreateLoyaltyDeckEvent());
+        execute(event);
         assertLoyalties(notACylonCount, youAreACylonCount, hasMutineer);
     }
 
     @Test
     void shouldAddExtraNotCylonCardsForBoomerAndGaius() {
-        player(1).selectCharacter(KARA_STARBUCK_THRACE);
-        player(2).selectCharacter(GAIUS_BALTAR);
-        player(3).selectCharacter(SHARON_BOOMER_VALERII);
+        selectCharacter(1, KARA_STARBUCK_THRACE);
+        selectCharacter(2, GAIUS_BALTAR);
+        selectCharacter(3, SHARON_BOOMER_VALERII);
 
-        execute(new CreateLoyaltyDeckEvent());
+        executeAndAssertNoFollowup(event);
 
         assertLoyalties(8, 1, false);
     }
@@ -66,7 +68,7 @@ class CreateLoyaltyDeckEventTest extends EventTest {
         setUpGame(withPlayers(4));
         pickCharacters(true);
 
-        execute(new CreateLoyaltyDeckEvent());
+        executeAndAssertNoFollowup(event);
 
         assertEquals(2, player(4).motiveCards().size());
     }
@@ -74,11 +76,11 @@ class CreateLoyaltyDeckEventTest extends EventTest {
     @Test
     void shouldDealLoyaltyCards() {
         setUpGame(withPlayers(3));
-        player(1).selectCharacter(GAIUS_BALTAR);
-        player(2).selectCharacter(KARL_HELO_AGATHON);
-        player(3).selectCharacter(SHARON_BOOMER_VALERII);
+        selectCharacter(1, GAIUS_BALTAR);
+        selectCharacter(2, KARL_HELO_AGATHON);
+        selectCharacter(3, SHARON_BOOMER_VALERII);
 
-        execute(new CreateLoyaltyDeckEvent());
+        executeAndAssertNoFollowup(event);
 
         assertEquals(2, player(1).loyaltyCards().size());
         assertEquals(1, player(2).loyaltyCards().size());
@@ -88,30 +90,28 @@ class CreateLoyaltyDeckEventTest extends EventTest {
     @Test
     void shouldFollowUpWithRevealMutineerAction() {
         setUpGame(withPlayers(4));
-        loyaltyDeck.nextCard(MUTINEER);
+        nextCard(loyaltyDeck, MUTINEER);
         pickCharacters(false);
 
-        val followup = execute(new CreateLoyaltyDeckEvent());
-
-        assertEquals(single(new RevealMutineerEvent()), followup);
+        executeAndAssertFollowup(event, single(new RevealMutineerEvent()));
     }
 
     void pickCharacters(boolean pickCylonLeader) {
-        player(1).selectCharacter(KARA_STARBUCK_THRACE);
-        player(2).selectCharacter(WILLIAM_ADAMA);
-        player(3).selectCharacter(LAURA_ROSLIN);
+        selectCharacter(1, KARA_STARBUCK_THRACE);
+        selectCharacter(2, WILLIAM_ADAMA);
+        selectCharacter(3, LAURA_ROSLIN);
         val playerCount = game.players().size();
         if (playerCount > 3) {
-            player(4).selectCharacter(pickCylonLeader ? CAVIL : CHIEF_GALEN_TYROL);
+            selectCharacter(4, pickCylonLeader ? CAVIL : CHIEF_GALEN_TYROL);
         }
         if (playerCount > 4) {
-            player(5).selectCharacter(CALLANDRA_CALLY_TYROL);
+            selectCharacter(5, CALLANDRA_CALLY_TYROL);
         }
         if (playerCount > 5) {
-            player(6).selectCharacter(ANASTASIA_DEE_DUALLA);
+            selectCharacter(6, ANASTASIA_DEE_DUALLA);
         }
         if (playerCount == 7) {
-            player(7).selectCharacter(SHERMAN_DOC_COTTLE);
+            selectCharacter(7, SHERMAN_DOC_COTTLE);
         }
     }
 

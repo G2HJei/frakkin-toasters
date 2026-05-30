@@ -6,8 +6,6 @@ import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.ship.CylonShips;
 import xyz.zlatanov.frakkintoasters.state.ship.Raider;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static xyz.zlatanov.frakkintoasters.event.Followup.NONE;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_8_OCLOCK;
@@ -17,35 +15,31 @@ import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.BASESTAR;
 
 class LaunchRaidersEventTest extends EventTest {
 
+    Event event = new LaunchRaidersEvent();
+
     @Test
     void shouldPlaceBasestarOnCylonFleetBoardWhenNoBasestarsOnMainBoard() {
-        val followup = executeEvent();
-
-        assertEquals(
-                all(new PlaceShipOnCylonFleetBoardEvent(BASESTAR), new AdvancePursuitTrackEvent()),
-                followup);
+        executeAndAssertFollowup(event, all(new PlaceShipOnCylonFleetBoardEvent(BASESTAR), new AdvancePursuitTrackEvent()));
     }
 
     @Test
     void shouldLaunchThreeRaidersFromBasestar() {
-        galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar());
+        basestarAt(GALACTICA_SPACE_8_OCLOCK);
 
-        val followup = executeEvent();
+        executeAndAssertNoFollowup(event);
 
-        assertEquals(3, galacticaBoard.shipsIn(GALACTICA_SPACE_8_OCLOCK, Raider.class).size());
-        assertEquals(NONE, followup);
+        assertShipCount(GALACTICA_SPACE_8_OCLOCK, Raider.class, 3);
     }
 
     @Test
     void shouldLaunchThreeRaidersFromEachOfMultipleBasestars() {
-        galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar());
-        galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, basestar());
+        basestarAt(GALACTICA_SPACE_8_OCLOCK);
+        basestarAt(GALACTICA_SPACE_2_OCLOCK);
 
-        val followup = executeEvent();
+        executeAndAssertNoFollowup(event);
 
-        assertEquals(3, galacticaBoard.shipsIn(GALACTICA_SPACE_8_OCLOCK, Raider.class).size());
-        assertEquals(3, galacticaBoard.shipsIn(GALACTICA_SPACE_2_OCLOCK, Raider.class).size());
-        assertEquals(NONE, followup);
+        assertShipCount(GALACTICA_SPACE_8_OCLOCK, Raider.class, 3);
+        assertShipCount(GALACTICA_SPACE_2_OCLOCK, Raider.class, 3);
     }
 
     @Test
@@ -53,24 +47,22 @@ class LaunchRaidersEventTest extends EventTest {
         setUpGame(Game.builder()
                 .cylonShips(CylonShips.builder().raiders(2).build())
                 .build());
-        galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar());
+        basestarAt(GALACTICA_SPACE_8_OCLOCK);
 
-        val followup = executeEvent();
+        executeAndAssertNoFollowup(event);
 
-        assertEquals(2, galacticaBoard.shipsIn(GALACTICA_SPACE_8_OCLOCK, Raider.class).size());
-        assertEquals(NONE, followup);
+        assertShipCount(GALACTICA_SPACE_8_OCLOCK, Raider.class, 2);
     }
 
     @Test
     void shouldDoNothingWhenOnlyBasestarHasDisabledHangarBay() {
         val basestar = basestar();
         basestar.damage(DISABLED_HANGAR_BAY);
-        galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar);
+        place(GALACTICA_SPACE_8_OCLOCK, basestar);
 
-        val followup = executeEvent();
+        executeAndAssertNoFollowup(event);
 
-        assertEquals(0, galacticaBoard.shipsIn(GALACTICA_SPACE_8_OCLOCK, Raider.class).size());
-        assertEquals(NONE, followup);
+        assertShipCount(GALACTICA_SPACE_8_OCLOCK, Raider.class, 0);
     }
 
     @Test
@@ -78,29 +70,24 @@ class LaunchRaidersEventTest extends EventTest {
         val healthy = basestar();
         val disabled = basestar();
         disabled.damage(DISABLED_HANGAR_BAY);
-        galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, healthy);
-        galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, disabled);
+        place(GALACTICA_SPACE_8_OCLOCK, healthy);
+        place(GALACTICA_SPACE_2_OCLOCK, disabled);
 
-        val followup = executeEvent();
+        executeAndAssertNoFollowup(event);
 
-        assertEquals(3, galacticaBoard.shipsIn(GALACTICA_SPACE_8_OCLOCK, Raider.class).size());
-        assertEquals(0, galacticaBoard.shipsIn(GALACTICA_SPACE_2_OCLOCK, Raider.class).size());
-        assertEquals(NONE, followup);
+        assertShipCount(GALACTICA_SPACE_8_OCLOCK, Raider.class, 3);
+        assertShipCount(GALACTICA_SPACE_2_OCLOCK, Raider.class, 0);
     }
 
     @Test
     void shouldLaunchRaidersWhenBasestarHasOtherDamageButHangarIsFunctional() {
         val basestar = basestar();
         basestar.damage(STRUCTURAL_DAMAGE);
-        galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar);
+        place(GALACTICA_SPACE_8_OCLOCK, basestar);
 
-        val followup = executeEvent();
+        executeAndAssertNoFollowup(event);
 
-        assertEquals(3, galacticaBoard.shipsIn(GALACTICA_SPACE_8_OCLOCK, Raider.class).size());
-        assertEquals(NONE, followup);
+        assertShipCount(GALACTICA_SPACE_8_OCLOCK, Raider.class, 3);
     }
 
-    Followup executeEvent() {
-        return execute(new LaunchRaidersEvent());
-    }
 }

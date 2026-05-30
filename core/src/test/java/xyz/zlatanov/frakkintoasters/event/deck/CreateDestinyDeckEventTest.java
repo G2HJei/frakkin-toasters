@@ -15,7 +15,7 @@ class CreateDestinyDeckEventTest extends EventTest {
 
     @Test
     void shouldCreateValidDeck() {
-        execute(new CreateDestinyDeckEvent());
+        executeAndAssertNoFollowup(new CreateDestinyDeckEvent());
         assertDestinyDeckComposition();
     }
 

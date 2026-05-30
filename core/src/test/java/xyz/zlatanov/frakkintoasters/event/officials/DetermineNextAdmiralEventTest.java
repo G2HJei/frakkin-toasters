@@ -14,15 +14,15 @@ class DetermineNextAdmiralEventTest extends EventTest {
 
     @BeforeEach
     void setUp() {
-        player(1).selectCharacter(WILLIAM_ADAMA);
-        player(2).selectCharacter(HELENA_CAIN);
+        selectCharacter(1, WILLIAM_ADAMA);
+        selectCharacter(2, HELENA_CAIN);
 
-        executeEvent();
+        executeAndAssertNoFollowup(new DetermineNextAdmiralEvent());
     }
 
     @Test
     void shouldRespectLineOfSuccession() {
-        assertEquals(HELENA_CAIN, game.admiral());
+        assertEquals(HELENA_CAIN, admiral());
     }
 
     @Test
@@ -32,20 +32,17 @@ class DetermineNextAdmiralEventTest extends EventTest {
 
     @Test
     void shouldIgnoreCharactersInBrig() {
-        game.moveTo(BRIG, HELENA_CAIN);
-        executeEvent();
-        assertEquals(WILLIAM_ADAMA, game.admiral());
+        moveTo(BRIG, HELENA_CAIN);
+        executeAndAssertNoFollowup(new DetermineNextAdmiralEvent());
+        assertEquals(WILLIAM_ADAMA, admiral());
     }
 
     @Test
     void shouldElectNoOneWhenAllAreInBrig() {
-        game.moveTo(BRIG, HELENA_CAIN);
-        game.moveTo(BRIG, WILLIAM_ADAMA);
-        executeEvent();
-        assertNull(game.admiral());
+        moveTo(BRIG, HELENA_CAIN);
+        moveTo(BRIG, WILLIAM_ADAMA);
+        executeAndAssertNoFollowup(new DetermineNextAdmiralEvent());
+        assertNull(admiral());
     }
 
-    void executeEvent() {
-        execute(new DetermineNextAdmiralEvent());
-    }
 }

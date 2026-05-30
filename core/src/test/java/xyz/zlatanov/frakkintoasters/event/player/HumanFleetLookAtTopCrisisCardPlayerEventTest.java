@@ -13,17 +13,18 @@ import static xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard.DETENTE;
 class HumanFleetLookAtTopCrisisCardPlayerEventTest extends EventTest {
     @Test
     void shouldDrawCardAndFollowUpWithPlacementChoiceAndSkillDraw() {
-        crisisDeck.nextCard(DETENTE);
+        nextCard(crisisDeck, DETENTE);
         val initialSize = crisisDeck.size();
 
-        val followups = execute(new HumanFleetLookAtTopCrisisCardPlayerEvent(1));
+        executeAndAssertFollowup(new HumanFleetLookAtTopCrisisCardPlayerEvent(1),
+                all(
+                        one(
+                                new PlaceCrisisCardOnTopEvent(1, DETENTE),
+                                new PlaceCrisisCardOnBottomEvent(1, DETENTE)),
+                        single(
+                                new PlayerDecisionEvent<>(1, DrawSkillCardsEvent.class, DRAW_EXACTLY_2))
+                ));
 
         assertEquals(initialSize - 1, crisisDeck.size());
-        assertEquals(all(
-                        one(new PlaceCrisisCardOnTopEvent(1, DETENTE),
-                                new PlaceCrisisCardOnBottomEvent(1, DETENTE)),
-                        single(new PlayerDecisionEvent<>(1, DrawSkillCardsEvent.class, DRAW_EXACTLY_2))
-                ),
-                followups);
     }
 }

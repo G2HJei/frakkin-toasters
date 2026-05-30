@@ -14,33 +14,30 @@ class DetermineNextCagEventTest extends EventTest {
 
     @BeforeEach
     void setUp() {
-        player(1).selectCharacter(KARA_STARBUCK_THRACE);
-        player(2).selectCharacter(LEE_APOLLO_ADAMA);
+        selectCharacter(1, KARA_STARBUCK_THRACE);
+        selectCharacter(2, LEE_APOLLO_ADAMA);
 
-        executeEvent();
+        executeAndAssertNoFollowup(new DetermineNextCagEvent());
     }
 
     @Test
     void shouldRespectLineOfSuccession() {
-        assertEquals(LEE_APOLLO_ADAMA, game.cag());
+        assertEquals(LEE_APOLLO_ADAMA, cag());
     }
 
     @Test
     void shouldIgnoreCharactersInBrig() {
-        game.moveTo(BRIG, LEE_APOLLO_ADAMA);
-        executeEvent();
-        assertEquals(KARA_STARBUCK_THRACE, game.cag());
+        moveTo(BRIG, LEE_APOLLO_ADAMA);
+        executeAndAssertNoFollowup(new DetermineNextCagEvent());
+        assertEquals(KARA_STARBUCK_THRACE, cag());
     }
 
     @Test
     void shouldElectNoOneWhenAllAreInBrig() {
-        game.moveTo(BRIG, KARA_STARBUCK_THRACE);
-        game.moveTo(BRIG, LEE_APOLLO_ADAMA);
-        executeEvent();
-        assertNull(game.cag());
+        moveTo(BRIG, KARA_STARBUCK_THRACE);
+        moveTo(BRIG, LEE_APOLLO_ADAMA);
+        executeAndAssertNoFollowup(new DetermineNextCagEvent());
+        assertNull(cag());
     }
 
-    void executeEvent() {
-        execute(new DetermineNextCagEvent());
-    }
 }

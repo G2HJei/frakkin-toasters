@@ -13,7 +13,7 @@ class PresidentsOfficeActionEventTest extends EventTest {
 
     @Test
     void shouldDraw2PoliticsCards() {
-        execute(new PresidentsOfficeActionEvent(1));
+        executeAndAssertNoFollowup(new PresidentsOfficeActionEvent(1));
         assertHas2PoliticsCards();
     }
 
