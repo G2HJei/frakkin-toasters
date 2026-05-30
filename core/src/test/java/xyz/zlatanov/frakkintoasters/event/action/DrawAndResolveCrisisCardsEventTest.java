@@ -15,7 +15,7 @@ class DrawAndResolveCrisisCardsEventTest extends EventTest {
     @Test
     void shouldFollowUpWithOneOfTheCrisisCards() {
         crisisDeck.nextCard(DETENTE).nextCard(AIRLOCK_LEAK);
-        val followup = new DrawAndResolveCrisisCardsEvent(1).execute(game);
+        val followup = execute(new DrawAndResolveCrisisCardsEvent(1));
         assertEquals(one(
                         new ResolveCapricaCrisisCardEvent(1, DETENTE, AIRLOCK_LEAK),
                         new ResolveCapricaCrisisCardEvent(1, AIRLOCK_LEAK, DETENTE)

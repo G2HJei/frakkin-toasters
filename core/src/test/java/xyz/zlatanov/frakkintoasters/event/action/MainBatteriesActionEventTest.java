@@ -34,7 +34,7 @@ class MainBatteriesActionEventTest extends EventTest {
         galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, civilian);
         die.nextRoll(1);
 
-        val followups = new MainBatteriesActionEvent(1, GALACTICA_SPACE_2_OCLOCK).execute(game);
+        val followups = execute(new MainBatteriesActionEvent(1, GALACTICA_SPACE_2_OCLOCK));
 
         assertEquals(single(new DestroyCivilianShipEvent(civilian.id())), followups);
     }
@@ -46,7 +46,7 @@ class MainBatteriesActionEventTest extends EventTest {
         galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, civilian1, civilian2);
         die.nextRoll(1);
 
-        val followups = new MainBatteriesActionEvent(1, GALACTICA_SPACE_2_OCLOCK).execute(game);
+        val followups = execute(new MainBatteriesActionEvent(1, GALACTICA_SPACE_2_OCLOCK));
 
         assertEquals(single(new PlayerDecisionEvent<>(1, DestroyCivilianShipEvent.class)), followups);
     }
@@ -54,7 +54,7 @@ class MainBatteriesActionEventTest extends EventTest {
     @Test
     void shouldDoNothingWhenNoCivilianShipsToDestroy() {
         die.nextRoll(1);
-        val followups = new MainBatteriesActionEvent(1, GALACTICA_SPACE_2_OCLOCK).execute(game);
+        val followups = execute(new MainBatteriesActionEvent(1, GALACTICA_SPACE_2_OCLOCK));
         assertEquals(Followup.NONE, followups);
     }
 
@@ -64,7 +64,7 @@ class MainBatteriesActionEventTest extends EventTest {
         galacticaBoard.place(GALACTICA_SPACE_4_OCLOCK, testViper);
         die.nextRoll(2);
 
-        val followups = new MainBatteriesActionEvent(1, GALACTICA_SPACE_4_OCLOCK).execute(game);
+        val followups = execute(new MainBatteriesActionEvent(1, GALACTICA_SPACE_4_OCLOCK));
 
         assertEquals(single(new DamageHumanFighterEvent(Set.of(testViper.id()))), followups);
     }
@@ -74,7 +74,7 @@ class MainBatteriesActionEventTest extends EventTest {
         galacticaBoard.place(GALACTICA_SPACE_4_OCLOCK, viper(), viper());
         die.nextRoll(3);
 
-        val followups = new MainBatteriesActionEvent(1, GALACTICA_SPACE_4_OCLOCK).execute(game);
+        val followups = execute(new MainBatteriesActionEvent(1, GALACTICA_SPACE_4_OCLOCK));
 
         assertEquals(single(new PlayerDecisionEvent<>(1, DamageHumanFighterEvent.class)), followups);
     }
@@ -82,21 +82,21 @@ class MainBatteriesActionEventTest extends EventTest {
     @Test
     void shouldDoNothingWhenNoVipers() {
         die.nextRoll(2);
-        val followups = new MainBatteriesActionEvent(1, GALACTICA_SPACE_4_OCLOCK).execute(game);
+        val followups = execute(new MainBatteriesActionEvent(1, GALACTICA_SPACE_4_OCLOCK));
         assertEquals(Followup.NONE, followups);
     }
 
     @Test
     void shouldDoNothingWhenNoRaiders() {
         die.nextRoll(4);
-        val followups = new MainBatteriesActionEvent(1, GALACTICA_SPACE_6_OCLOCK).execute(game);
+        val followups = execute(new MainBatteriesActionEvent(1, GALACTICA_SPACE_6_OCLOCK));
         assertEquals(Followup.NONE, followups);
     }
 
     @Test
     void shouldDoNothingWhenNoRaidersOnHighRoll() {
         die.nextRoll(8);
-        val followups = new MainBatteriesActionEvent(1, GALACTICA_SPACE_8_OCLOCK).execute(game);
+        val followups = execute(new MainBatteriesActionEvent(1, GALACTICA_SPACE_8_OCLOCK));
         assertEquals(Followup.NONE, followups);
     }
 
@@ -105,7 +105,7 @@ class MainBatteriesActionEventTest extends EventTest {
         galacticaBoard.place(GALACTICA_SPACE_6_OCLOCK, raider1, raider2);
         die.nextRoll(4);
 
-        val followup = new MainBatteriesActionEvent(1, GALACTICA_SPACE_6_OCLOCK).execute(game);
+        val followup = execute(new MainBatteriesActionEvent(1, GALACTICA_SPACE_6_OCLOCK));
 
         assertEquals(single(new DestroyRaidersEvent(Set.of(raider1.id(), raider2.id()))), followup);
     }
@@ -115,7 +115,7 @@ class MainBatteriesActionEventTest extends EventTest {
         galacticaBoard.place(GALACTICA_SPACE_6_OCLOCK, raider1);
         die.nextRoll(5);
 
-        val followups = new MainBatteriesActionEvent(1, GALACTICA_SPACE_6_OCLOCK).execute(game);
+        val followups = execute(new MainBatteriesActionEvent(1, GALACTICA_SPACE_6_OCLOCK));
 
         assertEquals(single(new DestroyRaidersEvent(Set.of(raider1.id()))), followups);
     }
@@ -125,7 +125,7 @@ class MainBatteriesActionEventTest extends EventTest {
         galacticaBoard.place(GALACTICA_SPACE_6_OCLOCK, raider1, raider2, raider3);
         die.nextRoll(6);
 
-        val followups = new MainBatteriesActionEvent(1, GALACTICA_SPACE_6_OCLOCK).execute(game);
+        val followups = execute(new MainBatteriesActionEvent(1, GALACTICA_SPACE_6_OCLOCK));
 
         assertEquals(single(new PlayerDecisionEvent<>(1, DestroyRaidersEvent.class)), followups);
     }
@@ -135,7 +135,7 @@ class MainBatteriesActionEventTest extends EventTest {
         galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, raider1, raider2, raider3, raider4);
         die.nextRoll(7);
 
-        val followup = new MainBatteriesActionEvent(1, GALACTICA_SPACE_8_OCLOCK).execute(game);
+        val followup = execute(new MainBatteriesActionEvent(1, GALACTICA_SPACE_8_OCLOCK));
 
         assertEquals(single(new DestroyRaidersEvent(Set.of(raider1.id(), raider2.id(), raider3.id(), raider4.id()))), followup);
 
@@ -146,7 +146,7 @@ class MainBatteriesActionEventTest extends EventTest {
         galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, raider1, raider2, raider3, raider4, raider());
         die.nextRoll(8);
 
-        val followups = new MainBatteriesActionEvent(1, GALACTICA_SPACE_8_OCLOCK).execute(game);
+        val followups = execute(new MainBatteriesActionEvent(1, GALACTICA_SPACE_8_OCLOCK));
 
         assertEquals(single(new PlayerDecisionEvent<>(1, DestroyRaidersEvent.class)), followups);
     }
@@ -156,7 +156,7 @@ class MainBatteriesActionEventTest extends EventTest {
         galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, raider1, raider2);
         die.nextRoll(7);
 
-        val followup = new MainBatteriesActionEvent(1, GALACTICA_SPACE_8_OCLOCK).execute(game);
+        val followup = execute(new MainBatteriesActionEvent(1, GALACTICA_SPACE_8_OCLOCK));
 
         assertEquals(single(new DestroyRaidersEvent(Set.of(raider1.id(), raider2.id()))), followup);
 

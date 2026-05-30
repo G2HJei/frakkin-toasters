@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.event.DamagePegasusEvent;
 import xyz.zlatanov.frakkintoasters.event.EventTest;
+import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,15 +21,13 @@ class PegasusCicActionEventTest extends EventTest {
     @BeforeEach
     void setUp() {
         basestar = basestar();
-        game.boards()
-                .galactica()
-                .place(GALACTICA_SPACE_2_OCLOCK, basestar);
+        galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, basestar);
     }
 
     @Test
     void shouldDamagePegasus() {
         die.nextRoll(3);
-        val followup = new PegasusCicActionEvent(basestar.id()).execute(game);
+        val followup = executeEvent();
         assertEquals(single(new DamagePegasusEvent()), followup);
     }
 
@@ -37,7 +36,7 @@ class PegasusCicActionEventTest extends EventTest {
         basestarDamageDeck.nextCard(DISABLED_WEAPONS);
         die.nextRoll(5);
 
-        new PegasusCicActionEvent(basestar.id()).execute(game);
+        executeEvent();
 
         assertEquals(1, basestar.damage().size());
         assertTrue(basestar.damage().contains(DISABLED_WEAPONS));
@@ -50,7 +49,7 @@ class PegasusCicActionEventTest extends EventTest {
         basestarDamageDeck.nextCard(DISABLED_WEAPONS).nextCard(STRUCTURAL_DAMAGE);
         die.nextRoll(8);
 
-        new PegasusCicActionEvent(basestar.id()).execute(game);
+        executeEvent();
 
         assertEquals(2, basestar.damage().size());
         assertEquals(2, basestarDamageDeck.cards().size());
@@ -63,10 +62,14 @@ class PegasusCicActionEventTest extends EventTest {
         basestar.damage(basestarDamageDeck.draw());
         die.nextRoll(8);
 
-        new PegasusCicActionEvent(basestar.id()).execute(game);
+        executeEvent();
 
         assertTrue(game.boards().galactica().shipsIn(GALACTICA_SPACE_2_OCLOCK).isEmpty());
         assertTrue(basestar.damage().isEmpty());
         assertEquals(4, basestarDamageDeck.cards().size());
+    }
+
+    Followup executeEvent() {
+        return execute(new PegasusCicActionEvent(basestar.id()));
     }
 }

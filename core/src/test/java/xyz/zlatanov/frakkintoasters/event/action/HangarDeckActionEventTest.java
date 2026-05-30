@@ -17,13 +17,13 @@ class HangarDeckActionEventTest extends EventTest {
     
     @BeforeEach
     void setUp() {
-        game.player(1).selectCharacter(LOUIS_HOSHI);
+        player(1).selectCharacter(LOUIS_HOSHI);
         game.moveTo(HANGAR_DECK, LOUIS_HOSHI);
     }
 
     @Test
     void shouldLaunchViperWithExtraAction() {
-        val followup = new HangarDeckActionEvent(1).execute(game);
+        val followup = execute(new HangarDeckActionEvent(1));
 
         val expectedFollowUp = all(
                 new PlayerDecisionEvent<>(1, LaunchViperEvent.class),

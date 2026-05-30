@@ -13,7 +13,7 @@ class PresidentsOfficeActionEventTest extends EventTest {
 
     @Test
     void shouldDraw2PoliticsCards() {
-        new PresidentsOfficeActionEvent(1).execute(game);
+        execute(new PresidentsOfficeActionEvent(1));
         assertHas2PoliticsCards();
     }
 

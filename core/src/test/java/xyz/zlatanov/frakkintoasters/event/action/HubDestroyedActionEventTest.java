@@ -24,7 +24,7 @@ class HubDestroyedActionEventTest extends EventTest {
                 .gainSkillCards(card1, card2, card3);
         game.moveTo(HUB_DESTROYED, TOM_ZAREK);
 
-        new HubDestroyedActionEvent(1, card1, card2, card3).execute(game);
+        execute(new HubDestroyedActionEvent(1, card1, card2, card3));
 
         assertTrue(player(1).skillCards().cards().isEmpty());
         assertEquals(1, player(1).superCrisisCards().cards().size());

@@ -20,12 +20,12 @@ class EngineRoomActionEventTest extends EventTest {
 
     @BeforeEach
     void setUp() {
-        game.player(1).gainSkillCards(card1, card2, card3);
+        player(1).gainSkillCards(card1, card2, card3);
     }
 
     @Test
     void shouldDiscardTwoSkillCardsAndActivateEngineRoom() {
-        val followups = new EngineRoomActionEvent(1, card1, card2).execute(game);
+        val followups = execute(new EngineRoomActionEvent(1, card1, card2));
 
         assertEquals(Followup.NONE, followups);
         assertEquals(List.of(card3), player(1).skillCards().cards());
@@ -35,12 +35,12 @@ class EngineRoomActionEventTest extends EventTest {
     @Test
     void shouldBeInvalidWhenPlayerDoesNotHaveCard() {
         val missingCard = new SkillCard(5, EXECUTIVE_ORDER);
-        assertFalse(new EngineRoomActionEvent(1, card1, missingCard).isValid(game));
+        assertFalse(isValid(new EngineRoomActionEvent(1, card1, missingCard)));
     }
 
     @Test
     void shouldBeInvalidWhenDiscardingSameCardTwice() {
-        assertFalse(new EngineRoomActionEvent(1, card1, card1).isValid(game));
+        assertFalse(isValid(new EngineRoomActionEvent(1, card1, card1)));
     }
 
 }

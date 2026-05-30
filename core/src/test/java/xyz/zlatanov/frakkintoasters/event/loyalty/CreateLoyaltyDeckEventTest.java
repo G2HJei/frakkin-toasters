@@ -52,9 +52,9 @@ class CreateLoyaltyDeckEventTest extends EventTest {
 
     @Test
     void shouldAddExtraNotCylonCardsForBoomerAndGaius() {
-        game.player(1).selectCharacter(KARA_STARBUCK_THRACE);
-        game.player(2).selectCharacter(GAIUS_BALTAR);
-        game.player(3).selectCharacter(SHARON_BOOMER_VALERII);
+        player(1).selectCharacter(KARA_STARBUCK_THRACE);
+        player(2).selectCharacter(GAIUS_BALTAR);
+        player(3).selectCharacter(SHARON_BOOMER_VALERII);
 
         execute(new CreateLoyaltyDeckEvent());
 
@@ -68,21 +68,21 @@ class CreateLoyaltyDeckEventTest extends EventTest {
 
         execute(new CreateLoyaltyDeckEvent());
 
-        assertEquals(2, game.player(4).motiveCards().size());
+        assertEquals(2, player(4).motiveCards().size());
     }
 
     @Test
     void shouldDealLoyaltyCards() {
         setUpGame(withPlayers(3));
-        game.player(1).selectCharacter(GAIUS_BALTAR);
-        game.player(2).selectCharacter(KARL_HELO_AGATHON);
-        game.player(3).selectCharacter(SHARON_BOOMER_VALERII);
+        player(1).selectCharacter(GAIUS_BALTAR);
+        player(2).selectCharacter(KARL_HELO_AGATHON);
+        player(3).selectCharacter(SHARON_BOOMER_VALERII);
 
         execute(new CreateLoyaltyDeckEvent());
 
-        assertEquals(2, game.player(1).loyaltyCards().size());
-        assertEquals(1, game.player(2).loyaltyCards().size());
-        assertEquals(1, game.player(3).loyaltyCards().size());
+        assertEquals(2, player(1).loyaltyCards().size());
+        assertEquals(1, player(2).loyaltyCards().size());
+        assertEquals(1, player(3).loyaltyCards().size());
     }
 
     @Test
