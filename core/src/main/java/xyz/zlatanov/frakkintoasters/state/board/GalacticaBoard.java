@@ -103,12 +103,13 @@ public class GalacticaBoard extends BattlestarBoard {
         return this;
     }
 
-    //todo usee Class instead of enum for type safety
 
+    //todo return optional
     public <T extends Ship> T removeFromReserves(Class<T> shipClass) {
         return removeFrom(reserves, shipClass);
     }
 
+    //todo return optional
     public <T extends Ship> T removeFromDamagedShips(Class<T> shipClass) {
         return removeFrom(damagedShips, shipClass);
     }
@@ -153,6 +154,7 @@ public class GalacticaBoard extends BattlestarBoard {
                 .toList();
     }
 
+    //todo return optional ?
     public <T extends Ship> T shipInSpace(int shipId, Class<T> shipClass) {
         return shipsInSpace(shipClass).stream()
                 .filter(r -> r.id() == shipId)
@@ -175,6 +177,7 @@ public class GalacticaBoard extends BattlestarBoard {
                 .toList();
     }
 
+    //todo return optional
     public Location locate(Ship ship) {
         return shipsInSpace.get(ship);
     }
@@ -192,11 +195,12 @@ public class GalacticaBoard extends BattlestarBoard {
         return this;
     }
 
-    public void advanceJumpPreparation() {
+    public GalacticaBoard advanceJumpPreparation() {
         val current = jumpPreparation.ordinal();
         val autoJump = JumpPreparation.values().length - 1;
         val next = current == autoJump ? 0 : current + 1;
         jumpPreparation = JumpPreparation.values()[next];
+        return this;
     }
 
     public GalacticaBoard decreaseFood(int amount) {

@@ -71,7 +71,7 @@ public class CylonShips {
         return Optional.of(centurions.removeLast());
     }
 
-    public void returned(Ship ship) {
+    public CylonShips returned(Ship ship) {
         switch (ship) {
             case Basestar b -> {
                 b.clearDamage();
@@ -81,10 +81,12 @@ public class CylonShips {
             case HeavyRaider h -> heavyRaiders.add(h);
             default -> throw new FrakCallTheAdmiralException();
         }
+        return this;
     }
 
-    public void returnedCenturion(Centurion centurion) {
+    public CylonShips returnedCenturion(Centurion centurion) {
         centurions.add(centurion);
+        return this;
     }
 
     public static class CylonShipsBuilder {
