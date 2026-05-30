@@ -24,8 +24,8 @@ public abstract class Board {
         }
     }
 
-    public Location locate(Character character) {
-        return characters.get(character);
+    public Optional<Location> locate(Character character) {
+        return Optional.ofNullable(characters.get(character));
     }
 
     public void remove(Character character) {

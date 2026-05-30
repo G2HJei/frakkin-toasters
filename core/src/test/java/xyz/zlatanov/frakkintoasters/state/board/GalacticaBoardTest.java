@@ -8,6 +8,7 @@ import xyz.zlatanov.frakkintoasters.state.ship.ViperMarkVII;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -44,7 +45,7 @@ class GalacticaBoardTest {
     void shouldSendCharactersFromDestroyedColonialOneToSickbay() {
         board.place(PRESIDENTS_OFFICE, GAIUS_BALTAR); //hehe
         board.destroyColonialOne(); //oops
-        assertEquals(SICKBAY, board.locate(GAIUS_BALTAR)); // poor Gaius
+        assertEquals(Optional.of(SICKBAY), board.locate(GAIUS_BALTAR)); // poor Gaius
     }
 
     @Test
@@ -77,7 +78,7 @@ class GalacticaBoardTest {
     void shouldPlacePilotedShip() {
         val pilotedViper = new Viper(4).pilot(KARL_HELO_AGATHON);
         board.place(GALACTICA_SPACE_4_OCLOCK, pilotedViper);
-        assertEquals(GALACTICA_SPACE_4_OCLOCK, board.locate(KARL_HELO_AGATHON));
+        assertEquals(Optional.of(GALACTICA_SPACE_4_OCLOCK), board.locate(KARL_HELO_AGATHON));
     }
 
     @Test

@@ -2,9 +2,11 @@ package xyz.zlatanov.frakkintoasters.state.board;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 
@@ -15,14 +17,14 @@ class BoardTest {
     @Test
     void shouldTrackCharacterLocation() {
         board.place(COMMAND, KARA_STARBUCK_THRACE);
-        assertEquals(COMMAND, board.locate(KARA_STARBUCK_THRACE));
+        assertEquals(Optional.of(COMMAND), board.locate(KARA_STARBUCK_THRACE));
     }
 
     @Test
     void shouldRemoveCharacterFromBoard() {
         board.place(COMMAND, GAIUS_BALTAR);
         board.remove(GAIUS_BALTAR);
-        assertNull(board.locate(GAIUS_BALTAR));
+        assertTrue(board.locate(GAIUS_BALTAR).isEmpty());
     }
 
     @Test
