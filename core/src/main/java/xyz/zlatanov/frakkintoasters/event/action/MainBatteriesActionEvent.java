@@ -9,8 +9,6 @@ import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
 import xyz.zlatanov.frakkintoasters.state.ship.Raider;
 import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 
-import java.util.Set;
-
 import static java.util.stream.Collectors.toSet;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 
@@ -42,13 +40,12 @@ public record MainBatteriesActionEvent(int playerNumber, Location spaceLocation)
     }
 
     private Followup damageViper(Game game) {
-        //todo include assault raptor here?
         val humanFighters = game.boards().galactica().humanFightersIn(spaceLocation);
         if (humanFighters.isEmpty()) {
             return Followup.NONE;
         }
         if (humanFighters.size() == 1) {
-            return single(new DamageHumanFighterEvent(Set.of(humanFighters.getFirst().id())));
+            return single(new DamageHumanFighterEvent(humanFighters.getFirst().id()));
         }
         return single(new PlayerDecisionEvent<>(playerNumber, DamageHumanFighterEvent.class));
     }

@@ -5,6 +5,7 @@ import xyz.zlatanov.frakkintoasters.event.ActionEvent;
 import xyz.zlatanov.frakkintoasters.event.DrawQuorumCardEvent;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayQuorumCardEvent;
+import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.state.Game;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
@@ -17,7 +18,7 @@ public record QuorumChamberActionEvent(int playerNumber) implements ActionEvent 
         game.presidentHand().add(drawnCard);
 
         return one(
-                new DrawQuorumCardEvent(),
-                new PlayQuorumCardEvent());
+                new DrawQuorumCardEvent(playerNumber),
+                new PlayerDecisionEvent<>(playerNumber, PlayQuorumCardEvent.class));
     }
 }

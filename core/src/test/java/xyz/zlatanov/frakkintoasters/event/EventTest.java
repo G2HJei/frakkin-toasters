@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event;
 
+import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import xyz.zlatanov.frakkintoasters.fake.FakeDeck;
 import xyz.zlatanov.frakkintoasters.fake.FakeDie;
@@ -35,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * <p>
  * This class provides a test harness that replaces production game components with fake/testable versions
  * to streamline testing of game events. It maintains references to all major game components including
- * boards, ships, and various decks of cards.
+ * boards, ships, and valious decks of cards.
  * <p>
  * Test classes should extend this class and use {@link #setUpGame(Game)} to initialize the test environment
  * with a game template. All deck implementations and the die are automatically replaced with fake versions
@@ -224,31 +225,31 @@ public class EventTest {
     }
 
     protected Basestar basestarAt(Location location) {
-        var basestar = basestar();
+        val basestar = basestar();
         place(location, basestar);
         return basestar;
     }
 
     protected Raider raiderAt(Location location) {
-        var raider = raider();
+        val raider = raider();
         place(location, raider);
         return raider;
     }
 
     protected HeavyRaider heavyRaiderAt(Location location) {
-        var heavyRaider = heavyRaider();
+        val heavyRaider = heavyRaider();
         place(location, heavyRaider);
         return heavyRaider;
     }
 
     protected Viper viperAt(Location location) {
-        var viper = viper();
+        val viper = viper();
         place(location, viper);
         return viper;
     }
 
     protected AssaultRaptor assaultRaptorAt(Location location) {
-        var assaultRaptor = assaultRaptor();
+        val assaultRaptor = assaultRaptor();
         place(location, assaultRaptor);
         return assaultRaptor;
     }
@@ -272,7 +273,7 @@ public class EventTest {
     }
 
     protected Player selectCharacter(int playerNumber, Character character) {
-        var player = player(playerNumber);
+        val player = player(playerNumber);
         player.selectCharacter(character);
         return player;
     }
@@ -284,28 +285,21 @@ public class EventTest {
     protected void moveTo(Location location, Character character) {
         game.moveTo(location, character);
     }
-    
-
-    private <T extends HumanFighter> T pilotAt(Character character, T ship, Location location) {
-        ship.pilot(character);
-        place(location, ship);
-        return ship;
-    }
 
     protected Player giveSkillCards(int playerNumber, SkillCard... cards) {
-        var player = player(playerNumber);
+        val player = player(playerNumber);
         player.gainSkillCards(cards);
         return player;
     }
 
     protected Player giveMutinyCards(int playerNumber, MutinyCard... cards) {
-        var player = player(playerNumber);
+        val player = player(playerNumber);
         Arrays.stream(cards).forEach(player.mutinyCards()::add);
         return player;
     }
 
     protected Player giveLoyaltyCards(int playerNumber, LoyaltyCard... cards) {
-        var player = player(playerNumber);
+        val player = player(playerNumber);
         Arrays.stream(cards).forEach(player.loyaltyCards()::add);
         return player;
     }
