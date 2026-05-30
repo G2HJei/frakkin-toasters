@@ -46,15 +46,16 @@ public class GalacticaBoard extends BattlestarBoard {
     }
 
     @Override
-    public Location locate(Character character) {
-        return Optional.ofNullable(super.locate(character))
-                .orElseGet(() -> shipsInSpace.entrySet()
-                        .stream()
-                        .filter(es -> es.getKey() instanceof HumanFighter
-                                && ((HumanFighter) es.getKey()).pilot() == character)
-                        .findFirst()
-                        .map(Map.Entry::getValue)
-                        .orElse(null));
+    public Optional<Location> locate(Character character) {
+        val superLocate = super.locate(character);
+        return superLocate.isPresent()
+                ? superLocate
+                : shipsInSpace.entrySet()
+                .stream()
+                .filter(es -> es.getKey() instanceof HumanFighter
+                              && ((HumanFighter) es.getKey()).pilot() == character)
+                .findFirst()
+                .map(Map.Entry::getValue);
     }
 
     private static Set<Location> galacticaLocations() {
@@ -149,15 +150,6 @@ public class GalacticaBoard extends BattlestarBoard {
                 .map(Map.Entry::getKey)
                 .filter(s -> shipClass.equals(s.getClass()))
                 .map(shipClass::cast)
-                .toList();
-    }
-
-    public <T extends Ship> List<Ship> shipsIn(Location location, List<Class<T>> shipClasses) {
-        return shipsInSpace.entrySet()
-                .stream()
-                .filter(e -> e.getValue() == location)
-                .map(Map.Entry::getKey)
-                .filter(s -> shipClasses.contains(s.getClass()))
                 .toList();
     }
 

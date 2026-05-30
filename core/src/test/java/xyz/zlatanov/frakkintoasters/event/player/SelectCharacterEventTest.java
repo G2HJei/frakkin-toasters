@@ -54,7 +54,7 @@ class SelectCharacterEventTest extends EventTest {
     @Test
     void shouldNotPlaceVanillaHelo() {
         executeAndAssertNoFollowup(select(KARL_HELO_AGATHON));
-        assertNull(locate(KARL_HELO_AGATHON));
+        assertThrows(AssertionError.class, () -> locate(KARL_HELO_AGATHON));
     }
 
     @Test

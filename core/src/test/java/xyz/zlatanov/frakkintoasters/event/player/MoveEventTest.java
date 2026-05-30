@@ -29,17 +29,18 @@ class MoveEventTest extends EventTest {
     @BeforeEach
     void setUp() {
         selectCharacter(1, KARA_STARBUCK_THRACE);
-        moveTo(ADMIRALS_QUARTERS, KARA_STARBUCK_THRACE);
     }
 
     @Test
     void shouldMoveWithinSameShip() {
+        moveTo(ADMIRALS_QUARTERS, KARA_STARBUCK_THRACE);
         executeAndAssertNoFollowup(new MoveEvent(1, RESEARCH_LAB, null));
         assertEquals(RESEARCH_LAB, locate(KARA_STARBUCK_THRACE));
     }
 
     @Test
     void shouldDiscardToMoveBetweenShips() {
+        moveTo(ADMIRALS_QUARTERS, KARA_STARBUCK_THRACE);
         giveSkillCards(1, skillCard);
 
         executeAndAssertNoFollowup(new MoveEvent(1, PRESIDENTS_OFFICE, skillCard));
@@ -51,16 +52,19 @@ class MoveEventTest extends EventTest {
 
     @Test
     void shouldNotBeAbleToHazardousLocations() {
+        moveTo(ADMIRALS_QUARTERS, KARA_STARBUCK_THRACE);
         assertInvalid(new MoveEvent(1, BRIG, null));
     }
 
     @Test
     void shouldNotAllowHumansMoveToCylonLocations() {
+        moveTo(ADMIRALS_QUARTERS, KARA_STARBUCK_THRACE);
         assertInvalid(new MoveEvent(1, CAPRICA, skillCard));
     }
 
     @Test
     void shouldNotAllowMovingToSpace() {
+        moveTo(ADMIRALS_QUARTERS, KARA_STARBUCK_THRACE);
         assertInvalid(new MoveEvent(1, GALACTICA_SPACE_6_OCLOCK, skillCard));
     }
 

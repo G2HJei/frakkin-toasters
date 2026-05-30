@@ -94,11 +94,13 @@ public class Game {
     }
 
     public Location locate(Character character) {
-        return boards.all().stream()
+        val locations = boards.all().stream()
                 .map(board -> board.locate(character))
-                .filter(Objects::nonNull)
-                .findFirst()
-                .orElse(null);
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
+        assert locations.size() == 1;
+        return locations.getFirst();
     }
 
     public Game moveTo(Location location, Character character) {
