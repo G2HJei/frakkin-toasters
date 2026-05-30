@@ -1,12 +1,9 @@
 package xyz.zlatanov.frakkintoasters.event;
 
-import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static xyz.zlatanov.frakkintoasters.event.Followup.NONE;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_8_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.DISABLED_WEAPONS;
@@ -14,51 +11,45 @@ import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.STRUCTURA
 
 class ActivateCylonBasestarEventTest extends EventTest {
 
-    Basestar basestar;
+    Basestar                   basestar;
+    ActivateCylonBasestarEvent event;
 
     @BeforeEach
     void setUp() {
         basestar = basestar();
+        event = new ActivateCylonBasestarEvent(basestar.id());
     }
 
     @Test
     void shouldDoNothingOnLowRoll() {
-        galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar);
-        die.nextRoll(3);
+        place(GALACTICA_SPACE_8_OCLOCK, basestar);
+        nextRoll(3);
 
-        val followup = execute(new ActivateCylonBasestarEvent(basestar.id()));
-
-        assertEquals(NONE, followup);
+        executeAndAssertNoFollowup(event);
     }
 
     @Test
     void shouldFollowupWithDamageDecisionOnHighRoll() {
-        galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar);
-        die.nextRoll(4);
+        place(GALACTICA_SPACE_8_OCLOCK, basestar);
+        nextRoll(4);
 
-        val followup = execute(new ActivateCylonBasestarEvent(basestar.id()));
-
-        assertEquals(one(new DamageGalacticaEvent(), new DamagePegasusEvent()), followup);
+        executeAndAssertFollowup(event, one(new DamageGalacticaEvent(), new DamagePegasusEvent()));
     }
 
     @Test
     void shouldNotAttackWhenBasestarHasDisabledWeapons() {
         basestar.damage(DISABLED_WEAPONS);
-        galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar);
+        place(GALACTICA_SPACE_8_OCLOCK, basestar);
 
-        val followup = execute(new ActivateCylonBasestarEvent(basestar.id()));
-
-        assertEquals(NONE, followup);
+        executeAndAssertNoFollowup(event);
     }
 
     @Test
     void shouldStillAttackWhenBasestarHasNonDisabledWeaponsDamage() {
         basestar.damage(STRUCTURAL_DAMAGE);
-        galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar);
-        die.nextRoll(5);
+        place(GALACTICA_SPACE_8_OCLOCK, basestar);
+        nextRoll(5);
 
-        val followup = execute(new ActivateCylonBasestarEvent(basestar.id()));
-
-        assertEquals(one(new DamageGalacticaEvent(), new DamagePegasusEvent()), followup);
+        executeAndAssertFollowup(event, one(new DamageGalacticaEvent(), new DamagePegasusEvent()));
     }
 }

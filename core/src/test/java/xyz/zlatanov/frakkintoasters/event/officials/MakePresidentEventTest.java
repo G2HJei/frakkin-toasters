@@ -10,8 +10,8 @@ class MakePresidentEventTest extends EventTest {
 
     @Test
     void shouldChangeThePresident() {
-        execute(new MakePresidentEvent(GAIUS_BALTAR));
-        assertEquals(GAIUS_BALTAR, game.president());
+        executeAndAssertNoFollowup(new MakePresidentEvent(GAIUS_BALTAR));
+        assertEquals(GAIUS_BALTAR, president());
     }
 
 }

@@ -13,12 +13,12 @@ class HumanFleetInfiltratePlayerEventTest extends EventTest {
 
     @Test
     void shouldBeginInfiltration() {
-        player(1).selectCharacter(CAPRICA_SIX);
-        game.moveTo(HUMAN_FLEET, CAPRICA_SIX);
+        selectCharacter(1, CAPRICA_SIX);
+        moveTo(HUMAN_FLEET, CAPRICA_SIX);
 
-        execute(new HumanFleetInfiltratePlayerEvent(1, RESEARCH_LAB));
+        executeAndAssertNoFollowup(new HumanFleetInfiltratePlayerEvent(1, RESEARCH_LAB));
 
         assertTrue(player(1).isInfiltrating());
-        assertEquals(RESEARCH_LAB, game.locate(CAPRICA_SIX));
+        assertEquals(RESEARCH_LAB, locate(CAPRICA_SIX));
     }
 }

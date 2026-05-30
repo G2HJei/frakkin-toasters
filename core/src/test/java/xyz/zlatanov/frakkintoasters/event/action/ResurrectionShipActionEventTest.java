@@ -12,8 +12,8 @@ class ResurrectionShipActionEventTest extends EventTest {
 
     @Test
     void shouldDrawSuperCrisisCard() {
-        superCrisisDeck.nextCard(THE_FARM);
-        execute(new ResurrectionShipActionEvent(1));
+        nextCard(superCrisisDeck, THE_FARM);
+        executeAndAssertNoFollowup(new ResurrectionShipActionEvent(1));
         assertEquals(List.of(THE_FARM), player(1).superCrisisCards().cards());
     }
 }

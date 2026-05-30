@@ -182,6 +182,10 @@ public class EventTest {
         return galacticaBoard.removeFromReserves(AssaultRaptor.class);
     }
 
+    protected CivilianShip civilianShip() {
+        return civilianShips.draw();
+    }
+
     protected Player player(int num) {
         return game.player(num);
     }
@@ -321,16 +325,12 @@ public class EventTest {
         assertTrue(player(playerNumber).skillCards().cards().isEmpty());
     }
 
-    protected void assertMutinyCards(int playerNumber, MutinyCard... expected) {
-        assertEquals(List.of(expected), player(playerNumber).mutinyCards().cards());
-    }
-
     protected void nextRoll(int result) {
         die.nextRoll(result);
     }
 
     @SafeVarargs
-    protected final <T> void nextCards(FakeDeck<T> deck, T... cards) {
+    protected final <T> void nextCard(FakeDeck<T> deck, T... cards) {
         Arrays.stream(cards).forEach(deck::nextCard);
     }
 
@@ -340,5 +340,21 @@ public class EventTest {
 
     protected void assertNoShips(Location location) {
         assertTrue(galacticaBoard.shipsIn(location).isEmpty());
+    }
+
+    protected Character admiral() {
+        return game.admiral();
+    }
+
+    protected Character cag() {
+        return game.cag();
+    }
+
+    protected Character president() {
+        return game.president();
+    }
+
+    protected Location locate(Character character) {
+        return game.locate(character);
     }
 }

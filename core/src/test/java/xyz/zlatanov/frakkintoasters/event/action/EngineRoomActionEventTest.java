@@ -4,12 +4,9 @@ import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.event.EventTest;
-import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 
 class EngineRoomActionEventTest extends EventTest {
@@ -20,27 +17,26 @@ class EngineRoomActionEventTest extends EventTest {
 
     @BeforeEach
     void setUp() {
-        player(1).gainSkillCards(card1, card2, card3);
+        giveSkillCards(1, card1, card2, card3);
     }
 
     @Test
     void shouldDiscardTwoSkillCardsAndActivateEngineRoom() {
-        val followups = execute(new EngineRoomActionEvent(1, card1, card2));
+        executeAndAssertNoFollowup(new EngineRoomActionEvent(1, card1, card2));
 
-        assertEquals(Followup.NONE, followups);
-        assertEquals(List.of(card3), player(1).skillCards().cards());
+        assertSkillCards(1, card3);
         assertTrue(galacticaBoard.engineRoomActivated());
     }
 
     @Test
     void shouldBeInvalidWhenPlayerDoesNotHaveCard() {
         val missingCard = new SkillCard(5, EXECUTIVE_ORDER);
-        assertFalse(isValid(new EngineRoomActionEvent(1, card1, missingCard)));
+        assertInvalid(new EngineRoomActionEvent(1, card1, missingCard));
     }
 
     @Test
     void shouldBeInvalidWhenDiscardingSameCardTwice() {
-        assertFalse(isValid(new EngineRoomActionEvent(1, card1, card1)));
+        assertInvalid(new EngineRoomActionEvent(1, card1, card1));
     }
 
 }

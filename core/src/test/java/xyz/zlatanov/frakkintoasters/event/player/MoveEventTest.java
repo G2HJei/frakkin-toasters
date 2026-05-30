@@ -28,58 +28,57 @@ class MoveEventTest extends EventTest {
 
     @BeforeEach
     void setUp() {
-        player(1).selectCharacter(KARA_STARBUCK_THRACE);
-        game.moveTo(ADMIRALS_QUARTERS, KARA_STARBUCK_THRACE);
+        selectCharacter(1, KARA_STARBUCK_THRACE);
+        moveTo(ADMIRALS_QUARTERS, KARA_STARBUCK_THRACE);
     }
 
     @Test
     void shouldMoveWithinSameShip() {
-        execute(new MoveEvent(1, RESEARCH_LAB, null));
-        assertEquals(RESEARCH_LAB, game.locate(KARA_STARBUCK_THRACE));
+        executeAndAssertNoFollowup(new MoveEvent(1, RESEARCH_LAB, null));
+        assertEquals(RESEARCH_LAB, locate(KARA_STARBUCK_THRACE));
     }
 
     @Test
     void shouldDiscardToMoveBetweenShips() {
-        player(1).skillCards().add(skillCard);
+        giveSkillCards(1, skillCard);
 
-        execute(new MoveEvent(1, PRESIDENTS_OFFICE, skillCard));
+        executeAndAssertNoFollowup(new MoveEvent(1, PRESIDENTS_OFFICE, skillCard));
 
-        assertEquals(PRESIDENTS_OFFICE, game.locate(KARA_STARBUCK_THRACE));
-        assertTrue(player(1).skillCards().cards().isEmpty());
+        assertEquals(PRESIDENTS_OFFICE, locate(KARA_STARBUCK_THRACE));
+        assertNoSkillCards(1);
         assertEquals(skillCard, leadershipDeck.lastDiscarded());
     }
 
     @Test
     void shouldNotBeAbleToHazardousLocations() {
-        assertFalse(isValid(new MoveEvent(1, BRIG, null)));
+        assertInvalid(new MoveEvent(1, BRIG, null));
     }
 
     @Test
     void shouldNotAllowHumansMoveToCylonLocations() {
-        assertFalse(isValid(new MoveEvent(1, CAPRICA, skillCard)));
+        assertInvalid(new MoveEvent(1, CAPRICA, skillCard));
     }
 
     @Test
     void shouldNotAllowMovingToSpace() {
-        assertFalse(isValid(new MoveEvent(1, GALACTICA_SPACE_6_OCLOCK, skillCard)));
+        assertInvalid(new MoveEvent(1, GALACTICA_SPACE_6_OCLOCK, skillCard));
     }
 
     @Test
     void shouldMoveInSpaceWhilePiloting() {
-        galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, new AssaultRaptor(1).pilot(KARA_STARBUCK_THRACE));
-        execute(new MoveEvent(1, GALACTICA_SPACE_4_OCLOCK, null));
-        assertEquals(GALACTICA_SPACE_4_OCLOCK, game.locate(KARA_STARBUCK_THRACE));
+        pilotedAssaultRaptorAt(KARA_STARBUCK_THRACE, GALACTICA_SPACE_2_OCLOCK);
+        executeAndAssertNoFollowup(new MoveEvent(1, GALACTICA_SPACE_4_OCLOCK, null));
+        assertEquals(GALACTICA_SPACE_4_OCLOCK, locate(KARA_STARBUCK_THRACE));
     }
 
     @Test
     void shouldLandWhilePiloting() {
-        val karasViper = viper().pilot(KARA_STARBUCK_THRACE);
-        galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, karasViper);
-        player(1).skillCards().add(skillCard);
+        val karasViper = pilotedViperAt(KARA_STARBUCK_THRACE, GALACTICA_SPACE_2_OCLOCK);
+        giveSkillCards(1, skillCard);
 
-        execute(new MoveEvent(1, PRESIDENTS_OFFICE, skillCard));
+        executeAndAssertNoFollowup(new MoveEvent(1, PRESIDENTS_OFFICE, skillCard));
 
-        assertEquals(PRESIDENTS_OFFICE, game.locate(KARA_STARBUCK_THRACE));
+        assertEquals(PRESIDENTS_OFFICE, locate(KARA_STARBUCK_THRACE));
         assertTrue(galacticaBoard.reserves().contains(karasViper));
         assertNull(karasViper.pilot());
     }

@@ -1,29 +1,31 @@
 package xyz.zlatanov.frakkintoasters.event;
 
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.state.board.Location;
+import xyz.zlatanov.frakkintoasters.state.damage.GalacticaDamage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static xyz.zlatanov.frakkintoasters.state.damage.GalacticaDamage.*;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.WEAPONS_CONTROL;
+import static xyz.zlatanov.frakkintoasters.state.damage.GalacticaDamage.FOOD;
+import static xyz.zlatanov.frakkintoasters.state.damage.GalacticaDamage.FUEL;
 
 class DamageGalacticaEventTest extends EventTest {
 
     @Test
     void shouldDamageGalactica() {
-        galacticaDamage.nextCard(WEAPONS_CONTROL);
+        nextCard(galacticaDamage, GalacticaDamage.WEAPONS_CONTROL);
 
-        executeEvent();
+        executeAndAssertNoFollowup(new DamageGalacticaEvent());
 
-        assertTrue(galacticaBoard.damagedLocations().contains(Location.WEAPONS_CONTROL));
+        assertTrue(galacticaBoard.damagedLocations().contains(WEAPONS_CONTROL));
         assertEquals(7, galacticaDamage.size());
     }
 
     @Test
     void shouldDamageGalacticaFood() {
-        galacticaDamage.nextCard(FOOD);
+        nextCard(galacticaDamage, FOOD);
 
-        executeEvent();
+        executeAndAssertNoFollowup(new DamageGalacticaEvent());
 
         assertEquals(7, galacticaBoard.food());
         assertEquals(7, galacticaDamage.size());
@@ -31,15 +33,12 @@ class DamageGalacticaEventTest extends EventTest {
 
     @Test
     void shouldDamageGalacticaFuel() {
-        galacticaDamage.nextCard(FUEL);
+        nextCard(galacticaDamage, FUEL);
 
-        executeEvent();
+        executeAndAssertNoFollowup(new DamageGalacticaEvent());
 
         assertEquals(7, galacticaBoard.fuel());
         assertEquals(7, galacticaDamage.size());
     }
 
-    void executeEvent() {
-        execute(new DamageGalacticaEvent());
-    }
 }

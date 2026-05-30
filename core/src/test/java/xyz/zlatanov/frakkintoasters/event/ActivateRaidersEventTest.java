@@ -4,61 +4,50 @@ import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.state.ship.Raider;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static xyz.zlatanov.frakkintoasters.event.Followup.NONE;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.RAIDER;
 
 class ActivateRaidersEventTest extends EventTest {
 
+    Event event = new ActivateRaidersEvent();
+
     @Test
     void shouldPlaceRaiderOnCylonFleetBoardWhenNoRaidersOrBasestarsOnMainBoard() {
-        val followup = executeEvent();
-        assertEquals(
-                all(new PlaceShipOnCylonFleetBoardEvent(RAIDER), new AdvancePursuitTrackEvent()),
-                followup);
+        executeAndAssertFollowup(event, all(new PlaceShipOnCylonFleetBoardEvent(RAIDER), new AdvancePursuitTrackEvent()));
     }
 
 
     @Test
     void shouldLaunchTwoRaidersFromEachBasestarWhenNoRaidersOnBoard() {
-        galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar());
+        basestarAt(GALACTICA_SPACE_8_OCLOCK);
 
-        val followup = executeEvent();
+        executeAndAssertNoFollowup(event);
 
-        val raiders = galacticaBoard.shipsIn(GALACTICA_SPACE_8_OCLOCK, Raider.class);
-        assertEquals(2, raiders.size());
-        assertEquals(NONE, followup);
+        assertShipCount(GALACTICA_SPACE_8_OCLOCK, Raider.class, 2);
     }
 
     @Test
     void shouldLaunchTwoRaidersFromEachOfMultipleBasestars() {
-        galacticaBoard.place(GALACTICA_SPACE_8_OCLOCK, basestar());
-        galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, basestar());
+        basestarAt(GALACTICA_SPACE_8_OCLOCK);
+        basestarAt(GALACTICA_SPACE_2_OCLOCK);
 
-        executeEvent();
+        executeAndAssertNoFollowup(event);
 
-        assertEquals(2, galacticaBoard.shipsIn(GALACTICA_SPACE_8_OCLOCK, Raider.class).size());
-        assertEquals(2, galacticaBoard.shipsIn(GALACTICA_SPACE_2_OCLOCK, Raider.class).size());
+        assertShipCount(GALACTICA_SPACE_8_OCLOCK, Raider.class, 2);
+        assertShipCount(GALACTICA_SPACE_2_OCLOCK, Raider.class, 2);
     }
 
     @Test
     void shouldActivateRaidersOneByOne() {
         val raider1 = raider();
         val raider2 = raider();
-        galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, raider1);
-        galacticaBoard.place(GALACTICA_SPACE_6_OCLOCK, raider2);
+        place(GALACTICA_SPACE_2_OCLOCK, raider1);
+        place(GALACTICA_SPACE_6_OCLOCK, raider2);
 
-        val followup = executeEvent();
-
-        assertEquals(all(
+        executeAndAssertFollowup(new ActivateRaidersEvent(),
+                all(
                         new ActivateRaiderEvent(raider1.id()),
-                        new ActivateRaiderEvent(raider2.id()))
-                , followup);
-    }
-
-    Followup executeEvent() {
-        return execute(new ActivateRaidersEvent());
+                        new ActivateRaiderEvent(raider2.id())));
     }
 }

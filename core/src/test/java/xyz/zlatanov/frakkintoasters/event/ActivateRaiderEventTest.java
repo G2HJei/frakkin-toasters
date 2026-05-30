@@ -1,6 +1,5 @@
 package xyz.zlatanov.frakkintoasters.event;
 
-import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.state.ship.AssaultRaptor;
@@ -17,12 +16,13 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.LOUANNE_KAT
 
 class ActivateRaiderEventTest extends EventTest {
 
-    Raider        raider;
-    CivilianShip  civilianShip;
-    CivilianShip  secondCivilianShip;
-    Viper         unmannedViper;
-    Viper         pilotedViper;
-    AssaultRaptor pilotedAssaultRaptor;
+    Raider              raider;
+    CivilianShip        civilianShip;
+    CivilianShip        secondCivilianShip;
+    Viper               unmannedViper;
+    Viper               pilotedViper;
+    AssaultRaptor       pilotedAssaultRaptor;
+    ActivateRaiderEvent event;
 
     @BeforeEach
     void setUp() {
@@ -32,113 +32,84 @@ class ActivateRaiderEventTest extends EventTest {
         unmannedViper = viper();
         pilotedViper = viper().pilot(KARA_STARBUCK_THRACE);
         pilotedAssaultRaptor = assaultRaptor().pilot(LOUANNE_KAT_KATRAINE);
+        event = new ActivateRaiderEvent(raider.id());
     }
 
     @Test
     void shouldAttackGalacticaWhenNoCivilianShipsOnBoard() {
-        galacticaBoard.place(GALACTICA_SPACE_4_OCLOCK, raider);
-        val followup = executeEvent();
-        assertEquals(single(new AttackGalacticaEvent(raider.id())), followup);
+        place(GALACTICA_SPACE_4_OCLOCK, raider);
+        executeAndAssertFollowup(new ActivateRaiderEvent(raider.id()), single(new AttackGalacticaEvent(raider.id())));
     }
 
     @Test
     void shouldMoveRaiderTowardNearestCivilianShip() {
-        galacticaBoard
-                .place(GALACTICA_SPACE_12_OCLOCK, raider)
-                .place(GALACTICA_SPACE_4_OCLOCK, civilianShip);
-        executeEvent();
+        place(GALACTICA_SPACE_12_OCLOCK, raider);
+        place(GALACTICA_SPACE_4_OCLOCK, civilianShip);
+        executeAndAssertNoFollowup(event);
         assertEquals(GALACTICA_SPACE_2_OCLOCK, galacticaBoard.locate(raider));
     }
 
     @Test
     void shouldMoveClockwiseWhenEquidistantCivilianShips() {
-        galacticaBoard
-                .place(GALACTICA_SPACE_12_OCLOCK, raider)
-                .place(GALACTICA_SPACE_2_OCLOCK, civilianShip)
-                .place(GALACTICA_SPACE_10_OCLOCK, secondCivilianShip);
-        executeEvent();
+        place(GALACTICA_SPACE_12_OCLOCK, raider);
+        place(GALACTICA_SPACE_2_OCLOCK, civilianShip);
+        place(GALACTICA_SPACE_10_OCLOCK, secondCivilianShip);
+        executeAndAssertNoFollowup(event);
         assertEquals(GALACTICA_SPACE_2_OCLOCK, galacticaBoard.locate(raider));
     }
 
     @Test
     void shouldMoveRaiderTowardNearestCivilianCounterClockwise() {
-        galacticaBoard
-                .place(GALACTICA_SPACE_12_OCLOCK, raider)
-                .place(GALACTICA_SPACE_10_OCLOCK, civilianShip);
-        executeEvent();
+        place(GALACTICA_SPACE_12_OCLOCK, raider);
+        place(GALACTICA_SPACE_10_OCLOCK, civilianShip);
+        executeAndAssertNoFollowup(event);
         assertEquals(GALACTICA_SPACE_10_OCLOCK, galacticaBoard.locate(raider));
     }
 
     @Test
     void shouldDestroyCivilianShipWhenNoVipersInArea() {
-        galacticaBoard
-                .place(GALACTICA_SPACE_4_OCLOCK, raider)
-                .place(GALACTICA_SPACE_4_OCLOCK, civilianShip);
-        val followup = executeEvent();
-        assertEquals(single(new DestroyCivilianShipEvent(civilianShip.id())), followup);
+        place(GALACTICA_SPACE_4_OCLOCK, raider, civilianShip);
+        executeAndAssertFollowup(new ActivateRaiderEvent(raider.id()), single(new DestroyCivilianShipEvent(civilianShip.id())));
         assertEquals(GALACTICA_SPACE_4_OCLOCK, galacticaBoard.locate(raider));
     }
 
     @Test
     void shouldLetPlayerChooseWhenMultipleCivilianShipsInArea() {
-        galacticaBoard
-                .place(GALACTICA_SPACE_4_OCLOCK, raider)
-                .place(GALACTICA_SPACE_4_OCLOCK, civilianShip)
-                .place(GALACTICA_SPACE_4_OCLOCK, secondCivilianShip);
-        val followup = executeEvent();
-        assertEquals(
+        place(GALACTICA_SPACE_4_OCLOCK, raider, civilianShip, secondCivilianShip);
+        executeAndAssertFollowup(
+                new ActivateRaiderEvent(raider.id()),
                 one(
                         new DestroyCivilianShipEvent(civilianShip.id()),
-                        new DestroyCivilianShipEvent(secondCivilianShip.id())),
-                followup);
+                        new DestroyCivilianShipEvent(secondCivilianShip.id())));
     }
 
     @Test
     void shouldAttackUnmannedViperFirst() {
-        galacticaBoard
-                .place(GALACTICA_SPACE_4_OCLOCK, raider)
-                .place(GALACTICA_SPACE_4_OCLOCK, unmannedViper)
-                .place(GALACTICA_SPACE_4_OCLOCK, pilotedViper);
-        val followup = executeEvent();
-        assertEquals(single(new AttackViperEvent(raider.id(), unmannedViper.id())), followup);
+        place(GALACTICA_SPACE_4_OCLOCK, raider, unmannedViper, pilotedViper);
+        executeAndAssertFollowup(new ActivateRaiderEvent(raider.id()), single(new AttackViperEvent(raider.id(), unmannedViper.id())));
     }
 
     @Test
     void shouldAttackPilotedViperWhenNoUnmannedVipers() {
-        galacticaBoard
-                .place(GALACTICA_SPACE_4_OCLOCK, raider)
-                .place(GALACTICA_SPACE_4_OCLOCK, pilotedViper);
-        val followup = executeEvent();
-        assertEquals(single(new AttackViperEvent(raider.id(), pilotedViper.id())), followup);
+        place(GALACTICA_SPACE_4_OCLOCK, raider, pilotedViper);
+        executeAndAssertFollowup(new ActivateRaiderEvent(raider.id()), single(new AttackViperEvent(raider.id(), pilotedViper.id())));
     }
 
     @Test
     void shouldLetPlayerChooseBetweenTwoPilotedVipers() {
-        galacticaBoard
-                .place(GALACTICA_SPACE_4_OCLOCK, raider)
-                .place(GALACTICA_SPACE_4_OCLOCK, pilotedViper)
-                .place(GALACTICA_SPACE_4_OCLOCK, pilotedAssaultRaptor);
+        place(GALACTICA_SPACE_4_OCLOCK, raider, pilotedViper, pilotedAssaultRaptor);
 
-        val followup = executeEvent();
-
-        assertEquals(
+        executeAndAssertFollowup(
+                new ActivateRaiderEvent(raider.id()),
                 one(
                         new AttackViperEvent(raider.id(), pilotedViper.id()),
-                        new AttackViperEvent(raider.id(), pilotedAssaultRaptor.id())),
-                followup);
+                        new AttackViperEvent(raider.id(), pilotedAssaultRaptor.id())));
     }
 
     @Test
     void shouldPreferViperOverCivilianShip() {
-        galacticaBoard
-                .place(GALACTICA_SPACE_4_OCLOCK, raider)
-                .place(GALACTICA_SPACE_4_OCLOCK, unmannedViper)
-                .place(GALACTICA_SPACE_4_OCLOCK, civilianShip);
-        val followup = executeEvent();
-        assertEquals(single(new AttackViperEvent(raider.id(), unmannedViper.id())), followup);
+        place(GALACTICA_SPACE_4_OCLOCK, raider, unmannedViper, civilianShip);
+        executeAndAssertFollowup(new ActivateRaiderEvent(raider.id()), single(new AttackViperEvent(raider.id(), unmannedViper.id())));
     }
 
-    Followup executeEvent() {
-        return execute(new ActivateRaiderEvent(raider.id()));
-    }
 }

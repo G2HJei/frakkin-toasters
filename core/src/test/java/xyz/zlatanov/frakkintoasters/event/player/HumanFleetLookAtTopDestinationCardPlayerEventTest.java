@@ -14,17 +14,18 @@ class HumanFleetLookAtTopDestinationCardPlayerEventTest extends EventTest {
 
     @Test
     void shouldDrawCardAndFollowUpWithPlacementChoiceAndSkillDraw() {
-        destinationDeck.nextCard(LIONS_HEAD_NEBULA);
+        nextCard(destinationDeck, LIONS_HEAD_NEBULA);
         val initialSize = destinationDeck.size();
 
-        val followups = execute(new HumanFleetLookAtTopDestinationCardPlayerEvent(1));
-
-        assertEquals(initialSize - 1, destinationDeck.size()); //todo assert something else?
-        assertEquals(all(
-                        one(new PlaceDestinationCardOnTopEvent(1, LIONS_HEAD_NEBULA),
+        executeAndAssertFollowup(new HumanFleetLookAtTopDestinationCardPlayerEvent(1),
+                all(
+                        one(
+                                new PlaceDestinationCardOnTopEvent(1, LIONS_HEAD_NEBULA),
                                 new PlaceDestinationCardOnBottomEvent(1, LIONS_HEAD_NEBULA)),
-                        single(new PlayerDecisionEvent<>(1, DrawSkillCardsEvent.class, DRAW_EXACTLY_2))
-                ),
-                followups);
+                        single(
+                                new PlayerDecisionEvent<>(1, DrawSkillCardsEvent.class, DRAW_EXACTLY_2))
+                ));
+
+        assertEquals(initialSize - 1, destinationDeck.size());
     }
 }

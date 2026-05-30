@@ -9,7 +9,7 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.SAUL_TIGH;
 class MakeAdmiralEventTest extends EventTest {
     @Test
     void shouldChangeTheAdmiral() {
-        execute(new MakeAdmiralEvent(SAUL_TIGH));
-        assertEquals(SAUL_TIGH, game.admiral());
+        executeAndAssertNoFollowup(new MakeAdmiralEvent(SAUL_TIGH));
+        assertEquals(SAUL_TIGH, admiral());
     }
 }
