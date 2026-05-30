@@ -284,14 +284,7 @@ public class EventTest {
     protected void moveTo(Location location, Character character) {
         game.moveTo(location, character);
     }
-
-    protected Viper pilotedViperAt(Character character, Location location) {
-        return pilotAt(character, viper(), location);
-    }
-
-    protected AssaultRaptor pilotedAssaultRaptorAt(Character character, Location location) {
-        return pilotAt(character, assaultRaptor(), location);
-    }
+    
 
     private <T extends HumanFighter> T pilotAt(Character character, T ship, Location location) {
         ship.pilot(character);

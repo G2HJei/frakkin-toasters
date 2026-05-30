@@ -66,14 +66,14 @@ class MoveEventTest extends EventTest {
 
     @Test
     void shouldMoveInSpaceWhilePiloting() {
-        pilotedAssaultRaptorAt(KARA_STARBUCK_THRACE, GALACTICA_SPACE_2_OCLOCK);
+        assaultRaptorAt(GALACTICA_SPACE_2_OCLOCK).pilot(KARA_STARBUCK_THRACE);
         executeAndAssertNoFollowup(new MoveEvent(1, GALACTICA_SPACE_4_OCLOCK, null));
         assertEquals(GALACTICA_SPACE_4_OCLOCK, locate(KARA_STARBUCK_THRACE));
     }
 
     @Test
     void shouldLandWhilePiloting() {
-        val karasViper = pilotedViperAt(KARA_STARBUCK_THRACE, GALACTICA_SPACE_2_OCLOCK);
+        val karasViper = viperAt(GALACTICA_SPACE_2_OCLOCK).pilot(KARA_STARBUCK_THRACE);
         giveSkillCards(1, skillCard);
 
         executeAndAssertNoFollowup(new MoveEvent(1, PRESIDENTS_OFFICE, skillCard));
