@@ -39,7 +39,7 @@ class DrawSkillCardsEventTest extends EventTest {
     @BeforeEach
     void setUp() {
         setUpGame(Game.builder(4).build());
-        game.player(1).selectCharacter(KARA_STARBUCK_THRACE);
+        player(1).selectCharacter(KARA_STARBUCK_THRACE);
     }
 
     @Test
@@ -51,8 +51,7 @@ class DrawSkillCardsEventTest extends EventTest {
 
     @Test
     void shouldNotReceiveOutsideOfSkillSet() {
-        val action = new DrawSkillCardsEvent(1, Map.of(TREACHERY, 1));
-        assertFalse(action.isValid(game));
+        assertFalse(isValid(new DrawSkillCardsEvent(1, Map.of(TREACHERY, 1))));
     }
 
     @Test

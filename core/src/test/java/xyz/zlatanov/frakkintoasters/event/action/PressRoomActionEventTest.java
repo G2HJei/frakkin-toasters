@@ -12,7 +12,7 @@ class PressRoomActionEventTest extends EventTest {
 
     @Test
     void shouldDraw1MutinyAndFollowup() {
-        val followup = new PressRoomActionEvent(1, 2).execute(game);
+        val followup = execute(new PressRoomActionEvent(1, 2));
         assertEquals(1, player(2).mutinyCards().size());
         assertEquals(expectedFollowUp(), followup);
     }

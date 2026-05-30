@@ -18,7 +18,7 @@ class HumanFleetInfiltratePlayerEventTest extends EventTest {
 
         execute(new HumanFleetInfiltratePlayerEvent(1, RESEARCH_LAB));
 
-        assertTrue(game.player(1).isInfiltrating());
+        assertTrue(player(1).isInfiltrating());
         assertEquals(RESEARCH_LAB, game.locate(CAPRICA_SIX));
     }
 }

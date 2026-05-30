@@ -72,7 +72,7 @@ class SelectCharacterEventTest extends EventTest {
     void shouldNotAllowDoubleSelection() {
         execute(select(KARA_STARBUCK_THRACE));
         val invalidAction = new SelectCharacterEvent(2, KARA_STARBUCK_THRACE);
-        assertThrows(InvalidActionException.class, () -> invalidAction.execute(game));
+        assertThrows(InvalidActionException.class, () -> execute(invalidAction));
     }
 
     @Test

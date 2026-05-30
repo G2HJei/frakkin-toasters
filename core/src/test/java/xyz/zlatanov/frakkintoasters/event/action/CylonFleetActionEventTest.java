@@ -55,11 +55,11 @@ class CylonFleetActionEventTest extends EventTest {
         Arrays.stream(ShipType.values()).toList().stream()
                 .filter(t -> t != HEAVY_RAIDER && t != RAIDER)
                 .forEach(invalidType ->
-                        assertFalse(new CylonFleetActionEvent(1, invalidType).isValid(game)));
+                        assertFalse(isValid(new CylonFleetActionEvent(1, invalidType))));
     }
 
     Followup executeAction(ShipType shipType) {
-        return new CylonFleetActionEvent(1, shipType).execute(game);
+        return execute(new CylonFleetActionEvent(1, shipType));
     }
 
     void assertCylonShips(Location... locations) {
