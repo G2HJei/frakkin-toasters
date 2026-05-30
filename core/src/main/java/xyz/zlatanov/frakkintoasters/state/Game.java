@@ -29,33 +29,35 @@ public class Game {
     // todo separate counters in own classes?
     // todo add turns
     @Builder.Default
-    private Map<Integer, Player> players       = Map.of(1, new Player(), 2, new Player(), 3, new Player());
+    private Map<Integer, Player> players           = Map.of(1, new Player(), 2, new Player(), 3, new Player());
     @Setter
     @Builder.Default
-    private int                  currentPlayer = 1;
+    private int                  currentPlayer     = 1;
     @Setter
     @Builder.Default
-    private GameStep             step          = SETUP;
+    private GameStep             step              = SETUP;
     @Builder.Default
-    private Die                  die           = new Die();
+    private Die                  die               = new Die();
     @Builder.Default
-    private ObjectiveCard        objective     = KOBOL;
+    private ObjectiveCard        objective         = KOBOL;
     @Builder.Default
-    private BoardsHolder         boards        = new BoardsHolder();
+    private BoardsHolder         boards            = new BoardsHolder();
     @Builder.Default
-    private DecksHolder          decks         = DecksHolder.builder().build();
+    private DecksHolder          decks             = DecksHolder.builder().build();
     @Builder.Default
-    private CylonShips           cylonShips    = CylonShips.builder().build();
+    private CylonShips           cylonShips        = CylonShips.builder().build();
     @Builder.Default
-    private int                  nukes         = 2;
+    private int                  nukes             = 2;
     @Setter
     private Character            president;
     @Builder.Default
-    private Deck<QuorumCard>     presidentHand = new Deck<>();
+    private Deck<QuorumCard>     presidentHand     = new Deck<>();
     @Setter
     private Character            admiral;
     @Setter
     private Character            cag;
+    @Builder.Default
+    private List<Object>         removedComponents = new ArrayList<>();
 
 
     public static GameBuilder builder() {
@@ -143,6 +145,15 @@ public class Game {
             case HeavyRaider h -> cylonShips.returned(h);
             default -> throw new FrakCallTheAdmiralException("todo: not implemented");
         }
+        return this;
+    }
+
+    public Game removeComponent(Object component) {
+        if (component instanceof CivilianShip civShip) {
+            boards.galactica().remove(civShip);
+        }
+        //todo implement other components' removal
+        removedComponents.add(component);
         return this;
     }
 }

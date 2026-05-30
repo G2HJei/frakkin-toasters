@@ -14,9 +14,9 @@ public record DamageGalacticaEvent() implements Event {
         val dmgDeck = game.decks().galacticaDamage();
         val galacticaDamage = dmgDeck.draw();
         if (FUEL == galacticaDamage) {
-            game.boards().galactica().decreaseFuel();
+            game.boards().galactica().decreaseFuel(1);
         } else if (FOOD == galacticaDamage) {
-            game.boards().galactica().decreaseFood();
+            game.boards().galactica().decreaseFood(1);
         } else {
             val damagedLocation = Location.valueOf(galacticaDamage.name());
             game.damage(damagedLocation);
