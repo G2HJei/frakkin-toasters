@@ -7,11 +7,13 @@ import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Player;
 import xyz.zlatanov.frakkintoasters.state.board.CylonFleetBoard;
 import xyz.zlatanov.frakkintoasters.state.board.GalacticaBoard;
+import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.board.PegasusBoard;
 import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.card.MutinyCard;
 import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
+import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.crisis.SuperCrisisCard;
 import xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage;
@@ -21,6 +23,12 @@ import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 import xyz.zlatanov.frakkintoasters.state.deck.DecksHolder;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.IntStream;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Base test class for event-related tests.
@@ -184,5 +192,153 @@ public class EventTest {
 
     protected boolean isValid(Event event) {
         return event.isValid(game);
+    }
+
+    protected void assertValid(Event event) {
+        assertTrue(isValid(event), () -> "Expected event to be valid: " + event);
+    }
+
+    protected void assertInvalid(Event event) {
+        assertFalse(isValid(event), () -> "Expected event to be invalid: " + event);
+    }
+
+    protected void executeAndAssertNoFollowup(Event event) {
+        executeAndAssertFollowup(event, Followup.NONE);
+    }
+
+    protected void executeAndAssertFollowup(Event event, Followup expected) {
+        assertEquals(expected, execute(event));
+    }
+
+    protected Followup executeValid(Event event) {
+        assertValid(event);
+        return execute(event);
+    }
+
+    protected void place(Location location, Ship... ships) {
+        galacticaBoard.place(location, ships);
+    }
+
+    protected Basestar basestarAt(Location location) {
+        var basestar = basestar();
+        place(location, basestar);
+        return basestar;
+    }
+
+    protected Raider raiderAt(Location location) {
+        var raider = raider();
+        place(location, raider);
+        return raider;
+    }
+
+    protected HeavyRaider heavyRaiderAt(Location location) {
+        var heavyRaider = heavyRaider();
+        place(location, heavyRaider);
+        return heavyRaider;
+    }
+
+    protected Viper viperAt(Location location) {
+        var viper = viper();
+        place(location, viper);
+        return viper;
+    }
+
+    protected AssaultRaptor assaultRaptorAt(Location location) {
+        var assaultRaptor = assaultRaptor();
+        place(location, assaultRaptor);
+        return assaultRaptor;
+    }
+
+    protected List<Raider> raidersAt(Location location, int count) {
+        return IntStream.range(0, count)
+                .mapToObj(i -> raiderAt(location))
+                .toList();
+    }
+
+    protected List<Viper> vipersAt(Location location, int count) {
+        return IntStream.range(0, count)
+                .mapToObj(i -> viperAt(location))
+                .toList();
+    }
+
+    protected List<Basestar> basestarsAt(Location location, int count) {
+        return IntStream.range(0, count)
+                .mapToObj(i -> basestarAt(location))
+                .toList();
+    }
+
+    protected Player selectCharacter(int playerNumber, Character character) {
+        var player = player(playerNumber);
+        player.selectCharacter(character);
+        return player;
+    }
+
+    protected Player selectCharacter(Character character) {
+        return selectCharacter(1, character);
+    }
+
+    protected void moveTo(Location location, Character character) {
+        game.moveTo(location, character);
+    }
+
+    protected Viper pilotedViperAt(Character character, Location location) {
+        return pilotAt(character, viper(), location);
+    }
+
+    protected AssaultRaptor pilotedAssaultRaptorAt(Character character, Location location) {
+        return pilotAt(character, assaultRaptor(), location);
+    }
+
+    private <T extends HumanFighter> T pilotAt(Character character, T ship, Location location) {
+        ship.pilot(character);
+        place(location, ship);
+        return ship;
+    }
+
+    protected Player giveSkillCards(int playerNumber, SkillCard... cards) {
+        var player = player(playerNumber);
+        player.gainSkillCards(cards);
+        return player;
+    }
+
+    protected Player giveMutinyCards(int playerNumber, MutinyCard... cards) {
+        var player = player(playerNumber);
+        Arrays.stream(cards).forEach(player.mutinyCards()::add);
+        return player;
+    }
+
+    protected Player giveLoyaltyCards(int playerNumber, LoyaltyCard... cards) {
+        var player = player(playerNumber);
+        Arrays.stream(cards).forEach(player.loyaltyCards()::add);
+        return player;
+    }
+
+    protected void assertSkillCards(int playerNumber, SkillCard... expected) {
+        assertEquals(List.of(expected), player(playerNumber).skillCards().cards());
+    }
+
+    protected void assertNoSkillCards(int playerNumber) {
+        assertTrue(player(playerNumber).skillCards().cards().isEmpty());
+    }
+
+    protected void assertMutinyCards(int playerNumber, MutinyCard... expected) {
+        assertEquals(List.of(expected), player(playerNumber).mutinyCards().cards());
+    }
+
+    protected void nextRoll(int result) {
+        die.nextRoll(result);
+    }
+
+    @SafeVarargs
+    protected final <T> void nextCards(FakeDeck<T> deck, T... cards) {
+        Arrays.stream(cards).forEach(deck::nextCard);
+    }
+
+    protected <T extends Ship> void assertShipCount(Location location, Class<T> shipClass, int expected) {
+        assertEquals(expected, galacticaBoard.shipsIn(location, shipClass).size());
+    }
+
+    protected void assertNoShips(Location location) {
+        assertTrue(galacticaBoard.shipsIn(location).isEmpty());
     }
 }
