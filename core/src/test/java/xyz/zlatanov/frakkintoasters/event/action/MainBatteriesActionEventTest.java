@@ -60,7 +60,7 @@ class MainBatteriesActionEventTest extends EventTest {
         place(GALACTICA_SPACE_4_OCLOCK, testViper);
         nextRoll(2);
 
-        executeAndAssertFollowup(new MainBatteriesActionEvent(1, GALACTICA_SPACE_4_OCLOCK), single(new DamageHumanFighterEvent(Set.of(testViper.id()))));
+        executeAndAssertFollowup(new MainBatteriesActionEvent(1, GALACTICA_SPACE_4_OCLOCK), single(new DamageHumanFighterEvent(testViper.id())));
     }
 
     @Test

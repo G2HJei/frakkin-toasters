@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.event.DrawQuorumCardEvent;
 import xyz.zlatanov.frakkintoasters.event.EventTest;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayQuorumCardEvent;
+import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
@@ -18,10 +19,10 @@ class QuorumChamberActionEventTest extends EventTest {
 
         executeAndAssertFollowup(new QuorumChamberActionEvent(1),
                 one(
-                        new DrawQuorumCardEvent(),
-                        new PlayQuorumCardEvent()));
+                        new DrawQuorumCardEvent(1),
+                        new PlayerDecisionEvent<>(1, PlayQuorumCardEvent.class)));
 
         assertEquals(1, presidentHand.cards().size());
     }
-    
+
 }
