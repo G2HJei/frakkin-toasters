@@ -4,7 +4,7 @@ import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.event.ActivateHeavyRaidersAndCenturionsAction;
 import xyz.zlatanov.frakkintoasters.event.ActivateRaidersEvent;
-import xyz.zlatanov.frakkintoasters.event.EventProcessorTestHarness;
+import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.ship.HeavyRaider;
 import xyz.zlatanov.frakkintoasters.state.ship.Raider;
@@ -19,7 +19,7 @@ import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.HEAVY_RAIDER;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.RAIDER;
 
 
-class CylonFleetEventProcessorTest extends EventProcessorTestHarness<CylonFleetEvent> {
+class CylonFleetEventProcessorTest extends EventTestHarness<CylonFleetEvent> {
 
     @Test
     void shouldLaunch2RaidersAndHeavyRaiderFromSingleBasestar() {

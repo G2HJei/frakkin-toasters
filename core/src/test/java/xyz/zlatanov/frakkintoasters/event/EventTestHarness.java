@@ -48,7 +48,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @see FakeDie
  * @see FakeDeck
  */
-public abstract class EventProcessorTestHarness<E extends Event> {
+public abstract class EventTestHarness<E extends Event> {
 
     /**
      * the game under test
