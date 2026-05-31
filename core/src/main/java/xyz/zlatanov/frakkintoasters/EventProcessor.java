@@ -12,7 +12,7 @@ import java.util.List;
 
 public abstract class EventProcessor<T extends Event> {
 
-    protected Game game;
+    protected Game game; //todo make private and use only utility metohds?
     protected T    event;
 
     public Followup execute(Game game, T event) {
