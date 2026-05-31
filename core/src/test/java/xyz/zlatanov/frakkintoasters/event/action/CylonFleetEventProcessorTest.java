@@ -4,7 +4,7 @@ import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.event.ActivateHeavyRaidersAndCenturionsAction;
 import xyz.zlatanov.frakkintoasters.event.ActivateRaidersEvent;
-import xyz.zlatanov.frakkintoasters.event.EventTest;
+import xyz.zlatanov.frakkintoasters.event.EventProcessorTestHarness;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.ship.HeavyRaider;
 import xyz.zlatanov.frakkintoasters.state.ship.Raider;
@@ -18,12 +18,13 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.HEAVY_RAIDER;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.RAIDER;
 
-class CylonFleetActionEventTest extends EventTest {
+
+class CylonFleetEventProcessorTest extends EventProcessorTestHarness<CylonFleetEvent> {
 
     @Test
     void shouldLaunch2RaidersAndHeavyRaiderFromSingleBasestar() {
         basestarAt(GALACTICA_SPACE_2_OCLOCK);
-        executeAndAssertNoFollowup(new CylonFleetActionEvent(1, null));
+        executeAndAssertNoFollowup(new CylonFleetEvent(1, null));
         assertCylonShips(GALACTICA_SPACE_2_OCLOCK);
     }
 
@@ -31,25 +32,25 @@ class CylonFleetActionEventTest extends EventTest {
     void shouldLaunch2RaidersAndHeavyRaiderFromEachBasestar() {
         basestarAt(GALACTICA_SPACE_2_OCLOCK);
         basestarAt(GALACTICA_SPACE_4_OCLOCK);
-        executeAndAssertNoFollowup(new CylonFleetActionEvent(1, null));
+        executeAndAssertNoFollowup(new CylonFleetEvent(1, null));
         assertCylonShips(GALACTICA_SPACE_2_OCLOCK, GALACTICA_SPACE_4_OCLOCK);
     }
 
     @Test
     void shouldFollowUpWithActivateRaidersEvent() {
-        executeAndAssertFollowup(new CylonFleetActionEvent(1, RAIDER), single(new ActivateRaidersEvent()));
+        executeAndAssertFollowup(new CylonFleetEvent(1, RAIDER), single(new ActivateRaidersEvent()));
     }
 
     @Test
     void shouldFollowUpWithActivateHeavyRaidersAndCenturionsEvent() {
-        executeAndAssertFollowup(new CylonFleetActionEvent(1, HEAVY_RAIDER), single(new ActivateHeavyRaidersAndCenturionsAction()));
+        executeAndAssertFollowup(new CylonFleetEvent(1, HEAVY_RAIDER), single(new ActivateHeavyRaidersAndCenturionsAction()));
     }
 
     @Test
     void shouldAcceptOnlyValidOrEmptyTypeToActivate() {
         Arrays.stream(ShipType.values())
                 .filter(t -> t != HEAVY_RAIDER && t != RAIDER)
-                .forEach(invalidType -> assertInvalid(new CylonFleetActionEvent(1, invalidType)));
+                .forEach(invalidType -> assertInvalid(new CylonFleetEvent(1, invalidType)));
     }
 
     void assertCylonShips(Location... locations) {

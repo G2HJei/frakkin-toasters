@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event;
 
+import lombok.SneakyThrows;
 import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
@@ -23,6 +24,7 @@ import xyz.zlatanov.frakkintoasters.state.damage.GalacticaDamage;
 import xyz.zlatanov.frakkintoasters.state.damage.PegasusDamage;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 import xyz.zlatanov.frakkintoasters.state.deck.DecksHolder;
+import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
@@ -48,19 +50,17 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public abstract class EventProcessorTestHarness<E extends Event> {
 
-    protected abstract EventProcessor<E> eventProcessor();
-
     /**
      * the game under test
      */
-    protected Game game;
+    private Game game;
 
-    protected GalacticaBoard   galacticaBoard;
-    protected PegasusBoard     pegasusBoard;
-    protected CylonFleetBoard  cylonFleetBoard;
-    protected CylonShips       cylonShips;
-    protected Deck<QuorumCard> presidentHand;
+    private GalacticaBoard  galacticaBoard;
+    private PegasusBoard    pegasusBoard;
+    private CylonFleetBoard cylonFleetBoard;
+    private CylonShips      cylonShips;
 
+    protected Deck<QuorumCard>          presidentHand;
     protected FakeDie                   die;
     protected FakeDeck<CivilianShip>    civilianShips;
     protected FakeDeck<GalacticaDamage> galacticaDamage;
@@ -80,7 +80,6 @@ public abstract class EventProcessorTestHarness<E extends Event> {
     protected FakeDeck<LoyaltyCard>     loyaltyDeck;
     protected FakeDeck<LoyaltyCard>     loyaltyNotCylonDeck;
     protected FakeDeck<MutinyCard>      mutinyDeck;
-
 
     /**
      * Sets up the game under test with default settings. All production components (decks, die) will be
@@ -163,6 +162,16 @@ public abstract class EventProcessorTestHarness<E extends Event> {
                 .build();
     }
 
+    @SneakyThrows
+    @SuppressWarnings("unchecked")
+    //use convention to enforce test name matching processor name and package and reduce test boilerplate code by instantiating event processor via reflection
+    private EventProcessor<E> eventProcessor() {
+        val testClassName = getClass().getName();
+        val processorClassName = testClassName.substring(0, testClassName.length() - "Test".length());
+        val processorClass = Class.forName(processorClassName);
+        return (EventProcessor<E>) processorClass.getDeclaredConstructor().newInstance();
+    }
+
     protected Basestar basestar() {
         return cylonShips.basestar().orElseThrow();
     }
@@ -199,16 +208,9 @@ public abstract class EventProcessorTestHarness<E extends Event> {
         return eventProcessor().execute(game, event);
     }
 
-    protected boolean isValid(Event event) {
-        return event.isValid(game);
-    }
 
-    protected void assertValid(Event event) {
-        assertTrue(isValid(event), () -> "Expected event to be valid: " + event);
-    }
-
-    protected void assertInvalid(Event event) {
-        assertFalse(isValid(event), () -> "Expected event to be invalid: " + event);
+    protected void assertInvalid(E event) {
+        assertThrows(InvalidActionException.class, () -> execute(event));
     }
 
     protected void executeAndAssertNoFollowup(E event) {
@@ -217,11 +219,6 @@ public abstract class EventProcessorTestHarness<E extends Event> {
 
     protected void executeAndAssertFollowup(E event, Followup expected) {
         assertEquals(expected, execute(event));
-    }
-
-    protected Followup executeValid(E event) {
-        assertValid(event);
-        return execute(event);
     }
 
     protected void place(Location location, Ship... ships) {

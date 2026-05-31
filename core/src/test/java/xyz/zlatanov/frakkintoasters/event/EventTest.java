@@ -1,9 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event;
 
-import lombok.SneakyThrows;
 import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
-import xyz.zlatanov.frakkintoasters.event.action.CylonFleetActionEventProcessor;
 import xyz.zlatanov.frakkintoasters.fake.FakeDeck;
 import xyz.zlatanov.frakkintoasters.fake.FakeDie;
 import xyz.zlatanov.frakkintoasters.state.Game;
