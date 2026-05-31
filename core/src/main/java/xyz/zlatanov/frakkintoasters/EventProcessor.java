@@ -1,45 +1,52 @@
 package xyz.zlatanov.frakkintoasters;
 
-import lombok.RequiredArgsConstructor;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint;
 import xyz.zlatanov.frakkintoasters.state.Game;
+import xyz.zlatanov.frakkintoasters.state.exception.EventConstraintViolationException;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
 
 import java.util.List;
 
-@RequiredArgsConstructor
 public abstract class EventProcessor<T extends Event> {
 
-    protected final Game game;
-    protected final T    event;
+    protected Game game;
+    protected T    event;
 
-    public Followup execute() {
+    public Followup execute(Game game, T event) {
+        setContext(game, event);
         validateConstraints();
         validateEvent();
-        return apply();
+        return processEvent();
     }
 
-    List<EventConstraint> eventConstraints() {
+    public List<EventConstraint> eventConstraints() {
         return List.of();
     }
 
-    boolean isValid() {
+    //todo tune access levels
+    public boolean isValidConstraint(EventConstraint constraint) {
+        throw new FrakCallTheAdmiralException();
+    }
+
+    public boolean isValid() {
         return true;
     }
 
-    abstract Followup apply();
+    public abstract Followup processEvent();
 
-    boolean isValidConstraint(EventConstraint constraint) {
-        throw new FrakCallTheAdmiralException();
+    private void setContext(Game game, T event) {
+        assert this.game == null && this.event == null;
+        this.game = game;
+        this.event = event;
     }
 
     private void validateConstraints() {
         for (var constraint : eventConstraints()) {
             if (!isValidConstraint(constraint)) {
-                throw new InvalidActionException("Invalid action!");
+                throw new EventConstraintViolationException(constraint.name());
             }
         }
     }
