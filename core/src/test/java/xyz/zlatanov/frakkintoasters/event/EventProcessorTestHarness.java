@@ -1,9 +1,8 @@
 package xyz.zlatanov.frakkintoasters.event;
 
-import lombok.SneakyThrows;
 import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
-import xyz.zlatanov.frakkintoasters.event.action.CylonFleetActionEventProcessor;
+import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.fake.FakeDeck;
 import xyz.zlatanov.frakkintoasters.fake.FakeDie;
 import xyz.zlatanov.frakkintoasters.state.Game;
@@ -44,10 +43,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * with a game template. All deck implementations and the die are automatically replaced with fake versions
  * that allow precise control over randomness during testing.
  *
- * @see xyz.zlatanov.frakkintoasters.fake.FakeDie
- * @see xyz.zlatanov.frakkintoasters.fake.FakeDeck
+ * @see FakeDie
+ * @see FakeDeck
  */
-public class EventTest {
+public abstract class EventProcessorTestHarness<E extends Event> {
+
+    protected abstract EventProcessor<E> eventProcessor();
+
     /**
      * the game under test
      */
@@ -193,8 +195,8 @@ public class EventTest {
         return game.player(num);
     }
 
-    protected Followup execute(Event event) {
-        return event.execute(game);
+    protected Followup execute(E event) {
+        return eventProcessor().execute(game, event);
     }
 
     protected boolean isValid(Event event) {
@@ -209,15 +211,15 @@ public class EventTest {
         assertFalse(isValid(event), () -> "Expected event to be invalid: " + event);
     }
 
-    protected void executeAndAssertNoFollowup(Event event) {
+    protected void executeAndAssertNoFollowup(E event) {
         executeAndAssertFollowup(event, Followup.NONE);
     }
 
-    protected void executeAndAssertFollowup(Event event, Followup expected) {
+    protected void executeAndAssertFollowup(E event, Followup expected) {
         assertEquals(expected, execute(event));
     }
 
-    protected Followup executeValid(Event event) {
+    protected Followup executeValid(E event) {
         assertValid(event);
         return execute(event);
     }
