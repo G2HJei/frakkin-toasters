@@ -16,7 +16,7 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.*;
 
-class PlaceShipOnCylonFleetBoardEventTest extends EventTest {
+class PlaceShipOnCylonFleetBoardEventProcessorTest extends EventTestHarness<PlaceShipOnCylonFleetBoardEvent> {
 
     @ParameterizedTest
     @MethodSource("shouldPlaceShipOnCorrespondingSpaceAreaArgs")
