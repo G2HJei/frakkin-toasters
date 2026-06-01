@@ -8,7 +8,7 @@ import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import java.util.List;
 import java.util.Optional;
 
-public interface SelectNextOfficialEventProcessor {
+public interface LineOfSuccessionSelector {
 
     List<Character> lineOfSuccession(Game game);
 

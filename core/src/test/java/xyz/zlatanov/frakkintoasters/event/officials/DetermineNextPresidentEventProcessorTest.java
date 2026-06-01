@@ -2,14 +2,14 @@ package xyz.zlatanov.frakkintoasters.event.officials;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.event.EventTest;
+import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.state.Game;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.GAIUS_BALTAR;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.LAURA_ROSLIN;
 
-class DetermineNextPresidentEventTest extends EventTest {
+class DetermineNextPresidentEventProcessorTest extends EventTestHarness<DetermineNextPresidentEvent> {
 
 
     @BeforeEach
