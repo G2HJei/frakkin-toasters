@@ -9,7 +9,7 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.WEAPONS_CONTROL;
 import static xyz.zlatanov.frakkintoasters.state.damage.GalacticaDamage.FOOD;
 import static xyz.zlatanov.frakkintoasters.state.damage.GalacticaDamage.FUEL;
 
-class DamageGalacticaEventTest extends EventTest {
+class DamageGalacticaEventProcessorTest extends EventTestHarness<DamageGalacticaEvent> {
 
     @Test
     void shouldDamageGalactica() {
