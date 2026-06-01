@@ -1,7 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event.player;
 
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.event.EventTest;
+import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -9,14 +9,14 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.HUMAN_FLEET;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.RESEARCH_LAB;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.CAPRICA_SIX;
 
-class HumanFleetInfiltratePlayerEventTest extends EventTest {
+class HumanFleetInfiltrateEventProcessorTest extends EventTestHarness<HumanFleetInfiltrateEvent> {
 
     @Test
     void shouldBeginInfiltration() {
         selectCharacter(1, CAPRICA_SIX);
         moveTo(HUMAN_FLEET, CAPRICA_SIX);
 
-        executeAndAssertNoFollowup(new HumanFleetInfiltratePlayerEvent(1, RESEARCH_LAB));
+        executeAndAssertNoFollowup(new HumanFleetInfiltrateEvent(1, RESEARCH_LAB));
 
         assertTrue(player(1).isInfiltrating());
         assertEquals(RESEARCH_LAB, locate(CAPRICA_SIX));
