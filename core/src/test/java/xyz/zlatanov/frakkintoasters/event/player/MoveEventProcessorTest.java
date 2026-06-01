@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import xyz.zlatanov.frakkintoasters.event.EventTest;
+import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.ship.AssaultRaptor;
 import xyz.zlatanov.frakkintoasters.state.ship.HumanFighter;
@@ -22,7 +22,7 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.ALL_HANDS_ON_DECK;
 
-class MoveEventTest extends EventTest {
+class MoveEventProcessorTest extends EventTestHarness<MoveEvent> {
 
     SkillCard skillCard = new SkillCard(0, ALL_HANDS_ON_DECK);
 
@@ -115,6 +115,11 @@ class MoveEventTest extends EventTest {
     void shouldValidateMovementAdjacency(HumanFighter ship, Location destination, boolean isValid) {
         ship.pilot(KARA_STARBUCK_THRACE);
         galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, ship);
-        assertEquals(isValid, isValid(new MoveEvent(1, destination, null)));
+        val event = new MoveEvent(1, destination, null);
+        if (isValid) {
+            assertDoesNotThrow(() -> execute(event));
+        } else {
+            assertInvalid(event);
+        }
     }
 }
