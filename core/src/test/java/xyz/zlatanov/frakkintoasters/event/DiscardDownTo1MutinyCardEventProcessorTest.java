@@ -9,7 +9,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.state.card.MutinyCard.*;
 
-class DiscardDownTo1MutinyCardEventTest extends EventTest {
+class DiscardDownTo1MutinyCardEventProcessorTest extends EventTestHarness<DiscardDownTo1MutinyCardEvent> {
 
     @Test
     void shouldDiscardAllButSelectedCard() {
