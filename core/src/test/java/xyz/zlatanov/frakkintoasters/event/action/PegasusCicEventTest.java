@@ -3,8 +3,7 @@ package xyz.zlatanov.frakkintoasters.event.action;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.event.DamagePegasusEvent;
-import xyz.zlatanov.frakkintoasters.event.Event;
-import xyz.zlatanov.frakkintoasters.event.EventTest;
+import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -13,16 +12,16 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.*;
 
-class PegasusCicActionEventTest extends EventTest {
+class PegasusCicEventProcessorTest extends EventTestHarness<PegasusCicEvent> {
 
-    Basestar basestar;
-    Event    event;
+    Basestar        basestar;
+    PegasusCicEvent event;
 
     @BeforeEach
     void setUp() {
         basestar = basestar();
         place(GALACTICA_SPACE_2_OCLOCK, basestar);
-        event = new PegasusCicActionEvent(basestar.id());
+        event = new PegasusCicEvent(basestar.id());
     }
 
     @Test

@@ -1,34 +1,33 @@
 package xyz.zlatanov.frakkintoasters.event.action;
 
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.DamagePegasusEvent;
-import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
-import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage;
 import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 
-public record PegasusCicActionEvent(int basestarId) implements Event {
+public class PegasusCicEventProcessor extends EventProcessor<PegasusCicEvent> {
 
     @Override
-    public Followup apply(Game game) {
+    public Followup processEvent() {
         val roll = game.die().roll();
         if (roll <= 3) {
             return single(new DamagePegasusEvent());
         } else if (roll <= 6) {
-            damageBasestar(game);
+            damageBasestar();
             return Followup.NONE;
         } else {
-            damageBasestar(game);
-            damageBasestar(game);
+            damageBasestar();
+            damageBasestar();
             return Followup.NONE;
         }
     }
 
-    private void damageBasestar(Game game) {
-        val basestar = findBasestar(game);
+    private void damageBasestar() {
+        val basestar = findBasestar();
         if (basestar == null) {
             return;
         }
@@ -39,10 +38,10 @@ public record PegasusCicActionEvent(int basestarId) implements Event {
         }
     }
 
-    private Basestar findBasestar(Game game) {
+    private Basestar findBasestar() {
         return game.boards().galactica().shipsInSpace(Basestar.class)
                 .stream()
-                .filter(s -> s.id() == basestarId)
+                .filter(s -> s.id() == event.basestarId())
                 .findFirst()
                 .orElse(null);
     }
