@@ -1,12 +1,12 @@
 package xyz.zlatanov.frakkintoasters.event.officials;
 
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.event.EventTest;
+import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.GAIUS_BALTAR;
 
-class MakePresidentEventTest extends EventTest {
+class MakePresidentEventProcessorTest extends EventTestHarness<MakePresidentEvent> {
 
     @Test
     void shouldChangeThePresident() {
