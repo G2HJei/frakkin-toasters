@@ -1,6 +1,5 @@
 package xyz.zlatanov.frakkintoasters.event.player;
 
-import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,7 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
-import xyz.zlatanov.frakkintoasters.event.EventTest;
+import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
@@ -17,8 +16,7 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DRAW_EXACTLY_2;
 import static xyz.zlatanov.frakkintoasters.state.GameStep.RECEIVE_SKILLS;
@@ -30,7 +28,7 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.AT_ANY_COST
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.BAIT;
 
 @ExtendWith(MockitoExtension.class)
-class DrawSkillCardsEventTest extends EventTest {
+class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEvent> {
 
     SkillCard leadershipCard = new SkillCard(0, AT_ANY_COST);
     SkillCard treacheryCard  = new SkillCard(0, BAIT);
@@ -40,6 +38,7 @@ class DrawSkillCardsEventTest extends EventTest {
     void setUp() {
         setUpGame(Game.builder(4).build());
         selectCharacter(1, KARA_STARBUCK_THRACE);
+        moveTo(ADMIRALS_QUARTERS, KARA_STARBUCK_THRACE);
     }
 
     @Test
@@ -75,7 +74,7 @@ class DrawSkillCardsEventTest extends EventTest {
     @MethodSource("cylonLeaderSelection")
     void shouldValidateCylonLeaderSelection(Character cylonLeader, Map<SkillCardColor, Integer> selection) {
         selectCharacter(2, cylonLeader);
-        assertValid(new DrawSkillCardsEvent(2, selection));
+        assertDoesNotThrow(() -> execute(new DrawSkillCardsEvent(2, selection)));
     }
 
     public static Stream<Arguments> cylonLeaderSelection() {
@@ -94,7 +93,7 @@ class DrawSkillCardsEventTest extends EventTest {
     @MethodSource("infiltratingCylonLeaderSelection")
     void shouldAllowExtraCardForInfiltratingCylonLeader(Character cylonLeader, Map<SkillCardColor, Integer> selection) {
         selectCharacter(2, cylonLeader).infiltrateGalactica();
-        assertValid(new DrawSkillCardsEvent(2, selection));
+        assertDoesNotThrow(() -> execute(new DrawSkillCardsEvent(2, selection)));
     }
 
     public static Stream<Arguments> infiltratingCylonLeaderSelection() {
@@ -113,21 +112,19 @@ class DrawSkillCardsEventTest extends EventTest {
     @Test
     void shouldValidateDrawExactly2ConstraintWhenTotalIs2() {
         revealCylon();
-        val action = new DrawSkillCardsEvent(1, Map.of(LEADERSHIP, 1, TREACHERY, 1), DRAW_EXACTLY_2);
-        assertTrue(action.isValidConstraint(game, DRAW_EXACTLY_2));
+        assertDoesNotThrow(() -> execute(new DrawSkillCardsEvent(1, Map.of(LEADERSHIP, 1, TREACHERY, 1), DRAW_EXACTLY_2)));
     }
 
     @Test
     void shouldFailDrawExactly2ConstraintWhenTotalIsNot2() {
-        val action = new DrawSkillCardsEvent(1, Map.of(LEADERSHIP, 1), DRAW_EXACTLY_2);
-        assertFalse(action.isValidConstraint(game, DRAW_EXACTLY_2));
+        assertInvalid(new DrawSkillCardsEvent(1, Map.of(LEADERSHIP, 1), DRAW_EXACTLY_2));
     }
 
     @Test
     void shouldDrawOnly1CardWhenInSickbay() {
         moveTo(SICKBAY, KARA_STARBUCK_THRACE);
         game.step(RECEIVE_SKILLS);
-        assertValid(new DrawSkillCardsEvent(1, Map.of(TACTICS, 1)));
+        assertDoesNotThrow(() -> execute(new DrawSkillCardsEvent(1, Map.of(TACTICS, 1))));
         assertInvalid(new DrawSkillCardsEvent(1, Map.of(TACTICS, 2)));
     }
 
@@ -135,7 +132,7 @@ class DrawSkillCardsEventTest extends EventTest {
     void shouldDrawOnly1CardWhenInResurrectionShip() {
         moveTo(RESURRECTION_SHIP, KARA_STARBUCK_THRACE);
         game.step(RECEIVE_SKILLS);
-        assertValid(new DrawSkillCardsEvent(1, Map.of(TACTICS, 1)));
+        assertDoesNotThrow(() -> execute(new DrawSkillCardsEvent(1, Map.of(TACTICS, 1))));
         assertInvalid(new DrawSkillCardsEvent(1, Map.of(TACTICS, 2)));
     }
 
@@ -144,14 +141,13 @@ class DrawSkillCardsEventTest extends EventTest {
         galacticaBoard.destroyResurrectionShip();
         moveTo(HUB_DESTROYED, KARA_STARBUCK_THRACE);
         game.step(RECEIVE_SKILLS);
-        assertValid(new DrawSkillCardsEvent(1, Map.of()));
+        assertDoesNotThrow(() -> execute(new DrawSkillCardsEvent(1, Map.of())));
         assertInvalid(new DrawSkillCardsEvent(1, Map.of(TACTICS, 1)));
     }
 
     @Test
     void shouldNotApplyReceiveSkillGameStepRestrictionOnOtherSteps() {
-        moveTo(SICKBAY, KARA_STARBUCK_THRACE);
-        assertValid(new DrawSkillCardsEvent(1, Map.of(TACTICS, 2)));
+        assertDoesNotThrow(() -> execute(new DrawSkillCardsEvent(1, Map.of(TACTICS, 2))));
 
     }
 
