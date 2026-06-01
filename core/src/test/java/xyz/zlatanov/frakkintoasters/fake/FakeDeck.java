@@ -12,7 +12,7 @@ public class FakeDeck<T> extends Deck<T> {
     private final Deque<T> nextCards = new LinkedList<>();
 
     public FakeDeck(Deck<T> delegate) {
-        add(delegate.cards());
+        addOnTop(delegate.cards());
     }
 
     public FakeDeck<T> nextCard(T card) {

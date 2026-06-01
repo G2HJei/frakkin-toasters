@@ -12,7 +12,7 @@ public record PressRoomEvent(int playerNumber, int targetPlayer) implements Acti
     @Override
     public Followup apply(Game game) {
         val cardDrawn = game.decks().mutiny().draw();
-        game.player(targetPlayer).mutinyCards().add(cardDrawn);
+        game.player(targetPlayer).mutinyCards().addOnTop(cardDrawn);
         return all(
                 single(new PlayerDecisionEvent<>(targetPlayer, DiscardDownTo1MutinyCardEvent.class)),
                 one(new PlayerDecisionEvent<>(playerNumber, Discard1MutinyCardEvent.class),

@@ -33,7 +33,7 @@ public class DrawSkillCardsEventProcessor extends EventProcessor<DrawSkillCardsE
             };
             for (int i = 0; i < entry.getValue(); i++) {
                 val card = deck.draw();
-                player().skillCards().add(card);
+                player().skillCards().addOnTop(card);
             }
         }
         return Followup.NONE;

@@ -298,13 +298,13 @@ public abstract class EventTestHarness<E extends Event> {
 
     protected Player giveMutinyCards(int playerNumber, MutinyCard... cards) {
         val player = player(playerNumber);
-        Arrays.stream(cards).forEach(player.mutinyCards()::add);
+        Arrays.stream(cards).forEach(player.mutinyCards()::addOnTop);
         return player;
     }
 
     protected Player giveLoyaltyCards(int playerNumber, LoyaltyCard... cards) {
         val player = player(playerNumber);
-        Arrays.stream(cards).forEach(player.loyaltyCards()::add);
+        Arrays.stream(cards).forEach(player.loyaltyCards()::addOnTop);
         return player;
     }
 

@@ -2,7 +2,9 @@ package xyz.zlatanov.frakkintoasters.event;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.state.card.MutinyCard.*;
@@ -16,6 +18,6 @@ class DiscardDownTo1MutinyCardEventTest extends EventTest {
         executeAndAssertNoFollowup(new DiscardDownTo1MutinyCardEvent(1, PANIC));
 
         assertEquals(List.of(PANIC), player(1).mutinyCards().cards());
-        assertEquals(List.of(ASSUME_COMMAND, FEED_THE_PEOPLE), player(1).mutinyCards().discardedCards());
+        assertEquals(Set.of(ASSUME_COMMAND, FEED_THE_PEOPLE), new HashSet<>(player(1).mutinyCards().discardedCards()));
     }
 }

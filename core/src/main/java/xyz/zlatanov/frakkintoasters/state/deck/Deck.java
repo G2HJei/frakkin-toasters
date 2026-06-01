@@ -10,17 +10,17 @@ public class Deck<T> {
     private final   List<T> revealedCards  = new ArrayList<>();
     private final   List<T> discardedCards = new ArrayList<>();
 
-    public Deck<T> add(T card) {
-        add(List.of(card));
+    public Deck<T> addOnTop(T card) {
+        addOnTop(List.of(card));
         return this;
     }
 
     @SafeVarargs
-    public final Deck<T> add(T... toAdd) {
-        return add(Arrays.stream(toAdd).toList());
+    public final Deck<T> addOnTop(T... toAdd) {
+        return addOnTop(Arrays.stream(toAdd).toList());
     }
 
-    public Deck<T> add(List<T> toAdd) {
+    public Deck<T> addOnTop(List<T> toAdd) {
         toAdd.reversed().forEach(cards::addFirst);
         return this;
     }

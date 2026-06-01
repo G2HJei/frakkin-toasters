@@ -14,18 +14,18 @@ class DeckTest {
 
     @BeforeEach
     void setUp() {
-        deck.add(List.of(new Card()));
+        deck.addOnTop(List.of(new Card()));
     }
 
     @Test
-    void shouldAddCardToBottomOfDeck() {
-        deck.add(card);
+    void shouldAddOnTopCardToBottomOfDeck() {
+        deck.addOnTop(card);
         assertEquals(2, deck.size());
     }
 
     @Test
     void shouldDrawCardFromTopOfDeck() {
-        deck.add(card);
+        deck.addToBottom(card);
         assertNotSame(card, deck.draw());
     }
 
@@ -53,7 +53,7 @@ class DeckTest {
 
     @Test
     void shouldRevealCard() {
-        deck.add(card);
+        deck.addOnTop(card);
         deck.reveal(card);
         assertTrue(deck.revealedCards().contains(card));
     }

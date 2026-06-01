@@ -47,7 +47,7 @@ public class DetermineNextPresidentEventProcessor extends EventProcessor<Determi
     public Followup process() {
         if (firstPresident(game)) {
             val quorumCard = game.decks().quorum().draw();
-            game.presidentHand().add(quorumCard);
+            game.presidentHand().addOnTop(quorumCard);
         }
         game.president(calcNextInLine(game));
         return Followup.NONE;

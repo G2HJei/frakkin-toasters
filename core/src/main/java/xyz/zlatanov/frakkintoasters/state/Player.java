@@ -37,7 +37,7 @@ public class Player {
     }
 
     public void gainSkillCards(SkillCard... cardsToAdd) {
-        skillCards.add(Arrays.asList(cardsToAdd));
+        skillCards.addOnTop(Arrays.asList(cardsToAdd));
     }
 
     public int handLimit() {
