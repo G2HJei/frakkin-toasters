@@ -85,7 +85,7 @@ class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEv
                 arguments(DANNA_BIERS, Map.of(LEADERSHIP, 1, TREACHERY, 1)),
                 arguments(DANNA_BIERS, Map.of(POLITICS, 1, TREACHERY, 1)),
                 arguments(DANNA_BIERS, Map.of(POLITICS, 1, ENGINEERING, 1)),
-                arguments(DANNA_BIERS, Map.of(POLITICS, 1, ENGINEERING, 1))
+                arguments(DANNA_BIERS, Map.of(LEADERSHIP, 1, ENGINEERING, 1))
         );
     }
 
@@ -100,7 +100,7 @@ class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEv
         return Stream.of(
                 arguments(CAPRICA_SIX, Map.of(LEADERSHIP, 1, TREACHERY, 1, ENGINEERING, 1)),
                 arguments(CAPRICA_SIX, Map.of(LEADERSHIP, 2, ENGINEERING, 1)),
-                arguments(CAPRICA_SIX, Map.of(LEADERSHIP, 2, TREACHERY, 1)),
+                arguments(CAPRICA_SIX, Map.of(LEADERSHIP, 1, TREACHERY, 2)),
 
                 arguments(DANNA_BIERS, Map.of(LEADERSHIP, 1, TREACHERY, 1, ENGINEERING, 1)),
                 arguments(DANNA_BIERS, Map.of(POLITICS, 1, TREACHERY, 1, ENGINEERING, 1)),

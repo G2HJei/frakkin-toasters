@@ -16,7 +16,7 @@ public class DrawSkillCardsEventProcessor extends EventProcessor<DrawSkillCardsE
     @Override
     public boolean isValid() {
         return meetsDrawLimit()
-                && meetsHazardousLocationRestrictions()
+                && meetsHazardousLocationReceiveSkillsStepRestrictions()
                 && (player().isHuman() ? validHumanSelection() : validRevealedCylonSelection());
     }
 
@@ -40,26 +40,28 @@ public class DrawSkillCardsEventProcessor extends EventProcessor<DrawSkillCardsE
     }
 
     public boolean meetsDrawLimit() {
+        val selectionCount = selectionCount();
         return switch (event.drawLimit()) {
             case null -> true;
-            case DRAW_EXACTLY_2 -> totalCardsToReceive() == 2;
-            case DRAW_EXACTLY_3 -> totalCardsToReceive() == 3;
+            case DRAW_EXACTLY_2 -> selectionCount == 2;
+            case DRAW_EXACTLY_3 -> selectionCount == 3;
+            case DRAW_EXACTLY_5 -> selectionCount == 5;
         };
     }
 
-    private boolean meetsHazardousLocationRestrictions() {
-        if (game.step() != RECEIVE_SKILLS) { //todo why??
+    private boolean meetsHazardousLocationReceiveSkillsStepRestrictions() {
+        if (game.step() != RECEIVE_SKILLS) {
             return true;
         }
         val location = game.locate(player().character());
         return switch (location) {
-            case SICKBAY, RESURRECTION_SHIP -> totalCardsToReceive() == 1;
-            case HUB_DESTROYED -> totalCardsToReceive() == 0;
+            case SICKBAY, RESURRECTION_SHIP -> selectionCount() == 1;
+            case HUB_DESTROYED -> selectionCount() == 0;
             default -> true;
         };
     }
 
-    private int totalCardsToReceive() {
+    private int selectionCount() {
         return event.selection().values().stream().mapToInt(Integer::intValue).sum();
     }
 
