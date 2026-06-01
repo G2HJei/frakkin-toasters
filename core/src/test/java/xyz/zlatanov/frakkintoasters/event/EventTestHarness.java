@@ -53,12 +53,12 @@ public abstract class EventTestHarness<E extends Event> {
     /**
      * the game under test
      */
-    private Game game;
+    protected Game game;
 
-    private GalacticaBoard  galacticaBoard;
-    private PegasusBoard    pegasusBoard;
-    private CylonFleetBoard cylonFleetBoard;
-    private CylonShips      cylonShips;
+    protected GalacticaBoard  galacticaBoard;
+    protected PegasusBoard    pegasusBoard;
+    protected CylonFleetBoard cylonFleetBoard;
+    protected CylonShips      cylonShips;
 
     protected Deck<QuorumCard>          presidentHand;
     protected FakeDie                   die;
