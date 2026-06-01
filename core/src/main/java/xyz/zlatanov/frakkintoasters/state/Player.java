@@ -1,6 +1,7 @@
 package xyz.zlatanov.frakkintoasters.state;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
@@ -17,10 +18,12 @@ import java.util.Arrays;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.CHIEF_GALEN_TYROL;
 import static xyz.zlatanov.frakkintoasters.state.character.CharacterType.CYLON_LEADER;
 
+@RequiredArgsConstructor
 @Getter
 @Accessors(fluent = true)
 public class Player {
 
+    private final int                   number;
     private       Character             character;
     private final Deck<SkillCard>       skillCards       = new Deck<>();
     private final Deck<MotiveCard>      motiveCards      = new Deck<>();

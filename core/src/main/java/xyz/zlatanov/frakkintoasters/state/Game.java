@@ -31,7 +31,7 @@ public class Game {
     // todo separate counters in own classes?
     // todo add turns
     @Builder.Default
-    private Map<Integer, Player> players           = Map.of(1, new Player(), 2, new Player(), 3, new Player());
+    private Map<Integer, Player> players           = Map.of(1, new Player(1), 2, new Player(2), 3, new Player(3));
     @Setter
     @Builder.Default
     private int                  currentPlayer     = 1;
@@ -69,7 +69,7 @@ public class Game {
     public static GameBuilder builder(int numberOfPlayers) {
         val playersMap = new TreeMap<Integer, Player>();
         for (int i = 1; i <= numberOfPlayers; i++) {
-            playersMap.put(i, new Player());
+            playersMap.put(i, new Player(i));
         }
         return new GameBuilder()
                 .players(playersMap);
