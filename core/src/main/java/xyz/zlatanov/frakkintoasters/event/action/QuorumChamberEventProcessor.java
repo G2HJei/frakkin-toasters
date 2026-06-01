@@ -1,24 +1,22 @@
 package xyz.zlatanov.frakkintoasters.event.action;
 
 import lombok.val;
-import xyz.zlatanov.frakkintoasters.event.ActionEvent;
+import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.DrawQuorumCardEvent;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayQuorumCardEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
-import xyz.zlatanov.frakkintoasters.state.Game;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 
-public record QuorumChamberActionEvent(int playerNumber) implements ActionEvent {
-
+public class QuorumChamberEventProcessor extends EventProcessor<QuorumChamberEvent> {
     @Override
-    public Followup apply(Game game) {
+    public Followup processEvent() {
         val drawnCard = game.decks().quorum().draw();
         game.presidentHand().add(drawnCard);
 
         return one(
-                new DrawQuorumCardEvent(playerNumber),
-                new PlayerDecisionEvent<>(playerNumber, PlayQuorumCardEvent.class));
+                new DrawQuorumCardEvent(event.playerNumber()),
+                new PlayerDecisionEvent<>(event.playerNumber(), PlayQuorumCardEvent.class));
     }
 }
