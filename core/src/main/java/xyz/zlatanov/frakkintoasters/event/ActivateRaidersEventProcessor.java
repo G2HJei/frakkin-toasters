@@ -3,19 +3,17 @@ package xyz.zlatanov.frakkintoasters.event;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.state.board.GalacticaBoard;
-import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 import xyz.zlatanov.frakkintoasters.state.ship.Raider;
 
 import java.util.Comparator;
 import java.util.List;
 
-import static xyz.zlatanov.frakkintoasters.state.board.Location.LOCATION_AREAS;
+import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.GALACTICA_SPACE;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.RAIDER;
 
 public class ActivateRaidersEventProcessor extends EventProcessor<ActivateRaidersEvent> {
 
-    public static final List<Location> SPACE_AREAS_CLOCKWISE = LOCATION_AREAS.get("Galactica space");
 
     @Override
     public Followup process() {
@@ -35,7 +33,7 @@ public class ActivateRaidersEventProcessor extends EventProcessor<ActivateRaider
     private List<Raider> getRaiders(GalacticaBoard galactica) {
         return galactica.shipsInSpace(Raider.class)
                 .stream()
-                .sorted(Comparator.comparingInt(a -> SPACE_AREAS_CLOCKWISE.indexOf(galactica.locate(a))))
+                .sorted(Comparator.comparingInt(a -> GALACTICA_SPACE.locations().indexOf(galactica.locate(a))))
                 .toList();
     }
 

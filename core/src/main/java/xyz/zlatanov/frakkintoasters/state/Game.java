@@ -20,6 +20,8 @@ import java.util.stream.IntStream;
 
 import static xyz.zlatanov.frakkintoasters.state.GameStep.SETUP;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
+import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.GALACTICA;
+import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.GALACTICA_SPACE;
 import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
 
 @Builder
@@ -116,7 +118,7 @@ public class Game {
 
 
     public Game moveTo(Location location, Ship ship) {
-        assert LOCATION_AREAS.get("Galactica space").contains(location);
+        assert GALACTICA_SPACE.locations().contains(location);
         boards.galactica()
                 .remove(ship)
                 .place(location, ship);
@@ -124,7 +126,7 @@ public class Game {
     }
 
     public Game damage(Location location) {
-        val board = LOCATION_AREAS.get("Galactica").contains(location)
+        val board = GALACTICA.locations().contains(location)
                 ? boards.galactica()
                 : boards.pegasus();
         val affectedCharacters = board
