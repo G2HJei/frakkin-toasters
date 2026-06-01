@@ -5,15 +5,18 @@ import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
+import xyz.zlatanov.frakkintoasters.state.board.LocationsArea;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.HumanFighter;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
+import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.GALACTICA_SPACE;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.VIPER_MARK_VII;
 
 public class MoveEventProcessor extends EventProcessor<MoveEvent> {
@@ -86,15 +89,15 @@ public class MoveEventProcessor extends EventProcessor<MoveEvent> {
         }
     }
 
-    private String startingArea() {
+    private LocationsArea startingArea() {
         val currLocation = currentLocation();
         if (currLocation == null) {
-            return "Hi, Helo!";
+            return null;
         }
         return getLocationArea(currLocation);
     }
 
-    private String targetArea() {
+    private LocationsArea targetArea() {
         return getLocationArea(destination);
     }
 
@@ -102,7 +105,7 @@ public class MoveEventProcessor extends EventProcessor<MoveEvent> {
     private HumanFighter humanFighter() {
         val playerCharacter = player().character();
         val galacticaBoard = game.boards().galactica();
-        return LOCATION_AREAS.get("Galactica space")
+        return GALACTICA_SPACE.locations()
                 .stream()
                 .map(galacticaBoard::shipsIn)
                 .flatMap(Collection::stream)
@@ -113,12 +116,10 @@ public class MoveEventProcessor extends EventProcessor<MoveEvent> {
                 .orElseThrow();
     }
 
-    private String getLocationArea(Location location) {
-        return LOCATION_AREAS.entrySet()
-                .stream()
-                .filter(es -> es.getValue().contains(location))
+    private LocationsArea getLocationArea(Location location) {
+        return Arrays.stream(LocationsArea.values())
+                .filter(a -> a.locations().contains(location))
                 .findFirst()
-                .map(Map.Entry::getKey)
                 .orElseThrow(FrakCallTheAdmiralException::new);
     }
 

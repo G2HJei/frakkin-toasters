@@ -12,11 +12,11 @@ import java.util.List;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.LOCATION_AREAS;
+import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.GALACTICA_SPACE;
 
 public class ActivateRaiderEventProcessor extends EventProcessor<ActivateRaiderEvent> {
 
-    private static final List<Location> SPACE_AREAS_CLOCKWISE = LOCATION_AREAS.get("Galactica space");
+    private static final List<Location> SPACE_AREAS_CLOCKWISE = GALACTICA_SPACE.locations();
 
     @Override
     public Followup process() {
