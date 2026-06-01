@@ -9,7 +9,7 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_
 import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.DISABLED_WEAPONS;
 import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.STRUCTURAL_DAMAGE;
 
-class ActivateCylonBasestarEventTest extends EventTest {
+class ActivateCylonBasestarEventProcessorTest extends EventTestHarness<ActivateCylonBasestarEvent> {
 
     Basestar                   basestar;
     ActivateCylonBasestarEvent event;
