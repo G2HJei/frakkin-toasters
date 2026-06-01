@@ -164,12 +164,15 @@ public abstract class EventTestHarness<E extends Event> {
 
     @SneakyThrows
     @SuppressWarnings("unchecked")
-    //use convention to enforce test name matching processor name and package and reduce test boilerplate code by instantiating event processor via reflection
     private EventProcessor<E> eventProcessor() {
         val testClassName = getClass().getName();
-        val processorClassName = testClassName.substring(0, testClassName.length() - "Test".length());
-        val processorClass = Class.forName(processorClassName);
-        return (EventProcessor<E>) processorClass.getDeclaredConstructor().newInstance();
+        try {
+            val processorClassName = testClassName.substring(0, testClassName.length() - "Test".length());
+            val processorClass = Class.forName(processorClassName);
+            return (EventProcessor<E>) processorClass.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException("Test class name does not match processor name/package", e);
+        }
     }
 
     protected Basestar basestar() {
@@ -344,5 +347,12 @@ public abstract class EventTestHarness<E extends Event> {
 
     protected Location locate(Character character) {
         return game.locate(character);
+    }
+
+    protected <T> FakeDeck<T> clear(FakeDeck<T> deck) {
+        while (!deck.cards().isEmpty()) {
+            deck.draw();
+        }
+        return deck;
     }
 }
