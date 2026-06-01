@@ -15,7 +15,7 @@ public class HumanFleetLookAtTopDestinationCardEventProcessor extends EventProce
         val playerNumber = event.playerNumber();
         return all(
                 one(new PlaceDestinationCardOnTopEvent(playerNumber, card),
-                        new PlaceDestinationCardOnBottomEvent(playerNumber, card)),
+                        new PlaceDestinationCardAtBottomEvent(playerNumber, card)),
                 single(new PlayerDecisionEvent<>(playerNumber, DrawSkillCardsEvent.class, DRAW_EXACTLY_2))
         );
     }

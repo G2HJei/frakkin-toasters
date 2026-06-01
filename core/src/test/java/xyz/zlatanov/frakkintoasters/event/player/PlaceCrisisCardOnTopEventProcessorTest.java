@@ -10,7 +10,7 @@ import static xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard.DETENTE;
 class PlaceCrisisCardOnTopEventProcessorTest extends EventTestHarness<PlaceCrisisCardOnTopEvent> {
 
     @Test
-    void shouldPlaceCardOnBottom() {
+    void shouldPlaceCardOnTop() {
         clear(crisisDeck).addOnTop(A_GUILTY_VERDICT);
         execute(new PlaceCrisisCardOnTopEvent(1, DETENTE));
         assertEquals(DETENTE, crisisDeck.cards().getFirst());

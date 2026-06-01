@@ -21,7 +21,7 @@ class HumanFleetLookAtTopDestinationCardEventProcessorTest extends EventTestHarn
                 all(
                         one(
                                 new PlaceDestinationCardOnTopEvent(1, LIONS_HEAD_NEBULA),
-                                new PlaceDestinationCardOnBottomEvent(1, LIONS_HEAD_NEBULA)),
+                                new PlaceDestinationCardAtBottomEvent(1, LIONS_HEAD_NEBULA)),
                         single(
                                 new PlayerDecisionEvent<>(1, DrawSkillCardsEvent.class, DRAW_EXACTLY_2))
                 ));
