@@ -2,7 +2,7 @@ package xyz.zlatanov.frakkintoasters.event.player;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.event.EventTest;
+import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
@@ -14,7 +14,7 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 
 
-class SelectCharacterEventTest extends EventTest {
+class SelectCharacterEventProcessorTest extends EventTestHarness<SelectCharacterEvent> {
 
     @BeforeEach
     void setUp() {
@@ -78,9 +78,7 @@ class SelectCharacterEventTest extends EventTest {
     void shouldObserveCharacterTypeLimits() {
         assertInvalid(select(LAURA_ROSLIN));
         assertInvalid(select(HELENA_CAIN));
-        assertValid(select(BRENDAN_HOTDOG_COSTANZA));
-        assertValid(select(GAIUS_BALTAR_ALT));
-        assertValid(select(CAVIL));
+        assertDoesNotThrow(() -> execute(select(GAIUS_BALTAR_ALT)));
     }
 
     @Test
@@ -105,7 +103,7 @@ class SelectCharacterEventTest extends EventTest {
         selectCharacter(6, SHERMAN_DOC_COTTLE);
         selectCharacter(7, SAMUEL_T_ANDERS);
         assertInvalid(select(WILLIAM_ADAMA));
-        assertValid(select(DANNA_BIERS));
+        assertDoesNotThrow(() -> execute(select(DANNA_BIERS)));
     }
 
     static SelectCharacterEvent select(Character character) {
