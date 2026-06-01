@@ -7,7 +7,7 @@ import xyz.zlatanov.frakkintoasters.state.Game;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
 
-public record PressRoomActionEvent(int playerNumber, int targetPlayer) implements ActionEvent {
+public record PressRoomEvent(int playerNumber, int targetPlayer) implements ActionEvent {
 
     @Override
     public Followup apply(Game game) {
