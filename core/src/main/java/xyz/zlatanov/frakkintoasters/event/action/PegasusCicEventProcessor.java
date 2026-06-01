@@ -12,7 +12,7 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 public class PegasusCicEventProcessor extends EventProcessor<PegasusCicEvent> {
 
     @Override
-    public Followup processEvent() {
+    public Followup process() {
         val roll = game.die().roll();
         if (roll <= 3) {
             return single(new DamagePegasusEvent());

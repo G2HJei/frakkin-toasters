@@ -16,7 +16,7 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 
 public class MainBatteriesEventProcessor extends EventProcessor<MainBatteriesEvent> {
     @Override
-    public Followup processEvent() {
+    public Followup process() {
         val roll = game.die().roll();
         if (roll == 1) {
             return destroyCivilianShip();

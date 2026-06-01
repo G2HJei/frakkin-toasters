@@ -22,10 +22,10 @@ public abstract class EventProcessor<T extends Event> {
         init();
         validateConstraints();
         validateEvent();
-        return processEvent();
+        return process();
     }
 
-    public abstract Followup processEvent();
+    public abstract Followup process();
 
     protected void init() {
 

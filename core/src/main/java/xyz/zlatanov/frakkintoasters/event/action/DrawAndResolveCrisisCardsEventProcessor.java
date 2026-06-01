@@ -11,7 +11,7 @@ public class DrawAndResolveCrisisCardsEventProcessor extends EventProcessor<Draw
 
 
     @Override
-    public Followup processEvent() {
+    public Followup process() {
         val firstCrisis = game.decks().crisis().draw();
         val secondCrisis = game.decks().crisis().draw();
         return one(

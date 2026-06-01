@@ -11,7 +11,7 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 
 public class QuorumChamberEventProcessor extends EventProcessor<QuorumChamberEvent> {
     @Override
-    public Followup processEvent() {
+    public Followup process() {
         val drawnCard = game.decks().quorum().draw();
         game.presidentHand().add(drawnCard);
 

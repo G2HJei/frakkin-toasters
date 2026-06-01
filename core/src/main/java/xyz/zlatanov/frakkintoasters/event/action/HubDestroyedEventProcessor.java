@@ -11,7 +11,7 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.CYLON_FLEET;
 public class HubDestroyedEventProcessor extends EventProcessor<HubDestroyedEvent> {
 
     @Override
-    public Followup processEvent() {
+    public Followup process() {
         for (val card : List.of(event.discardCard1(), event.discardCard2(), event.discardCard3())) {
             player().skillCards().remove(card);
             game.decks().discard(card);

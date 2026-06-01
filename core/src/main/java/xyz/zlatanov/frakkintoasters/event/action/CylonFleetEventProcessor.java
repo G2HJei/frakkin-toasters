@@ -25,7 +25,7 @@ public class CylonFleetEventProcessor extends EventProcessor<CylonFleetEvent> {
     }
 
     @Override
-    public Followup processEvent() {
+    public Followup process() {
         val shipType = event.typeToActivate();
         if (shipType == null) {
             launch2RaidersAndHeavyRaider();

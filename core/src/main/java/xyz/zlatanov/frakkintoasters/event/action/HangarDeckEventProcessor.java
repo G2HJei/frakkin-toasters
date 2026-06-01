@@ -12,7 +12,7 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 public class HangarDeckEventProcessor extends EventProcessor<HangarDeckEvent> {
 
     @Override
-    public Followup processEvent() {
+    public Followup process() {
         val playerNumber = event.playerNumber();
         return all(
                 new PlayerDecisionEvent<>(playerNumber, LaunchViperEvent.class),
