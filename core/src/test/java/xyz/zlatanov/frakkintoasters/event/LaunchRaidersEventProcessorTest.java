@@ -13,9 +13,9 @@ import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.DISABLED_
 import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.STRUCTURAL_DAMAGE;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.BASESTAR;
 
-class LaunchRaidersEventTest extends EventTest {
+class LaunchRaidersEventProcessorTest extends EventTestHarness<LaunchRaidersEvent> {
 
-    Event event = new LaunchRaidersEvent();
+    LaunchRaidersEvent event = new LaunchRaidersEvent();
 
     @Test
     void shouldPlaceBasestarOnCylonFleetBoardWhenNoBasestarsOnMainBoard() {
