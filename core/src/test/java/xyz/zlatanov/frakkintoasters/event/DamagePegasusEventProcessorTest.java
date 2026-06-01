@@ -7,7 +7,7 @@ import xyz.zlatanov.frakkintoasters.state.damage.PegasusDamage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class DamagePegasusEventTest extends EventTest {
+class DamagePegasusEventProcessorTest extends EventTestHarness<DamagePegasusEvent> {
     @Test
     void shouldDamagePegasus() {
         nextCard(pegasusDamage, PegasusDamage.PEGASUS_CIC);
