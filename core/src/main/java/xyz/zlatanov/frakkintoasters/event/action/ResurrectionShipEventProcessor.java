@@ -8,7 +8,7 @@ public class ResurrectionShipEventProcessor extends EventProcessor<ResurrectionS
     @Override
     public Followup process() {
         val drawn = game.decks().superCrisis().draw();
-        player().superCrisisCards().add(drawn);
+        player().superCrisisCards().addOnTop(drawn);
         return Followup.NONE;
     }
 }

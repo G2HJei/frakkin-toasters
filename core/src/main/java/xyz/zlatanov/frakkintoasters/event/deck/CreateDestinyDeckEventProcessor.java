@@ -9,12 +9,12 @@ public class CreateDestinyDeckEventProcessor extends EventProcessor<CreateDestin
     public Followup process() {
         val decks = game.decks();
         decks.destiny()
-                .add(decks.politics().draw(2))
-                .add(decks.leadership().draw(2))
-                .add(decks.tactics().draw(2))
-                .add(decks.piloting().draw(2))
-                .add(decks.engineering().draw(2))
-                .add(decks.treachery().draw(2));
+                .addOnTop(decks.politics().draw(2))
+                .addOnTop(decks.leadership().draw(2))
+                .addOnTop(decks.tactics().draw(2))
+                .addOnTop(decks.piloting().draw(2))
+                .addOnTop(decks.engineering().draw(2))
+                .addOnTop(decks.treachery().draw(2));
         return Followup.NONE;
     }
 }

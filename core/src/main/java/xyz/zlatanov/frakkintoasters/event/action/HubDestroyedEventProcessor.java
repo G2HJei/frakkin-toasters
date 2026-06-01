@@ -16,7 +16,7 @@ public class HubDestroyedEventProcessor extends EventProcessor<HubDestroyedEvent
             player().skillCards().remove(card);
             game.decks().discard(card);
         }
-        player().superCrisisCards().add(game.decks().superCrisis().draw());
+        player().superCrisisCards().addOnTop(game.decks().superCrisis().draw());
         game.moveTo(CYLON_FLEET, player().character());
         return Followup.NONE;
     }

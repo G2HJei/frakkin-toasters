@@ -15,7 +15,7 @@ public class PressRoomEventProcessor extends EventProcessor<PressRoomEvent> {
     @Override
     public Followup process() {
         val cardDrawn = game.decks().mutiny().draw();
-        game.player(event.targetPlayer()).mutinyCards().add(cardDrawn);
+        game.player(event.targetPlayer()).mutinyCards().addOnTop(cardDrawn);
         return all(
                 single(new PlayerDecisionEvent<>(event.targetPlayer(), DiscardDownTo1MutinyCardEvent.class)),
                 one(new PlayerDecisionEvent<>(event.playerNumber(), Discard1MutinyCardEvent.class),

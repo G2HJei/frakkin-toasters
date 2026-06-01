@@ -13,7 +13,7 @@ public class QuorumChamberEventProcessor extends EventProcessor<QuorumChamberEve
     @Override
     public Followup process() {
         val drawnCard = game.decks().quorum().draw();
-        game.presidentHand().add(drawnCard);
+        game.presidentHand().addOnTop(drawnCard);
 
         return one(
                 new DrawQuorumCardEvent(event.playerNumber()),

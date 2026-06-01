@@ -55,7 +55,7 @@ public class CreateLoyaltyDeckEventProcessor extends EventProcessor<CreateLoyalt
 
     private void setupLoyaltyNotCylonDeck() {
         val deck = game.decks().loyaltyNotCylon();
-        deck.add(
+        deck.addOnTop(
                 //todo check correct vanilla non-cylon cards count
                 List.of(NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON,
                         NOT_CYLON_USE_CAUTION,
@@ -80,7 +80,7 @@ public class CreateLoyaltyDeckEventProcessor extends EventProcessor<CreateLoyalt
         val cylonLoyalties = Arrays.stream(values())
                 .filter(LoyaltyCard::isCylon)
                 .toList();
-        deck.add(cylonLoyalties);
+        deck.addOnTop(cylonLoyalties);
         deck.shuffle();
         return deck;
     }
@@ -90,10 +90,10 @@ public class CreateLoyaltyDeckEventProcessor extends EventProcessor<CreateLoyalt
         val hasCylonLeader = hasCylonLeader();
         val loyaltyDeck = game.decks().loyalty();
         for (int i = 0; i < notCylonDraws(playerCount, hasCylonLeader); i++) {
-            loyaltyDeck.add(game.decks().loyaltyNotCylon().draw());
+            loyaltyDeck.addOnTop(game.decks().loyaltyNotCylon().draw());
         }
         for (int i = 0; i < cylonDraws(playerCount, hasCylonLeader); i++) {
-            loyaltyDeck.add(cylonDeck.draw());
+            loyaltyDeck.addOnTop(cylonDeck.draw());
         }
     }
 
@@ -105,7 +105,7 @@ public class CreateLoyaltyDeckEventProcessor extends EventProcessor<CreateLoyalt
                 playerCount == 6 && !hasCylonLeader ||
                 playerCount == 7;
         if (shouldAddMutineer) {
-            game.decks().loyalty().add(MUTINEER);
+            game.decks().loyalty().addOnTop(MUTINEER);
         }
     }
 
@@ -114,10 +114,10 @@ public class CreateLoyaltyDeckEventProcessor extends EventProcessor<CreateLoyalt
         val loyaltyDeck = game.decks().loyalty();
         val notACylonDeck = game.decks().loyaltyNotCylon();
         if (selectedCharacters.contains(SHARON_BOOMER_VALERII)) {
-            loyaltyDeck.add(notACylonDeck.draw());
+            loyaltyDeck.addOnTop(notACylonDeck.draw());
         }
         if (selectedCharacters.contains(GAIUS_BALTAR)) {
-            loyaltyDeck.add(notACylonDeck.draw());
+            loyaltyDeck.addOnTop(notACylonDeck.draw());
         }
     }
 
@@ -125,7 +125,7 @@ public class CreateLoyaltyDeckEventProcessor extends EventProcessor<CreateLoyalt
         for (val player : game.players()) {
             val cardsToDraw = player.character() == GAIUS_BALTAR ? 2 : 1;
             val loyaltyCards = game.decks().loyalty().draw(cardsToDraw);
-            player.loyaltyCards().add(loyaltyCards);
+            player.loyaltyCards().addOnTop(loyaltyCards);
         }
     }
 
@@ -139,7 +139,7 @@ public class CreateLoyaltyDeckEventProcessor extends EventProcessor<CreateLoyalt
                 .findFirst()
                 .orElseThrow(FrakCallTheAdmiralException::new);
         val motiveCards = genericDeck(MotiveCard.class).draw(2);
-        cylonPlayer.motiveCards().add(motiveCards);
+        cylonPlayer.motiveCards().addOnTop(motiveCards);
     }
 
     private List<Character> getSelectedCharacters() {

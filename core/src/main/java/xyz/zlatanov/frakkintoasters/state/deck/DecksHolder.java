@@ -81,15 +81,15 @@ public class DecksHolder {
                 deck.discard(skillCard);
             }
             case GalacticaDamage dmg -> {
-                galacticaDamage.add(dmg);
+                galacticaDamage.addOnTop(dmg);
                 galacticaDamage.shuffle();
             }
             case BasestarDamage dmg -> {
-                basestarDamage.add(dmg);
+                basestarDamage.addOnTop(dmg);
                 basestarDamage.shuffle();
             }
             case PegasusDamage dmg -> {
-                pegasusDamage.add(dmg);
+                pegasusDamage.addOnTop(dmg);
                 pegasusDamage.shuffle();
             }
             case null, default ->

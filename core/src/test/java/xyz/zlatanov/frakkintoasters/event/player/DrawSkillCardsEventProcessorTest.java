@@ -58,7 +58,7 @@ class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEv
 
         executeAndAssertNoFollowup(new DrawSkillCardsEvent(1, Map.of(LEADERSHIP, 1, TREACHERY, 1)));
 
-        assertSkillCards(1, leadershipCard, treacheryCard);
+        assertSkillCards(1, treacheryCard, leadershipCard);
     }
 
     @Test

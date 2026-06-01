@@ -7,9 +7,9 @@ import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
 
 public record PlaceDestinationCardOnTopEvent(int playerNumber, DestinationCard card) implements PlayerEvent {
 
-	@Override
-	public Followup apply(Game game) {
-		game.decks().destination().add(card);
-		return Followup.NONE;
-	}
+    @Override
+    public Followup apply(Game game) {
+        game.decks().destination().addOnTop(card);
+        return Followup.NONE;
+    }
 }
