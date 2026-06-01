@@ -17,7 +17,7 @@ import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
-import java.util.Collection;
+import java.util.List;
 
 import static xyz.zlatanov.frakkintoasters.state.card.DestinationCard.*;
 import static xyz.zlatanov.frakkintoasters.state.util.AllCardsProvider.*;
@@ -63,7 +63,7 @@ public class DecksHolder {
     @Builder.Default
     private final Deck<MutinyCard>      mutiny          = genericDeck(MutinyCard.class);
 
-    public void discard(Collection<?> cards) {
+    public void discard(List<?> cards) {
         cards.forEach(this::discard);
     }
 

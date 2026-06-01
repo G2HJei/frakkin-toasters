@@ -34,6 +34,11 @@ public class Deck<T> {
         return remove(List.of(cardToRemove));
     }
 
+    @SafeVarargs
+    public final Deck<T> remove(T... cardsToRemove) {
+        return remove(List.of(cardsToRemove));
+    }
+
     public Deck<T> remove(List<T> cardsToRemove) {
         assert new HashSet<>(cards).containsAll(cardsToRemove);
         cards.removeAll(cardsToRemove);
