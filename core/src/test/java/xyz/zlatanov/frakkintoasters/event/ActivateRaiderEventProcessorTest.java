@@ -14,7 +14,7 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.LOUANNE_KAT_KATRAINE;
 
-class ActivateRaiderEventTest extends EventTest {
+class ActivateRaiderEventProcessorTest extends EventTestHarness<ActivateRaiderEvent> {
 
     Raider              raider;
     CivilianShip        civilianShip;
