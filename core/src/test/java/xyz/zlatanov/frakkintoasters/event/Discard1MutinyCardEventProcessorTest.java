@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static xyz.zlatanov.frakkintoasters.state.card.MutinyCard.PANIC;
 
-class Discard1MutinyCardEventTest extends EventTest {
+class Discard1MutinyCardEventProcessorTest extends EventTestHarness<Discard1MutinyCardEvent> {
 
     @Test
     void shouldDiscardSelectedCard() {
