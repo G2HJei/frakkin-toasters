@@ -2,7 +2,7 @@ package xyz.zlatanov.frakkintoasters.event.deck;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.event.EventTest;
+import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
 
 import java.util.Map;
 
@@ -11,7 +11,7 @@ import static java.util.stream.Collectors.summingInt;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.*;
 
-class CreateDestinyDeckEventTest extends EventTest {
+class CreateDestinyDeckEventProcessorTest extends EventTestHarness<CreateDestinyDeckEvent> {
 
     @Test
     void shouldCreateValidDeck() {
