@@ -1,7 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event.action;
 
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.event.EventTest;
+import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -10,7 +10,7 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.HUB_DESTROYED;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.TOM_ZAREK;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 
-class HubDestroyedActionEventTest extends EventTest {
+class HubDestroyedEventProcessorTest extends EventTestHarness<HubDestroyedEvent> {
 
     SkillCard card1 = new SkillCard(3, REPAIR);
     SkillCard card2 = new SkillCard(4, SCIENTIFIC_RESEARCH);
@@ -23,7 +23,7 @@ class HubDestroyedActionEventTest extends EventTest {
         giveSkillCards(1, card1, card2, card3);
         moveTo(HUB_DESTROYED, TOM_ZAREK);
 
-        executeAndAssertNoFollowup(new HubDestroyedActionEvent(1, card1, card2, card3));
+        executeAndAssertNoFollowup(new HubDestroyedEvent(1, card1, card2, card3));
 
         assertNoSkillCards(1);
         assertEquals(1, player(1).superCrisisCards().cards().size());
