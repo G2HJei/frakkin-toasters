@@ -1,14 +1,14 @@
 package xyz.zlatanov.frakkintoasters.event.action;
 
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.event.EventTest;
+import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.state.crisis.SuperCrisisCard.THE_FARM;
 
-class ResurrectionShipEventTest extends EventTest {
+class ResurrectionShipEventProcessorTest extends EventTestHarness<ResurrectionShipEvent> {
 
     @Test
     void shouldDrawSuperCrisisCard() {

@@ -3,14 +3,10 @@ package xyz.zlatanov.frakkintoasters;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
-import xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Player;
-import xyz.zlatanov.frakkintoasters.state.exception.EventConstraintViolationException;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
-
-import java.util.List;
 
 public abstract class EventProcessor<T extends Event> {
 
@@ -20,8 +16,7 @@ public abstract class EventProcessor<T extends Event> {
     public final Followup execute(Game game, T event) {
         setContext(game, event);
         init();
-        validateConstraints();
-        validateEvent();
+        validate();
         return process();
     }
 
@@ -29,14 +24,6 @@ public abstract class EventProcessor<T extends Event> {
 
     protected void init() {
 
-    }
-
-    protected List<EventConstraint> eventConstraints() {
-        return List.of();
-    }
-
-    protected boolean isValidConstraint(EventConstraint constraint) {
-        throw new FrakCallTheAdmiralException();
     }
 
     protected boolean isValid() {
@@ -49,15 +36,7 @@ public abstract class EventProcessor<T extends Event> {
         this.event = event;
     }
 
-    private void validateConstraints() {
-        for (var constraint : eventConstraints()) {
-            if (!isValidConstraint(constraint)) {
-                throw new EventConstraintViolationException(constraint.name());
-            }
-        }
-    }
-
-    private void validateEvent() {
+    private void validate() {
         if (!isValid()) {
             throw new InvalidActionException("Invalid action!");
         }
