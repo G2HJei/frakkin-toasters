@@ -18,7 +18,7 @@ public class EngineRoomEventProcessor extends EventProcessor<EngineRoomEvent> {
     }
 
     @Override
-    public Followup processEvent() {
+    public Followup process() {
         val cards = List.of(event.discardCard1(), event.discardCard2());
         player().skillCards().remove(cards);
         game.decks().discard(cards);

@@ -8,12 +8,12 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.state.crisis.SuperCrisisCard.THE_FARM;
 
-class ResurrectionShipActionEventTest extends EventTest {
+class ResurrectionShipEventTest extends EventTest {
 
     @Test
     void shouldDrawSuperCrisisCard() {
         nextCard(superCrisisDeck, THE_FARM);
-        executeAndAssertNoFollowup(new ResurrectionShipActionEvent(1));
+        executeAndAssertNoFollowup(new ResurrectionShipEvent(1));
         assertEquals(List.of(THE_FARM), player(1).superCrisisCards().cards());
     }
 }

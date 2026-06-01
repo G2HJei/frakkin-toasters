@@ -13,7 +13,7 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.*;
 public class PressRoomEventProcessor extends EventProcessor<PressRoomEvent> {
 
     @Override
-    public Followup processEvent() {
+    public Followup process() {
         val cardDrawn = game.decks().mutiny().draw();
         game.player(event.targetPlayer()).mutinyCards().add(cardDrawn);
         return all(
