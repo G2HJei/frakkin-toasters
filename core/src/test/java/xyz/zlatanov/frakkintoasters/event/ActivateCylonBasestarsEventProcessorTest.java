@@ -11,11 +11,11 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_
 import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.DISABLED_WEAPONS;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.BASESTAR;
 
-class ActivateCylonBasestarsEventTest extends EventTest {
+class ActivateCylonBasestarsEventProcessorTest extends EventTestHarness<ActivateCylonBasestarsEvent> {
 
-    Basestar basestar1;
-    Basestar basestar2;
-    Event    event = new ActivateCylonBasestarsEvent();
+    Basestar                    basestar1;
+    Basestar                    basestar2;
+    ActivateCylonBasestarsEvent event = new ActivateCylonBasestarsEvent();
 
     @BeforeEach
     void setUp() {
