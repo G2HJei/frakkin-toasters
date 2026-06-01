@@ -2,8 +2,10 @@ package xyz.zlatanov.frakkintoasters;
 
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
 import xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint;
 import xyz.zlatanov.frakkintoasters.state.Game;
+import xyz.zlatanov.frakkintoasters.state.Player;
 import xyz.zlatanov.frakkintoasters.state.exception.EventConstraintViolationException;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
@@ -15,27 +17,31 @@ public abstract class EventProcessor<T extends Event> {
     protected Game game; //todo make private and use only utility metohds?
     protected T    event;
 
-    public Followup execute(Game game, T event) {
+    public final Followup execute(Game game, T event) {
         setContext(game, event);
+        init();
         validateConstraints();
         validateEvent();
         return processEvent();
     }
 
-    public List<EventConstraint> eventConstraints() {
+    public abstract Followup processEvent();
+
+    protected void init() {
+
+    }
+
+    protected List<EventConstraint> eventConstraints() {
         return List.of();
     }
 
-    //todo tune access levels
-    public boolean isValidConstraint(EventConstraint constraint) {
+    protected boolean isValidConstraint(EventConstraint constraint) {
         throw new FrakCallTheAdmiralException();
     }
 
-    public boolean isValid() {
+    protected boolean isValid() {
         return true;
     }
-
-    public abstract Followup processEvent();
 
     private void setContext(Game game, T event) {
         assert this.game == null && this.event == null;
@@ -54,6 +60,14 @@ public abstract class EventProcessor<T extends Event> {
     private void validateEvent() {
         if (!isValid()) {
             throw new InvalidActionException("Invalid action!");
+        }
+    }
+
+    protected Player player() {
+        if (event instanceof PlayerEvent playerEvent) {
+            return game.player(playerEvent.playerNumber());
+        } else {
+            throw new FrakCallTheAdmiralException("Cannot find player for non-player event");
         }
     }
 }
