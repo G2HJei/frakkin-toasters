@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
 
-class DestroyCivilianShipEventTest extends EventTest {
+class DestroyCivilianShipEventProcessorTest extends EventTestHarness<DestroyCivilianShipEvent> {
 
     @Test
     void shouldLoseShipResourcesAndRemoveShip() {
