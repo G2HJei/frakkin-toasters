@@ -8,9 +8,9 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.RAIDER;
 
-class ActivateRaidersEventTest extends EventTest {
+class ActivateRaidersEventProcessorTest extends EventTestHarness<ActivateRaidersEvent> {
 
-    Event event = new ActivateRaidersEvent();
+    ActivateRaidersEvent event = new ActivateRaidersEvent();
 
     @Test
     void shouldPlaceRaiderOnCylonFleetBoardWhenNoRaidersOrBasestarsOnMainBoard() {
