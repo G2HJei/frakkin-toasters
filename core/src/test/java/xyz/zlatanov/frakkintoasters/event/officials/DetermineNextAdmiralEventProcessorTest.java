@@ -2,7 +2,7 @@ package xyz.zlatanov.frakkintoasters.event.officials;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.event.EventTest;
+import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -10,7 +10,7 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.BRIG;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.HELENA_CAIN;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.WILLIAM_ADAMA;
 
-class DetermineNextAdmiralEventTest extends EventTest {
+class DetermineNextAdmiralEventProcessorTest extends EventTestHarness<DetermineNextAdmiralEvent> {
 
     @BeforeEach
     void setUp() {

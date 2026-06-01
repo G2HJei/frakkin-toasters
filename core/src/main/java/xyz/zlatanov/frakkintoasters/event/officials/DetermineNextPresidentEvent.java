@@ -1,6 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event.officials;
 
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
@@ -9,7 +10,7 @@ import java.util.List;
 
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 
-public record DetermineNextPresidentEvent() implements SelectNextOfficialEvent {
+public record DetermineNextPresidentEvent() implements SelectNextOfficialEventProcessor, Event {
 
     @Override
     public List<Character> lineOfSuccession(Game game) {
