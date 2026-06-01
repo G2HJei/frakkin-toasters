@@ -17,11 +17,11 @@ import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.HEAVY_RAIDER;
 import static xyz.zlatanov.frakkintoasters.state.track.BoardingParty.POSITION_1;
 import static xyz.zlatanov.frakkintoasters.state.track.BoardingParty.START;
 
-class ActivateHeavyRaidersAndCenturionsActionTest extends EventTest {
+class ActivateHeavyRaidersAndCenturionsEventProcessorTest extends EventTestHarness<ActivateHeavyRaidersAndCenturionsEvent> {
 
-    HeavyRaider heavyRaider;
-    Centurion   centurion;
-    Event       event = new ActivateHeavyRaidersAndCenturionsAction();
+    HeavyRaider                            heavyRaider;
+    Centurion                              centurion;
+    ActivateHeavyRaidersAndCenturionsEvent event = new ActivateHeavyRaidersAndCenturionsEvent();
 
     @BeforeEach
     void setUp() {
@@ -90,7 +90,7 @@ class ActivateHeavyRaidersAndCenturionsActionTest extends EventTest {
     @Test
     void shouldFollowWithPlaceHeavyRaiderOnCylonFleetBoardAndAdvancePursuitTrack() {
         setUpGame(Game.builder().build());
-        executeAndAssertFollowup(new ActivateHeavyRaidersAndCenturionsAction(),
+        executeAndAssertFollowup(new ActivateHeavyRaidersAndCenturionsEvent(),
                 all(new PlaceShipOnCylonFleetBoardEvent(HEAVY_RAIDER),
                         new AdvancePursuitTrackEvent()));
     }
@@ -102,7 +102,7 @@ class ActivateHeavyRaidersAndCenturionsActionTest extends EventTest {
                 .advanceBoardingParty()
                 .advanceBoardingParty();
 
-        executeAndAssertFollowup(new ActivateHeavyRaidersAndCenturionsAction(), one(new CylonsWinEvent()));
+        executeAndAssertFollowup(new ActivateHeavyRaidersAndCenturionsEvent(), one(new CylonsWinEvent()));
     }
 
     void boardGalactica(Centurion centurion) {
