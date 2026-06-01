@@ -21,7 +21,7 @@ public class Deck<T> {
     }
 
     public Deck<T> add(List<T> toAdd) {
-        cards.addAll(toAdd);
+        toAdd.reversed().forEach(cards::addFirst);
         return this;
     }
 
