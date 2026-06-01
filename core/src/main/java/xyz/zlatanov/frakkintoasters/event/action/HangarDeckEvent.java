@@ -8,7 +8,7 @@ import xyz.zlatanov.frakkintoasters.state.Game;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 
-public record HangarDeckActionEvent(int playerNumber) implements ActionEvent {
+public record HangarDeckEvent(int playerNumber) implements ActionEvent {
 
     @Override
     public Followup apply(Game game) {
