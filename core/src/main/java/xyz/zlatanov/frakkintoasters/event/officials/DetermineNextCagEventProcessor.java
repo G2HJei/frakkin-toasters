@@ -12,7 +12,7 @@ import java.util.List;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.BRIG;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 
-public class DetermineNextCagEventProcessor extends EventProcessor<DetermineNextCagEvent> implements SelectNextOfficialEventProcessor {
+public class DetermineNextCagEventProcessor extends EventProcessor<DetermineNextCagEvent> implements LineOfSuccessionSelector {
 
     @Override
     public List<xyz.zlatanov.frakkintoasters.state.character.Character> lineOfSuccession(Game game) {
