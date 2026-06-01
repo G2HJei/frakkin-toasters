@@ -2,18 +2,18 @@ package xyz.zlatanov.frakkintoasters.event.action;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.event.EventTest;
+import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.POLITICS;
 
-class PresidentsOfficeActionEventTest extends EventTest {
+class PresidentsOfficeEventProcessorTest extends EventTestHarness<PresidentsOfficeEvent> {
 
     @Test
     void shouldDraw2PoliticsCards() {
-        executeAndAssertNoFollowup(new PresidentsOfficeActionEvent(1));
+        executeAndAssertNoFollowup(new PresidentsOfficeEvent(1));
         assertHas2PoliticsCards();
     }
 
