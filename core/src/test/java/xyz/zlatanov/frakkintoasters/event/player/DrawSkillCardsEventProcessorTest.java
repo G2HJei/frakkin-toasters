@@ -2,11 +2,9 @@ package xyz.zlatanov.frakkintoasters.event.player;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.junit.jupiter.MockitoExtension;
 import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
@@ -27,7 +25,6 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.AT_ANY_COST;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.BAIT;
 
-@ExtendWith(MockitoExtension.class)
 class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEvent> {
 
     SkillCard leadershipCard = new SkillCard(0, AT_ANY_COST);

@@ -13,7 +13,7 @@ mechanics.
 ./gradlew build          # Build the project
 ./gradlew test           # Run all tests
 ./gradlew :core:test     # Run tests in the core module
-./gradlew :core:test --tests "xyz.zlatanov.frakkintoasters.event.player.MoveEventTest"  # Run a single test class
+./gradlew :core:test --tests "xyz.zlatanov.frakkintoasters.event.player.MoveEventProcessorTest"  # Run a single test class
 ```
 
 ## Project Structure
@@ -66,8 +66,11 @@ patterns like "choose between a single event or a sequence of events":
 ```java
 return one(
         single(new PlaySuperCrisisCardEvent(playerNumber)),
-        all(new DrawCrisisCardsEvent(playerNumber),
-                new ResolveCapricaCrisisEvent(playerNumber)));
+
+all(new DrawCrisisCardsEvent(playerNumber),
+                new
+
+ResolveCapricaCrisisEvent(playerNumber)));
 ```
 
 ### Event Constraints
