@@ -5,8 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import xyz.zlatanov.frakkintoasters.event.Event;
-import xyz.zlatanov.frakkintoasters.event.EventTest;
+import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Player;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
@@ -22,9 +21,9 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.MUTINEER;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 
-class CreateLoyaltyDeckEventTest extends EventTest {
+class CreateLoyaltyDeckEventProcessorTest extends EventTestHarness<CreateLoyaltyDeckEvent> {
 
-    Event event = new CreateLoyaltyDeckEvent();
+    CreateLoyaltyDeckEvent event = new CreateLoyaltyDeckEvent();
 
     static Stream<Arguments> simpleLoyaltyDeckParams() {
         return Stream.of(
