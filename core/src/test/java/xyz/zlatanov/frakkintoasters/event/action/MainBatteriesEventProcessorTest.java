@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.event.DamageHumanFighterEvent;
 import xyz.zlatanov.frakkintoasters.event.DestroyCivilianShipEvent;
 import xyz.zlatanov.frakkintoasters.event.DestroyRaidersEvent;
-import xyz.zlatanov.frakkintoasters.event.EventTest;
+import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.state.ship.Raider;
 
@@ -15,7 +15,7 @@ import java.util.Set;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 
-class MainBatteriesActionEventTest extends EventTest {
+class MainBatteriesEventProcessorTest extends EventTestHarness<MainBatteriesEvent> {
     Raider raider1;
     Raider raider2;
     Raider raider3;
@@ -35,7 +35,7 @@ class MainBatteriesActionEventTest extends EventTest {
         place(GALACTICA_SPACE_2_OCLOCK, civilian);
         nextRoll(1);
 
-        executeAndAssertFollowup(new MainBatteriesActionEvent(1, GALACTICA_SPACE_2_OCLOCK), single(new DestroyCivilianShipEvent(civilian.id())));
+        executeAndAssertFollowup(new MainBatteriesEvent(1, GALACTICA_SPACE_2_OCLOCK), single(new DestroyCivilianShipEvent(civilian.id())));
     }
 
     @Test
@@ -45,13 +45,13 @@ class MainBatteriesActionEventTest extends EventTest {
         place(GALACTICA_SPACE_2_OCLOCK, civilian1, civilian2);
         nextRoll(1);
 
-        executeAndAssertFollowup(new MainBatteriesActionEvent(1, GALACTICA_SPACE_2_OCLOCK), single(new PlayerDecisionEvent<>(1, DestroyCivilianShipEvent.class)));
+        executeAndAssertFollowup(new MainBatteriesEvent(1, GALACTICA_SPACE_2_OCLOCK), single(new PlayerDecisionEvent<>(1, DestroyCivilianShipEvent.class)));
     }
 
     @Test
     void shouldDoNothingWhenNoCivilianShipsToDestroy() {
         nextRoll(1);
-        executeAndAssertNoFollowup(new MainBatteriesActionEvent(1, GALACTICA_SPACE_2_OCLOCK));
+        executeAndAssertNoFollowup(new MainBatteriesEvent(1, GALACTICA_SPACE_2_OCLOCK));
     }
 
     @Test
@@ -60,7 +60,7 @@ class MainBatteriesActionEventTest extends EventTest {
         place(GALACTICA_SPACE_4_OCLOCK, testViper);
         nextRoll(2);
 
-        executeAndAssertFollowup(new MainBatteriesActionEvent(1, GALACTICA_SPACE_4_OCLOCK), single(new DamageHumanFighterEvent(testViper.id())));
+        executeAndAssertFollowup(new MainBatteriesEvent(1, GALACTICA_SPACE_4_OCLOCK), single(new DamageHumanFighterEvent(testViper.id())));
     }
 
     @Test
@@ -68,25 +68,25 @@ class MainBatteriesActionEventTest extends EventTest {
         place(GALACTICA_SPACE_4_OCLOCK, viper(), viper());
         nextRoll(3);
 
-        executeAndAssertFollowup(new MainBatteriesActionEvent(1, GALACTICA_SPACE_4_OCLOCK), single(new PlayerDecisionEvent<>(1, DamageHumanFighterEvent.class)));
+        executeAndAssertFollowup(new MainBatteriesEvent(1, GALACTICA_SPACE_4_OCLOCK), single(new PlayerDecisionEvent<>(1, DamageHumanFighterEvent.class)));
     }
 
     @Test
     void shouldDoNothingWhenNoVipers() {
         nextRoll(2);
-        executeAndAssertNoFollowup(new MainBatteriesActionEvent(1, GALACTICA_SPACE_4_OCLOCK));
+        executeAndAssertNoFollowup(new MainBatteriesEvent(1, GALACTICA_SPACE_4_OCLOCK));
     }
 
     @Test
     void shouldDoNothingWhenNoRaiders() {
         nextRoll(4);
-        executeAndAssertNoFollowup(new MainBatteriesActionEvent(1, GALACTICA_SPACE_6_OCLOCK));
+        executeAndAssertNoFollowup(new MainBatteriesEvent(1, GALACTICA_SPACE_6_OCLOCK));
     }
 
     @Test
     void shouldDoNothingWhenNoRaidersOnHighRoll() {
         nextRoll(8);
-        executeAndAssertNoFollowup(new MainBatteriesActionEvent(1, GALACTICA_SPACE_8_OCLOCK));
+        executeAndAssertNoFollowup(new MainBatteriesEvent(1, GALACTICA_SPACE_8_OCLOCK));
     }
 
     @Test
@@ -94,7 +94,7 @@ class MainBatteriesActionEventTest extends EventTest {
         place(GALACTICA_SPACE_6_OCLOCK, raider1, raider2);
         nextRoll(4);
 
-        executeAndAssertFollowup(new MainBatteriesActionEvent(1, GALACTICA_SPACE_6_OCLOCK), single(new DestroyRaidersEvent(Set.of(raider1.id(), raider2.id()))));
+        executeAndAssertFollowup(new MainBatteriesEvent(1, GALACTICA_SPACE_6_OCLOCK), single(new DestroyRaidersEvent(Set.of(raider1.id(), raider2.id()))));
     }
 
     @Test
@@ -102,7 +102,7 @@ class MainBatteriesActionEventTest extends EventTest {
         place(GALACTICA_SPACE_6_OCLOCK, raider1);
         nextRoll(5);
 
-        executeAndAssertFollowup(new MainBatteriesActionEvent(1, GALACTICA_SPACE_6_OCLOCK), single(new DestroyRaidersEvent(Set.of(raider1.id()))));
+        executeAndAssertFollowup(new MainBatteriesEvent(1, GALACTICA_SPACE_6_OCLOCK), single(new DestroyRaidersEvent(Set.of(raider1.id()))));
     }
 
     @Test
@@ -110,7 +110,7 @@ class MainBatteriesActionEventTest extends EventTest {
         place(GALACTICA_SPACE_6_OCLOCK, raider1, raider2, raider3);
         nextRoll(6);
 
-        executeAndAssertFollowup(new MainBatteriesActionEvent(1, GALACTICA_SPACE_6_OCLOCK), single(new PlayerDecisionEvent<>(1, DestroyRaidersEvent.class)));
+        executeAndAssertFollowup(new MainBatteriesEvent(1, GALACTICA_SPACE_6_OCLOCK), single(new PlayerDecisionEvent<>(1, DestroyRaidersEvent.class)));
     }
 
     @Test
@@ -118,7 +118,7 @@ class MainBatteriesActionEventTest extends EventTest {
         place(GALACTICA_SPACE_8_OCLOCK, raider1, raider2, raider3, raider4);
         nextRoll(7);
 
-        executeAndAssertFollowup(new MainBatteriesActionEvent(1, GALACTICA_SPACE_8_OCLOCK), single(new DestroyRaidersEvent(Set.of(raider1.id(), raider2.id(), raider3.id(), raider4.id()))));
+        executeAndAssertFollowup(new MainBatteriesEvent(1, GALACTICA_SPACE_8_OCLOCK), single(new DestroyRaidersEvent(Set.of(raider1.id(), raider2.id(), raider3.id(), raider4.id()))));
 
     }
 
@@ -127,7 +127,7 @@ class MainBatteriesActionEventTest extends EventTest {
         place(GALACTICA_SPACE_8_OCLOCK, raider1, raider2, raider3, raider4, raider());
         nextRoll(8);
 
-        executeAndAssertFollowup(new MainBatteriesActionEvent(1, GALACTICA_SPACE_8_OCLOCK), single(new PlayerDecisionEvent<>(1, DestroyRaidersEvent.class)));
+        executeAndAssertFollowup(new MainBatteriesEvent(1, GALACTICA_SPACE_8_OCLOCK), single(new PlayerDecisionEvent<>(1, DestroyRaidersEvent.class)));
     }
 
     @Test
@@ -135,7 +135,7 @@ class MainBatteriesActionEventTest extends EventTest {
         place(GALACTICA_SPACE_8_OCLOCK, raider1, raider2);
         nextRoll(7);
 
-        executeAndAssertFollowup(new MainBatteriesActionEvent(1, GALACTICA_SPACE_8_OCLOCK), single(new DestroyRaidersEvent(Set.of(raider1.id(), raider2.id()))));
+        executeAndAssertFollowup(new MainBatteriesEvent(1, GALACTICA_SPACE_8_OCLOCK), single(new DestroyRaidersEvent(Set.of(raider1.id(), raider2.id()))));
 
     }
 }
