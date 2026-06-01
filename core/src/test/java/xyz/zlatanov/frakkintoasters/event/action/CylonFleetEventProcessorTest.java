@@ -2,7 +2,7 @@ package xyz.zlatanov.frakkintoasters.event.action;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.event.ActivateHeavyRaidersAndCenturionsAction;
+import xyz.zlatanov.frakkintoasters.event.ActivateHeavyRaidersAndCenturionsEvent;
 import xyz.zlatanov.frakkintoasters.event.ActivateRaidersEvent;
 import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
@@ -43,7 +43,7 @@ class CylonFleetEventProcessorTest extends EventTestHarness<CylonFleetEvent> {
 
     @Test
     void shouldFollowUpWithActivateHeavyRaidersAndCenturionsEvent() {
-        executeAndAssertFollowup(new CylonFleetEvent(1, HEAVY_RAIDER), single(new ActivateHeavyRaidersAndCenturionsAction()));
+        executeAndAssertFollowup(new CylonFleetEvent(1, HEAVY_RAIDER), single(new ActivateHeavyRaidersAndCenturionsEvent()));
     }
 
     @Test

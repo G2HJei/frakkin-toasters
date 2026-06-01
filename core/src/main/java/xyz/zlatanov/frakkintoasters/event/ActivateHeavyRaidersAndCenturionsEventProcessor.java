@@ -1,6 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event;
 
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.endgame.CylonsWinEvent;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.CylonFleetBoard;
@@ -18,7 +19,7 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.HEAVY_RAIDER;
 import static xyz.zlatanov.frakkintoasters.state.track.BoardingParty.HUMANS_LOSE;
 
-public record ActivateHeavyRaidersAndCenturionsAction() implements Event {
+public class ActivateHeavyRaidersAndCenturionsEventProcessor extends EventProcessor<ActivateHeavyRaidersAndCenturionsEvent> {
 
     private static final Map<Location, Location> NEXT_STEP_TOWARD_LAUNCH = Map.of(
             GALACTICA_SPACE_12_OCLOCK, GALACTICA_SPACE_2_OCLOCK,
@@ -27,7 +28,7 @@ public record ActivateHeavyRaidersAndCenturionsAction() implements Event {
             GALACTICA_SPACE_10_OCLOCK, GALACTICA_SPACE_8_OCLOCK);
 
     @Override
-    public Followup apply(Game game) {
+    public Followup process() {
         val galactica = game.boards().galactica();
         val heavyRaiders = galactica.shipsInSpace(HeavyRaider.class);
         val basestars = galactica.shipsInSpace(Basestar.class);

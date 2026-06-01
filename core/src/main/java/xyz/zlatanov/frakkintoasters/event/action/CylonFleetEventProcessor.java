@@ -2,7 +2,7 @@ package xyz.zlatanov.frakkintoasters.event.action;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
-import xyz.zlatanov.frakkintoasters.event.ActivateHeavyRaidersAndCenturionsAction;
+import xyz.zlatanov.frakkintoasters.event.ActivateHeavyRaidersAndCenturionsEvent;
 import xyz.zlatanov.frakkintoasters.event.ActivateRaidersEvent;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
@@ -33,7 +33,7 @@ public class CylonFleetEventProcessor extends EventProcessor<CylonFleetEvent> {
         } else if (shipType == RAIDER) {
             return single(new ActivateRaidersEvent());
         } else {
-            return single(new ActivateHeavyRaidersAndCenturionsAction());
+            return single(new ActivateHeavyRaidersAndCenturionsEvent());
         }
     }
 
