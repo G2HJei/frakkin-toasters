@@ -63,6 +63,7 @@ public abstract class EventProcessor<T extends Event> {
         }
     }
 
+    //todo maybe instead of utility methods use utility fields for a lot of stuff?
     protected Player player() {
         if (event instanceof PlayerEvent playerEvent) {
             return game.player(playerEvent.playerNumber());
