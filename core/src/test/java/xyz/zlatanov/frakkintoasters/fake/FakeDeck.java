@@ -29,4 +29,11 @@ public class FakeDeck<T> extends Deck<T> {
         }
         return super.draw();
     }
+
+    public FakeDeck<T> clear() {
+        while (!cards().isEmpty()) {
+            draw();
+        }
+        return this;
+    }
 }

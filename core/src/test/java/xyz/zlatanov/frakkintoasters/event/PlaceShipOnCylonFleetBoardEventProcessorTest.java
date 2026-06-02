@@ -28,9 +28,8 @@ class PlaceShipOnCylonFleetBoardEventProcessorTest extends EventTestHarness<Plac
 
     // todo uncomment after cylonShips refactor to return Optional @Test
     void shouldTransferShipsToMainBoard() {
-        val basestarToMove = basestar();
-        cylonFleetBoard.place(CYLON_FLEET_SPACE_7_8, basestarToMove);
-        cylonFleetBoard.place(CYLON_FLEET_SPACE_1, basestar());
+        val basestarToMove = basestarAt(CYLON_FLEET_SPACE_7_8);
+        basestarAt(CYLON_FLEET_SPACE_1);
 
         val followup = executeEvent(BASESTAR);
 

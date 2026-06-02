@@ -13,7 +13,7 @@ class DiscardDownTo1MutinyCardEventProcessorTest extends EventTestHarness<Discar
 
     @Test
     void shouldDiscardAllButSelectedCard() {
-        giveMutinyCards(1, PANIC, ASSUME_COMMAND, FEED_THE_PEOPLE);
+        mutinyCards(1, PANIC, ASSUME_COMMAND, FEED_THE_PEOPLE);
 
         executeAndAssertNoFollowup(new DiscardDownTo1MutinyCardEvent(1, PANIC));
 

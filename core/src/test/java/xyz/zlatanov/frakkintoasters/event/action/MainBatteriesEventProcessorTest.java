@@ -56,10 +56,8 @@ class MainBatteriesEventProcessorTest extends EventTestHarness<MainBatteriesEven
 
     @Test
     void shouldDestroyOnlyViperPresent() {
-        val testViper = viper();
-        place(GALACTICA_SPACE_4_OCLOCK, testViper);
+        val testViper = viperAt(GALACTICA_SPACE_4_OCLOCK);
         nextRoll(2);
-
         executeAndAssertFollowup(new MainBatteriesEvent(1, GALACTICA_SPACE_4_OCLOCK), single(new DamageHumanFighterEvent(testViper.id())));
     }
 
@@ -67,7 +65,6 @@ class MainBatteriesEventProcessorTest extends EventTestHarness<MainBatteriesEven
     void shouldFollowWithDamageViperDecisionWhenMultipleVipersArePresent() {
         place(GALACTICA_SPACE_4_OCLOCK, viper(), viper());
         nextRoll(3);
-
         executeAndAssertFollowup(new MainBatteriesEvent(1, GALACTICA_SPACE_4_OCLOCK), single(new PlayerDecisionEvent<>(1, DamageHumanFighterEvent.class)));
     }
 
