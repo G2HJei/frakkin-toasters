@@ -13,7 +13,7 @@ class DamageGalacticaEventProcessorTest extends EventTestHarness<DamageGalactica
 
     @Test
     void shouldDamageGalactica() {
-        nextCard(galacticaDamage, GalacticaDamage.WEAPONS_CONTROL);
+        galacticaDamage.nextCard(GalacticaDamage.WEAPONS_CONTROL);
 
         executeAndAssertNoFollowup(new DamageGalacticaEvent());
 
@@ -23,7 +23,7 @@ class DamageGalacticaEventProcessorTest extends EventTestHarness<DamageGalactica
 
     @Test
     void shouldDamageGalacticaFood() {
-        nextCard(galacticaDamage, FOOD);
+        galacticaDamage.nextCard(FOOD);
 
         executeAndAssertNoFollowup(new DamageGalacticaEvent());
 
@@ -33,7 +33,7 @@ class DamageGalacticaEventProcessorTest extends EventTestHarness<DamageGalactica
 
     @Test
     void shouldDamageGalacticaFuel() {
-        nextCard(galacticaDamage, FUEL);
+        galacticaDamage.nextCard(FUEL);
 
         executeAndAssertNoFollowup(new DamageGalacticaEvent());
 

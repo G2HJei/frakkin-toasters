@@ -20,7 +20,7 @@ class HubDestroyedEventProcessorTest extends EventTestHarness<HubDestroyedEvent>
     void shouldDiscard3SkillCardsDrawSuperCrisisAndMoveToCylonFleet() {
         galacticaBoard.destroyResurrectionShip();
         player(1).character(TOM_ZAREK);
-        skillCards(1, card1, card2, card3);
+        player(1).gainSkillCards(card1, card2, card3);
         moveTo(HUB_DESTROYED, TOM_ZAREK);
 
         executeAndAssertNoFollowup(new HubDestroyedEvent(1, card1, card2, card3));

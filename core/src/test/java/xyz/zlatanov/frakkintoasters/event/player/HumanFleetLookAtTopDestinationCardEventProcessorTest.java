@@ -14,7 +14,7 @@ class HumanFleetLookAtTopDestinationCardEventProcessorTest extends EventTestHarn
 
     @Test
     void shouldDrawCardAndFollowUpWithPlacementChoiceAndSkillDraw() {
-        nextCard(destinationDeck, LIONS_HEAD_NEBULA);
+        destinationDeck.nextCard(LIONS_HEAD_NEBULA);
         val initialSize = destinationDeck.size();
 
         executeAndAssertFollowup(new HumanFleetLookAtTopDestinationCardEvent(1),

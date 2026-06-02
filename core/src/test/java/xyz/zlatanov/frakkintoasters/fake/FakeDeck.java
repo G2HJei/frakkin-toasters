@@ -3,6 +3,7 @@ package xyz.zlatanov.frakkintoasters.fake;
 import lombok.NoArgsConstructor;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 
+import java.util.Arrays;
 import java.util.Deque;
 import java.util.LinkedList;
 
@@ -15,8 +16,9 @@ public class FakeDeck<T> extends Deck<T> {
         addOnTop(delegate.cards());
     }
 
-    public FakeDeck<T> nextCard(T card) {
-        nextCards.add(card);
+    @SafeVarargs
+    public final FakeDeck<T> nextCard(T... cards) {
+        nextCards.addAll(Arrays.asList(cards));
         return this;
     }
 

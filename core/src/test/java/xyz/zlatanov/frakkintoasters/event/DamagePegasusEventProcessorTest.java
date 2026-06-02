@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class DamagePegasusEventProcessorTest extends EventTestHarness<DamagePegasusEvent> {
     @Test
     void shouldDamagePegasus() {
-        nextCard(pegasusDamage, PegasusDamage.PEGASUS_CIC);
+        pegasusDamage.nextCard(PegasusDamage.PEGASUS_CIC);
 
         executeAndAssertNoFollowup(new DamagePegasusEvent());
 

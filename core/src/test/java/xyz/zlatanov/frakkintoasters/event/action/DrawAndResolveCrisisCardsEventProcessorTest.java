@@ -12,7 +12,7 @@ class DrawAndResolveCrisisCardsEventProcessorTest extends EventTestHarness<DrawA
 
     @Test
     void shouldFollowUpWithOneOfTheCrisisCards() {
-        nextCard(crisisDeck, DETENTE, AIRLOCK_LEAK);
+        crisisDeck.nextCard(DETENTE, AIRLOCK_LEAK);
         executeAndAssertFollowup(new DrawAndResolveCrisisCardsEvent(1),
                 one(
                         new ResolveCapricaCrisisCardEvent(1, DETENTE, AIRLOCK_LEAK),

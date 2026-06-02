@@ -40,7 +40,7 @@ class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEv
 
     @Test
     void shouldReceiveCardsWithinSkillSet() {
-        nextCard(leadershipDeck, leadershipCard);
+        leadershipDeck.nextCard(leadershipCard);
         executeAndAssertNoFollowup(new DrawSkillCardsEvent(1, Map.of(LEADERSHIP, 1)));
         assertSkillCards(1, leadershipCard);
     }
@@ -53,8 +53,8 @@ class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEv
     @Test
     void shouldReceiveAnyColorWhenRevealedCylon() {
         revealCylon();
-        nextCard(leadershipDeck, leadershipCard);
-        nextCard(treacheryDeck, treacheryCard);
+        leadershipDeck.nextCard(leadershipCard);
+        treacheryDeck.nextCard(treacheryCard);
 
         executeAndAssertNoFollowup(new DrawSkillCardsEvent(1, Map.of(LEADERSHIP, 1, TREACHERY, 1)));
 

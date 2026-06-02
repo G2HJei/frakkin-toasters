@@ -13,7 +13,7 @@ import static xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard.DETENTE;
 class HumanFleetLookAtTopCrisisCardEventProcessorTest extends EventTestHarness<HumanFleetLookAtTopCrisisCardEvent> {
     @Test
     void shouldDrawCardAndFollowUpWithPlacementChoiceAndSkillDraw() {
-        nextCard(crisisDeck, DETENTE);
+        crisisDeck.nextCard(DETENTE);
         val initialSize = crisisDeck.size();
 
         executeAndAssertFollowup(new HumanFleetLookAtTopCrisisCardEvent(1),
