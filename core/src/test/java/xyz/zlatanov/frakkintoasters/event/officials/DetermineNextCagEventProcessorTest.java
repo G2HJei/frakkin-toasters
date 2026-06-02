@@ -14,8 +14,8 @@ class DetermineNextCagEventProcessorTest extends EventTestHarness<DetermineNextC
 
     @BeforeEach
     void setUp() {
-        selectCharacter(1, KARA_STARBUCK_THRACE);
-        selectCharacter(2, LEE_APOLLO_ADAMA);
+        player(1).character(KARA_STARBUCK_THRACE);
+        player(2).character(LEE_APOLLO_ADAMA);
 
         executeAndAssertNoFollowup(new DetermineNextCagEvent());
     }

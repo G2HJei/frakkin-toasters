@@ -30,7 +30,6 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -258,34 +257,6 @@ public abstract class EventTestHarness<E extends Event> {
         return assaultRaptor;
     }
 
-    protected List<Raider> raidersAt(Location location, int count) {
-        return IntStream.range(0, count)
-                .mapToObj(i -> raiderAt(location))
-                .toList();
-    }
-
-    protected List<Viper> vipersAt(Location location, int count) {
-        return IntStream.range(0, count)
-                .mapToObj(i -> viperAt(location))
-                .toList();
-    }
-
-    protected List<Basestar> basestarsAt(Location location, int count) {
-        return IntStream.range(0, count)
-                .mapToObj(i -> basestarAt(location))
-                .toList();
-    }
-
-    protected Player selectCharacter(int playerNumber, Character character) {
-        val player = player(playerNumber);
-        player.selectCharacter(character);
-        return player;
-    }
-
-    protected Player selectCharacter(Character character) {
-        return selectCharacter(1, character);
-    }
-
     protected void moveTo(Location location, Character character) {
         game.moveTo(location, character);
     }
@@ -299,12 +270,6 @@ public abstract class EventTestHarness<E extends Event> {
     protected Player giveMutinyCards(int playerNumber, MutinyCard... cards) {
         val player = player(playerNumber);
         Arrays.stream(cards).forEach(player.mutinyCards()::addOnTop);
-        return player;
-    }
-
-    protected Player giveLoyaltyCards(int playerNumber, LoyaltyCard... cards) {
-        val player = player(playerNumber);
-        Arrays.stream(cards).forEach(player.loyaltyCards()::addOnTop);
         return player;
     }
 

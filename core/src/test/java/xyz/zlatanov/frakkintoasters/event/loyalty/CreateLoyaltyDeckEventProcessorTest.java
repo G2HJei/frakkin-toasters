@@ -53,9 +53,9 @@ class CreateLoyaltyDeckEventProcessorTest extends EventTestHarness<CreateLoyalty
 
     @Test
     void shouldAddOnTopExtraNotCylonCardsForBoomerAndGaius() {
-        selectCharacter(1, KARA_STARBUCK_THRACE);
-        selectCharacter(2, GAIUS_BALTAR);
-        selectCharacter(3, SHARON_BOOMER_VALERII);
+        player(1).character(KARA_STARBUCK_THRACE);
+        player(2).character(GAIUS_BALTAR);
+        player(3).character(SHARON_BOOMER_VALERII);
 
         executeAndAssertNoFollowup(event);
 
@@ -75,9 +75,9 @@ class CreateLoyaltyDeckEventProcessorTest extends EventTestHarness<CreateLoyalty
     @Test
     void shouldDealLoyaltyCards() {
         setUpGame(withPlayers(3));
-        selectCharacter(1, GAIUS_BALTAR);
-        selectCharacter(2, KARL_HELO_AGATHON);
-        selectCharacter(3, SHARON_BOOMER_VALERII);
+        player(1).character(GAIUS_BALTAR);
+        player(2).character(KARL_HELO_AGATHON);
+        player(3).character(SHARON_BOOMER_VALERII);
 
         executeAndAssertNoFollowup(event);
 
@@ -96,21 +96,21 @@ class CreateLoyaltyDeckEventProcessorTest extends EventTestHarness<CreateLoyalty
     }
 
     void pickCharacters(boolean pickCylonLeader) {
-        selectCharacter(1, KARA_STARBUCK_THRACE);
-        selectCharacter(2, WILLIAM_ADAMA);
-        selectCharacter(3, LAURA_ROSLIN);
+        player(1).character(KARA_STARBUCK_THRACE);
+        player(2).character(WILLIAM_ADAMA);
+        player(3).character(LAURA_ROSLIN);
         val playerCount = game.players().size();
         if (playerCount > 3) {
-            selectCharacter(4, pickCylonLeader ? CAVIL : CHIEF_GALEN_TYROL);
+            player(4).character(pickCylonLeader ? CAVIL : CHIEF_GALEN_TYROL);
         }
         if (playerCount > 4) {
-            selectCharacter(5, CALLANDRA_CALLY_TYROL);
+            player(5).character(CALLANDRA_CALLY_TYROL);
         }
         if (playerCount > 5) {
-            selectCharacter(6, ANASTASIA_DEE_DUALLA);
+            player(6).character(ANASTASIA_DEE_DUALLA);
         }
         if (playerCount == 7) {
-            selectCharacter(7, SHERMAN_DOC_COTTLE);
+            player(7).character(SHERMAN_DOC_COTTLE);
         }
     }
 

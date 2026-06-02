@@ -12,8 +12,8 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.REPAIR;
 
 class PlayerTest {
 
-    Player xo    = new Player(1).selectCharacter(SAUL_TIGH);
-    Player chief = new Player(2).selectCharacter(CHIEF_GALEN_TYROL);
+    Player xo    = new Player(1).character(SAUL_TIGH);
+    Player chief = new Player(2).character(CHIEF_GALEN_TYROL);
 
     @Test
     void shouldTrackSkillCards() {

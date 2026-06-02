@@ -41,9 +41,9 @@ class SelectCharacterEventProcessorTest extends EventTestHarness<SelectCharacter
 
     @Test
     void shouldFollowupWithSetupOptions() {
-        selectCharacter(4, LOUANNE_KAT_KATRAINE);
-        selectCharacter(3, KARA_STARBUCK_THRACE);
-        selectCharacter(2, TOM_ZAREK);
+        player(4).character(LOUANNE_KAT_KATRAINE);
+        player(3).character(KARA_STARBUCK_THRACE);
+        player(2).character(TOM_ZAREK);
 
         executeAndAssertFollowup(select(HELENA_CAIN),
                 one(
@@ -70,7 +70,7 @@ class SelectCharacterEventProcessorTest extends EventTestHarness<SelectCharacter
 
     @Test
     void shouldNotAllowDoubleSelectionOfAlternateVersion() {
-        selectCharacter(2, GAIUS_BALTAR);
+        player(2).character(GAIUS_BALTAR);
         assertInvalid(select(GAIUS_BALTAR_ALT));
     }
 
@@ -83,7 +83,7 @@ class SelectCharacterEventProcessorTest extends EventTestHarness<SelectCharacter
 
     @Test
     void shouldAllowOnlyOneCylonLeader() {
-        selectCharacter(2, CAPRICA_SIX);
+        player(2).character(CAPRICA_SIX);
         assertInvalid(select(SIMON_ONEIL));
     }
 
@@ -96,12 +96,12 @@ class SelectCharacterEventProcessorTest extends EventTestHarness<SelectCharacter
     @Test
     void shouldRequireCylonLeaderIn7PlayerGame() {
         setUpGame(Game.builder(7).build());
-        selectCharacter(2, CHIEF_GALEN_TYROL);
-        selectCharacter(3, ANASTASIA_DEE_DUALLA);
-        selectCharacter(4, CALLANDRA_CALLY_TYROL);
-        selectCharacter(5, GAIUS_BALTAR_ALT);
-        selectCharacter(6, SHERMAN_DOC_COTTLE);
-        selectCharacter(7, SAMUEL_T_ANDERS);
+        player(2).character(CHIEF_GALEN_TYROL);
+        player(3).character(ANASTASIA_DEE_DUALLA);
+        player(4).character(CALLANDRA_CALLY_TYROL);
+        player(5).character(GAIUS_BALTAR_ALT);
+        player(6).character(SHERMAN_DOC_COTTLE);
+        player(7).character(SAMUEL_T_ANDERS);
         assertInvalid(select(WILLIAM_ADAMA));
         assertDoesNotThrow(() -> execute(select(DANNA_BIERS)));
     }

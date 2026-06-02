@@ -15,7 +15,7 @@ class HangarDeckEventProcessorTest extends EventTestHarness<HangarDeckEvent> {
 
     @BeforeEach
     void setUp() {
-        selectCharacter(1, LOUIS_HOSHI);
+        player(1).character(LOUIS_HOSHI);
         moveTo(HANGAR_DECK, LOUIS_HOSHI);
     }
 
