@@ -11,7 +11,7 @@ class PlaceDestinationCardAtBottomEventProcessorTest extends EventTestHarness<Pl
 
     @Test
     void shouldPlaceCardAtBottom() {
-        clear(destinationDeck).addOnTop(MISJUMP);
+        destinationDeck.clear().addOnTop(MISJUMP);
         execute(new PlaceDestinationCardAtBottomEvent(1, BINARY_STAR));
         assertEquals(BINARY_STAR, destinationDeck.cards().getLast());
     }

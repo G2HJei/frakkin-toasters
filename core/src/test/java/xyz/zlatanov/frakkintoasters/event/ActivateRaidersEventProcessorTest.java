@@ -40,10 +40,8 @@ class ActivateRaidersEventProcessorTest extends EventTestHarness<ActivateRaiders
 
     @Test
     void shouldActivateRaidersOneByOne() {
-        val raider1 = raider();
-        val raider2 = raider();
-        place(GALACTICA_SPACE_2_OCLOCK, raider1);
-        place(GALACTICA_SPACE_6_OCLOCK, raider2);
+        val raider1 = raiderAt(GALACTICA_SPACE_2_OCLOCK);
+        val raider2 = raiderAt(GALACTICA_SPACE_6_OCLOCK);
 
         executeAndAssertFollowup(new ActivateRaidersEvent(),
                 all(

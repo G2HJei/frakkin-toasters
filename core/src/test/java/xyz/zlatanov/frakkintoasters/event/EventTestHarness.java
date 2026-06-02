@@ -261,13 +261,13 @@ public abstract class EventTestHarness<E extends Event> {
         game.moveTo(location, character);
     }
 
-    protected Player giveSkillCards(int playerNumber, SkillCard... cards) {
+    protected Player skillCards(int playerNumber, SkillCard... cards) {
         val player = player(playerNumber);
         player.gainSkillCards(cards);
         return player;
     }
 
-    protected Player giveMutinyCards(int playerNumber, MutinyCard... cards) {
+    protected Player mutinyCards(int playerNumber, MutinyCard... cards) {
         val player = player(playerNumber);
         Arrays.stream(cards).forEach(player.mutinyCards()::addOnTop);
         return player;
@@ -312,12 +312,5 @@ public abstract class EventTestHarness<E extends Event> {
 
     protected Location locate(Character character) {
         return game.locate(character);
-    }
-
-    protected <T> FakeDeck<T> clear(FakeDeck<T> deck) {
-        while (!deck.cards().isEmpty()) {
-            deck.draw();
-        }
-        return deck;
     }
 }

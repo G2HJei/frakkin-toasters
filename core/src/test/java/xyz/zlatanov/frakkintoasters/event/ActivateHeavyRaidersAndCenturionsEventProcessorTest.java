@@ -78,7 +78,7 @@ class ActivateHeavyRaidersAndCenturionsEventProcessorTest extends EventTestHarne
     @Test
     void shouldKeepHeavyRaidersIfAlLCenturionsAreOnBoards() {
         while (!cylonShips.centurions().isEmpty()) {
-            boardGalactica(cylonShips.centurion().orElseThrow());
+            boardGalactica(centurion());
         }
         place(GALACTICA_SPACE_6_OCLOCK, heavyRaider);
 

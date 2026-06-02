@@ -10,7 +10,7 @@ import static xyz.zlatanov.frakkintoasters.state.card.DestinationCard.MISJUMP;
 class PlaceDestinationCardOnTopEventProcessorTest extends EventTestHarness<PlaceDestinationCardOnTopEvent> {
     @Test
     void shouldPlaceCardOnTop() {
-        clear(destinationDeck).addOnTop(MISJUMP);
+        destinationDeck.clear().addOnTop(MISJUMP);
         execute(new PlaceDestinationCardOnTopEvent(1, BINARY_STAR));
         assertEquals(BINARY_STAR, destinationDeck.cards().getFirst());
     }

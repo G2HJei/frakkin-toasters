@@ -41,7 +41,7 @@ class MoveEventProcessorTest extends EventTestHarness<MoveEvent> {
     @Test
     void shouldDiscardToMoveBetweenShips() {
         moveTo(ADMIRALS_QUARTERS, KARA_STARBUCK_THRACE);
-        giveSkillCards(1, skillCard);
+        skillCards(1, skillCard);
 
         executeAndAssertNoFollowup(new MoveEvent(1, PRESIDENTS_OFFICE, skillCard));
 
@@ -78,7 +78,7 @@ class MoveEventProcessorTest extends EventTestHarness<MoveEvent> {
     @Test
     void shouldLandWhilePiloting() {
         val karasViper = viperAt(GALACTICA_SPACE_2_OCLOCK).pilot(KARA_STARBUCK_THRACE);
-        giveSkillCards(1, skillCard);
+        skillCards(1, skillCard);
 
         executeAndAssertNoFollowup(new MoveEvent(1, PRESIDENTS_OFFICE, skillCard));
 

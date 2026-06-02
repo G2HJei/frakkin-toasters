@@ -11,7 +11,7 @@ class PlaceCrisisCardOnBottomEventProcessorTest extends EventTestHarness<PlaceCr
 
     @Test
     void shouldPlaceCardAtBottom() {
-        clear(crisisDeck).addOnTop(A_GUILTY_VERDICT);
+        crisisDeck.clear().addOnTop(A_GUILTY_VERDICT);
         execute(new PlaceCrisisCardOnBottomEvent(1, DETENTE));
         assertEquals(DETENTE, crisisDeck.cards().getLast());
     }

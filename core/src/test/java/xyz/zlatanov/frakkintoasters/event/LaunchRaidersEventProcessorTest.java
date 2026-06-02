@@ -1,6 +1,5 @@
 package xyz.zlatanov.frakkintoasters.event;
 
-import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.ship.CylonShips;
@@ -56,22 +55,15 @@ class LaunchRaidersEventProcessorTest extends EventTestHarness<LaunchRaidersEven
 
     @Test
     void shouldDoNothingWhenOnlyBasestarHasDisabledHangarBay() {
-        val basestar = basestar();
-        basestar.damage(DISABLED_HANGAR_BAY);
-        place(GALACTICA_SPACE_8_OCLOCK, basestar);
-
+        basestarAt(GALACTICA_SPACE_8_OCLOCK).damage(DISABLED_HANGAR_BAY);
         executeAndAssertNoFollowup(event);
-
         assertShipCount(GALACTICA_SPACE_8_OCLOCK, Raider.class, 0);
     }
 
     @Test
     void shouldLaunchFromHealthyBasestarButNotFromHangarDisabledOne() {
-        val healthy = basestar();
-        val disabled = basestar();
-        disabled.damage(DISABLED_HANGAR_BAY);
-        place(GALACTICA_SPACE_8_OCLOCK, healthy);
-        place(GALACTICA_SPACE_2_OCLOCK, disabled);
+        basestarAt(GALACTICA_SPACE_8_OCLOCK);
+        basestarAt(GALACTICA_SPACE_2_OCLOCK).damage(DISABLED_HANGAR_BAY);
 
         executeAndAssertNoFollowup(event);
 
@@ -81,12 +73,8 @@ class LaunchRaidersEventProcessorTest extends EventTestHarness<LaunchRaidersEven
 
     @Test
     void shouldLaunchRaidersWhenBasestarHasOtherDamageButHangarIsFunctional() {
-        val basestar = basestar();
-        basestar.damage(STRUCTURAL_DAMAGE);
-        place(GALACTICA_SPACE_8_OCLOCK, basestar);
-
+        basestarAt(GALACTICA_SPACE_8_OCLOCK).damage(STRUCTURAL_DAMAGE);
         executeAndAssertNoFollowup(event);
-
         assertShipCount(GALACTICA_SPACE_8_OCLOCK, Raider.class, 3);
     }
 

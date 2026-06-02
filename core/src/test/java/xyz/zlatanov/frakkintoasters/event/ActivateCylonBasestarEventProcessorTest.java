@@ -16,40 +16,32 @@ class ActivateCylonBasestarEventProcessorTest extends EventTestHarness<ActivateC
 
     @BeforeEach
     void setUp() {
-        basestar = basestar();
+        basestar = basestarAt(GALACTICA_SPACE_8_OCLOCK);
         event = new ActivateCylonBasestarEvent(basestar.id());
     }
 
     @Test
     void shouldDoNothingOnLowRoll() {
-        place(GALACTICA_SPACE_8_OCLOCK, basestar);
         nextRoll(3);
-
         executeAndAssertNoFollowup(event);
     }
 
     @Test
     void shouldFollowupWithDamageDecisionOnHighRoll() {
-        place(GALACTICA_SPACE_8_OCLOCK, basestar);
         nextRoll(4);
-
         executeAndAssertFollowup(event, one(new DamageGalacticaEvent(), new DamagePegasusEvent()));
     }
 
     @Test
     void shouldNotAttackWhenBasestarHasDisabledWeapons() {
         basestar.damage(DISABLED_WEAPONS);
-        place(GALACTICA_SPACE_8_OCLOCK, basestar);
-
         executeAndAssertNoFollowup(event);
     }
 
     @Test
     void shouldStillAttackWhenBasestarHasNonDisabledWeaponsDamage() {
         basestar.damage(STRUCTURAL_DAMAGE);
-        place(GALACTICA_SPACE_8_OCLOCK, basestar);
         nextRoll(5);
-
         executeAndAssertFollowup(event, one(new DamageGalacticaEvent(), new DamagePegasusEvent()));
     }
 }
