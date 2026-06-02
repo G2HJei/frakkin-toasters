@@ -31,7 +31,7 @@ class PegasusCicEventProcessorTest extends EventTestHarness<PegasusCicEvent> {
 
     @Test
     void shouldDamageBasestar() {
-        nextCard(basestarDamageDeck, DISABLED_WEAPONS);
+        basestarDamageDeck.nextCard(DISABLED_WEAPONS);
         nextRoll(5);
 
         executeAndAssertNoFollowup(event);
@@ -44,7 +44,7 @@ class PegasusCicEventProcessorTest extends EventTestHarness<PegasusCicEvent> {
 
     @Test
     void shouldDamageBasestarTwice() {
-        nextCard(basestarDamageDeck, DISABLED_WEAPONS, STRUCTURAL_DAMAGE);
+        basestarDamageDeck.nextCard(DISABLED_WEAPONS, STRUCTURAL_DAMAGE);
         nextRoll(8);
 
         executeAndAssertNoFollowup(event);
@@ -56,7 +56,7 @@ class PegasusCicEventProcessorTest extends EventTestHarness<PegasusCicEvent> {
 
     @Test
     void shouldDamageOnlyOnceIfDestroyed() {
-        nextCard(basestarDamageDeck, CRITICAL_HIT);
+        basestarDamageDeck.nextCard(CRITICAL_HIT);
         basestar.damage(basestarDamageDeck.draw());
         nextRoll(8);
 

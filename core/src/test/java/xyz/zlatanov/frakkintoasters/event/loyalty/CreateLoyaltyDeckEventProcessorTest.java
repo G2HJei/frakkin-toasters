@@ -89,7 +89,7 @@ class CreateLoyaltyDeckEventProcessorTest extends EventTestHarness<CreateLoyalty
     @Test
     void shouldFollowUpWithRevealMutineerAction() {
         setUpGame(withPlayers(4));
-        nextCard(loyaltyDeck, MUTINEER);
+        loyaltyDeck.nextCard(MUTINEER);
         pickCharacters(false);
 
         executeAndAssertFollowup(event, single(new RevealMutineerEvent()));

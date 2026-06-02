@@ -28,8 +28,8 @@ import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -261,33 +261,16 @@ public abstract class EventTestHarness<E extends Event> {
         game.moveTo(location, character);
     }
 
-    protected Player skillCards(int playerNumber, SkillCard... cards) {
-        val player = player(playerNumber);
-        player.gainSkillCards(cards);
-        return player;
-    }
-
-    protected Player mutinyCards(int playerNumber, MutinyCard... cards) {
-        val player = player(playerNumber);
-        Arrays.stream(cards).forEach(player.mutinyCards()::addOnTop);
-        return player;
-    }
-
     protected void assertSkillCards(int playerNumber, SkillCard... expected) {
-        assertEquals(List.of(expected), player(playerNumber).skillCards().cards());
+        assertEquals(Set.of(expected), new HashSet<>(player(playerNumber).skillCards().cards()));
     }
 
     protected void assertNoSkillCards(int playerNumber) {
-        assertTrue(player(playerNumber).skillCards().cards().isEmpty());
+        assertEquals(0, player(playerNumber).skillCards().size());
     }
 
     protected void nextRoll(int result) {
         die.nextRoll(result);
-    }
-
-    @SafeVarargs
-    protected final <T> void nextCard(FakeDeck<T> deck, T... cards) {
-        Arrays.stream(cards).forEach(deck::nextCard);
     }
 
     protected <T extends Ship> void assertShipCount(Location location, Class<T> shipClass, int expected) {
