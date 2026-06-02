@@ -34,7 +34,7 @@ class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEv
     @BeforeEach
     void setUp() {
         setUpGame(Game.builder(4).build());
-        selectCharacter(1, KARA_STARBUCK_THRACE);
+        player(1).character(KARA_STARBUCK_THRACE);
         moveTo(ADMIRALS_QUARTERS, KARA_STARBUCK_THRACE);
     }
 
@@ -70,7 +70,7 @@ class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEv
     @ParameterizedTest
     @MethodSource("cylonLeaderSelection")
     void shouldValidateCylonLeaderSelection(Character cylonLeader, Map<SkillCardColor, Integer> selection) {
-        selectCharacter(2, cylonLeader);
+        player(2).character(cylonLeader);
         assertDoesNotThrow(() -> execute(new DrawSkillCardsEvent(2, selection)));
     }
 
@@ -89,7 +89,7 @@ class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEv
     @ParameterizedTest
     @MethodSource("infiltratingCylonLeaderSelection")
     void shouldAllowExtraCardForInfiltratingCylonLeader(Character cylonLeader, Map<SkillCardColor, Integer> selection) {
-        selectCharacter(2, cylonLeader).infiltrateGalactica();
+        player(2).character(cylonLeader).infiltrateGalactica();
         assertDoesNotThrow(() -> execute(new DrawSkillCardsEvent(2, selection)));
     }
 
@@ -149,7 +149,8 @@ class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEv
     }
 
     private void revealCylon() {
-        giveLoyaltyCards(1, CYLON_SEND_TO_BRIG);
-        player(1).loyaltyCards().reveal(CYLON_SEND_TO_BRIG);
+        player(1).loyaltyCards()
+                .addOnTop(CYLON_SEND_TO_BRIG)
+                .reveal(CYLON_SEND_TO_BRIG);
     }
 }

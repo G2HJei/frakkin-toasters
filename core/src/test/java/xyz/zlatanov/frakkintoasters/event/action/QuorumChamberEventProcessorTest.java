@@ -14,7 +14,7 @@ class QuorumChamberEventProcessorTest extends EventTestHarness<QuorumChamberEven
 
     @Test
     void shouldDrawQuorumCardAndFollowup() {
-        selectCharacter(1, LAURA_ROSLIN);
+        player(1).character(LAURA_ROSLIN);
         game.president(LAURA_ROSLIN);
 
         executeAndAssertFollowup(new QuorumChamberEvent(1),

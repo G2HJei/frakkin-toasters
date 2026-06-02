@@ -14,8 +14,8 @@ class DetermineNextAdmiralEventProcessorTest extends EventTestHarness<DetermineN
 
     @BeforeEach
     void setUp() {
-        selectCharacter(1, WILLIAM_ADAMA);
-        selectCharacter(2, HELENA_CAIN);
+        player(1).character(WILLIAM_ADAMA);
+        player(2).character(HELENA_CAIN);
 
         executeAndAssertNoFollowup(new DetermineNextAdmiralEvent());
     }

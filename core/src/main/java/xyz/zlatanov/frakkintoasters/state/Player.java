@@ -33,7 +33,7 @@ public class Player {
     private       boolean               hasMiracleToken  = true;
     private       boolean               isInfiltrating   = false;
 
-    public Player selectCharacter(Character selection) {
+    public Player character(Character selection) {
         assert character == null; //todo use asserts in core to avoid throwing FrakCallTheAdmiralException(s) everywhere
         character = selection;
         return this;

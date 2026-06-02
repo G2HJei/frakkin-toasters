@@ -28,7 +28,7 @@ class MoveEventProcessorTest extends EventTestHarness<MoveEvent> {
 
     @BeforeEach
     void setUp() {
-        selectCharacter(1, KARA_STARBUCK_THRACE);
+        player(1).character(KARA_STARBUCK_THRACE);
     }
 
     @Test

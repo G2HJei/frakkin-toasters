@@ -13,7 +13,7 @@ class HumanFleetInfiltrateEventProcessorTest extends EventTestHarness<HumanFleet
 
     @Test
     void shouldBeginInfiltration() {
-        selectCharacter(1, CAPRICA_SIX);
+        player(1).character(CAPRICA_SIX);
         moveTo(HUMAN_FLEET, CAPRICA_SIX);
 
         executeAndAssertNoFollowup(new HumanFleetInfiltrateEvent(1, RESEARCH_LAB));
