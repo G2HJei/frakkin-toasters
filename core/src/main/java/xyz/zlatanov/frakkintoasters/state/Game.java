@@ -87,8 +87,8 @@ public class Game {
         val galacticaBoard = boards.galactica();
         val raiders = IntStream.range(0, 4).mapToObj(i -> cylonShips.raider()).map(Optional::orElseThrow).map(Ship.class::cast).toList();
         boards.galactica()
-                .place(GALACTICA_SPACE_4_OCLOCK, galacticaBoard.removeFromReserves(Viper.class))
-                .place(GALACTICA_SPACE_6_OCLOCK, galacticaBoard.removeFromReserves(Viper.class))
+                .place(GALACTICA_SPACE_4_OCLOCK, galacticaBoard.removeFromReserves(Viper.class).orElseThrow()) // reserves are never empty during setup
+                .place(GALACTICA_SPACE_6_OCLOCK, galacticaBoard.removeFromReserves(Viper.class).orElseThrow()) // reserves are never empty during setup
                 .place(GALACTICA_SPACE_2_OCLOCK, List.of(decks.civilianShips().draw(), decks.civilianShips().draw()))
                 .place(GALACTICA_SPACE_8_OCLOCK, cylonShips.basestar().orElseThrow())
                 .place(GALACTICA_SPACE_8_OCLOCK, raiders);

@@ -64,7 +64,7 @@ class GalacticaBoardTest {
     void shouldManageDamagedShip() {
         val raptor = new Raptor(2);
         board.addToDamagedShips(raptor);
-        assertEquals(raptor, board.removeFromDamagedShips(Raptor.class));
+        assertEquals(raptor, board.removeFromDamagedShips(Raptor.class).orElseThrow());
     }
 
     @Test

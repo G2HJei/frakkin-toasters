@@ -104,13 +104,11 @@ public class GalacticaBoard extends BattlestarBoard {
     }
 
 
-    //todo return optional
-    public <T extends Ship> T removeFromReserves(Class<T> shipClass) {
+    public <T extends Ship> Optional<T> removeFromReserves(Class<T> shipClass) {
         return removeFrom(reserves, shipClass);
     }
 
-    //todo return optional
-    public <T extends Ship> T removeFromDamagedShips(Class<T> shipClass) {
+    public <T extends Ship> Optional<T> removeFromDamagedShips(Class<T> shipClass) {
         return removeFrom(damagedShips, shipClass);
     }
 
@@ -233,13 +231,13 @@ public class GalacticaBoard extends BattlestarBoard {
         return this;
     }
 
-    private <T extends Ship> T removeFrom(Set<Ship> source, Class<T> shipClass) {
-        val ship = source.stream()
+    private <T extends Ship> Optional<T> removeFrom(Set<Ship> source, Class<T> shipClass) {
+        return source.stream()
                 .filter(s -> shipClass.equals(s.getClass()))
                 .findFirst()
-                .map(shipClass::cast)
-                .orElse(null);
-        source.remove(ship);
-        return ship;
+                .map(ship -> {
+                    source.remove(ship);
+                    return shipClass.cast(ship);
+                });
     }
 }

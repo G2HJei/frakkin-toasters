@@ -249,11 +249,11 @@ public abstract class EventTestHarness<E extends Event> {
     }
 
     protected Viper viper() {
-        return galacticaBoard.removeFromReserves(Viper.class);
+        return galacticaBoard.removeFromReserves(Viper.class).orElseThrow();
     }
 
     protected AssaultRaptor assaultRaptor() {
-        return galacticaBoard.removeFromReserves(AssaultRaptor.class);
+        return galacticaBoard.removeFromReserves(AssaultRaptor.class).orElseThrow();
     }
 
     protected CivilianShip civilianShip() {
