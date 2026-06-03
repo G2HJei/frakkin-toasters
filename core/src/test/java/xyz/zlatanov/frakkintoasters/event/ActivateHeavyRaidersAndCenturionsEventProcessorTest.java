@@ -4,7 +4,6 @@ import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.event.endgame.CylonsWinEvent;
-import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.ship.Centurion;
 import xyz.zlatanov.frakkintoasters.state.ship.HeavyRaider;
 
@@ -34,7 +33,7 @@ class ActivateHeavyRaidersAndCenturionsEventProcessorTest extends EventTestHarne
     void shouldMoveHeavyRaiderTowardsNearestLaunchIcon() {
         place(GALACTICA_SPACE_2_OCLOCK, heavyRaider);
         executeAndAssertNoFollowup(event);
-        assertEquals(GALACTICA_SPACE_4_OCLOCK, galacticaBoard.locate(heavyRaider));
+        assertEquals(GALACTICA_SPACE_4_OCLOCK, locate(heavyRaider));
     }
 
     @Test
@@ -57,7 +56,7 @@ class ActivateHeavyRaidersAndCenturionsEventProcessorTest extends EventTestHarne
 
         executeAndAssertNoFollowup(event);
 
-        assertEquals(GALACTICA_SPACE_4_OCLOCK, galacticaBoard.locate(heavyRaider));
+        assertEquals(GALACTICA_SPACE_4_OCLOCK, locate(heavyRaider));
         assertEquals(POSITION_1, galacticaBoard.boardingPartyTrack().get(centurion));
     }
 
@@ -68,7 +67,7 @@ class ActivateHeavyRaidersAndCenturionsEventProcessorTest extends EventTestHarne
 
         executeAndAssertNoFollowup(event);
 
-        assertNull(galacticaBoard.locate(heavyRaider));
+        assertNull(locate(heavyRaider));
         val track = galacticaBoard.boardingPartyTrack();
         assertEquals(1, track.size());
         assertEquals(START, track.values().iterator().next());
@@ -84,12 +83,12 @@ class ActivateHeavyRaidersAndCenturionsEventProcessorTest extends EventTestHarne
 
         executeAndAssertNoFollowup(event);
 
-        assertEquals(GALACTICA_SPACE_6_OCLOCK, galacticaBoard.locate(heavyRaider));
+        assertEquals(GALACTICA_SPACE_6_OCLOCK, locate(heavyRaider));
     }
 
     @Test
     void shouldFollowWithPlaceHeavyRaiderOnCylonFleetBoardAndAdvancePursuitTrack() {
-        setUpGame(Game.builder().build());
+        setUpGame();
         executeAndAssertFollowup(new ActivateHeavyRaidersAndCenturionsEvent(),
                 all(new PlaceShipOnCylonFleetBoardEvent(HEAVY_RAIDER),
                         new AdvancePursuitTrackEvent()));

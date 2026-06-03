@@ -9,7 +9,6 @@ import xyz.zlatanov.frakkintoasters.state.ship.Viper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
-import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.LOUANNE_KAT_KATRAINE;
@@ -38,7 +37,7 @@ class ActivateRaiderEventProcessorTest extends EventTestHarness<ActivateRaiderEv
     @Test
     void shouldAttackGalacticaWhenNoCivilianShipsOnBoard() {
         place(GALACTICA_SPACE_4_OCLOCK, raider);
-        executeAndAssertFollowup(new ActivateRaiderEvent(raider.id()), single(new AttackGalacticaEvent(raider.id())));
+        executeAndAssertFollowup(new ActivateRaiderEvent(raider.id()), new AttackGalacticaEvent(raider.id()));
     }
 
     @Test
@@ -46,7 +45,7 @@ class ActivateRaiderEventProcessorTest extends EventTestHarness<ActivateRaiderEv
         place(GALACTICA_SPACE_12_OCLOCK, raider);
         place(GALACTICA_SPACE_4_OCLOCK, civilianShip);
         executeAndAssertNoFollowup(event);
-        assertEquals(GALACTICA_SPACE_2_OCLOCK, galacticaBoard.locate(raider));
+        assertEquals(GALACTICA_SPACE_2_OCLOCK, locate(raider));
     }
 
     @Test
@@ -55,7 +54,7 @@ class ActivateRaiderEventProcessorTest extends EventTestHarness<ActivateRaiderEv
         place(GALACTICA_SPACE_2_OCLOCK, civilianShip);
         place(GALACTICA_SPACE_10_OCLOCK, secondCivilianShip);
         executeAndAssertNoFollowup(event);
-        assertEquals(GALACTICA_SPACE_2_OCLOCK, galacticaBoard.locate(raider));
+        assertEquals(GALACTICA_SPACE_2_OCLOCK, locate(raider));
     }
 
     @Test
@@ -63,14 +62,14 @@ class ActivateRaiderEventProcessorTest extends EventTestHarness<ActivateRaiderEv
         place(GALACTICA_SPACE_12_OCLOCK, raider);
         place(GALACTICA_SPACE_10_OCLOCK, civilianShip);
         executeAndAssertNoFollowup(event);
-        assertEquals(GALACTICA_SPACE_10_OCLOCK, galacticaBoard.locate(raider));
+        assertEquals(GALACTICA_SPACE_10_OCLOCK, locate(raider));
     }
 
     @Test
     void shouldDestroyCivilianShipWhenNoVipersInArea() {
         place(GALACTICA_SPACE_4_OCLOCK, raider, civilianShip);
-        executeAndAssertFollowup(new ActivateRaiderEvent(raider.id()), single(new DestroyCivilianShipEvent(civilianShip.id())));
-        assertEquals(GALACTICA_SPACE_4_OCLOCK, galacticaBoard.locate(raider));
+        executeAndAssertFollowup(new ActivateRaiderEvent(raider.id()), new DestroyCivilianShipEvent(civilianShip.id()));
+        assertEquals(GALACTICA_SPACE_4_OCLOCK, locate(raider));
     }
 
     @Test
@@ -86,13 +85,13 @@ class ActivateRaiderEventProcessorTest extends EventTestHarness<ActivateRaiderEv
     @Test
     void shouldAttackUnmannedViperFirst() {
         place(GALACTICA_SPACE_4_OCLOCK, raider, unmannedViper, pilotedViper);
-        executeAndAssertFollowup(new ActivateRaiderEvent(raider.id()), single(new AttackViperEvent(raider.id(), unmannedViper.id())));
+        executeAndAssertFollowup(new ActivateRaiderEvent(raider.id()), new AttackViperEvent(raider.id(), unmannedViper.id()));
     }
 
     @Test
     void shouldAttackPilotedViperWhenNoUnmannedVipers() {
         place(GALACTICA_SPACE_4_OCLOCK, raider, pilotedViper);
-        executeAndAssertFollowup(new ActivateRaiderEvent(raider.id()), single(new AttackViperEvent(raider.id(), pilotedViper.id())));
+        executeAndAssertFollowup(new ActivateRaiderEvent(raider.id()), new AttackViperEvent(raider.id(), pilotedViper.id()));
     }
 
     @Test
@@ -109,7 +108,7 @@ class ActivateRaiderEventProcessorTest extends EventTestHarness<ActivateRaiderEv
     @Test
     void shouldPreferViperOverCivilianShip() {
         place(GALACTICA_SPACE_4_OCLOCK, raider, unmannedViper, civilianShip);
-        executeAndAssertFollowup(new ActivateRaiderEvent(raider.id()), single(new AttackViperEvent(raider.id(), unmannedViper.id())));
+        executeAndAssertFollowup(new ActivateRaiderEvent(raider.id()), new AttackViperEvent(raider.id(), unmannedViper.id()));
     }
 
 }

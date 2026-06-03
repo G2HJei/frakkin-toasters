@@ -4,12 +4,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
-import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
-import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 
@@ -18,7 +16,7 @@ class SelectCharacterEventProcessorTest extends EventTestHarness<SelectCharacter
 
     @BeforeEach
     void setUp() {
-        setUpGame(Game.builder(4).build());
+        setUpGame(4);
     }
 
     @Test
@@ -59,7 +57,7 @@ class SelectCharacterEventProcessorTest extends EventTestHarness<SelectCharacter
 
     @Test
     void shouldFollowupForApollo() {
-        executeAndAssertFollowup(select(LEE_APOLLO_ADAMA), single(new PlayerDecisionEvent<>(1, LaunchViperEvent.class)));
+        executeAndAssertFollowup(select(LEE_APOLLO_ADAMA), new PlayerDecisionEvent<>(1, LaunchViperEvent.class));
     }
 
     @Test
@@ -95,7 +93,7 @@ class SelectCharacterEventProcessorTest extends EventTestHarness<SelectCharacter
 
     @Test
     void shouldRequireCylonLeaderIn7PlayerGame() {
-        setUpGame(Game.builder(7).build());
+        setUpGame(7);
         player(2).character(CHIEF_GALEN_TYROL);
         player(3).character(ANASTASIA_DEE_DUALLA);
         player(4).character(CALLANDRA_CALLY_TYROL);

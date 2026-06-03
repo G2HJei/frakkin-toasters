@@ -12,7 +12,6 @@ import xyz.zlatanov.frakkintoasters.state.ship.ShipType;
 
 import java.util.Arrays;
 
-import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_4_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.HEAVY_RAIDER;
@@ -38,12 +37,12 @@ class CylonFleetEventProcessorTest extends EventTestHarness<CylonFleetEvent> {
 
     @Test
     void shouldFollowUpWithActivateRaidersEvent() {
-        executeAndAssertFollowup(new CylonFleetEvent(1, RAIDER), single(new ActivateRaidersEvent()));
+        executeAndAssertFollowup(new CylonFleetEvent(1, RAIDER), new ActivateRaidersEvent());
     }
 
     @Test
     void shouldFollowUpWithActivateHeavyRaidersAndCenturionsEvent() {
-        executeAndAssertFollowup(new CylonFleetEvent(1, HEAVY_RAIDER), single(new ActivateHeavyRaidersAndCenturionsEvent()));
+        executeAndAssertFollowup(new CylonFleetEvent(1, HEAVY_RAIDER), new ActivateHeavyRaidersAndCenturionsEvent());
     }
 
     @Test

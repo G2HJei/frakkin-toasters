@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
-import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_8_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.DISABLED_WEAPONS;
@@ -32,7 +31,7 @@ class ActivateCylonBasestarsEventProcessorTest extends EventTestHarness<Activate
     void shouldFollowupWithSingleBasestarActivation() {
         place(GALACTICA_SPACE_8_OCLOCK, basestar1);
 
-        executeAndAssertFollowup(new ActivateCylonBasestarsEvent(), single(new ActivateCylonBasestarEvent(basestar1.id())));
+        executeAndAssertFollowup(new ActivateCylonBasestarsEvent(), new ActivateCylonBasestarEvent(basestar1.id()));
     }
 
     @Test
@@ -50,6 +49,6 @@ class ActivateCylonBasestarsEventProcessorTest extends EventTestHarness<Activate
         basestar1.damage(DISABLED_WEAPONS);
         place(GALACTICA_SPACE_8_OCLOCK, basestar1);
 
-        executeAndAssertFollowup(new ActivateCylonBasestarsEvent(), single(new ActivateCylonBasestarEvent(basestar1.id())));
+        executeAndAssertFollowup(new ActivateCylonBasestarsEvent(), new ActivateCylonBasestarEvent(basestar1.id()));
     }
 }

@@ -6,7 +6,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
-import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
@@ -33,7 +32,7 @@ class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEv
 
     @BeforeEach
     void setUp() {
-        setUpGame(Game.builder(4).build());
+        setUpGame(4);
         player(1).character(KARA_STARBUCK_THRACE);
         moveTo(ADMIRALS_QUARTERS, KARA_STARBUCK_THRACE);
     }
