@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.*;
 
@@ -31,9 +30,9 @@ class PlaceShipOnCylonFleetBoardEventProcessorTest extends EventTestHarness<Plac
         val basestarToMove = basestarAt(CYLON_FLEET_SPACE_7_8);
         basestarAt(CYLON_FLEET_SPACE_1);
 
-        val followup = executeEvent(BASESTAR);
-
-        assertEquals(single(new MoveCylonShipsToMainBoard(List.of(basestarToMove.id()))), followup);
+        executeAndAssertFollowup(
+                new PlaceShipOnCylonFleetBoardEvent(BASESTAR),
+                new MoveCylonShipsToMainBoard(List.of(basestarToMove.id())));
     }
 
 

@@ -3,7 +3,6 @@ package xyz.zlatanov.frakkintoasters.event.officials;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
-import xyz.zlatanov.frakkintoasters.state.Game;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.GAIUS_BALTAR;
@@ -14,7 +13,7 @@ class DetermineNextPresidentEventProcessorTest extends EventTestHarness<Determin
 
     @BeforeEach
     void setUp() {
-        setUpGame(Game.builder(2).build());
+        setUpGame(2);
         player(1).character(GAIUS_BALTAR);
         player(2).character(LAURA_ROSLIN);
 

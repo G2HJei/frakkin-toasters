@@ -6,7 +6,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
-import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Player;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
@@ -17,7 +16,6 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
-import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.MUTINEER;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 
@@ -38,14 +36,10 @@ class CreateLoyaltyDeckEventProcessorTest extends EventTestHarness<CreateLoyalty
         );
     }
 
-    static Game withPlayers(int playerCount) {
-        return Game.builder(playerCount).build();
-    }
-
     @ParameterizedTest
     @MethodSource("simpleLoyaltyDeckParams")
     void shouldCreateSimpleLoyaltyDeck(int playerCount, boolean pickCylonLeader, int youAreACylonCount, int notACylonCount, boolean hasMutineer) {
-        setUpGame(withPlayers(playerCount));
+        setUpGame(playerCount);
         pickCharacters(pickCylonLeader);
         execute(event);
         assertLoyalties(notACylonCount, youAreACylonCount, hasMutineer);
@@ -64,7 +58,7 @@ class CreateLoyaltyDeckEventProcessorTest extends EventTestHarness<CreateLoyalty
 
     @Test
     void shouldDealMotiveCardsToCylonLeader() {
-        setUpGame(withPlayers(4));
+        setUpGame(4);
         pickCharacters(true);
 
         executeAndAssertNoFollowup(event);
@@ -74,7 +68,7 @@ class CreateLoyaltyDeckEventProcessorTest extends EventTestHarness<CreateLoyalty
 
     @Test
     void shouldDealLoyaltyCards() {
-        setUpGame(withPlayers(3));
+        setUpGame(3);
         player(1).character(GAIUS_BALTAR);
         player(2).character(KARL_HELO_AGATHON);
         player(3).character(SHARON_BOOMER_VALERII);
@@ -88,11 +82,11 @@ class CreateLoyaltyDeckEventProcessorTest extends EventTestHarness<CreateLoyalty
 
     @Test
     void shouldFollowUpWithRevealMutineerAction() {
-        setUpGame(withPlayers(4));
+        setUpGame(4);
         loyaltyDeck.nextCard(MUTINEER);
         pickCharacters(false);
 
-        executeAndAssertFollowup(event, single(new RevealMutineerEvent()));
+        executeAndAssertFollowup(event, new RevealMutineerEvent());
     }
 
     void pickCharacters(boolean pickCylonLeader) {

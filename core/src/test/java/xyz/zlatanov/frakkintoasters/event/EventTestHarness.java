@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 
 /**
  * Base test class for event-related tests.
@@ -91,6 +92,10 @@ public abstract class EventTestHarness<E extends Event> {
     @BeforeEach
     protected void setUpGame() {
         setUpGame(Game.builder().build());
+    }
+
+    protected void setUpGame(int playerCount) {
+        setUpGame(Game.builder(playerCount).build());
     }
 
     /**
@@ -188,6 +193,10 @@ public abstract class EventTestHarness<E extends Event> {
         return game.locate(character);
     }
 
+    protected Location locate(Ship ship) {
+        return galacticaBoard.locate(ship);
+    }
+
     /* Player */
     protected Player player(int playerNumber) {
         return game.player(playerNumber);
@@ -212,6 +221,10 @@ public abstract class EventTestHarness<E extends Event> {
 
     protected void executeAndAssertFollowup(E event, Followup expected) {
         assertEquals(expected, execute(event));
+    }
+
+    protected void executeAndAssertFollowup(E event, Event expected) {
+        executeAndAssertFollowup(event, single(expected));
     }
 
     protected void assertInvalid(E event) {
