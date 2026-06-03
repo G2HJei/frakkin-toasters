@@ -174,6 +174,51 @@ public abstract class EventTestHarness<E extends Event> {
         }
     }
 
+    /* === UTILITY METHODS === */
+    /*  General */
+    protected void nextRoll(int result) {
+        die.nextRoll(result);
+    }
+
+    protected void moveTo(Location location, Character character) {
+        game.moveTo(location, character);
+    }
+
+    protected Location locate(Character character) {
+        return game.locate(character);
+    }
+
+    /* Player */
+    protected Player player(int playerNumber) {
+        return game.player(playerNumber);
+    }
+
+    protected void assertSkillCards(int playerNumber, SkillCard... expected) {
+        assertEquals(Set.of(expected), new HashSet<>(player(playerNumber).skillCards().cards()));
+    }
+
+    protected void assertNoSkillCards(int playerNumber) {
+        assertEquals(0, player(playerNumber).skillCards().size());
+    }
+
+    /* Event execution */
+    protected Followup execute(E event) {
+        return eventProcessor().execute(game, event);
+    }
+
+    protected void executeAndAssertNoFollowup(E event) {
+        executeAndAssertFollowup(event, Followup.NONE);
+    }
+
+    protected void executeAndAssertFollowup(E event, Followup expected) {
+        assertEquals(expected, execute(event));
+    }
+
+    protected void assertInvalid(E event) {
+        assertThrows(InvalidActionException.class, () -> execute(event));
+    }
+
+    /* Ships */
     protected Basestar basestar() {
         return cylonShips.basestar().orElseThrow();
     }
@@ -200,27 +245,6 @@ public abstract class EventTestHarness<E extends Event> {
 
     protected CivilianShip civilianShip() {
         return civilianShips.draw();
-    }
-
-    protected Player player(int num) {
-        return game.player(num);
-    }
-
-    protected Followup execute(E event) {
-        return eventProcessor().execute(game, event);
-    }
-
-
-    protected void assertInvalid(E event) {
-        assertThrows(InvalidActionException.class, () -> execute(event));
-    }
-
-    protected void executeAndAssertNoFollowup(E event) {
-        executeAndAssertFollowup(event, Followup.NONE);
-    }
-
-    protected void executeAndAssertFollowup(E event, Followup expected) {
-        assertEquals(expected, execute(event));
     }
 
     protected void place(Location location, Ship... ships) {
@@ -257,22 +281,6 @@ public abstract class EventTestHarness<E extends Event> {
         return assaultRaptor;
     }
 
-    protected void moveTo(Location location, Character character) {
-        game.moveTo(location, character);
-    }
-
-    protected void assertSkillCards(int playerNumber, SkillCard... expected) {
-        assertEquals(Set.of(expected), new HashSet<>(player(playerNumber).skillCards().cards()));
-    }
-
-    protected void assertNoSkillCards(int playerNumber) {
-        assertEquals(0, player(playerNumber).skillCards().size());
-    }
-
-    protected void nextRoll(int result) {
-        die.nextRoll(result);
-    }
-
     protected <T extends Ship> void assertShipCount(Location location, Class<T> shipClass, int expected) {
         assertEquals(expected, galacticaBoard.shipsIn(location, shipClass).size());
     }
@@ -280,6 +288,8 @@ public abstract class EventTestHarness<E extends Event> {
     protected void assertNoShips(Location location) {
         assertTrue(galacticaBoard.shipsIn(location).isEmpty());
     }
+
+    /* Titles */
 
     protected Character admiral() {
         return game.admiral();
@@ -293,7 +303,16 @@ public abstract class EventTestHarness<E extends Event> {
         return game.president();
     }
 
-    protected Location locate(Character character) {
-        return game.locate(character);
+    protected void admiral(Character admiral) {
+        game.admiral(admiral);
     }
+
+    protected void cag(Character cag) {
+        game.cag(cag);
+    }
+
+    protected void president(Character president) {
+        game.president(president);
+    }
+
 }
