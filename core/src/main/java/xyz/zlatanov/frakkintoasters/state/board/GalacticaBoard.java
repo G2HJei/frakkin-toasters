@@ -152,7 +152,6 @@ public class GalacticaBoard extends BattlestarBoard {
                 .toList();
     }
 
-    //todo return optional ?
     public <T extends Ship> T shipInSpace(int shipId, Class<T> shipClass) {
         return shipsInSpace(shipClass).stream()
                 .filter(r -> r.id() == shipId)
@@ -175,9 +174,10 @@ public class GalacticaBoard extends BattlestarBoard {
                 .toList();
     }
 
-    //todo return optional
     public Location locate(Ship ship) {
-        return shipsInSpace.get(ship);
+        val location = shipsInSpace.get(ship);
+        assert location != null;
+        return location;
     }
 
     public GalacticaBoard boardGalactica(Centurion centurion) {
