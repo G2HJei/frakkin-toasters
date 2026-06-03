@@ -27,8 +27,8 @@ class ActivateRaiderEventProcessorTest extends EventTestHarness<ActivateRaiderEv
     @BeforeEach
     void setUp() {
         raider = raider();
-        civilianShip = civilianShips.draw();
-        secondCivilianShip = civilianShips.draw();
+        civilianShip = civilianShip();
+        secondCivilianShip = civilianShip();
         unmannedViper = viper();
         pilotedViper = viper().pilot(KARA_STARBUCK_THRACE);
         pilotedAssaultRaptor = assaultRaptor().pilot(LOUANNE_KAT_KATRAINE);
