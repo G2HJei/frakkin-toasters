@@ -13,7 +13,7 @@ class DestroyCivilianShipEventProcessorTest extends EventTestHarness<DestroyCivi
     @Test
     void shouldLoseShipResourcesAndRemoveShip() {
         val civilianShip = new CivilianShip(2000, 2, 3, 4);
-        galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, civilianShip);
+        place(GALACTICA_SPACE_2_OCLOCK, civilianShip);
 
         executeAndAssertNoFollowup(new DestroyCivilianShipEvent(2000));
 

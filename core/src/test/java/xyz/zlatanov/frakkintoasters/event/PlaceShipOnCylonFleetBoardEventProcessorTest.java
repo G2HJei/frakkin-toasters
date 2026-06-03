@@ -21,7 +21,7 @@ class PlaceShipOnCylonFleetBoardEventProcessorTest extends EventTestHarness<Plac
     @ParameterizedTest
     @MethodSource("shouldPlaceShipOnCorrespondingSpaceAreaArgs")
     void shouldPlaceShipOnCorrespondingSpaceArea(Class<Ship> shipClass, int nextDieRoll, Location placementLocation) {
-        die.nextRoll(nextDieRoll);
+        nextRoll(nextDieRoll);
         executeEvent(shipTypeFor(shipClass));
         assertEquals(1, cylonFleetBoard.shipsIn(placementLocation, shipClass).size());
     }

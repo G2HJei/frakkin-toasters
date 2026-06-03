@@ -114,7 +114,7 @@ class MoveEventProcessorTest extends EventTestHarness<MoveEvent> {
     @MethodSource("adjacencyTests")
     void shouldValidateMovementAdjacency(HumanFighter ship, Location destination, boolean isValid) {
         ship.pilot(KARA_STARBUCK_THRACE);
-        galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, ship);
+        place(GALACTICA_SPACE_2_OCLOCK, ship);
         val event = new MoveEvent(1, destination, null);
         if (isValid) {
             assertDoesNotThrow(() -> execute(event));
