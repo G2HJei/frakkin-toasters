@@ -10,14 +10,16 @@ import xyz.zlatanov.frakkintoasters.state.track.BoardingParty;
 import xyz.zlatanov.frakkintoasters.state.track.JumpPreparation;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
+import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.*;
 import static xyz.zlatanov.frakkintoasters.state.track.BoardingParty.HUMANS_LOSE;
 import static xyz.zlatanov.frakkintoasters.state.track.BoardingParty.START;
 
 @Getter
 @Accessors(fluent = true)
-public class GalacticaBoard extends BattlestarBoard implements SpaceLocationsBoard {
+public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard {
     private       int                           fuel                 = 8;
     private       int                           food                 = 8;
     private       int                           morale               = 10;
@@ -27,44 +29,27 @@ public class GalacticaBoard extends BattlestarBoard implements SpaceLocationsBoa
     private       boolean                       engineRoomActivated  = false;
     private       boolean                       colonialOneDestroyed = false;
     private       boolean                       hubDestroyed         = false;
-    private final Set<Ship>                     reserves             = new HashSet<>();
-    private final Set<Ship>                     damagedShips         = new HashSet<>();
+    private final Map<Character, Location>      characters           = new HashMap<>();
+    private final Set<Location>                 damagedLocations     = new HashSet<>();
+    private final Set<Location>                 locations            = new HashSet<>(Stream.of(GALACTICA.locations(), GALACTICA_SPACE.locations(), COLONIAL_ONE.locations(), CYLON_LOCATIONS.locations().stream().filter(l -> !Set.of(HUB_DESTROYED, BASESTAR_BRIDGE).contains(l)).toList()).flatMap(Collection::stream).toList());
+    private final Set<Ship>                     reserves             = new HashSet<>(Set.of(new Viper(1), new Viper(2), new Viper(3), new Viper(4), new Viper(5), new Viper(6), new Raptor(11), new Raptor(12), new Raptor(13), new Raptor(14), new AssaultRaptor(21)));
+    private final Set<Ship>                     damagedShips         = new HashSet<>(Set.of(new ViperMarkVII(71), new ViperMarkVII(72), new ViperMarkVII(73), new ViperMarkVII(74)));
     private final Map<Ship, Location>           shipsInSpace         = new HashMap<>();
     private final Map<Centurion, BoardingParty> boardingPartyTrack   = new HashMap<>();
 
     public static final List<Location> VIPER_LAUNCH_SPACES = List.of(GALACTICA_SPACE_4_OCLOCK, GALACTICA_SPACE_6_OCLOCK);
 
-
-    public GalacticaBoard() {
-        super(galacticaLocations());
-        addToReserves(List.of(
-                new Viper(1), new Viper(2), new Viper(3), new Viper(4), new Viper(5), new Viper(6), new Raptor(11),
-                new Raptor(12), new Raptor(13), new Raptor(14),
-                new AssaultRaptor(21)));
-        addToDamagedShips(List.of(new ViperMarkVII(71), new ViperMarkVII(72), new ViperMarkVII(73), new ViperMarkVII(74)));
-    }
-
     @Override
     public Optional<Location> locate(Character character) {
-        val superLocate = super.locate(character);
+        val superLocate = Optional.ofNullable(characters().get(character));
         return superLocate.isPresent()
                 ? superLocate
-                : shipsInSpace.entrySet()//todo make parent classes interfaces now!!!
+                : shipsInSpace.entrySet()
                 .stream()
                 .filter(es -> es.getKey() instanceof HumanFighter
                               && ((HumanFighter) es.getKey()).pilot() == character)
                 .findFirst()
                 .map(Map.Entry::getValue);
-    }
-
-    private static Set<Location> galacticaLocations() {
-        return new HashSet<>(Set.of(FTL_CONTROL, WEAPONS_CONTROL, COMMUNICATIONS, RESEARCH_LAB, ARMORY, COMMAND, ADMIRALS_QUARTERS, HANGAR_DECK, SICKBAY, BRIG,
-
-                PRESS_ROOM, PRESIDENTS_OFFICE, ADMINISTRATION,
-
-                CAPRICA, CYLON_FLEET, HUMAN_FLEET, RESURRECTION_SHIP,
-
-                GALACTICA_SPACE_12_OCLOCK, GALACTICA_SPACE_2_OCLOCK, GALACTICA_SPACE_4_OCLOCK, GALACTICA_SPACE_6_OCLOCK, GALACTICA_SPACE_8_OCLOCK, GALACTICA_SPACE_10_OCLOCK));
     }
 
     public void destroyColonialOne() {

@@ -1,7 +1,12 @@
 package xyz.zlatanov.frakkintoasters.state.board;
 
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import org.junit.jupiter.api.Test;
+import xyz.zlatanov.frakkintoasters.state.character.Character;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -12,7 +17,7 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 
 class BoardTest {
 
-    Board board = new TestBoard(Set.of(COMMAND, GALACTICA_SPACE_2_OCLOCK, GALACTICA_SPACE_6_OCLOCK, BRIG));
+    Board board = new TestBoard();
 
     @Test
     void shouldTrackCharacterLocation() {
@@ -34,10 +39,10 @@ class BoardTest {
         assertTrue(board.charactersIn(COMMAND).isEmpty());
     }
 
-    static class TestBoard extends Board {
-
-        public TestBoard(Set<Location> locations) {
-            super(locations);
-        }
+    @Getter
+    @Accessors(fluent = true)
+    static class TestBoard implements Board {
+        Set<Location>            locations  = Set.of(COMMAND, GALACTICA_SPACE_2_OCLOCK, GALACTICA_SPACE_6_OCLOCK, BRIG);
+        Map<Character, Location> characters = new HashMap<>();
     }
 }
