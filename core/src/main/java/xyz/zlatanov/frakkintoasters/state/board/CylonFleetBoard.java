@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.CYLON_FLEET_SPACE;
+import static xyz.zlatanov.frakkintoasters.state.track.Pursuit.AUTO_ATTACK;
 import static xyz.zlatanov.frakkintoasters.state.track.Pursuit.START;
 
 @Getter
@@ -38,9 +39,8 @@ public class CylonFleetBoard implements Board, SpaceLocationsBoard {
     }
 
     public void advancePursuit() {
+        assert pursuitTrack != AUTO_ATTACK;
         val current = pursuitTrack.ordinal();
-        val autoAttack = Pursuit.values().length - 1;
-        val next = current == autoAttack ? 0 : current + 1;
-        pursuitTrack = Pursuit.values()[next];
+        pursuitTrack = Pursuit.values()[current + 1];
     }
 }

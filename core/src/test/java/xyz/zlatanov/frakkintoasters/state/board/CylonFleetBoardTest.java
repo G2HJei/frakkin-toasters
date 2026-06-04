@@ -3,8 +3,9 @@ package xyz.zlatanov.frakkintoasters.state.board;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static xyz.zlatanov.frakkintoasters.state.track.Pursuit.AUTO_ATTACK;
 import static xyz.zlatanov.frakkintoasters.state.track.Pursuit.ONE_CIVILIAN_SHIP;
-import static xyz.zlatanov.frakkintoasters.state.track.Pursuit.START;
 
 class CylonFleetBoardTest {
 
@@ -17,6 +18,7 @@ class CylonFleetBoardTest {
         board.advancePursuit();
         board.advancePursuit();
         board.advancePursuit();
-        assertEquals(START, board.pursuitTrack());
+        assertEquals(AUTO_ATTACK, board.pursuitTrack());
+        assertThrows(AssertionError.class, () -> board.advancePursuit());
     }
 }
