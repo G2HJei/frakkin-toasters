@@ -20,8 +20,6 @@ public class ActivateRaiderEventProcessor extends EventProcessor<ActivateRaiderE
 
     @Override
     public Followup process() {
-        val galacticaBoard = game.boards().galactica();
-
         val raider = galacticaBoard.shipInSpace(event.raiderShipId(), Raider.class);
         val location = galacticaBoard.locate(raider);
 
@@ -61,7 +59,7 @@ public class ActivateRaiderEventProcessor extends EventProcessor<ActivateRaiderE
 
     private void moveTowardNearestCivilian(Raider raider, Location raiderLocation,
                                            List<CivilianShip> civilians) {
-        val galactica = game.boards().galactica();
+        val galactica = galacticaBoard;
         val raiderIndex = SPACE_AREAS_CLOCKWISE.indexOf(raiderLocation);
         val size = SPACE_AREAS_CLOCKWISE.size();
 

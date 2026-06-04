@@ -15,7 +15,7 @@ public class LaunchRaidersEventProcessor extends EventProcessor<LaunchRaidersEve
 
     @Override
     public Followup process() {
-        val basestars = game.boards().galactica().shipsInSpace(Basestar.class);
+        val basestars = galacticaBoard.shipsInSpace(Basestar.class);
         if (basestars.isEmpty()) {
             return placeBasestarOnCylonFleetBoard();
         } else {
@@ -37,7 +37,6 @@ public class LaunchRaidersEventProcessor extends EventProcessor<LaunchRaidersEve
     }
 
     private void launch3Raiders(Basestar basestar) {
-        val galacticaBoard = game.boards().galactica();
         val basestarLocation = galacticaBoard.locate(basestar);
         int raidersLaunched = 0;
         while (raidersLaunched++ < 3) {

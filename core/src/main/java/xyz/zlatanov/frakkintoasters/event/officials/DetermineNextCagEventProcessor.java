@@ -42,7 +42,7 @@ public class DetermineNextCagEventProcessor extends EventProcessor<DetermineNext
                 TORY_FOSTER,
                 ROMO_LAMPKIN,
                 LAURA_ROSLIN));
-        lineOfSuccession.removeAll(game.boards().galactica().charactersIn(BRIG));
+        lineOfSuccession.removeAll(galacticaBoard.charactersIn(BRIG));
         return lineOfSuccession;
     }
 

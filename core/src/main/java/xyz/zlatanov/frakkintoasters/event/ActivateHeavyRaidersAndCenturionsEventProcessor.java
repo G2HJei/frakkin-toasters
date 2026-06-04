@@ -3,7 +3,6 @@ package xyz.zlatanov.frakkintoasters.event;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.endgame.CylonsWinEvent;
-import xyz.zlatanov.frakkintoasters.state.board.GalacticaBoard;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 import xyz.zlatanov.frakkintoasters.state.ship.HeavyRaider;
@@ -25,13 +24,6 @@ public class ActivateHeavyRaidersAndCenturionsEventProcessor extends EventProces
             GALACTICA_SPACE_2_OCLOCK, GALACTICA_SPACE_4_OCLOCK,
             GALACTICA_SPACE_8_OCLOCK, GALACTICA_SPACE_6_OCLOCK,
             GALACTICA_SPACE_10_OCLOCK, GALACTICA_SPACE_8_OCLOCK);
-
-    private GalacticaBoard galacticaBoard;
-
-    @Override
-    protected void init() {
-        galacticaBoard = game.boards().galactica();
-    }
 
     @Override
     public Followup process() {

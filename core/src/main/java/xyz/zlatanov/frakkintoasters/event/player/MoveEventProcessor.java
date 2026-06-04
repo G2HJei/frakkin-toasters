@@ -52,7 +52,7 @@ public class MoveEventProcessor extends EventProcessor<MoveEvent> {
             if (isStayingInSpace) {
                 game.moveTo(destination, ship);
             } else {
-                game.boards().galactica().addToReserves(ship);
+                galacticaBoard.addToReserves(ship);
                 ship.pilot(null);
                 game.moveTo(destination, playerCharacter);
             }
@@ -103,7 +103,6 @@ public class MoveEventProcessor extends EventProcessor<MoveEvent> {
 
     private HumanFighter humanFighter() {
         val playerCharacter = player().character();
-        val galacticaBoard = game.boards().galactica();
         return GALACTICA_SPACE.locations()
                 .stream()
                 .map(galacticaBoard::shipsIn)

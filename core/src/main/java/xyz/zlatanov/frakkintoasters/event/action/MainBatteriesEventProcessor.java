@@ -31,7 +31,7 @@ public class MainBatteriesEventProcessor extends EventProcessor<MainBatteriesEve
 
 
     private Followup destroyCivilianShip() {
-        val civilians = game.boards().galactica().shipsIn(event.spaceLocation(), CivilianShip.class);
+        val civilians = galacticaBoard.shipsIn(event.spaceLocation(), CivilianShip.class);
         if (civilians.isEmpty()) {
             return Followup.NONE;
         }
@@ -42,7 +42,7 @@ public class MainBatteriesEventProcessor extends EventProcessor<MainBatteriesEve
     }
 
     private Followup damageViper() {
-        val humanFighters = game.boards().galactica().humanFightersIn(event.spaceLocation());
+        val humanFighters = galacticaBoard.humanFightersIn(event.spaceLocation());
         if (humanFighters.isEmpty()) {
             return Followup.NONE;
         }
@@ -53,7 +53,7 @@ public class MainBatteriesEventProcessor extends EventProcessor<MainBatteriesEve
     }
 
     private Followup destroyRaiders(int count) {
-        val raiders = game.boards().galactica().shipsIn(event.spaceLocation(), Raider.class);
+        val raiders = galacticaBoard.shipsIn(event.spaceLocation(), Raider.class);
         if (raiders.isEmpty()) {
             return Followup.NONE;
         }

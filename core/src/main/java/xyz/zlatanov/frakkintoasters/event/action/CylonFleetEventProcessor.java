@@ -39,7 +39,7 @@ public class CylonFleetEventProcessor extends EventProcessor<CylonFleetEvent> {
 
 
     private void launch2RaidersAndHeavyRaider() {
-        val galactica = game.boards().galactica();
+        val galactica = galacticaBoard;
         for (val basestar : galactica.shipsInSpace(Basestar.class)) {
             val location = galactica.locate(basestar);
             val shipsToPlace = getShips();

@@ -39,7 +39,7 @@ public class PegasusCicEventProcessor extends EventProcessor<PegasusCicEvent> {
     }
 
     private Basestar findBasestar() {
-        return game.boards().galactica().shipsInSpace(Basestar.class)
+        return galacticaBoard.shipsInSpace(Basestar.class)
                 .stream()
                 .filter(s -> s.id() == event.basestarId())
                 .findFirst()

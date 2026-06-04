@@ -42,7 +42,7 @@ public class DetermineNextAdmiralEventProcessor extends EventProcessor<Determine
                 ROMO_LAMPKIN,
                 TORY_FOSTER,
                 LAURA_ROSLIN));
-        lineOfSuccession.removeAll(game.boards().galactica().charactersIn(BRIG));
+        lineOfSuccession.removeAll(galacticaBoard.charactersIn(BRIG));
         return lineOfSuccession;
     }
 

@@ -11,7 +11,7 @@ import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.DISABLED_
 public class ActivateCylonBasestarEventProcessor extends EventProcessor<ActivateCylonBasestarEvent> {
     @Override
     public Followup process() {
-        val basestar = game.boards().galactica().shipInSpace(event.basestarShipId(), Basestar.class);
+        val basestar = galacticaBoard.shipInSpace(event.basestarShipId(), Basestar.class);
         val weaponsDisabled = basestar.damage().contains(DISABLED_WEAPONS);
         if (!weaponsDisabled && rollDie() > 3) {
             return one(new DamageGalacticaEvent(), new DamagePegasusEvent());

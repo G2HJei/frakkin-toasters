@@ -14,9 +14,9 @@ public class DamageGalacticaEventProcessor extends EventProcessor<DamageGalactic
         val dmgDeck = game.decks().galacticaDamage();
         val galacticaDamage = dmgDeck.draw();
         if (FUEL == galacticaDamage) {
-            game.boards().galactica().decreaseFuel(1);
+            galacticaBoard.decreaseFuel(1);
         } else if (FOOD == galacticaDamage) {
-            game.boards().galactica().decreaseFood(1);
+            galacticaBoard.decreaseFood(1);
         } else {
             val damagedLocation = Location.valueOf(galacticaDamage.name());
             game.damage(damagedLocation);
