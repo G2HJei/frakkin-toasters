@@ -2,6 +2,9 @@ package xyz.zlatanov.frakkintoasters.event.action;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import xyz.zlatanov.frakkintoasters.event.ActivateHeavyRaidersAndCenturionsEvent;
 import xyz.zlatanov.frakkintoasters.event.ActivateRaidersEvent;
 import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
@@ -11,6 +14,7 @@ import xyz.zlatanov.frakkintoasters.state.ship.Raider;
 import xyz.zlatanov.frakkintoasters.state.ship.ShipType;
 
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_4_OCLOCK;
@@ -49,11 +53,16 @@ class CylonFleetEventProcessorTest extends EventTestHarness<CylonFleetEvent> {
         assertFollowup(new ActivateHeavyRaidersAndCenturionsEvent());
     }
 
-    @Test
-    void shouldAcceptOnlyValidOrEmptyTypeToActivate() {
-        Arrays.stream(ShipType.values())
+    public static Stream<Arguments> invalidShipTypes() {
+        return Arrays.stream(ShipType.values())
                 .filter(t -> t != HEAVY_RAIDER && t != RAIDER)
-                .forEach(invalidType -> assertInvalid(new CylonFleetEvent(1, invalidType)));
+                .map(Arguments::arguments);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidShipTypes")
+    void shouldAcceptOnlyValidOrEmptyTypeToActivate(ShipType invalidType) {
+        assertInvalid(new CylonFleetEvent(1, invalidType));
     }
 
     void assertCylonShips(Location... locations) {

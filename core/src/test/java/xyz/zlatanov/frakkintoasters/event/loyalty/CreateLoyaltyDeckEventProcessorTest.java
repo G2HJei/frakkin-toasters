@@ -41,6 +41,7 @@ class CreateLoyaltyDeckEventProcessorTest extends EventTestHarness<CreateLoyalty
     void shouldCreateSimpleLoyaltyDeck(int playerCount, boolean pickCylonLeader, int youAreACylonCount, int notACylonCount, boolean hasMutineer) {
         setUpGame(playerCount);
         pickCharacters(pickCylonLeader);
+        setupMutineer(hasMutineer);
         execute(event);
         assertLoyalties(notACylonCount, youAreACylonCount, hasMutineer);
     }
@@ -110,7 +111,13 @@ class CreateLoyaltyDeckEventProcessorTest extends EventTestHarness<CreateLoyalty
         }
     }
 
-    void assertLoyalties(int notACylonCount, int youAreACylonCount, boolean mutineer) {
+    private void setupMutineer(boolean hasMutineer) {
+        if (hasMutineer) {
+            loyaltyDeck.nextCard(MUTINEER);
+        }
+    }
+
+    void assertLoyalties(int notACylonCount, int youAreACylonCount, boolean hasMutineer) {
         val loyaltyCards = new ArrayList<>(loyaltyDeck.cards());
         loyaltyCards.addAll(
                 game.players()
@@ -119,7 +126,7 @@ class CreateLoyaltyDeckEventProcessorTest extends EventTestHarness<CreateLoyalty
                         .map(Deck::cards)
                         .flatMap(Collection::stream)
                         .toList());
-        assertEquals(mutineer, loyaltyCards.contains(MUTINEER));
+        assertEquals(hasMutineer, loyaltyCards.contains(MUTINEER));
         assertEquals(notACylonCount,
                 loyaltyCards.stream()
                         .filter(c -> !c.isCylon())
@@ -129,5 +136,8 @@ class CreateLoyaltyDeckEventProcessorTest extends EventTestHarness<CreateLoyalty
                 loyaltyCards.stream()
                         .filter(LoyaltyCard::isCylon)
                         .count());
+        if (hasMutineer) {
+            assertFollowup(new RevealMutineerEvent());
+        }
     }
 }

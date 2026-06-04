@@ -65,7 +65,7 @@ class SelectCharacterEventProcessorTest extends EventTestHarness<SelectCharacter
 
     @Test
     void shouldNotAllowDoubleSelection() {
-        execute(select(KARA_STARBUCK_THRACE));
+        player(1).character(KARA_STARBUCK_THRACE);
         assertInvalid(new SelectCharacterEvent(2, KARA_STARBUCK_THRACE));
     }
 
@@ -78,8 +78,16 @@ class SelectCharacterEventProcessorTest extends EventTestHarness<SelectCharacter
     @Test
     void shouldObserveCharacterTypeLimits() {
         assertInvalid(select(LAURA_ROSLIN));
+    }
+
+    @Test
+    void shouldObserveCharacterTypeLimits2() {
         assertInvalid(select(HELENA_CAIN));
-        assertDoesNotThrow(() -> execute(select(GAIUS_BALTAR_ALT)));
+    }
+
+    @Test
+    void shouldObserveCharacterTypeLimits3() {
+        execute(select(GAIUS_BALTAR_ALT));
     }
 
     @Test
@@ -96,6 +104,17 @@ class SelectCharacterEventProcessorTest extends EventTestHarness<SelectCharacter
 
     @Test
     void shouldRequireCylonLeaderIn7PlayerGame() {
+        setup7playerGame();
+        execute(select(CAVIL));
+    }
+
+    @Test
+    void shoudlForbidNonCylonLeaderIn7PlayerGame() {
+        setup7playerGame();
+        assertInvalid(select(WILLIAM_ADAMA));
+    }
+
+    private void setup7playerGame() {
         setUpGame(7);
         player(2).character(CHIEF_GALEN_TYROL);
         player(3).character(ANASTASIA_DEE_DUALLA);
@@ -103,8 +122,6 @@ class SelectCharacterEventProcessorTest extends EventTestHarness<SelectCharacter
         player(5).character(GAIUS_BALTAR_ALT);
         player(6).character(SHERMAN_DOC_COTTLE);
         player(7).character(SAMUEL_T_ANDERS);
-        assertInvalid(select(WILLIAM_ADAMA));
-        assertDoesNotThrow(() -> execute(select(DANNA_BIERS)));
     }
 
     static SelectCharacterEvent select(Character character) {
