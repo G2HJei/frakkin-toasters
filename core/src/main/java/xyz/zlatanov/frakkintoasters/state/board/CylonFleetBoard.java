@@ -38,9 +38,14 @@ public class CylonFleetBoard implements Board, SpaceLocationsBoard {
         throw new UnsupportedOperationException();
     }
 
-    public void advancePursuit() {
+    public Pursuit advancePursuit() {
         assert pursuitTrack != AUTO_ATTACK;
         val current = pursuitTrack.ordinal();
         pursuitTrack = Pursuit.values()[current + 1];
+        return pursuitTrack;
+    }
+
+    public void resetPursuit() {
+        pursuitTrack = START;
     }
 }
