@@ -3,8 +3,7 @@ package xyz.zlatanov.frakkintoasters.event;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.endgame.CylonsWinEvent;
-import xyz.zlatanov.frakkintoasters.state.Game;
-import xyz.zlatanov.frakkintoasters.state.board.CylonFleetBoard;
+import xyz.zlatanov.frakkintoasters.state.board.GalacticaBoard;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 import xyz.zlatanov.frakkintoasters.state.ship.HeavyRaider;
@@ -27,15 +26,21 @@ public class ActivateHeavyRaidersAndCenturionsEventProcessor extends EventProces
             GALACTICA_SPACE_8_OCLOCK, GALACTICA_SPACE_6_OCLOCK,
             GALACTICA_SPACE_10_OCLOCK, GALACTICA_SPACE_8_OCLOCK);
 
+    private GalacticaBoard galacticaBoard;
+
+    @Override
+    protected void init() {
+        galacticaBoard = game.boards().galactica();
+    }
+
     @Override
     public Followup process() {
-        val galactica = game.boards().galactica();
-        val heavyRaiders = galactica.shipsInSpace(HeavyRaider.class);
-        val basestars = galactica.shipsInSpace(Basestar.class);
-        val noCenturionsInPlay = galactica.boardingPartyTrack().isEmpty();
+        val heavyRaiders = galacticaBoard.shipsInSpace(HeavyRaider.class);
+        val basestars = galacticaBoard.shipsInSpace(Basestar.class);
+        val noCenturionsInPlay = galacticaBoard.boardingPartyTrack().isEmpty();
 
-        galactica.advanceBoardingParty();
-        if (galactica.boardingPartyTrack().containsValue(HUMANS_LOSE)) {
+        galacticaBoard.advanceBoardingParty();
+        if (galacticaBoard.boardingPartyTrack().containsValue(HUMANS_LOSE)) {
             return one(new CylonsWinEvent());
         }
         if (heavyRaiders.isEmpty() && basestars.isEmpty() && noCenturionsInPlay) {
@@ -44,75 +49,41 @@ public class ActivateHeavyRaidersAndCenturionsEventProcessor extends EventProces
                     new AdvancePursuitTrackEvent());
         }
         if (heavyRaiders.isEmpty()) {
-            return launchHeavyRaiders(game, basestars);
+            return launchHeavyRaiders(basestars);
         }
         for (val hr : heavyRaiders) {
-            val loc = galactica.locate(hr);
+            val loc = galacticaBoard.locate(hr);
             if (VIPER_LAUNCH_SPACES.contains(loc)) {
-                boardGalactica(game, hr);
+                boardGalactica(hr);
             } else {
-                advanceToEntry(game, hr, loc);
+                advanceToEntry(hr, loc);
             }
         }
         return Followup.NONE;
     }
 
-    //todo move in PlaceShipOnCylonFleetBoardEvent
-    private static Followup placeOnCylonFleetBoard(Game game) {
-        val cylonFleet = game.boards().cylonFleet();
-        cylonFleet.advancePursuit();
-        val target = CylonFleetBoard.spaceFromRoll(game.die().roll());
-        game.cylonShips()
-                .heavyRaider()
-                .ifPresentOrElse(
-                        ship -> cylonFleet.place(target, ship),
-                        () -> spillOutOfShips(game));
-        return Followup.NONE;
-    }
-
-    //todo move in separate event to follow PlaceShipOnCylonFleetBoardEvent
-    private static void spillOutOfShips(Game game) {
-        val cylonFleet = game.boards().cylonFleet();
-        val galactica = game.boards().galactica();
-        for (int i = CylonFleetBoard.SPACE_AREAS.size() - 1; i >= 0; i--) {
-            val space = CylonFleetBoard.SPACE_AREAS.get(i);
-            val heavyRaiders = cylonFleet.shipsIn(space, HeavyRaider.class);
-
-            if (!heavyRaiders.isEmpty()) {
-                val destination = CylonFleetBoard.MOVE_TO_GALACTICA_MAP.get(space);
-                for (val hr : heavyRaiders) {
-                    cylonFleet.remove(hr);
-                    galactica.place(destination, hr);
-                }
-                return;
-            }
-        }
-    }
-
-    private static Followup launchHeavyRaiders(Game game, List<Basestar> basestars) {
-        val galactica = game.boards().galactica();
+    private Followup launchHeavyRaiders(List<Basestar> basestars) {
         for (val basestar : basestars) {
-            val basestarLocation = galactica.locate(basestar);
+            val basestarLocation = galacticaBoard.locate(basestar);
             game.cylonShips()
                     .heavyRaider()
-                    .ifPresent(hr -> galactica.place(basestarLocation, hr));
+                    .ifPresent(hr -> galacticaBoard.place(basestarLocation, hr));
         }
         return Followup.NONE;
     }
 
-    private static void boardGalactica(Game game, HeavyRaider hr) {
-        val galactica = game.boards().galactica();
+    private void boardGalactica(HeavyRaider hr) {
         game.cylonShips()
                 .centurion()
                 .ifPresent(c -> {
-                            galactica.remove(hr);
+                            galacticaBoard.remove(hr);
                             game.cylonShips().returned(hr);
-                            galactica.boardGalactica(c);
+                            galacticaBoard.boardGalactica(c);
                         }
                 );
     }
 
-    private static void advanceToEntry(Game game, HeavyRaider hr, Location loc) {
+    private void advanceToEntry(HeavyRaider hr, Location loc) {
         game.moveTo(NEXT_STEP_TOWARD_LAUNCH.get(loc), hr);
     }
 }

@@ -22,7 +22,6 @@ public class ActivateCylonBasestarsEventProcessor extends EventProcessor<Activat
         }
 
         return all(basestars.stream()
-                //todo return in clockwise order always (in galactica board class)
                 .sorted(Comparator.comparingInt(b -> GALACTICA_SPACE.locations().indexOf(galactica.locate(b))))
                 .map(b -> new ActivateCylonBasestarEvent(b.id()))
                 .toArray(Event[]::new));

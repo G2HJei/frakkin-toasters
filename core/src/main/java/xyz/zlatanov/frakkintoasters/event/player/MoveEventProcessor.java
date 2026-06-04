@@ -3,7 +3,6 @@ package xyz.zlatanov.frakkintoasters.event.player;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
-import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.board.LocationsArea;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
@@ -73,11 +72,11 @@ public class MoveEventProcessor extends EventProcessor<MoveEvent> {
         return isMovingToDifferentLocation
                 && !shipToSpaceMovement
                 && !hazardousLocation
-                && validSpaceDistance(game, currentLocation)
+                && validSpaceDistance(currentLocation)
                 && isHuman != cylonLocation;
     }
 
-    private boolean validSpaceDistance(Game game, Location currentLocation) {
+    private boolean validSpaceDistance(Location currentLocation) {
         val isPiloting = currentLocation.isSpaceLocation();
         val isStayingInSpace = destination.isSpaceLocation();
         if (isPiloting && isStayingInSpace) {

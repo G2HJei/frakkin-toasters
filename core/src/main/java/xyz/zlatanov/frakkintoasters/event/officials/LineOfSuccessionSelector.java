@@ -10,10 +10,10 @@ import java.util.Optional;
 
 public interface LineOfSuccessionSelector {
 
-    List<Character> lineOfSuccession(Game game);
+    List<Character> lineOfSuccession();
 
     default Character calcNextInLine(Game game) {
-        val lineOfSuccession = lineOfSuccession(game);
+        val lineOfSuccession = lineOfSuccession();
         Character nextInLine = null;
         var nextRank = 99;
         for (val player : game.players()) {

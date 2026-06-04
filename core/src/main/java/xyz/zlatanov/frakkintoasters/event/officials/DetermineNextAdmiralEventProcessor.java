@@ -3,7 +3,6 @@ package xyz.zlatanov.frakkintoasters.event.officials;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
-import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 
 import java.util.ArrayList;
@@ -15,7 +14,7 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 public class DetermineNextAdmiralEventProcessor extends EventProcessor<DetermineNextAdmiralEvent> implements LineOfSuccessionSelector {
 
     @Override
-    public List<xyz.zlatanov.frakkintoasters.state.character.Character> lineOfSuccession(Game game) {
+    public List<Character> lineOfSuccession() {
         val lineOfSuccession = new ArrayList<>(List.of(
                 HELENA_CAIN,
                 WILLIAM_ADAMA,
