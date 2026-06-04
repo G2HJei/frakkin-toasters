@@ -2,35 +2,50 @@ package xyz.zlatanov.frakkintoasters.event;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
-import xyz.zlatanov.frakkintoasters.state.Game;
-import xyz.zlatanov.frakkintoasters.state.board.CylonFleetBoard;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
-import xyz.zlatanov.frakkintoasters.state.ship.HeavyRaider;
 import xyz.zlatanov.frakkintoasters.state.ship.Ship;
+import xyz.zlatanov.frakkintoasters.state.ship.ShipType;
 
 import java.util.Map;
+import java.util.Optional;
+import java.util.TreeSet;
 
+import static xyz.zlatanov.frakkintoasters.state.board.CylonFleetBoard.MOVE_TO_GALACTICA_MAP;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 
 public class PlaceShipOnCylonFleetBoardEventProcessor extends EventProcessor<PlaceShipOnCylonFleetBoardEvent> {
 
     @Override
     public Followup process() {
-        val ship = getShip();
-        val placementLocation = placementMap.get(game.die().roll());
-        game.boards().cylonFleet().place(placementLocation, ship);
+        getShip().ifPresentOrElse(
+                this::placeOnCylonFleetBoard,
+                this::transferShipsToMainBoard);
         return Followup.NONE;
     }
 
-    private Ship getShip() {
+    private Optional<? extends Ship> getShip() {
         val cylonShips = game.cylonShips();
         return switch (event.cylonShipType()) {
-            case RAIDER -> cylonShips.raider().orElseThrow();
-            case HEAVY_RAIDER -> cylonShips.heavyRaider().orElseThrow();
-            case BASESTAR -> cylonShips.basestar().orElseThrow();
+            case RAIDER -> cylonShips.raider();
+            case HEAVY_RAIDER -> cylonShips.heavyRaider();
+            case BASESTAR -> cylonShips.basestar();
             default -> throw new FrakCallTheAdmiralException();
         };
+    }
+
+    private void placeOnCylonFleetBoard(Ship ship) {
+        val placementLocation = placementMap.get(rollDie());
+        game.boards().cylonFleet().place(placementLocation, ship);
+    }
+
+    private void transferShipsToMainBoard() {
+        val sourceLocation = findLocationToTransferFrom();
+        val targetLocation = MOVE_TO_GALACTICA_MAP.get(sourceLocation);
+        game.boards().cylonFleet()
+                .shipsIn(sourceLocation).stream()
+                .filter(s -> ShipType.of(s.getClass()).equals(event.cylonShipType()))
+                .forEach(s -> moveShip(s, targetLocation));
     }
 
     private static final Map<Integer, Location> placementMap = Map.of(
@@ -44,34 +59,22 @@ public class PlaceShipOnCylonFleetBoardEventProcessor extends EventProcessor<Pla
             8, CYLON_FLEET_SPACE_7_8
     );
 
-    //todo consider out of ships case
-    private Followup placeOnCylonFleetBoard(Game game) {
-        val cylonFleet = game.boards().cylonFleet();
-        cylonFleet.advancePursuit();
-        val target = CylonFleetBoard.spaceFromRoll(game.die().roll());
-        game.cylonShips()
-                .heavyRaider()
-                .ifPresentOrElse(
-                        ship -> cylonFleet.place(target, ship),
-                        this::spillOutOfShips);
-        return Followup.NONE;
+    private Location findLocationToTransferFrom() {
+        val locationsWithShip = new TreeSet<Location>();
+        game.boards().cylonFleet()
+                .shipsInSpace()
+                .entrySet()
+                .stream()
+                .filter(e -> ShipType.of(e.getKey().getClass()).equals(event.cylonShipType()))
+                .map(Map.Entry::getValue)
+                .forEach(locationsWithShip::add);
+        return locationsWithShip.getLast();
     }
 
-    private void spillOutOfShips() {
-        val cylonFleet = game.boards().cylonFleet();
-        val galactica = game.boards().galactica();
-        for (int i = CylonFleetBoard.SPACE_AREAS.size() - 1; i >= 0; i--) {
-            val space = CylonFleetBoard.SPACE_AREAS.get(i);
-            val heavyRaiders = cylonFleet.shipsIn(space, HeavyRaider.class);
-
-            if (!heavyRaiders.isEmpty()) {
-                val destination = CylonFleetBoard.MOVE_TO_GALACTICA_MAP.get(space);
-                for (val hr : heavyRaiders) {
-                    cylonFleet.remove(hr);
-                    galactica.place(destination, hr);
-                }
-                return;
-            }
-        }
+    private void moveShip(Ship ship, Location targetLocation) {
+        // todo add utility method for this kind of remove > place action if used often enough
+        game.boards().cylonFleet().remove(ship);
+        game.boards().galactica().place(targetLocation, ship);
     }
+
 }

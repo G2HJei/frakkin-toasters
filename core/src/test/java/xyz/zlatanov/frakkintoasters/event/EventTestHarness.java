@@ -8,10 +8,7 @@ import xyz.zlatanov.frakkintoasters.fake.FakeDeck;
 import xyz.zlatanov.frakkintoasters.fake.FakeDie;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Player;
-import xyz.zlatanov.frakkintoasters.state.board.CylonFleetBoard;
-import xyz.zlatanov.frakkintoasters.state.board.GalacticaBoard;
-import xyz.zlatanov.frakkintoasters.state.board.Location;
-import xyz.zlatanov.frakkintoasters.state.board.PegasusBoard;
+import xyz.zlatanov.frakkintoasters.state.board.*;
 import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.card.MutinyCard;
@@ -31,8 +28,10 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
+import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.CYLON_FLEET_SPACE;
 
 /**
  * Base test class for event-related tests.
@@ -261,7 +260,7 @@ public abstract class EventTestHarness<E extends Event> {
     }
 
     protected void place(Location location, Ship... ships) {
-        galacticaBoard.place(location, ships);
+        getSpaceLocationsBoard(location).place(location, ships);
     }
 
     protected Basestar basestarAt(Location location) {
@@ -294,12 +293,23 @@ public abstract class EventTestHarness<E extends Event> {
         return assaultRaptor;
     }
 
-    protected <T extends Ship> void assertShipCount(Location location, Class<T> shipClass, int expected) {
-        assertEquals(expected, galacticaBoard.shipsIn(location, shipClass).size());
+    protected void assertNoShips(Location location) {
+        assertShipCount(location, 0);
     }
 
-    protected void assertNoShips(Location location) {
-        assertTrue(galacticaBoard.shipsIn(location).isEmpty());
+    protected void assertShipCount(Location location, int expected) {
+        assertEquals(expected, getSpaceLocationsBoard(location).shipsIn(location).size());
+    }
+
+    protected <T extends Ship> void assertShipCount(Location location, Class<T> shipClass, int expected) {
+        assertEquals(expected, getSpaceLocationsBoard(location).shipsIn(location, shipClass).size());
+    }
+
+    private SpaceLocationsBoard getSpaceLocationsBoard(Location location) {
+        SpaceLocationsBoard board = CYLON_FLEET_SPACE.locations().contains(location)
+                ? cylonFleetBoard
+                : galacticaBoard;
+        return board;
     }
 
     /* Titles */

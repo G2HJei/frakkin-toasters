@@ -13,7 +13,7 @@ public class ActivateCylonBasestarEventProcessor extends EventProcessor<Activate
     public Followup process() {
         val basestar = game.boards().galactica().shipInSpace(event.basestarShipId(), Basestar.class);
         val weaponsDisabled = basestar.damage().contains(DISABLED_WEAPONS);
-        if (!weaponsDisabled && game.die().roll() > 3) {
+        if (!weaponsDisabled && rollDie() > 3) {
             return one(new DamageGalacticaEvent(), new DamagePegasusEvent());
         } else {
             return NONE;

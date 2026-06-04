@@ -13,7 +13,7 @@ public class PegasusCicEventProcessor extends EventProcessor<PegasusCicEvent> {
 
     @Override
     public Followup process() {
-        val roll = game.die().roll();
+        val roll = rollDie();
         if (roll <= 3) {
             return single(new DamagePegasusEvent());
         } else if (roll <= 6) {
