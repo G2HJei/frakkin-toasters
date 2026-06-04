@@ -1,43 +1,41 @@
 package xyz.zlatanov.frakkintoasters.state.board;
 
-import lombok.RequiredArgsConstructor;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
-public abstract class Board {
+public interface Board {
 
-    protected final Set<Location>            locations;
-    private final   Map<Character, Location> characters = new HashMap<>();
+    Set<Location> locations();
 
-    public Set<Location> locations() {
-        return new HashSet<>(locations);
-    }
+    Map<Character, Location> characters();
 
-    public void place(Location to, Character... characterToPlace) {
-        assert locations.contains(to) && !to.isSpaceLocation();
+    default void place(Location to, Character... characterToPlace) {
+        assert locations().contains(to) && !to.isSpaceLocation();
         for (val c : characterToPlace) {
-            characters.put(c, to);
+            characters().put(c, to);
         }
     }
 
-    public Optional<Location> locate(Character character) {
-        return Optional.ofNullable(characters.get(character));
+    default Optional<Location> locate(Character character) {
+        return Optional.ofNullable(characters().get(character));
     }
 
-    public void remove(Character character) {
+    default void remove(Character character) {
         remove(List.of(character));
     }
 
-    public void remove(List<Character> charactersToRemove) {
-        charactersToRemove.forEach(characters::remove);
+    default void remove(List<Character> charactersToRemove) {
+        charactersToRemove.forEach(c -> characters().remove(c));
     }
 
-    public List<Character> charactersIn(Location location) {
-        return characters.entrySet()
+    default List<Character> charactersIn(Location location) {
+        return characters().entrySet()
                 .stream()
                 .filter(es -> es.getValue() == location)
                 .map(Map.Entry::getKey)

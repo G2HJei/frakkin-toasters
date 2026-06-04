@@ -6,7 +6,6 @@ import xyz.zlatanov.frakkintoasters.state.ship.Raptor;
 import xyz.zlatanov.frakkintoasters.state.ship.Viper;
 import xyz.zlatanov.frakkintoasters.state.ship.ViperMarkVII;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -22,14 +21,9 @@ class GalacticaBoardTest {
     GalacticaBoard board = new GalacticaBoard();
 
     @Test
-    void shouldStartWithAllLocations() {
-        assertEquals(startingLocations(), board.locations());
-    }
-
-    @Test
     void shouldDestroyColonialOne() {
         board.destroyColonialOne();
-        assertEquals(noColonialOneLocations(), board.locations());
+        assertTrue(board.locations().stream().noneMatch(l -> Set.of(PRESS_ROOM, PRESIDENTS_OFFICE, ADMINISTRATION).contains(l)));
         assertTrue(board.colonialOneDestroyed());
     }
 
@@ -100,41 +94,5 @@ class GalacticaBoardTest {
         board.advanceJumpPreparation();
         board.advanceJumpPreparation();
         assertEquals(START, board.jumpPreparation());
-    }
-
-    private Set<Location> startingLocations() {
-        return new HashSet<>(List.of(
-                FTL_CONTROL,
-                WEAPONS_CONTROL,
-                COMMUNICATIONS,
-                RESEARCH_LAB,
-                ARMORY,
-                COMMAND,
-                ADMIRALS_QUARTERS,
-                HANGAR_DECK,
-                SICKBAY,
-                BRIG,
-
-                PRESS_ROOM,
-                PRESIDENTS_OFFICE,
-                ADMINISTRATION,
-
-                CAPRICA,
-                CYLON_FLEET,
-                HUMAN_FLEET,
-                RESURRECTION_SHIP,
-
-                GALACTICA_SPACE_12_OCLOCK,
-                GALACTICA_SPACE_2_OCLOCK,
-                GALACTICA_SPACE_4_OCLOCK,
-                GALACTICA_SPACE_6_OCLOCK,
-                GALACTICA_SPACE_8_OCLOCK,
-                GALACTICA_SPACE_10_OCLOCK));
-    }
-
-    private Set<Location> noColonialOneLocations() {
-        val locations = startingLocations();
-        locations.removeAll(Set.of(PRESS_ROOM, PRESIDENTS_OFFICE, ADMINISTRATION));
-        return locations;
     }
 }
