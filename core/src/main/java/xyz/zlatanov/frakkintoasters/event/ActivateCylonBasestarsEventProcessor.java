@@ -14,7 +14,7 @@ public class ActivateCylonBasestarsEventProcessor extends EventProcessor<Activat
 
     @Override
     public Followup process() {
-        val galactica = game.boards().galactica();
+        val galactica = galacticaBoard;
         val basestars = galactica.shipsInSpace(Basestar.class);
 
         if (basestars.isEmpty()) {

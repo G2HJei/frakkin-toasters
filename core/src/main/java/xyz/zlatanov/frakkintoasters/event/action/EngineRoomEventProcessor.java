@@ -22,7 +22,7 @@ public class EngineRoomEventProcessor extends EventProcessor<EngineRoomEvent> {
         val cards = List.of(event.discardCard1(), event.discardCard2());
         player().skillCards().remove(cards);
         game.decks().discard(cards);
-        game.boards().galactica().engineRoomActivated(true);
+        galacticaBoard.engineRoomActivated(true);
         return Followup.NONE;
     }
 }

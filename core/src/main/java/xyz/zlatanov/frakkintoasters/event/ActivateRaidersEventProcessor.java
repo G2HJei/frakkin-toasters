@@ -17,7 +17,6 @@ public class ActivateRaidersEventProcessor extends EventProcessor<ActivateRaider
 
     @Override
     public Followup process() {
-        val galacticaBoard = game.boards().galactica();
         val raiders = getRaiders(galacticaBoard);
         val basestars = galacticaBoard.shipsInSpace(Basestar.class);
 
@@ -45,7 +44,7 @@ public class ActivateRaidersEventProcessor extends EventProcessor<ActivateRaider
     }
 
     private Followup launchRaiders(List<Basestar> basestars) {
-        val galactica = game.boards().galactica();
+        val galactica = galacticaBoard;
         for (val basestar : basestars) {
             val basestarLocation = galactica.locate(basestar);
             for (int i = 0; i < 2; i++) {

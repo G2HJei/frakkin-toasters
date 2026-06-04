@@ -36,13 +36,13 @@ public class PlaceShipOnCylonFleetBoardEventProcessor extends EventProcessor<Pla
 
     private void placeOnCylonFleetBoard(Ship ship) {
         val placementLocation = placementMap.get(rollDie());
-        game.boards().cylonFleet().place(placementLocation, ship);
+        cylonFleetBoard.place(placementLocation, ship);
     }
 
     private void transferShipsToMainBoard() {
         val sourceLocation = findLocationToTransferFrom();
         val targetLocation = MOVE_TO_GALACTICA_MAP.get(sourceLocation);
-        game.boards().cylonFleet()
+        cylonFleetBoard
                 .shipsIn(sourceLocation).stream()
                 .filter(s -> ShipType.of(s.getClass()).equals(event.cylonShipType()))
                 .forEach(s -> moveShip(s, targetLocation));
@@ -61,7 +61,7 @@ public class PlaceShipOnCylonFleetBoardEventProcessor extends EventProcessor<Pla
 
     private Location findLocationToTransferFrom() {
         val locationsWithShip = new TreeSet<Location>();
-        game.boards().cylonFleet()
+        cylonFleetBoard
                 .shipsInSpace()
                 .entrySet()
                 .stream()
@@ -73,8 +73,8 @@ public class PlaceShipOnCylonFleetBoardEventProcessor extends EventProcessor<Pla
 
     private void moveShip(Ship ship, Location targetLocation) {
         // todo add utility method for this kind of remove > place action if used often enough
-        game.boards().cylonFleet().remove(ship);
-        game.boards().galactica().place(targetLocation, ship);
+        cylonFleetBoard.remove(ship);
+        galacticaBoard.place(targetLocation, ship);
     }
 
 }
