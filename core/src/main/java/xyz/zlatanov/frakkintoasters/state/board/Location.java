@@ -1,7 +1,9 @@
 package xyz.zlatanov.frakkintoasters.state.board;
 
 import java.util.List;
+import java.util.stream.Stream;
 
+import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.CYLON_FLEET_SPACE;
 import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.GALACTICA_SPACE;
 
 public enum Location {
@@ -65,7 +67,7 @@ public enum Location {
     //BREEDERS_CANYON,
     //SHIPYARD;
 
-    private static final List<Location> spaceLocations     = GALACTICA_SPACE.locations();
+    private static final List<Location> spaceLocations     = Stream.of(GALACTICA_SPACE.locations(), CYLON_FLEET_SPACE.locations()).flatMap(List::stream).toList();
     private static final List<Location> hazardousLocations = List.of(SICKBAY, BRIG, RESURRECTION_SHIP, HUB_DESTROYED);
 
     public boolean isSpaceLocation() {

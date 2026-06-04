@@ -5,7 +5,6 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
-import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
 import xyz.zlatanov.frakkintoasters.state.track.BoardingParty;
 import xyz.zlatanov.frakkintoasters.state.track.JumpPreparation;
@@ -18,7 +17,7 @@ import static xyz.zlatanov.frakkintoasters.state.track.BoardingParty.START;
 
 @Getter
 @Accessors(fluent = true)
-public class GalacticaBoard extends BattlestarBoard {
+public class GalacticaBoard extends BattlestarBoard implements SpaceLocationsBoard {
     private       int                           fuel                 = 8;
     private       int                           food                 = 8;
     private       int                           morale               = 10;
@@ -50,7 +49,7 @@ public class GalacticaBoard extends BattlestarBoard {
         val superLocate = super.locate(character);
         return superLocate.isPresent()
                 ? superLocate
-                : shipsInSpace.entrySet()
+                : shipsInSpace.entrySet()//todo make parent classes interfaces now!!!
                 .stream()
                 .filter(es -> es.getKey() instanceof HumanFighter
                               && ((HumanFighter) es.getKey()).pilot() == character)
@@ -110,74 +109,6 @@ public class GalacticaBoard extends BattlestarBoard {
 
     public <T extends Ship> Optional<T> removeFromDamagedShips(Class<T> shipClass) {
         return removeFrom(damagedShips, shipClass);
-    }
-
-    public GalacticaBoard place(Location in, Ship... ships) {
-        return place(in, Arrays.stream(ships).toList());
-    }
-
-    public GalacticaBoard place(Location in, List<Ship> ships) {
-        assert locations().contains(in) && in.isSpaceLocation();
-        ships.forEach(s -> shipsInSpace.put(s, in));
-        ships.stream()
-                .filter(s -> s instanceof HumanFighter)
-                .map(HumanFighter.class::cast)
-                .map(HumanFighter::pilot)
-                .filter(Objects::nonNull)
-                .forEach(this::remove);
-        return this;
-    }
-
-    public GalacticaBoard remove(Ship ship) {
-        assert shipsInSpace.containsKey(ship);
-        shipsInSpace.remove(ship);
-        return this;
-    }
-
-    public List<Ship> shipsIn(Location location) {
-        return shipsInSpace.entrySet()
-                .stream()
-                .filter(e -> e.getValue() == location)
-                .map(Map.Entry::getKey)
-                .toList();
-    }
-
-    public <T extends Ship> List<T> shipsIn(Location location, Class<T> shipClass) {
-        return shipsInSpace.entrySet()
-                .stream()
-                .filter(e -> e.getValue() == location)
-                .map(Map.Entry::getKey)
-                .filter(s -> shipClass.equals(s.getClass()))
-                .map(shipClass::cast)
-                .toList();
-    }
-
-    public <T extends Ship> T shipInSpace(int shipId, Class<T> shipClass) {
-        return shipsInSpace(shipClass).stream()
-                .filter(r -> r.id() == shipId)
-                .findFirst()
-                .orElseThrow(FrakCallTheAdmiralException::new);
-    }
-
-    public <T extends Ship> List<T> shipsInSpace(Class<T> shipClass) {
-        return shipsInSpace.keySet()
-                .stream()
-                .filter(s -> shipClass.equals(s.getClass()))
-                .map(shipClass::cast)
-                .toList();
-    }
-
-    public List<HumanFighter> humanFightersIn(Location location) {
-        return shipsIn(location).stream()
-                .filter(HumanFighter.class::isInstance)
-                .map(HumanFighter.class::cast)
-                .toList();
-    }
-
-    public Location locate(Ship ship) {
-        val location = shipsInSpace.get(ship);
-        assert location != null;
-        return location;
     }
 
     public GalacticaBoard boardGalactica(Centurion centurion) {
