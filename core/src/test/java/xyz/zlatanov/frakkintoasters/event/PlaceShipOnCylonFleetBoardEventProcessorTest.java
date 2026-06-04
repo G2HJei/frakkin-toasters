@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.*;
 
@@ -38,14 +39,14 @@ class PlaceShipOnCylonFleetBoardEventProcessorTest extends EventTestHarness<Plac
 
     static Stream<Arguments> shouldPlaceShipOnCorrespondingSpaceAreaArgs() {
         return Stream.of(
-                Arguments.arguments(Basestar.class, 1, CYLON_FLEET_SPACE_1),
-                Arguments.arguments(Basestar.class, 2, CYLON_FLEET_SPACE_2),
-                Arguments.arguments(Basestar.class, 3, CYLON_FLEET_SPACE_3),
-                Arguments.arguments(Basestar.class, 4, CYLON_FLEET_SPACE_4),
-                Arguments.arguments(Basestar.class, 5, CYLON_FLEET_SPACE_5_6),
-                Arguments.arguments(Basestar.class, 6, CYLON_FLEET_SPACE_5_6),
-                Arguments.arguments(Raider.class, 7, CYLON_FLEET_SPACE_7_8),
-                Arguments.arguments(HeavyRaider.class, 8, CYLON_FLEET_SPACE_7_8)
+                arguments(Basestar.class, 1, CYLON_FLEET_SPACE_1),
+                arguments(Basestar.class, 2, CYLON_FLEET_SPACE_2),
+                arguments(Basestar.class, 3, CYLON_FLEET_SPACE_3),
+                arguments(Basestar.class, 4, CYLON_FLEET_SPACE_4),
+                arguments(Basestar.class, 5, CYLON_FLEET_SPACE_5_6),
+                arguments(Basestar.class, 6, CYLON_FLEET_SPACE_5_6),
+                arguments(Raider.class, 7, CYLON_FLEET_SPACE_7_8),
+                arguments(HeavyRaider.class, 8, CYLON_FLEET_SPACE_7_8)
         );
     }
 

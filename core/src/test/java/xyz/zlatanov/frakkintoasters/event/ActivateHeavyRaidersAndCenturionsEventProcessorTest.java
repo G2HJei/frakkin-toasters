@@ -8,7 +8,7 @@ import xyz.zlatanov.frakkintoasters.state.ship.Centurion;
 import xyz.zlatanov.frakkintoasters.state.ship.HeavyRaider;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
@@ -67,7 +67,7 @@ class ActivateHeavyRaidersAndCenturionsEventProcessorTest extends EventTestHarne
 
         executeAndAssertNoFollowup(event);
 
-        assertNull(locate(heavyRaider));
+        assertTrue(cylonShips.heavyRaiders().contains(heavyRaider));
         val track = galacticaBoard.boardingPartyTrack();
         assertEquals(1, track.size());
         assertEquals(START, track.values().iterator().next());

@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
+import xyz.zlatanov.frakkintoasters.state.ship.HumanFighter;
 import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 import xyz.zlatanov.frakkintoasters.state.track.Pursuit;
 
@@ -17,7 +18,7 @@ import static xyz.zlatanov.frakkintoasters.state.track.Pursuit.START;
 
 @Getter
 @Accessors(fluent = true)
-public class CylonFleetBoard extends Board {
+public class CylonFleetBoard extends Board implements SpaceLocationsBoard {
 
     public static final List<Location>          SPACE_AREAS           = List.of(
             CYLON_FLEET_SPACE_1, CYLON_FLEET_SPACE_2, CYLON_FLEET_SPACE_3,
@@ -55,24 +56,9 @@ public class CylonFleetBoard extends Board {
         };
     }
 
-    public CylonFleetBoard place(Location in, Ship ship) {
-        assert SPACE_AREAS.contains(in);
-        shipsInSpace.put(ship, in);
-        return this;
-    }
-
-    public CylonFleetBoard remove(Ship ship) {
-        shipsInSpace.remove(ship);
-        return this;
-    }
-
-    public <T extends Ship> List<T> shipsIn(Location location, Class<T> shipClass) {
-        return shipsInSpace.entrySet().stream()
-                .filter(e -> e.getValue() == location)
-                .map(Map.Entry::getKey)
-                .filter(shipClass::isInstance)
-                .map(shipClass::cast)
-                .toList();
+    @Override
+    public List<HumanFighter> humanFightersIn(Location location) {
+        throw new UnsupportedOperationException();
     }
 
     public void advancePursuit() {
