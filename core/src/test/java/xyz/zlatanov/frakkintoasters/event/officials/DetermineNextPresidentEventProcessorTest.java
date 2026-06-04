@@ -16,10 +16,7 @@ class DetermineNextPresidentEventProcessorTest extends EventTestHarness<Determin
         setUpGame(2);
         player(1).character(GAIUS_BALTAR);
         player(2).character(LAURA_ROSLIN);
-
         execute(new DetermineNextPresidentEvent());
-
-        assertNoFollowup();
     }
 
     @Test

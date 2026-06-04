@@ -17,7 +17,6 @@ class DestroyCivilianShipEventProcessorTest extends EventTestHarness<DestroyCivi
 
         execute(new DestroyCivilianShipEvent(2000));
 
-        assertNoFollowup();
         assertEquals(6, galacticaBoard.fuel());
         assertEquals(7, galacticaBoard.morale());
         assertEquals(8, galacticaBoard.population());

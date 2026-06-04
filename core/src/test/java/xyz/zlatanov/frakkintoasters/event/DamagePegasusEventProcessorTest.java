@@ -11,9 +11,8 @@ class DamagePegasusEventProcessorTest extends EventTestHarness<DamagePegasusEven
     @Test
     void shouldDamagePegasus() {
         pegasusDamage.nextCard(PegasusDamage.PEGASUS_CIC);
-        execute(new DamagePegasusEvent());
 
-        assertNoFollowup();
+        execute(new DamagePegasusEvent());
 
         assertTrue(pegasusBoard.damagedLocations().contains(Location.PEGASUS_CIC));
         assertEquals(3, pegasusDamage.size());

@@ -25,10 +25,7 @@ class LaunchRaidersEventProcessorTest extends EventTestHarness<LaunchRaidersEven
     @Test
     void shouldLaunchThreeRaidersFromBasestar() {
         basestarAt(GALACTICA_SPACE_8_OCLOCK);
-
         execute(event);
-
-        assertNoFollowup();
         assertShipCount(GALACTICA_SPACE_8_OCLOCK, Raider.class, 3);
     }
 
@@ -39,7 +36,6 @@ class LaunchRaidersEventProcessorTest extends EventTestHarness<LaunchRaidersEven
 
         execute(event);
 
-        assertNoFollowup();
         assertShipCount(GALACTICA_SPACE_8_OCLOCK, Raider.class, 3);
         assertShipCount(GALACTICA_SPACE_2_OCLOCK, Raider.class, 3);
     }
@@ -53,7 +49,6 @@ class LaunchRaidersEventProcessorTest extends EventTestHarness<LaunchRaidersEven
 
         execute(event);
 
-        assertNoFollowup();
         assertShipCount(GALACTICA_SPACE_8_OCLOCK, Raider.class, 2);
     }
 
@@ -61,8 +56,6 @@ class LaunchRaidersEventProcessorTest extends EventTestHarness<LaunchRaidersEven
     void shouldDoNothingWhenOnlyBasestarHasDisabledHangarBay() {
         basestarAt(GALACTICA_SPACE_8_OCLOCK).damage(DISABLED_HANGAR_BAY);
         execute(event);
-
-        assertNoFollowup();
         assertShipCount(GALACTICA_SPACE_8_OCLOCK, Raider.class, 0);
     }
 
@@ -73,7 +66,6 @@ class LaunchRaidersEventProcessorTest extends EventTestHarness<LaunchRaidersEven
 
         execute(event);
 
-        assertNoFollowup();
         assertShipCount(GALACTICA_SPACE_8_OCLOCK, Raider.class, 3);
         assertShipCount(GALACTICA_SPACE_2_OCLOCK, Raider.class, 0);
     }
@@ -82,8 +74,6 @@ class LaunchRaidersEventProcessorTest extends EventTestHarness<LaunchRaidersEven
     void shouldLaunchRaidersWhenBasestarHasOtherDamageButHangarIsFunctional() {
         basestarAt(GALACTICA_SPACE_8_OCLOCK).damage(STRUCTURAL_DAMAGE);
         execute(event);
-
-        assertNoFollowup();
         assertShipCount(GALACTICA_SPACE_8_OCLOCK, Raider.class, 3);
     }
 

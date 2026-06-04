@@ -11,9 +11,8 @@ class Discard1MutinyCardEventProcessorTest extends EventTestHarness<Discard1Muti
     @Test
     void shouldDiscardSelectedCard() {
         player(1).mutinyCards().addOnTop(PANIC);
-        execute(new Discard1MutinyCardEvent(1, PANIC));
 
-        assertNoFollowup();
+        execute(new Discard1MutinyCardEvent(1, PANIC));
 
         assertTrue(player(1).mutinyCards().isEmpty());
         assertEquals(PANIC, player(1).mutinyCards().lastDiscarded());

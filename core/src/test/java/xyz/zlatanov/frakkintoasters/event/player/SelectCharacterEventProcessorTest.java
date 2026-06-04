@@ -22,21 +22,18 @@ class SelectCharacterEventProcessorTest extends EventTestHarness<SelectCharacter
     @Test
     void shouldSelectCharacter() {
         execute(select(KARA_STARBUCK_THRACE));
-        assertNoFollowup();
         assertEquals(KARA_STARBUCK_THRACE, player(1).character());
     }
 
     @Test
     void shouldPlaceInSetupLocation() {
         execute(select(LOUANNE_KAT_KATRAINE));
-        assertNoFollowup();
         assertEquals(HANGAR_DECK, locate(LOUANNE_KAT_KATRAINE));
     }
 
     @Test
     void shouldReceiveMiracleToken() {
         execute(select(CHIEF_GALEN_TYROL));
-        assertNoFollowup();
         assertTrue(player(1).hasMiracleToken());
     }
 
@@ -57,7 +54,6 @@ class SelectCharacterEventProcessorTest extends EventTestHarness<SelectCharacter
     @Test
     void shouldNotPlaceVanillaHelo() {
         execute(select(KARL_HELO_AGATHON));
-        assertNoFollowup();
         assertThrows(AssertionError.class, () -> locate(KARL_HELO_AGATHON));
     }
 
@@ -70,7 +66,6 @@ class SelectCharacterEventProcessorTest extends EventTestHarness<SelectCharacter
     @Test
     void shouldNotAllowDoubleSelection() {
         execute(select(KARA_STARBUCK_THRACE));
-        assertNoFollowup();
         assertInvalid(new SelectCharacterEvent(2, KARA_STARBUCK_THRACE));
     }
 

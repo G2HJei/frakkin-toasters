@@ -32,28 +32,20 @@ class ActivateHeavyRaidersAndCenturionsEventProcessorTest extends EventTestHarne
     @Test
     void shouldMoveHeavyRaiderTowardsNearestLaunchIcon() {
         place(GALACTICA_SPACE_2_OCLOCK, heavyRaider);
-
         execute(event);
-
-        assertNoFollowup();
         assertEquals(GALACTICA_SPACE_4_OCLOCK, locate(heavyRaider));
     }
 
     @Test
     void shouldAdvanceCenturionsOnBoardingPartyTrack() {
         boardGalactica(centurion);
-
         execute(event);
-
-        assertNoFollowup();
         assertEquals(POSITION_1, galacticaBoard.boardingPartyTrack().get(centurion));
     }
 
     @Test
     void shouldSpawnNewHeavyRaiderIfNoneOnBoard() {
         execute(event);
-
-        assertNoFollowup();
         assertShipCount(GALACTICA_SPACE_8_OCLOCK, HeavyRaider.class, 1);
     }
 
@@ -64,7 +56,6 @@ class ActivateHeavyRaidersAndCenturionsEventProcessorTest extends EventTestHarne
 
         execute(event);
 
-        assertNoFollowup();
         assertEquals(GALACTICA_SPACE_4_OCLOCK, locate(heavyRaider));
         assertEquals(POSITION_1, galacticaBoard.boardingPartyTrack().get(centurion));
     }
@@ -75,8 +66,6 @@ class ActivateHeavyRaidersAndCenturionsEventProcessorTest extends EventTestHarne
         val centurionsAvailable = cylonShips.centurions().size();
 
         execute(event);
-
-        assertNoFollowup();
 
         assertTrue(cylonShips.heavyRaiders().contains(heavyRaider));
         val track = galacticaBoard.boardingPartyTrack();
@@ -94,7 +83,6 @@ class ActivateHeavyRaidersAndCenturionsEventProcessorTest extends EventTestHarne
 
         execute(event);
 
-        assertNoFollowup();
         assertEquals(GALACTICA_SPACE_6_OCLOCK, locate(heavyRaider));
     }
 

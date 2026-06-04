@@ -37,7 +37,6 @@ class PegasusCicEventProcessorTest extends EventTestHarness<PegasusCicEvent> {
 
         execute(event);
 
-        assertNoFollowup();
         assertEquals(1, basestar.damage().size());
         assertTrue(basestar.damage().contains(DISABLED_WEAPONS));
         assertEquals(3, basestarDamageDeck.cards().size());
@@ -51,7 +50,6 @@ class PegasusCicEventProcessorTest extends EventTestHarness<PegasusCicEvent> {
 
         execute(event);
 
-        assertNoFollowup();
         assertEquals(2, basestar.damage().size());
         assertEquals(2, basestarDamageDeck.cards().size());
 
@@ -65,7 +63,6 @@ class PegasusCicEventProcessorTest extends EventTestHarness<PegasusCicEvent> {
 
         execute(event);
 
-        assertNoFollowup();
         assertNoShips(GALACTICA_SPACE_2_OCLOCK);
         assertTrue(basestar.damage().isEmpty());
         assertEquals(4, basestarDamageDeck.cards().size());

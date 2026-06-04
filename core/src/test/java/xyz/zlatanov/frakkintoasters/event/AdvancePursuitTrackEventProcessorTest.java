@@ -54,7 +54,6 @@ class AdvancePursuitTrackEventProcessorTest extends EventTestHarness<AdvancePurs
 
         execute(event);
 
-        assertNoFollowup();
         assertShipsTransfer();
     }
 

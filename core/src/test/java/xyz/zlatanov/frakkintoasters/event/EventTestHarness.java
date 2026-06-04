@@ -2,6 +2,7 @@ package xyz.zlatanov.frakkintoasters.event;
 
 import lombok.SneakyThrows;
 import lombok.val;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.fake.FakeDeck;
@@ -81,6 +82,8 @@ public abstract class EventTestHarness<E extends Event> {
     protected FakeDeck<MutinyCard>      mutinyDeck;
 
     protected Followup followup;
+
+    private boolean followupAsserted;
 
     /**
      * Sets up the game under test with default settings. All production components (decks, die) will be
@@ -217,19 +220,25 @@ public abstract class EventTestHarness<E extends Event> {
         return followup;
     }
 
-    protected void assertNoFollowup() {
-        assertEquals(Followup.NONE, followup);
-    }
-
     protected void assertFollowup(Followup expected) {
+        followupAsserted = true;
         assertEquals(expected, followup);
     }
 
     protected void assertFollowup(Event expected) {
+        followupAsserted = true;
         assertEquals(single(expected), followup);
     }
 
+    @AfterEach
+    protected void assertNoFollowUpByDefault() {
+        if (!followupAsserted) {
+            assertEquals(Followup.NONE, followup);
+        }
+    }
+
     protected void assertInvalid(E event) {
+        followupAsserted = true;
         assertThrows(InvalidActionException.class, () -> execute(event));
     }
 

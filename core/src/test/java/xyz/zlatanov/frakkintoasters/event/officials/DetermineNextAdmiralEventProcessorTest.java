@@ -16,10 +16,7 @@ class DetermineNextAdmiralEventProcessorTest extends EventTestHarness<DetermineN
     void setUp() {
         player(1).character(WILLIAM_ADAMA);
         player(2).character(HELENA_CAIN);
-
         execute(new DetermineNextAdmiralEvent());
-
-        assertNoFollowup();
     }
 
     @Test
@@ -35,10 +32,7 @@ class DetermineNextAdmiralEventProcessorTest extends EventTestHarness<DetermineN
     @Test
     void shouldIgnoreCharactersInBrig() {
         moveTo(BRIG, HELENA_CAIN);
-
         execute(new DetermineNextAdmiralEvent());
-
-        assertNoFollowup();
         assertEquals(WILLIAM_ADAMA, admiral());
     }
 
@@ -49,7 +43,6 @@ class DetermineNextAdmiralEventProcessorTest extends EventTestHarness<DetermineN
 
         execute(new DetermineNextAdmiralEvent());
 
-        assertNoFollowup();
         assertNull(admiral());
     }
 

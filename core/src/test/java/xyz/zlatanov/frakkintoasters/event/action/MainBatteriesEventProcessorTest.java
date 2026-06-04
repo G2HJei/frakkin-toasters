@@ -55,7 +55,6 @@ class MainBatteriesEventProcessorTest extends EventTestHarness<MainBatteriesEven
     void shouldDoNothingWhenNoCivilianShipsToDestroy() {
         nextRoll(1);
         execute(new MainBatteriesEvent(1, GALACTICA_SPACE_2_OCLOCK));
-        assertNoFollowup();
     }
 
     @Test
@@ -82,21 +81,18 @@ class MainBatteriesEventProcessorTest extends EventTestHarness<MainBatteriesEven
     void shouldDoNothingWhenNoVipers() {
         nextRoll(2);
         execute(new MainBatteriesEvent(1, GALACTICA_SPACE_4_OCLOCK));
-        assertNoFollowup();
     }
 
     @Test
     void shouldDoNothingWhenNoRaiders() {
         nextRoll(4);
         execute(new MainBatteriesEvent(1, GALACTICA_SPACE_6_OCLOCK));
-        assertNoFollowup();
     }
 
     @Test
     void shouldDoNothingWhenNoRaidersOnHighRoll() {
         nextRoll(8);
         execute(new MainBatteriesEvent(1, GALACTICA_SPACE_8_OCLOCK));
-        assertNoFollowup();
     }
 
     @Test

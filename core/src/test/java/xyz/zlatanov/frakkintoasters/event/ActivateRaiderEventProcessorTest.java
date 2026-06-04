@@ -48,7 +48,6 @@ class ActivateRaiderEventProcessorTest extends EventTestHarness<ActivateRaiderEv
 
         execute(event);
 
-        assertNoFollowup();
         assertEquals(GALACTICA_SPACE_2_OCLOCK, locate(raider));
     }
 
@@ -60,7 +59,6 @@ class ActivateRaiderEventProcessorTest extends EventTestHarness<ActivateRaiderEv
 
         execute(event);
 
-        assertNoFollowup();
         assertEquals(GALACTICA_SPACE_2_OCLOCK, locate(raider));
     }
 
@@ -71,7 +69,6 @@ class ActivateRaiderEventProcessorTest extends EventTestHarness<ActivateRaiderEv
 
         execute(event);
 
-        assertNoFollowup();
         assertEquals(GALACTICA_SPACE_10_OCLOCK, locate(raider));
     }
 
