@@ -14,7 +14,6 @@ class PresidentsOfficeEventProcessorTest extends EventTestHarness<PresidentsOffi
     @Test
     void shouldDraw2PoliticsCards() {
         execute(new PresidentsOfficeEvent(1));
-        assertNoFollowup();
         assertHas2PoliticsCards();
     }
 

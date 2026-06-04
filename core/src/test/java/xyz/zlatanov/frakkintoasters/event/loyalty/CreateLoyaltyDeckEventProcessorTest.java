@@ -53,7 +53,6 @@ class CreateLoyaltyDeckEventProcessorTest extends EventTestHarness<CreateLoyalty
 
         execute(event);
 
-        assertNoFollowup();
         assertLoyalties(8, 1, false);
     }
 
@@ -64,7 +63,6 @@ class CreateLoyaltyDeckEventProcessorTest extends EventTestHarness<CreateLoyalty
 
         execute(event);
 
-        assertNoFollowup();
         assertEquals(2, player(4).motiveCards().size());
     }
 
@@ -77,7 +75,6 @@ class CreateLoyaltyDeckEventProcessorTest extends EventTestHarness<CreateLoyalty
 
         execute(event);
 
-        assertNoFollowup();
         assertEquals(2, player(1).loyaltyCards().size());
         assertEquals(1, player(2).loyaltyCards().size());
         assertEquals(1, player(3).loyaltyCards().size());

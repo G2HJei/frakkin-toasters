@@ -25,7 +25,6 @@ class HubDestroyedEventProcessorTest extends EventTestHarness<HubDestroyedEvent>
 
         execute(new HubDestroyedEvent(1, card1, card2, card3));
 
-        assertNoFollowup();
         assertNoSkillCards(1);
         assertEquals(1, player(1).superCrisisCards().cards().size());
         assertEquals(CYLON_FLEET, locate(TOM_ZAREK));

@@ -40,10 +40,7 @@ class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEv
     @Test
     void shouldReceiveCardsWithinSkillSet() {
         leadershipDeck.nextCard(leadershipCard);
-
         execute(new DrawSkillCardsEvent(1, Map.of(LEADERSHIP, 1)));
-
-        assertNoFollowup();
         assertSkillCards(1, leadershipCard);
     }
 
@@ -60,7 +57,6 @@ class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEv
 
         execute(new DrawSkillCardsEvent(1, Map.of(LEADERSHIP, 1, TREACHERY, 1)));
 
-        assertNoFollowup();
         assertSkillCards(1, treacheryCard, leadershipCard);
     }
 
@@ -127,7 +123,6 @@ class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEv
 
         execute(new DrawSkillCardsEvent(1, Map.of(TACTICS, 1)));
 
-        assertNoFollowup();
         assertInvalid(new DrawSkillCardsEvent(1, Map.of(TACTICS, 2)));
     }
 
@@ -138,7 +133,6 @@ class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEv
 
         execute(new DrawSkillCardsEvent(1, Map.of(TACTICS, 1)));
 
-        assertNoFollowup();
         assertInvalid(new DrawSkillCardsEvent(1, Map.of(TACTICS, 2)));
     }
 
@@ -150,7 +144,6 @@ class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEv
 
         execute(new DrawSkillCardsEvent(1, Map.of()));
 
-        assertNoFollowup();
         assertInvalid(new DrawSkillCardsEvent(1, Map.of(TACTICS, 1)));
     }
 

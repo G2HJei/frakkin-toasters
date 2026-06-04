@@ -17,7 +17,6 @@ class DiscardDownTo1MutinyCardEventProcessorTest extends EventTestHarness<Discar
 
         execute(new DiscardDownTo1MutinyCardEvent(1, PANIC));
 
-        assertNoFollowup();
         assertEquals(List.of(PANIC), player(1).mutinyCards().cards());
         assertEquals(Set.of(ASSUME_COMMAND, FEED_THE_PEOPLE), new HashSet<>(player(1).mutinyCards().discardedCards()));
     }

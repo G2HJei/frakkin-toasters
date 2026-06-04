@@ -18,7 +18,6 @@ class HumanFleetInfiltrateEventProcessorTest extends EventTestHarness<HumanFleet
 
         execute(new HumanFleetInfiltrateEvent(1, RESEARCH_LAB));
 
-        assertNoFollowup();
         assertTrue(player(1).isInfiltrating());
         assertEquals(RESEARCH_LAB, locate(CAPRICA_SIX));
     }

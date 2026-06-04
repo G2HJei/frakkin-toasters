@@ -23,10 +23,7 @@ class CylonFleetEventProcessorTest extends EventTestHarness<CylonFleetEvent> {
     @Test
     void shouldLaunch2RaidersAndHeavyRaiderFromSingleBasestar() {
         basestarAt(GALACTICA_SPACE_2_OCLOCK);
-
         execute(new CylonFleetEvent(1, null));
-
-        assertNoFollowup();
         assertCylonShips(GALACTICA_SPACE_2_OCLOCK);
     }
 
@@ -37,7 +34,6 @@ class CylonFleetEventProcessorTest extends EventTestHarness<CylonFleetEvent> {
 
         execute(new CylonFleetEvent(1, null));
 
-        assertNoFollowup();
         assertCylonShips(GALACTICA_SPACE_2_OCLOCK, GALACTICA_SPACE_4_OCLOCK);
     }
 

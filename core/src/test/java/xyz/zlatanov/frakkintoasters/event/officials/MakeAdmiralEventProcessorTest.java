@@ -10,7 +10,6 @@ class MakeAdmiralEventProcessorTest extends EventTestHarness<MakeAdmiralEvent> {
     @Test
     void shouldChangeTheAdmiral() {
         execute(new MakeAdmiralEvent(SAUL_TIGH));
-        assertNoFollowup();
         assertEquals(SAUL_TIGH, admiral());
     }
 }

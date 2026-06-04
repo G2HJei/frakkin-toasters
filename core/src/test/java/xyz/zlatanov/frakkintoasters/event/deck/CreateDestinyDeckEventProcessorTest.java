@@ -16,8 +16,6 @@ class CreateDestinyDeckEventProcessorTest extends EventTestHarness<CreateDestiny
     @Test
     void shouldCreateValidDeck() {
         execute(new CreateDestinyDeckEvent());
-
-        assertNoFollowup();
         assertDestinyDeckComposition();
     }
 

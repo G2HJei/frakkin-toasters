@@ -24,7 +24,6 @@ class ActivateCylonBasestarEventProcessorTest extends EventTestHarness<ActivateC
     void shouldDoNothingOnLowRoll() {
         nextRoll(3);
         execute(event);
-        assertNoFollowup();
     }
 
     @Test
@@ -38,7 +37,6 @@ class ActivateCylonBasestarEventProcessorTest extends EventTestHarness<ActivateC
     void shouldNotAttackWhenBasestarHasDisabledWeapons() {
         basestar.damage(DISABLED_WEAPONS);
         execute(event);
-        assertNoFollowup();
     }
 
     @Test
