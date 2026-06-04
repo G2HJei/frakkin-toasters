@@ -50,4 +50,8 @@ public abstract class EventProcessor<T extends Event> {
             throw new FrakCallTheAdmiralException("Cannot find player for non-player event");
         }
     }
+
+    protected int rollDie() {
+        return game.die().roll();
+    }
 }
