@@ -17,7 +17,7 @@ public class DrawSkillCardsEventProcessor extends EventProcessor<DrawSkillCardsE
     public boolean isValid() {
         return meetsDrawLimit()
                 && meetsHazardousLocationReceiveSkillsStepRestrictions()
-                && (player().isHuman() ? validHumanSelection() : validRevealedCylonSelection());
+                && (player.isHuman() ? validHumanSelection() : validRevealedCylonSelection());
     }
 
     @Override
@@ -33,7 +33,7 @@ public class DrawSkillCardsEventProcessor extends EventProcessor<DrawSkillCardsE
             };
             for (int i = 0; i < entry.getValue(); i++) {
                 val card = deck.draw();
-                player().skillCards().addOnTop(card);
+                player.skillCards().addOnTop(card);
             }
         }
         return Followup.NONE;
@@ -53,7 +53,7 @@ public class DrawSkillCardsEventProcessor extends EventProcessor<DrawSkillCardsE
         if (game.step() != RECEIVE_SKILLS) {
             return true;
         }
-        val location = game.locate(player().character());
+        val location = game.locate(player.character());
         return switch (location) {
             case SICKBAY, RESURRECTION_SHIP -> selectionCount() == 1;
             case HUB_DESTROYED -> selectionCount() == 0;
@@ -76,7 +76,7 @@ public class DrawSkillCardsEventProcessor extends EventProcessor<DrawSkillCardsE
     }
 
     private boolean validHumanSelection() {
-        val skillSet = player().character().skillSet();
+        val skillSet = player.character().skillSet();
         val limits = new HashMap<SkillCardColor, Integer>();
         for (val option : skillSet) {
             for (val color : option.colors()) {
@@ -103,7 +103,7 @@ public class DrawSkillCardsEventProcessor extends EventProcessor<DrawSkillCardsE
                         });
             }
         }
-        if (player().isInfiltrating()) {
+        if (player.isInfiltrating()) {
             //cylon leader can select one extra card from within their skill set
             return new HashSet<>(limits.values())
                     .equals(Set.of(0, -1));

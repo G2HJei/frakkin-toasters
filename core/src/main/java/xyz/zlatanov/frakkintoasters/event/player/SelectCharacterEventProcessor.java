@@ -41,7 +41,7 @@ public class SelectCharacterEventProcessor extends EventProcessor<SelectCharacte
 
     @Override
     public Followup process() {
-        player().character(selectedCharacter);
+        player.character(selectedCharacter);
         val setup = selectedCharacter.setup();
         if (setup.length == 1) {
             moveToSetup();

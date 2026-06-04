@@ -7,7 +7,7 @@ public class DiscardDownTo1MutinyCardEventProcessor extends EventProcessor<Disca
 
     @Override
     public Followup process() {
-        val mutinyCardDeck = player().mutinyCards();
+        val mutinyCardDeck = player.mutinyCards();
         val cardsToDiscard = mutinyCardDeck
                 .cards()
                 .stream()
