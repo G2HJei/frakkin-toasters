@@ -10,7 +10,7 @@ import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
 
 public abstract class EventProcessor<T extends Event> {
 
-    protected Game game; //todo make private and use only utility metohds?
+    protected Game game;
     protected T    event;
 
     public final Followup execute(Game game, T event) {

@@ -3,7 +3,6 @@ package xyz.zlatanov.frakkintoasters.event.officials;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
-import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 
 import java.util.List;
@@ -13,7 +12,7 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 public class DetermineNextPresidentEventProcessor extends EventProcessor<DetermineNextPresidentEvent> implements LineOfSuccessionSelector {
 
     @Override
-    public List<Character> lineOfSuccession(Game game) {
+    public List<Character> lineOfSuccession() {
         return List.of(
                 LAURA_ROSLIN,
                 GAIUS_BALTAR,
@@ -45,7 +44,7 @@ public class DetermineNextPresidentEventProcessor extends EventProcessor<Determi
 
     @Override
     public Followup process() {
-        if (firstPresident(game)) {
+        if (firstPresident()) {
             val quorumCard = game.decks().quorum().draw();
             game.presidentHand().addOnTop(quorumCard);
         }
@@ -53,7 +52,7 @@ public class DetermineNextPresidentEventProcessor extends EventProcessor<Determi
         return Followup.NONE;
     }
 
-    private boolean firstPresident(Game game) {
+    private boolean firstPresident() {
         return game.president() == null;
     }
 }

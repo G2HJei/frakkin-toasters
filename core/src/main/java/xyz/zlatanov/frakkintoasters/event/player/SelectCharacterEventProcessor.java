@@ -5,7 +5,6 @@ import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
-import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Player;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
@@ -34,10 +33,10 @@ public class SelectCharacterEventProcessor extends EventProcessor<SelectCharacte
 
     @Override
     public boolean isValid() {
-        return !characterAlreadySelected(game)
-                && !altAlreadySelected(game)
-                && typeIsMostPlentiful(game)
-                && respectsCylonLeaderRule(game);
+        return !characterAlreadySelected()
+                && !altAlreadySelected()
+                && typeIsMostPlentiful()
+                && respectsCylonLeaderRule();
     }
 
     @Override
@@ -45,7 +44,7 @@ public class SelectCharacterEventProcessor extends EventProcessor<SelectCharacte
         player().character(selectedCharacter);
         val setup = selectedCharacter.setup();
         if (setup.length == 1) {
-            moveToSetup(game);
+            moveToSetup();
             return Followup.NONE;
         } else if (setup.length > 1) {
             return multipleSetupOptionsFollowup();
@@ -54,14 +53,14 @@ public class SelectCharacterEventProcessor extends EventProcessor<SelectCharacte
         }
     }
 
-    private boolean characterAlreadySelected(Game game) {
-        return currentlySelectedCharacters(game)
+    private boolean characterAlreadySelected() {
+        return currentlySelectedCharacters()
                 .stream()
                 .anyMatch(c -> c == selectedCharacter);
     }
 
-    private boolean altAlreadySelected(Game game) {
-        val currentSelections = currentlySelectedCharacters(game);
+    private boolean altAlreadySelected() {
+        val currentSelections = currentlySelectedCharacters();
         return Stream.of(
                         new xyz.zlatanov.frakkintoasters.state.character.Character[]{GAIUS_BALTAR, GAIUS_BALTAR_ALT},
                         new xyz.zlatanov.frakkintoasters.state.character.Character[]{KARL_HELO_AGATHON, KARL_HELO_AGATHON_ALT},
@@ -73,13 +72,13 @@ public class SelectCharacterEventProcessor extends EventProcessor<SelectCharacte
                                 (currentSelections.contains(pair[1]) && selectedCharacter == pair[0]));
     }
 
-    private boolean typeIsMostPlentiful(Game game) {
+    private boolean typeIsMostPlentiful() {
         val excludedTypes = List.of(SUPPORT, CYLON_LEADER);
         val selectedType = selectedCharacter.type();
         if (excludedTypes.contains(selectedType)) {
             return true;
         }
-        val currentlySelectedCharacters = currentlySelectedCharacters(game);
+        val currentlySelectedCharacters = currentlySelectedCharacters();
         val mostPlentiful = Arrays.stream(xyz.zlatanov.frakkintoasters.state.character.Character.values())
                 .filter(c -> !currentlySelectedCharacters.contains(c))
                 .map(xyz.zlatanov.frakkintoasters.state.character.Character::type)
@@ -97,18 +96,18 @@ public class SelectCharacterEventProcessor extends EventProcessor<SelectCharacte
         return mostPlentiful.contains(selectedType);
     }
 
-    private boolean respectsCylonLeaderRule(Game game) {
+    private boolean respectsCylonLeaderRule() {
         val playerCount = game.players().size();
         if (selectedCharacter.type() != CYLON_LEADER) {
             return playerCount < 7;
         }
-        val cylonLeaderSelected = currentlySelectedCharacters(game).stream()
+        val cylonLeaderSelected = currentlySelectedCharacters().stream()
                 .map(xyz.zlatanov.frakkintoasters.state.character.Character::type)
                 .anyMatch(t -> t == CYLON_LEADER);
         return playerCount > 3 && !cylonLeaderSelected;
     }
 
-    private List<Character> currentlySelectedCharacters(Game game) {
+    private List<Character> currentlySelectedCharacters() {
         return game.players()
                 .stream()
                 .map(Player::character)
@@ -116,7 +115,7 @@ public class SelectCharacterEventProcessor extends EventProcessor<SelectCharacte
                 .toList();
     }
 
-    private void moveToSetup(Game game) {
+    private void moveToSetup() {
         game.moveTo(selectedCharacter.setup()[0], selectedCharacter);
     }
 
