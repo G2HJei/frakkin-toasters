@@ -81,9 +81,9 @@ public abstract class EventTestHarness<E extends Event> {
     protected FakeDeck<LoyaltyCard>     loyaltyNotCylonDeck;
     protected FakeDeck<MutinyCard>      mutinyDeck;
 
-    protected Followup followup;
-
-    private boolean followupAsserted;
+    private EventProcessor<E> eventProcessor;
+    private Followup          followup;
+    private boolean           followupAsserted;
 
     /**
      * Sets up the game under test with default settings. All production components (decks, die) will be
@@ -96,6 +96,14 @@ public abstract class EventTestHarness<E extends Event> {
     @BeforeEach
     protected void setUpGame() {
         setUpGame(Game.builder().build());
+        createEventProcessor();
+    }
+
+    @AfterEach
+    protected void assertNoFollowUpByDefault() {
+        if (!followupAsserted) {
+            assertEquals(Followup.NONE, followup);
+        }
     }
 
     protected void setUpGame(int playerCount) {
@@ -172,12 +180,12 @@ public abstract class EventTestHarness<E extends Event> {
 
     @SneakyThrows
     @SuppressWarnings("unchecked")
-    private EventProcessor<E> eventProcessor() {
+    private void createEventProcessor() {
         val testClassName = getClass().getName();
         try {
             val processorClassName = testClassName.substring(0, testClassName.length() - "Test".length());
             val processorClass = Class.forName(processorClassName);
-            return (EventProcessor<E>) processorClass.getDeclaredConstructor().newInstance();
+            eventProcessor = (EventProcessor<E>) processorClass.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
             throw new RuntimeException("Test class name does not match processor name/package", e);
         }
@@ -215,9 +223,8 @@ public abstract class EventTestHarness<E extends Event> {
     }
 
     /* Event execution */
-    protected Followup execute(E event) {
-        followup = eventProcessor().execute(game, event);
-        return followup;
+    protected void execute(E event) {
+        followup = eventProcessor.execute(game, event);
     }
 
     protected void assertFollowup(Followup expected) {
@@ -228,13 +235,6 @@ public abstract class EventTestHarness<E extends Event> {
     protected void assertFollowup(Event expected) {
         followupAsserted = true;
         assertEquals(single(expected), followup);
-    }
-
-    @AfterEach
-    protected void assertNoFollowUpByDefault() {
-        if (!followupAsserted) {
-            assertEquals(Followup.NONE, followup);
-        }
     }
 
     protected void assertInvalid(E event) {

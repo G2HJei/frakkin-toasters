@@ -6,6 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
+import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
@@ -116,35 +117,36 @@ class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEv
         assertInvalid(new DrawSkillCardsEvent(1, Map.of(LEADERSHIP, 1), DRAW_EXACTLY_2));
     }
 
-    @Test
-    void shouldDrawOnly1CardWhenInSickbay() {
-        moveTo(SICKBAY, KARA_STARBUCK_THRACE);
+    @ParameterizedTest
+    @MethodSource("hazardousLocationLimits")
+    void shouldDrawLessCardsWhenInHazardousLocation(Location location, int limit) {
+        if (location == HUB_DESTROYED) {
+            galacticaBoard.destroyResurrectionShip();
+        }
+        moveTo(location, KARA_STARBUCK_THRACE);
         game.step(RECEIVE_SKILLS);
 
-        execute(new DrawSkillCardsEvent(1, Map.of(TACTICS, 1)));
-
-        assertInvalid(new DrawSkillCardsEvent(1, Map.of(TACTICS, 2)));
+        execute(new DrawSkillCardsEvent(1, limit > 0 ? Map.of(TACTICS, limit) : Map.of()));
     }
 
-    @Test
-    void shouldDrawOnly1CardWhenInResurrectionShip() {
-        moveTo(RESURRECTION_SHIP, KARA_STARBUCK_THRACE);
-        game.step(RECEIVE_SKILLS);
-
-        execute(new DrawSkillCardsEvent(1, Map.of(TACTICS, 1)));
-
-        assertInvalid(new DrawSkillCardsEvent(1, Map.of(TACTICS, 2)));
+    public static Stream<Arguments> hazardousLocationLimits() {
+        return Stream.of(
+                arguments(SICKBAY, 1),
+                arguments(RESURRECTION_SHIP, 1),
+                arguments(HUB_DESTROYED, 0)
+        );
     }
 
-    @Test
-    void shouldNotDrawWhenInHubDestroyed() {
-        galacticaBoard.destroyResurrectionShip();
-        moveTo(HUB_DESTROYED, KARA_STARBUCK_THRACE);
+    @ParameterizedTest
+    @MethodSource("hazardousLocationLimits")
+    void shouldNotDrawMoreThanHazardousLocationLimit(Location location, int limit) {
+        if (location == HUB_DESTROYED) {
+            galacticaBoard.destroyResurrectionShip();
+        }
+        moveTo(location, KARA_STARBUCK_THRACE);
         game.step(RECEIVE_SKILLS);
 
-        execute(new DrawSkillCardsEvent(1, Map.of()));
-
-        assertInvalid(new DrawSkillCardsEvent(1, Map.of(TACTICS, 1)));
+        assertInvalid(new DrawSkillCardsEvent(1, Map.of(TACTICS, ++limit)));
     }
 
     @Test

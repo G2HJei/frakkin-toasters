@@ -16,11 +16,11 @@ class DetermineNextCagEventProcessorTest extends EventTestHarness<DetermineNextC
     void setUp() {
         player(1).character(KARA_STARBUCK_THRACE);
         player(2).character(LEE_APOLLO_ADAMA);
-        execute(new DetermineNextCagEvent());
     }
 
     @Test
     void shouldRespectLineOfSuccession() {
+        execute(new DetermineNextCagEvent());
         assertEquals(LEE_APOLLO_ADAMA, cag());
     }
 

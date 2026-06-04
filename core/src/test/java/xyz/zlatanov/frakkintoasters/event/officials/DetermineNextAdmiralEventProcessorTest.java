@@ -16,16 +16,17 @@ class DetermineNextAdmiralEventProcessorTest extends EventTestHarness<DetermineN
     void setUp() {
         player(1).character(WILLIAM_ADAMA);
         player(2).character(HELENA_CAIN);
-        execute(new DetermineNextAdmiralEvent());
     }
 
     @Test
     void shouldRespectLineOfSuccession() {
+        execute(new DetermineNextAdmiralEvent());
         assertEquals(HELENA_CAIN, admiral());
     }
 
     @Test
     void shouldStartWith2Nukes() {
+        execute(new DetermineNextAdmiralEvent());
         assertEquals(2, game.nukes());
     }
 
