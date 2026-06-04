@@ -11,15 +11,15 @@ public class HumanFleetInfiltrateEventProcessor extends EventProcessor<HumanFlee
     @Override
     public boolean isValid() {
         val location = event.galacticaLocation();
-        return player().character().type() == CYLON_LEADER
+        return player.character().type() == CYLON_LEADER
                 && GALACTICA.locations().contains(location)
                 && !location.isHazardousLocation();
     }
 
     @Override
     public Followup process() {
-        player().infiltrateGalactica();
-        game.moveTo(event.galacticaLocation(), player().character());
+        player.infiltrateGalactica();
+        game.moveTo(event.galacticaLocation(), player.character());
         return Followup.NONE;
     }
 }

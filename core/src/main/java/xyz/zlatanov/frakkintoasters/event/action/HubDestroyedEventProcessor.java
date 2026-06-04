@@ -13,11 +13,11 @@ public class HubDestroyedEventProcessor extends EventProcessor<HubDestroyedEvent
     @Override
     public Followup process() {
         for (val card : List.of(event.discardCard1(), event.discardCard2(), event.discardCard3())) {
-            player().skillCards().remove(card);
+            player.skillCards().remove(card);
             game.decks().discard(card);
         }
-        player().superCrisisCards().addOnTop(game.decks().superCrisis().draw());
-        game.moveTo(CYLON_FLEET, player().character());
+        player.superCrisisCards().addOnTop(game.decks().superCrisis().draw());
+        game.moveTo(CYLON_FLEET, player.character());
         return Followup.NONE;
     }
 }

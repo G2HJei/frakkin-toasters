@@ -41,10 +41,10 @@ public class MoveEventProcessor extends EventProcessor<MoveEvent> {
     @Override
     public Followup process() {
         if (discardCard != null) {
-            player().skillCards().remove(discardCard);
+            player.skillCards().remove(discardCard);
             game.decks().discard(discardCard);
         }
-        val playerCharacter = player().character();
+        val playerCharacter = player.character();
         val isPiloting = game.locate(playerCharacter).isSpaceLocation();
         val isStayingInSpace = destination.isSpaceLocation();
         if (isPiloting) {
@@ -102,7 +102,7 @@ public class MoveEventProcessor extends EventProcessor<MoveEvent> {
 
 
     private HumanFighter humanFighter() {
-        val playerCharacter = player().character();
+        val playerCharacter = player.character();
         return GALACTICA_SPACE.locations()
                 .stream()
                 .map(galacticaBoard::shipsIn)
@@ -122,7 +122,7 @@ public class MoveEventProcessor extends EventProcessor<MoveEvent> {
     }
 
     private Location currentLocation() {
-        return game.locate(player().character());
+        return game.locate(player.character());
     }
 
     private static final Map<Location, Map<Location, Integer>> distanceLookupTable = Map.of(

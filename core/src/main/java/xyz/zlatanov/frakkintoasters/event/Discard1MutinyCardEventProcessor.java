@@ -8,7 +8,7 @@ public class Discard1MutinyCardEventProcessor extends EventProcessor<Discard1Mut
     @Override
     public Followup process() {
         val cardToDiscard = event.cardToDiscard();
-        player().mutinyCards()
+        player.mutinyCards()
                 .remove(cardToDiscard)
                 .discard(cardToDiscard);
         return Followup.NONE;
