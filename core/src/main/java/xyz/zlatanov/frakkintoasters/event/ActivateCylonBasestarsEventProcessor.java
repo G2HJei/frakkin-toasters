@@ -18,7 +18,9 @@ public class ActivateCylonBasestarsEventProcessor extends EventProcessor<Activat
         val basestars = galactica.shipsInSpace(Basestar.class);
 
         if (basestars.isEmpty()) {
-            return all(new PlaceShipOnCylonFleetBoardEvent(BASESTAR), new AdvancePursuitTrackEvent());
+            return all(
+                    new PlaceShipOnCylonFleetBoardEvent(BASESTAR),
+                    new AdvancePursuitTrackEvent());
         }
 
         return all(basestars.stream()

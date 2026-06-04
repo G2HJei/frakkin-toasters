@@ -24,7 +24,9 @@ public class LaunchRaidersEventProcessor extends EventProcessor<LaunchRaidersEve
     }
 
     private Followup placeBasestarOnCylonFleetBoard() {
-        return all(new PlaceShipOnCylonFleetBoardEvent(BASESTAR), new AdvancePursuitTrackEvent());
+        return all(
+                new PlaceShipOnCylonFleetBoardEvent(BASESTAR),
+                new AdvancePursuitTrackEvent());
     }
 
     private Followup launchRaidersFromEachBasestar(List<Basestar> basestars) {

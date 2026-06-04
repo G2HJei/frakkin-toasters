@@ -5,7 +5,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
-import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
 
 import java.util.List;
@@ -14,7 +13,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
-import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.*;
+import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.BASESTAR;
 
 class PlaceShipOnCylonFleetBoardEventProcessorTest extends EventTestHarness<PlaceShipOnCylonFleetBoardEvent> {
 
@@ -22,7 +21,7 @@ class PlaceShipOnCylonFleetBoardEventProcessorTest extends EventTestHarness<Plac
     @MethodSource("shouldPlaceShipOnCorrespondingSpaceAreaArgs")
     void shouldPlaceShipOnCorrespondingSpaceArea(Class<Ship> shipClass, int nextDieRoll, Location placementLocation) {
         nextRoll(nextDieRoll);
-        executeEvent(shipTypeFor(shipClass));
+        execute(new PlaceShipOnCylonFleetBoardEvent(ShipType.of(shipClass)));
         assertEquals(1, cylonFleetBoard.shipsIn(placementLocation, shipClass).size());
     }
 
@@ -48,20 +47,5 @@ class PlaceShipOnCylonFleetBoardEventProcessorTest extends EventTestHarness<Plac
                 arguments(Raider.class, 7, CYLON_FLEET_SPACE_7_8),
                 arguments(HeavyRaider.class, 8, CYLON_FLEET_SPACE_7_8)
         );
-    }
-
-    <T extends Ship> ShipType shipTypeFor(Class<T> shipClass) {
-        if (shipClass.equals(Raider.class)) {
-            return RAIDER;
-        } else if (shipClass.equals(HeavyRaider.class)) {
-            return HEAVY_RAIDER;
-        } else if (shipClass.equals(Basestar.class)) {
-            return BASESTAR;
-        }
-        throw new FrakCallTheAdmiralException();
-    }
-
-    Followup executeEvent(ShipType shipType) {
-        return execute(new PlaceShipOnCylonFleetBoardEvent(shipType));
     }
 }

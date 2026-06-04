@@ -7,6 +7,7 @@ import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.board.LocationsArea;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.HumanFighter;
+import xyz.zlatanov.frakkintoasters.state.ship.ViperMarkVII;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import java.util.Arrays;
@@ -16,7 +17,6 @@ import java.util.Objects;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.GALACTICA_SPACE;
-import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.VIPER_MARK_VII;
 
 public class MoveEventProcessor extends EventProcessor<MoveEvent> {
 
@@ -81,7 +81,7 @@ public class MoveEventProcessor extends EventProcessor<MoveEvent> {
         val isStayingInSpace = destination.isSpaceLocation();
         if (isPiloting && isStayingInSpace) {
             val distance = distanceLookupTable.get(currentLocation).get(destination);
-            val maxDistance = 1 + (humanFighter().type() == VIPER_MARK_VII ? 1 : 0);
+            val maxDistance = 1 + (humanFighter() instanceof ViperMarkVII ? 1 : 0);
             return distance <= maxDistance;
         } else {
             return true;
