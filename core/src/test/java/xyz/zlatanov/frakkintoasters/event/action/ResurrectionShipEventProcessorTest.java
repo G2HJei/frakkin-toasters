@@ -13,7 +13,10 @@ class ResurrectionShipEventProcessorTest extends EventTestHarness<ResurrectionSh
     @Test
     void shouldDrawSuperCrisisCard() {
         superCrisisDeck.nextCard(THE_FARM);
-        executeAndAssertNoFollowup(new ResurrectionShipEvent(1));
+
+        execute(new ResurrectionShipEvent(1));
+
+        assertNoFollowup();
         assertEquals(List.of(THE_FARM), player(1).superCrisisCards().cards());
     }
 }

@@ -21,10 +21,10 @@ class HangarDeckEventProcessorTest extends EventTestHarness<HangarDeckEvent> {
 
     @Test
     void shouldLaunchViperWithExtraAction() {
-        executeAndAssertFollowup(new HangarDeckEvent(1),
+        execute(new HangarDeckEvent(1));
+        assertFollowup(
                 all(
                         new PlayerDecisionEvent<>(1, LaunchViperEvent.class),
-                        new PlayerDecisionEvent<>(1, ActionEvent.class)
-                ));
+                        new PlayerDecisionEvent<>(1, ActionEvent.class)));
     }
 }

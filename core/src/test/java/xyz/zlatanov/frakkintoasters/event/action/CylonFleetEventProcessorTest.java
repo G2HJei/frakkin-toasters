@@ -23,7 +23,10 @@ class CylonFleetEventProcessorTest extends EventTestHarness<CylonFleetEvent> {
     @Test
     void shouldLaunch2RaidersAndHeavyRaiderFromSingleBasestar() {
         basestarAt(GALACTICA_SPACE_2_OCLOCK);
-        executeAndAssertNoFollowup(new CylonFleetEvent(1, null));
+
+        execute(new CylonFleetEvent(1, null));
+
+        assertNoFollowup();
         assertCylonShips(GALACTICA_SPACE_2_OCLOCK);
     }
 
@@ -31,18 +34,23 @@ class CylonFleetEventProcessorTest extends EventTestHarness<CylonFleetEvent> {
     void shouldLaunch2RaidersAndHeavyRaiderFromEachBasestar() {
         basestarAt(GALACTICA_SPACE_2_OCLOCK);
         basestarAt(GALACTICA_SPACE_4_OCLOCK);
-        executeAndAssertNoFollowup(new CylonFleetEvent(1, null));
+
+        execute(new CylonFleetEvent(1, null));
+
+        assertNoFollowup();
         assertCylonShips(GALACTICA_SPACE_2_OCLOCK, GALACTICA_SPACE_4_OCLOCK);
     }
 
     @Test
     void shouldFollowUpWithActivateRaidersEvent() {
-        executeAndAssertFollowup(new CylonFleetEvent(1, RAIDER), new ActivateRaidersEvent());
+        execute(new CylonFleetEvent(1, RAIDER));
+        assertFollowup(new ActivateRaidersEvent());
     }
 
     @Test
     void shouldFollowUpWithActivateHeavyRaidersAndCenturionsEvent() {
-        executeAndAssertFollowup(new CylonFleetEvent(1, HEAVY_RAIDER), new ActivateHeavyRaidersAndCenturionsEvent());
+        execute(new CylonFleetEvent(1, HEAVY_RAIDER));
+        assertFollowup(new ActivateHeavyRaidersAndCenturionsEvent());
     }
 
     @Test

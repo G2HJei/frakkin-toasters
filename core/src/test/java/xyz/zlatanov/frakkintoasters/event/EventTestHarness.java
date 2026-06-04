@@ -80,6 +80,8 @@ public abstract class EventTestHarness<E extends Event> {
     protected FakeDeck<LoyaltyCard>     loyaltyNotCylonDeck;
     protected FakeDeck<MutinyCard>      mutinyDeck;
 
+    protected Followup followup;
+
     /**
      * Sets up the game under test with default settings. All production components (decks, die) will be
      * replaced with fake/testable versions.
@@ -211,19 +213,20 @@ public abstract class EventTestHarness<E extends Event> {
 
     /* Event execution */
     protected Followup execute(E event) {
-        return eventProcessor().execute(game, event);
+        followup = eventProcessor().execute(game, event);
+        return followup;
     }
 
-    protected void executeAndAssertNoFollowup(E event) {
-        executeAndAssertFollowup(event, Followup.NONE);
+    protected void assertNoFollowup() {
+        assertEquals(Followup.NONE, followup);
     }
 
-    protected void executeAndAssertFollowup(E event, Followup expected) {
-        assertEquals(expected, execute(event));
+    protected void assertFollowup(Followup expected) {
+        assertEquals(expected, followup);
     }
 
-    protected void executeAndAssertFollowup(E event, Event expected) {
-        executeAndAssertFollowup(event, single(expected));
+    protected void assertFollowup(Event expected) {
+        assertEquals(single(expected), followup);
     }
 
     protected void assertInvalid(E event) {

@@ -16,15 +16,15 @@ class HumanFleetLookAtTopCrisisCardEventProcessorTest extends EventTestHarness<H
         crisisDeck.nextCard(DETENTE);
         val initialSize = crisisDeck.size();
 
-        executeAndAssertFollowup(new HumanFleetLookAtTopCrisisCardEvent(1),
+        execute(new HumanFleetLookAtTopCrisisCardEvent(1));
+
+        assertEquals(initialSize - 1, crisisDeck.size());
+        assertFollowup(
                 all(
                         one(
                                 new PlaceCrisisCardOnTopEvent(1, DETENTE),
                                 new PlaceCrisisCardOnBottomEvent(1, DETENTE)),
                         single(
-                                new PlayerDecisionEvent<>(1, DrawSkillCardsEvent.class, DRAW_EXACTLY_2))
-                ));
-
-        assertEquals(initialSize - 1, crisisDeck.size());
+                                new PlayerDecisionEvent<>(1, DrawSkillCardsEvent.class, DRAW_EXACTLY_2))));
     }
 }

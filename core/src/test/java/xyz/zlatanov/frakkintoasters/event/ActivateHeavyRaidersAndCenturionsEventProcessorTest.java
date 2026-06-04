@@ -32,20 +32,28 @@ class ActivateHeavyRaidersAndCenturionsEventProcessorTest extends EventTestHarne
     @Test
     void shouldMoveHeavyRaiderTowardsNearestLaunchIcon() {
         place(GALACTICA_SPACE_2_OCLOCK, heavyRaider);
-        executeAndAssertNoFollowup(event);
+
+        execute(event);
+
+        assertNoFollowup();
         assertEquals(GALACTICA_SPACE_4_OCLOCK, locate(heavyRaider));
     }
 
     @Test
     void shouldAdvanceCenturionsOnBoardingPartyTrack() {
         boardGalactica(centurion);
-        executeAndAssertNoFollowup(event);
+
+        execute(event);
+
+        assertNoFollowup();
         assertEquals(POSITION_1, galacticaBoard.boardingPartyTrack().get(centurion));
     }
 
     @Test
     void shouldSpawnNewHeavyRaiderIfNoneOnBoard() {
-        executeAndAssertNoFollowup(event);
+        execute(event);
+
+        assertNoFollowup();
         assertShipCount(GALACTICA_SPACE_8_OCLOCK, HeavyRaider.class, 1);
     }
 
@@ -54,8 +62,9 @@ class ActivateHeavyRaidersAndCenturionsEventProcessorTest extends EventTestHarne
         place(GALACTICA_SPACE_2_OCLOCK, heavyRaider);
         boardGalactica(centurion);
 
-        executeAndAssertNoFollowup(event);
+        execute(event);
 
+        assertNoFollowup();
         assertEquals(GALACTICA_SPACE_4_OCLOCK, locate(heavyRaider));
         assertEquals(POSITION_1, galacticaBoard.boardingPartyTrack().get(centurion));
     }
@@ -65,7 +74,9 @@ class ActivateHeavyRaidersAndCenturionsEventProcessorTest extends EventTestHarne
         place(GALACTICA_SPACE_4_OCLOCK, heavyRaider);
         val centurionsAvailable = cylonShips.centurions().size();
 
-        executeAndAssertNoFollowup(event);
+        execute(event);
+
+        assertNoFollowup();
 
         assertTrue(cylonShips.heavyRaiders().contains(heavyRaider));
         val track = galacticaBoard.boardingPartyTrack();
@@ -81,16 +92,19 @@ class ActivateHeavyRaidersAndCenturionsEventProcessorTest extends EventTestHarne
         }
         place(GALACTICA_SPACE_6_OCLOCK, heavyRaider);
 
-        executeAndAssertNoFollowup(event);
+        execute(event);
 
+        assertNoFollowup();
         assertEquals(GALACTICA_SPACE_6_OCLOCK, locate(heavyRaider));
     }
 
     @Test
     void shouldFollowWithPlaceHeavyRaiderOnCylonFleetBoardAndAdvancePursuitTrack() {
         setUpGame();
-        executeAndAssertFollowup(new ActivateHeavyRaidersAndCenturionsEvent(),
-                all(new PlaceShipOnCylonFleetBoardEvent(HEAVY_RAIDER),
+        execute(new ActivateHeavyRaidersAndCenturionsEvent());
+        assertFollowup(
+                all(
+                        new PlaceShipOnCylonFleetBoardEvent(HEAVY_RAIDER),
                         new AdvancePursuitTrackEvent()));
     }
 
@@ -100,8 +114,8 @@ class ActivateHeavyRaidersAndCenturionsEventProcessorTest extends EventTestHarne
                 .advanceBoardingParty()
                 .advanceBoardingParty()
                 .advanceBoardingParty();
-
-        executeAndAssertFollowup(new ActivateHeavyRaidersAndCenturionsEvent(), one(new CylonsWinEvent()));
+        execute(new ActivateHeavyRaidersAndCenturionsEvent());
+        assertFollowup(one(new CylonsWinEvent()));
     }
 
     void boardGalactica(Centurion centurion) {

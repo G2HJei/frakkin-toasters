@@ -21,19 +21,22 @@ class SelectCharacterEventProcessorTest extends EventTestHarness<SelectCharacter
 
     @Test
     void shouldSelectCharacter() {
-        executeAndAssertNoFollowup(select(KARA_STARBUCK_THRACE));
+        execute(select(KARA_STARBUCK_THRACE));
+        assertNoFollowup();
         assertEquals(KARA_STARBUCK_THRACE, player(1).character());
     }
 
     @Test
     void shouldPlaceInSetupLocation() {
-        executeAndAssertNoFollowup(select(LOUANNE_KAT_KATRAINE));
+        execute(select(LOUANNE_KAT_KATRAINE));
+        assertNoFollowup();
         assertEquals(HANGAR_DECK, locate(LOUANNE_KAT_KATRAINE));
     }
 
     @Test
     void shouldReceiveMiracleToken() {
-        executeAndAssertNoFollowup(select(CHIEF_GALEN_TYROL));
+        execute(select(CHIEF_GALEN_TYROL));
+        assertNoFollowup();
         assertTrue(player(1).hasMiracleToken());
     }
 
@@ -43,7 +46,9 @@ class SelectCharacterEventProcessorTest extends EventTestHarness<SelectCharacter
         player(3).character(KARA_STARBUCK_THRACE);
         player(2).character(TOM_ZAREK);
 
-        executeAndAssertFollowup(select(HELENA_CAIN),
+        execute(select(HELENA_CAIN));
+
+        assertFollowup(
                 one(
                         new MoveEvent(1, PEGASUS_CIC, null),
                         new MoveEvent(1, COMMAND, null)));
@@ -51,18 +56,21 @@ class SelectCharacterEventProcessorTest extends EventTestHarness<SelectCharacter
 
     @Test
     void shouldNotPlaceVanillaHelo() {
-        executeAndAssertNoFollowup(select(KARL_HELO_AGATHON));
+        execute(select(KARL_HELO_AGATHON));
+        assertNoFollowup();
         assertThrows(AssertionError.class, () -> locate(KARL_HELO_AGATHON));
     }
 
     @Test
     void shouldFollowupForApollo() {
-        executeAndAssertFollowup(select(LEE_APOLLO_ADAMA), new PlayerDecisionEvent<>(1, LaunchViperEvent.class));
+        execute(select(LEE_APOLLO_ADAMA));
+        assertFollowup(new PlayerDecisionEvent<>(1, LaunchViperEvent.class));
     }
 
     @Test
     void shouldNotAllowDoubleSelection() {
-        executeAndAssertNoFollowup(select(KARA_STARBUCK_THRACE));
+        execute(select(KARA_STARBUCK_THRACE));
+        assertNoFollowup();
         assertInvalid(new SelectCharacterEvent(2, KARA_STARBUCK_THRACE));
     }
 

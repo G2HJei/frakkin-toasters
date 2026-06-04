@@ -51,8 +51,9 @@ class CreateLoyaltyDeckEventProcessorTest extends EventTestHarness<CreateLoyalty
         player(2).character(GAIUS_BALTAR);
         player(3).character(SHARON_BOOMER_VALERII);
 
-        executeAndAssertNoFollowup(event);
+        execute(event);
 
+        assertNoFollowup();
         assertLoyalties(8, 1, false);
     }
 
@@ -61,8 +62,9 @@ class CreateLoyaltyDeckEventProcessorTest extends EventTestHarness<CreateLoyalty
         setUpGame(4);
         pickCharacters(true);
 
-        executeAndAssertNoFollowup(event);
+        execute(event);
 
+        assertNoFollowup();
         assertEquals(2, player(4).motiveCards().size());
     }
 
@@ -73,8 +75,9 @@ class CreateLoyaltyDeckEventProcessorTest extends EventTestHarness<CreateLoyalty
         player(2).character(KARL_HELO_AGATHON);
         player(3).character(SHARON_BOOMER_VALERII);
 
-        executeAndAssertNoFollowup(event);
+        execute(event);
 
+        assertNoFollowup();
         assertEquals(2, player(1).loyaltyCards().size());
         assertEquals(1, player(2).loyaltyCards().size());
         assertEquals(1, player(3).loyaltyCards().size());
@@ -86,7 +89,9 @@ class CreateLoyaltyDeckEventProcessorTest extends EventTestHarness<CreateLoyalty
         loyaltyDeck.nextCard(MUTINEER);
         pickCharacters(false);
 
-        executeAndAssertFollowup(event, new RevealMutineerEvent());
+        execute(event);
+
+        assertFollowup(new RevealMutineerEvent());
     }
 
     void pickCharacters(boolean pickCylonLeader) {

@@ -14,7 +14,8 @@ class ActivateRaidersEventProcessorTest extends EventTestHarness<ActivateRaiders
 
     @Test
     void shouldPlaceRaiderOnCylonFleetBoardWhenNoRaidersOrBasestarsOnMainBoard() {
-        executeAndAssertFollowup(event, all(new PlaceShipOnCylonFleetBoardEvent(RAIDER), new AdvancePursuitTrackEvent()));
+        execute(event);
+        assertFollowup(all(new PlaceShipOnCylonFleetBoardEvent(RAIDER), new AdvancePursuitTrackEvent()));
     }
 
 
@@ -22,8 +23,9 @@ class ActivateRaidersEventProcessorTest extends EventTestHarness<ActivateRaiders
     void shouldLaunchTwoRaidersFromEachBasestarWhenNoRaidersOnBoard() {
         basestarAt(GALACTICA_SPACE_8_OCLOCK);
 
-        executeAndAssertNoFollowup(event);
+        execute(event);
 
+        assertNoFollowup();
         assertShipCount(GALACTICA_SPACE_8_OCLOCK, Raider.class, 2);
     }
 
@@ -32,8 +34,9 @@ class ActivateRaidersEventProcessorTest extends EventTestHarness<ActivateRaiders
         basestarAt(GALACTICA_SPACE_8_OCLOCK);
         basestarAt(GALACTICA_SPACE_2_OCLOCK);
 
-        executeAndAssertNoFollowup(event);
+        execute(event);
 
+        assertNoFollowup();
         assertShipCount(GALACTICA_SPACE_8_OCLOCK, Raider.class, 2);
         assertShipCount(GALACTICA_SPACE_2_OCLOCK, Raider.class, 2);
     }
@@ -43,7 +46,9 @@ class ActivateRaidersEventProcessorTest extends EventTestHarness<ActivateRaiders
         val raider1 = raiderAt(GALACTICA_SPACE_2_OCLOCK);
         val raider2 = raiderAt(GALACTICA_SPACE_6_OCLOCK);
 
-        executeAndAssertFollowup(new ActivateRaidersEvent(),
+        execute(new ActivateRaidersEvent());
+
+        assertFollowup(
                 all(
                         new ActivateRaiderEvent(raider1.id()),
                         new ActivateRaiderEvent(raider2.id())));
