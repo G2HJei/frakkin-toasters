@@ -15,8 +15,9 @@ class DestroyCivilianShipEventProcessorTest extends EventTestHarness<DestroyCivi
         val civilianShip = new CivilianShip(2000, 2, 3, 4);
         place(GALACTICA_SPACE_2_OCLOCK, civilianShip);
 
-        executeAndAssertNoFollowup(new DestroyCivilianShipEvent(2000));
+        execute(new DestroyCivilianShipEvent(2000));
 
+        assertNoFollowup();
         assertEquals(6, galacticaBoard.fuel());
         assertEquals(7, galacticaBoard.morale());
         assertEquals(8, galacticaBoard.population());

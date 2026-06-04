@@ -17,7 +17,10 @@ class HumanFleetLookAtTopDestinationCardEventProcessorTest extends EventTestHarn
         destinationDeck.nextCard(LIONS_HEAD_NEBULA);
         val initialSize = destinationDeck.size();
 
-        executeAndAssertFollowup(new HumanFleetLookAtTopDestinationCardEvent(1),
+        execute(new HumanFleetLookAtTopDestinationCardEvent(1));
+
+        assertEquals(initialSize - 1, destinationDeck.size());
+        assertFollowup(
                 all(
                         one(
                                 new PlaceDestinationCardOnTopEvent(1, LIONS_HEAD_NEBULA),
@@ -25,7 +28,5 @@ class HumanFleetLookAtTopDestinationCardEventProcessorTest extends EventTestHarn
                         single(
                                 new PlayerDecisionEvent<>(1, DrawSkillCardsEvent.class, DRAW_EXACTLY_2))
                 ));
-
-        assertEquals(initialSize - 1, destinationDeck.size());
     }
 }

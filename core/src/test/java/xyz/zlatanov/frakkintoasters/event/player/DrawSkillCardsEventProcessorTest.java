@@ -40,7 +40,10 @@ class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEv
     @Test
     void shouldReceiveCardsWithinSkillSet() {
         leadershipDeck.nextCard(leadershipCard);
-        executeAndAssertNoFollowup(new DrawSkillCardsEvent(1, Map.of(LEADERSHIP, 1)));
+
+        execute(new DrawSkillCardsEvent(1, Map.of(LEADERSHIP, 1)));
+
+        assertNoFollowup();
         assertSkillCards(1, leadershipCard);
     }
 
@@ -55,8 +58,9 @@ class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEv
         leadershipDeck.nextCard(leadershipCard);
         treacheryDeck.nextCard(treacheryCard);
 
-        executeAndAssertNoFollowup(new DrawSkillCardsEvent(1, Map.of(LEADERSHIP, 1, TREACHERY, 1)));
+        execute(new DrawSkillCardsEvent(1, Map.of(LEADERSHIP, 1, TREACHERY, 1)));
 
+        assertNoFollowup();
         assertSkillCards(1, treacheryCard, leadershipCard);
     }
 
@@ -120,7 +124,10 @@ class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEv
     void shouldDrawOnly1CardWhenInSickbay() {
         moveTo(SICKBAY, KARA_STARBUCK_THRACE);
         game.step(RECEIVE_SKILLS);
-        assertDoesNotThrow(() -> execute(new DrawSkillCardsEvent(1, Map.of(TACTICS, 1))));
+
+        execute(new DrawSkillCardsEvent(1, Map.of(TACTICS, 1)));
+
+        assertNoFollowup();
         assertInvalid(new DrawSkillCardsEvent(1, Map.of(TACTICS, 2)));
     }
 
@@ -128,7 +135,10 @@ class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEv
     void shouldDrawOnly1CardWhenInResurrectionShip() {
         moveTo(RESURRECTION_SHIP, KARA_STARBUCK_THRACE);
         game.step(RECEIVE_SKILLS);
-        assertDoesNotThrow(() -> execute(new DrawSkillCardsEvent(1, Map.of(TACTICS, 1))));
+
+        execute(new DrawSkillCardsEvent(1, Map.of(TACTICS, 1)));
+
+        assertNoFollowup();
         assertInvalid(new DrawSkillCardsEvent(1, Map.of(TACTICS, 2)));
     }
 
@@ -137,7 +147,10 @@ class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEv
         galacticaBoard.destroyResurrectionShip();
         moveTo(HUB_DESTROYED, KARA_STARBUCK_THRACE);
         game.step(RECEIVE_SKILLS);
-        assertDoesNotThrow(() -> execute(new DrawSkillCardsEvent(1, Map.of())));
+
+        execute(new DrawSkillCardsEvent(1, Map.of()));
+
+        assertNoFollowup();
         assertInvalid(new DrawSkillCardsEvent(1, Map.of(TACTICS, 1)));
     }
 

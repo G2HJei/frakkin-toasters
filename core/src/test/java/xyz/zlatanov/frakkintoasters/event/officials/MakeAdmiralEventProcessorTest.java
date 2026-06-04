@@ -9,7 +9,8 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.SAUL_TIGH;
 class MakeAdmiralEventProcessorTest extends EventTestHarness<MakeAdmiralEvent> {
     @Test
     void shouldChangeTheAdmiral() {
-        executeAndAssertNoFollowup(new MakeAdmiralEvent(SAUL_TIGH));
+        execute(new MakeAdmiralEvent(SAUL_TIGH));
+        assertNoFollowup();
         assertEquals(SAUL_TIGH, admiral());
     }
 }

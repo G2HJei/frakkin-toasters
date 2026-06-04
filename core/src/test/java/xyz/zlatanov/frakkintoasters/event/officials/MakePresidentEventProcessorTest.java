@@ -10,7 +10,8 @@ class MakePresidentEventProcessorTest extends EventTestHarness<MakePresidentEven
 
     @Test
     void shouldChangeThePresident() {
-        executeAndAssertNoFollowup(new MakePresidentEvent(GAIUS_BALTAR));
+        execute(new MakePresidentEvent(GAIUS_BALTAR));
+        assertNoFollowup();
         assertEquals(GAIUS_BALTAR, president());
     }
 

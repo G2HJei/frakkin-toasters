@@ -17,7 +17,9 @@ class DetermineNextCagEventProcessorTest extends EventTestHarness<DetermineNextC
         player(1).character(KARA_STARBUCK_THRACE);
         player(2).character(LEE_APOLLO_ADAMA);
 
-        executeAndAssertNoFollowup(new DetermineNextCagEvent());
+        execute(new DetermineNextCagEvent());
+
+        assertNoFollowup();
     }
 
     @Test
@@ -28,7 +30,10 @@ class DetermineNextCagEventProcessorTest extends EventTestHarness<DetermineNextC
     @Test
     void shouldIgnoreCharactersInBrig() {
         moveTo(BRIG, LEE_APOLLO_ADAMA);
-        executeAndAssertNoFollowup(new DetermineNextCagEvent());
+
+        execute(new DetermineNextCagEvent());
+
+        assertNoFollowup();
         assertEquals(KARA_STARBUCK_THRACE, cag());
     }
 
@@ -36,7 +41,10 @@ class DetermineNextCagEventProcessorTest extends EventTestHarness<DetermineNextC
     void shouldElectNoOneWhenAllAreInBrig() {
         moveTo(BRIG, KARA_STARBUCK_THRACE);
         moveTo(BRIG, LEE_APOLLO_ADAMA);
-        executeAndAssertNoFollowup(new DetermineNextCagEvent());
+
+        execute(new DetermineNextCagEvent());
+
+        assertNoFollowup();
         assertNull(cag());
     }
 

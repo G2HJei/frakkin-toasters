@@ -24,14 +24,15 @@ class ActivateCylonBasestarsEventProcessorTest extends EventTestHarness<Activate
 
     @Test
     void shouldPlaceBasestarOnCylonFleetBoardWhenNoBasestarsOnMainBoard() {
-        executeAndAssertFollowup(event, all(new PlaceShipOnCylonFleetBoardEvent(BASESTAR), new AdvancePursuitTrackEvent()));
+        execute(event);
+        assertFollowup(all(new PlaceShipOnCylonFleetBoardEvent(BASESTAR), new AdvancePursuitTrackEvent()));
     }
 
     @Test
     void shouldFollowupWithSingleBasestarActivation() {
         place(GALACTICA_SPACE_8_OCLOCK, basestar1);
-
-        executeAndAssertFollowup(new ActivateCylonBasestarsEvent(), new ActivateCylonBasestarEvent(basestar1.id()));
+        execute(new ActivateCylonBasestarsEvent());
+        assertFollowup(new ActivateCylonBasestarEvent(basestar1.id()));
     }
 
     @Test
@@ -39,7 +40,9 @@ class ActivateCylonBasestarsEventProcessorTest extends EventTestHarness<Activate
         place(GALACTICA_SPACE_2_OCLOCK, basestar1);
         place(GALACTICA_SPACE_8_OCLOCK, basestar2);
 
-        executeAndAssertFollowup(new ActivateCylonBasestarsEvent(), all(
+        execute(new ActivateCylonBasestarsEvent());
+
+        assertFollowup(all(
                 new ActivateCylonBasestarEvent(basestar1.id()),
                 new ActivateCylonBasestarEvent(basestar2.id())));
     }
@@ -49,6 +52,8 @@ class ActivateCylonBasestarsEventProcessorTest extends EventTestHarness<Activate
         basestar1.damage(DISABLED_WEAPONS);
         place(GALACTICA_SPACE_8_OCLOCK, basestar1);
 
-        executeAndAssertFollowup(new ActivateCylonBasestarsEvent(), new ActivateCylonBasestarEvent(basestar1.id()));
+        execute(new ActivateCylonBasestarsEvent());
+
+        assertFollowup(new ActivateCylonBasestarEvent(basestar1.id()));
     }
 }

@@ -37,14 +37,18 @@ class ActivateRaiderEventProcessorTest extends EventTestHarness<ActivateRaiderEv
     @Test
     void shouldAttackGalacticaWhenNoCivilianShipsOnBoard() {
         place(GALACTICA_SPACE_4_OCLOCK, raider);
-        executeAndAssertFollowup(new ActivateRaiderEvent(raider.id()), new AttackGalacticaEvent(raider.id()));
+        execute(new ActivateRaiderEvent(raider.id()));
+        assertFollowup(new AttackGalacticaEvent(raider.id()));
     }
 
     @Test
     void shouldMoveRaiderTowardNearestCivilianShip() {
         place(GALACTICA_SPACE_12_OCLOCK, raider);
         place(GALACTICA_SPACE_4_OCLOCK, civilianShip);
-        executeAndAssertNoFollowup(event);
+
+        execute(event);
+
+        assertNoFollowup();
         assertEquals(GALACTICA_SPACE_2_OCLOCK, locate(raider));
     }
 
@@ -53,7 +57,10 @@ class ActivateRaiderEventProcessorTest extends EventTestHarness<ActivateRaiderEv
         place(GALACTICA_SPACE_12_OCLOCK, raider);
         place(GALACTICA_SPACE_2_OCLOCK, civilianShip);
         place(GALACTICA_SPACE_10_OCLOCK, secondCivilianShip);
-        executeAndAssertNoFollowup(event);
+
+        execute(event);
+
+        assertNoFollowup();
         assertEquals(GALACTICA_SPACE_2_OCLOCK, locate(raider));
     }
 
@@ -61,22 +68,28 @@ class ActivateRaiderEventProcessorTest extends EventTestHarness<ActivateRaiderEv
     void shouldMoveRaiderTowardNearestCivilianCounterClockwise() {
         place(GALACTICA_SPACE_12_OCLOCK, raider);
         place(GALACTICA_SPACE_10_OCLOCK, civilianShip);
-        executeAndAssertNoFollowup(event);
+
+        execute(event);
+
+        assertNoFollowup();
         assertEquals(GALACTICA_SPACE_10_OCLOCK, locate(raider));
     }
 
     @Test
     void shouldDestroyCivilianShipWhenNoVipersInArea() {
         place(GALACTICA_SPACE_4_OCLOCK, raider, civilianShip);
-        executeAndAssertFollowup(new ActivateRaiderEvent(raider.id()), new DestroyCivilianShipEvent(civilianShip.id()));
+
+        execute(new ActivateRaiderEvent(raider.id()));
+
+        assertFollowup(new DestroyCivilianShipEvent(civilianShip.id()));
         assertEquals(GALACTICA_SPACE_4_OCLOCK, locate(raider));
     }
 
     @Test
     void shouldLetPlayerChooseWhenMultipleCivilianShipsInArea() {
         place(GALACTICA_SPACE_4_OCLOCK, raider, civilianShip, secondCivilianShip);
-        executeAndAssertFollowup(
-                new ActivateRaiderEvent(raider.id()),
+        execute(new ActivateRaiderEvent(raider.id()));
+        assertFollowup(
                 one(
                         new DestroyCivilianShipEvent(civilianShip.id()),
                         new DestroyCivilianShipEvent(secondCivilianShip.id())));
@@ -85,21 +98,22 @@ class ActivateRaiderEventProcessorTest extends EventTestHarness<ActivateRaiderEv
     @Test
     void shouldAttackUnmannedViperFirst() {
         place(GALACTICA_SPACE_4_OCLOCK, raider, unmannedViper, pilotedViper);
-        executeAndAssertFollowup(new ActivateRaiderEvent(raider.id()), new AttackViperEvent(raider.id(), unmannedViper.id()));
+        execute(new ActivateRaiderEvent(raider.id()));
+        assertFollowup(new AttackViperEvent(raider.id(), unmannedViper.id()));
     }
 
     @Test
     void shouldAttackPilotedViperWhenNoUnmannedVipers() {
         place(GALACTICA_SPACE_4_OCLOCK, raider, pilotedViper);
-        executeAndAssertFollowup(new ActivateRaiderEvent(raider.id()), new AttackViperEvent(raider.id(), pilotedViper.id()));
+        execute(new ActivateRaiderEvent(raider.id()));
+        assertFollowup(new AttackViperEvent(raider.id(), pilotedViper.id()));
     }
 
     @Test
     void shouldLetPlayerChooseBetweenTwoPilotedVipers() {
         place(GALACTICA_SPACE_4_OCLOCK, raider, pilotedViper, pilotedAssaultRaptor);
-
-        executeAndAssertFollowup(
-                new ActivateRaiderEvent(raider.id()),
+        execute(new ActivateRaiderEvent(raider.id()));
+        assertFollowup(
                 one(
                         new AttackViperEvent(raider.id(), pilotedViper.id()),
                         new AttackViperEvent(raider.id(), pilotedAssaultRaptor.id())));
@@ -108,7 +122,8 @@ class ActivateRaiderEventProcessorTest extends EventTestHarness<ActivateRaiderEv
     @Test
     void shouldPreferViperOverCivilianShip() {
         place(GALACTICA_SPACE_4_OCLOCK, raider, unmannedViper, civilianShip);
-        executeAndAssertFollowup(new ActivateRaiderEvent(raider.id()), new AttackViperEvent(raider.id(), unmannedViper.id()));
+        execute(new ActivateRaiderEvent(raider.id()));
+        assertFollowup(new AttackViperEvent(raider.id(), unmannedViper.id()));
     }
 
 }

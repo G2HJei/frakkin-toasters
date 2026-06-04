@@ -17,12 +17,13 @@ class QuorumChamberEventProcessorTest extends EventTestHarness<QuorumChamberEven
         player(1).character(LAURA_ROSLIN);
         president(LAURA_ROSLIN);
 
-        executeAndAssertFollowup(new QuorumChamberEvent(1),
+        execute(new QuorumChamberEvent(1));
+
+        assertEquals(1, presidentHand.cards().size());
+        assertFollowup(
                 one(
                         new DrawQuorumCardEvent(1),
                         new PlayerDecisionEvent<>(1, PlayQuorumCardEvent.class)));
-
-        assertEquals(1, presidentHand.cards().size());
     }
 
 }

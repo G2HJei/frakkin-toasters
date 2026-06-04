@@ -34,7 +34,9 @@ class MainBatteriesEventProcessorTest extends EventTestHarness<MainBatteriesEven
         place(GALACTICA_SPACE_2_OCLOCK, civilian);
         nextRoll(1);
 
-        executeAndAssertFollowup(new MainBatteriesEvent(1, GALACTICA_SPACE_2_OCLOCK), new DestroyCivilianShipEvent(civilian.id()));
+        execute(new MainBatteriesEvent(1, GALACTICA_SPACE_2_OCLOCK));
+
+        assertFollowup(new DestroyCivilianShipEvent(civilian.id()));
     }
 
     @Test
@@ -44,45 +46,57 @@ class MainBatteriesEventProcessorTest extends EventTestHarness<MainBatteriesEven
         place(GALACTICA_SPACE_2_OCLOCK, civilian1, civilian2);
         nextRoll(1);
 
-        executeAndAssertFollowup(new MainBatteriesEvent(1, GALACTICA_SPACE_2_OCLOCK), new PlayerDecisionEvent<>(1, DestroyCivilianShipEvent.class));
+        execute(new MainBatteriesEvent(1, GALACTICA_SPACE_2_OCLOCK));
+
+        assertFollowup(new PlayerDecisionEvent<>(1, DestroyCivilianShipEvent.class));
     }
 
     @Test
     void shouldDoNothingWhenNoCivilianShipsToDestroy() {
         nextRoll(1);
-        executeAndAssertNoFollowup(new MainBatteriesEvent(1, GALACTICA_SPACE_2_OCLOCK));
+        execute(new MainBatteriesEvent(1, GALACTICA_SPACE_2_OCLOCK));
+        assertNoFollowup();
     }
 
     @Test
     void shouldDestroyOnlyViperPresent() {
         val testViper = viperAt(GALACTICA_SPACE_4_OCLOCK);
         nextRoll(2);
-        executeAndAssertFollowup(new MainBatteriesEvent(1, GALACTICA_SPACE_4_OCLOCK), new DamageHumanFighterEvent(testViper.id()));
+
+        execute(new MainBatteriesEvent(1, GALACTICA_SPACE_4_OCLOCK));
+
+        assertFollowup(new DamageHumanFighterEvent(testViper.id()));
     }
 
     @Test
     void shouldFollowWithDamageViperDecisionWhenMultipleVipersArePresent() {
         place(GALACTICA_SPACE_4_OCLOCK, viper(), viper());
         nextRoll(3);
-        executeAndAssertFollowup(new MainBatteriesEvent(1, GALACTICA_SPACE_4_OCLOCK), new PlayerDecisionEvent<>(1, DamageHumanFighterEvent.class));
+
+        execute(new MainBatteriesEvent(1, GALACTICA_SPACE_4_OCLOCK));
+
+        assertFollowup(new PlayerDecisionEvent<>(1, DamageHumanFighterEvent.class));
     }
 
     @Test
     void shouldDoNothingWhenNoVipers() {
         nextRoll(2);
-        executeAndAssertNoFollowup(new MainBatteriesEvent(1, GALACTICA_SPACE_4_OCLOCK));
+        execute(new MainBatteriesEvent(1, GALACTICA_SPACE_4_OCLOCK));
+        assertNoFollowup();
     }
 
     @Test
     void shouldDoNothingWhenNoRaiders() {
         nextRoll(4);
-        executeAndAssertNoFollowup(new MainBatteriesEvent(1, GALACTICA_SPACE_6_OCLOCK));
+        execute(new MainBatteriesEvent(1, GALACTICA_SPACE_6_OCLOCK));
+        assertNoFollowup();
     }
 
     @Test
     void shouldDoNothingWhenNoRaidersOnHighRoll() {
         nextRoll(8);
-        executeAndAssertNoFollowup(new MainBatteriesEvent(1, GALACTICA_SPACE_8_OCLOCK));
+        execute(new MainBatteriesEvent(1, GALACTICA_SPACE_8_OCLOCK));
+        assertNoFollowup();
     }
 
     @Test
@@ -90,7 +104,9 @@ class MainBatteriesEventProcessorTest extends EventTestHarness<MainBatteriesEven
         place(GALACTICA_SPACE_6_OCLOCK, raider1, raider2);
         nextRoll(4);
 
-        executeAndAssertFollowup(new MainBatteriesEvent(1, GALACTICA_SPACE_6_OCLOCK), new DestroyRaidersEvent(Set.of(raider1.id(), raider2.id())));
+        execute(new MainBatteriesEvent(1, GALACTICA_SPACE_6_OCLOCK));
+
+        assertFollowup(new DestroyRaidersEvent(Set.of(raider1.id(), raider2.id())));
     }
 
     @Test
@@ -98,7 +114,9 @@ class MainBatteriesEventProcessorTest extends EventTestHarness<MainBatteriesEven
         place(GALACTICA_SPACE_6_OCLOCK, raider1);
         nextRoll(5);
 
-        executeAndAssertFollowup(new MainBatteriesEvent(1, GALACTICA_SPACE_6_OCLOCK), new DestroyRaidersEvent(Set.of(raider1.id())));
+        execute(new MainBatteriesEvent(1, GALACTICA_SPACE_6_OCLOCK));
+
+        assertFollowup(new DestroyRaidersEvent(Set.of(raider1.id())));
     }
 
     @Test
@@ -106,7 +124,9 @@ class MainBatteriesEventProcessorTest extends EventTestHarness<MainBatteriesEven
         place(GALACTICA_SPACE_6_OCLOCK, raider1, raider2, raider3);
         nextRoll(6);
 
-        executeAndAssertFollowup(new MainBatteriesEvent(1, GALACTICA_SPACE_6_OCLOCK), new PlayerDecisionEvent<>(1, DestroyRaidersEvent.class));
+        execute(new MainBatteriesEvent(1, GALACTICA_SPACE_6_OCLOCK));
+
+        assertFollowup(new PlayerDecisionEvent<>(1, DestroyRaidersEvent.class));
     }
 
     @Test
@@ -114,7 +134,9 @@ class MainBatteriesEventProcessorTest extends EventTestHarness<MainBatteriesEven
         place(GALACTICA_SPACE_8_OCLOCK, raider1, raider2, raider3, raider4);
         nextRoll(7);
 
-        executeAndAssertFollowup(new MainBatteriesEvent(1, GALACTICA_SPACE_8_OCLOCK), new DestroyRaidersEvent(Set.of(raider1.id(), raider2.id(), raider3.id(), raider4.id())));
+        execute(new MainBatteriesEvent(1, GALACTICA_SPACE_8_OCLOCK));
+
+        assertFollowup(new DestroyRaidersEvent(Set.of(raider1.id(), raider2.id(), raider3.id(), raider4.id())));
 
     }
 
@@ -123,7 +145,9 @@ class MainBatteriesEventProcessorTest extends EventTestHarness<MainBatteriesEven
         place(GALACTICA_SPACE_8_OCLOCK, raider1, raider2, raider3, raider4, raider());
         nextRoll(8);
 
-        executeAndAssertFollowup(new MainBatteriesEvent(1, GALACTICA_SPACE_8_OCLOCK), new PlayerDecisionEvent<>(1, DestroyRaidersEvent.class));
+        execute(new MainBatteriesEvent(1, GALACTICA_SPACE_8_OCLOCK));
+
+        assertFollowup(new PlayerDecisionEvent<>(1, DestroyRaidersEvent.class));
     }
 
     @Test
@@ -131,7 +155,9 @@ class MainBatteriesEventProcessorTest extends EventTestHarness<MainBatteriesEven
         place(GALACTICA_SPACE_8_OCLOCK, raider1, raider2);
         nextRoll(7);
 
-        executeAndAssertFollowup(new MainBatteriesEvent(1, GALACTICA_SPACE_8_OCLOCK), new DestroyRaidersEvent(Set.of(raider1.id(), raider2.id())));
+        execute(new MainBatteriesEvent(1, GALACTICA_SPACE_8_OCLOCK));
+
+        assertFollowup(new DestroyRaidersEvent(Set.of(raider1.id(), raider2.id())));
 
     }
 }

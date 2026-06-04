@@ -34,7 +34,10 @@ class MoveEventProcessorTest extends EventTestHarness<MoveEvent> {
     @Test
     void shouldMoveWithinSameShip() {
         moveTo(ADMIRALS_QUARTERS, KARA_STARBUCK_THRACE);
-        executeAndAssertNoFollowup(new MoveEvent(1, RESEARCH_LAB, null));
+
+        execute(new MoveEvent(1, RESEARCH_LAB, null));
+
+        assertNoFollowup();
         assertEquals(RESEARCH_LAB, locate(KARA_STARBUCK_THRACE));
     }
 
@@ -43,8 +46,9 @@ class MoveEventProcessorTest extends EventTestHarness<MoveEvent> {
         moveTo(ADMIRALS_QUARTERS, KARA_STARBUCK_THRACE);
         player(1).gainSkillCards(skillCard);
 
-        executeAndAssertNoFollowup(new MoveEvent(1, PRESIDENTS_OFFICE, skillCard));
+        execute(new MoveEvent(1, PRESIDENTS_OFFICE, skillCard));
 
+        assertNoFollowup();
         assertEquals(PRESIDENTS_OFFICE, locate(KARA_STARBUCK_THRACE));
         assertNoSkillCards(1);
         assertEquals(skillCard, leadershipDeck.lastDiscarded());
@@ -71,7 +75,10 @@ class MoveEventProcessorTest extends EventTestHarness<MoveEvent> {
     @Test
     void shouldMoveInSpaceWhilePiloting() {
         assaultRaptorAt(GALACTICA_SPACE_2_OCLOCK).pilot(KARA_STARBUCK_THRACE);
-        executeAndAssertNoFollowup(new MoveEvent(1, GALACTICA_SPACE_4_OCLOCK, null));
+
+        execute(new MoveEvent(1, GALACTICA_SPACE_4_OCLOCK, null));
+
+        assertNoFollowup();
         assertEquals(GALACTICA_SPACE_4_OCLOCK, locate(KARA_STARBUCK_THRACE));
     }
 
@@ -80,8 +87,9 @@ class MoveEventProcessorTest extends EventTestHarness<MoveEvent> {
         val karasViper = viperAt(GALACTICA_SPACE_2_OCLOCK).pilot(KARA_STARBUCK_THRACE);
         player(1).gainSkillCards(skillCard);
 
-        executeAndAssertNoFollowup(new MoveEvent(1, PRESIDENTS_OFFICE, skillCard));
+        execute(new MoveEvent(1, PRESIDENTS_OFFICE, skillCard));
 
+        assertNoFollowup();
         assertEquals(PRESIDENTS_OFFICE, locate(KARA_STARBUCK_THRACE));
         assertTrue(galacticaBoard.reserves().contains(karasViper));
         assertNull(karasViper.pilot());

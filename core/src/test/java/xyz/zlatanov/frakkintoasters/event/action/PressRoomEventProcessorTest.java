@@ -14,7 +14,9 @@ class PressRoomEventProcessorTest extends EventTestHarness<PressRoomEvent> {
 
     @Test
     void shouldDraw1MutinyAndFollowup() {
-        executeAndAssertFollowup(new PressRoomEvent(1, 2),
+        execute(new PressRoomEvent(1, 2));
+        assertEquals(1, player(2).mutinyCards().size());
+        assertFollowup(
                 all(
                         single(
                                 new PlayerDecisionEvent<>(2, DiscardDownTo1MutinyCardEvent.class)),
@@ -22,7 +24,6 @@ class PressRoomEventProcessorTest extends EventTestHarness<PressRoomEvent> {
                                 new PlayerDecisionEvent<>(1, Discard1MutinyCardEvent.class),
                                 new NoOpEvent(1))
                 ));
-        assertEquals(1, player(2).mutinyCards().size());
     }
 
 }

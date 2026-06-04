@@ -41,7 +41,9 @@ class AdvancePursuitTrackEventProcessorTest extends EventTestHarness<AdvancePurs
     void shouldAdvancePursuitTrackWithFollowup(Pursuit startingPursuit, Pursuit pursuitAfterEvent, Followup expectedFollowup) {
         setup(startingPursuit);
 
-        executeAndAssertFollowup(event, expectedFollowup);
+        execute(event);
+
+        assertFollowup(expectedFollowup);
         assertEquals(pursuitAfterEvent, cylonFleetBoard.pursuitTrack());
     }
 
@@ -50,7 +52,9 @@ class AdvancePursuitTrackEventProcessorTest extends EventTestHarness<AdvancePurs
         setup(TWO_CIVILIAN_SHIPS);
         setupShipsToTransfer();
 
-        executeAndAssertNoFollowup(event);
+        execute(event);
+
+        assertNoFollowup();
         assertShipsTransfer();
     }
 
