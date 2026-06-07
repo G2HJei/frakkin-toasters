@@ -22,10 +22,20 @@ public class LaunchViperEventProcessor extends EventProcessor<LaunchViperEvent> 
 
     @Override
     protected boolean isValid() {
+        val pilot = event.pilot();
+        val unmannedViperId = event.unmannedViperId();
         val validLocation = VIPER_LAUNCH_SPACES.contains(event.location());
         val validShipType = VALID_LAUNCH_VIPER_SHIP_TYPES.contains(event.shipType());
-        val validPilot = event.pilot() == null || PILOT_CHARACTERS.contains(event.pilot());
-        return validLocation && validShipType && validPilot;
+        val validPilot = pilot == null || PILOT_CHARACTERS.contains(pilot);
+        val reserveFighterAvailable = galacticaBoard.reserves().stream().anyMatch(s -> s instanceof HumanFighter);
+        val noPilotNoViperToLand = pilot == null && unmannedViperId == null;
+        val pilotingFromReserves = pilot != null && reserveFighterAvailable && unmannedViperId == null;
+        val pilotingUnmannedViper = pilot != null && !reserveFighterAvailable && unmannedViperId != null && viperToLandingIsInSpace();
+        val validUnmannedViperId = noPilotNoViperToLand || pilotingFromReserves || pilotingUnmannedViper;
+        return validLocation &&
+                validShipType &&
+                validPilot &&
+                validUnmannedViperId;
     }
 
     @Override
@@ -37,6 +47,12 @@ public class LaunchViperEventProcessor extends EventProcessor<LaunchViperEvent> 
         return Followup.NONE;
     }
 
+    private boolean viperToLandingIsInSpace() {
+        return galacticaBoard.shipsInSpace(event.shipType().shipClass())
+                .stream()
+                .anyMatch(s -> s.id() == event.unmannedViperId());
+    }
+
     private HumanFighter launchShip() {
         val humanFighter = (switch (event.shipType()) {
             case VIPER -> galacticaBoard.removeFromReserves(Viper.class);
@@ -45,19 +61,18 @@ public class LaunchViperEventProcessor extends EventProcessor<LaunchViperEvent> 
             default -> throw new FrakCallTheAdmiralException();
         })
                 .map(HumanFighter.class::cast)
-                .orElseGet(() -> landUnmannedViperToPilotIt()); //todo
+                .orElseGet(this::landUnmannedViperToPilotIt);
         galacticaBoard.place(event.location(), humanFighter);
         return humanFighter;
     }
 
     private void pilotShip(HumanFighter humanFighter) {
-        val pilot = event.pilot();
-        galacticaBoard.remove(pilot);
-        humanFighter.pilot(pilot);
+        galacticaBoard.remove(event.pilot());
+        humanFighter.pilot(event.pilot());
     }
 
     private HumanFighter landUnmannedViperToPilotIt() {
-        val ship = galacticaBoard.shipInSpace(event.viperToLand(), HumanFighter.class);
+        val ship = galacticaBoard.shipInSpace(event.unmannedViperId(), HumanFighter.class);
         galacticaBoard.addToReserves(ship);
         return ship;
     }

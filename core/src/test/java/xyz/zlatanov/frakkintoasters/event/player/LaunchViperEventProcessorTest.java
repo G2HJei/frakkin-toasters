@@ -76,6 +76,19 @@ class LaunchViperEventProcessorTest extends EventTestHarness<LaunchViperEvent> {
         assertEquals(GALACTICA_SPACE_6_OCLOCK, locate(viper));
     }
 
+    @Test
+    void shouldRequireHumanFighterToLandOnlyToPilotIt() {
+        assertInvalid(new LaunchViperEvent(VIPER, GALACTICA_SPACE_4_OCLOCK, LEE_ADAMA, 1));
+    }
+
+    @Test
+    void shouldRequireValidHumanFighterToLand() {
+        moveTo(HANGAR_DECK, LEE_ADAMA);
+        launchAllHumanFighters();
+        val damagedViperId = galacticaBoard.removeFromDamagedShips(ViperMarkVII.class).orElseThrow().id();
+        assertInvalid(new LaunchViperEvent(VIPER, GALACTICA_SPACE_4_OCLOCK, LEE_ADAMA, damagedViperId));
+    }
+
     private void launchAllHumanFighters() {
         val humanFighter = galacticaBoard.removeFromReserves(Viper.class)
                 .map(HumanFighter.class::cast)
