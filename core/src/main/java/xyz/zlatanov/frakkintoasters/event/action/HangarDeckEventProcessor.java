@@ -1,6 +1,5 @@
 package xyz.zlatanov.frakkintoasters.event.action;
 
-import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.ActionEvent;
 import xyz.zlatanov.frakkintoasters.event.Followup;
@@ -13,10 +12,9 @@ public class HangarDeckEventProcessor extends EventProcessor<HangarDeckEvent> {
 
     @Override
     public Followup process() {
-        val playerNumber = event.playerNumber();
         return all(
-                new PlayerDecisionEvent<>(playerNumber, LaunchViperEvent.class),
-                new PlayerDecisionEvent<>(playerNumber, ActionEvent.class));
+                new PlayerDecisionEvent<>(player.number(), LaunchViperEvent.class),
+                new PlayerDecisionEvent<>(player.number(), ActionEvent.class));
     }
 
 }

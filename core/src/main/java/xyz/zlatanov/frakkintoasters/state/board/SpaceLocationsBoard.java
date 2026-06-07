@@ -46,7 +46,8 @@ public interface SpaceLocationsBoard {
     default <T extends Ship> List<T> shipsInSpace(Class<T> shipClass) {
         return shipsInSpace().keySet()
                 .stream()
-                .filter(s -> shipClass.equals(s.getClass()))
+                .filter(s -> shipClass.equals(s.getClass())
+                        || shipClass.equals(HumanFighter.class) && s instanceof HumanFighter)
                 .map(shipClass::cast)
                 .toList();
     }

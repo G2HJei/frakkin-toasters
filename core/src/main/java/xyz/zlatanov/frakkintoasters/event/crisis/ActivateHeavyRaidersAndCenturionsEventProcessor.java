@@ -1,7 +1,10 @@
-package xyz.zlatanov.frakkintoasters.event;
+package xyz.zlatanov.frakkintoasters.event.crisis;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
+import xyz.zlatanov.frakkintoasters.event.AdvancePursuitTrackEvent;
+import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.PlaceShipOnCylonFleetBoardEvent;
 import xyz.zlatanov.frakkintoasters.event.endgame.CylonsWinEvent;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
@@ -10,7 +13,6 @@ import xyz.zlatanov.frakkintoasters.state.ship.HeavyRaider;
 import java.util.List;
 import java.util.Map;
 
-import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.board.GalacticaBoard.VIPER_LAUNCH_SPACES;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
@@ -36,7 +38,7 @@ public class ActivateHeavyRaidersAndCenturionsEventProcessor extends EventProces
             return one(new CylonsWinEvent());
         }
         if (heavyRaiders.isEmpty() && basestars.isEmpty() && noCenturionsInPlay) {
-            return all(
+            return Followup.all(
                     new PlaceShipOnCylonFleetBoardEvent(HEAVY_RAIDER),
                     new AdvancePursuitTrackEvent());
         }

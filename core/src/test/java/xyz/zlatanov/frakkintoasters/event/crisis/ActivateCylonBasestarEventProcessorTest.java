@@ -1,7 +1,11 @@
-package xyz.zlatanov.frakkintoasters.event;
+package xyz.zlatanov.frakkintoasters.event.crisis;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import xyz.zlatanov.frakkintoasters.event.DamageGalacticaEvent;
+import xyz.zlatanov.frakkintoasters.event.DamagePegasusEvent;
+import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
+import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
@@ -30,7 +34,7 @@ class ActivateCylonBasestarEventProcessorTest extends EventTestHarness<ActivateC
     void shouldFollowupWithDamageDecisionOnHighRoll() {
         nextRoll(4);
         execute(event);
-        assertFollowup(one(new DamageGalacticaEvent(), new DamagePegasusEvent()));
+        assertFollowup(Followup.one(new DamageGalacticaEvent(), new DamagePegasusEvent()));
     }
 
     @Test

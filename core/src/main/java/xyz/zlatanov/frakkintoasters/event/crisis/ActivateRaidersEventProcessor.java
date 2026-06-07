@@ -1,7 +1,11 @@
-package xyz.zlatanov.frakkintoasters.event;
+package xyz.zlatanov.frakkintoasters.event.crisis;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
+import xyz.zlatanov.frakkintoasters.event.AdvancePursuitTrackEvent;
+import xyz.zlatanov.frakkintoasters.event.Event;
+import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.PlaceShipOnCylonFleetBoardEvent;
 import xyz.zlatanov.frakkintoasters.state.board.GalacticaBoard;
 import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 import xyz.zlatanov.frakkintoasters.state.ship.Raider;

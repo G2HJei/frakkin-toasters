@@ -1,10 +1,10 @@
 package xyz.zlatanov.frakkintoasters.event.player;
 
-import lombok.experimental.Accessors;
-import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
+import xyz.zlatanov.frakkintoasters.event.LocationEvent;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
+import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.ship.ShipType;
 
-@Accessors(fluent = true)
-public record LaunchViperEvent(int playerNumber, ShipType shipType, Location location) implements PlayerEvent {
+public record LaunchViperEvent(ShipType shipType, Location location, Character pilot,
+                               Integer viperToLand) implements LocationEvent {
 }

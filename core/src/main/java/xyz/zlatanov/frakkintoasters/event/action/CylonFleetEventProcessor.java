@@ -2,9 +2,9 @@ package xyz.zlatanov.frakkintoasters.event.action;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
-import xyz.zlatanov.frakkintoasters.event.ActivateHeavyRaidersAndCenturionsEvent;
-import xyz.zlatanov.frakkintoasters.event.ActivateRaidersEvent;
 import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.crisis.ActivateHeavyRaidersAndCenturionsEvent;
+import xyz.zlatanov.frakkintoasters.event.crisis.ActivateRaidersEvent;
 import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 
