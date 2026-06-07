@@ -1,7 +1,11 @@
-package xyz.zlatanov.frakkintoasters.event;
+package xyz.zlatanov.frakkintoasters.event.crisis;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import xyz.zlatanov.frakkintoasters.event.AttackGalacticaEvent;
+import xyz.zlatanov.frakkintoasters.event.AttackViperEvent;
+import xyz.zlatanov.frakkintoasters.event.DestroyCivilianShipEvent;
+import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.state.ship.AssaultRaptor;
 import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
 import xyz.zlatanov.frakkintoasters.state.ship.Raider;

@@ -1,15 +1,18 @@
-package xyz.zlatanov.frakkintoasters.event;
+package xyz.zlatanov.frakkintoasters.event.crisis;
 
 import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import xyz.zlatanov.frakkintoasters.event.AdvancePursuitTrackEvent;
+import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
+import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.PlaceShipOnCylonFleetBoardEvent;
 import xyz.zlatanov.frakkintoasters.event.endgame.CylonsWinEvent;
 import xyz.zlatanov.frakkintoasters.state.ship.Centurion;
 import xyz.zlatanov.frakkintoasters.state.ship.HeavyRaider;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.HEAVY_RAIDER;
@@ -91,7 +94,7 @@ class ActivateHeavyRaidersAndCenturionsEventProcessorTest extends EventTestHarne
         setUpGame();
         execute(new ActivateHeavyRaidersAndCenturionsEvent());
         assertFollowup(
-                all(
+                Followup.all(
                         new PlaceShipOnCylonFleetBoardEvent(HEAVY_RAIDER),
                         new AdvancePursuitTrackEvent()));
     }

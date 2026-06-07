@@ -1,7 +1,8 @@
-package xyz.zlatanov.frakkintoasters.event;
+package xyz.zlatanov.frakkintoasters.event.crisis;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
+import xyz.zlatanov.frakkintoasters.event.*;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
 import xyz.zlatanov.frakkintoasters.state.ship.HumanFighter;
@@ -45,7 +46,7 @@ public class ActivateRaiderEventProcessor extends EventProcessor<ActivateRaiderE
     private Followup attackViper(Raider raider, List<HumanFighter> humanFighters) {
         val unmanned = humanFighters.stream().filter(s -> s.pilot() == null).toList();
         val targets = !unmanned.isEmpty() ? unmanned : humanFighters;
-        return one(targets.stream()
+        return Followup.one(targets.stream()
                 .sorted(Comparator.comparingInt(HumanFighter::id))
                 .map(s -> new AttackViperEvent(raider.id(), s.id()))
                 .toArray(Event[]::new));

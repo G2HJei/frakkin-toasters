@@ -118,6 +118,7 @@ public class Game {
 
 
     public Game moveTo(Location location, Ship ship) {
+        //todo move to cylon fleet board location when jumping
         assert GALACTICA_SPACE.locations().contains(location);
         boards.galactica()
                 .remove(ship)

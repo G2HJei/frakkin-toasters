@@ -1,7 +1,11 @@
-package xyz.zlatanov.frakkintoasters.event;
+package xyz.zlatanov.frakkintoasters.event.crisis;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import xyz.zlatanov.frakkintoasters.event.AdvancePursuitTrackEvent;
+import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
+import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.PlaceShipOnCylonFleetBoardEvent;
 import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
@@ -25,7 +29,7 @@ class ActivateCylonBasestarsEventProcessorTest extends EventTestHarness<Activate
     @Test
     void shouldPlaceBasestarOnCylonFleetBoardWhenNoBasestarsOnMainBoard() {
         execute(event);
-        assertFollowup(all(new PlaceShipOnCylonFleetBoardEvent(BASESTAR), new AdvancePursuitTrackEvent()));
+        assertFollowup(Followup.all(new PlaceShipOnCylonFleetBoardEvent(BASESTAR), new AdvancePursuitTrackEvent()));
     }
 
     @Test
