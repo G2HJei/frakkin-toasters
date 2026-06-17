@@ -16,8 +16,10 @@ import xyz.zlatanov.frakkintoasters.state.damage.PegasusDamage;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 
 import java.util.List;
+import java.util.Optional;
 
 import static xyz.zlatanov.frakkintoasters.state.card.DestinationCard.*;
 import static xyz.zlatanov.frakkintoasters.state.util.AllCardsProvider.*;
@@ -96,5 +98,18 @@ public class DecksHolder {
                 //todo
                     throw new FrakCallTheAdmiralException();
         }
+    }
+
+    public Optional<SkillCard> drawSkillCard(SkillCardColor skillCardColor) {
+        return Optional.of(
+                switch (skillCardColor) {
+                    case POLITICS -> politics().draw();
+                    case LEADERSHIP -> leadership.draw();
+                    case TACTICS -> tactics.draw();
+                    case PILOTING -> piloting.draw();
+                    case ENGINEERING -> engineering.draw();
+                    case TREACHERY -> treachery.draw();
+                }
+        );
     }
 }

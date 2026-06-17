@@ -45,7 +45,9 @@ public class Deck<T> {
         return this;
     }
 
-    public T draw() {//todo what if empty??
+    public T draw() {
+        //todo what if empty?? make Optional<T>
+        //todo shuffle deck if empty (all decks?)
         return cards.removeFirst();
     }
 

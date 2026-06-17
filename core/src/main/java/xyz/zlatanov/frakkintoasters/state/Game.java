@@ -14,6 +14,7 @@ import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 import xyz.zlatanov.frakkintoasters.state.deck.DecksHolder;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -159,6 +160,14 @@ public class Game {
         }
         //todo implement other components' removal
         removedComponents.add(component);
+        return this;
+    }
+
+    public Game drawSkillCard(int playerNumber, SkillCardColor skillCardColor) {
+        decks.drawSkillCard(skillCardColor)
+                .ifPresent(c ->
+                        player(playerNumber)
+                                .gainSkillCards(c));
         return this;
     }
 }
