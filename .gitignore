@@ -7,9 +7,11 @@ replay_pid*
 # Gradle
 .gradle/
 build/
+gradlew.bat
 
 # IntelliJ IDEA
 .idea/
+.junie/
 
 # Claude
 .claude/

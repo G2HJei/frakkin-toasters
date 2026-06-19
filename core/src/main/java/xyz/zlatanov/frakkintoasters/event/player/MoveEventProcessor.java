@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
 
-import static xyz.zlatanov.frakkintoasters.state.board.Location.DISTANCE_LOOKUP_TABLE;
+import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.DISTANCE_LOOKUP_TABLE;
 import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.GALACTICA_SPACE;
 
 public class MoveEventProcessor extends EventProcessor<MoveEvent> {
