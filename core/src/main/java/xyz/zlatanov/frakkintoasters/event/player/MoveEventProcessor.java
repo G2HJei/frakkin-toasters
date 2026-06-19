@@ -12,10 +12,9 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Objects;
 
-import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.DISTANCE_LOOKUP_TABLE;
 import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.GALACTICA_SPACE;
 
 public class MoveEventProcessor extends EventProcessor<MoveEvent> {
@@ -80,7 +79,7 @@ public class MoveEventProcessor extends EventProcessor<MoveEvent> {
         val isPiloting = currentLocation.isSpaceLocation();
         val isStayingInSpace = destination.isSpaceLocation();
         if (isPiloting && isStayingInSpace) {
-            val distance = distanceLookupTable.get(currentLocation).get(destination);
+            val distance = DISTANCE_LOOKUP_TABLE.get(currentLocation).get(destination);
             val maxDistance = 1 + (humanFighter() instanceof ViperMarkVII ? 1 : 0);
             return distance <= maxDistance;
         } else {
@@ -124,43 +123,4 @@ public class MoveEventProcessor extends EventProcessor<MoveEvent> {
     private Location currentLocation() {
         return game.locate(player.character());
     }
-
-    private static final Map<Location, Map<Location, Integer>> distanceLookupTable = Map.of(
-            GALACTICA_SPACE_2_OCLOCK, Map.of(
-                    GALACTICA_SPACE_4_OCLOCK, 1,
-                    GALACTICA_SPACE_6_OCLOCK, 2,
-                    GALACTICA_SPACE_8_OCLOCK, 3,
-                    GALACTICA_SPACE_10_OCLOCK, 2,
-                    GALACTICA_SPACE_12_OCLOCK, 1),
-            GALACTICA_SPACE_4_OCLOCK, Map.of(
-                    GALACTICA_SPACE_6_OCLOCK, 1,
-                    GALACTICA_SPACE_8_OCLOCK, 2,
-                    GALACTICA_SPACE_10_OCLOCK, 3,
-                    GALACTICA_SPACE_12_OCLOCK, 2,
-                    GALACTICA_SPACE_2_OCLOCK, 1),
-            GALACTICA_SPACE_6_OCLOCK, Map.of(
-                    GALACTICA_SPACE_8_OCLOCK, 1,
-                    GALACTICA_SPACE_10_OCLOCK, 2,
-                    GALACTICA_SPACE_12_OCLOCK, 3,
-                    GALACTICA_SPACE_2_OCLOCK, 2,
-                    GALACTICA_SPACE_4_OCLOCK, 1),
-            GALACTICA_SPACE_8_OCLOCK, Map.of(
-                    GALACTICA_SPACE_10_OCLOCK, 1,
-                    GALACTICA_SPACE_12_OCLOCK, 2,
-                    GALACTICA_SPACE_2_OCLOCK, 3,
-                    GALACTICA_SPACE_4_OCLOCK, 2,
-                    GALACTICA_SPACE_6_OCLOCK, 1),
-            GALACTICA_SPACE_10_OCLOCK, Map.of(
-                    GALACTICA_SPACE_12_OCLOCK, 1,
-                    GALACTICA_SPACE_2_OCLOCK, 2,
-                    GALACTICA_SPACE_4_OCLOCK, 3,
-                    GALACTICA_SPACE_6_OCLOCK, 2,
-                    GALACTICA_SPACE_8_OCLOCK, 1),
-            GALACTICA_SPACE_12_OCLOCK, Map.of(
-                    GALACTICA_SPACE_2_OCLOCK, 1,
-                    GALACTICA_SPACE_4_OCLOCK, 2,
-                    GALACTICA_SPACE_6_OCLOCK, 3,
-                    GALACTICA_SPACE_8_OCLOCK, 2,
-                    GALACTICA_SPACE_10_OCLOCK, 1)
-    );
 }

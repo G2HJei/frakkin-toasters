@@ -1,6 +1,7 @@
 package xyz.zlatanov.frakkintoasters.state.board;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.CYLON_FLEET_SPACE;
@@ -66,6 +67,45 @@ public enum Location {
     //OCCUPATION_AUTHORITY,
     //BREEDERS_CANYON,
     //SHIPYARD;
+
+    public static final Map<Location, Map<Location, Integer>> DISTANCE_LOOKUP_TABLE = Map.of(
+            GALACTICA_SPACE_2_OCLOCK, Map.of(
+                    GALACTICA_SPACE_4_OCLOCK, 1,
+                    GALACTICA_SPACE_6_OCLOCK, 2,
+                    GALACTICA_SPACE_8_OCLOCK, 3,
+                    GALACTICA_SPACE_10_OCLOCK, 2,
+                    GALACTICA_SPACE_12_OCLOCK, 1),
+            GALACTICA_SPACE_4_OCLOCK, Map.of(
+                    GALACTICA_SPACE_6_OCLOCK, 1,
+                    GALACTICA_SPACE_8_OCLOCK, 2,
+                    GALACTICA_SPACE_10_OCLOCK, 3,
+                    GALACTICA_SPACE_12_OCLOCK, 2,
+                    GALACTICA_SPACE_2_OCLOCK, 1),
+            GALACTICA_SPACE_6_OCLOCK, Map.of(
+                    GALACTICA_SPACE_8_OCLOCK, 1,
+                    GALACTICA_SPACE_10_OCLOCK, 2,
+                    GALACTICA_SPACE_12_OCLOCK, 3,
+                    GALACTICA_SPACE_2_OCLOCK, 2,
+                    GALACTICA_SPACE_4_OCLOCK, 1),
+            GALACTICA_SPACE_8_OCLOCK, Map.of(
+                    GALACTICA_SPACE_10_OCLOCK, 1,
+                    GALACTICA_SPACE_12_OCLOCK, 2,
+                    GALACTICA_SPACE_2_OCLOCK, 3,
+                    GALACTICA_SPACE_4_OCLOCK, 2,
+                    GALACTICA_SPACE_6_OCLOCK, 1),
+            GALACTICA_SPACE_10_OCLOCK, Map.of(
+                    GALACTICA_SPACE_12_OCLOCK, 1,
+                    GALACTICA_SPACE_2_OCLOCK, 2,
+                    GALACTICA_SPACE_4_OCLOCK, 3,
+                    GALACTICA_SPACE_6_OCLOCK, 2,
+                    GALACTICA_SPACE_8_OCLOCK, 1),
+            GALACTICA_SPACE_12_OCLOCK, Map.of(
+                    GALACTICA_SPACE_2_OCLOCK, 1,
+                    GALACTICA_SPACE_4_OCLOCK, 2,
+                    GALACTICA_SPACE_6_OCLOCK, 3,
+                    GALACTICA_SPACE_8_OCLOCK, 2,
+                    GALACTICA_SPACE_10_OCLOCK, 1)
+    );
 
     private static final List<Location> spaceLocations     = Stream.of(GALACTICA_SPACE.locations(), CYLON_FLEET_SPACE.locations()).flatMap(List::stream).toList();
     private static final List<Location> hazardousLocations = List.of(SICKBAY, BRIG, RESURRECTION_SHIP, HUB_DESTROYED);
