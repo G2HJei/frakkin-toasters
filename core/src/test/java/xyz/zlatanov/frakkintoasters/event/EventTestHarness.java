@@ -39,7 +39,7 @@ import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.CYLON_FLEET
  * <p>
  * This class provides a test harness that replaces production game components with fake/testable versions
  * to streamline testing of game events. It maintains references to all major game components including
- * boards, ships, and valious decks of cards.
+ * boards, ships, and various decks of cards.
  * <p>
  * Test classes should extend this class and use {@link #setUpGame(Game)} to initialize the test environment
  * with a game template. All deck implementations and the die are automatically replaced with fake versions

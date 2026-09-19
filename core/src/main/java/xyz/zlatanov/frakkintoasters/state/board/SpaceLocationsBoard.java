@@ -2,6 +2,7 @@ package xyz.zlatanov.frakkintoasters.state.board;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
+import xyz.zlatanov.frakkintoasters.state.ship.CylonShip;
 import xyz.zlatanov.frakkintoasters.state.ship.HumanFighter;
 import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 
@@ -47,7 +48,8 @@ public interface SpaceLocationsBoard {
         return shipsInSpace().keySet()
                 .stream()
                 .filter(s -> shipClass.equals(s.getClass())
-                        || shipClass.equals(HumanFighter.class) && s instanceof HumanFighter)
+                        || shipClass.equals(HumanFighter.class) && s instanceof HumanFighter
+                        || shipClass.equals(CylonShip.class) && s instanceof CylonShip)
                 .map(shipClass::cast)
                 .toList();
     }

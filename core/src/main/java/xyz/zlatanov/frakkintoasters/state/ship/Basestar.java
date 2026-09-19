@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-public class Basestar implements Ship {
+public class Basestar implements CylonShip {
 
     private final int                  id;
     private final List<BasestarDamage> damage = new ArrayList<>();
