@@ -26,7 +26,8 @@ public class LaunchViperEventProcessor extends EventProcessor<LaunchViperEvent> 
         val unmannedViperId = event.unmannedViperId();
         val validLocation = VIPER_LAUNCH_SPACES.contains(event.location());
         val validShipType = VALID_LAUNCH_VIPER_SHIP_TYPES.contains(event.shipType());
-        val validPilot = pilot == null || PILOT_CHARACTERS.contains(pilot);
+        val validPilot = pilot == null || PILOT_CHARACTERS.contains(pilot); //todo  && player.character() == pilot;
+        val validMandatoryPilot = !event.mustLaunchInViper() || pilot != null;
         val reserveFighterAvailable = galacticaBoard.reserves().stream().anyMatch(s -> s instanceof HumanFighter);
         val noPilotNoViperToLand = pilot == null && unmannedViperId == null;
         val pilotingFromReserves = pilot != null && reserveFighterAvailable && unmannedViperId == null;
@@ -35,6 +36,7 @@ public class LaunchViperEventProcessor extends EventProcessor<LaunchViperEvent> 
         return validLocation &&
                 validShipType &&
                 validPilot &&
+                validMandatoryPilot &&
                 validUnmannedViperId;
     }
 
