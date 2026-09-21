@@ -8,7 +8,7 @@ import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.LaunchViperEvent;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
-import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.MUST_PILOT;
+import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.MUST_LAUNCH_IN_VIPER;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.HANGAR_DECK;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.LOUIS_HOSHI;
@@ -23,7 +23,7 @@ class HangarDeckEventProcessorTest extends EventTestHarness<HangarDeckEvent> {
         assertFollowup(
                 all(
                         single(
-                                new PlayerDecisionEvent<>(1, LaunchViperEvent.class, MUST_PILOT)),
+                                new PlayerDecisionEvent<>(1, LaunchViperEvent.class, MUST_LAUNCH_IN_VIPER)),
                         one(
                                 new PlayerDecisionEvent<>(1, ActionEvent.class),
                                 new NoOpEvent(1))));

@@ -4,5 +4,5 @@ public enum EventConstraint {
     DRAW_EXACTLY_2,
     DRAW_EXACTLY_3,
     DRAW_EXACTLY_5,
-    MUST_PILOT
+    MUST_LAUNCH_IN_VIPER
 }

@@ -9,7 +9,7 @@ import xyz.zlatanov.frakkintoasters.event.player.LaunchViperEvent;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillSetOption;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
-import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.MUST_PILOT;
+import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.MUST_LAUNCH_IN_VIPER;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.PILOTING;
 
 public class HangarDeckEventProcessor extends EventProcessor<HangarDeckEvent> {
@@ -26,7 +26,7 @@ public class HangarDeckEventProcessor extends EventProcessor<HangarDeckEvent> {
     public Followup process() {
         return all(
                 single(
-                        new PlayerDecisionEvent<>(player.number(), LaunchViperEvent.class, MUST_PILOT)),
+                        new PlayerDecisionEvent<>(player.number(), LaunchViperEvent.class, MUST_LAUNCH_IN_VIPER)),
                 one(
                         new PlayerDecisionEvent<>(player.number(), ActionEvent.class),
                         new NoOpEvent(player.number())));

@@ -19,12 +19,12 @@ class LaunchViperEventProcessorTest extends EventTestHarness<LaunchViperEvent> {
 
     @Test
     void shouldNotAllowIllegalLocation() {
-        assertInvalid(new LaunchViperEvent(VIPER, GALACTICA_SPACE_2_OCLOCK, null, null));
+        assertInvalid(new LaunchViperEvent(VIPER, GALACTICA_SPACE_2_OCLOCK));
     }
 
     @Test
     void shouldNotAllowCylonShipsAndRaptors() {
-        assertInvalid(new LaunchViperEvent(RAPTOR, GALACTICA_SPACE_4_OCLOCK, null, null));
+        assertInvalid(new LaunchViperEvent(RAPTOR, GALACTICA_SPACE_4_OCLOCK));
     }
 
     @Test
@@ -33,22 +33,27 @@ class LaunchViperEventProcessorTest extends EventTestHarness<LaunchViperEvent> {
     }
 
     @Test
+    void shouldNotAllowNoPilotWithConstraint() {
+        assertInvalid(new LaunchViperEvent(VIPER, GALACTICA_SPACE_6_OCLOCK, null, null, true));
+    }
+
+    @Test
     void shouldLaunchViper() {
-        execute(new LaunchViperEvent(VIPER, GALACTICA_SPACE_4_OCLOCK, null, null));
+        execute(new LaunchViperEvent(VIPER, GALACTICA_SPACE_4_OCLOCK));
         assertShipCount(GALACTICA_SPACE_4_OCLOCK, Viper.class, 1);
     }
 
     @Test
     void shouldLaunchViperMarkVII() {
         galacticaBoard.addToReserves(new ViperMarkVII(0));
-        execute(new LaunchViperEvent(VIPER_MARK_VII, GALACTICA_SPACE_6_OCLOCK, null, null));
+        execute(new LaunchViperEvent(VIPER_MARK_VII, GALACTICA_SPACE_6_OCLOCK));
         assertShipCount(GALACTICA_SPACE_6_OCLOCK, ViperMarkVII.class, 1);
     }
 
     @Test
     void shouldLaunchAssaultRaptor() {
         galacticaBoard.addToReserves(new AssaultRaptor(0));
-        execute(new LaunchViperEvent(ASSAULT_RAPTOR, GALACTICA_SPACE_6_OCLOCK, null, null));
+        execute(new LaunchViperEvent(ASSAULT_RAPTOR, GALACTICA_SPACE_6_OCLOCK));
         assertShipCount(GALACTICA_SPACE_6_OCLOCK, AssaultRaptor.class, 1);
     }
 
