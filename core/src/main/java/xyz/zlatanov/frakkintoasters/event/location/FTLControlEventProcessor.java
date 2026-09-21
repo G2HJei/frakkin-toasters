@@ -9,6 +9,9 @@ import xyz.zlatanov.frakkintoasters.event.JumpingTheFleetEvent;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 
 public class FTLControlEventProcessor extends EventProcessor<FTLControlEvent> {
+
+    //todo validate preparation is @ MINUS_1/3
+
     @Override
     public Followup process() {
         val roll = rollDie();
