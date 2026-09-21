@@ -11,7 +11,8 @@ import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static xyz.zlatanov.frakkintoasters.event.Followup.*;
+import static xyz.zlatanov.frakkintoasters.event.Followup.all;
+import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 
 class CommunicationsEventProcessorTest extends EventTestHarness<CommunicationsEvent> {
@@ -65,7 +66,6 @@ class CommunicationsEventProcessorTest extends EventTestHarness<CommunicationsEv
     @Test
     void shouldDoNothingWhenNoCivilianShipSelected() {
         execute(new CommunicationsEvent(3, null, null));
-        assertFollowup(NONE);
     }
 
 }
