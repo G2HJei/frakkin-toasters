@@ -3,6 +3,7 @@ package xyz.zlatanov.frakkintoasters.event.player;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 
 import java.util.HashMap;
@@ -46,6 +47,7 @@ public class DrawSkillCardsEventProcessor extends EventProcessor<DrawSkillCardsE
             case DRAW_EXACTLY_2 -> selectionCount == 2;
             case DRAW_EXACTLY_3 -> selectionCount == 3;
             case DRAW_EXACTLY_5 -> selectionCount == 5;
+            default -> throw new FrakCallTheAdmiralException();
         };
     }
 
