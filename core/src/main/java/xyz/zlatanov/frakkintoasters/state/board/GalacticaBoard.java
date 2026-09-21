@@ -5,6 +5,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
+import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
 import xyz.zlatanov.frakkintoasters.state.track.BoardingParty;
 import xyz.zlatanov.frakkintoasters.state.track.JumpPreparation;
@@ -35,7 +36,7 @@ public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard {
     private final Set<Ship>                     reserves             = new HashSet<>(Set.of(new Viper(1), new Viper(2), new Viper(3), new Viper(4), new Viper(5), new Viper(6), new Raptor(11), new Raptor(12), new Raptor(13), new Raptor(14), new AssaultRaptor(21)));
     private final Set<Ship>                     damagedShips         = new HashSet<>(Set.of(new ViperMarkVII(71), new ViperMarkVII(72), new ViperMarkVII(73), new ViperMarkVII(74)));
     private final Map<Ship, Location>           shipsInSpace         = new HashMap<>();
-    private final Map<Centurion, BoardingParty> boardingPartyTrack   = new HashMap<>();
+    private final Map<Centurion, BoardingParty> boardingPartyTrack   = new LinkedHashMap<>();
 
     public static final List<Location> VIPER_LAUNCH_SPACES = List.of(GALACTICA_SPACE_4_OCLOCK, GALACTICA_SPACE_6_OCLOCK);
 
@@ -47,7 +48,7 @@ public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard {
                 : shipsInSpace.entrySet()
                 .stream()
                 .filter(es -> es.getKey() instanceof HumanFighter
-                              && ((HumanFighter) es.getKey()).pilot() == character)
+                        && ((HumanFighter) es.getKey()).pilot() == character)
                 .findFirst()
                 .map(Map.Entry::getValue);
     }
@@ -115,6 +116,15 @@ public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard {
         val next = current == autoJump ? 0 : current + 1;
         jumpPreparation = JumpPreparation.values()[next];
         return this;
+    }
+
+    public Centurion destroyCenturion(int centurionId) {
+        val centurion = boardingPartyTrack.keySet().stream()
+                .filter(c -> centurionId == c.id())
+                .findFirst()
+                .orElseThrow(FrakCallTheAdmiralException::new);
+        boardingPartyTrack.remove(centurion);
+        return centurion;
     }
 
     public GalacticaBoard decreaseFood(int amount) {
