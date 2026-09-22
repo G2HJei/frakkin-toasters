@@ -2,10 +2,10 @@ package xyz.zlatanov.frakkintoasters.event.crisis;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.event.DamageGalacticaEvent;
-import xyz.zlatanov.frakkintoasters.event.DamagePegasusEvent;
 import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.ship.DamageGalacticaEvent;
+import xyz.zlatanov.frakkintoasters.event.ship.DamagePegasusEvent;
 import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;

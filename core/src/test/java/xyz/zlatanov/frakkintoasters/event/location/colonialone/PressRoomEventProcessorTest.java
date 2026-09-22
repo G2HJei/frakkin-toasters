@@ -1,0 +1,29 @@
+package xyz.zlatanov.frakkintoasters.event.location.colonialone;
+
+import org.junit.jupiter.api.Test;
+import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
+import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
+import xyz.zlatanov.frakkintoasters.event.deck.Discard1MutinyCardEvent;
+import xyz.zlatanov.frakkintoasters.event.deck.DiscardDownTo1MutinyCardEvent;
+import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static xyz.zlatanov.frakkintoasters.event.Followup.*;
+
+class PressRoomEventProcessorTest extends EventTestHarness<PressRoomEvent> {
+
+    @Test
+    void shouldDraw1MutinyAndFollowup() {
+        execute(new PressRoomEvent(1, 2));
+        assertEquals(1, player(2).mutinyCards().size());
+        assertFollowup(
+                all(
+                        single(
+                                new PlayerDecisionEvent<>(2, DiscardDownTo1MutinyCardEvent.class)),
+                        one(
+                                new PlayerDecisionEvent<>(1, Discard1MutinyCardEvent.class),
+                                new NoOpEvent(1))
+                ));
+    }
+
+}
