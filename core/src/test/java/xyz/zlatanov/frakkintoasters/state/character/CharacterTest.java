@@ -1,7 +1,6 @@
 package xyz.zlatanov.frakkintoasters.state.character;
 
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.state.skill.SkillSetOption;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.CHIEF_GALEN_TYROL;

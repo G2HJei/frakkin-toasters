@@ -32,6 +32,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
+import static xyz.zlatanov.frakkintoasters.event.Followup.skillCheckFollowup;
 import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.CYLON_FLEET_SPACE;
 
 /**
@@ -240,6 +241,11 @@ public abstract class EventTestHarness<E extends Event> {
     protected void assertInvalid(E event) {
         followupAsserted = true;
         assertThrows(InvalidActionException.class, () -> execute(event));
+    }
+
+    protected void assertSkillCheckTriggered() {
+        followupAsserted = true;
+        assertEquals(skillCheckFollowup(game), followup);
     }
 
     /* Ships */
