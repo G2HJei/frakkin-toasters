@@ -10,13 +10,15 @@ import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 
 public class QuorumChamberEventProcessor extends EventProcessor<QuorumChamberEvent> {
+
+    // todo verify acting player is the president
     @Override
     public Followup process() {
         val drawnCard = game.decks().quorum().draw();
         game.presidentHand().addOnTop(drawnCard);
 
         return one(
-                new DrawQuorumCardEvent(event.playerNumber()),
+                new DrawQuorumCardEvent(event.playerNumber()), // todo this should be player decision
                 new PlayerDecisionEvent<>(event.playerNumber(), PlayQuorumCardEvent.class));
     }
 }

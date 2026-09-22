@@ -15,6 +15,7 @@ import xyz.zlatanov.frakkintoasters.state.deck.DecksHolder;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCheck;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -32,6 +33,8 @@ public class Game {
     // todo separate counters in own classes?
     // todo add turns
     @Builder.Default
+    private ObjectiveCard        objective         = KOBOL;
+    @Builder.Default
     private Map<Integer, Player> players           = Map.of(1, new Player(1), 2, new Player(2), 3, new Player(3));
     @Setter
     @Builder.Default
@@ -41,8 +44,6 @@ public class Game {
     private GameStep             step              = SETUP;
     @Builder.Default
     private Die                  die               = new Die();
-    @Builder.Default
-    private ObjectiveCard        objective         = KOBOL;
     @Builder.Default
     private BoardsHolder         boards            = new BoardsHolder();
     @Builder.Default
@@ -59,6 +60,8 @@ public class Game {
     private Character            admiral;
     @Setter
     private Character            cag;
+    @Setter
+    private SkillCheck           activeSkillCheck;
     @Builder.Default
     private List<Object>         removedComponents = new ArrayList<>();
 
