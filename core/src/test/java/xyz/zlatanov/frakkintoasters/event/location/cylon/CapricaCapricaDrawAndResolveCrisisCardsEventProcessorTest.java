@@ -1,4 +1,4 @@
-package xyz.zlatanov.frakkintoasters.event.action;
+package xyz.zlatanov.frakkintoasters.event.location.cylon;
 
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
@@ -8,12 +8,12 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard.AIRLOCK_LEAK;
 import static xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard.DETENTE;
 
-class DrawAndResolveCrisisCardsEventProcessorTest extends EventTestHarness<DrawAndResolveCrisisCardsEvent> {
+class CapricaCapricaDrawAndResolveCrisisCardsEventProcessorTest extends EventTestHarness<CapricaDrawAndResolveCrisisCardsEvent> {
 
     @Test
     void shouldFollowUpWithOneOfTheCrisisCards() {
         crisisDeck.nextCard(DETENTE, AIRLOCK_LEAK);
-        execute(new DrawAndResolveCrisisCardsEvent(1));
+        execute(new CapricaDrawAndResolveCrisisCardsEvent(1));
         assertFollowup(
                 one(
                         new ResolveCapricaCrisisCardEvent(1, DETENTE, AIRLOCK_LEAK),

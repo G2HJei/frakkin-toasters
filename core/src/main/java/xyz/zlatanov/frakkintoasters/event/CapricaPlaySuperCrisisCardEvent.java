@@ -1,0 +1,9 @@
+package xyz.zlatanov.frakkintoasters.event;
+
+import xyz.zlatanov.frakkintoasters.state.crisis.SuperCrisisCard;
+
+public record CapricaPlaySuperCrisisCardEvent(int playerNumber,
+                                              SuperCrisisCard superCrisisCard) implements ActionEvent {
+
+    //todo follow up with chosen card's specific event
+}
