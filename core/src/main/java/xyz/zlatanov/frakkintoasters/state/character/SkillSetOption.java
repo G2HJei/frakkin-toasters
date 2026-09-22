@@ -1,6 +1,7 @@
-package xyz.zlatanov.frakkintoasters.state.skill;
+package xyz.zlatanov.frakkintoasters.state.character;
 
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 
 import java.util.Arrays;
 import java.util.HashSet;
