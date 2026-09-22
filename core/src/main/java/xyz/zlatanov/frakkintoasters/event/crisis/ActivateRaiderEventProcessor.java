@@ -2,7 +2,11 @@ package xyz.zlatanov.frakkintoasters.event.crisis;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
-import xyz.zlatanov.frakkintoasters.event.*;
+import xyz.zlatanov.frakkintoasters.event.AttackGalacticaEvent;
+import xyz.zlatanov.frakkintoasters.event.AttackViperEvent;
+import xyz.zlatanov.frakkintoasters.event.Event;
+import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.ship.DestroyCivilianShipEvent;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
 import xyz.zlatanov.frakkintoasters.state.ship.HumanFighter;

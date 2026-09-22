@@ -1,0 +1,37 @@
+package xyz.zlatanov.frakkintoasters.event.location.cylon;
+
+import lombok.val;
+import org.junit.jupiter.api.Test;
+import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
+import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
+import xyz.zlatanov.frakkintoasters.event.player.DrawSkillCardsEvent;
+import xyz.zlatanov.frakkintoasters.event.player.PlaceDestinationCardAtBottomEvent;
+import xyz.zlatanov.frakkintoasters.event.player.PlaceDestinationCardOnTopEvent;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static xyz.zlatanov.frakkintoasters.event.Followup.all;
+import static xyz.zlatanov.frakkintoasters.event.Followup.single;
+import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DRAW_EXACTLY_2;
+import static xyz.zlatanov.frakkintoasters.state.card.DestinationCard.LIONS_HEAD_NEBULA;
+
+class HumanFleetLookAtTopDestinationCardEventProcessorTest extends EventTestHarness<HumanFleetLookAtTopDestinationCardEvent> {
+
+    @Test
+    void shouldDrawCardAndFollowUpWithPlacementChoiceAndSkillDraw() {
+        destinationDeck.nextCard(LIONS_HEAD_NEBULA);
+        val initialSize = destinationDeck.size();
+
+        execute(new HumanFleetLookAtTopDestinationCardEvent(1));
+
+        assertEquals(initialSize - 1, destinationDeck.size());
+        assertFollowup(
+                all(
+                        Followup.one(
+                                new PlaceDestinationCardOnTopEvent(1, LIONS_HEAD_NEBULA),
+                                new PlaceDestinationCardAtBottomEvent(1, LIONS_HEAD_NEBULA)),
+                        single(
+                                new PlayerDecisionEvent<>(1, DrawSkillCardsEvent.class, DRAW_EXACTLY_2))
+                ));
+    }
+}

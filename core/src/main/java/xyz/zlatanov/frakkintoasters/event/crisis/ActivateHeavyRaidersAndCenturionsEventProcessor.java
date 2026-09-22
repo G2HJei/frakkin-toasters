@@ -2,10 +2,10 @@ package xyz.zlatanov.frakkintoasters.event.crisis;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
-import xyz.zlatanov.frakkintoasters.event.AdvancePursuitTrackEvent;
 import xyz.zlatanov.frakkintoasters.event.Followup;
-import xyz.zlatanov.frakkintoasters.event.PlaceShipOnCylonFleetBoardEvent;
+import xyz.zlatanov.frakkintoasters.event.board.AdvancePursuitTrackEvent;
 import xyz.zlatanov.frakkintoasters.event.endgame.CylonsWinEvent;
+import xyz.zlatanov.frakkintoasters.event.ship.PlaceShipOnCylonFleetBoardEvent;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 import xyz.zlatanov.frakkintoasters.state.ship.HeavyRaider;
