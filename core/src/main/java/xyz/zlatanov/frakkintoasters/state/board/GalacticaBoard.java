@@ -1,7 +1,6 @@
 package xyz.zlatanov.frakkintoasters.state.board;
 
 import lombok.Getter;
-import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
@@ -26,8 +25,6 @@ public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard {
     private       int                           morale               = 10;
     private       int                           population           = 12;
     private       JumpPreparation               jumpPreparation      = JumpPreparation.START;
-    @Setter
-    private       boolean                       engineRoomActivated  = false;
     private       boolean                       colonialOneDestroyed = false;
     private       boolean                       hubDestroyed         = false;
     private final Map<Character, Location>      characters           = new HashMap<>();
