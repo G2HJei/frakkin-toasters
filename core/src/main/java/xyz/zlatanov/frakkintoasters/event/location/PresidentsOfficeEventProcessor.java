@@ -1,4 +1,4 @@
-package xyz.zlatanov.frakkintoasters.event.action;
+package xyz.zlatanov.frakkintoasters.event.location;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
