@@ -19,7 +19,7 @@ class EngineRoomEventProcessorTest extends EventTestHarness<EngineRoomEvent> {
 
         execute(new EngineRoomEvent(1, skillCard1, skillCard2));
 
-        assertTrue(galacticaBoard.engineRoomActivated());
+        assertTrue(pegasusBoard.engineRoomActivated());
     }
 
 }
