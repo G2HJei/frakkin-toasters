@@ -102,7 +102,7 @@ public class Deck<T> {
     public Deck<T> shuffle() {
         cards.addAll(discardedCards);
         discardedCards.clear();
-        Collections.shuffle(cards);
+        Collections.shuffle(cards); //todo make deterministic
         return this;
     }
 

@@ -2,6 +2,7 @@ package xyz.zlatanov.frakkintoasters.event.location.galactica;
 
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckHolder;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.skillCheckFollowup;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheck.ADMIRALS_QUARTERS;
@@ -10,7 +11,7 @@ public class AdmiralsQuartersEventProcessor extends EventProcessor<AdmiralsQuart
 
     @Override
     public Followup process() {
-        game.activeSkillCheck(ADMIRALS_QUARTERS);
+        game.activeSkillCheck(new SkillCheckHolder(ADMIRALS_QUARTERS));
         return skillCheckFollowup(game);
     }
 }
