@@ -174,7 +174,8 @@ public class Game {
         return this;
     }
 
-    public void startSkillCheck(SkillCheck skillCheck) {
+    public SkillCheckHolder startSkillCheck(SkillCheck skillCheck) {
         activeSkillCheck = new SkillCheckHolder(skillCheck);
+        return activeSkillCheck;
     }
 }
