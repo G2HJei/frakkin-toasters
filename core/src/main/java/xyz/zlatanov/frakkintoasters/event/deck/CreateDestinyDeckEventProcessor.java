@@ -15,6 +15,7 @@ public class CreateDestinyDeckEventProcessor extends EventProcessor<CreateDestin
                 .addOnTop(decks.piloting().draw(2))
                 .addOnTop(decks.engineering().draw(2))
                 .addOnTop(decks.treachery().draw(2));
+        decks.destiny().shuffle();
         return Followup.NONE;
     }
 }

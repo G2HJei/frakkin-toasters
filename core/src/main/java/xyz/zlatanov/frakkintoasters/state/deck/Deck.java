@@ -11,7 +11,7 @@ import java.util.*;
 public class Deck<T> {
 
     private final   boolean autoShuffle;
-    protected final List<T> cards          = new ArrayList<>();
+    protected final List<T> cards          = new ArrayList<>(); //todo use Deque?
     private final   List<T> revealedCards  = new ArrayList<>();
     private final   List<T> discardedCards = new ArrayList<>();
 

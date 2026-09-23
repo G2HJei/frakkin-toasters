@@ -12,6 +12,8 @@ public class FakeDeck<T> extends Deck<T> {
 
     private final Deque<T> nextCards = new LinkedList<>();
 
+    private boolean wasShuffled = false;
+
     public FakeDeck(Deck<T> delegate) {
         addOnTop(delegate.cards());
     }
@@ -32,10 +34,20 @@ public class FakeDeck<T> extends Deck<T> {
         return super.draw();
     }
 
+    @Override
+    public Deck<T> shuffle() {
+        wasShuffled = true;
+        return super.shuffle();
+    }
+
     public FakeDeck<T> clear() {
         while (!cards().isEmpty()) {
             draw();
         }
         return this;
+    }
+
+    public boolean wasShuffled() {
+        return wasShuffled;
     }
 }
