@@ -1,16 +1,23 @@
 package xyz.zlatanov.frakkintoasters.state.deck;
 
 import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
 import lombok.val;
 
 import java.util.*;
 
+@RequiredArgsConstructor
 @EqualsAndHashCode
 public class Deck<T> {
 
+    private final   boolean autoShuffle;
     protected final List<T> cards          = new ArrayList<>();
     private final   List<T> revealedCards  = new ArrayList<>();
     private final   List<T> discardedCards = new ArrayList<>();
+
+    public Deck() {
+        this(true);
+    }
 
     public Deck<T> addOnTop(T card) {
         addOnTop(List.of(card));
@@ -49,8 +56,11 @@ public class Deck<T> {
 
     public T draw() {
         //todo what if empty?? make Optional<T>
-        //todo shuffle deck if empty (all decks?)
-        return cards.removeFirst();
+        val drawn = cards.removeFirst();
+        if (autoShuffle && cards.isEmpty() && !discardedCards.isEmpty()) {
+            shuffle();
+        }
+        return drawn;
     }
 
     public List<T> draw(int cards) {

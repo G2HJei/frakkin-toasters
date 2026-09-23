@@ -31,11 +31,11 @@ public class DecksHolder {
     @Builder.Default
     private       Deck<CivilianShip>    civilianShips   = civilianShipsDeck();
     @Builder.Default
-    private final Deck<GalacticaDamage> galacticaDamage = genericDeck(GalacticaDamage.class);
+    private final Deck<GalacticaDamage> galacticaDamage = genericDeck(GalacticaDamage.class, false);
     @Builder.Default
-    private final Deck<PegasusDamage>   pegasusDamage   = genericDeck(PegasusDamage.class);
+    private final Deck<PegasusDamage>   pegasusDamage   = genericDeck(PegasusDamage.class, false);
     @Builder.Default
-    private final Deck<BasestarDamage>  basestarDamage  = genericDeck(BasestarDamage.class);
+    private final Deck<BasestarDamage>  basestarDamage  = genericDeck(BasestarDamage.class, false);
     @Builder.Default
     private final Deck<DestinationCard> destination     = genericDeck(DestinationCard.class, REMOTE_PLANET, ICY_MOON, BARREN_PLANET, TYLIUM_PLANET, TYLIUM_PLANET, TYLIUM_PLANET);
     @Builder.Default
@@ -51,7 +51,7 @@ public class DecksHolder {
     @Builder.Default
     private final Deck<SkillCard>       treachery       = treacheryCards();
     @Builder.Default
-    private final Deck<SkillCard>       destiny         = new Deck<>();
+    private final Deck<SkillCard>       destiny         = new Deck<>(false);
     @Builder.Default
     private final Deck<QuorumCard>      quorum          = genericDeck(QuorumCard.class);
     @Builder.Default
@@ -59,9 +59,9 @@ public class DecksHolder {
     @Builder.Default
     private final Deck<SuperCrisisCard> superCrisis     = genericDeck(SuperCrisisCard.class);
     @Builder.Default
-    private final Deck<LoyaltyCard>     loyalty         = new Deck<>();
+    private final Deck<LoyaltyCard>     loyalty         = new Deck<>(false);
     @Builder.Default
-    private final Deck<LoyaltyCard>     loyaltyNotCylon = new Deck<>();
+    private final Deck<LoyaltyCard>     loyaltyNotCylon = new Deck<>(false);
     @Builder.Default
     private final Deck<MutinyCard>      mutiny          = genericDeck(MutinyCard.class);
 

@@ -57,7 +57,7 @@ public class Game {
     @Setter
     private Character            president;
     @Builder.Default
-    private Deck<QuorumCard>     presidentHand     = new Deck<>();
+    private Deck<QuorumCard>     presidentHand     = new Deck<>(false);
     @Setter
     private Character            admiral;
     @Setter
