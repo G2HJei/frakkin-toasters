@@ -8,7 +8,7 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard.AIRLOCK_LEAK;
 import static xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard.DETENTE;
 
-class CapricaCapricaDrawAndResolveCrisisCardsEventProcessorTest extends EventTestHarness<CapricaDrawAndResolveCrisisCardsEvent> {
+class CapricaDrawAndResolveCrisisCardsEventProcessorTest extends EventTestHarness<CapricaDrawAndResolveCrisisCardsEvent> {
 
     @Test
     void shouldFollowUpWithOneOfTheCrisisCards() {

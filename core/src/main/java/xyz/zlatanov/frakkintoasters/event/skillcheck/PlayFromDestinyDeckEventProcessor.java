@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event.skillcheck;
 
+import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 
@@ -7,6 +8,8 @@ public class PlayFromDestinyDeckEventProcessor extends EventProcessor<PlayFromDe
 
     @Override
     public Followup process() {
-        return null;
+        val destinyCards = game.decks().destiny().draw(2);
+        game.activeSkillCheck().cards().addOnTop(destinyCards);
+        return Followup.NONE;
     }
 }

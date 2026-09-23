@@ -1,9 +1,11 @@
 package xyz.zlatanov.frakkintoasters.state.deck;
 
+import lombok.EqualsAndHashCode;
 import lombok.val;
 
 import java.util.*;
 
+@EqualsAndHashCode
 public class Deck<T> {
 
     protected final List<T> cards          = new ArrayList<>();
@@ -109,4 +111,5 @@ public class Deck<T> {
     public boolean isEmpty() {
         return cards.isEmpty();
     }
+
 }
