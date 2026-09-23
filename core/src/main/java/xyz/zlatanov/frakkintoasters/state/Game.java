@@ -15,6 +15,7 @@ import xyz.zlatanov.frakkintoasters.state.deck.DecksHolder;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCheck;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckHolder;
 
 import java.util.*;
@@ -48,7 +49,6 @@ public class Game {
     private BoardsHolder         boards            = new BoardsHolder();
     @Builder.Default
     private DecksHolder          decks             = DecksHolder.builder().build();
-    @Setter
     private SkillCheckHolder     activeSkillCheck;
     @Builder.Default
     private CylonShips           cylonShips        = CylonShips.builder().build();
@@ -172,5 +172,9 @@ public class Game {
                         player(playerNumber)
                                 .gainSkillCards(c));
         return this;
+    }
+
+    public void startSkillCheck(SkillCheck skillCheck) {
+        activeSkillCheck = new SkillCheckHolder(skillCheck);
     }
 }
