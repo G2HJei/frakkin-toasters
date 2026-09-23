@@ -19,7 +19,6 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DRAW_EXACTLY_2;
 import static xyz.zlatanov.frakkintoasters.state.GameStep.RECEIVE_SKILLS;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
-import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.CYLON_SEND_TO_BRIG;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.AT_ANY_COST;
@@ -155,9 +154,4 @@ class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEv
 
     }
 
-    private void revealCylon() {
-        player(1).loyaltyCards()
-                .addOnTop(CYLON_SEND_TO_BRIG)
-                .reveal(CYLON_SEND_TO_BRIG);
-    }
 }

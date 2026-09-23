@@ -34,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.event.Followup.skillCheckFollowup;
 import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.CYLON_FLEET_SPACE;
+import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.CYLON_SEND_TO_BRIG;
 
 /**
  * Base test class for event-related tests.
@@ -221,6 +222,12 @@ public abstract class EventTestHarness<E extends Event> {
 
     protected void assertNoSkillCards(int playerNumber) {
         assertEquals(0, player(playerNumber).skillCards().size());
+    }
+
+    protected void revealCylon() {
+        player(1).loyaltyCards()
+                .addOnTop(CYLON_SEND_TO_BRIG)
+                .reveal(CYLON_SEND_TO_BRIG);
     }
 
     /* Event execution */
