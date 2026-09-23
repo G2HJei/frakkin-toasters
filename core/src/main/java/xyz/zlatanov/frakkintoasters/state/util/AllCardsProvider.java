@@ -15,7 +15,7 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 public class AllCardsProvider {
 
     public static Deck<CivilianShip> civilianShipsDeck() {
-        val deck = new Deck<CivilianShip>();
+        val deck = new Deck<CivilianShip>(false);
         //todo randomize civ ship ids to avoid frontend cheating
         deck.addOnTop(new CivilianShip(2001, 0, 0, 0));
         deck.addOnTop(new CivilianShip(2002, 0, 0, 0));
@@ -35,7 +35,12 @@ public class AllCardsProvider {
 
     @SafeVarargs
     public static <T extends Enum<T>> Deck<T> genericDeck(Class<T> clazz, T... repeatedCards) {
-        return new Deck<T>()
+        return genericDeck(clazz, true, repeatedCards);
+    }
+
+    @SafeVarargs
+    public static <T extends Enum<T>> Deck<T> genericDeck(Class<T> clazz, boolean autoShuffle, T... repeatedCards) {
+        return new Deck<T>(autoShuffle)
                 .addOnTop(Arrays.asList(clazz.getEnumConstants()))
                 .addOnTop(Arrays.asList(repeatedCards))
                 .shuffle();

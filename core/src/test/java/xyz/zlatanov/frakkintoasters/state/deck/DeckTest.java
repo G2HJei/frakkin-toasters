@@ -59,8 +59,24 @@ class DeckTest {
     }
 
     @Test
-    void shouldShuffleWhenEmptyAfterDraw() {
-        //todo
+    void shouldAutoShuffleWhenEmptyAfterDraw() {
+        val secondCard = new Card();
+        deck.discard(secondCard);
+
+        deck.draw();
+
+        assertEquals(List.of(secondCard), deck.cards());
+    }
+
+    @Test
+    void shouldNotAutoShuffleIfConfigured() {
+        val manualShuffleDeck = new Deck<>(false);
+        manualShuffleDeck.addOnTop(new Card());
+        manualShuffleDeck.discard(new Card());
+
+        manualShuffleDeck.draw();
+
+        assertTrue(manualShuffleDeck.cards.isEmpty());
     }
 
     static class Card {
