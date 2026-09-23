@@ -12,7 +12,7 @@ class AdmiralsQuartersEventProcessorTest extends EventTestHarness<AdmiralsQuarte
     void shouldActivateAdmiralsQuartersSkillCheck() {
         game.currentPlayer(2);
         execute(new AdmiralsQuartersEvent(2, 3));
-        assertEquals(ADMIRALS_QUARTERS, game.activeSkillCheck());
+        assertEquals(ADMIRALS_QUARTERS, game.activeSkillCheck().type());
         assertSkillCheckTriggered();
     }
 
