@@ -7,6 +7,8 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import java.util.List;
 
+import static xyz.zlatanov.frakkintoasters.event.deck.CreateDestinyDeckEventProcessor.createNewDestinyDeck;
+
 public class PlayFromDestinyDeckEventProcessor extends EventProcessor<PlayFromDestinyDeckEvent> {
 
     @Override
@@ -20,7 +22,7 @@ public class PlayFromDestinyDeckEventProcessor extends EventProcessor<PlayFromDe
         val destinyDeck = game.decks().destiny();
         val cards = destinyDeck.draw(2);
         if (destinyDeck.isEmpty()) {
-            createNewDestinyDeck();
+            createNewDestinyDeck(game);
         }
         return cards;
     }
@@ -29,15 +31,4 @@ public class PlayFromDestinyDeckEventProcessor extends EventProcessor<PlayFromDe
         game.activeSkillCheck().cards().addOnTop(destinyCards);
     }
 
-    private void createNewDestinyDeck() {
-        val decks = game.decks();
-        game.decks().destiny()
-                .addOnTop(decks.politics().draw(2))
-                .addOnTop(decks.leadership().draw(2))
-                .addOnTop(decks.tactics().draw(2))
-                .addOnTop(decks.piloting().draw(2))
-                .addOnTop(decks.engineering().draw(2))
-                .addOnTop(decks.treachery().draw(2));
-        game.decks().destiny().shuffle();
-    }
 }
