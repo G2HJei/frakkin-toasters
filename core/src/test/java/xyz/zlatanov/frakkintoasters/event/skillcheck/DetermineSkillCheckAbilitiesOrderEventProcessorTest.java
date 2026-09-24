@@ -11,6 +11,7 @@ import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.ability.DamageViperAndRemoveCardFromSkillCheckEvent;
+import xyz.zlatanov.frakkintoasters.event.skillcheck.ability.ForceTheirHandEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.ability.QuickThinkingEvent;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
@@ -20,7 +21,6 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
-import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.PLAY_EXACTLY_1;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 
@@ -40,8 +40,7 @@ class DetermineSkillCheckAbilitiesOrderEventProcessorTest extends EventTestHarne
                         new PlayerDecisionEvent<>(1, DamageViperAndRemoveCardFromSkillCheckEvent.class),
                         new NoOpEvent(1))),
                 argumentSet("Force their hand", List.of(FORCE_THEIR_HAND), one(
-                        new PlayerDecisionEvent<>(1, PlaySkillsEvent.class, List.of(PLAY_EXACTLY_1)),
-                        new NoOpEvent(1))),
+                        new PlayerDecisionEvent<>(1, ForceTheirHandEvent.class))),
                 argumentSet("Quick thinking", List.of(QUICK_THINKING), one(
                         new PlayerDecisionEvent<>(1, QuickThinkingEvent.class),
                         new NoOpEvent(1)))
