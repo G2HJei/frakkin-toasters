@@ -2,5 +2,5 @@ package xyz.zlatanov.frakkintoasters.event.skillcheck.ability;
 
 import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
 
-public record ABetterMachineEvent(int playerNumber) implements PlayerEvent {
+public record ViolentOutburstsEvent(int playerNumber) implements PlayerEvent {
 }
