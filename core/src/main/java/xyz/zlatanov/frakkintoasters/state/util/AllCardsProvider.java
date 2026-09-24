@@ -144,7 +144,7 @@ public class AllCardsProvider {
                 .addOnTop(skills(3, 0, ESTABLISH_NETWORK))
                 .addOnTop(skills(1, 6, BUILD_NUKE))
                 // todo check quantities
-                .addOnTop(skills(1, 0, INSTALL_UPGRADE))
+                .addOnTop(skills(1, 0, INSTALL_UPGRADES))
                 .addOnTop(skills(1, 3, RAPTOR_SPECIALIST))
                 .addOnTop(skills(1, 5, TEST_THE_LIMITS))
                 .shuffle();
@@ -153,7 +153,7 @@ public class AllCardsProvider {
     public static Deck<SkillCard> treacheryCards() {
         return new Deck<SkillCard>()
                 //todo check quantities below
-                .addOnTop(skills(1, 0, DRAIDIS_CONTACT))
+                .addOnTop(skills(1, 0, DRADIS_CONTACT))
                 .addOnTop(skills(1, 0, BAIT))
                 .addOnTop(skills(1, 3, A_BETTER_MACHINE))
                 .addOnTop(skills(1, 3, PERSONAL_VICES))

@@ -26,7 +26,7 @@ class ShuffleAndDivideCardsEventProcessorTest extends EventTestHarness<ShuffleAn
                         new SkillCard(2, AT_ANY_COST),
                         new SkillCard(2, REPAIR),
                         new SkillCard(3, LAUNCH_SCOUT),
-                        new SkillCard(3, DRAIDIS_CONTACT),
+                        new SkillCard(3, DRADIS_CONTACT),
                         new SkillCard(3, BAIT),
                         new SkillCard(4, POLITICAL_PROWESS),
                         new SkillCard(4, COMBAT_VETERAN),
@@ -59,9 +59,16 @@ class ShuffleAndDivideCardsEventProcessorTest extends EventTestHarness<ShuffleAn
                         new SkillCard(0, TEST_THE_LIMITS),
                         //treachery
                         new SkillCard(3, BAIT),
-                        new SkillCard(3, DRAIDIS_CONTACT)
+                        new SkillCard(3, DRADIS_CONTACT)
                 ),
                 game.activeSkillCheck().nonMatchingPile());
+
+        assertFollowup(new DetermineSkillCheckAbilitiesOrder(1, List.of(
+                new SkillCard(1, IRON_WILL),
+                new SkillCard(5, DOGFIGHT),
+                new SkillCard(3, BAIT),
+                new SkillCard(3, DRADIS_CONTACT)
+        )));
     }
 
 }

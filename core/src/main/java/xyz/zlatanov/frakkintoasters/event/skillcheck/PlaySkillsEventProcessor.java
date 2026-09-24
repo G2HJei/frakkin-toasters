@@ -10,7 +10,7 @@ public class PlaySkillsEventProcessor extends EventProcessor<PlaySkillsEvent> {
     @Override
     protected boolean isValid() {
         val inBrig = game.locate(player.character()) == BRIG;
-        val cardsCount = event.skillCards().length;
+        val cardsCount = event.skillCards().size();
         val maxCards = inBrig || !player.isHuman() ? 1
                 : player.isInfiltrating() ? 2
                 // : inDetention || isInfiltrating ? 2 todo after implementing Location.DETENTION
