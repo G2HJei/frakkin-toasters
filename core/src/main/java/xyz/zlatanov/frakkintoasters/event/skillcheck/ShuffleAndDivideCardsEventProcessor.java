@@ -72,6 +72,6 @@ public class ShuffleAndDivideCardsEventProcessor extends EventProcessor<ShuffleA
                 .toList();
         return cardsWithAbilities.isEmpty()
                 ? Followup.NONE
-                : Followup.single(new DetermineSkillCheckAbilitiesOrder(game.currentPlayer(), cardsWithAbilities));
+                : Followup.single(new DetermineSkillCheckAbilitiesOrderEvent(game.currentPlayer(), cardsWithAbilities));
     }
 }

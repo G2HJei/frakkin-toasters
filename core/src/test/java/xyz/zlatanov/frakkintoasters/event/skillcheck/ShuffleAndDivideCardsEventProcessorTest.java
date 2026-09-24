@@ -63,7 +63,7 @@ class ShuffleAndDivideCardsEventProcessorTest extends EventTestHarness<ShuffleAn
                 ),
                 game.activeSkillCheck().nonMatchingPile());
 
-        assertFollowup(new DetermineSkillCheckAbilitiesOrder(1, List.of(
+        assertFollowup(new DetermineSkillCheckAbilitiesOrderEvent(1, List.of(
                 new SkillCard(1, IRON_WILL),
                 new SkillCard(5, DOGFIGHT),
                 new SkillCard(3, BAIT),
