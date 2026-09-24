@@ -8,9 +8,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.event.Followup;
-import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
-import xyz.zlatanov.frakkintoasters.event.skillcheck.ability.DamageViperAndRemoveCardFromSkillCheckEvent;
+import xyz.zlatanov.frakkintoasters.event.skillcheck.ability.ABetterMachineEvent;
+import xyz.zlatanov.frakkintoasters.event.skillcheck.ability.DogfightEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.ability.ForceTheirHandEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.ability.QuickThinkingEvent;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
-import static xyz.zlatanov.frakkintoasters.event.Followup.one;
+import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 
@@ -36,14 +36,10 @@ class DetermineSkillCheckAbilitiesOrderEventProcessorTest extends EventTestHarne
                 argumentSet("No cards with abilities", List.of(), Followup.NONE),
                 argumentSet("Install upgrades", List.of(INSTALL_UPGRADES), Followup.NONE),
                 argumentSet("All hands on deck", List.of(ALL_HANDS_ON_DECK), Followup.NONE),
-                argumentSet("Dogfight", List.of(DOGFIGHT), one(
-                        new PlayerDecisionEvent<>(1, DamageViperAndRemoveCardFromSkillCheckEvent.class),
-                        new NoOpEvent(1))),
-                argumentSet("Force their hand", List.of(FORCE_THEIR_HAND), one(
-                        new PlayerDecisionEvent<>(1, ForceTheirHandEvent.class))),
-                argumentSet("Quick thinking", List.of(QUICK_THINKING), one(
-                        new PlayerDecisionEvent<>(1, QuickThinkingEvent.class),
-                        new NoOpEvent(1)))
+                argumentSet("Dogfight", List.of(DOGFIGHT), single(new PlayerDecisionEvent<>(1, DogfightEvent.class))),
+                argumentSet("Force their hand", List.of(FORCE_THEIR_HAND), single(new PlayerDecisionEvent<>(1, ForceTheirHandEvent.class))),
+                argumentSet("Quick thinking", List.of(QUICK_THINKING), single(new PlayerDecisionEvent<>(1, QuickThinkingEvent.class))),
+                argumentSet("A better machine", List.of(A_BETTER_MACHINE), single(new ABetterMachineEvent()))
         );
     }
 
