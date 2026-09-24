@@ -11,7 +11,6 @@ import xyz.zlatanov.frakkintoasters.event.skillcheck.ability.QuickThinkingEvent;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
-import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 
 public class DetermineSkillCheckAbilitiesOrderEventProcessor extends EventProcessor<DetermineSkillCheckAbilitiesOrderEvent> {
     @Override
@@ -27,18 +26,14 @@ public class DetermineSkillCheckAbilitiesOrderEventProcessor extends EventProces
     }
 
     private Followup buildFollowup(SkillCard skillCard) {
-        if (DOGFIGHT == skillCard.type()) {
-            return single(new PlayerDecisionEvent<>(player.number(), DogfightEvent.class));
-        }
-        if (FORCE_THEIR_HAND == skillCard.type() && player.isHuman()) {
-            return single(new PlayerDecisionEvent<>(player.number(), ForceTheirHandEvent.class));
-        }
-        if (QUICK_THINKING == skillCard.type()) {
-            return single(new PlayerDecisionEvent<>(player.number(), QuickThinkingEvent.class));
-        }
-        if (A_BETTER_MACHINE == skillCard.type()) {
-            return single(new ABetterMachineEvent());
-        }
-        return Followup.NONE;
+        return switch (skillCard.type()) {
+            case DOGFIGHT -> single(new PlayerDecisionEvent<>(player.number(), DogfightEvent.class));
+            case FORCE_THEIR_HAND -> player.isHuman()
+                    ? single(new PlayerDecisionEvent<>(player.number(), ForceTheirHandEvent.class))
+                    : Followup.NONE;
+            case QUICK_THINKING -> single(new PlayerDecisionEvent<>(player.number(), QuickThinkingEvent.class));
+            case A_BETTER_MACHINE -> single(new ABetterMachineEvent());
+            default -> Followup.NONE;
+        };
     }
 }
