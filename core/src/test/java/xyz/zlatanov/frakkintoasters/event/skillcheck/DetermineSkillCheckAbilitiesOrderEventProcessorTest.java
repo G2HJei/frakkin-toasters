@@ -9,10 +9,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
-import xyz.zlatanov.frakkintoasters.event.skillcheck.ability.ABetterMachineEvent;
-import xyz.zlatanov.frakkintoasters.event.skillcheck.ability.DogfightEvent;
-import xyz.zlatanov.frakkintoasters.event.skillcheck.ability.ForceTheirHandEvent;
-import xyz.zlatanov.frakkintoasters.event.skillcheck.ability.QuickThinkingEvent;
+import xyz.zlatanov.frakkintoasters.event.skillcheck.ability.*;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 
@@ -36,10 +33,21 @@ class DetermineSkillCheckAbilitiesOrderEventProcessorTest extends EventTestHarne
                 argumentSet("No cards with abilities", List.of(), Followup.NONE),
                 argumentSet("Install upgrades", List.of(INSTALL_UPGRADES), Followup.NONE),
                 argumentSet("All hands on deck", List.of(ALL_HANDS_ON_DECK), Followup.NONE),
+                argumentSet("Establish network", List.of(ESTABLISH_NETWORK), Followup.NONE),
+                argumentSet("Iron will", List.of(IRON_WILL), Followup.NONE),
                 argumentSet("Dogfight", List.of(DOGFIGHT), single(new PlayerDecisionEvent<>(1, DogfightEvent.class))),
                 argumentSet("Force their hand", List.of(FORCE_THEIR_HAND), single(new PlayerDecisionEvent<>(1, ForceTheirHandEvent.class))),
                 argumentSet("Quick thinking", List.of(QUICK_THINKING), single(new PlayerDecisionEvent<>(1, QuickThinkingEvent.class))),
-                argumentSet("A better machine", List.of(A_BETTER_MACHINE), single(new ABetterMachineEvent()))
+                argumentSet("A better machine", List.of(A_BETTER_MACHINE), single(new ABetterMachineEvent(1))),
+                argumentSet("Bait", List.of(BAIT), single(new BaitEvent())),
+                argumentSet("Dradis contact", List.of(DRADIS_CONTACT), single(new DradisContactEvent())),
+                argumentSet("Exploit a weakness", List.of(EXPLOIT_A_WEAKNESS), single(new PlayerDecisionEvent<>(1, ExploitAWeaknessEvent.class))),
+                argumentSet("Personal vices", List.of(PERSONAL_VICES), single(new PersonalVicesEvent(1))),
+                argumentSet("Violent outbursts", List.of(VIOLENT_OUTBURSTS), single(new ViolentOutburstsEvent(1))),
+                argumentSet("Protect the fleet", List.of(PROTECT_THE_FLEET), single(new PlayerDecisionEvent<>(1, ProtectTheFleetEvent.class))),
+                argumentSet("Red tape", List.of(RED_TAPE), single(new RedTapeEvent())),
+                argumentSet("Trust instincts", List.of(TRUST_INSTINCTS), single(new TrustInstinctsEvent()))
+
         );
     }
 
