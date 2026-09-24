@@ -5,5 +5,7 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import java.util.List;
 
-public record PlaySkillsEvent(int playerNumber, List<SkillCard> skillCards) implements PlayerEvent {
+public record DetermineSkillCheckAbilitiesOrder(int playerNumber, List<SkillCard> cardsWithAbilities)
+        implements PlayerEvent {
+
 }
