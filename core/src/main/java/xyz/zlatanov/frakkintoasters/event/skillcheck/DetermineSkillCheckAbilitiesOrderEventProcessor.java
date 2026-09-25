@@ -15,6 +15,7 @@ public class DetermineSkillCheckAbilitiesOrderEventProcessor extends EventProces
         val followups = event.cardsWithAbilities()
                 .stream()
                 .map(this::buildFollowup)
+                .distinct()
                 .filter(f -> !f.equals(Followup.NONE))
                 .toList();
         return followups.isEmpty()
