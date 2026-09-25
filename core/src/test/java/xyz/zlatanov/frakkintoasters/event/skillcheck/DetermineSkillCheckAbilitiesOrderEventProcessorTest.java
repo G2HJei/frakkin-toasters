@@ -80,4 +80,13 @@ class DetermineSkillCheckAbilitiesOrderEventProcessorTest extends EventTestHarne
                 single(new RedTapeEvent())
         ));
     }
+
+    @Test
+    void shouldFollowUpOnlyOncePerSkillCardType() {
+        execute(new DetermineSkillCheckAbilitiesOrderEvent(1, List.of(
+                new SkillCard(0, DOGFIGHT),
+                new SkillCard(0, DOGFIGHT)
+        )));
+        assertFollowup(single(new PlayerDecisionEvent<>(1, DogfightEvent.class)));
+    }
 }
