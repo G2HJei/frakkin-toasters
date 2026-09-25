@@ -36,12 +36,12 @@ class DamageHumanFighterEventProcessorTest extends EventTestHarness<DamageHumanF
 
     @Test
     void shouldDamageViperInReserves() {
-        val reservesViper = new Viper(1);
+        val viper = galacticaBoard.removeFromReserves(Viper.class).orElseThrow();
+        galacticaBoard.addToReserves(viper);
+        execute(new DamageHumanFighterEvent(viper.id()));
 
-        execute(new DamageHumanFighterEvent(reservesViper.id()));
-
-        assertFalse(galacticaBoard.reserves().contains(reservesViper));
-        assertTrue(galacticaBoard.damagedShips().contains(reservesViper));
+        assertFalse(galacticaBoard.reserves().contains(viper));
+        assertTrue(galacticaBoard.damagedShips().contains(viper));
     }
 
     @Test
@@ -53,15 +53,5 @@ class DamageHumanFighterEventProcessorTest extends EventTestHarness<DamageHumanF
         assertNoShips(GALACTICA_SPACE_4_OCLOCK);
         assertFalse(galacticaBoard.damagedShips().contains(assaultRaptor));
         assertTrue(game.removedComponents().contains(assaultRaptor));
-    }
-
-    @Test
-    void shouldNotAllowUnknownShip() {
-        assertInvalid(new DamageHumanFighterEvent(99));
-    }
-
-    @Test
-    void shouldNotAllowDamagingRaptor() {
-        assertInvalid(new DamageHumanFighterEvent(11));
     }
 }

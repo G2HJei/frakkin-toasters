@@ -2,7 +2,6 @@ package xyz.zlatanov.frakkintoasters.state.board;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.state.ship.Raptor;
 import xyz.zlatanov.frakkintoasters.state.ship.Viper;
 import xyz.zlatanov.frakkintoasters.state.ship.ViperMarkVII;
 
@@ -18,6 +17,7 @@ import static xyz.zlatanov.frakkintoasters.state.track.JumpPreparation.POSITION_
 import static xyz.zlatanov.frakkintoasters.state.track.JumpPreparation.START;
 
 class GalacticaBoardTest {
+
     GalacticaBoard board = new GalacticaBoard();
 
     @Test
@@ -56,9 +56,9 @@ class GalacticaBoardTest {
 
     @Test
     void shouldManageDamagedShip() {
-        val raptor = new Raptor(2);
-        board.addToDamagedShips(raptor);
-        assertEquals(raptor, board.removeFromDamagedShips(Raptor.class).orElseThrow());
+        val viper = new Viper(2);
+        board.addToDamagedShips(viper);
+        assertEquals(viper, board.removeFromDamagedShips(Viper.class).orElseThrow());
     }
 
     @Test
