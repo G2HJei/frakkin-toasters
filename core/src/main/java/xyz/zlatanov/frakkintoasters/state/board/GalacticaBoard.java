@@ -31,7 +31,7 @@ public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard {
     private final Set<Location>                 damagedLocations     = new HashSet<>();
     private final Set<Location>                 locations            = new HashSet<>(Stream.of(GALACTICA.locations(), GALACTICA_SPACE.locations(), COLONIAL_ONE.locations(), CYLON_LOCATIONS.locations().stream().filter(l -> !Set.of(HUB_DESTROYED, BASESTAR_BRIDGE).contains(l)).toList()).flatMap(Collection::stream).toList());
     private final Set<Ship>                     reserves             = new HashSet<>(Set.of(new Viper(1), new Viper(2), new Viper(3), new Viper(4), new Viper(5), new Viper(6), new Raptor(11), new Raptor(12), new Raptor(13), new Raptor(14), new AssaultRaptor(21)));
-    private final Set<Ship>                     damagedShips         = new HashSet<>(Set.of(new ViperMarkVII(71), new ViperMarkVII(72), new ViperMarkVII(73), new ViperMarkVII(74)));
+    private final Set<Viper>                    damagedShips         = new HashSet<>(Set.of(new ViperMarkVII(71), new ViperMarkVII(72), new ViperMarkVII(73), new ViperMarkVII(74)));
     private final Map<Ship, Location>           shipsInSpace         = new HashMap<>();
     private final Map<Centurion, BoardingParty> boardingPartyTrack   = new LinkedHashMap<>();
 
@@ -76,11 +76,11 @@ public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard {
         return this;
     }
 
-    public GalacticaBoard addToDamagedShips(Ship ship) {
+    public GalacticaBoard addToDamagedShips(Viper ship) {
         return addToDamagedShips(List.of(ship));
     }
 
-    public GalacticaBoard addToDamagedShips(List<Ship> ships) {
+    public GalacticaBoard addToDamagedShips(List<Viper> ships) {
         damagedShips.addAll(ships);
         return this;
     }
@@ -90,7 +90,17 @@ public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard {
         return removeFrom(reserves, shipClass);
     }
 
-    public <T extends Ship> Optional<T> removeFromDamagedShips(Class<T> shipClass) {
+    public Optional<HumanFighter> removeFromReserves(int shipId) {
+        val reservesFighter = reserves.stream()
+                .filter(s -> s instanceof HumanFighter)
+                .map(HumanFighter.class::cast)
+                .filter(s -> s.id() == shipId)
+                .findFirst();
+        reservesFighter.ifPresent(reserves::remove);
+        return reservesFighter;
+    }
+
+    public <T extends Viper> Optional<T> removeFromDamagedShips(Class<T> shipClass) {
         return removeFrom(damagedShips, shipClass);
     }
 
@@ -154,7 +164,7 @@ public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard {
         return this;
     }
 
-    private <T extends Ship> Optional<T> removeFrom(Set<Ship> source, Class<T> shipClass) {
+    private <T extends Ship> Optional<T> removeFrom(Set<? extends Ship> source, Class<T> shipClass) {
         return source.stream()
                 .filter(s -> shipClass.equals(s.getClass()))
                 .findFirst()
