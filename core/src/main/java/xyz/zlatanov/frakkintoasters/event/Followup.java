@@ -88,7 +88,7 @@ public sealed interface Followup permits Followup.None, Followup.Single, Followu
     private static void addPlayerDecisions(Game game, ArrayList<Event> followupEvents) {
         var decidingPlayer = game.currentPlayer();
         do {
-            decidingPlayer = game.players().size() < decidingPlayer ? 1 : ++decidingPlayer;
+            decidingPlayer = decidingPlayer >= game.players().size() ? 1 : ++decidingPlayer;
             followupEvents.add(new PlayerDecisionEvent<>(decidingPlayer, PlaySkillsEvent.class));
         } while (decidingPlayer != game.currentPlayer());
     }

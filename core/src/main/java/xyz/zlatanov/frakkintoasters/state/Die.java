@@ -5,7 +5,7 @@ import java.util.Random;
 public class Die {
 
     public int roll() {
-        return new Random().nextInt(1, 8); //todo make deterministic
+        return new Random().nextInt(1, 9); //todo make deterministic
 
     }
 }
