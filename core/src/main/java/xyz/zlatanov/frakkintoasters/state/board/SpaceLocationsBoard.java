@@ -49,7 +49,8 @@ public interface SpaceLocationsBoard {
                 .stream()
                 .filter(s -> shipClass.equals(s.getClass())
                         || shipClass.equals(HumanFighter.class) && s instanceof HumanFighter
-                        || shipClass.equals(CylonShip.class) && s instanceof CylonShip)
+                        || shipClass.equals(CylonShip.class) && s instanceof CylonShip
+                        || shipClass.equals(Ship.class))
                 .map(shipClass::cast)
                 .toList();
     }

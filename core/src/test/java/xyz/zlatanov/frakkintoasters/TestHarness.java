@@ -255,6 +255,12 @@ public abstract class TestHarness {
         return viper;
     }
 
+    protected Viper viperMarkVIIAt(Location location) {
+        val viper = viper();
+        place(location, viper);
+        return viper;
+    }
+
     protected AssaultRaptor assaultRaptorAt(Location location) {
         val assaultRaptor = assaultRaptor();
         place(location, assaultRaptor);
@@ -274,10 +280,9 @@ public abstract class TestHarness {
     }
 
     private SpaceLocationsBoard getSpaceLocationsBoard(Location location) {
-        SpaceLocationsBoard board = CYLON_FLEET_SPACE.locations().contains(location)
+        return CYLON_FLEET_SPACE.locations().contains(location)
                 ? cylonFleetBoard
                 : galacticaBoard;
-        return board;
     }
 
     /* Titles */
