@@ -2,10 +2,10 @@ package xyz.zlatanov.frakkintoasters.event.location.galactica;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
+import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.event.AttackBasestarEvent;
 import xyz.zlatanov.frakkintoasters.event.AttackHeavyRaiderEvent;
 import xyz.zlatanov.frakkintoasters.event.AttackRaiderEvent;
-import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
 
 import static xyz.zlatanov.frakkintoasters.event.AttackBasestarEvent.Attacker.GALACTICA;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;

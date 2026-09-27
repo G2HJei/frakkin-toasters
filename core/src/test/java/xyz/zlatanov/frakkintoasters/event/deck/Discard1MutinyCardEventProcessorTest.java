@@ -1,7 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event.deck;
 
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
+import xyz.zlatanov.frakkintoasters.EventTestHarness;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;

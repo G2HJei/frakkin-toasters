@@ -1,8 +1,8 @@
 package xyz.zlatanov.frakkintoasters.event.location.colonialone;
 
 import org.junit.jupiter.api.Test;
+import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.event.DrawQuorumCardEvent;
-import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayQuorumCardEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 

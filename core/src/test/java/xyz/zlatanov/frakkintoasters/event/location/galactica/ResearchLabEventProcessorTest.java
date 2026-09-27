@@ -2,7 +2,7 @@ package xyz.zlatanov.frakkintoasters.event.location.galactica;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
+import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.*;

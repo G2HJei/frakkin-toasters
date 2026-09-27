@@ -1,7 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event.action;
 
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
+import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

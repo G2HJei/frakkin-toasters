@@ -2,7 +2,7 @@ package xyz.zlatanov.frakkintoasters.event.ship;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
+import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

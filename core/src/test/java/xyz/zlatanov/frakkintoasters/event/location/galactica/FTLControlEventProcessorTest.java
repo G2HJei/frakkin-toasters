@@ -2,8 +2,8 @@ package xyz.zlatanov.frakkintoasters.event.location.galactica;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.event.CylonVictoryEvent;
-import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.event.JumpingTheFleetEvent;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

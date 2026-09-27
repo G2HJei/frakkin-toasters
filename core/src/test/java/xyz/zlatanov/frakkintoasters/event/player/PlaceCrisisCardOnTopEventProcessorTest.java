@@ -1,7 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event.player;
 
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
+import xyz.zlatanov.frakkintoasters.EventTestHarness;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard.A_GUILTY_VERDICT;

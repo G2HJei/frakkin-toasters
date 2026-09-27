@@ -2,7 +2,7 @@ package xyz.zlatanov.frakkintoasters.event.location.pegasus;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
+import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.event.ship.DamagePegasusEvent;
 import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 

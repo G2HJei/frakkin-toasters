@@ -1,8 +1,8 @@
 package xyz.zlatanov.frakkintoasters.event.location.galactica;
 
 import org.junit.jupiter.api.Test;
+import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.event.ActivateViperEvent;
-import xyz.zlatanov.frakkintoasters.event.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;

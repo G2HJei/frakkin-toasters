@@ -1,10 +1,7 @@
-package xyz.zlatanov.frakkintoasters.event;
+package xyz.zlatanov.frakkintoasters;
 
-import lombok.SneakyThrows;
 import lombok.val;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.fake.FakeDeck;
 import xyz.zlatanov.frakkintoasters.fake.FakeDie;
 import xyz.zlatanov.frakkintoasters.state.Game;
@@ -22,7 +19,6 @@ import xyz.zlatanov.frakkintoasters.state.damage.GalacticaDamage;
 import xyz.zlatanov.frakkintoasters.state.damage.PegasusDamage;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 import xyz.zlatanov.frakkintoasters.state.deck.DecksHolder;
-import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
@@ -30,9 +26,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static xyz.zlatanov.frakkintoasters.event.Followup.single;
-import static xyz.zlatanov.frakkintoasters.event.Followup.skillCheckFollowup;
 import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.CYLON_FLEET_SPACE;
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.CYLON_SEND_TO_BRIG;
 
@@ -50,7 +43,7 @@ import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.CYLON_SEND_TO_
  * @see FakeDie
  * @see FakeDeck
  */
-public abstract class EventTestHarness<E extends Event> {
+public abstract class TestHarness {
 
     /**
      * the game under test
@@ -83,10 +76,6 @@ public abstract class EventTestHarness<E extends Event> {
     protected FakeDeck<LoyaltyCard>     loyaltyNotCylonDeck;
     protected FakeDeck<MutinyCard>      mutinyDeck;
 
-    private EventProcessor<E> eventProcessor;
-    private Followup          followup;
-    private boolean           followupAsserted;
-
     /**
      * Sets up the game under test with default settings. All production components (decks, die) will be
      * replaced with fake/testable versions.
@@ -98,14 +87,6 @@ public abstract class EventTestHarness<E extends Event> {
     @BeforeEach
     protected void setUpGame() {
         setUpGame(Game.builder().build());
-        createEventProcessor();
-    }
-
-    @AfterEach
-    protected void assertNoFollowUpByDefault() {
-        if (!followupAsserted) {
-            assertEquals(Followup.NONE, followup);
-        }
     }
 
     protected void setUpGame(int playerCount) {
@@ -180,19 +161,6 @@ public abstract class EventTestHarness<E extends Event> {
                 .build();
     }
 
-    @SneakyThrows
-    @SuppressWarnings("unchecked")
-    private void createEventProcessor() {
-        val testClassName = getClass().getName();
-        try {
-            val processorClassName = testClassName.substring(0, testClassName.length() - "Test".length());
-            val processorClass = Class.forName(processorClassName);
-            eventProcessor = (EventProcessor<E>) processorClass.getDeclaredConstructor().newInstance();
-        } catch (Exception e) {
-            throw new RuntimeException("Test class name does not match processor name/package", e);
-        }
-    }
-
     /* === UTILITY METHODS === */
     /*  General */
     protected void nextRoll(int result) {
@@ -228,31 +196,6 @@ public abstract class EventTestHarness<E extends Event> {
         player(1).loyaltyCards()
                 .addOnTop(CYLON_SEND_TO_BRIG)
                 .reveal(CYLON_SEND_TO_BRIG);
-    }
-
-    /* Event execution */
-    protected void execute(E event) {
-        followup = eventProcessor.execute(game, event);
-    }
-
-    protected void assertFollowup(Followup expected) {
-        followupAsserted = true;
-        assertEquals(expected, followup);
-    }
-
-    protected void assertFollowup(Event expected) {
-        followupAsserted = true;
-        assertEquals(single(expected), followup);
-    }
-
-    protected void assertInvalid(E event) {
-        followupAsserted = true;
-        assertThrows(InvalidActionException.class, () -> execute(event));
-    }
-
-    protected void assertSkillCheckTriggered() {
-        followupAsserted = true;
-        assertEquals(skillCheckFollowup(game), followup);
     }
 
     /* Ships */

@@ -3,6 +3,7 @@ package xyz.zlatanov.frakkintoasters;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
+import xyz.zlatanov.frakkintoasters.operation.GameOperations;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Player;
 import xyz.zlatanov.frakkintoasters.state.board.CylonFleetBoard;
@@ -12,8 +13,9 @@ import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
 
 public abstract class EventProcessor<T extends Event> {
 
-    protected Game game;
-    protected T    event;
+    protected Game           game;
+    protected T              event;
+    protected GameOperations ops;
 
     //utility fields improving event processors' readability
     protected Player          player;
