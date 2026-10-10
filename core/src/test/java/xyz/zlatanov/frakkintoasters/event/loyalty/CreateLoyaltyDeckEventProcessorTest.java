@@ -6,9 +6,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
-import xyz.zlatanov.frakkintoasters.state.Player;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
-import xyz.zlatanov.frakkintoasters.state.deck.Deck;
+import xyz.zlatanov.frakkintoasters.state.view.DeckView;
+import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -122,8 +122,8 @@ class CreateLoyaltyDeckEventProcessorTest extends EventTestHarness<CreateLoyalty
         loyaltyCards.addAll(
                 game.players()
                         .stream()
-                        .map(Player::loyaltyCards)
-                        .map(Deck::cards)
+                        .map(PlayerView::loyaltyCards)
+                        .map(DeckView::cards)
                         .flatMap(Collection::stream)
                         .toList());
         assertEquals(hasMutineer, loyaltyCards.contains(MUTINEER));

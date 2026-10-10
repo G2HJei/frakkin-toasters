@@ -5,10 +5,10 @@ import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.PlaceCivilianShipEvent;
-import xyz.zlatanov.frakkintoasters.state.Player;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.Ship;
+import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
 
 import java.util.HashMap;
 
@@ -37,7 +37,7 @@ public class AdvancePursuitTrackEventProcessor extends EventProcessor<AdvancePur
                 .stream()
                 .filter(p -> p.character() == game.cag())
                 .findFirst()
-                .map(Player::number)
+                .map(PlayerView::number)
                 .orElseThrow(FrakCallTheAdmiralException::new);
         return new PlayerDecisionEvent<>(cagPlayerNumber, PlaceCivilianShipEvent.class);
     }

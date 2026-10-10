@@ -3,12 +3,13 @@ package xyz.zlatanov.frakkintoasters.event.loyalty;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
-import xyz.zlatanov.frakkintoasters.state.Player;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
+import xyz.zlatanov.frakkintoasters.state.view.DeckView;
+import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -44,8 +45,8 @@ public class CreateLoyaltyDeckEventProcessor extends EventProcessor<CreateLoyalt
     private Followup followup() {
         val hasMutineer = game.players()
                 .stream()
-                .map(Player::loyaltyCards)
-                .map(Deck::cards)
+                .map(PlayerView::loyaltyCards)
+                .map(DeckView::cards)
                 .flatMap(Collection::stream)
                 .anyMatch(MUTINEER::equals);
         return hasMutineer
@@ -145,7 +146,7 @@ public class CreateLoyaltyDeckEventProcessor extends EventProcessor<CreateLoyalt
     private List<Character> getSelectedCharacters() {
         return game.players()
                 .stream()
-                .map(Player::character)
+                .map(PlayerView::character)
                 .toList();
     }
 

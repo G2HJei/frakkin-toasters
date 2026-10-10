@@ -17,6 +17,7 @@ import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
+import xyz.zlatanov.frakkintoasters.state.view.DecksHolderView;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,7 +28,7 @@ import static xyz.zlatanov.frakkintoasters.state.util.AllCardsProvider.*;
 @Builder
 @Getter
 @Accessors(fluent = true)
-public class DecksHolder {
+public class DecksHolder implements DecksHolderView {
     @Builder.Default
     private       Deck<CivilianShip>    civilianShips   = civilianShipsDeck();
     @Builder.Default

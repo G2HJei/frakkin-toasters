@@ -4,7 +4,6 @@ import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.TestHarness;
-import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
 import xyz.zlatanov.frakkintoasters.state.ship.Raptor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -98,6 +97,6 @@ class ShipOperationsDestroyTest extends TestHarness {
 
     @Test
     void shouldDestroyCivilianShip() {
-        civilianShips.nextCard(new CivilianShip(-1, ))
+        //civilianShips.nextCard(new CivilianShip(-1, ))
     }
 }

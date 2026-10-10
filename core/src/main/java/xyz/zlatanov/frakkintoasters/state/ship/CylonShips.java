@@ -3,6 +3,7 @@ package xyz.zlatanov.frakkintoasters.state.ship;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
+import xyz.zlatanov.frakkintoasters.state.view.CylonShipsView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.Optional;
 
 @Getter
 @Accessors(fluent = true)
-public class CylonShips {
+public class CylonShips implements CylonShipsView {
 
     private static final int ID_OFFSET = 1000;
 

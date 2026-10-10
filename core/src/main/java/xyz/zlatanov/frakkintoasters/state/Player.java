@@ -12,6 +12,7 @@ import xyz.zlatanov.frakkintoasters.state.crisis.SuperCrisisCard;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
+import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,7 +24,7 @@ import static xyz.zlatanov.frakkintoasters.state.character.CharacterType.CYLON_L
 @RequiredArgsConstructor
 @Getter
 @Accessors(fluent = true)
-public class Player {
+public class Player implements PlayerView {
 
     private final int                        number;
     private       Character                  character;
@@ -46,6 +47,7 @@ public class Player {
         skillCards.addOnTop(Arrays.asList(cardsToAdd));
     }
 
+    @Override
     public int handLimit() {
         return character == CHIEF_GALEN_TYROL ? 8 : 10;
     }
@@ -61,10 +63,12 @@ public class Player {
         hasMiracleToken = true;
     }
 
+    @Override
     public boolean hasMiracleToken() {
         return hasMiracleToken;
     }
 
+    @Override
     public boolean isHuman() {
         val isCylonLeader = character.type() == CYLON_LEADER;
         val hasNotRevealedCylonLoyalty = loyaltyCards.revealedCards()
@@ -88,6 +92,6 @@ public class Player {
         val revealedShip = new RevealedCivilianShip(civilianShipId, duration);
         assert !revealedCivilianShips.contains(revealedShip);
         revealedCivilianShips.add(revealedShip);
-        //todo reduce duration after each event
+        //todo refactor this mechanism and move it to CivilianShip class
     }
 }

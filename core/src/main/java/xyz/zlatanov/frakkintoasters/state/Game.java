@@ -17,6 +17,8 @@ import xyz.zlatanov.frakkintoasters.state.ship.*;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheck;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckHolder;
+import xyz.zlatanov.frakkintoasters.state.view.GameView;
+import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -30,7 +32,7 @@ import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
 @Builder
 @Getter
 @Accessors(fluent = true)
-public class Game {
+public class Game implements GameView {
     // todo separate counters in own classes?
     // todo add turns
     @Builder.Default
@@ -63,7 +65,7 @@ public class Game {
     @Setter
     private Character            cag;
     @Builder.Default
-    private List<Object>         removedComponents = new ArrayList<>();
+    private RemovedComponents    removedComponents = new RemovedComponents();
 
 
     public static GameBuilder builder() {
@@ -79,11 +81,13 @@ public class Game {
                 .players(playersMap);
     }
 
-    public List<Player> players() {
+    @Override
+    public List<PlayerView> players() {
         return new ArrayList<>(players.values());
     }
 
-    public Player player(int playerNumber) {
+    @Override
+    public PlayerView player(int playerNumber) {
         return players.get(playerNumber);
     }
 
@@ -99,6 +103,7 @@ public class Game {
         return this;
     }
 
+    @Override
     public Location locate(Character character) {
         val locations = boards.all().stream()
                 .map(board -> board.locate(character))
@@ -169,7 +174,7 @@ public class Game {
     public Game drawSkillCard(int playerNumber, SkillCardColor skillCardColor) {
         decks.drawSkillCard(skillCardColor)
                 .ifPresent(c ->
-                        player(playerNumber)
+                        ((Player) player(playerNumber)) //todo move to operation
                                 .gainSkillCards(c));
         return this;
     }

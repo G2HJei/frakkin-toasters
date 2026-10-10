@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
+import xyz.zlatanov.frakkintoasters.state.view.SkillCheckHolderView;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -16,7 +17,7 @@ import java.util.Set;
 @Accessors(fluent = true)
 @RequiredArgsConstructor
 @EqualsAndHashCode
-public class SkillCheckHolder {
+public class SkillCheckHolder implements SkillCheckHolderView {
 
     private final SkillCheck         type;
     private final Deck<SkillCard>    cards             = new Deck<>();

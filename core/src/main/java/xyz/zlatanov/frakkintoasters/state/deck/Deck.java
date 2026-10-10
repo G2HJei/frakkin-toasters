@@ -3,12 +3,13 @@ package xyz.zlatanov.frakkintoasters.state.deck;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.state.view.DeckView;
 
 import java.util.*;
 
 @RequiredArgsConstructor
 @EqualsAndHashCode
-public class Deck<T> {
+public class Deck<T> implements DeckView<T> {
 
     private final   boolean autoShuffle;
     protected final List<T> cards          = new ArrayList<>(); //todo use Deque?
@@ -71,14 +72,17 @@ public class Deck<T> {
         return result;
     }
 
+    @Override
     public List<T> cards() {
         return Collections.unmodifiableList(cards);
     }
 
+    @Override
     public List<T> discardedCards() {
         return Collections.unmodifiableList(discardedCards);
     }
 
+    @Override
     public int size() {
         return cards.size();
     }
@@ -92,10 +96,12 @@ public class Deck<T> {
         return this;
     }
 
+    @Override
     public int discardSize() {
         return discardedCards.size();
     }
 
+    @Override
     public T lastDiscarded() {
         return discardedCards.isEmpty() ? null : discardedCards.getLast();
     }
@@ -107,6 +113,7 @@ public class Deck<T> {
         return this;
     }
 
+    @Override
     public List<T> revealedCards() {
         return Collections.unmodifiableList(revealedCards);
     }
@@ -118,6 +125,7 @@ public class Deck<T> {
         return this;
     }
 
+    @Override
     public boolean isEmpty() {
         return cards.isEmpty();
     }

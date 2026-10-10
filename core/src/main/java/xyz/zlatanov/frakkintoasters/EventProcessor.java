@@ -3,41 +3,44 @@ package xyz.zlatanov.frakkintoasters;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
-import xyz.zlatanov.frakkintoasters.operation.GameOperations;
 import xyz.zlatanov.frakkintoasters.state.Game;
-import xyz.zlatanov.frakkintoasters.state.Player;
 import xyz.zlatanov.frakkintoasters.state.board.CylonFleetBoard;
 import xyz.zlatanov.frakkintoasters.state.board.GalacticaBoard;
 import xyz.zlatanov.frakkintoasters.state.board.PegasusBoard;
 import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
+import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
 
 public abstract class EventProcessor<T extends Event> {
 
-    protected Game           game;
-    protected T              event;
-    protected GameOperations ops;
+    protected Game game; //todo replace with GameView
+    protected T    event;
 
     //utility fields improving event processors' readability
-    protected Player          player;
-    protected GalacticaBoard  galacticaBoard;
-    protected PegasusBoard    pegasusBoard;
-    protected CylonFleetBoard cylonFleetBoard;
+    protected PlayerView      player;
+    protected GalacticaBoard  galacticaBoard; //todo replace with board view
+    protected PegasusBoard    pegasusBoard;//todo replace with board view
+    protected CylonFleetBoard cylonFleetBoard;//todo replace with board view
 
     public final Followup execute(Game game, T event) {
         setContext(game, event);
         init();
         validate();
+        initOperations(game);
         return process();
     }
 
     public abstract Followup process();
 
-    protected void init() {
+    protected void init() { //todo probably remove
         //allows initialization of helper fields in subclasses with heavy logic
     }
 
     protected boolean isValid() {
         return true;
+    }
+
+    protected void initOperations(Game game) {
+        //allows GameOperation initialization before processing the event's business logic
     }
 
     private void setContext(Game game, T event) {
