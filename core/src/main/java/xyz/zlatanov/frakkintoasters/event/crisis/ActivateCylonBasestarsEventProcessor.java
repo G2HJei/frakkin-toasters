@@ -6,7 +6,7 @@ import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.board.AdvancePursuitTrackEvent;
 import xyz.zlatanov.frakkintoasters.event.ship.PlaceShipOnCylonFleetBoardEvent;
-import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
+import xyz.zlatanov.frakkintoasters.state.view.BasestarView;
 
 import java.util.Comparator;
 
@@ -18,7 +18,7 @@ public class ActivateCylonBasestarsEventProcessor extends EventProcessor<Activat
     @Override
     public Followup process() {
         val galactica = galacticaBoard;
-        val basestars = galactica.shipsInSpace(Basestar.class);
+        val basestars = galactica.shipsInSpace(BasestarView.class);
 
         if (basestars.isEmpty()) {
             return Followup.all(

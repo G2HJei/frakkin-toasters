@@ -12,7 +12,6 @@ import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 import xyz.zlatanov.frakkintoasters.state.deck.DecksHolder;
-import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheck;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckHolder;
@@ -24,8 +23,6 @@ import java.util.stream.IntStream;
 
 import static xyz.zlatanov.frakkintoasters.state.GameStep.SETUP;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
-import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.GALACTICA;
-import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.GALACTICA_SPACE;
 import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
 
 @Builder
@@ -111,63 +108,6 @@ public class Game implements GameView {
                 .toList();
         assert locations.size() == 1;
         return locations.getFirst();
-    }
-
-    public Game moveTo(Location location, Character character) {
-        assert !location.isSpaceLocation();
-        boards.all().forEach(b -> b.remove(character));
-        boards.all().stream()
-                .filter(b -> b.locations().contains(location))
-                .findFirst()
-                .orElseThrow(FrakCallTheAdmiralException::new)
-                .place(location, character);
-        return this;
-    }
-
-
-    public Game moveTo(Location location, Ship ship) {
-        //todo move to cylon fleet board location when jumping
-        assert GALACTICA_SPACE.locations().contains(location);
-        boards.galactica()
-                .remove(ship)
-                .place(location, ship);
-        return this;
-    }
-
-    public Game damage(Location location) {
-        val board = GALACTICA.locations().contains(location)
-                ? boards.galactica()
-                : boards.pegasus();
-        val affectedCharacters = board
-                .damage(location)
-                .charactersIn(location);
-        if (!affectedCharacters.isEmpty()) {
-            board.place(SICKBAY, affectedCharacters.toArray(new Character[0]));
-        }
-        return this;
-    }
-
-    public Game destroy(Ship ship) {
-        boards.galactica().remove(ship);
-        switch (ship) {
-            case Basestar basestar -> {
-                decks.discard(basestar.damage());
-                cylonShips.returned(basestar);
-            }
-            case Raider r -> cylonShips.returned(r);
-            case HeavyRaider h -> cylonShips.returned(h);
-            default -> throw new FrakCallTheAdmiralException("todo: not implemented");
-        }
-        return this;
-    }
-
-    public Game removeComponent(Object component) {
-        if (component instanceof CivilianShip civShip) {
-            boards.galactica().remove(civShip);
-        }
-        //todo implement other components' removal
-        removedComponents.add(component);
-        return this;
     }
 
     public SkillCheckHolder startSkillCheck(SkillCheck skillCheck) {

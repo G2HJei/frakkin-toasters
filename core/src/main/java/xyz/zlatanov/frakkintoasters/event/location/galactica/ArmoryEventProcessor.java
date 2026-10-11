@@ -9,10 +9,9 @@ public class ArmoryEventProcessor extends EventProcessor<ArmoryEvent> {
     //validate centurion with centurionId is on the boarding track
     @Override
     public Followup process() {
-        val roll = rollDie();
+        val roll = ops.rollDie();
         if (roll >= 7) {
-            val destroyedCenturion = galacticaBoard.destroyCenturion(event.centurionId());
-            game.cylonShips().returnedCenturion(destroyedCenturion);
+            ops.galactica().destroyCenturion(event.centurionId());
         }
         return Followup.NONE;
     }

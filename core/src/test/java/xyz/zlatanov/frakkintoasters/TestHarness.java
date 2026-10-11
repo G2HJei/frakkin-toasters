@@ -4,6 +4,7 @@ import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import xyz.zlatanov.frakkintoasters.fake.FakeDeck;
 import xyz.zlatanov.frakkintoasters.fake.FakeDie;
+import xyz.zlatanov.frakkintoasters.operation.GameOps;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Player;
 import xyz.zlatanov.frakkintoasters.state.board.*;
@@ -49,6 +50,11 @@ public abstract class TestHarness {
      * the game under test
      */
     protected Game game;
+
+    /**
+     * game ops bound to the game under test
+     */
+    protected GameOps ops;
 
     protected GalacticaBoard  galacticaBoard;
     protected PegasusBoard    pegasusBoard;
@@ -159,6 +165,7 @@ public abstract class TestHarness {
                         .mutiny(mutinyDeck)
                         .build())
                 .build();
+        this.ops = new GameOps(game);
     }
 
     /* === UTILITY METHODS === */
@@ -168,7 +175,7 @@ public abstract class TestHarness {
     }
 
     protected void moveTo(Location location, Character character) {
-        game.moveTo(location, character);
+        ops.character(character).moveTo(location);
     }
 
     protected Location locate(Character character) {

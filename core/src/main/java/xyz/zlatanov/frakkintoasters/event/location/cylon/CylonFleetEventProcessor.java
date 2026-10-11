@@ -5,10 +5,7 @@ import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.crisis.ActivateHeavyRaidersAndCenturionsEvent;
 import xyz.zlatanov.frakkintoasters.event.crisis.ActivateRaidersEvent;
-import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
-import xyz.zlatanov.frakkintoasters.state.ship.Ship;
-
-import java.util.ArrayList;
+import xyz.zlatanov.frakkintoasters.state.view.BasestarView;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.HEAVY_RAIDER;
@@ -39,19 +36,9 @@ public class CylonFleetEventProcessor extends EventProcessor<CylonFleetEvent> {
 
 
     private void launch2RaidersAndHeavyRaider() {
-        val galactica = galacticaBoard;
-        for (val basestar : galactica.shipsInSpace(Basestar.class)) {
-            val location = galactica.locate(basestar);
-            val shipsToPlace = getShips();
-            galactica.place(location, shipsToPlace);
+        for (val basestar : galacticaBoard.shipsInSpace(BasestarView.class)) {
+            ops.ship(basestar.id()).launchRaiders(2);
+            ops.ship(basestar.id()).launchHeavyRaider();
         }
-    }
-
-    private ArrayList<Ship> getShips() {
-        val shipsToPlace = new ArrayList<Ship>();
-        game.cylonShips().raider().ifPresent(shipsToPlace::add);
-        game.cylonShips().raider().ifPresent(shipsToPlace::add);
-        game.cylonShips().heavyRaider().ifPresent(shipsToPlace::add);
-        return shipsToPlace;
     }
 }

@@ -4,7 +4,6 @@ import lombok.val;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.STRUCTURAL_DAMAGE;
 
 class CylonShipsTest {
 
@@ -111,18 +110,5 @@ class CylonShipsTest {
         val c1 = ships.centurion().orElseThrow();
         val c2 = ships.centurion().orElseThrow();
         assertNotEquals(c1.id(), c2.id());
-    }
-
-    @Test
-    void shouldClearBasestarDamageOnReturn() {
-        val ships = CylonShips.builder().basestars(1).build();
-        val basestar = ships.basestar().orElseThrow();
-        basestar.damage(STRUCTURAL_DAMAGE);
-        assertFalse(basestar.damage().isEmpty());
-
-        ships.returned(basestar);
-        val returned = ships.basestar().orElseThrow();
-        assertTrue(returned.damage().isEmpty());
-        assertSame(basestar, returned);
     }
 }

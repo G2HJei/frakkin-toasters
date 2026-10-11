@@ -18,13 +18,13 @@ public interface GameView {
 
     GameStep step();
 
-    //BoardsHolderView boards();
+    BoardsHolderView boards();
 
     //  DecksHolderView decks();
 
     //SkillCheckHolderView activeSkillCheck();
 
-    //  CylonShipsView cylonShips();
+    CylonShipsView cylonShips();
 
     int nukes();
 

@@ -15,8 +15,7 @@ public class DogfightEventProcessor extends EventProcessor<DogfightEvent> {
         if (removedCard == null) {
             return Followup.NONE;
         }
-        game.activeSkillCheck().remove(removedCard);
-        game.decks().discard(removedCard);
+        ops.skillCheck().discard(removedCard);
         return single(new DamageHumanFighterEvent(event.viperId()));
     }
 }

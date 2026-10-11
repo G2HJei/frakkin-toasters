@@ -1,7 +1,6 @@
 package xyz.zlatanov.frakkintoasters.operation;
 
 import lombok.val;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.TestHarness;
 import xyz.zlatanov.frakkintoasters.state.ship.Raptor;
@@ -10,15 +9,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.LOUANNE_KAT_KATRAINE;
+import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.STRUCTURAL_DAMAGE;
 
 class ShipOpsDestroyTest extends TestHarness {
-
-    GameOps ops;
-
-    @BeforeEach
-    void setUp() {
-        ops = new GameOps(game);
-    }
 
     @Test
     void shouldDestroyRaider() {
@@ -48,6 +41,19 @@ class ShipOpsDestroyTest extends TestHarness {
 
         assertNoShips(GALACTICA_SPACE_2_OCLOCK);
         assertTrue(cylonShips.basestars().contains(basestar));
+    }
+
+    @Test
+    void shouldReturnBasestarDamageToTheDeckAndRepairTheBasestar() {
+        val basestar = basestarAt(GALACTICA_SPACE_2_OCLOCK);
+        val fullDeckSize = basestarDamageDeck.size();
+        basestarDamageDeck.nextCard(STRUCTURAL_DAMAGE);
+        basestar.damage(basestarDamageDeck.draw());
+
+        ops.ship(basestar.id()).destroy();
+
+        assertTrue(basestar.damage().isEmpty());
+        assertEquals(fullDeckSize, basestarDamageDeck.size());
     }
 
     @Test

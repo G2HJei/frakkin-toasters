@@ -5,7 +5,7 @@ import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.ship.DamagePegasusEvent;
 import xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage;
-import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
+import xyz.zlatanov.frakkintoasters.state.view.BasestarView;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 
@@ -13,7 +13,7 @@ public class PegasusCicEventProcessor extends EventProcessor<PegasusCicEvent> {
 
     @Override
     public Followup process() {
-        val roll = rollDie();
+        val roll = ops.rollDie();
         if (roll <= 3) {
             return single(new DamagePegasusEvent());
         } else if (roll <= 6) {
@@ -31,22 +31,21 @@ public class PegasusCicEventProcessor extends EventProcessor<PegasusCicEvent> {
         if (basestar == null) {
             return;
         }
-        val damage = game.decks().basestarDamage().draw();
-        basestar.damage(damage);
+        ops.ship(basestar.id()).damage();
         if (countHits(basestar) > 2) {
-            game.destroy(basestar);
+            ops.ship(basestar.id()).destroy();
         }
     }
 
-    private Basestar findBasestar() {
-        return galacticaBoard.shipsInSpace(Basestar.class)
+    private BasestarView findBasestar() {
+        return galacticaBoard.shipsInSpace(BasestarView.class)
                 .stream()
                 .filter(s -> s.id() == event.basestarId())
                 .findFirst()
                 .orElse(null);
     }
 
-    private int countHits(Basestar basestar) {
+    private int countHits(BasestarView basestar) {
         var hits = 0;
         for (var dmg : basestar.damage()) {
             hits += dmg == BasestarDamage.CRITICAL_HIT ? 2 : 1;

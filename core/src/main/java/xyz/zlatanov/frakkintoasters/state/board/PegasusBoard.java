@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
+import xyz.zlatanov.frakkintoasters.state.view.PegasusBoardView;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,7 +15,7 @@ import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.PEGASUS;
 
 @Getter
 @Accessors(fluent = true)
-public class PegasusBoard implements BattlestarBoard {
+public class PegasusBoard implements BattlestarBoard, PegasusBoardView {
 
     private final Set<Location>            locations           = new HashSet<>(PEGASUS.locations());
     private final Set<Location>            damagedLocations    = new HashSet<>();

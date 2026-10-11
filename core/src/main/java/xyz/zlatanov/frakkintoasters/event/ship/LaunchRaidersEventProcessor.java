@@ -4,7 +4,7 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.board.AdvancePursuitTrackEvent;
-import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
+import xyz.zlatanov.frakkintoasters.state.view.BasestarView;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ public class LaunchRaidersEventProcessor extends EventProcessor<LaunchRaidersEve
 
     @Override
     public Followup process() {
-        val basestars = galacticaBoard.shipsInSpace(Basestar.class);
+        val basestars = galacticaBoard.shipsInSpace(BasestarView.class);
         if (basestars.isEmpty()) {
             return placeBasestarOnCylonFleetBoard();
         } else {
@@ -31,19 +31,10 @@ public class LaunchRaidersEventProcessor extends EventProcessor<LaunchRaidersEve
                 new AdvancePursuitTrackEvent());
     }
 
-    private Followup launchRaidersFromEachBasestar(List<Basestar> basestars) {
+    private Followup launchRaidersFromEachBasestar(List<BasestarView> basestars) {
         basestars.stream()
                 .filter(b -> !b.damage().contains(DISABLED_HANGAR_BAY))
-                .forEach(this::launch3Raiders);
+                .forEach(b -> ops.ship(b.id()).launchRaiders(3));
         return NONE;
-    }
-
-    private void launch3Raiders(Basestar basestar) {
-        val basestarLocation = galacticaBoard.locate(basestar);
-        int raidersLaunched = 0;
-        while (raidersLaunched++ < 3) {
-            game.cylonShips().raider()
-                    .ifPresent(r -> galacticaBoard.place(basestarLocation, r));
-        }
     }
 }

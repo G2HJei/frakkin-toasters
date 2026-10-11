@@ -14,10 +14,10 @@ public class FTLControlEventProcessor extends EventProcessor<FTLControlEvent> {
 
     @Override
     public Followup process() {
-        val roll = rollDie();
+        val roll = ops.rollDie();
         if (roll < 7) {
             val lostPop = galacticaBoard.jumpPreparation().lostPopulation();
-            galacticaBoard.decreasePopulation(lostPop);
+            ops.galactica().decreasePopulation(lostPop);
         }
         return galacticaBoard.population() > 0
                 ? single(new JumpingTheFleetEvent())

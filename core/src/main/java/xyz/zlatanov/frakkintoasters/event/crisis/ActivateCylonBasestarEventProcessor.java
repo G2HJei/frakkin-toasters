@@ -5,7 +5,7 @@ import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.ship.DamageGalacticaEvent;
 import xyz.zlatanov.frakkintoasters.event.ship.DamagePegasusEvent;
-import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
+import xyz.zlatanov.frakkintoasters.state.view.BasestarView;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.NONE;
 import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.DISABLED_WEAPONS;
@@ -13,9 +13,9 @@ import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.DISABLED_
 public class ActivateCylonBasestarEventProcessor extends EventProcessor<ActivateCylonBasestarEvent> {
     @Override
     public Followup process() {
-        val basestar = galacticaBoard.shipInSpace(event.basestarShipId(), Basestar.class);
+        val basestar = galacticaBoard.shipInSpace(event.basestarShipId(), BasestarView.class);
         val weaponsDisabled = basestar.damage().contains(DISABLED_WEAPONS);
-        if (!weaponsDisabled && rollDie() > 3) {
+        if (!weaponsDisabled && ops.rollDie() > 3) {
             return Followup.one(new DamageGalacticaEvent(), new DamagePegasusEvent());
         } else {
             return NONE;

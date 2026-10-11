@@ -12,8 +12,8 @@ public class CapricaDrawAndResolveCrisisCardsEventProcessor extends EventProcess
 
     @Override
     public Followup process() {
-        val firstCrisis = game.decks().crisis().draw();
-        val secondCrisis = game.decks().crisis().draw();
+        val firstCrisis = ops.player(event.playerNumber()).drawCrisisCard();
+        val secondCrisis = ops.player(event.playerNumber()).drawCrisisCard();
         return one(
                 new ResolveCapricaCrisisCardEvent(event.playerNumber(), firstCrisis, secondCrisis),
                 new ResolveCapricaCrisisCardEvent(event.playerNumber(), secondCrisis, firstCrisis)

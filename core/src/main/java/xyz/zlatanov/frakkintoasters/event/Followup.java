@@ -6,7 +6,7 @@ import xyz.zlatanov.frakkintoasters.event.skillcheck.PlayFromDestinyDeckEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.PlaySkillsEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.ResolveSkillCheckEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.ShuffleAndDivideCardsEvent;
-import xyz.zlatanov.frakkintoasters.state.Game;
+import xyz.zlatanov.frakkintoasters.state.view.GameView;
 
 import java.util.*;
 
@@ -76,7 +76,7 @@ public sealed interface Followup permits Followup.None, Followup.Single, Followu
         return new OneOf(Arrays.stream(followups).collect(toCollection(LinkedHashSet::new)));
     }
 
-    static Followup skillCheckFollowup(Game game) {
+    static Followup skillCheckFollowup(GameView game) {
         val followupEvents = new ArrayList<Event>();
         followupEvents.add(new PlayFromDestinyDeckEvent());
         addPlayerDecisions(game, followupEvents);
@@ -85,7 +85,7 @@ public sealed interface Followup permits Followup.None, Followup.Single, Followu
         return all(followupEvents.toArray(Event[]::new));
     }
 
-    private static void addPlayerDecisions(Game game, ArrayList<Event> followupEvents) {
+    private static void addPlayerDecisions(GameView game, ArrayList<Event> followupEvents) {
         var decidingPlayer = game.currentPlayer();
         do {
             decidingPlayer = decidingPlayer >= game.players().size() ? 1 : ++decidingPlayer;

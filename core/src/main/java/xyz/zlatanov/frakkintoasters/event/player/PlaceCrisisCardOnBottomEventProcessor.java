@@ -7,7 +7,7 @@ public class PlaceCrisisCardOnBottomEventProcessor extends EventProcessor<PlaceC
 
     @Override
     public Followup process() {
-        game.decks().crisis().addToBottom(event.card());
+        ops.player(event.playerNumber()).placeCrisisCardOnBottom(event.card());
         return Followup.NONE;
     }
 }

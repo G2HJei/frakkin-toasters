@@ -4,16 +4,16 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
-import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
-import xyz.zlatanov.frakkintoasters.state.ship.*;
+import xyz.zlatanov.frakkintoasters.state.ship.ShipType;
+import xyz.zlatanov.frakkintoasters.state.view.HumanFighterView;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import static xyz.zlatanov.frakkintoasters.state.board.GalacticaBoard.VIPER_LAUNCH_SPACES;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.PILOTING;
+import static xyz.zlatanov.frakkintoasters.state.view.GalacticaBoardView.VIPER_LAUNCH_SPACES;
 
 public class LaunchViperEventProcessor extends EventProcessor<LaunchViperEvent> {
 
@@ -29,7 +29,7 @@ public class LaunchViperEventProcessor extends EventProcessor<LaunchViperEvent> 
         val validPilot = pilot == null || PILOT_CHARACTERS.contains(pilot);
         //todo  && player.character() == pilot; OR REFACTOR INTO PLAYER EVENT??
         val validMandatoryPilot = !event.mustLaunchInViper() || pilot != null;
-        val reserveFighterAvailable = galacticaBoard.reserves().stream().anyMatch(s -> s instanceof HumanFighter);
+        val reserveFighterAvailable = galacticaBoard.reserves().stream().anyMatch(s -> s instanceof HumanFighterView);
         val noPilotNoViperToLand = pilot == null && unmannedViperId == null;
         val pilotingFromReserves = pilot != null && reserveFighterAvailable && unmannedViperId == null;
         val pilotingUnmannedViper = pilot != null && !reserveFighterAvailable && unmannedViperId != null && viperToLandingIsInSpace();
@@ -43,9 +43,9 @@ public class LaunchViperEventProcessor extends EventProcessor<LaunchViperEvent> 
 
     @Override
     public Followup process() {
-        val humanFighter = launchShip();
+        val humanFighterId = ops.galactica().launchHumanFighter(event.shipType(), event.location(), event.unmannedViperId());
         if (event.pilot() != null) {
-            pilotShip(humanFighter);
+            ops.character(event.pilot()).pilot(humanFighterId);
         }
         return Followup.NONE;
     }
@@ -54,30 +54,6 @@ public class LaunchViperEventProcessor extends EventProcessor<LaunchViperEvent> 
         return galacticaBoard.shipsInSpace(event.shipType().shipClass())
                 .stream()
                 .anyMatch(s -> s.id() == event.unmannedViperId());
-    }
-
-    private HumanFighter launchShip() {
-        val humanFighter = (switch (event.shipType()) {
-            case VIPER -> galacticaBoard.removeFromReserves(Viper.class);
-            case VIPER_MARK_VII -> galacticaBoard.removeFromReserves(ViperMarkVII.class);
-            case ASSAULT_RAPTOR -> galacticaBoard.removeFromReserves(AssaultRaptor.class);
-            default -> throw new FrakCallTheAdmiralException();
-        })
-                .map(HumanFighter.class::cast)
-                .orElseGet(this::landUnmannedViperToPilotIt);
-        galacticaBoard.place(event.location(), humanFighter);
-        return humanFighter;
-    }
-
-    private void pilotShip(HumanFighter humanFighter) {
-        galacticaBoard.remove(event.pilot());
-        humanFighter.pilot(event.pilot());
-    }
-
-    private HumanFighter landUnmannedViperToPilotIt() {
-        val ship = galacticaBoard.shipInSpace(event.unmannedViperId(), HumanFighter.class);
-        galacticaBoard.addToReserves(ship);
-        return ship;
     }
 
 }

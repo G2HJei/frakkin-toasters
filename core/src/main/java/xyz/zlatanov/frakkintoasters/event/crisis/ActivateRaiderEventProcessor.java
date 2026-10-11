@@ -9,8 +9,8 @@ import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.ship.DestroyCivilianShipEvent;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
-import xyz.zlatanov.frakkintoasters.state.ship.HumanFighter;
 import xyz.zlatanov.frakkintoasters.state.ship.Raider;
+import xyz.zlatanov.frakkintoasters.state.view.HumanFighterView;
 
 import java.util.Comparator;
 import java.util.List;
@@ -47,11 +47,11 @@ public class ActivateRaiderEventProcessor extends EventProcessor<ActivateRaiderE
         return single(new AttackGalacticaEvent(raider.id()));
     }
 
-    private Followup attackViper(Raider raider, List<HumanFighter> humanFighters) {
+    private Followup attackViper(Raider raider, List<HumanFighterView> humanFighters) {
         val unmanned = humanFighters.stream().filter(s -> s.pilot() == null).toList();
         val targets = !unmanned.isEmpty() ? unmanned : humanFighters;
         return Followup.one(targets.stream()
-                .sorted(Comparator.comparingInt(HumanFighter::id))
+                .sorted(Comparator.comparingInt(HumanFighterView::id))
                 .map(s -> new AttackViperEvent(raider.id(), s.id()))
                 .toArray(Event[]::new));
     }
@@ -88,6 +88,6 @@ public class ActivateRaiderEventProcessor extends EventProcessor<ActivateRaiderE
         val nextIndex = moveClockwise
                 ? (raiderIndex + 1) % size
                 : (raiderIndex - 1 + size) % size;
-        game.moveTo(SPACE_AREAS_CLOCKWISE.get(nextIndex), raider);
+        ops.ship(raider.id()).moveTo(SPACE_AREAS_CLOCKWISE.get(nextIndex));
     }
 }

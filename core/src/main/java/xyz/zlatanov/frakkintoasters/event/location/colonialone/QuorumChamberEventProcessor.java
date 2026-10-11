@@ -1,6 +1,5 @@
 package xyz.zlatanov.frakkintoasters.event.location.colonialone;
 
-import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.DrawQuorumCardEvent;
 import xyz.zlatanov.frakkintoasters.event.Followup;
@@ -14,8 +13,7 @@ public class QuorumChamberEventProcessor extends EventProcessor<QuorumChamberEve
     // todo verify acting player is the president
     @Override
     public Followup process() {
-        val drawnCard = game.decks().quorum().draw();
-        game.presidentHand().addOnTop(drawnCard);
+        ops.president().drawQuorumCard();
 
         return one(
                 new DrawQuorumCardEvent(event.playerNumber()), // todo this should be player decision

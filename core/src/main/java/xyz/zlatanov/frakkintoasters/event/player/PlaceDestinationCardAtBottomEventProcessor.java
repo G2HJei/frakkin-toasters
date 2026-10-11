@@ -7,7 +7,7 @@ public class PlaceDestinationCardAtBottomEventProcessor extends EventProcessor<P
 
     @Override
     public Followup process() {
-        game.decks().destination().addToBottom(event.card());
+        ops.player(event.playerNumber()).placeDestinationCardOnBottom(event.card());
         return Followup.NONE;
     }
 }

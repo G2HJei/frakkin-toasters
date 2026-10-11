@@ -16,8 +16,8 @@ public class HumanFleetLookAtTopCrisisCardEventProcessor extends EventProcessor<
 
     @Override
     public Followup process() {
-        val card = game.decks().crisis().draw();
         val playerNumber = event.playerNumber();
+        val card = ops.player(playerNumber).drawCrisisCard();
         return all(
                 Followup.one(
                         new PlaceCrisisCardOnTopEvent(playerNumber, card),

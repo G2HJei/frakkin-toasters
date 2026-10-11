@@ -4,9 +4,10 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
-import xyz.zlatanov.frakkintoasters.state.ship.HumanFighter;
 import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 import xyz.zlatanov.frakkintoasters.state.track.Pursuit;
+import xyz.zlatanov.frakkintoasters.state.view.CylonFleetBoardView;
+import xyz.zlatanov.frakkintoasters.state.view.HumanFighterView;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -18,7 +19,7 @@ import static xyz.zlatanov.frakkintoasters.state.track.Pursuit.START;
 
 @Getter
 @Accessors(fluent = true)
-public class CylonFleetBoard implements Board, SpaceLocationsBoard {
+public class CylonFleetBoard implements Board, SpaceLocationsBoard, CylonFleetBoardView {
     public static final Map<Location, Location> MOVE_TO_GALACTICA_MAP = Map.of(
             CYLON_FLEET_SPACE_1, GALACTICA_SPACE_2_OCLOCK,
             CYLON_FLEET_SPACE_2, GALACTICA_SPACE_4_OCLOCK,
@@ -34,7 +35,7 @@ public class CylonFleetBoard implements Board, SpaceLocationsBoard {
     private final Map<Ship, Location>      shipsInSpace     = new HashMap<>();
 
     @Override
-    public List<HumanFighter> humanFightersIn(Location location) {
+    public List<HumanFighterView> humanFightersIn(Location location) {
         throw new UnsupportedOperationException();
     }
 

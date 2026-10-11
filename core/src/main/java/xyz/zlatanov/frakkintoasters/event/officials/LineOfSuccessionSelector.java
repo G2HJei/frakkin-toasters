@@ -1,9 +1,9 @@
 package xyz.zlatanov.frakkintoasters.event.officials;
 
 import lombok.val;
-import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
+import xyz.zlatanov.frakkintoasters.state.view.GameView;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,7 +12,7 @@ public interface LineOfSuccessionSelector {
 
     List<Character> lineOfSuccession();
 
-    default Character calcNextInLine(Game game) {
+    default Character calcNextInLine(GameView game) {
         val lineOfSuccession = lineOfSuccession();
         Character nextInLine = null;
         var nextRank = 99;

@@ -48,7 +48,7 @@ public class DetermineNextCagEventProcessor extends EventProcessor<DetermineNext
 
     @Override
     public Followup process() {
-        game.cag(calcNextInLine(game));
+        ops.cag().assign(calcNextInLine(game));
         return Followup.NONE;
     }
 

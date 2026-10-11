@@ -1,7 +1,6 @@
 package xyz.zlatanov.frakkintoasters.operation;
 
 import lombok.val;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.TestHarness;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
@@ -12,13 +11,6 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.BUILD_NUKE;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.LAUNCH_SCOUT;
 
 class PlayerOpsDrawSkillCardTest extends TestHarness {
-
-    GameOps ops;
-
-    @BeforeEach
-    void setUp() {
-        ops = new GameOps(game);
-    }
 
     @Test
     void shouldGiveDrawnCardToPlayer() {

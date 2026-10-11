@@ -6,9 +6,9 @@ import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.board.AdvancePursuitTrackEvent;
 import xyz.zlatanov.frakkintoasters.event.ship.PlaceShipOnCylonFleetBoardEvent;
-import xyz.zlatanov.frakkintoasters.state.board.GalacticaBoard;
-import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 import xyz.zlatanov.frakkintoasters.state.ship.Raider;
+import xyz.zlatanov.frakkintoasters.state.view.BasestarView;
+import xyz.zlatanov.frakkintoasters.state.view.GalacticaBoardView;
 
 import java.util.Comparator;
 import java.util.List;
@@ -22,7 +22,7 @@ public class ActivateRaidersEventProcessor extends EventProcessor<ActivateRaider
     @Override
     public Followup process() {
         val raiders = getRaiders(galacticaBoard);
-        val basestars = galacticaBoard.shipsInSpace(Basestar.class);
+        val basestars = galacticaBoard.shipsInSpace(BasestarView.class);
 
         if (!raiders.isEmpty()) {
             return activateRaidersOneByOne(raiders, galacticaBoard);
@@ -33,29 +33,22 @@ public class ActivateRaidersEventProcessor extends EventProcessor<ActivateRaider
         }
     }
 
-    private List<Raider> getRaiders(GalacticaBoard galactica) {
+    private List<Raider> getRaiders(GalacticaBoardView galactica) {
         return galactica.shipsInSpace(Raider.class)
                 .stream()
                 .sorted(Comparator.comparingInt(a -> GALACTICA_SPACE.locations().indexOf(galactica.locate(a))))
                 .toList();
     }
 
-    private Followup activateRaidersOneByOne(List<Raider> raiders, GalacticaBoard galactica) {
+    private Followup activateRaidersOneByOne(List<Raider> raiders, GalacticaBoardView galactica) {
         return Followup.all(
                 raiders.stream()
                         .map(r -> new ActivateRaiderEvent(r.id()))
                         .toArray(Event[]::new));
     }
 
-    private Followup launchRaiders(List<Basestar> basestars) {
-        val galactica = galacticaBoard;
-        for (val basestar : basestars) {
-            val basestarLocation = galactica.locate(basestar);
-            for (int i = 0; i < 2; i++) {
-                game.cylonShips().raider()
-                        .ifPresent(r -> galactica.place(basestarLocation, r));
-            }
-        }
+    private Followup launchRaiders(List<BasestarView> basestars) {
+        basestars.forEach(basestar -> ops.ship(basestar.id()).launchRaiders(2));
         return Followup.NONE;
     }
 

@@ -9,11 +9,7 @@ public class DestroyCivilianShipEventProcessor extends EventProcessor<DestroyCiv
     @Override
     public Followup process() {
         val civilianShip = galacticaBoard.shipInSpace(event.shipId(), CivilianShip.class);
-        galacticaBoard
-                .decreaseFuel(civilianShip.fuelCost())
-                .decreaseMorale(civilianShip.moraleCost())
-                .decreasePopulation(civilianShip.populationCost());
-        game.removeComponent(civilianShip);
+        ops.ship(civilianShip.id()).destroy();
         return Followup.NONE;
     }
 }

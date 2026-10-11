@@ -5,21 +5,16 @@ import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.PlaceCivilianShipEvent;
-import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
-import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
-
-import java.util.HashMap;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
-import static xyz.zlatanov.frakkintoasters.state.board.CylonFleetBoard.MOVE_TO_GALACTICA_MAP;
 
 public class AdvancePursuitTrackEventProcessor extends EventProcessor<AdvancePursuitTrackEvent> {
     @Override
     public Followup process() {
-        val pursuit = cylonFleetBoard.advancePursuit();
+        val pursuit = ops.cylonFleet().advancePursuit();
         switch (pursuit) {
             case ONE_CIVILIAN_SHIP:
                 return single(decisionEvent());
@@ -43,14 +38,7 @@ public class AdvancePursuitTrackEventProcessor extends EventProcessor<AdvancePur
     }
 
     private void transferAllShipsToMainBoard() {
-        cylonFleetBoard.resetPursuit();
-        new HashMap<>(cylonFleetBoard.shipsInSpace()).forEach(this::moveShip);
-    }
-
-    private void moveShip(Ship ship, Location cylonFleetBoardLocation) {
-        val targetLocation = MOVE_TO_GALACTICA_MAP.get(cylonFleetBoardLocation);
-        // todo add utility method for this kind of remove > place action if used often enough
-        cylonFleetBoard.remove(ship);
-        galacticaBoard.place(targetLocation, ship);
+        ops.cylonFleet().resetPursuit();
+        ops.cylonFleet().moveShipsToGalactica();
     }
 }

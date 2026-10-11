@@ -6,11 +6,8 @@ import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
-import static java.util.Comparator.comparing;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 
 public class ShuffleAndDivideCardsEventProcessor extends EventProcessor<ShuffleAndDivideCardsEvent> {
@@ -39,31 +36,8 @@ public class ShuffleAndDivideCardsEventProcessor extends EventProcessor<ShuffleA
 
     @Override
     public Followup process() {
-        val cards = drawAllAndSort();
-        splitIntoPiles(cards);
+        val cards = ops.skillCheck().divideCards();
         return buildFollowup(cards);
-    }
-
-    private ArrayList<SkillCard> drawAllAndSort() {
-        val deck = game.activeSkillCheck().cards();
-        val all = new ArrayList<>(deck.draw(deck.size()));
-        all.sort(comparing((SkillCard card) -> card.type().color())
-                .thenComparing(SkillCard::value, Comparator.reverseOrder())
-                .thenComparing(SkillCard::type, Comparator.reverseOrder()));
-        return all;
-    }
-
-    private void splitIntoPiles(ArrayList<SkillCard> sortedCards) {
-        val skillCheck = game.activeSkillCheck();
-        val matchingColors = skillCheck.type().skillCheckColors();
-        for (val card : sortedCards) {
-            val cardMatchesSkillCheck = matchingColors.contains(card.type().color());
-            if (cardMatchesSkillCheck) {
-                skillCheck.matchingPile().add(card);
-            } else {
-                skillCheck.nonMatchingPile().add(card);
-            }
-        }
     }
 
     private Followup buildFollowup(List<SkillCard> cards) {

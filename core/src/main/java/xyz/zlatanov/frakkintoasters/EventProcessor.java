@@ -5,23 +5,20 @@ import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
 import xyz.zlatanov.frakkintoasters.operation.GameOps;
 import xyz.zlatanov.frakkintoasters.state.Game;
-import xyz.zlatanov.frakkintoasters.state.board.CylonFleetBoard;
-import xyz.zlatanov.frakkintoasters.state.board.GalacticaBoard;
-import xyz.zlatanov.frakkintoasters.state.board.PegasusBoard;
 import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
-import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
+import xyz.zlatanov.frakkintoasters.state.view.*;
 
 public abstract class EventProcessor<T extends Event> {
 
-    protected Game    game; //todo replace with GameView
-    protected T       event;
-    protected GameOps ops; //set right before process(), so init() and isValid() can't change state
+    protected GameView game;
+    protected T        event;
+    protected GameOps  ops; //set right before process(), so init() and isValid() can't change state
 
     //utility fields improving event processors' readability
-    protected PlayerView      player;
-    protected GalacticaBoard  galacticaBoard; //todo replace with board view
-    protected PegasusBoard    pegasusBoard;//todo replace with board view
-    protected CylonFleetBoard cylonFleetBoard;//todo replace with board view
+    protected PlayerView          player;
+    protected GalacticaBoardView  galacticaBoard;
+    protected PegasusBoardView    pegasusBoard;
+    protected CylonFleetBoardView cylonFleetBoard;
 
     public final Followup execute(Game game, T event) {
         setContext(game, event);
@@ -41,7 +38,7 @@ public abstract class EventProcessor<T extends Event> {
         return true;
     }
 
-    private void setContext(Game game, T event) {
+    private void setContext(GameView game, T event) {
         assert this.game == null && this.event == null;
         this.game = game;
         this.event = event;
@@ -57,11 +54,6 @@ public abstract class EventProcessor<T extends Event> {
         if (!isValid()) {
             throw new InvalidActionException("Invalid action!");
         }
-    }
-
-    //utility methods
-    protected int rollDie() {
-        return game.die().roll();
     }
 
 }

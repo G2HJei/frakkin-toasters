@@ -8,6 +8,7 @@ import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
 import xyz.zlatanov.frakkintoasters.state.track.BoardingParty;
 import xyz.zlatanov.frakkintoasters.state.track.JumpPreparation;
+import xyz.zlatanov.frakkintoasters.state.view.GalacticaBoardView;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -19,7 +20,7 @@ import static xyz.zlatanov.frakkintoasters.state.track.BoardingParty.START;
 
 @Getter
 @Accessors(fluent = true)
-public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard {
+public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard, GalacticaBoardView {
     private       int                           fuel                 = 8;
     private       int                           food                 = 8;
     private       int                           morale               = 10;
@@ -35,7 +36,15 @@ public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard {
     private final Map<Ship, Location>           shipsInSpace         = new HashMap<>();
     private final Map<Centurion, BoardingParty> boardingPartyTrack   = new LinkedHashMap<>();
 
-    public static final List<Location> VIPER_LAUNCH_SPACES = List.of(GALACTICA_SPACE_4_OCLOCK, GALACTICA_SPACE_6_OCLOCK);
+    @Override
+    public Set<Ship> reserves() {
+        return Collections.unmodifiableSet(reserves);
+    }
+
+    @Override
+    public Map<Centurion, BoardingParty> boardingPartyTrack() {
+        return Collections.unmodifiableMap(boardingPartyTrack);
+    }
 
     @Override
     public Optional<Location> locate(Character character) {
@@ -88,6 +97,11 @@ public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard {
 
     public <T extends Ship> Optional<T> removeFromReserves(Class<T> shipClass) {
         return removeFrom(reserves, shipClass);
+    }
+
+    public GalacticaBoard removeFromReserves(Ship ship) {
+        reserves.remove(ship);
+        return this;
     }
 
     public Optional<HumanFighter> removeFromReserves(int shipId) {

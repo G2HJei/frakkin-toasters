@@ -72,12 +72,19 @@ public class CylonShips implements CylonShipsView {
         return Optional.of(centurions.removeLast());
     }
 
+    @Override
+    public int available(ShipType shipType) {
+        return switch (shipType) {
+            case BASESTAR -> basestars.size();
+            case RAIDER -> raiders.size();
+            case HEAVY_RAIDER -> heavyRaiders.size();
+            default -> throw new FrakCallTheAdmiralException();
+        };
+    }
+
     public CylonShips returned(Ship ship) {
         switch (ship) {
-            case Basestar b -> {
-                b.clearDamage();
-                basestars.add(b);
-            }
+            case Basestar b -> basestars.add(b);
             case Raider r -> raiders.add(r);
             case HeavyRaider h -> heavyRaiders.add(h);
             default -> throw new FrakCallTheAdmiralException();

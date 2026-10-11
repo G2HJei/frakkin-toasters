@@ -1,7 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event;
 
-import xyz.zlatanov.frakkintoasters.state.Game;
-import xyz.zlatanov.frakkintoasters.state.Player;
+import xyz.zlatanov.frakkintoasters.state.view.GameView;
+import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
 
 public interface PlayerEvent extends Event {
 
@@ -9,7 +9,7 @@ public interface PlayerEvent extends Event {
 
     int playerNumber();
 
-    default Player player(Game game) {
-        return (Player) game.player(playerNumber());
+    default PlayerView player(GameView game) {
+        return game.player(playerNumber());
     }
 }

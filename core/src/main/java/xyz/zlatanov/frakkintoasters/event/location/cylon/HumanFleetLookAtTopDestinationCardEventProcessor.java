@@ -14,8 +14,8 @@ import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DRAW
 public class HumanFleetLookAtTopDestinationCardEventProcessor extends EventProcessor<HumanFleetLookAtTopDestinationCardEvent> {
     @Override
     public Followup process() {
-        val card = game.decks().destination().draw();
         val playerNumber = event.playerNumber();
+        val card = ops.player(playerNumber).drawDestinationCard();
         return all(
                 one(
                         new PlaceDestinationCardOnTopEvent(playerNumber, card),

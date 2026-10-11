@@ -1,6 +1,5 @@
 package xyz.zlatanov.frakkintoasters.event.officials;
 
-import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
@@ -45,10 +44,9 @@ public class DetermineNextPresidentEventProcessor extends EventProcessor<Determi
     @Override
     public Followup process() {
         if (firstPresident()) {
-            val quorumCard = game.decks().quorum().draw();
-            game.presidentHand().addOnTop(quorumCard);
+            ops.president().drawQuorumCard();
         }
-        game.president(calcNextInLine(game));
+        ops.president().assign(calcNextInLine(game));
         return Followup.NONE;
     }
 
