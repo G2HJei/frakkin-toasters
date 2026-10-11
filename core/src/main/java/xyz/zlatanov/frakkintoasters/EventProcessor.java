@@ -3,6 +3,7 @@ package xyz.zlatanov.frakkintoasters;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
+import xyz.zlatanov.frakkintoasters.operation.GameOps;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.CylonFleetBoard;
 import xyz.zlatanov.frakkintoasters.state.board.GalacticaBoard;
@@ -12,8 +13,9 @@ import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
 
 public abstract class EventProcessor<T extends Event> {
 
-    protected Game game; //todo replace with GameView
-    protected T    event;
+    protected Game    game; //todo replace with GameView
+    protected T       event;
+    protected GameOps ops; //set right before process(), so init() and isValid() can't change state
 
     //utility fields improving event processors' readability
     protected PlayerView      player;
@@ -25,7 +27,7 @@ public abstract class EventProcessor<T extends Event> {
         setContext(game, event);
         init();
         validate();
-        initOperations(game);
+        ops = new GameOps(game);
         return process();
     }
 
@@ -37,10 +39,6 @@ public abstract class EventProcessor<T extends Event> {
 
     protected boolean isValid() {
         return true;
-    }
-
-    protected void initOperations(Game game) {
-        //allows GameOperation initialization before processing the event's business logic
     }
 
     private void setContext(Game game, T event) {

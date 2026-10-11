@@ -104,7 +104,7 @@ public class DecksHolder implements DecksHolderView {
     public Optional<SkillCard> drawSkillCard(SkillCardColor skillCardColor) {
         return Optional.of(
                 switch (skillCardColor) {
-                    case POLITICS -> politics().draw();
+                    case POLITICS -> politics.draw();
                     case LEADERSHIP -> leadership.draw();
                     case TACTICS -> tactics.draw();
                     case PILOTING -> piloting.draw();

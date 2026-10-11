@@ -1,6 +1,5 @@
 package xyz.zlatanov.frakkintoasters.operation;
 
-import lombok.RequiredArgsConstructor;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
@@ -9,18 +8,22 @@ import java.util.Optional;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.SICKBAY;
 
-@RequiredArgsConstructor
-public class ShipOperations {
+public class ShipOps extends AbstractOps {
 
-    private final Game game;
+    private final int shipId;
 
-    public void destroy(int shipId) {
+    ShipOps(Game game, int shipId) {
+        super(game);
+        this.shipId = shipId;
+    }
+
+    public void destroy() {
         game.boards().galactica()
                 .reserves().stream()
                 .filter(s -> s.id() == shipId)
                 .findFirst()
                 .ifPresentOrElse(this::destroyFromReserves,
-                        () -> destroyInSpace(shipId));
+                        this::destroyInSpace);
     }
 
     private void destroyFromReserves(Ship ship) {
@@ -28,7 +31,7 @@ public class ShipOperations {
         game.removeComponent(ship);
     }
 
-    private void destroyInSpace(int shipId) {
+    private void destroyInSpace() {
         val galacticaBoard = game.boards().galactica();
         val ship = galacticaBoard.shipInSpace(shipId, Ship.class);
         galacticaBoard.remove(ship);

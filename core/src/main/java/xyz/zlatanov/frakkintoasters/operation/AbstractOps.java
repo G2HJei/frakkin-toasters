@@ -1,11 +1,12 @@
 package xyz.zlatanov.frakkintoasters.operation;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import xyz.zlatanov.frakkintoasters.state.Game;
 
-@RequiredArgsConstructor
-public abstract class GameOperation {
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
+public abstract class AbstractOps {
 
-    private final Game game;
+    protected final Game game;
     //todo journal
 }
