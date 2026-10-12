@@ -8,6 +8,7 @@ import xyz.zlatanov.frakkintoasters.state.character.Character;
 import java.util.List;
 
 public interface GameView {
+
     ObjectiveCard objective();
 
     List<PlayerView> players();
@@ -20,17 +21,11 @@ public interface GameView {
 
     BoardsHolderView boards();
 
-    //  DecksHolderView decks();
-
-    //SkillCheckHolderView activeSkillCheck();
-
     CylonShipsView cylonShips();
 
     int nukes();
 
     Character president();
-
-    //  DeckView<QuorumCard> presidentHand();
 
     Character admiral();
 
