@@ -1,7 +1,7 @@
 package xyz.zlatanov.frakkintoasters.operation;
 
+import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.Game;
-import xyz.zlatanov.frakkintoasters.state.Player;
 import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
@@ -26,6 +26,14 @@ public class PlayerOps extends AbstractOps {
         return game.decks().crisis().draw();
     }
 
+    public PlayerOps drawSuperCrisisCard() {
+        val card = game.decks().superCrisis().draw();
+        game.player(playerNumber)
+                .superCrisisCards()
+                .addOnTop(card);
+        return this;
+    }
+
     public DestinationCard drawDestinationCard() {
         return game.decks().destination().draw();
     }
@@ -46,8 +54,17 @@ public class PlayerOps extends AbstractOps {
         game.decks().destination().addToBottom(card);
     }
 
+    public PlayerOps discard(SkillCard skillCard1, SkillCard skillCard2, SkillCard skillCard3) {
+        game.player(playerNumber)
+                .skillCards()
+                .remove(skillCard1, skillCard2, skillCard3);
+        game.decks()
+                .discard(skillCard1, skillCard2, skillCard3);
+        return this;
+    }
+
     private void giveToPlayer(SkillCard card) {
-        ((Player) game.player(playerNumber))
+        game.player(playerNumber)
                 .gainSkillCards(card);
     }
 }

@@ -12,7 +12,9 @@ import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 import xyz.zlatanov.frakkintoasters.state.deck.DecksHolder;
-import xyz.zlatanov.frakkintoasters.state.ship.*;
+import xyz.zlatanov.frakkintoasters.state.ship.CylonShips;
+import xyz.zlatanov.frakkintoasters.state.ship.Ship;
+import xyz.zlatanov.frakkintoasters.state.ship.Viper;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheck;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckHolder;
 import xyz.zlatanov.frakkintoasters.state.view.GameView;
@@ -83,7 +85,7 @@ public class Game implements GameView {
     }
 
     @Override
-    public PlayerView player(int playerNumber) {
+    public Player player(int playerNumber) {
         return players.get(playerNumber);
     }
 

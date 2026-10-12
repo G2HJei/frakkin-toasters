@@ -66,6 +66,10 @@ public class DecksHolder implements DecksHolderView {
     @Builder.Default
     private final Deck<MutinyCard>      mutiny          = genericDeck(MutinyCard.class);
 
+    public void discard(Object... cards) {
+        discard(List.of(cards));
+    }
+
     public void discard(List<?> cards) {
         cards.forEach(this::discard);
     }
