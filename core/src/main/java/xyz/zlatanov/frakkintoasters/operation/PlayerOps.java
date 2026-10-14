@@ -3,9 +3,12 @@ package xyz.zlatanov.frakkintoasters.operation;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
+import xyz.zlatanov.frakkintoasters.state.card.MutinyCard;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
+
+import java.util.Arrays;
 
 public class PlayerOps extends AbstractOps {
 
@@ -61,6 +64,13 @@ public class PlayerOps extends AbstractOps {
         game.decks()
                 .discard(skillCard1, skillCard2, skillCard3);
         return this;
+    }
+
+    public void discard(MutinyCard... cards) {
+        game.player(playerNumber)
+                .mutinyCards()
+                .remove(cards);
+        game.decks().discard(Arrays.stream(cards).toList());
     }
 
     private void giveToPlayer(SkillCard card) {

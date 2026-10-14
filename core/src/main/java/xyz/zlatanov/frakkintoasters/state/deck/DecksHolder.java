@@ -99,6 +99,9 @@ public class DecksHolder implements DecksHolderView {
                 pegasusDamage.addOnTop(dmg);
                 pegasusDamage.shuffle();
             }
+            case MutinyCard mutinyCard -> {
+                mutiny.discard(mutinyCard);
+            }
             case null, default ->
                 //todo
                     throw new FrakCallTheAdmiralException();
