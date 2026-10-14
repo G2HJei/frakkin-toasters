@@ -17,7 +17,7 @@ class PlayerOpsDrawSkillCardTest extends TestHarness {
         val card = new SkillCard(1, BUILD_NUKE);
         engineeringDeck.nextCard(card);
 
-        ops.player(1).drawSkillCard(ENGINEERING);
+        ops.player(1).drawSkillCards(ENGINEERING);
 
         assertSkillCards(1, card);
     }
@@ -27,7 +27,7 @@ class PlayerOpsDrawSkillCardTest extends TestHarness {
         val card = new SkillCard(2, LAUNCH_SCOUT);
         tacticsDeck.nextCard(card);
 
-        ops.player(2).drawSkillCard(TACTICS);
+        ops.player(2).drawSkillCards(TACTICS);
 
         assertSkillCards(2, card);
         assertNoSkillCards(1);

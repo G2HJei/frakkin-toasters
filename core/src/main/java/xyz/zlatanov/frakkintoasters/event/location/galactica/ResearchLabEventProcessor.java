@@ -20,7 +20,7 @@ public class ResearchLabEventProcessor extends EventProcessor<ResearchLabEvent> 
 
     @Override
     public Followup process() {
-        ops.player(player.number()).drawSkillCard(event.skillCardColor());
+        ops.player(player.number()).drawSkillCards(event.skillCardColor());
         return Followup.NONE;
     }
 }

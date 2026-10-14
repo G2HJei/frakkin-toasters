@@ -19,10 +19,12 @@ public class PlayerOps extends AbstractOps {
         this.playerNumber = playerNumber;
     }
 
-    public void drawSkillCard(SkillCardColor skillCardColor) { //todo handle multiple cards?
-        game.decks()
-                .drawSkillCard(skillCardColor)
-                .ifPresent(this::giveToPlayer);
+    public void drawSkillCards(SkillCardColor... colors) {
+        for (val color : colors) {
+            game.decks()
+                    .drawSkillCard(color)
+                    .ifPresent(this::giveToPlayer);
+        }
     }
 
     public CrisisCard drawCrisisCard() {
