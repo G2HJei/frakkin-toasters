@@ -31,12 +31,18 @@ public class PlayerOps extends AbstractOps {
         return game.decks().crisis().draw();
     }
 
-    public PlayerOps drawSuperCrisisCard() {
+    public void drawSuperCrisisCard() {
         val card = game.decks().superCrisis().draw();
         game.player(playerNumber)
                 .superCrisisCards()
                 .addOnTop(card);
-        return this;
+    }
+
+    public void drawMutinyCard() {
+        val card = game.decks().mutiny().draw();
+        game.player(playerNumber)
+                .mutinyCards()
+                .addOnTop(card);
     }
 
     public DestinationCard drawDestinationCard() {
