@@ -57,12 +57,11 @@ public class PlayerOps extends AbstractOps {
         game.decks().destination().addToBottom(card);
     }
 
-    public PlayerOps discard(SkillCard skillCard1, SkillCard skillCard2, SkillCard skillCard3) {
+    public PlayerOps discard(SkillCard... cards) {
         game.player(playerNumber)
                 .skillCards()
-                .remove(skillCard1, skillCard2, skillCard3);
-        game.decks()
-                .discard(skillCard1, skillCard2, skillCard3);
+                .remove(cards);
+        game.decks().discard(cards);
         return this;
     }
 

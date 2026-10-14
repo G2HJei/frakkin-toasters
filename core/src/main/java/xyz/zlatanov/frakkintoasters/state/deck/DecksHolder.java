@@ -66,7 +66,11 @@ public class DecksHolder implements DecksHolderView {
     @Builder.Default
     private final Deck<MutinyCard>      mutiny          = genericDeck(MutinyCard.class);
 
-    public void discard(Object... cards) {
+    public void discard(SkillCard... cards) {
+        discard(List.of(cards));
+    }
+
+    public void discard(Enum<?>... cards) {
         discard(List.of(cards));
     }
 
