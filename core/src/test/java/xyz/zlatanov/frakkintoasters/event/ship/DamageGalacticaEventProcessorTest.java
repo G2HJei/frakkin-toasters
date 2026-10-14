@@ -29,7 +29,7 @@ class DamageGalacticaEventProcessorTest extends EventTestHarness<DamageGalactica
         execute(new DamageGalacticaEvent());
 
         assertEquals(7, galacticaBoard.food());
-        assertEquals(7, galacticaDamage.size());
+        assertEquals(8, galacticaDamage.size());
     }
 
     @Test
@@ -39,7 +39,7 @@ class DamageGalacticaEventProcessorTest extends EventTestHarness<DamageGalactica
         execute(new DamageGalacticaEvent());
 
         assertEquals(7, galacticaBoard.fuel());
-        assertEquals(7, galacticaDamage.size());
+        assertEquals(8, galacticaDamage.size());
     }
 
 }
