@@ -16,7 +16,8 @@ abstract class BattlestarOps extends GameOps {
 
     protected void damageLocation(Location location) {
         board().damage(location)
-                .charactersIn(location)
-                .forEach(character -> new CharacterOps(game, character).moveTo(SICKBAY));
+                .charactersIn(location).stream()
+                .map(this::player)
+                .forEach(p -> p.moveTo(SICKBAY));
     }
 }

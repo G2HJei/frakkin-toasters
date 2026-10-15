@@ -1,6 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event.player;
 
 import lombok.val;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.state.ship.AssaultRaptor;
@@ -16,6 +17,10 @@ import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.*;
 
 class LaunchViperEventProcessorTest extends EventTestHarness<LaunchViperEvent> {
 
+    @BeforeEach
+    void setUp() {
+        player(1).character(LEE_ADAMA);
+    }
 
     @Test
     void shouldNotAllowIllegalLocation() {

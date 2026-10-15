@@ -5,8 +5,6 @@ import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
 
-import java.util.Optional;
-
 import static xyz.zlatanov.frakkintoasters.state.board.Location.SICKBAY;
 import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.GALACTICA_SPACE;
 
@@ -92,11 +90,7 @@ public class ShipOps extends GameOps {
 
     private void damageHumanFighter(HumanFighter humanFighter) {
         galacticaBoard().remove(humanFighter);
-        val pilot = humanFighter.pilot();
-        if (pilot != null) {
-            humanFighter.pilot(null);
-            new CharacterOps(game, pilot).moveTo(SICKBAY);
-        }
+        handlePilot(humanFighter);
         if (humanFighter instanceof Viper viper) {
             galacticaBoard().addToDamagedShips(viper);
         } else {
@@ -116,13 +110,20 @@ public class ShipOps extends GameOps {
         if (ship instanceof CylonShip) {
             destroyCylonShip(ship);
         } else if (ship instanceof HumanFighter humanFighter) {
-            Optional.ofNullable(humanFighter.pilot())
-                    .ifPresent(pilot -> new CharacterOps(game, pilot).moveTo(SICKBAY));
+            handlePilot(humanFighter);
             destroyHumanShip(humanFighter);
         } else if (ship instanceof CivilianShip civilianShip) {
             destroyCivilianShip(civilianShip);
         } else {
             destroyHumanShip(ship);
+        }
+    }
+
+    private void handlePilot(HumanFighter humanFighter) {
+        val pilot = humanFighter.pilot();
+        if (pilot != null) {
+            humanFighter.pilot(null);
+            player(pilot).moveTo(SICKBAY);
         }
     }
 
@@ -152,7 +153,7 @@ public class ShipOps extends GameOps {
     public void land(Location destination) {
         val ship = galacticaBoard().shipInSpace(shipId, HumanFighter.class);
         galacticaBoard().addToReserves(ship);
-        character(ship.pilot()).moveTo(destination);
+        player(ship.pilot()).moveTo(destination);
         ship.pilot(null);
     }
 

@@ -95,6 +95,7 @@ class ShipOpsDestroyTest extends TestHarness {
 
     @Test
     void shouldDestroyAssaultRaptorAndSendItsPilotToSickbay() {
+        player(1).character(LOUANNE_KAT_KATRAINE);
         val assRaptor = assaultRaptorAt(GALACTICA_SPACE_8_OCLOCK)
                 .pilot(LOUANNE_KAT_KATRAINE);
         ops.ship(assRaptor.id()).destroy();

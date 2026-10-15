@@ -13,8 +13,7 @@ public class HubDestroyedEventProcessor extends EventProcessor<HubDestroyedEvent
                 .discard(event.discardCard1(),
                         event.discardCard2(),
                         event.discardCard3())
-                .drawSuperCrisisCard();
-        ops.character(player.character())
+                .drawSuperCrisisCard()
                 .moveTo(CYLON_FLEET);
         return Followup.NONE;
     }

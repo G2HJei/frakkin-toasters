@@ -175,7 +175,7 @@ public abstract class TestHarness {
     }
 
     protected void moveTo(Location location, Character character) {
-        ops.character(character).moveTo(location);
+        ops.player(character).moveTo(location);
     }
 
     protected Location locate(Character character) {

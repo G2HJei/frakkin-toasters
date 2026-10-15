@@ -1,7 +1,9 @@
 package xyz.zlatanov.frakkintoasters.operation;
 
+import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
+import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 
 public class GameOps extends AbstractOps {
 
@@ -9,12 +11,17 @@ public class GameOps extends AbstractOps {
         super(game);
     }
 
-    public PlayerOps player(int playerNumber) {
-        return new PlayerOps(game, playerNumber);
+    public PlayerOps player(Character character) {
+        for (val p : game.players()) {
+            if (p.character() == character) {
+                return player(p.number());
+            }
+        }
+        throw new FrakCallTheAdmiralException();
     }
 
-    public CharacterOps character(Character character) {
-        return new CharacterOps(game, character);
+    public PlayerOps player(int playerNumber) {
+        return new PlayerOps(game, playerNumber);
     }
 
     public ShipOps ship(int shipId) {

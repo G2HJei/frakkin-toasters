@@ -45,7 +45,7 @@ public class LaunchViperEventProcessor extends EventProcessor<LaunchViperEvent> 
     public Followup process() {
         val humanFighterId = ops.galactica().launchHumanFighter(event.shipType(), event.location(), event.unmannedViperId());
         if (event.pilot() != null) {
-            ops.character(event.pilot()).pilot(humanFighterId);
+            ops.player(event.pilot()).pilot(humanFighterId);
         }
         return Followup.NONE;
     }

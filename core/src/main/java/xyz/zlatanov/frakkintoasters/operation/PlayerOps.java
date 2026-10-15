@@ -9,6 +9,8 @@ import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
 import xyz.zlatanov.frakkintoasters.state.card.MutinyCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
+import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
+import xyz.zlatanov.frakkintoasters.state.ship.HumanFighter;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 
@@ -35,6 +37,17 @@ public class PlayerOps extends GameOps {
         player.loyaltyCards().addOnTop(loyaltyCards);
     }
 
+    public void moveTo(Location location) {
+        assert !location.isSpaceLocation();
+        val character = player.character();
+        game.boards().all().forEach(b -> b.remove(character));
+        game.boards().all().stream()
+                .filter(b -> b.locations().contains(location))
+                .findFirst()
+                .orElseThrow(FrakCallTheAdmiralException::new)
+                .place(location, character);
+    }
+
     public void drawSkillCards(SkillCardColor... colors) {
         drawSkillCards(Arrays.stream(colors).toList());
     }
@@ -51,10 +64,11 @@ public class PlayerOps extends GameOps {
         return game.decks().crisis().draw();
     }
 
-    public void drawSuperCrisisCard() {
+    public PlayerOps drawSuperCrisisCard() {
         val card = game.decks().superCrisis().draw();
         player.superCrisisCards()
                 .addOnTop(card);
+        return this;
     }
 
     public void drawMutinyCard() {
@@ -101,17 +115,25 @@ public class PlayerOps extends GameOps {
         game.decks().discard(Arrays.stream(cards).toList());
     }
 
-    private void giveToPlayer(SkillCard card) {
-        player.gainSkillCards(card);
-    }
-
     public void infiltrateGalactica(Location infiltrateLocation) {
         player.infiltrateGalactica();
-        character(player.character()).moveTo(infiltrateLocation);
+        moveTo(infiltrateLocation);
     }
 
     public void lookAtShip(Integer civId) {
         player.revealedCivilianShipIds()
                 .add(civId);
+    }
+
+    public void pilot(int humanFighterId) {
+        val character = player.character();
+        galacticaBoard().remove(character);
+        galacticaBoard()
+                .shipInSpace(humanFighterId, HumanFighter.class)
+                .pilot(character);
+    }
+
+    private void giveToPlayer(SkillCard card) {
+        player.gainSkillCards(card);
     }
 }

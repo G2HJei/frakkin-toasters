@@ -53,7 +53,7 @@ public class MoveEventProcessor extends EventProcessor<MoveEvent> {
                 ops.ship(ship.id()).land(destination);
             }
         } else {
-            ops.character(playerCharacter).moveTo(destination);
+            ops.player(playerCharacter).moveTo(destination);
         }
         return Followup.NONE;
     }

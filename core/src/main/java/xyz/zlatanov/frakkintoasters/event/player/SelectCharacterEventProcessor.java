@@ -117,7 +117,7 @@ public class SelectCharacterEventProcessor extends EventProcessor<SelectCharacte
 
     private void moveToSetup() {
         val setupLocation = selectedCharacter.setup()[0];
-        ops.character(selectedCharacter).moveTo(setupLocation);
+        ops.player(selectedCharacter).moveTo(setupLocation);
     }
 
     private Followup multipleSetupOptionsFollowup() {
