@@ -90,4 +90,10 @@ public class PlayerOps extends GameOps {
         game.player(playerNumber).infiltrateGalactica();
         character(game.player(playerNumber).character()).moveTo(infiltrateLocation);
     }
+
+    public void lookAtShip(Integer civId) {
+        game.player(playerNumber)
+                .revealedCivilianShipIds()
+                .add(civId);
+    }
 }
