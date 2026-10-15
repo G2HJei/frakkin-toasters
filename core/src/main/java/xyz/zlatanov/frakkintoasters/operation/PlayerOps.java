@@ -2,6 +2,7 @@ package xyz.zlatanov.frakkintoasters.operation;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.Game;
+import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
 import xyz.zlatanov.frakkintoasters.state.card.MutinyCard;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
@@ -10,7 +11,7 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 
 import java.util.Arrays;
 
-public class PlayerOps extends AbstractOps {
+public class PlayerOps extends GameOps {
 
     private final int playerNumber;
 
@@ -83,5 +84,10 @@ public class PlayerOps extends AbstractOps {
     private void giveToPlayer(SkillCard card) {
         game.player(playerNumber)
                 .gainSkillCards(card);
+    }
+
+    public void infiltrateGalactica(Location infiltrateLocation) {
+        game.player(playerNumber).infiltrateGalactica();
+        character(game.player(playerNumber).character()).moveTo(infiltrateLocation);
     }
 }
