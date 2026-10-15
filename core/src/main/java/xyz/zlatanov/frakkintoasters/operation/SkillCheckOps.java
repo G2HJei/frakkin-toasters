@@ -34,11 +34,6 @@ public class SkillCheckOps extends GameOps {
         addCards(cards);
     }
 
-    /**
-     * Sorts the played cards and splits them into matching and non-matching piles.
-     *
-     * @return all cards, sorted by color, value and type
-     */
     public List<SkillCard> divideCards() {
         val cards = drawAllAndSort();
         splitIntoPiles(cards);
