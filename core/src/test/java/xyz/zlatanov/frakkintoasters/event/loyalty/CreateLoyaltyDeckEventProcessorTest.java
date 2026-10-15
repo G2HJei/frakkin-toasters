@@ -47,7 +47,7 @@ class CreateLoyaltyDeckEventProcessorTest extends EventTestHarness<CreateLoyalty
     }
 
     @Test
-    void shouldAddOnTopExtraNotCylonCardsForBoomerAndGaius() {
+    void shouldExtraNotCylonCardsForBoomerAndGaius() {
         player(1).character(KARA_STARBUCK_THRACE);
         player(2).character(GAIUS_BALTAR);
         player(3).character(SHARON_BOOMER_VALERII);

@@ -19,21 +19,25 @@ import static xyz.zlatanov.frakkintoasters.state.character.CharacterType.CYLON_L
 
 public class CreateLoyaltyDeckEventProcessor extends EventProcessor<CreateLoyaltyDeckEvent> {
 
+    private static final List<Character> CHARACTERS_WITH_EXTRA_CARDS = List.of(SHARON_BOOMER_VALERII, GAIUS_BALTAR);
+
     @Override
     public Followup process() {
-        creteLoyaltyDecks();
+        val withCylonLeader = withCylonLeader();
+        creteLoyaltyDecks(withCylonLeader);
         dealLoyaltyCards();
-        dealMotiveCards();
+        if (withCylonLeader) {
+            dealMotiveCards();
+        }
         return followup();
     }
 
-    private void creteLoyaltyDecks() {
-        val cylonLeader = cylonLeader();
-        val notCylonDraws = notCylonDraws(game.players().size(), cylonLeader) + extraCards();
-        val cylonDraws = cylonDraws(game.players().size(), cylonLeader);
+    private void creteLoyaltyDecks(boolean withCylonLeader) {
+        val notCylonDraws = notCylonDraws(game.players().size(), withCylonLeader) + extraCards();
+        val cylonDraws = cylonDraws(game.players().size(), withCylonLeader);
         ops.loyaltyDeck()
                 .createNotACylon()
-                .create(notCylonDraws, cylonDraws, mutineer());
+                .create(notCylonDraws, cylonDraws, withMutineer());
     }
 
     private void dealLoyaltyCards() {
@@ -44,9 +48,6 @@ public class CreateLoyaltyDeckEventProcessor extends EventProcessor<CreateLoyalt
     }
 
     private void dealMotiveCards() {
-        if (!cylonLeader()) {
-            return;
-        }
         val cylonPlayerNumber = game.players()
                 .stream()
                 .filter(p -> p.character().type() == CYLON_LEADER)
@@ -68,15 +69,16 @@ public class CreateLoyaltyDeckEventProcessor extends EventProcessor<CreateLoyalt
                 : Followup.NONE;
     }
 
-    private boolean cylonLeader() {
-        return getSelectedCharacters()
-                .stream()
-                .anyMatch(c -> c.type() == CYLON_LEADER);
+    private boolean withCylonLeader() {
+        return game.players().stream()
+                .map(PlayerView::character)
+                .map(Character::type)
+                .anyMatch(CYLON_LEADER::equals);
     }
 
-    private boolean mutineer() {
+    private boolean withMutineer() {
         val playerCount = game.players().size();
-        val hasCylonLeader = cylonLeader();
+        val hasCylonLeader = withCylonLeader();
         return playerCount == 4 && !hasCylonLeader ||
                 playerCount == 5 && hasCylonLeader ||
                 playerCount == 6 && !hasCylonLeader ||
@@ -84,15 +86,10 @@ public class CreateLoyaltyDeckEventProcessor extends EventProcessor<CreateLoyalt
     }
 
     private int extraCards() {
-        val selectedCharacters = getSelectedCharacters();
-        var extraCards = 0;
-        if (selectedCharacters.contains(SHARON_BOOMER_VALERII)) {
-            extraCards++;
-        }
-        if (selectedCharacters.contains(GAIUS_BALTAR)) {
-            extraCards++;
-        }
-        return extraCards;
+        return (int) game.players().stream()
+                .map(PlayerView::character)
+                .filter(CHARACTERS_WITH_EXTRA_CARDS::contains)
+                .count();
     }
 
     private List<Character> getSelectedCharacters() {

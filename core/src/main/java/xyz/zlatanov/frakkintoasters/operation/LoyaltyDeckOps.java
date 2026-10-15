@@ -40,7 +40,7 @@ public class LoyaltyDeckOps extends AbstractOps {
         return this;
     }
 
-    public LoyaltyDeckOps create(int notCylonDraws, int cylonDraws, boolean mutineer) {
+    public LoyaltyDeckOps create(int notCylonDraws, int cylonDraws, boolean withMutineer) {
         val loyaltyDeck = game.decks().loyalty();
         for (int i = 0; i < notCylonDraws; i++) {
             val notACylonLoyalty = game.decks().loyaltyNotCylon().draw();
@@ -50,7 +50,7 @@ public class LoyaltyDeckOps extends AbstractOps {
         for (int i = 0; i < cylonDraws; i++) {
             loyaltyDeck.addOnTop(cylonDeck.draw());
         }
-        if (mutineer) {
+        if (withMutineer) {
             loyaltyDeck.addOnTop(MUTINEER);
         }
         loyaltyDeck.shuffle();
