@@ -3,6 +3,7 @@ package xyz.zlatanov.frakkintoasters.operation;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.TestHarness;
+import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
 import xyz.zlatanov.frakkintoasters.state.ship.Raptor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -98,12 +99,23 @@ class ShipOpsDestroyTest extends TestHarness {
         player(1).character(LOUANNE_KAT_KATRAINE);
         val assRaptor = assaultRaptorAt(GALACTICA_SPACE_8_OCLOCK)
                 .pilot(LOUANNE_KAT_KATRAINE);
+
         ops.ship(assRaptor.id()).destroy();
+
         assertEquals(SICKBAY, locate(LOUANNE_KAT_KATRAINE));
     }
 
     @Test
-    void shouldDestroyCivilianShip() {
-        //civilianShips.nextCard(new CivilianShip(-1, ))
+    void shouldDestroyCivilianShipInSpace() {
+        val civShipId = -1;
+        civilianShips.nextCard(new CivilianShip(civShipId, 1, 2, 3));
+        place(GALACTICA_SPACE_2_OCLOCK, civilianShip());
+
+        ops.ship(-1).destroy();
+
+        assertEquals(7, galacticaBoard.fuel());
+        assertEquals(8, galacticaBoard.morale());
+        assertEquals(9, galacticaBoard.population());
     }
+
 }
