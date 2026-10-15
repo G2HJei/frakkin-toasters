@@ -6,6 +6,7 @@ import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
 import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
 import xyz.zlatanov.frakkintoasters.state.card.MutinyCard;
+import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
@@ -22,6 +23,10 @@ public class PlayerOps extends GameOps {
     PlayerOps(Game game, int playerNumber) {
         super(game);
         this.playerNumber = playerNumber;
+    }
+
+    public void selectCharacter(Character selectedCharacter) {
+        game.player(playerNumber).character(selectedCharacter);
     }
 
     public void drawLoyaltyCards(int cardsToDraw) {
