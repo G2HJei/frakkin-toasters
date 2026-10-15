@@ -2,7 +2,7 @@ package xyz.zlatanov.frakkintoasters.operation;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.Game;
-import xyz.zlatanov.frakkintoasters.state.board.BattlestarBoard;
+import xyz.zlatanov.frakkintoasters.state.board.GalacticaBoard;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
@@ -60,7 +60,7 @@ public class GalacticaOps extends BattlestarOps {
     }
 
     @Override
-    protected BattlestarBoard board() {
+    protected GalacticaBoard board() {
         return galacticaBoard();
     }
 

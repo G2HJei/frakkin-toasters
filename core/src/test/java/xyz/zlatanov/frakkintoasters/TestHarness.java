@@ -188,7 +188,7 @@ public abstract class TestHarness {
 
     /* Player */
     protected Player player(int playerNumber) {
-        return (Player) game.player(playerNumber);
+        return game.player(playerNumber);
     }
 
     protected void assertSkillCards(int playerNumber, SkillCard... expected) {

@@ -2,8 +2,8 @@ package xyz.zlatanov.frakkintoasters.operation;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.Game;
-import xyz.zlatanov.frakkintoasters.state.board.BattlestarBoard;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
+import xyz.zlatanov.frakkintoasters.state.board.PegasusBoard;
 
 public class PegasusOps extends BattlestarOps {
 
@@ -17,7 +17,11 @@ public class PegasusOps extends BattlestarOps {
     }
 
     @Override
-    protected BattlestarBoard board() {
+    protected PegasusBoard board() {
         return game.boards().pegasus();
+    }
+
+    public void activateEngineRoom() {
+        board().engineRoomActivated(true);
     }
 }
