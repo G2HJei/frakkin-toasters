@@ -10,7 +10,7 @@ import java.util.Optional;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.SICKBAY;
 import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.GALACTICA_SPACE;
 
-public class ShipOps extends AbstractOps {
+public class ShipOps extends GameOps {
 
     private final int shipId;
 

@@ -11,7 +11,7 @@ import java.util.List;
 
 import static java.util.Comparator.comparing;
 
-public class SkillCheckOps extends AbstractOps {
+public class SkillCheckOps extends GameOps {
 
     SkillCheckOps(Game game) {
         super(game);

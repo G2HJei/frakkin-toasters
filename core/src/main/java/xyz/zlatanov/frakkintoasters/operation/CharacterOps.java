@@ -6,7 +6,7 @@ import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.HumanFighter;
 
-public class CharacterOps extends AbstractOps {
+public class CharacterOps extends GameOps {
 
     private final Character character;
 

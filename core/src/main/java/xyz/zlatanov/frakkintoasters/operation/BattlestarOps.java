@@ -6,7 +6,7 @@ import xyz.zlatanov.frakkintoasters.state.board.Location;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.SICKBAY;
 
-abstract class BattlestarOps extends AbstractOps {
+abstract class BattlestarOps extends GameOps {
 
     BattlestarOps(Game game) {
         super(game);

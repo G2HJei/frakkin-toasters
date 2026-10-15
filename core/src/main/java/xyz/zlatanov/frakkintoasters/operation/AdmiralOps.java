@@ -3,7 +3,7 @@ package xyz.zlatanov.frakkintoasters.operation;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 
-public class AdmiralOps extends AbstractOps {
+public class AdmiralOps extends GameOps {
 
     AdmiralOps(Game game) {
         super(game);

@@ -13,7 +13,7 @@ import java.util.Optional;
 
 import static xyz.zlatanov.frakkintoasters.state.board.CylonFleetBoard.MOVE_TO_GALACTICA_MAP;
 
-public class CylonFleetOps extends AbstractOps {
+public class CylonFleetOps extends GameOps {
 
     CylonFleetOps(Game game) {
         super(game);
