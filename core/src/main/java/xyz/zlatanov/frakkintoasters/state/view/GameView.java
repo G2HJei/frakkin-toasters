@@ -11,7 +11,7 @@ public interface GameView {
 
     ObjectiveCard objective();
 
-    List<PlayerView> players();
+    List<? extends PlayerView> players();
 
     PlayerView player(int playerNumber);
 

@@ -18,7 +18,6 @@ import xyz.zlatanov.frakkintoasters.state.ship.Viper;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheck;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckHolder;
 import xyz.zlatanov.frakkintoasters.state.view.GameView;
-import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -80,7 +79,7 @@ public class Game implements GameView {
     }
 
     @Override
-    public List<PlayerView> players() {
+    public List<Player> players() {
         return new ArrayList<>(players.values());
     }
 

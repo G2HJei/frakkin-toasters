@@ -37,6 +37,10 @@ public class GameOps extends AbstractOps {
         return new SkillCheckOps(game);
     }
 
+    public LoyaltyDeckOps loyaltyDeck() {
+        return new LoyaltyDeckOps(game);
+    }
+
     public DestinyDeckOps destinyDeck() {
         return new DestinyDeckOps(game);
     }
