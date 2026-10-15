@@ -148,4 +148,12 @@ public class ShipOps extends GameOps {
                 .decreasePopulation(civilianShip.populationCost());
         game.removedComponents().add(civilianShip);
     }
+
+    public void land(Location destination) {
+        val ship = galacticaBoard().shipInSpace(shipId, HumanFighter.class);
+        galacticaBoard().addToReserves(ship);
+        character(ship.pilot()).moveTo(destination);
+        ship.pilot(null);
+    }
+
 }
