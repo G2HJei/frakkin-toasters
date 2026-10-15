@@ -2,6 +2,7 @@ package xyz.zlatanov.frakkintoasters.operation;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.Game;
+import xyz.zlatanov.frakkintoasters.state.Player;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
 import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
@@ -18,20 +19,20 @@ import static xyz.zlatanov.frakkintoasters.state.util.AllCardsProvider.genericDe
 
 public class PlayerOps extends GameOps {
 
-    private final int playerNumber;
+    private final Player player;
 
     PlayerOps(Game game, int playerNumber) {
         super(game);
-        this.playerNumber = playerNumber;
+        this.player = game.player(playerNumber);
     }
 
     public void selectCharacter(Character selectedCharacter) {
-        game.player(playerNumber).character(selectedCharacter);
+        player.character(selectedCharacter);
     }
 
     public void drawLoyaltyCards(int cardsToDraw) {
         val loyaltyCards = game.decks().loyalty().draw(cardsToDraw);
-        game.player(playerNumber).loyaltyCards().addOnTop(loyaltyCards);
+        player.loyaltyCards().addOnTop(loyaltyCards);
     }
 
     public void drawSkillCards(SkillCardColor... colors) {
@@ -52,21 +53,19 @@ public class PlayerOps extends GameOps {
 
     public void drawSuperCrisisCard() {
         val card = game.decks().superCrisis().draw();
-        game.player(playerNumber)
-                .superCrisisCards()
+        player.superCrisisCards()
                 .addOnTop(card);
     }
 
     public void drawMutinyCard() {
         val card = game.decks().mutiny().draw();
-        game.player(playerNumber)
-                .mutinyCards()
+        player.mutinyCards()
                 .addOnTop(card);
     }
 
     public void drawMotiveCards() {
         val motiveCards = genericDeck(MotiveCard.class).draw(2);
-        game.player(playerNumber).motiveCards().addOnTop(motiveCards);
+        player.motiveCards().addOnTop(motiveCards);
     }
 
     public DestinationCard drawDestinationCard() {
@@ -90,33 +89,29 @@ public class PlayerOps extends GameOps {
     }
 
     public PlayerOps discard(SkillCard... cards) {
-        game.player(playerNumber)
-                .skillCards()
+        player.skillCards()
                 .remove(cards);
         game.decks().discard(cards);
         return this;
     }
 
     public void discard(MutinyCard... cards) {
-        game.player(playerNumber)
-                .mutinyCards()
+        player.mutinyCards()
                 .remove(cards);
         game.decks().discard(Arrays.stream(cards).toList());
     }
 
     private void giveToPlayer(SkillCard card) {
-        game.player(playerNumber)
-                .gainSkillCards(card);
+        player.gainSkillCards(card);
     }
 
     public void infiltrateGalactica(Location infiltrateLocation) {
-        game.player(playerNumber).infiltrateGalactica();
-        character(game.player(playerNumber).character()).moveTo(infiltrateLocation);
+        player.infiltrateGalactica();
+        character(player.character()).moveTo(infiltrateLocation);
     }
 
     public void lookAtShip(Integer civId) {
-        game.player(playerNumber)
-                .revealedCivilianShipIds()
+        player.revealedCivilianShipIds()
                 .add(civId);
     }
 }
