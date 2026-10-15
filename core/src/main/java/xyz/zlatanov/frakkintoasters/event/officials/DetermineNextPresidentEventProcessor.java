@@ -44,9 +44,9 @@ public class DetermineNextPresidentEventProcessor extends EventProcessor<Determi
     @Override
     public Followup process() {
         if (firstPresident()) {
-            ops.president().drawQuorumCard();
+            ops.titles().drawQuorumCard();
         }
-        ops.president().assign(calcNextInLine(game));
+        ops.titles().assignPresident(calcNextInLine(game));
         return Followup.NONE;
     }
 

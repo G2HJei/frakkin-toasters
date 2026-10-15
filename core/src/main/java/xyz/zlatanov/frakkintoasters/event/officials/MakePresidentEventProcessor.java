@@ -6,7 +6,7 @@ import xyz.zlatanov.frakkintoasters.event.Followup;
 public class MakePresidentEventProcessor extends EventProcessor<MakePresidentEvent> {
     @Override
     public Followup process() {
-        ops.president().assign(event.character());
+        ops.titles().assignPresident(event.character());
         return Followup.NONE;
     }
 }

@@ -13,7 +13,7 @@ public class QuorumChamberEventProcessor extends EventProcessor<QuorumChamberEve
     // todo verify acting player is the president
     @Override
     public Followup process() {
-        ops.president().drawQuorumCard();
+        ops.titles().drawQuorumCard();
 
         return one(
                 new DrawQuorumCardEvent(event.playerNumber()), // todo this should be player decision

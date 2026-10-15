@@ -7,7 +7,7 @@ public class MakeAdmiralEventProcessor extends EventProcessor<MakeAdmiralEvent> 
 
     @Override
     public Followup process() {
-        ops.admiral().assign(event.character());
+        ops.titles().assignAdmiral(event.character());
         return Followup.NONE;
     }
 }

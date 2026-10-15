@@ -45,16 +45,8 @@ public class GameOps extends AbstractOps {
         return new DestinyDeckOps(game);
     }
 
-    public PresidentOps president() {
-        return new PresidentOps(game);
-    }
-
-    public AdmiralOps admiral() {
-        return new AdmiralOps(game);
-    }
-
-    public CagOps cag() {
-        return new CagOps(game);
+    public TitleOps titles() {
+        return new TitleOps(game);
     }
 
     public int rollDie() {
