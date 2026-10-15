@@ -11,6 +11,7 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static xyz.zlatanov.frakkintoasters.state.util.AllCardsProvider.genericDeck;
 
@@ -29,6 +30,10 @@ public class PlayerOps extends GameOps {
     }
 
     public void drawSkillCards(SkillCardColor... colors) {
+        drawSkillCards(Arrays.stream(colors).toList());
+    }
+
+    public void drawSkillCards(List<SkillCardColor> colors) {
         for (val color : colors) {
             game.decks()
                     .drawSkillCard(color)
