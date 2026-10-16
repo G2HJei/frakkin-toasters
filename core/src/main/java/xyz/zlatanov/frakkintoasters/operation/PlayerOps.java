@@ -56,7 +56,7 @@ public class PlayerOps extends GameOps {
         for (val color : colors) {
             game.decks()
                     .drawSkillCard(color)
-                    .ifPresent(this::giveToPlayer);
+                    .ifPresent(player::gainSkillCards);
         }
     }
 
@@ -133,7 +133,7 @@ public class PlayerOps extends GameOps {
                 .pilot(character);
     }
 
-    private void giveToPlayer(SkillCard card) {
+    public void receiveSkillCard(SkillCard card) {
         player.gainSkillCards(card);
     }
 }

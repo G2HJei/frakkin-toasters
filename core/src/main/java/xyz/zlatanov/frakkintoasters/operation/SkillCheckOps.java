@@ -57,6 +57,11 @@ public class SkillCheckOps extends GameOps {
         game.decks().discard(card);
     }
 
+    public void giveCardToPlayer(SkillCard card, int playerNumber) {
+        game.activeSkillCheck().remove(card);
+        player(playerNumber).receiveSkillCard(card);
+    }
+
     private List<SkillCard> drawAllAndSort() {
         val deck = game.activeSkillCheck().cards();
         val all = new ArrayList<>(deck.draw(deck.size()));
