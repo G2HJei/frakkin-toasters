@@ -10,6 +10,7 @@ import java.util.List;
 
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.*;
 
+//todo maybe create SetupUpOps and move the code there
 public class LoyaltyDeckOps extends AbstractOps {
 
     LoyaltyDeckOps(Game game) {

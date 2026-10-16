@@ -7,7 +7,7 @@ public class PlayFromDestinyDeckEventProcessor extends EventProcessor<PlayFromDe
 
     @Override
     public Followup process() {
-        ops.skillCheck().addFromDestinyDeck(2);
+        ops.skillCheck().playFromDestinyDeck(2);
         return Followup.NONE;
     }
 

@@ -17,24 +17,36 @@ public class SkillCheckOps extends GameOps {
         super(game);
     }
 
+    public void createDestinyDeck() {
+        val decks = game.decks();
+        decks.destiny()
+                .addOnTop(decks.politics().draw(2))
+                .addOnTop(decks.leadership().draw(2))
+                .addOnTop(decks.tactics().draw(2))
+                .addOnTop(decks.piloting().draw(2))
+                .addOnTop(decks.engineering().draw(2))
+                .addOnTop(decks.treachery().draw(2));
+        decks.destiny().shuffle();
+    }
+
     public void start(SkillCheck skillCheck) {
         game.startSkillCheck(skillCheck);
     }
 
-    public void addCards(List<SkillCard> cards) {
-        game.activeSkillCheck().cards().addOnTop(cards);
-    }
-
-    public void addFromDestinyDeck(int count) { //todo always 2? check rules
+    public void playFromDestinyDeck(int count) { //todo always 2? check rules
         val destinyDeck = game.decks().destiny();
         val cards = destinyDeck.draw(count);
         if (destinyDeck.isEmpty()) {
-            new DestinyDeckOps(game).create();
+            createDestinyDeck();
         }
-        addCards(cards);
+        playCards(cards);
     }
 
-    public List<SkillCard> divideCards() {
+    public void playCards(List<SkillCard> cards) {
+        game.activeSkillCheck().cards().addOnTop(cards);
+    }
+
+    public List<SkillCard> shuffleAndDivideCards() {
         val cards = drawAllAndSort();
         splitIntoPiles(cards);
         return List.copyOf(cards);

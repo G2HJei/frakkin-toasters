@@ -16,12 +16,12 @@ public class PegasusOps extends BattlestarOps {
         damageLocation(Location.valueOf(pegasusDamage.name()));
     }
 
+    public void activateEngineRoom() {
+        board().engineRoomActivated(true);
+    }
+
     @Override
     protected PegasusBoard board() {
         return game.boards().pegasus();
-    }
-
-    public void activateEngineRoom() {
-        board().engineRoomActivated(true);
     }
 }

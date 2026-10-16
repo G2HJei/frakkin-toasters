@@ -36,7 +36,7 @@ public class ShuffleAndDivideCardsEventProcessor extends EventProcessor<ShuffleA
 
     @Override
     public Followup process() {
-        val cards = ops.skillCheck().divideCards();
+        val cards = ops.skillCheck().shuffleAndDivideCards();
         return buildFollowup(cards);
     }
 

@@ -48,10 +48,6 @@ public class GameOps extends AbstractOps {
         return new LoyaltyDeckOps(game);
     }
 
-    public DestinyDeckOps destinyDeck() {
-        return new DestinyDeckOps(game);
-    }
-
     public TitleOps titles() {
         return new TitleOps(game);
     }

@@ -9,7 +9,6 @@ import xyz.zlatanov.frakkintoasters.state.ship.ShipType;
 import xyz.zlatanov.frakkintoasters.state.track.Pursuit;
 
 import java.util.HashMap;
-import java.util.Optional;
 
 import static xyz.zlatanov.frakkintoasters.state.board.CylonFleetBoard.MOVE_TO_GALACTICA_MAP;
 
@@ -29,7 +28,7 @@ public class CylonFleetOps extends GameOps {
 
     public void place(ShipType shipType, Location location) {
         val cylonShips = game.cylonShips();
-        Optional<? extends Ship> ship = switch (shipType) {
+        val ship = switch (shipType) {
             case RAIDER -> cylonShips.raider();
             case HEAVY_RAIDER -> cylonShips.heavyRaider();
             case BASESTAR -> cylonShips.basestar();
