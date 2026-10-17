@@ -36,10 +36,18 @@ public class SkillCheckOps extends GameOps {
         return this;
     }
 
-    public void playFromDestinyDeck(int count) { //todo always 2? check rules
+    public void playFromDestinyDeck(int count) {
+        playFromDestinyDeck(count, false);
+    }
+
+    public void playFromDestinyDeck(int count, boolean faceUp) { //todo always 2? check rules
         val destinyDeck = game.decks().destiny();
         val cards = destinyDeck.draw(count);
-        game.activeSkillCheck().cards().addOnTop(cards);
+        if (faceUp) {
+            cards.forEach(this::addOnTopOfPile);
+        } else {
+            game.activeSkillCheck().cards().addOnTop(cards);
+        }
         if (destinyDeck.isEmpty()) {
             createDestinyDeck();
         }
@@ -50,13 +58,13 @@ public class SkillCheckOps extends GameOps {
     }
 
     public void playCards(int playerNumber, List<SkillCard> cards) {
-        val skilLCheck = game.activeSkillCheck();
+        val skillCheck = game.activeSkillCheck();
         for (val card : cards) {
             game.player(playerNumber).skillCards().remove(card);
-            if (skilLCheck.cards().isEmpty()) {
+            if (skillCheck.cards().isEmpty()) {
                 addOnTopOfPile(card);
             } else {
-                skilLCheck.cards().addOnTop(card);
+                skillCheck.cards().addOnTop(card);
             }
         }
     }
