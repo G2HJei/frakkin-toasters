@@ -39,7 +39,7 @@ public class FollowupUtils {
                     ? single(new PlayerDecisionEvent<>(player.number(), ForceTheirHandEvent.class))
                     : Followup.NONE;
             case QUICK_THINKING -> single(new PlayerDecisionEvent<>(player.number(), QuickThinkingEvent.class));
-            case A_BETTER_MACHINE -> single(new ABetterMachineEvent(player.number()));
+            case A_BETTER_MACHINE -> single(new ABetterMachineEvent());
             case BAIT -> single(new BaitEvent());
             case DRADIS_CONTACT -> single(new DradisContactEvent());
             case EXPLOIT_A_WEAKNESS -> single(new PlayerDecisionEvent<>(player.number(), ExploitAWeaknessEvent.class));

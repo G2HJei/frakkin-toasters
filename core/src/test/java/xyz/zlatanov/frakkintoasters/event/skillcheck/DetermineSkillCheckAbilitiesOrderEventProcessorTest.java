@@ -33,7 +33,7 @@ class DetermineSkillCheckAbilitiesOrderEventProcessorTest extends EventTestHarne
                 arguments(DOGFIGHT, single(new PlayerDecisionEvent<>(1, DogfightEvent.class))),
                 arguments(FORCE_THEIR_HAND, single(new PlayerDecisionEvent<>(1, ForceTheirHandEvent.class))),
                 arguments(QUICK_THINKING, single(new PlayerDecisionEvent<>(1, QuickThinkingEvent.class))),
-                arguments(A_BETTER_MACHINE, single(new ABetterMachineEvent(1))),
+                arguments(A_BETTER_MACHINE, single(new ABetterMachineEvent())),
                 arguments(BAIT, single(new BaitEvent())),
                 arguments(DRADIS_CONTACT, single(new DradisContactEvent())),
                 arguments(EXPLOIT_A_WEAKNESS, single(new PlayerDecisionEvent<>(1, ExploitAWeaknessEvent.class))),

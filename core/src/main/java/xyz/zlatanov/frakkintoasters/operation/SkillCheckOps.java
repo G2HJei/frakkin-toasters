@@ -3,12 +3,10 @@ package xyz.zlatanov.frakkintoasters.operation;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 import static java.util.Comparator.comparing;
 
@@ -124,5 +122,31 @@ public class SkillCheckOps extends GameOps {
     private boolean matchesSkillCheckColors(SkillCard card) {
         val cardColor = card.type().color();
         return game.activeSkillCheck().type().skillCheckColors().contains(cardColor);
+    }
+
+    public void shuffleIntoDestinyDeck(SkillCardColor... skillCardColor) {
+        val selection = computeColorSelection(skillCardColor);
+        selection.forEach(
+                (color, count) -> {
+                    val deck = switch (color) {
+                        case POLITICS -> game.decks().politics();
+                        case LEADERSHIP -> game.decks().leadership();
+                        case TACTICS -> game.decks().tactics();
+                        case PILOTING -> game.decks().piloting();
+                        case ENGINEERING -> game.decks().engineering();
+                        case TREACHERY -> game.decks().treachery();
+                    };
+                    val cards = deck.draw(count);
+                    game.decks().destiny().addOnTop(cards);
+                });
+        game.decks().destiny().shuffle();
+    }
+
+    private Map<SkillCardColor, Integer> computeColorSelection(SkillCardColor[] skillCardColor) {
+        val selection = new TreeMap<SkillCardColor, Integer>();
+        for (val color : skillCardColor) {
+            selection.compute(color, (k, v) -> (v == null) ? 1 : v + 1);
+        }
+        return selection;
     }
 }
