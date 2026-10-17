@@ -3,7 +3,7 @@ package xyz.zlatanov.frakkintoasters.operation;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
-import xyz.zlatanov.frakkintoasters.state.skill.SkillCheck;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -29,8 +29,8 @@ public class SkillCheckOps extends GameOps {
         decks.destiny().shuffle();
     }
 
-    public void start(SkillCheck skillCheck) {
-        game.startSkillCheck(skillCheck);
+    public void start(SkillCheckType type) {
+        game.startSkillCheck(type);
     }
 
     public void playFromDestinyDeck(int count) { //todo always 2? check rules
@@ -50,6 +50,10 @@ public class SkillCheckOps extends GameOps {
         val cards = drawAllAndSort();
         splitIntoPiles(cards);
         return List.copyOf(cards);
+    }
+
+    public void discard(List<SkillCard> cards) {
+        cards.forEach(this::discard);
     }
 
     public void discard(SkillCard card) {
@@ -77,9 +81,9 @@ public class SkillCheckOps extends GameOps {
         for (val card : sortedCards) {
             val cardMatchesSkillCheck = matchingColors.contains(card.type().color());
             if (cardMatchesSkillCheck) {
-                skillCheck.matchingPile().add(card);
+                skillCheck.matchingPile().addToBottom(card);
             } else {
-                skillCheck.nonMatchingPile().add(card);
+                skillCheck.nonMatchingPile().addToBottom(card);
             }
         }
     }

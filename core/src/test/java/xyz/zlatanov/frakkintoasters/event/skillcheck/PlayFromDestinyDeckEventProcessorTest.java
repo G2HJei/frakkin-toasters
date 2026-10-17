@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.AT_ANY_COST;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.BAIT;
-import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheck.ADMIRALS_QUARTERS;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType.ADMIRALS_QUARTERS;
 
 class PlayFromDestinyDeckEventProcessorTest extends EventTestHarness<PlayFromDestinyDeckEvent> {
 

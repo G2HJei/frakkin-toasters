@@ -21,6 +21,8 @@ public interface GameView {
 
     BoardsHolderView boards();
 
+    SkillCheckView activeSkillCheck();
+
     CylonShipsView cylonShips();
 
     int nukes();

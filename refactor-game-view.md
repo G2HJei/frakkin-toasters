@@ -73,7 +73,7 @@ without even a cast:
 
 - `SpaceLocationsBoard.shipsInSpace()` returns the board's own map, and `place`/`remove` are default methods that write
   through it.
-- Lombok `@Getter` exposes raw collections: the piles in `SkillCheckHolder`, `Player.revealedCivilianShips()` and
+- Lombok `@Getter` exposes raw collections: the piles in `SkillCheck`, `Player.revealedCivilianShips()` and
   `Game.removedComponents()`. Declaring them as `List` in an interface doesn't help, because `List` has `add`.
 - Getters return writable objects: every `Deck` (player hands and `DecksHolder`), `Player`, ships with setters
   (`HumanFighter.pilot(Character)`, `Basestar.damage(...)`), and `Game.die()`.

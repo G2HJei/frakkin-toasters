@@ -1,25 +1,50 @@
 package xyz.zlatanov.frakkintoasters.state.skill;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
+import xyz.zlatanov.frakkintoasters.state.deck.Deck;
+import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
+import xyz.zlatanov.frakkintoasters.state.view.SkillCheckView;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
-import static java.util.Comparator.comparing;
-import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.LEADERSHIP;
-import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.TACTICS;
 
 @Getter
 @Accessors(fluent = true)
-public enum SkillCheck {
-    ADMIRALS_QUARTERS(LEADERSHIP, TACTICS);
+@RequiredArgsConstructor
+@EqualsAndHashCode
+public class SkillCheck implements SkillCheckView {
 
-    private final List<SkillCardColor> skillCheckColors;
+    private final SkillCheckType      type;
+    private final Deck<SkillCard>     cards             = new Deck<>();
+    private final Deck<SkillCard>     matchingPile      = new Deck<>();
+    private final Deck<SkillCard>     nonMatchingPile   = new Deck<>();
+    private final List<SkillCardType> resolvedAbilities = new ArrayList<>();
 
-    SkillCheck(SkillCardColor... colors) {
-        skillCheckColors = Arrays.stream(colors)
-                .sorted(comparing(Enum::ordinal))
-                .toList();
+    //todo handle already resolved mechanics and removing future events when skill check ability card is removed separately
+    public SkillCheck remove(SkillCard card) {
+        if (matchingPile.cards().contains(card)) {
+            matchingPile.remove(card);
+        } else if (nonMatchingPile.cards().contains(card)) {
+            nonMatchingPile.remove(card);
+        } else {
+            throw new FrakCallTheAdmiralException();
+        }
+        return this;
     }
+
+    public SkillCheck resolved(SkillCardType cardType) {
+        assert !resolvedAbilities.contains(cardType) : "Skill check abilities can be resolved once per skill check";
+        resolvedAbilities.add(cardType);
+        return this;
+    }
+
+    @Override
+    public List<SkillCardType> resolvedAbilities() {
+        return Collections.unmodifiableList(resolvedAbilities);
+    }
+
 }

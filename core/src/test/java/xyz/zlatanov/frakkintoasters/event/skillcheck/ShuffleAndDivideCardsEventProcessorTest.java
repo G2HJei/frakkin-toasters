@@ -8,7 +8,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
-import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheck.ADMIRALS_QUARTERS;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType.ADMIRALS_QUARTERS;
 
 class ShuffleAndDivideCardsEventProcessorTest extends EventTestHarness<ShuffleAndDivideCardsEvent> {
 
@@ -44,7 +44,7 @@ class ShuffleAndDivideCardsEventProcessorTest extends EventTestHarness<ShuffleAn
                         new SkillCard(3, LAUNCH_SCOUT),
                         new SkillCard(1, A_SECOND_CHANCE)
                 ),
-                game.activeSkillCheck().matchingPile());
+                game.activeSkillCheck().matchingPile().cards());
 
         assertEquals(List.of(
                         //politics
@@ -61,7 +61,7 @@ class ShuffleAndDivideCardsEventProcessorTest extends EventTestHarness<ShuffleAn
                         new SkillCard(3, BAIT),
                         new SkillCard(3, DRADIS_CONTACT)
                 ),
-                game.activeSkillCheck().nonMatchingPile());
+                game.activeSkillCheck().nonMatchingPile().cards());
 
         assertFollowup(new DetermineSkillCheckAbilitiesOrderEvent(1, List.of(
                 new SkillCard(1, IRON_WILL),

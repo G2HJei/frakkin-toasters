@@ -13,7 +13,7 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.DANNA_BIERS;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
-import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheck.ADMIRALS_QUARTERS;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType.ADMIRALS_QUARTERS;
 
 class PlaySkillsEventProcessorTest extends EventTestHarness<PlaySkillsEvent> {
 

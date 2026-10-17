@@ -1,11 +1,11 @@
 package xyz.zlatanov.frakkintoasters.state;
 
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckHolder;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCheck;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
-import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheck.ADMIRALS_QUARTERS;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType.ADMIRALS_QUARTERS;
 
 class GameTest {
 
@@ -20,7 +20,7 @@ class GameTest {
     @Test
     void shouldStartSkillCheck() {
         game.startSkillCheck(ADMIRALS_QUARTERS);
-        assertEquals(new SkillCheckHolder(ADMIRALS_QUARTERS), game.activeSkillCheck());
+        assertEquals(new SkillCheck(ADMIRALS_QUARTERS), game.activeSkillCheck());
     }
 
 }

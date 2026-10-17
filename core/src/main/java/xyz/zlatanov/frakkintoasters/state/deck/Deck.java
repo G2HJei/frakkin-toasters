@@ -51,7 +51,7 @@ public class Deck<T> implements DeckView<T> {
 
     public Deck<T> remove(List<T> cardsToRemove) {
         assert new HashSet<>(cards).containsAll(cardsToRemove);
-        cards.removeAll(cardsToRemove);
+        cardsToRemove.forEach(cards::remove);
         return this;
     }
 

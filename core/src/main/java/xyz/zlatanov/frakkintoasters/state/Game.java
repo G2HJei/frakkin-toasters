@@ -16,7 +16,7 @@ import xyz.zlatanov.frakkintoasters.state.ship.CylonShips;
 import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 import xyz.zlatanov.frakkintoasters.state.ship.Viper;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheck;
-import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckHolder;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
 import xyz.zlatanov.frakkintoasters.state.view.GameView;
 
 import java.util.*;
@@ -48,7 +48,7 @@ public class Game implements GameView {
     private BoardsHolder         boards            = new BoardsHolder();
     @Builder.Default
     private DecksHolder          decks             = DecksHolder.builder().build();
-    private SkillCheckHolder     activeSkillCheck;
+    private SkillCheck           activeSkillCheck;
     @Builder.Default
     private CylonShips           cylonShips        = CylonShips.builder().build();
     @Builder.Default
@@ -111,8 +111,8 @@ public class Game implements GameView {
         return locations.getFirst();
     }
 
-    public SkillCheckHolder startSkillCheck(SkillCheck skillCheck) {
-        activeSkillCheck = new SkillCheckHolder(skillCheck);
+    public SkillCheck startSkillCheck(SkillCheckType type) {
+        activeSkillCheck = new SkillCheck(type);
         return activeSkillCheck;
     }
 }
