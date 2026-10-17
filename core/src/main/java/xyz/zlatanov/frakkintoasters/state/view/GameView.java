@@ -15,7 +15,7 @@ public interface GameView {
 
     PlayerView player(int playerNumber);
 
-    int currentPlayer();
+    int currentPlayer(); //todo replace with PlayerView currentPlayer() ?
 
     GameStep step();
 

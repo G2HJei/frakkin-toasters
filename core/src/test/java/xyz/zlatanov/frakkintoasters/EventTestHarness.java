@@ -6,12 +6,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.FollowupUtils;
 import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
-import static xyz.zlatanov.frakkintoasters.event.Followup.skillCheckFollowup;
 
 
 public abstract class EventTestHarness<E extends Event> extends TestHarness {
@@ -56,7 +56,7 @@ public abstract class EventTestHarness<E extends Event> extends TestHarness {
 
     protected void assertSkillCheckTriggered() {
         followupAsserted = true;
-        assertEquals(skillCheckFollowup(game), followup);
+        assertEquals(FollowupUtils.skillCheckFollowup(game), followup);
     }
 
     @SneakyThrows

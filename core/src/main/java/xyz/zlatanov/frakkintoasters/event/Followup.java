@@ -1,14 +1,9 @@
 package xyz.zlatanov.frakkintoasters.event;
 
-import lombok.val;
-import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
-import xyz.zlatanov.frakkintoasters.event.skillcheck.PlayFromDestinyDeckEvent;
-import xyz.zlatanov.frakkintoasters.event.skillcheck.PlaySkillsEvent;
-import xyz.zlatanov.frakkintoasters.event.skillcheck.ResolveSkillCheckEvent;
-import xyz.zlatanov.frakkintoasters.event.skillcheck.ShuffleAndDivideCardsEvent;
-import xyz.zlatanov.frakkintoasters.state.view.GameView;
-
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 import static java.util.stream.Collectors.toCollection;
 
@@ -74,22 +69,5 @@ public sealed interface Followup permits Followup.None, Followup.Single, Followu
             return followups[0];
         }
         return new OneOf(Arrays.stream(followups).collect(toCollection(LinkedHashSet::new)));
-    }
-
-    static Followup skillCheckFollowup(GameView game) {
-        val followupEvents = new ArrayList<Event>();
-        followupEvents.add(new PlayFromDestinyDeckEvent());
-        addPlayerDecisions(game, followupEvents);
-        followupEvents.add(new ShuffleAndDivideCardsEvent());
-        followupEvents.add(new ResolveSkillCheckEvent());
-        return all(followupEvents.toArray(Event[]::new));
-    }
-
-    private static void addPlayerDecisions(GameView game, ArrayList<Event> followupEvents) {
-        var decidingPlayer = game.currentPlayer();
-        do {
-            decidingPlayer = decidingPlayer >= game.players().size() ? 1 : ++decidingPlayer;
-            followupEvents.add(new PlayerDecisionEvent<>(decidingPlayer, PlaySkillsEvent.class));
-        } while (decidingPlayer != game.currentPlayer());
     }
 }

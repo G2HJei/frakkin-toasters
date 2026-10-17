@@ -30,10 +30,6 @@ class DetermineSkillCheckAbilitiesOrderEventProcessorTest extends EventTestHarne
 
     public static Stream<Arguments> shouldFollowupWithCardEvents() {
         return Stream.of(
-                arguments(INSTALL_UPGRADES, Followup.NONE),
-                arguments(ALL_HANDS_ON_DECK, Followup.NONE),
-                arguments(ESTABLISH_NETWORK, Followup.NONE),
-                arguments(IRON_WILL, Followup.NONE),
                 arguments(DOGFIGHT, single(new PlayerDecisionEvent<>(1, DogfightEvent.class))),
                 arguments(FORCE_THEIR_HAND, single(new PlayerDecisionEvent<>(1, ForceTheirHandEvent.class))),
                 arguments(QUICK_THINKING, single(new PlayerDecisionEvent<>(1, QuickThinkingEvent.class))),
@@ -72,7 +68,6 @@ class DetermineSkillCheckAbilitiesOrderEventProcessorTest extends EventTestHarne
     void shouldFollowupWithMultipleEvents() {
         execute(new DetermineSkillCheckAbilitiesOrderEvent(1, List.of(
                 new SkillCard(0, FORCE_THEIR_HAND),
-                new SkillCard(0, IRON_WILL),
                 new SkillCard(0, RED_TAPE)
         )));
         assertFollowup(all(

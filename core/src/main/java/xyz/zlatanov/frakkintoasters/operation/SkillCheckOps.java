@@ -36,11 +36,11 @@ public class SkillCheckOps extends GameOps {
         return this;
     }
 
-    public void playFromDestinyDeck(int count) {
-        playFromDestinyDeck(count, false);
+    public List<SkillCard> playFromDestinyDeck(int count) {
+        return playFromDestinyDeck(count, false);
     }
 
-    public void playFromDestinyDeck(int count, boolean faceUp) { //todo always 2? check rules
+    public List<SkillCard> playFromDestinyDeck(int count, boolean faceUp) { //todo always 2? check rules
         val destinyDeck = game.decks().destiny();
         val cards = destinyDeck.draw(count);
         if (faceUp) {
@@ -51,6 +51,7 @@ public class SkillCheckOps extends GameOps {
         if (destinyDeck.isEmpty()) {
             createDestinyDeck();
         }
+        return cards;
     }
 
     public void playCards(int playerNumber, SkillCard... cards) {

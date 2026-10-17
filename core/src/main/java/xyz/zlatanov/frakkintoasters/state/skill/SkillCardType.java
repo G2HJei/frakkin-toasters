@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
 
+import java.util.Set;
+
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.*;
 
 @Getter
@@ -67,5 +69,13 @@ public enum SkillCardType {
     VIOLENT_OUTBURSTS(TREACHERY),
     EXPLOIT_A_WEAKNESS(TREACHERY);
 
-    private final SkillCardColor color;
+    private static final Set<SkillCardType> SKILL_CHECK_ABILITY_CARDS = Set.of(
+            DOGFIGHT, FORCE_THEIR_HAND, QUICK_THINKING, A_BETTER_MACHINE, BAIT, DRADIS_CONTACT, EXPLOIT_A_WEAKNESS,
+            PERSONAL_VICES, VIOLENT_OUTBURSTS, PROTECT_THE_FLEET, RED_TAPE, TRUST_INSTINCTS, INSTALL_UPGRADES,
+            ALL_HANDS_ON_DECK, ESTABLISH_NETWORK, IRON_WILL);
+    private final        SkillCardColor     color;
+
+    public boolean hasSkillCheckAbility() {
+        return SKILL_CHECK_ABILITY_CARDS.contains(this);
+    }
 }
