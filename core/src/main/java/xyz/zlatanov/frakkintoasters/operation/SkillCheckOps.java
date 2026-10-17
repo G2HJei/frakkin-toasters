@@ -6,6 +6,7 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -17,7 +18,7 @@ public class SkillCheckOps extends GameOps {
         super(game);
     }
 
-    public void createDestinyDeck() {
+    public SkillCheckOps createDestinyDeck() {
         val decks = game.decks();
         decks.destiny()
                 .addOnTop(decks.politics().draw(2))
@@ -27,23 +28,37 @@ public class SkillCheckOps extends GameOps {
                 .addOnTop(decks.engineering().draw(2))
                 .addOnTop(decks.treachery().draw(2));
         decks.destiny().shuffle();
+        return this;
     }
 
-    public void start(SkillCheckType type) {
+    public SkillCheckOps start(SkillCheckType type) {
         game.startSkillCheck(type);
+        return this;
     }
 
     public void playFromDestinyDeck(int count) { //todo always 2? check rules
         val destinyDeck = game.decks().destiny();
         val cards = destinyDeck.draw(count);
+        game.activeSkillCheck().cards().addOnTop(cards);
         if (destinyDeck.isEmpty()) {
             createDestinyDeck();
         }
-        playCards(cards);
     }
 
-    public void playCards(List<SkillCard> cards) {
-        game.activeSkillCheck().cards().addOnTop(cards);
+    public void playCards(int playerNumber, SkillCard... cards) {
+        playCards(playerNumber, Arrays.stream(cards).toList());
+    }
+
+    public void playCards(int playerNumber, List<SkillCard> cards) {
+        val skilLCheck = game.activeSkillCheck();
+        for (val card : cards) {
+            game.player(playerNumber).skillCards().remove(card);
+            if (skilLCheck.cards().isEmpty()) {
+                addOnTopOfPile(card);
+            } else {
+                skilLCheck.cards().addOnTop(card);
+            }
+        }
     }
 
     public List<SkillCard> shuffleAndDivideCards() {
@@ -76,15 +91,29 @@ public class SkillCheckOps extends GameOps {
     }
 
     private void splitIntoPiles(List<SkillCard> sortedCards) {
-        val skillCheck = game.activeSkillCheck();
-        val matchingColors = skillCheck.type().skillCheckColors();
         for (val card : sortedCards) {
-            val cardMatchesSkillCheck = matchingColors.contains(card.type().color());
-            if (cardMatchesSkillCheck) {
-                skillCheck.matchingPile().addToBottom(card);
-            } else {
-                skillCheck.nonMatchingPile().addToBottom(card);
-            }
+            addToBottomOfPile(card);
         }
+    }
+
+    private void addOnTopOfPile(SkillCard card) {
+        if (matchesSkillCheckColors(card)) {
+            game.activeSkillCheck().matchingPile().addOnTop(card);
+        } else {
+            game.activeSkillCheck().nonMatchingPile().addOnTop(card);
+        }
+    }
+
+    private void addToBottomOfPile(SkillCard card) {
+        if (matchesSkillCheckColors(card)) {
+            game.activeSkillCheck().matchingPile().addToBottom(card);
+        } else {
+            game.activeSkillCheck().nonMatchingPile().addToBottom(card);
+        }
+    }
+
+    private boolean matchesSkillCheckColors(SkillCard card) {
+        val cardColor = card.type().color();
+        return game.activeSkillCheck().type().skillCheckColors().contains(cardColor);
     }
 }

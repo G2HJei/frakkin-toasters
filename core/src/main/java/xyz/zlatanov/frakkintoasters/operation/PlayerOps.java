@@ -73,8 +73,8 @@ public class PlayerOps extends GameOps {
 
     public void drawMutinyCard() {
         val card = game.decks().mutiny().draw();
-        player.mutinyCards()
-                .addOnTop(card);
+        player.mutinyCards().addOnTop(card);
+        //todo if 2nd -> discard one and move to brig. Handle followup in engine not in each mutiny drawing event
     }
 
     public void drawMotiveCards() {

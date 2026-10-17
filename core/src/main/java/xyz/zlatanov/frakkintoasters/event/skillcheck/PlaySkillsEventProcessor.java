@@ -20,7 +20,7 @@ public class PlaySkillsEventProcessor extends EventProcessor<PlaySkillsEvent> {
 
     @Override
     public Followup process() {
-        ops.skillCheck().playCards(event.skillCards());
+        ops.skillCheck().playCards(player.number(), event.skillCards());
         return Followup.NONE;
     }
 }

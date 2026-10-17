@@ -21,7 +21,10 @@ class PlaySkillsEventProcessorTest extends EventTestHarness<PlaySkillsEvent> {
     void setUp() {
         player(1).character(KARA_STARBUCK_THRACE);
         moveTo(HANGAR_DECK, KARA_STARBUCK_THRACE);
-        game.startSkillCheck(ADMIRALS_QUARTERS);
+        ops.skillCheck()
+                .createDestinyDeck()
+                .start(ADMIRALS_QUARTERS)
+                .playFromDestinyDeck(2);
     }
 
     @Test
@@ -53,7 +56,10 @@ class PlaySkillsEventProcessorTest extends EventTestHarness<PlaySkillsEvent> {
     @Test
     void shouldContributeToActiveSkillCheck() {
         val contribution = new SkillCard(0, CALCULATIONS);
+        player(1).skillCards().addOnTop(contribution);
+
         execute(new PlaySkillsEvent(1, List.of(contribution)));
+
         assertTrue(game.activeSkillCheck().cards().cards().contains(contribution));
     }
 }
