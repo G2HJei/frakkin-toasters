@@ -21,6 +21,8 @@ public interface GameView {
 
     GameStep step();
 
+    int turn();
+
     BoardsHolderView boards();
 
     SkillCheckView activeSkillCheck();

@@ -42,6 +42,9 @@ public class Game implements GameView {
     @Setter
     @Builder.Default
     private GameStep             step                = SETUP;
+    @Setter
+    @Builder.Default
+    private int                  turn                = 0;
     @Builder.Default
     private Die                  die                 = new Die();
     @Builder.Default

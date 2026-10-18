@@ -37,7 +37,7 @@ public class PlayerOps extends GameOps {
         player.loyaltyCards().addOnTop(loyaltyCards);
     }
 
-    public void moveTo(Location location) {
+    public void moveTo(Location location) { //todo move to brig makes Admiral lose its title
         assert !location.isSpaceLocation();
         val character = player.character();
         game.boards().all().forEach(b -> b.remove(character));

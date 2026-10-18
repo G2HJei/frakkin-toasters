@@ -44,7 +44,7 @@ public class FollowupUtils {
             case DRADIS_CONTACT -> single(new DradisContactEvent());
             case EXPLOIT_A_WEAKNESS -> single(new PlayerDecisionEvent<>(player.number(), ExploitAWeaknessEvent.class));
             case PERSONAL_VICES -> single(new PersonalVicesEvent());
-            case VIOLENT_OUTBURSTS -> single(new ViolentOutburstsEvent(player.number()));
+            case VIOLENT_OUTBURSTS -> single(new ViolentOutburstsEvent());
             case PROTECT_THE_FLEET -> single(new PlayerDecisionEvent<>(player.number(), ProtectTheFleetEvent.class));
             case RED_TAPE -> single(new RedTapeEvent());
             case TRUST_INSTINCTS -> single(new TrustInstinctsEvent());

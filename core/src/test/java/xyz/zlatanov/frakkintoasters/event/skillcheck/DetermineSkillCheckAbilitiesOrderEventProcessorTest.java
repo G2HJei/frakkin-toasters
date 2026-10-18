@@ -38,7 +38,7 @@ class DetermineSkillCheckAbilitiesOrderEventProcessorTest extends EventTestHarne
                 arguments(DRADIS_CONTACT, single(new DradisContactEvent())),
                 arguments(EXPLOIT_A_WEAKNESS, single(new PlayerDecisionEvent<>(1, ExploitAWeaknessEvent.class))),
                 arguments(PERSONAL_VICES, single(new PersonalVicesEvent())),
-                arguments(VIOLENT_OUTBURSTS, single(new ViolentOutburstsEvent(1))),
+                arguments(VIOLENT_OUTBURSTS, single(new ViolentOutburstsEvent())),
                 arguments(PROTECT_THE_FLEET, single(new PlayerDecisionEvent<>(1, ProtectTheFleetEvent.class))),
                 arguments(RED_TAPE, single(new RedTapeEvent())),
                 arguments(TRUST_INSTINCTS, single(new TrustInstinctsEvent()))
