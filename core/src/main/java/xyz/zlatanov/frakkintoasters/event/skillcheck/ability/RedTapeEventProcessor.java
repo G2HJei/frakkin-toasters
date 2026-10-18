@@ -25,6 +25,7 @@ public class RedTapeEventProcessor extends EventProcessor<RedTapeEvent> {
         return Followup.NONE;
     }
 
+    //todo card value here and in QuickThinkingEventProcessor could be moved to utility method - in SkillCheck class?
     private int cardValue(SkillCard card) {
         val faceValue = card.value();
         val valueDoubled = card.type().color() == ENGINEERING &&
