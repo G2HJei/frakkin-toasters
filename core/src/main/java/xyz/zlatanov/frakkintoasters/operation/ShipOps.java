@@ -157,4 +157,11 @@ public class ShipOps extends GameOps {
         ship.pilot(null);
     }
 
+    public void escort() {
+        val civ = galacticaBoard().shipInSpace(shipId, CivilianShip.class);
+        galacticaBoard().remove(civ);
+        game.decks().civilianShips()
+                .addOnTop(civ)
+                .shuffle();
+    }
 }

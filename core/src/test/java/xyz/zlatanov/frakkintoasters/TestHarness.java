@@ -234,6 +234,12 @@ public abstract class TestHarness {
         return civilianShips.draw();
     }
 
+    protected CivilianShip civilianShipAt(Location location) {
+        val civ = civilianShip();
+        place(location, civ);
+        return civ;
+    }
+
     protected void place(Location location, Ship... ships) {
         getSpaceLocationsBoard(location).place(location, ships);
     }
