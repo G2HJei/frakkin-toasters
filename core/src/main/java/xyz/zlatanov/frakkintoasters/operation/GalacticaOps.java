@@ -35,8 +35,12 @@ public class GalacticaOps extends BattlestarOps {
         }
     }
 
-    public void decreasePopulation(int amount) {
-        galacticaBoard().decreasePopulation(amount);
+    public void decreasePopulation(int populationLost) {
+        galacticaBoard().decreasePopulation(populationLost);
+    }
+
+    public void decreaseMorale(int moraleLost) {
+        galacticaBoard().decreaseMorale(moraleLost);
     }
 
     public void advanceBoardingParty() {
