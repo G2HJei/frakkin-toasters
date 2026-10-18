@@ -33,36 +33,36 @@ public class Game implements GameView {
     // todo separate counters in own classes?
     // todo add turns
     @Builder.Default
-    private ObjectiveCard        objective         = KOBOL;
+    private ObjectiveCard        objective           = KOBOL;
     @Builder.Default
-    private Map<Integer, Player> players           = Map.of(1, new Player(1), 2, new Player(2), 3, new Player(3));
+    private Map<Integer, Player> players             = Map.of(1, new Player(1), 2, new Player(2), 3, new Player(3));
     @Setter
     @Builder.Default
-    private int                  currentPlayer     = 1;
+    private int                  currentPlayerNumber = 1;
     @Setter
     @Builder.Default
-    private GameStep             step              = SETUP;
+    private GameStep             step                = SETUP;
     @Builder.Default
-    private Die                  die               = new Die();
+    private Die                  die                 = new Die();
     @Builder.Default
-    private BoardsHolder         boards            = new BoardsHolder();
+    private BoardsHolder         boards              = new BoardsHolder();
     @Builder.Default
-    private DecksHolder          decks             = DecksHolder.builder().build();
+    private DecksHolder          decks               = DecksHolder.builder().build();
     private SkillCheck           activeSkillCheck;
     @Builder.Default
-    private CylonShips           cylonShips        = CylonShips.builder().build();
+    private CylonShips           cylonShips          = CylonShips.builder().build();
     @Builder.Default
-    private int                  nukes             = 2;
+    private int                  nukes               = 2;
     @Setter
     private Character            president;
     @Builder.Default
-    private Deck<QuorumCard>     presidentHand     = new Deck<>(false);
+    private Deck<QuorumCard>     presidentHand       = new Deck<>(false);
     @Setter
     private Character            admiral;
     @Setter
     private Character            cag;
     @Builder.Default
-    private RemovedComponents    removedComponents = new RemovedComponents();
+    private RemovedComponents    removedComponents   = new RemovedComponents();
 
 
     public static GameBuilder builder() {
@@ -86,6 +86,11 @@ public class Game implements GameView {
     @Override
     public Player player(int playerNumber) {
         return players.get(playerNumber);
+    }
+
+    @Override
+    public Player currentPlayer() {
+        return player(currentPlayerNumber);
     }
 
     public Game setupGalacticaBoard() {

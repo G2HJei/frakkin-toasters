@@ -22,6 +22,6 @@ public class TrustInstinctsEventProcessor extends EventProcessor<TrustInstinctsE
 
 
     private Followup getFollowup(SkillCard c) {
-        return FollowupUtils.skillCheckAbilityFollowup(game.player(game.currentPlayer()), c);
+        return FollowupUtils.skillCheckAbilityFollowup(game.player(game.currentPlayerNumber()), c);
     }
 }

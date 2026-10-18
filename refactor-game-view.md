@@ -120,7 +120,8 @@ that matter.
   to it.
 
 **5. Only game ops should write, the engine included.** Component write methods stay public, so anything holding a
-`Game` could change it without logging. That includes the future engine advancing `step` or `currentPlayer`, and setup
+`Game` could change it without logging. That includes the future engine advancing `step` or `currentPlayerNumber`, and
+setup
 code. A second ArchUnit rule, allowing only `..operation..` and tests to call `@Mutates` methods, keeps the log
 complete.
 

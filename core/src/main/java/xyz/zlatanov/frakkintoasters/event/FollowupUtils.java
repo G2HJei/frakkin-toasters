@@ -43,7 +43,7 @@ public class FollowupUtils {
             case BAIT -> single(new BaitEvent());
             case DRADIS_CONTACT -> single(new DradisContactEvent());
             case EXPLOIT_A_WEAKNESS -> single(new PlayerDecisionEvent<>(player.number(), ExploitAWeaknessEvent.class));
-            case PERSONAL_VICES -> single(new PersonalVicesEvent(player.number()));
+            case PERSONAL_VICES -> single(new PersonalVicesEvent());
             case VIOLENT_OUTBURSTS -> single(new ViolentOutburstsEvent(player.number()));
             case PROTECT_THE_FLEET -> single(new PlayerDecisionEvent<>(player.number(), ProtectTheFleetEvent.class));
             case RED_TAPE -> single(new RedTapeEvent());
@@ -57,10 +57,10 @@ public class FollowupUtils {
     }
 
     private static void addPlayerDecisions(GameView game, ArrayList<Event> followupEvents) {
-        var decidingPlayer = game.currentPlayer();
+        var decidingPlayer = game.currentPlayerNumber();
         do {
             decidingPlayer = decidingPlayer >= game.players().size() ? 1 : ++decidingPlayer;
             followupEvents.add(new PlayerDecisionEvent<>(decidingPlayer, PlaySkillsEvent.class));
-        } while (decidingPlayer != game.currentPlayer());
+        } while (decidingPlayer != game.currentPlayerNumber());
     }
 }
