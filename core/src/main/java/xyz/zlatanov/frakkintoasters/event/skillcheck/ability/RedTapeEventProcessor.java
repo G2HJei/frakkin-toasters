@@ -3,9 +3,13 @@ package xyz.zlatanov.frakkintoasters.event.skillcheck.ability;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import java.util.Collection;
 import java.util.stream.Stream;
+
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.ENGINEERING;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.ESTABLISH_NETWORK;
 
 public class RedTapeEventProcessor extends EventProcessor<RedTapeEvent> {
 
@@ -15,9 +19,17 @@ public class RedTapeEventProcessor extends EventProcessor<RedTapeEvent> {
                         game.activeSkillCheck().matchingPile().cards(),
                         game.activeSkillCheck().nonMatchingPile().cards())
                 .flatMap(Collection::stream)
-                .filter(c -> c.value() > 4)
+                .filter(c -> cardValue(c) > 4)
                 .toList();
         ops.skillCheck().discard(cardsToDiscard);
         return Followup.NONE;
+    }
+
+    private int cardValue(SkillCard card) {
+        val faceValue = card.value();
+        val valueDoubled = card.type().color() == ENGINEERING &&
+                game.activeSkillCheck().resolvedAbilities().contains(ESTABLISH_NETWORK);
+        val valueMultiplier = valueDoubled ? 2 : 1;
+        return faceValue * valueMultiplier;
     }
 }

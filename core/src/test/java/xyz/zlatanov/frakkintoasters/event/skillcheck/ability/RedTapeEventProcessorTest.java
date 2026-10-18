@@ -8,8 +8,7 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.AT_ANY_COST;
-import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.BAIT;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType.ADMIRALS_QUARTERS;
 
 class RedTapeEventProcessorTest extends EventTestHarness<RedTapeEvent> {
@@ -32,4 +31,17 @@ class RedTapeEventProcessorTest extends EventTestHarness<RedTapeEvent> {
         assertEquals(List.of(card0, card2, card4), game.activeSkillCheck().matchingPile().cards());
         assertEquals(List.of(card1, card3), game.activeSkillCheck().nonMatchingPile().cards());
     }
+
+    @Test
+    void shouldRemoveBoostedEngineeringCard() {
+        val engineeringTwoValueCard = new SkillCard(3, REPAIR);
+        game.startSkillCheck(ADMIRALS_QUARTERS);
+        game.activeSkillCheck().nonMatchingPile().addOnTop(engineeringTwoValueCard);
+        game.activeSkillCheck().resolved(ESTABLISH_NETWORK);
+
+        execute(new RedTapeEvent());
+
+        assertEquals(List.of(), game.activeSkillCheck().nonMatchingPile().cards());
+    }
+
 }
