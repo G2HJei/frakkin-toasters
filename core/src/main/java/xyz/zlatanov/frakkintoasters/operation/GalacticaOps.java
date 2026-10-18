@@ -61,6 +61,11 @@ public class GalacticaOps extends BattlestarOps {
         return humanFighter.id();
     }
 
+    public void placeCivilianShip(Location location) {
+        val civ = game.decks().civilianShips().draw();
+        galacticaBoard().place(location, civ);
+    }
+
     @Override
     protected GalacticaBoard board() {
         return galacticaBoard();
