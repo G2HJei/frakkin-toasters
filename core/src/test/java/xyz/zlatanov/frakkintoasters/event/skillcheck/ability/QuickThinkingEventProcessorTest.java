@@ -7,7 +7,7 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheck;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.AT_ANY_COST;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType.ADMIRALS_QUARTERS;
 
 class QuickThinkingEventProcessorTest extends EventTestHarness<QuickThinkingEvent> {
@@ -23,7 +23,7 @@ class QuickThinkingEventProcessorTest extends EventTestHarness<QuickThinkingEven
 
     @Test
     void shouldDoNothing() {
-        execute(new QuickThinkingEvent(1, null));
+        execute(new QuickThinkingEvent(null));
         assertTrue(game.activeSkillCheck().cards().isEmpty());
     }
 
@@ -31,7 +31,7 @@ class QuickThinkingEventProcessorTest extends EventTestHarness<QuickThinkingEven
     void shouldGiveSelectedCardToPlayer() {
         game.activeSkillCheck().matchingPile().addOnTop(validCard);
 
-        execute(new QuickThinkingEvent(1, validCard));
+        execute(new QuickThinkingEvent(validCard));
 
         assertTrue(game.activeSkillCheck().cards().isEmpty());
         assertTrue(player(1).skillCards().cards().contains(validCard));
@@ -40,6 +40,12 @@ class QuickThinkingEventProcessorTest extends EventTestHarness<QuickThinkingEven
     @Test
     void shouldNotAllowValueGreaterThan3() {
         game.activeSkillCheck().matchingPile().addOnTop(invalidCard);
-        assertInvalid(new QuickThinkingEvent(1, invalidCard));
+        assertInvalid(new QuickThinkingEvent(invalidCard));
+    }
+
+    @Test
+    void shouldNotAllowDiscardingCardWithBoostedValue() {
+        game.activeSkillCheck().resolved(ESTABLISH_NETWORK);
+        assertInvalid(new QuickThinkingEvent(new SkillCard(2, REPAIR)));
     }
 }
