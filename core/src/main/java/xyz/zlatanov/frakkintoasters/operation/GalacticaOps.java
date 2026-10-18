@@ -66,6 +66,12 @@ public class GalacticaOps extends BattlestarOps {
         galacticaBoard().place(location, civ);
     }
 
+    public void placeRaider(Location location) {
+        game.cylonShips()
+                .raider()
+                .ifPresent(r -> galacticaBoard().place(location, r));
+    }
+
     @Override
     protected GalacticaBoard board() {
         return galacticaBoard();
