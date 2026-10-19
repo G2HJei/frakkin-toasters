@@ -26,7 +26,7 @@ public class FollowupUtils {
     public static Followup skillCheckFollowup(GameView game) {
         val followupEvents = new ArrayList<Event>();
         followupEvents.add(new PlayFromDestinyDeckEvent());
-        addPlayerDecisions(game, followupEvents);
+        addPlayerDecisions(game, followupEvents, PlaySkillsEvent.class);
         followupEvents.add(new ShuffleAndDivideCardsEvent());
         followupEvents.add(new ResolveSkillCheckEvent());
         return all(followupEvents.toArray(Event[]::new));
@@ -56,11 +56,11 @@ public class FollowupUtils {
         };
     }
 
-    private static void addPlayerDecisions(GameView game, ArrayList<Event> followupEvents) {
+    private static void addPlayerDecisions(GameView game, ArrayList<Event> followupEvents, Class<? extends PlayerEvent> playerEventClass) {
         var decidingPlayer = game.currentPlayerNumber();
         do {
             decidingPlayer = decidingPlayer >= game.players().size() ? 1 : ++decidingPlayer;
-            followupEvents.add(new PlayerDecisionEvent<>(decidingPlayer, PlaySkillsEvent.class));
+            followupEvents.add(new PlayerDecisionEvent<>(decidingPlayer, playerEventClass));
         } while (decidingPlayer != game.currentPlayerNumber());
     }
 }

@@ -8,6 +8,7 @@ import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.FollowupUtils;
 import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -54,7 +55,8 @@ public abstract class EventTestHarness<E extends Event> extends TestHarness {
         assertThrows(InvalidActionException.class, () -> execute(event));
     }
 
-    protected void assertSkillCheckTriggered() {
+    protected void assertSkillCheckTriggered(SkillCheckType skillCheckType) {
+        assertEquals(skillCheckType, game.activeSkillCheck().type());
         followupAsserted = true;
         assertEquals(FollowupUtils.skillCheckFollowup(game), followup);
     }
