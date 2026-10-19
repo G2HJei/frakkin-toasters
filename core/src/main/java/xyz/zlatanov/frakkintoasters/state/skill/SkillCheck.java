@@ -9,9 +9,7 @@ import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.view.SkillCheckView;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.ENGINEERING;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.ESTABLISH_NETWORK;
@@ -22,11 +20,12 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.ESTABLISH_N
 @EqualsAndHashCode
 public class SkillCheck implements SkillCheckView {
 
-    private final SkillCheckType      type;
-    private final Deck<SkillCard>     cards             = new Deck<>();
-    private final Deck<SkillCard>     matchingPile      = new Deck<>();
-    private final Deck<SkillCard>     nonMatchingPile   = new Deck<>();
-    private final List<SkillCardType> resolvedAbilities = new ArrayList<>();
+    private final SkillCheckType                type;
+    private final Map<Integer, List<SkillCard>> playedBeforeSkillCheck = new LinkedHashMap<>();
+    private final Deck<SkillCard>               cards                  = new Deck<>();
+    private final Deck<SkillCard>               matchingPile           = new Deck<>();
+    private final Deck<SkillCard>               nonMatchingPile        = new Deck<>();
+    private final List<SkillCardType>           resolvedAbilities      = new ArrayList<>();
 
     //todo handle already resolved mechanics and removing future events when skill check ability card is removed separately
     public SkillCheck remove(SkillCard card) {

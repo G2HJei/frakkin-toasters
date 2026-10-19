@@ -69,13 +69,27 @@ public enum SkillCardType {
     VIOLENT_OUTBURSTS(TREACHERY),
     EXPLOIT_A_WEAKNESS(TREACHERY);
 
+    private final SkillCardColor color;
+
     private static final Set<SkillCardType> SKILL_CHECK_ABILITY_CARDS = Set.of(
             DOGFIGHT, FORCE_THEIR_HAND, QUICK_THINKING, A_BETTER_MACHINE, BAIT, DRADIS_CONTACT, EXPLOIT_A_WEAKNESS,
             PERSONAL_VICES, VIOLENT_OUTBURSTS, PROTECT_THE_FLEET, RED_TAPE, TRUST_INSTINCTS, INSTALL_UPGRADES,
             ALL_HANDS_ON_DECK, ESTABLISH_NETWORK, IRON_WILL);
-    private final        SkillCardColor     color;
+
+    private static final Set<SkillCardType> BEFORE_SKILL_CHECK_CARDS = Set.of(
+            INVESTIGATIVE_COMMITTEE, SCIENTIFIC_RESEARCH, SUPPORT_THE_PEOPLE, AT_ANY_COST, GUTS_AND_INITIATIVE, JURY_RIGGED, RESTORE_ORDER, A_SECOND_CHANCE);
+
+    private static final Set<SkillCardType> RECKLESS_CARDS = Set.of(SUPPORT_THE_PEOPLE, AT_ANY_COST, GUTS_AND_INITIATIVE, JURY_RIGGED);
 
     public boolean hasSkillCheckAbility() {
         return SKILL_CHECK_ABILITY_CARDS.contains(this);
+    }
+
+    public boolean playableBeforeSkillCheck() {
+        return BEFORE_SKILL_CHECK_CARDS.contains(this);
+    }
+
+    public boolean reckless() {
+        return RECKLESS_CARDS.contains(this);
     }
 }
