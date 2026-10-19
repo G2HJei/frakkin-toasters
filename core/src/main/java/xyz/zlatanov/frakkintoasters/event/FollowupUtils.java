@@ -3,10 +3,7 @@ package xyz.zlatanov.frakkintoasters.event;
 import lombok.NoArgsConstructor;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
-import xyz.zlatanov.frakkintoasters.event.skillcheck.PlayFromDestinyDeckEvent;
-import xyz.zlatanov.frakkintoasters.event.skillcheck.PlaySkillsEvent;
-import xyz.zlatanov.frakkintoasters.event.skillcheck.ResolveSkillCheckEvent;
-import xyz.zlatanov.frakkintoasters.event.skillcheck.ShuffleAndDivideCardsEvent;
+import xyz.zlatanov.frakkintoasters.event.skillcheck.*;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.ability.*;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
@@ -14,22 +11,23 @@ import xyz.zlatanov.frakkintoasters.state.view.GameView;
 import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static lombok.AccessLevel.PRIVATE;
-import static xyz.zlatanov.frakkintoasters.event.Followup.all;
-import static xyz.zlatanov.frakkintoasters.event.Followup.single;
+import static xyz.zlatanov.frakkintoasters.event.Followup.*;
 
 @NoArgsConstructor(access = PRIVATE)
 public class FollowupUtils {
 
 
     public static Followup skillCheckFollowup(GameView game) {
-        val followupEvents = new ArrayList<Event>();
-        followupEvents.add(new PlayFromDestinyDeckEvent());
-        addPlayerDecisions(game, followupEvents, PlaySkillsEvent.class);
-        followupEvents.add(new ShuffleAndDivideCardsEvent());
-        followupEvents.add(new ResolveSkillCheckEvent());
-        return all(followupEvents.toArray(Event[]::new));
+        val followupEvents = new ArrayList<Followup>();
+        followupEvents.add(single(new PlayFromDestinyDeckEvent()));
+        followupEvents.add(addPlayerDecisions(game, List.of(PlayRestoreOrderEvent.class, PlayRecklessSkillCardEvent.class)));
+        followupEvents.add(addPlayerDecisions(game, List.of(PlaySkillsEvent.class)));
+        followupEvents.add(single(new ShuffleAndDivideCardsEvent()));
+        followupEvents.add(single(new ResolveSkillCheckEvent()));
+        return all(followupEvents.toArray(Followup[]::new));
     }
 
     public static Followup skillCheckAbilityFollowup(PlayerView player, SkillCard skillCard) {
@@ -56,11 +54,18 @@ public class FollowupUtils {
         };
     }
 
-    private static void addPlayerDecisions(GameView game, ArrayList<Event> followupEvents, Class<? extends PlayerEvent> playerEventClass) {
+    private static Followup addPlayerDecisions(GameView game, List<Class<? extends PlayerEvent>> eventClasses) {
+        val followups = new ArrayList<Followup>();
         var decidingPlayer = game.currentPlayerNumber();
         do {
+            val playerEvents = new PlayerEvent[eventClasses.size()];
             decidingPlayer = decidingPlayer >= game.players().size() ? 1 : ++decidingPlayer;
-            followupEvents.add(new PlayerDecisionEvent<>(decidingPlayer, playerEventClass));
+            for (int i = 0; i < eventClasses.size(); i++) {
+                val event = eventClasses.get(i);
+                playerEvents[i] = new PlayerDecisionEvent<>(decidingPlayer, event);
+            }
+            followups.add(one(playerEvents));
         } while (decidingPlayer != game.currentPlayerNumber());
+        return all(followups.toArray(Followup[]::new));
     }
 }
