@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event.skillcheck.ability;
 
+import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
@@ -45,7 +46,10 @@ class QuickThinkingEventProcessorTest extends EventTestHarness<QuickThinkingEven
 
     @Test
     void shouldNotAllowDiscardingCardWithBoostedValue() {
+        val repair2 = new SkillCard(2, REPAIR);
         game.activeSkillCheck().resolved(ESTABLISH_NETWORK);
-        assertInvalid(new QuickThinkingEvent(new SkillCard(2, REPAIR)));
+        game.activeSkillCheck().matchingPile().addOnTop(repair2);
+
+        assertInvalid(new QuickThinkingEvent(repair2));
     }
 }

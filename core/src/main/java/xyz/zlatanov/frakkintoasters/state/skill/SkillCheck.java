@@ -4,6 +4,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
+import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.view.SkillCheckView;
@@ -11,6 +12,9 @@ import xyz.zlatanov.frakkintoasters.state.view.SkillCheckView;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.ENGINEERING;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.ESTABLISH_NETWORK;
 
 @Getter
 @Accessors(fluent = true)
@@ -45,6 +49,16 @@ public class SkillCheck implements SkillCheckView {
     @Override
     public List<SkillCardType> resolvedAbilities() {
         return Collections.unmodifiableList(resolvedAbilities);
+    }
+
+    @Override
+    public int cardValue(SkillCard card) {
+        assert nonMatchingPile.cards().contains(card) || matchingPile.cards().contains(card) : "Card not in skill check";
+        val faceValue = card.value();
+        val valueDoubled = card.type().color() == ENGINEERING &&
+                resolvedAbilities.contains(ESTABLISH_NETWORK);
+        val valueMultiplier = valueDoubled ? 2 : 1;
+        return faceValue * valueMultiplier;
     }
 
 }

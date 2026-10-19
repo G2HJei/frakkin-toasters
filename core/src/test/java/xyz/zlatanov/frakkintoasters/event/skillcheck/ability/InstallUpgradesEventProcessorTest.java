@@ -6,7 +6,7 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.CALCULATIONS;
 
-class InstallUpgradesEventTest extends EventTestHarness<InstallUpgradesEvent> {
+class InstallUpgradesEventProcessorTest extends EventTestHarness<InstallUpgradesEvent> {
 
     SkillCard card1 = new SkillCard(1, CALCULATIONS);
     SkillCard card2 = new SkillCard(2, CALCULATIONS);

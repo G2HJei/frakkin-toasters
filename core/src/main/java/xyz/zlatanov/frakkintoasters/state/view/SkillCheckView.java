@@ -16,4 +16,6 @@ public interface SkillCheckView {
     DeckView<SkillCard> nonMatchingPile();
 
     List<SkillCardType> resolvedAbilities();
+
+    int cardValue(SkillCard card);
 }
