@@ -15,7 +15,7 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBU
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType.ADMIRALS_QUARTERS;
 
-class PlaySkillsEventProcessorTest extends EventTestHarness<PlaySkillsEvent> {
+class PlayCardsIntoSkillCheckEventProcessorTest extends EventTestHarness<PlayCardsIntoSkillCheckEvent> {
 
     @BeforeEach
     void setUp() {
@@ -30,7 +30,7 @@ class PlaySkillsEventProcessorTest extends EventTestHarness<PlaySkillsEvent> {
     @Test
     void shouldAllowUpToOneCardForCharactersInBrig() {
         moveTo(BRIG, KARA_STARBUCK_THRACE);
-        assertInvalid(new PlaySkillsEvent(1, List.of(
+        assertInvalid(new PlayCardsIntoSkillCheckEvent(1, List.of(
                 new SkillCard(1, DOGFIGHT),
                 new SkillCard(2, EXECUTIVE_ORDER))));
     }
@@ -38,7 +38,7 @@ class PlaySkillsEventProcessorTest extends EventTestHarness<PlaySkillsEvent> {
     @Test
     void shouldAllowUpToOneCardForRevealedCylon() {
         revealCylon();
-        assertInvalid(new PlaySkillsEvent(1, List.of(
+        assertInvalid(new PlayCardsIntoSkillCheckEvent(1, List.of(
                 new SkillCard(1, DOGFIGHT),
                 new SkillCard(2, EXECUTIVE_ORDER))));
     }
@@ -47,7 +47,7 @@ class PlaySkillsEventProcessorTest extends EventTestHarness<PlaySkillsEvent> {
     void shouldAllowUpToTwoCardsForInfiltrator() {
         player(2).character(DANNA_BIERS).infiltrateGalactica();
         moveTo(ADMINISTRATION, DANNA_BIERS);
-        assertInvalid(new PlaySkillsEvent(2, List.of(
+        assertInvalid(new PlayCardsIntoSkillCheckEvent(2, List.of(
                 new SkillCard(1, DOGFIGHT),
                 new SkillCard(2, EXECUTIVE_ORDER),
                 new SkillCard(3, FULL_THROTTLE))));
@@ -58,7 +58,7 @@ class PlaySkillsEventProcessorTest extends EventTestHarness<PlaySkillsEvent> {
         val contribution = new SkillCard(0, CALCULATIONS);
         player(1).skillCards().addOnTop(contribution);
 
-        execute(new PlaySkillsEvent(1, List.of(contribution)));
+        execute(new PlayCardsIntoSkillCheckEvent(1, List.of(contribution)));
 
         assertTrue(game.activeSkillCheck().cards().cards().contains(contribution));
     }

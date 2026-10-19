@@ -14,20 +14,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static lombok.AccessLevel.PRIVATE;
-import static xyz.zlatanov.frakkintoasters.event.Followup.*;
+import static xyz.zlatanov.frakkintoasters.event.Followup.all;
+import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 
 @NoArgsConstructor(access = PRIVATE)
 public class FollowupUtils {
 
 
     public static Followup skillCheckFollowup(GameView game) {
-        val followupEvents = new ArrayList<Followup>();
-        followupEvents.add(single(new PlayFromDestinyDeckEvent()));
-        followupEvents.add(addPlayerDecisions(game, List.of(PlayRestoreOrderEvent.class, PlayRecklessSkillCardEvent.class)));
-        followupEvents.add(addPlayerDecisions(game, List.of(PlaySkillsEvent.class)));
-        followupEvents.add(single(new ShuffleAndDivideCardsEvent()));
-        followupEvents.add(single(new ResolveSkillCheckEvent()));
-        return all(followupEvents.toArray(Followup[]::new));
+        val followupEvents = new ArrayList<Event>();
+        followupEvents.add(new PlayFromDestinyDeckEvent());
+        followupEvents.addAll(addPlayerDecisions(game, PlayCardsBeforeSkillCheckEvent.class));
+        followupEvents.addAll(addPlayerDecisions(game, PlayCardsIntoSkillCheckEvent.class));
+        followupEvents.add(new ShuffleAndDivideCardsEvent());
+        followupEvents.add(new ResolveSkillCheckEvent());
+        return all(followupEvents.toArray(Event[]::new));
     }
 
     public static Followup skillCheckAbilityFollowup(PlayerView player, SkillCard skillCard) {
@@ -54,18 +55,13 @@ public class FollowupUtils {
         };
     }
 
-    private static Followup addPlayerDecisions(GameView game, List<Class<? extends PlayerEvent>> eventClasses) {
-        val followups = new ArrayList<Followup>();
+    private static List<Event> addPlayerDecisions(GameView game, Class<? extends PlayerEvent> eventClass) {
+        val playerEvents = new ArrayList<Event>();
         var decidingPlayer = game.currentPlayerNumber();
         do {
-            val playerEvents = new PlayerEvent[eventClasses.size()];
             decidingPlayer = decidingPlayer >= game.players().size() ? 1 : ++decidingPlayer;
-            for (int i = 0; i < eventClasses.size(); i++) {
-                val event = eventClasses.get(i);
-                playerEvents[i] = new PlayerDecisionEvent<>(decidingPlayer, event);
-            }
-            followups.add(one(playerEvents));
+            playerEvents.add(new PlayerDecisionEvent<>(decidingPlayer, eventClass));
         } while (decidingPlayer != game.currentPlayerNumber());
-        return all(followups.toArray(Followup[]::new));
+        return playerEvents;
     }
 }

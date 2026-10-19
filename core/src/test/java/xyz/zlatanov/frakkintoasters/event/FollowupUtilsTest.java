@@ -6,7 +6,7 @@ import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static xyz.zlatanov.frakkintoasters.event.Followup.*;
+import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 
 class FollowupUtilsTest extends TestHarness {
 
@@ -14,24 +14,17 @@ class FollowupUtilsTest extends TestHarness {
     void shouldBuildAllFollowupEvents() {
         assertEquals(
                 all(
-                        single(new PlayFromDestinyDeckEvent()),
-                        all(
-                                one(
-                                        new PlayerDecisionEvent<>(2, PlayRestoreOrderEvent.class),
-                                        new PlayerDecisionEvent<>(2, PlayRecklessSkillCardEvent.class)),
-                                one(
-                                        new PlayerDecisionEvent<>(3, PlayRestoreOrderEvent.class),
-                                        new PlayerDecisionEvent<>(3, PlayRecklessSkillCardEvent.class)),
-                                one(
-                                        new PlayerDecisionEvent<>(1, PlayRestoreOrderEvent.class),
-                                        new PlayerDecisionEvent<>(1, PlayRecklessSkillCardEvent.class))
-                        ),
-                        all(
-                                one(new PlayerDecisionEvent<>(2, PlaySkillsEvent.class)),
-                                one(new PlayerDecisionEvent<>(3, PlaySkillsEvent.class)),
-                                one(new PlayerDecisionEvent<>(1, PlaySkillsEvent.class))),
-                        single(new ShuffleAndDivideCardsEvent()),
-                        single(new ResolveSkillCheckEvent())
+                        new PlayFromDestinyDeckEvent(),
+                        new PlayerDecisionEvent<>(2, PlayCardsBeforeSkillCheckEvent.class),
+                        new PlayerDecisionEvent<>(3, PlayCardsBeforeSkillCheckEvent.class),
+                        new PlayerDecisionEvent<>(1, PlayCardsBeforeSkillCheckEvent.class),
+                        // engine can add here player decision for TiebreakCardsBeforeSkillCheckEvent
+                        new PlayerDecisionEvent<>(2, PlayCardsIntoSkillCheckEvent.class),
+                        new PlayerDecisionEvent<>(3, PlayCardsIntoSkillCheckEvent.class),
+                        new PlayerDecisionEvent<>(1, PlayCardsIntoSkillCheckEvent.class),
+                        new ShuffleAndDivideCardsEvent(),
+                        // engine can add here skill check abilities if any
+                        new ResolveSkillCheckEvent()
                 ),
                 FollowupUtils.skillCheckFollowup(game));
     }

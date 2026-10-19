@@ -6,7 +6,7 @@ import xyz.zlatanov.frakkintoasters.event.Followup;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.BRIG;
 
-public class PlaySkillsEventProcessor extends EventProcessor<PlaySkillsEvent> {
+public class PlayCardsIntoSkillCheckEventProcessor extends EventProcessor<PlayCardsIntoSkillCheckEvent> {
     @Override
     protected boolean isValid() {
         val inBrig = game.locate(player.character()) == BRIG;
