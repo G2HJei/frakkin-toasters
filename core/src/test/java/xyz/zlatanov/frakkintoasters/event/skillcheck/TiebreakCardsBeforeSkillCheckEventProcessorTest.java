@@ -20,9 +20,9 @@ class TiebreakCardsBeforeSkillCheckEventProcessorTest extends EventTestHarness<T
     @Test
     void shouldReturnExtraCardsToPlayers() {
         game.startSkillCheck(ADMIRALS_QUARTERS);
-        game.activeSkillCheck().playedBeforeSkillCheck().put(1, List.of(aSecondChance, restoreOrder, juryRigged, atAnyCOst));
-        game.activeSkillCheck().playedBeforeSkillCheck().put(2, List.of(restoreOrder, juryRigged));
-        game.activeSkillCheck().playedBeforeSkillCheck().put(3, List.of(aSecondChance, juryRigged2));
+        game.activeSkillCheck().playedBefore(1, List.of(aSecondChance, restoreOrder, juryRigged, atAnyCOst));
+        game.activeSkillCheck().playedBefore(2, List.of(restoreOrder, juryRigged));
+        game.activeSkillCheck().playedBefore(3, List.of(aSecondChance, juryRigged2));
 
         execute(new TiebreakCardsBeforeSkillCheckEvent(Map.of(
                 JURY_RIGGED, 1,
@@ -31,7 +31,7 @@ class TiebreakCardsBeforeSkillCheckEventProcessorTest extends EventTestHarness<T
 
         assertSkillCards(1, aSecondChance, restoreOrder);
         assertSkillCards(2, juryRigged);
-        assertSkillCards(2, juryRigged2);
+        assertSkillCards(3, juryRigged2);
     }
 
 }

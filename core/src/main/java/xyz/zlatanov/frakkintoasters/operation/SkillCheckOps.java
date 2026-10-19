@@ -36,7 +36,7 @@ public class SkillCheckOps extends GameOps {
 
     public void playBeforeSkillCheck(int playerNumber, List<SkillCard> skillCards) {
         game.player(playerNumber).skillCards().remove(skillCards);
-        game.activeSkillCheck().playedBeforeSkillCheck().put(playerNumber, skillCards);
+        game.activeSkillCheck().playedBefore(playerNumber, skillCards);
     }
 
     public List<SkillCard> playFromDestinyDeck(int count) {
@@ -84,12 +84,12 @@ public class SkillCheckOps extends GameOps {
     }
 
     public void discard(SkillCard card) {
-        game.activeSkillCheck().remove(card);
+        game.activeSkillCheck().remove(card, null);
         game.decks().discard(card);
     }
 
     public void giveCardToPlayer(SkillCard card, int playerNumber) {
-        game.activeSkillCheck().remove(card);
+        game.activeSkillCheck().remove(card, playerNumber);
         player(playerNumber).receiveSkillCard(card);
     }
 

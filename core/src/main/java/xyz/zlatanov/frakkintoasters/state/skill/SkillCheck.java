@@ -28,8 +28,12 @@ public class SkillCheck implements SkillCheckView {
     private final List<SkillCardType>           resolvedAbilities      = new ArrayList<>();
 
     //todo handle already resolved mechanics and removing future events when skill check ability card is removed separately
-    public SkillCheck remove(SkillCard card) {
-        if (matchingPile.cards().contains(card)) {
+    public SkillCheck remove(SkillCard card, Integer playerNumber) {
+        if (Optional.ofNullable(playedBeforeSkillCheck.get(playerNumber))
+                .map(cards -> cards.contains(card))
+                .orElse(false)) {
+            playedBeforeSkillCheck.get(playerNumber).remove(card);
+        } else if (matchingPile.cards().contains(card)) {
             matchingPile.remove(card);
         } else if (nonMatchingPile.cards().contains(card)) {
             nonMatchingPile.remove(card);
@@ -37,6 +41,19 @@ public class SkillCheck implements SkillCheckView {
             throw new FrakCallTheAdmiralException();
         }
         return this;
+    }
+
+    public void playedBefore(int playerNumber, List<SkillCard> cards) {
+        playedBeforeSkillCheck.put(playerNumber, new ArrayList<>(cards));
+    }
+
+    @Override
+    public List<SkillCard> playedBeforeSkillCheck(int playerNumber) {
+        return playedBeforeSkillCheck.getOrDefault(playerNumber, List.of());
+    }
+
+    public void tieBrokenBefore(int playerNumber, SkillCard card) {
+        playedBeforeSkillCheck.get(playerNumber).remove(card);
     }
 
     public SkillCheck resolved(SkillCardType cardType) {
