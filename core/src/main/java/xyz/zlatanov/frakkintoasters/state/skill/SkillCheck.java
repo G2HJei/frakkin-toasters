@@ -52,10 +52,6 @@ public class SkillCheck implements SkillCheckView {
         return playedBeforeSkillCheck.getOrDefault(playerNumber, List.of());
     }
 
-    public void tieBrokenBefore(int playerNumber, SkillCard card) {
-        playedBeforeSkillCheck.get(playerNumber).remove(card);
-    }
-
     public SkillCheck resolved(SkillCardType cardType) {
         assert !resolvedAbilities.contains(cardType) : "Skill check abilities can be resolved once per skill check";
         resolvedAbilities.add(cardType);
