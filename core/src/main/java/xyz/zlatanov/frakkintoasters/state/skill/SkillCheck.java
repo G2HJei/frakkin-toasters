@@ -11,6 +11,7 @@ import xyz.zlatanov.frakkintoasters.state.view.SkillCheckView;
 
 import java.util.*;
 
+import static java.util.Collections.unmodifiableList;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.ENGINEERING;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.ESTABLISH_NETWORK;
 
@@ -48,8 +49,16 @@ public class SkillCheck implements SkillCheckView {
     }
 
     @Override
+    public List<SkillCard> playedBeforeSkillCheck() {
+        return playedBeforeSkillCheck.values()
+                .stream()
+                .flatMap(Collection::stream)
+                .toList();
+    }
+
+    @Override
     public List<SkillCard> playedBeforeSkillCheck(int playerNumber) {
-        return playedBeforeSkillCheck.getOrDefault(playerNumber, List.of());
+        return unmodifiableList(playedBeforeSkillCheck.getOrDefault(playerNumber, List.of()));
     }
 
     public SkillCheck resolved(SkillCardType cardType) {
@@ -60,7 +69,7 @@ public class SkillCheck implements SkillCheckView {
 
     @Override
     public List<SkillCardType> resolvedAbilities() {
-        return Collections.unmodifiableList(resolvedAbilities);
+        return unmodifiableList(resolvedAbilities);
     }
 
     @Override

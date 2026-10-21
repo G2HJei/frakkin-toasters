@@ -15,6 +15,8 @@ public interface SkillCheckView {
 
     DeckView<SkillCard> nonMatchingPile();
 
+    List<SkillCard> playedBeforeSkillCheck();
+
     List<SkillCard> playedBeforeSkillCheck(int playerNumber);
 
     List<SkillCardType> resolvedAbilities();
