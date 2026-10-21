@@ -58,7 +58,7 @@ public abstract class EventTestHarness<E extends Event> extends TestHarness {
     protected void assertSkillCheckTriggered(SkillCheckType skillCheckType) {
         assertEquals(skillCheckType, game.activeSkillCheck().type());
         followupAsserted = true;
-        assertEquals(FollowupUtils.skillCheckFollowup(game), followup);
+        assertEquals(FollowupUtils.beforeSkillCheckFollowups(game), followup);
     }
 
     @SneakyThrows

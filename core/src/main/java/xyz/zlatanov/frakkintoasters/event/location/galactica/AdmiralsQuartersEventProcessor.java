@@ -11,6 +11,6 @@ public class AdmiralsQuartersEventProcessor extends EventProcessor<AdmiralsQuart
     @Override
     public Followup process() {
         ops.skillCheck().start(ADMIRALS_QUARTERS);
-        return FollowupUtils.skillCheckFollowup(game);
+        return FollowupUtils.beforeSkillCheckFollowups(game);
     }
 }

@@ -3,7 +3,7 @@ package xyz.zlatanov.frakkintoasters.event;
 import lombok.NoArgsConstructor;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
-import xyz.zlatanov.frakkintoasters.event.skillcheck.*;
+import xyz.zlatanov.frakkintoasters.event.skillcheck.PlayCardsBeforeSkillCheckEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.ability.*;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
@@ -21,13 +21,8 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 public class FollowupUtils {
 
 
-    public static Followup skillCheckFollowup(GameView game) {
-        val followupEvents = new ArrayList<Event>();
-        followupEvents.add(new PlayFromDestinyDeckEvent());
-        followupEvents.addAll(addPlayerDecisions(game, PlayCardsBeforeSkillCheckEvent.class));
-        followupEvents.addAll(addPlayerDecisions(game, PlayCardsIntoSkillCheckEvent.class));
-        followupEvents.add(new ShuffleAndDivideCardsEvent());
-        followupEvents.add(new ResolveSkillCheckEvent());
+    public static Followup beforeSkillCheckFollowups(GameView game) {
+        val followupEvents = addPlayerDecisions(game, PlayCardsBeforeSkillCheckEvent.class);
         return all(followupEvents.toArray(Event[]::new));
     }
 
