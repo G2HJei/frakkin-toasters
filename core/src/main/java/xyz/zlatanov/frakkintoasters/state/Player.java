@@ -74,8 +74,8 @@ public class Player implements PlayerView {
         val hasNotRevealedCylonLoyalty = loyaltyCards.revealedCards()
                 .stream()
                 .noneMatch(LoyaltyCard::isCylon);
-        return isCylonLeader && isInfiltrating
-                || hasNotRevealedCylonLoyalty;
+        return isCylonLeader && isInfiltrating ||
+                !isCylonLeader && hasNotRevealedCylonLoyalty;
     }
 
     public void infiltrateGalactica() {
