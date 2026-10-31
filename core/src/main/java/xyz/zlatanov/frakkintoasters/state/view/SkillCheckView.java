@@ -15,6 +15,8 @@ public interface SkillCheckView {
 
     DeckView<SkillCard> nonMatchingPile();
 
+    boolean playedBeforeRevealed();
+
     List<SkillCard> playedBeforeSkillCheck();
 
     List<SkillCard> playedBeforeSkillCheck(int playerNumber);

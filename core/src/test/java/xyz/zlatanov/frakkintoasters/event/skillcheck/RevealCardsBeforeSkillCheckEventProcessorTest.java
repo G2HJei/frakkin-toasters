@@ -8,6 +8,7 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.AT_ANY_COST;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType.ADMIRALS_QUARTERS;
@@ -33,7 +34,11 @@ class RevealCardsBeforeSkillCheckEventProcessorTest extends EventTestHarness<Rev
                         new PlayFromDestinyDeckEvent()));
     }
 
-    //todo test cards are revealed
+    @Test
+    void shouldRevealCardsBeforeSkillCheck() {
+        execute(new RevealCardsBeforeSkillCheckEvent());
+        assertTrue(game.activeSkillCheck().playedBeforeRevealed());
+    }
 
     private void addPlayedBefore(int playerNumber) {
         game.activeSkillCheck().playedBefore(playerNumber, List.of(new SkillCard(0, AT_ANY_COST)));
