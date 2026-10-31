@@ -39,6 +39,10 @@ public class SkillCheckOps extends GameOps {
         game.activeSkillCheck().playedBefore(playerNumber, skillCards);
     }
 
+    public void revealPlayedBefore() {
+        game.activeSkillCheck().revealPlayedBefore();
+    }
+
     public List<SkillCard> playFromDestinyDeck(int count) {
         return playFromDestinyDeck(count, false);
     }

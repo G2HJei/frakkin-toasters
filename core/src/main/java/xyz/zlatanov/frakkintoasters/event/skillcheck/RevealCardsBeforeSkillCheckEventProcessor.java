@@ -15,6 +15,7 @@ public class RevealCardsBeforeSkillCheckEventProcessor extends EventProcessor<Re
 
     @Override
     public Followup process() {
+        ops.skillCheck().revealPlayedBefore();
         return shouldTieBreak() ?
                 all(
                         new PlayerDecisionEvent<>(game.currentPlayerNumber(), TiebreakCardsBeforeSkillCheckEvent.class),
