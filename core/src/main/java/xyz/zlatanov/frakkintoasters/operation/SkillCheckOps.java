@@ -61,6 +61,12 @@ public class SkillCheckOps extends GameOps {
         return cards;
     }
 
+    public SkillCard revealAndDiscardTreacheryCard() {
+        val card = game.decks().treachery().draw();
+        game.decks().discard(card);
+        return card;
+    }
+
     public void playCards(int playerNumber, SkillCard... cards) {
         playCards(playerNumber, Arrays.stream(cards).toList());
     }

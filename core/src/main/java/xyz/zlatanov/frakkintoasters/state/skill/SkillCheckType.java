@@ -7,14 +7,15 @@ import java.util.Arrays;
 import java.util.List;
 
 import static java.util.Comparator.comparing;
-import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.LEADERSHIP;
-import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.TACTICS;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.*;
 
 @Getter
 @Accessors(fluent = true)
 public enum SkillCheckType {
-    ADMIRALS_QUARTERS(LEADERSHIP, TACTICS);
+    ADMIRALS_QUARTERS(LEADERSHIP, TACTICS),
+    POWER_FAILURE(LEADERSHIP, TACTICS, ENGINEERING);
 
+    //todo add power
     private final List<SkillCardColor> skillCheckColors;
 
     SkillCheckType(SkillCardColor... colors) {
