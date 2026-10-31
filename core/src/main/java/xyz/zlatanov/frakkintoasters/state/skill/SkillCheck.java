@@ -44,8 +44,9 @@ public class SkillCheck implements SkillCheckView {
         return this;
     }
 
-    public void playedBefore(int playerNumber, List<SkillCard> cards) {
+    public SkillCheck playedBefore(int playerNumber, List<SkillCard> cards) {
         playedBeforeSkillCheck.put(playerNumber, new ArrayList<>(cards));
+        return this;
     }
 
     @Override
