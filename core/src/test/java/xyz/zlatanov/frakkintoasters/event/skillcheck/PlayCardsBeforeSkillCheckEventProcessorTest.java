@@ -22,7 +22,7 @@ class PlayCardsBeforeSkillCheckEventProcessorTest extends EventTestHarness<PlayC
 
         execute(new PlayCardsBeforeSkillCheckEvent(1, restoreOrder));
 
-        assertEquals(List.of(restoreOrder), game.activeSkillCheck().playedBeforeSkillCheck().get(1));
+        assertEquals(List.of(restoreOrder), game.activeSkillCheck().playedBeforeSkillCheck(1));
     }
 
     @Test
