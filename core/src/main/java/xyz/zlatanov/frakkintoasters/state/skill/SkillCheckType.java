@@ -13,7 +13,12 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.*;
 @Accessors(fluent = true)
 public enum SkillCheckType {
     ADMIRALS_QUARTERS(LEADERSHIP, TACTICS),
-    POWER_FAILURE(LEADERSHIP, TACTICS, ENGINEERING);
+    DIVISIVE_BEHAVIOR(POLITICS, LEADERSHIP, TACTICS),
+    HAUNTED_BY_THE_PAST(POLITICS, LEADERSHIP),
+    IN_THE_RING(POLITICS, LEADERSHIP, TACTICS),
+    POWER_FAILURE(LEADERSHIP, TACTICS, ENGINEERING),
+    THREAT_OF_SUPER_NOVA(LEADERSHIP, PILOTING, ENGINEERING),
+    FIRE_ALL_MISSILES(TACTICS, PILOTING);
 
     //todo add power
     private final List<SkillCardColor> skillCheckColors;

@@ -48,7 +48,7 @@ public class DetermineNextAdmiralEventProcessor extends EventProcessor<Determine
 
     @Override
     public Followup process() {
-        ops.titles().assignAdmiral(calcNextInLine(game));
+        ops.titles().assignAdmiral(calcNextInLine(game, event.excludedPlayerNumber()));
         return Followup.NONE;
     }
 

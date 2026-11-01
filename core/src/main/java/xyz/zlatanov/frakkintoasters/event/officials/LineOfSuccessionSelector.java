@@ -6,17 +6,21 @@ import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.view.GameView;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public interface LineOfSuccessionSelector {
 
     List<Character> lineOfSuccession();
 
-    default Character calcNextInLine(GameView game) {
+    default Character calcNextInLine(GameView game, Integer excludedPlayerNumber) {
         val lineOfSuccession = lineOfSuccession();
         Character nextInLine = null;
         var nextRank = 99;
         for (val player : game.players()) {
+            if (Objects.equals(player.number(), excludedPlayerNumber)) {
+                continue;
+            }
             val character = player.character();
             val rank = lineOfSuccession.indexOf(character);
             if (rank > -1 && rank < nextRank) {

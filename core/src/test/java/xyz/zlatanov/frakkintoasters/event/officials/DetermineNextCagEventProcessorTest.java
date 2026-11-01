@@ -25,6 +25,12 @@ class DetermineNextCagEventProcessorTest extends EventTestHarness<DetermineNextC
     }
 
     @Test
+    void shouldIgnoreExcludedPlayer() {
+        execute(new DetermineNextCagEvent(2));
+        assertEquals(KARA_STARBUCK_THRACE, cag());
+    }
+
+    @Test
     void shouldIgnoreCharactersInBrig() {
         moveTo(BRIG, LEE_APOLLO_ADAMA);
         execute(new DetermineNextCagEvent());

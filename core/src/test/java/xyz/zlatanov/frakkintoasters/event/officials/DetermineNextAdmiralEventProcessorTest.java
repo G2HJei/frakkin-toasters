@@ -25,6 +25,12 @@ class DetermineNextAdmiralEventProcessorTest extends EventTestHarness<DetermineN
     }
 
     @Test
+    void shouldIgnoreExcludedPlayer() {
+        execute(new DetermineNextAdmiralEvent(2));
+        assertEquals(WILLIAM_ADAMA, admiral());
+    }
+
+    @Test
     void shouldStartWith2Nukes() {
         execute(new DetermineNextAdmiralEvent());
         assertEquals(2, game.nukes());

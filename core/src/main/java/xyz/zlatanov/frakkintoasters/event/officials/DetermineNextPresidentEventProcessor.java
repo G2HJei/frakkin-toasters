@@ -46,7 +46,7 @@ public class DetermineNextPresidentEventProcessor extends EventProcessor<Determi
         if (firstPresident()) {
             ops.titles().drawQuorumCard();
         }
-        ops.titles().assignPresident(calcNextInLine(game));
+        ops.titles().assignPresident(calcNextInLine(game, event.excludedPlayerNumber()));
         return Followup.NONE;
     }
 
