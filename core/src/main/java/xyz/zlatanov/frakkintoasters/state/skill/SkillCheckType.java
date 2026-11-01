@@ -5,6 +5,7 @@ import lombok.experimental.Accessors;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import static java.util.Comparator.comparing;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.*;
@@ -23,9 +24,16 @@ public enum SkillCheckType {
     //todo add power
     private final List<SkillCardColor> skillCheckColors;
 
+    //todo add the Brig, the Airlock, Resistance HQ and Detention once they have skill check types
+    private static final Set<SkillCheckType> LOCATION_SKILL_CHECKS = Set.of(ADMIRALS_QUARTERS);
+
     SkillCheckType(SkillCardColor... colors) {
         skillCheckColors = Arrays.stream(colors)
                 .sorted(comparing(Enum::ordinal))
                 .toList();
+    }
+
+    public boolean triggeredByLocation() {
+        return LOCATION_SKILL_CHECKS.contains(this);
     }
 }

@@ -30,4 +30,6 @@ public interface PlayerView {
     boolean isInfiltrating();
 
     boolean isHuman();
+
+    boolean isRevealedCylon();
 }

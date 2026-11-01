@@ -1,9 +1,6 @@
 package xyz.zlatanov.frakkintoasters.state.view;
 
-import xyz.zlatanov.frakkintoasters.state.skill.PlayedCard;
-import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
-import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
-import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
+import xyz.zlatanov.frakkintoasters.state.skill.*;
 
 import java.util.List;
 
@@ -27,4 +24,13 @@ public interface SkillCheckView {
     List<SkillCardType> resolvedAbilities();
 
     int cardValue(SkillCard card);
+
+    boolean emergencyDeclared();
+
+    SkillCheckResult result();
+
+    /**
+     * Change of Plans was played, so the pass result is not resolved. The skill check still counts as passed.
+     */
+    boolean passResultReplaced();
 }

@@ -4,6 +4,7 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckResult;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
 
 import java.util.*;
@@ -101,6 +102,18 @@ public class SkillCheckOps extends GameOps {
     public void giveCardToPlayer(SkillCard card, int playerNumber) {
         game.activeSkillCheck().remove(card, playerNumber);
         player(playerNumber).receiveSkillCard(card);
+    }
+
+    public void declareEmergency() {
+        game.activeSkillCheck().declareEmergency();
+    }
+
+    public void determineResult(SkillCheckResult result) {
+        game.activeSkillCheck().result(result);
+    }
+
+    public void replacePassResult() {
+        game.activeSkillCheck().replacePassResult();
     }
 
     private List<SkillCard> drawAllAndSort() {

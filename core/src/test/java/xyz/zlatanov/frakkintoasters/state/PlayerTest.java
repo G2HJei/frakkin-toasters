@@ -6,8 +6,8 @@ import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static xyz.zlatanov.frakkintoasters.state.character.Character.CHIEF_GALEN_TYROL;
-import static xyz.zlatanov.frakkintoasters.state.character.Character.SAUL_TIGH;
+import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.CYLON_SEND_TO_BRIG;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.REPAIR;
 
 class PlayerTest {
@@ -40,6 +40,24 @@ class PlayerTest {
     void shouldNotAllowExhaustingMiracleTokenIfNoneAvailable() {
         chief.exhaustMiracleToken();
         assertThrows(FrakCallTheAdmiralException.class, () -> chief.exhaustMiracleToken());
+    }
+
+    @Test
+    void shouldBeRevealedCylonOnlyAfterRevealingCylonLoyaltyCard() {
+        xo.loyaltyCards().addOnTop(CYLON_SEND_TO_BRIG);
+        assertFalse(xo.isRevealedCylon());
+
+        xo.loyaltyCards().reveal(CYLON_SEND_TO_BRIG);
+        assertTrue(xo.isRevealedCylon());
+        assertFalse(xo.isHuman());
+    }
+
+    @Test
+        //todo verify if this is correct when cylon leader is NOT infiltrating
+    void shouldNotTreatCylonLeaderAsRevealedCylon() {
+        val cavil = new Player(3).character(CAVIL);
+        assertFalse(cavil.isRevealedCylon());
+        assertFalse(cavil.isHuman());
     }
 
 }

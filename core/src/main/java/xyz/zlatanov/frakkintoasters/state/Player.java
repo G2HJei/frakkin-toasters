@@ -71,11 +71,16 @@ public class Player implements PlayerView {
     @Override
     public boolean isHuman() {
         val isCylonLeader = character.type() == CYLON_LEADER;
-        val hasNotRevealedCylonLoyalty = loyaltyCards.revealedCards()
-                .stream()
-                .noneMatch(LoyaltyCard::isCylon);
         return isCylonLeader && isInfiltrating ||
-                !isCylonLeader && hasNotRevealedCylonLoyalty;
+                !isCylonLeader && !isRevealedCylon();
+    }
+
+    //todo review when a cylon leader is revealed cylon and when a human and updathe the methods if needed
+    @Override
+    public boolean isRevealedCylon() {
+        return loyaltyCards.revealedCards()
+                .stream()
+                .anyMatch(LoyaltyCard::isCylon);
     }
 
     public void infiltrateGalactica() {

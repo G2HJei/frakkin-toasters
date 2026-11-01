@@ -16,6 +16,7 @@ import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.groupingBy;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.ENGINEERING;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.ESTABLISH_NETWORK;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckResult.PASS;
 
 @Getter
 @Accessors(fluent = true)
@@ -30,6 +31,9 @@ public class SkillCheck implements SkillCheckView {
     private final Deck<SkillCard>               matchingPile           = new Deck<>();
     private final Deck<SkillCard>               nonMatchingPile        = new Deck<>();
     private final List<SkillCardType>           resolvedAbilities      = new ArrayList<>();
+    private       boolean                       emergencyDeclared      = false;
+    private       SkillCheckResult              result;
+    private       boolean                       passResultReplaced     = false; //by a second chance
 
     //todo handle already resolved mechanics and removing future events when skill check ability card is removed separately
     public SkillCheck remove(SkillCard card, Integer playerNumber) {
@@ -101,6 +105,23 @@ public class SkillCheck implements SkillCheckView {
     @Override
     public List<SkillCardType> resolvedAbilities() {
         return unmodifiableList(resolvedAbilities);
+    }
+
+    public void declareEmergency() {
+        assert !emergencyDeclared : "Limit of 1 Declare Emergency per skill check";
+        emergencyDeclared = true;
+    }
+
+    public SkillCheck result(SkillCheckResult result) {
+        assert this.result == null : "Skill check result already determined";
+        this.result = result;
+        return this;
+    }
+
+    public SkillCheck replacePassResult() {
+        assert result == PASS && !passResultReplaced : "Only a pending pass result can be replaced";
+        passResultReplaced = true;
+        return this;
     }
 
     @Override

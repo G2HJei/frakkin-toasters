@@ -143,4 +143,8 @@ public class PlayerOps extends GameOps {
     public void receiveSkillCard(SkillCard card) {
         player.gainSkillCards(card);
     }
+
+    public void gainMiracleToken() {
+        player.gainMiracleToken();
+    }
 }
