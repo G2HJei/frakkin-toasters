@@ -9,7 +9,7 @@ public class SendToSickbayEventProcessor extends EventProcessor<SendToSickbayEve
 
     @Override
     public Followup process() {
-        ops.player(event.targetPlayerNumber()).moveTo(SICKBAY);
+        ops.player(event.targetPlayerNumber()).sendTo(SICKBAY);
         return Followup.NONE;
     }
 }

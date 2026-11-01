@@ -6,16 +6,13 @@ import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.board.LocationsArea;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
-import xyz.zlatanov.frakkintoasters.state.ship.HumanFighter;
 import xyz.zlatanov.frakkintoasters.state.ship.ViperMarkVII;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Objects;
 
 import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.DISTANCE_LOOKUP_TABLE;
-import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.GALACTICA_SPACE;
 
 public class MoveEventProcessor extends EventProcessor<MoveEvent> {
 
@@ -46,7 +43,7 @@ public class MoveEventProcessor extends EventProcessor<MoveEvent> {
         val isPiloting = game.locate(playerCharacter).isSpaceLocation();
         val isStayingInSpace = destination.isSpaceLocation();
         if (isPiloting) {
-            val ship = humanFighter();
+            val ship = galacticaBoard.pilotedFighter(player.character()).orElseThrow();
             if (isStayingInSpace) {
                 ops.ship(ship.id()).moveTo(destination);
             } else {
@@ -77,7 +74,8 @@ public class MoveEventProcessor extends EventProcessor<MoveEvent> {
         val isStayingInSpace = destination.isSpaceLocation();
         if (isPiloting && isStayingInSpace) {
             val distance = DISTANCE_LOOKUP_TABLE.get(currentLocation).get(destination);
-            val maxDistance = 1 + (humanFighter() instanceof ViperMarkVII ? 1 : 0);
+            val fighter = galacticaBoard.pilotedFighter(player.character()).orElseThrow();
+            val maxDistance = 1 + (fighter instanceof ViperMarkVII ? 1 : 0);
             return distance <= maxDistance;
         } else {
             return true;
@@ -94,20 +92,6 @@ public class MoveEventProcessor extends EventProcessor<MoveEvent> {
 
     private LocationsArea targetArea() {
         return getLocationArea(destination);
-    }
-
-
-    private HumanFighter humanFighter() {
-        val playerCharacter = player.character();
-        return GALACTICA_SPACE.locations()
-                .stream()
-                .map(galacticaBoard::shipsIn)
-                .flatMap(Collection::stream)
-                .filter(s -> s instanceof HumanFighter
-                        && ((HumanFighter) s).pilot() == playerCharacter)
-                .map(HumanFighter.class::cast)
-                .findFirst()
-                .orElseThrow();
     }
 
     private LocationsArea getLocationArea(Location location) {

@@ -1,13 +1,16 @@
 package xyz.zlatanov.frakkintoasters.state.view;
 
 import xyz.zlatanov.frakkintoasters.state.board.Location;
+import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.ship.Centurion;
+import xyz.zlatanov.frakkintoasters.state.ship.HumanFighter;
 import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 import xyz.zlatanov.frakkintoasters.state.track.BoardingParty;
 import xyz.zlatanov.frakkintoasters.state.track.JumpPreparation;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_4_OCLOCK;
@@ -30,4 +33,6 @@ public interface GalacticaBoardView extends BoardView, SpaceLocationsBoardView {
     Set<Ship> reserves();
 
     Map<Centurion, BoardingParty> boardingPartyTrack();
+
+    Optional<HumanFighter> pilotedFighter(Character character);
 }

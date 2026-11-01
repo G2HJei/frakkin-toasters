@@ -268,8 +268,8 @@ public abstract class TestHarness {
         return viper;
     }
 
-    protected Viper viperMarkVIIAt(Location location) {
-        val viper = viper();
+    protected ViperMarkVII viperMarkVIIAt(Location location) {
+        val viper = galacticaBoard.removeFromDamagedShips(ViperMarkVII.class).orElseThrow();
         place(location, viper);
         return viper;
     }

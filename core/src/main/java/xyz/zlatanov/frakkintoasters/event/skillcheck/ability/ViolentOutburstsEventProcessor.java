@@ -13,7 +13,7 @@ public class ViolentOutburstsEventProcessor extends EventProcessor<ViolentOutbur
     public Followup process() {
         val currPlayer = game.currentPlayer();
         if (currPlayer.isHuman() && (currPlayer.character() != KARL_HELO_AGATHON || game.turn() > 1)) {
-            ops.player(currPlayer.number()).moveTo(BRIG);
+            ops.player(currPlayer.number()).sendTo(BRIG);
         }
         return Followup.NONE;
     }

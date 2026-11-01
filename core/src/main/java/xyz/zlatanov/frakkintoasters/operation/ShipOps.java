@@ -152,6 +152,7 @@ public class ShipOps extends GameOps {
 
     public void land(Location destination) {
         val ship = galacticaBoard().shipInSpace(shipId, HumanFighter.class);
+        galacticaBoard().remove(ship);
         galacticaBoard().addToReserves(ship);
         player(ship.pilot()).moveTo(destination);
         ship.pilot(null);

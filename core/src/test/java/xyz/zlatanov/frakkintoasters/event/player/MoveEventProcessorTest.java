@@ -84,6 +84,7 @@ class MoveEventProcessorTest extends EventTestHarness<MoveEvent> {
 
         assertEquals(PRESIDENTS_OFFICE, locate(KARA_STARBUCK_THRACE));
         assertTrue(galacticaBoard.reserves().contains(karasViper));
+        assertFalse(galacticaBoard.shipsInSpace().containsKey(karasViper));
         assertNull(karasViper.pilot());
     }
 

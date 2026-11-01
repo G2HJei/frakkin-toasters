@@ -48,15 +48,17 @@ public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard, Gal
 
     @Override
     public Optional<Location> locate(Character character) {
-        val superLocate = Optional.ofNullable(characters().get(character));
-        return superLocate.isPresent()
-                ? superLocate
-                : shipsInSpace.entrySet()
+        return Optional.ofNullable(characters().get(character))
+                .or(() -> pilotedFighter(character).map(shipsInSpace::get));
+    }
+
+    @Override
+    public Optional<HumanFighter> pilotedFighter(Character character) {
+        return shipsInSpace.keySet()
                 .stream()
-                .filter(es -> es.getKey() instanceof HumanFighter
-                        && ((HumanFighter) es.getKey()).pilot() == character)
-                .findFirst()
-                .map(Map.Entry::getValue);
+                .filter(s -> s instanceof HumanFighter fighter && fighter.pilot() == character)
+                .map(HumanFighter.class::cast)
+                .findFirst();
     }
 
     public void destroyColonialOne() {

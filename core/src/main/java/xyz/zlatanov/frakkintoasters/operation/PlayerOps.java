@@ -48,6 +48,13 @@ public class PlayerOps extends GameOps {
                 .place(location, character);
     }
 
+    public void sendTo(Location location) {
+        galacticaBoard().pilotedFighter(player.character())
+                .ifPresentOrElse(
+                        fighter -> ship(fighter.id()).land(location),
+                        () -> moveTo(location));
+    }
+
     public void drawSkillCards(SkillCardColor... colors) {
         drawSkillCards(Arrays.stream(colors).toList());
     }
