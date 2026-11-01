@@ -60,9 +60,11 @@ public class AllCardsProvider {
                 .addOnTop(skills(1, 5, PREVENTIVE_POLICY))
                 .addOnTop(skills(1, 6, POLITICAL_PROWESS))
                 //todo check correct quantities of the following
-                .addOnTop(skills(1, 6, FORCE_THEIR_HAND))
-                .addOnTop(skills(1, 6, POPULAR_INFLUENCE))
-                .addOnTop(skills(1, 6, NEGOTIATION))
+                .addOnTop(skills(1, 3, POPULAR_INFLUENCE))
+                .addOnTop(skills(1, 4, POPULAR_INFLUENCE))
+                .addOnTop(skills(1, 5, NEGOTIATION))
+                .addOnTop(skills(1, 0, FORCE_THEIR_HAND))
+                .addOnTop(skills(1, 0, RED_TAPE))
                 .shuffle();
     }
 
@@ -83,6 +85,7 @@ public class AllCardsProvider {
                 //todo check correct quantities of the deck
                 .addOnTop(skills(1, 0, ALL_HANDS_ON_DECK))
                 .addOnTop(skills(1, 3, RESTORE_ORDER))
+                .addOnTop(skills(1, 4, RESTORE_ORDER))
                 .addOnTop(skills(1, 5, CHANGE_OF_PLANS))
                 .shuffle();
     }
@@ -102,9 +105,10 @@ public class AllCardsProvider {
                 .addOnTop(skills(3, 0, TRUST_INSTINCTS))
                 .addOnTop(skills(1, 6, SCOUTING_FOR_FUEL))
                 //todo check quantities below
-                .addOnTop(skills(1, 1, QUICK_THINKING))
                 .addOnTop(skills(1, 3, UNORTHODOX_PLAN))
+                .addOnTop(skills(1, 4, UNORTHODOX_PLAN))
                 .addOnTop(skills(1, 5, A_SECOND_CHANCE))
+                .addOnTop(skills(1, 0, QUICK_THINKING))
                 .shuffle();
     }
 
@@ -125,6 +129,7 @@ public class AllCardsProvider {
                 //todo check quantities below
                 .addOnTop(skills(1, 0, DOGFIGHT))
                 .addOnTop(skills(1, 3, COMBAT_VETERAN))
+                .addOnTop(skills(1, 4, COMBAT_VETERAN))
                 .addOnTop(skills(1, 5, LAUNCH_RESERVES))
                 .shuffle();
     }
@@ -146,6 +151,7 @@ public class AllCardsProvider {
                 // todo check quantities
                 .addOnTop(skills(1, 0, INSTALL_UPGRADES))
                 .addOnTop(skills(1, 3, RAPTOR_SPECIALIST))
+                .addOnTop(skills(1, 4, RAPTOR_SPECIALIST))
                 .addOnTop(skills(1, 5, TEST_THE_LIMITS))
                 .shuffle();
     }

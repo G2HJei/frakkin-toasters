@@ -4,6 +4,9 @@ import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.ship.ShipType;
 
+// Protect the Fleet - color: PILOTING, values: 0
+// Skill Check: If at least 3 strength in piloting Skill Cards are in this skill check, the current player may activate
+// one unmanned viper.
 public record ProtectTheFleetEvent(int playerNumber,
 
                                    ShipType launchShipType,

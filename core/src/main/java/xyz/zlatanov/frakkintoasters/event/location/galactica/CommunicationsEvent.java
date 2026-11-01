@@ -2,6 +2,8 @@ package xyz.zlatanov.frakkintoasters.event.location.galactica;
 
 import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
 
+// Communications (Galactica location)
+// Action: Look at the back of 2 civilian ships. You may then move them to adjacent area(s).
 public record CommunicationsEvent(int playerNumber, Integer civilianShipId1,
                                   Integer civilianShipId2) implements PlayerEvent {
 }
