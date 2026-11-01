@@ -37,17 +37,11 @@ public enum Location {
     MAIN_BATTERIES,
     ENGINE_ROOM,
 
-    //demetrius
-    BRIDGE,
-    TACTICAL_PLOT,
-    CAPTAINS_CABIN,
-
     //cylon
     CAPRICA,
     CYLON_FLEET,
     HUMAN_FLEET,
     RESURRECTION_SHIP,
-    HUB_DESTROYED,
 
     //cylon fleet
     BASESTAR_BRIDGE,
@@ -57,14 +51,6 @@ public enum Location {
     CYLON_FLEET_SPACE_4,
     CYLON_FLEET_SPACE_5_6,
     CYLON_FLEET_SPACE_7_8;
-
-    //new caprica
-    //MEDICAL_CENTER,
-    //RESISTANCE_HQ,
-    //DETENTION,
-    //OCCUPATION_AUTHORITY,
-    //BREEDERS_CANYON,
-    //SHIPYARD;
 
     public boolean isSpaceLocation() {
         return SPACE_LOCATIONS.contains(this);

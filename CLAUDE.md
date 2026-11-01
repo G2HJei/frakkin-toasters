@@ -7,6 +7,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Web version of the Battlestar Galactica board game. Java implementation modeling the game's state, events, and
 mechanics. So far only the game-logic `core` module exists. There is no engine driving turns yet and no frontend.
 
+## Scope
+
+The rules and card images are in `materials/` (`bsg-rules/Battlestar_Galactica_CR2-0.pdf` and its Appendix are the
+combined rulebook v2). The first version covers the full game with the Kobol objective.
+
+Out of scope: everything that only applies with the New Caprica, Ionian Nebula or Earth Objective Cards. The rulebook
+marks these rules with a blue, green or orange background. Don't model them, and remove them if you find them in the
+code. That includes:
+
+- New Caprica: the New Caprica board and its locations (Detention, Resistance HQ, ...), New Caprica crisis cards and
+  occupation forces
+- Ionian Nebula: trauma tokens, allies, crossroads cards and the alternate basestar damage tokens
+- Earth: the Demetrius and Rebel Basestar boards, mission cards, the basestar allegiance marker and the Hub Destroyed
+  overlay
+
 ## Build Commands
 
 ```bash
@@ -54,7 +69,7 @@ Multi-module Gradle project with a single `core` module. Package root: `xyz.zlat
   implemented by the state classes. Processors read state only through these
 - `state/board/` - board hierarchy: `Board` (base, tracks characters by location) -> `BattlestarBoard` (adds damage
   tracking) -> `GalacticaBoard`/`PegasusBoard`. Also `CylonFleetBoard`, `SpaceLocationsBoard`, `BoardsHolder` (aggregates
-  all boards). The `Location` enum defines all 38 board spaces
+  all boards). The `Location` enum defines all 34 board spaces in scope
 - `state/ship/` - `Ship` interface with implementations: `Viper`, `ViperMarkVII`, `Raptor`, `AssaultRaptor`,
   `Basestar`, `Raider`, `HeavyRaider`, `Centurion`, `CivilianShip`. `CylonShips` manages the Cylon ship supply. Ships
   have unique integer IDs

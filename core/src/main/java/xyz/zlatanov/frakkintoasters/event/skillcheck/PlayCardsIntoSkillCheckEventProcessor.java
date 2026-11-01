@@ -13,7 +13,6 @@ public class PlayCardsIntoSkillCheckEventProcessor extends EventProcessor<PlayCa
         val cardsCount = event.skillCards().size();
         val maxCards = inBrig || !player.isHuman() ? 1
                 : player.isInfiltrating() ? 2
-                // : inDetention || isInfiltrating ? 2 todo after implementing Location.DETENTION
                 : Integer.MAX_VALUE;
         return cardsCount <= maxCards;
     }

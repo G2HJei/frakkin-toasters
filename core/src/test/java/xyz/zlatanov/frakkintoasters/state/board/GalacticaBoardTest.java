@@ -28,14 +28,6 @@ class GalacticaBoardTest {
     }
 
     @Test
-    void shouldDestroyResurrectionShip() {
-        board.destroyResurrectionShip();
-        assertFalse(board.locations().contains(RESURRECTION_SHIP));
-        assertTrue(board.locations().contains(HUB_DESTROYED));
-        assertTrue(board.hubDestroyed());
-    }
-
-    @Test
     void shouldSendCharactersFromDestroyedColonialOneToSickbay() {
         board.place(PRESIDENTS_OFFICE, GAIUS_BALTAR); //hehe
         board.destroyColonialOne(); //oops

@@ -11,9 +11,10 @@ import static java.util.Comparator.comparing;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.*;
 
 /**
- * Every skill check in the game: crisis, super crisis and mission cards, and the game board locations that call for one.
- * Each constant lists the printed difficulty, the partial pass number when the card has one, and the skill types that
- * count as positive strength.
+ * Every skill check in scope: crisis and super crisis cards, and the game board locations that call for one. Skill checks
+ * that only exist with the New Caprica, Ionian Nebula or Earth objectives (New Caprica crises and locations, missions)
+ * are out of scope. Each constant lists the printed difficulty, the partial pass number when the card has one, and the
+ * skill types that count as positive strength.
  */
 @Getter
 @Accessors(fluent = true)
@@ -23,8 +24,6 @@ public enum SkillCheckType {
     ADMIRALS_QUARTERS(7, LEADERSHIP, TACTICS),
     AIRLOCK(12, POLITICS, TACTICS, TREACHERY), //todo reduce the difficulty by 4 when the chosen character is in the Brig
     BRIG(7, POLITICS, TACTICS),
-    DETENTION(9, POLITICS, TACTICS),
-    RESISTANCE_HQ(7, LEADERSHIP, TACTICS, TREACHERY),
 
     // Galactica crises
     ADMIRAL_GRILLED(9, POLITICS, LEADERSHIP),
@@ -126,30 +125,6 @@ public enum SkillCheckType {
     RELIGIOUS_TURMOIL(7, POLITICS, TACTICS),
     SECRET_MEETINGS(9, POLITICS, TACTICS, ENGINEERING),
 
-    // New Caprica crises
-    ARRESTS_AT_NIGHT(10, LEADERSHIP, TACTICS),
-    BETRAYED_FROM_WITHIN(9, 6, POLITICS, LEADERSHIP),
-    BRUTAL_TREATMENT(9, POLITICS, TACTICS),
-    CENTURION_AMBUSH(7, TACTICS, PILOTING),
-    CONTACT_INFORMANT(9, POLITICS, TACTICS),
-    CONTACT_RAPTOR(7, POLITICS, ENGINEERING),
-    DECODE_CYLON_MAPS(8, TACTICS, ENGINEERING),
-    DISSENT_AMONG_CYLONS(12, 7, POLITICS, LEADERSHIP),
-    HELD_FOR_QUESTIONING(10, POLITICS, LEADERSHIP, TACTICS),
-    HIDING_UNDERGROUND(9, LEADERSHIP, TACTICS),
-    INTRA_ATMOS_ENTRY(15, 9, LEADERSHIP, TACTICS, PILOTING, ENGINEERING),
-    LABOR_UNION_STRIKE(13, 10, POLITICS, TACTICS),
-    MEET_LIAISON_OFFICER(10, POLITICS, TACTICS),
-    NCP_RECRUITMENT(8, POLITICS, LEADERSHIP),
-    ORGANIZE_THE_PILOTS(9, POLITICS, PILOTING),
-    PLAYING_WITH_EMOTIONS(7, POLITICS, TACTICS),
-    PREPARE_FOR_A_FIGHT(8, LEADERSHIP, TACTICS, ENGINEERING),
-    PREPARE_THE_CIVILIANS(9, POLITICS, LEADERSHIP),
-    RECOVER_LAUNCH_KEYS(10, LEADERSHIP, TACTICS, ENGINEERING),
-    RESCUE_DETAINEES(9, LEADERSHIP, TACTICS),
-    RESISTANCE_BOMBINGS(12, 7, LEADERSHIP, TACTICS, ENGINEERING),
-    SECOND_THOUGHTS(9, POLITICS, LEADERSHIP),
-
     // super crises
     BOMB_ON_COLONIAL_1(15, TACTICS, PILOTING, ENGINEERING),
     CYLON_INTRUDERS(18, 14, LEADERSHIP, TACTICS),
@@ -158,17 +133,8 @@ public enum SkillCheckType {
     FOOTAGE_TRANSMITTED(17, 12, POLITICS, LEADERSHIP, TACTICS),
     HUMAN_PRISONER(18, LEADERSHIP, TACTICS),
     INBOUND_NUKES(15, LEADERSHIP, TACTICS),
-    THE_FARM(15, 8, TACTICS, ENGINEERING),
+    THE_FARM(15, 8, TACTICS, ENGINEERING);
 
-    // Daybreak missions
-    ATTACK_ON_THE_COLONY(14, TACTICS, PILOTING),
-    CYLON_CIVIL_WAR(21, POLITICS, LEADERSHIP, TACTICS),
-    DESTROY_THE_HUB(14, LEADERSHIP, TACTICS, PILOTING),
-    DIGGING_UP_THE_PAST(14, POLITICS, LEADERSHIP),
-    NEEDS_OF_THE_PEOPLE(18, POLITICS, LEADERSHIP, ENGINEERING),
-    RESCUE_HERA(20, POLITICS, TACTICS, PILOTING),
-    THE_RED_STRIPES(16, TACTICS, PILOTING, ENGINEERING),
-    THE_SEARCH_FOR_HOME(25, POLITICS, LEADERSHIP, TACTICS, ENGINEERING);
 
     /**
      * The printed difficulty. Cards like "Declare Emergency" and "Jury Rigged" reduce it only for the active skill check.
@@ -181,7 +147,7 @@ public enum SkillCheckType {
     private final List<SkillCardColor> skillCheckColors;
 
     private static final Set<SkillCheckType> LOCATION_SKILL_CHECKS = Set.of(
-            ADMINISTRATION, ADMIRALS_QUARTERS, AIRLOCK, BRIG, DETENTION, RESISTANCE_HQ);
+            ADMINISTRATION, ADMIRALS_QUARTERS, AIRLOCK, BRIG);
 
     SkillCheckType(int difficulty, SkillCardColor... colors) {
         this(difficulty, null, colors);

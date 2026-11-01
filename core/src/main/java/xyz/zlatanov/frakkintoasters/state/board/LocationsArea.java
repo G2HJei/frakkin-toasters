@@ -39,8 +39,7 @@ public enum LocationsArea {
             CAPRICA,
             CYLON_FLEET,
             HUMAN_FLEET,
-            RESURRECTION_SHIP,
-            HUB_DESTROYED),
+            RESURRECTION_SHIP),
     CYLON_FLEET_SPACE(
             CYLON_FLEET_SPACE_1,
             CYLON_FLEET_SPACE_2,
@@ -52,16 +51,12 @@ public enum LocationsArea {
             PEGASUS_CIC,
             AIRLOCK,
             MAIN_BATTERIES,
-            ENGINE_ROOM),
-    DEMETRIUS(
-            BRIDGE,
-            TACTICAL_PLOT,
-            CAPTAINS_CABIN);
+            ENGINE_ROOM);
 
     private final List<Location> locations;
 
     public static final List<Location> SPACE_LOCATIONS     = Stream.of(GALACTICA_SPACE.locations(), CYLON_FLEET_SPACE.locations()).flatMap(List::stream).toList();
-    public static final List<Location> HAZARDOUS_LOCATIONS = List.of(SICKBAY, BRIG, RESURRECTION_SHIP, HUB_DESTROYED);
+    public static final List<Location> HAZARDOUS_LOCATIONS = List.of(SICKBAY, BRIG, RESURRECTION_SHIP);
 
     public static final Map<Location, Map<Location, Integer>> DISTANCE_LOOKUP_TABLE = Map.of(
             GALACTICA_SPACE_2_OCLOCK, Map.of(

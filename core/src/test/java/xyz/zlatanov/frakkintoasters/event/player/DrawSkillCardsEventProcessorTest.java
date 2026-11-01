@@ -119,29 +119,22 @@ class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEv
     @ParameterizedTest
     @MethodSource("hazardousLocationLimits")
     void shouldDrawLessCardsWhenInHazardousLocation(Location location, int limit) {
-        if (location == HUB_DESTROYED) {
-            galacticaBoard.destroyResurrectionShip();
-        }
         moveTo(location, KARA_STARBUCK_THRACE);
         game.step(RECEIVE_SKILLS);
 
-        execute(new DrawSkillCardsEvent(1, limit > 0 ? Map.of(TACTICS, limit) : Map.of()));
+        execute(new DrawSkillCardsEvent(1, Map.of(TACTICS, limit)));
     }
 
     public static Stream<Arguments> hazardousLocationLimits() {
         return Stream.of(
                 arguments(SICKBAY, 1),
-                arguments(RESURRECTION_SHIP, 1),
-                arguments(HUB_DESTROYED, 0)
+                arguments(RESURRECTION_SHIP, 1)
         );
     }
 
     @ParameterizedTest
     @MethodSource("hazardousLocationLimits")
     void shouldNotDrawMoreThanHazardousLocationLimit(Location location, int limit) {
-        if (location == HUB_DESTROYED) {
-            galacticaBoard.destroyResurrectionShip();
-        }
         moveTo(location, KARA_STARBUCK_THRACE);
         game.step(RECEIVE_SKILLS);
 
