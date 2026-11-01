@@ -9,28 +9,29 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import java.util.stream.Collectors;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.NONE;
-import static xyz.zlatanov.frakkintoasters.event.Followup.all;
+import static xyz.zlatanov.frakkintoasters.event.Followup.single;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.RESTORE_ORDER;
 
-public class RevealCardsBeforeSkillCheckEventProcessor extends EventProcessor<ResolveCardsBeforeSkillCheckEvent> {
+public class RevealCardsBeforeSkillCheckEventProcessor extends EventProcessor<RevealCardsBeforeSkillCheckEvent> {
 
     @Override
     public Followup process() {
         ops.skillCheck().revealPlayedBefore();
         return shouldTieBreak() ?
-                all(
-                        new PlayerDecisionEvent<>(game.currentPlayerNumber(), TiebreakCardsBeforeSkillCheckEvent.class),
-                        new PlayFromDestinyDeckEvent())
+                single(new PlayerDecisionEvent<>(game.currentPlayerNumber(), TiebreakCardsBeforeSkillCheckEvent.class))
                 : NONE;
     }
 
     private boolean shouldTieBreak() {
-        val totalCardsCount = game.activeSkillCheck().playedBeforeSkillCheck().size();
-        val uniqueCardsCount = game.activeSkillCheck().playedBeforeSkillCheck()
-                .stream()
+        val playedBefore = game.activeSkillCheck().playedBeforeSkillCheck();
+        val uniqueCardsCount = playedBefore.stream()
                 .map(SkillCard::type)
                 .collect(Collectors.toSet())
                 .size();
-        return totalCardsCount != uniqueCardsCount
-                && totalCardsCount > 0;
+        val recklessAndRestoreOrderCards = playedBefore.stream()
+                .filter(c -> c.type().reckless() || c.type() == RESTORE_ORDER)
+                .count();
+        return playedBefore.size() != uniqueCardsCount
+                || recklessAndRestoreOrderCards > 1;
     }
 }
