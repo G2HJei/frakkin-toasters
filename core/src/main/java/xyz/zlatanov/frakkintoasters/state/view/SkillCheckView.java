@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.state.view;
 
+import xyz.zlatanov.frakkintoasters.state.skill.PlayedCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
@@ -20,6 +21,8 @@ public interface SkillCheckView {
     List<SkillCard> playedBeforeSkillCheck();
 
     List<SkillCard> playedBeforeSkillCheck(int playerNumber);
+
+    List<List<PlayedCard>> playedBeforeConflicts();
 
     List<SkillCardType> resolvedAbilities();
 

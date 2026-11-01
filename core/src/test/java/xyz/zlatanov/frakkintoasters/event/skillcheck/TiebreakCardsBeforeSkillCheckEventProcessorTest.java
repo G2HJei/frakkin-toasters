@@ -3,7 +3,7 @@ package xyz.zlatanov.frakkintoasters.event.skillcheck;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
-import xyz.zlatanov.frakkintoasters.event.skillcheck.TiebreakCardsBeforeSkillCheckEvent.PlayedCard;
+import xyz.zlatanov.frakkintoasters.state.skill.PlayedCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import java.util.List;

@@ -92,4 +92,8 @@ public enum SkillCardType {
     public boolean reckless() {
         return RECKLESS_CARDS.contains(this);
     }
+
+    public boolean recklessOrRestoreOrder() {
+        return reckless() || this == RESTORE_ORDER;
+    }
 }

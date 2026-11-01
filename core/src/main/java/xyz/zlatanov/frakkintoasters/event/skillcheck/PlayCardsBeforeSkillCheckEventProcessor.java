@@ -8,8 +8,6 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 
 import java.util.HashSet;
 
-import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.RESTORE_ORDER;
-
 public class PlayCardsBeforeSkillCheckEventProcessor extends EventProcessor<PlayCardsBeforeSkillCheckEvent> {
 
     //todo validate no duplicates and either reckless/restore order
@@ -22,7 +20,7 @@ public class PlayCardsBeforeSkillCheckEventProcessor extends EventProcessor<Play
                 .allMatch(SkillCardType::playableBeforeSkillCheck);
         val noDuplicates = event.skillCards().size() == new HashSet<>(event.skillCards()).size();
         val recklessAndRestoreOrderCards = event.skillCards().stream()
-                .filter(c -> c.type().reckless() || c.type() == RESTORE_ORDER)
+                .filter(c -> c.type().recklessOrRestoreOrder())
                 .count();
         return playableBeforeSkillCheck
                 && noDuplicates

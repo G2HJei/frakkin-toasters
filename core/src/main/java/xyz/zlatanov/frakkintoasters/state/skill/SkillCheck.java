@@ -10,8 +10,10 @@ import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.view.SkillCheckView;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static java.util.Collections.unmodifiableList;
+import static java.util.stream.Collectors.groupingBy;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.ENGINEERING;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.ESTABLISH_NETWORK;
 
@@ -70,6 +72,24 @@ public class SkillCheck implements SkillCheckView {
     @Override
     public List<SkillCard> playedBeforeSkillCheck(int playerNumber) {
         return unmodifiableList(playedBeforeSkillCheck.getOrDefault(playerNumber, List.of()));
+    }
+
+    @Override
+    public List<List<PlayedCard>> playedBeforeConflicts() {
+        val playedCards = playedBeforeSkillCheck.entrySet()
+                .stream()
+                .flatMap(e -> e.getValue().stream().map(c -> new PlayedCard(e.getKey(), c)))
+                .toList();
+        val recklessAndRestoreOrderCards = playedCards.stream()
+                .filter(c -> c.skillCard().type().recklessOrRestoreOrder())
+                .toList();
+        val sameTypeCards = playedCards.stream()
+                .filter(c -> !c.skillCard().type().recklessOrRestoreOrder())
+                .collect(groupingBy(c -> c.skillCard().type()))
+                .values();
+        return Stream.concat(Stream.of(recklessAndRestoreOrderCards), sameTypeCards.stream())
+                .filter(group -> group.size() > 1)
+                .toList();
     }
 
     public SkillCheck resolved(SkillCardType cardType) {
