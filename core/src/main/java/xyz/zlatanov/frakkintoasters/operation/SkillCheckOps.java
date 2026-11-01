@@ -108,12 +108,20 @@ public class SkillCheckOps extends GameOps {
         game.activeSkillCheck().declareEmergency();
     }
 
+    public void totalStrength(int totalStrength) {
+        game.activeSkillCheck().totalStrength(totalStrength);
+    }
+
     public void determineResult(SkillCheckResult result) {
         game.activeSkillCheck().result(result);
     }
 
     public void replacePassResult() {
         game.activeSkillCheck().replacePassResult();
+    }
+
+    public void preventFailResult() {
+        game.activeSkillCheck().preventFailResult();
     }
 
     private List<SkillCard> drawAllAndSort() {

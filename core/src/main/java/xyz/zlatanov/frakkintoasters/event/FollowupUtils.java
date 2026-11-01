@@ -15,8 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static lombok.AccessLevel.PRIVATE;
-import static xyz.zlatanov.frakkintoasters.event.Followup.all;
-import static xyz.zlatanov.frakkintoasters.event.Followup.single;
+import static xyz.zlatanov.frakkintoasters.event.Followup.*;
 
 @NoArgsConstructor(access = PRIVATE)
 public class FollowupUtils {
@@ -27,6 +26,16 @@ public class FollowupUtils {
         followupEvents.addAll(addPlayerDecisions(game, PlayCardsBeforeSkillCheckEvent.class));
         followupEvents.add(new ResolveCardsBeforeSkillCheckEvent());
         return all(followupEvents.toArray(Event[]::new));
+    }
+
+    /**
+     * Each player chooses to either play the event (e.g. a "Declare Emergency" card) or do nothing.
+     */
+    public static List<Followup> playOrPassDecisions(GameView game, Class<? extends PlayerEvent> eventClass) {
+        return game.players().stream()
+                .map(PlayerView::number)
+                .map(n -> one(new PlayerDecisionEvent<>(n, eventClass), new NoOpEvent(n)))
+                .toList();
     }
 
     public static Followup skillCheckAbilityFollowup(PlayerView player, SkillCard skillCard) {

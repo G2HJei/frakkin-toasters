@@ -4,11 +4,15 @@ import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
+import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
+import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static xyz.zlatanov.frakkintoasters.event.Followup.all;
+import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.LAURA_ROSLIN;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckResult.FAIL;
@@ -35,6 +39,10 @@ class PoliticalProwessEventProcessorTest extends EventTestHarness<PoliticalProwe
         assertNoSkillCards(1);
         assertEquals(List.of(POLITICAL_PROWESS_6), politicsDeck.discardedCards());
         assertEquals(PASS, game.activeSkillCheck().result());
+        assertFollowup(all(
+                one(new PlayerDecisionEvent<>(1, ChangeOfPlansEvent.class), new NoOpEvent(1)),
+                one(new PlayerDecisionEvent<>(2, ChangeOfPlansEvent.class), new NoOpEvent(2)),
+                one(new PlayerDecisionEvent<>(3, ChangeOfPlansEvent.class), new NoOpEvent(3))));
     }
 
     @Test

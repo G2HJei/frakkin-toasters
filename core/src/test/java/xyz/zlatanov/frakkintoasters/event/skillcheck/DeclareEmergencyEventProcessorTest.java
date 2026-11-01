@@ -27,7 +27,7 @@ class DeclareEmergencyEventProcessorTest extends EventTestHarness<DeclareEmergen
     void setUp() {
         player(1).character(KARA_STARBUCK_THRACE);
         player(1).gainSkillCards(DECLARE_EMERGENCY_3);
-        skillCheck = game.startSkillCheck(ADMIRALS_QUARTERS);
+        skillCheck = game.startSkillCheck(ADMIRALS_QUARTERS).totalStrength(5);
     }
 
     @Test
@@ -37,6 +37,12 @@ class DeclareEmergencyEventProcessorTest extends EventTestHarness<DeclareEmergen
         assertNoSkillCards(1);
         assertEquals(List.of(DECLARE_EMERGENCY_3), leadershipDeck.discardedCards());
         assertTrue(skillCheck.emergencyDeclared());
+    }
+
+    @Test
+    void shouldNotAllowBeforeStrengthIsTotaled() {
+        skillCheck = game.startSkillCheck(ADMIRALS_QUARTERS);
+        assertInvalid(new DeclareEmergencyEvent(1, DECLARE_EMERGENCY_3));
     }
 
     @Test

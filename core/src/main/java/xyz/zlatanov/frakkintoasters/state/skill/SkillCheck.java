@@ -16,6 +16,7 @@ import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.groupingBy;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.ENGINEERING;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.ESTABLISH_NETWORK;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckResult.FAIL;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckResult.PASS;
 
 @Getter
@@ -32,8 +33,10 @@ public class SkillCheck implements SkillCheckView {
     private final Deck<SkillCard>               nonMatchingPile        = new Deck<>();
     private final List<SkillCardType>           resolvedAbilities      = new ArrayList<>();
     private       boolean                       emergencyDeclared      = false;
+    private       Integer                       totalStrength;
     private       SkillCheckResult              result;
-    private       boolean                       passResultReplaced     = false; //by a second chance
+    private       boolean                       passResultReplaced     = false; //by change of plans
+    private       boolean                       failResultPrevented    = false; //by iron will
 
     //todo handle already resolved mechanics and removing future events when skill check ability card is removed separately
     public SkillCheck remove(SkillCard card, Integer playerNumber) {
@@ -112,6 +115,12 @@ public class SkillCheck implements SkillCheckView {
         emergencyDeclared = true;
     }
 
+    public SkillCheck totalStrength(int totalStrength) {
+        assert this.totalStrength == null : "Skill check strength already totaled";
+        this.totalStrength = totalStrength;
+        return this;
+    }
+
     public SkillCheck result(SkillCheckResult result) {
         assert this.result == null : "Skill check result already determined";
         this.result = result;
@@ -121,6 +130,12 @@ public class SkillCheck implements SkillCheckView {
     public SkillCheck replacePassResult() {
         assert result == PASS && !passResultReplaced : "Only a pending pass result can be replaced";
         passResultReplaced = true;
+        return this;
+    }
+
+    public SkillCheck preventFailResult() {
+        assert result == FAIL && !failResultPrevented : "Only a pending fail result can be prevented";
+        failResultPrevented = true;
         return this;
     }
 

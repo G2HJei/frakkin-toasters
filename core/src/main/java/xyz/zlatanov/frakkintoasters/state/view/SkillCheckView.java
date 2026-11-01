@@ -27,10 +27,21 @@ public interface SkillCheckView {
 
     boolean emergencyDeclared();
 
+    /**
+     * The matching pile strength minus the non-matching pile strength, {@code null} until the strength is totaled.
+     */
+    Integer totalStrength();
+
     SkillCheckResult result();
 
     /**
      * Change of Plans was played, so the pass result is not resolved. The skill check still counts as passed.
      */
     boolean passResultReplaced();
+
+    /**
+     * Iron Will was resolved and the total strength was within 4 of the difficulty, so the fail result is not resolved.
+     * The skill check still counts as failed.
+     */
+    boolean failResultPrevented();
 }

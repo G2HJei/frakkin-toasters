@@ -15,6 +15,7 @@ public class DeclareEmergencyEventProcessor extends EventProcessor<DeclareEmerge
         return card.type() == DECLARE_EMERGENCY
                 && player.skillCards().cards().contains(card)
                 && !skillCheck.emergencyDeclared()
+                && skillCheck.totalStrength() != null
                 && skillCheck.result() == null;
     }
 
