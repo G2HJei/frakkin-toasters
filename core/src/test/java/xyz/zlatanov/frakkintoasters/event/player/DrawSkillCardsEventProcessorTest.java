@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DRAW_EXACTLY_1;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DRAW_EXACTLY_2;
 import static xyz.zlatanov.frakkintoasters.state.GameStep.RECEIVE_SKILLS;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
@@ -114,6 +115,18 @@ class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEv
     @Test
     void shouldFailDrawExactly2ConstraintWhenTotalIsNot2() {
         assertInvalid(new DrawSkillCardsEvent(1, Map.of(LEADERSHIP, 1), DRAW_EXACTLY_2));
+    }
+
+    @Test
+    void shouldValidateDrawExactly1ConstraintWhenTotalIs1() {
+        leadershipDeck.nextCard(leadershipCard);
+        execute(new DrawSkillCardsEvent(1, Map.of(LEADERSHIP, 1), DRAW_EXACTLY_1));
+        assertSkillCards(1, leadershipCard);
+    }
+
+    @Test
+    void shouldFailDrawExactly1ConstraintWhenTotalIsNot1() {
+        assertInvalid(new DrawSkillCardsEvent(1, Map.of(LEADERSHIP, 1, TACTICS, 1), DRAW_EXACTLY_1));
     }
 
     @ParameterizedTest

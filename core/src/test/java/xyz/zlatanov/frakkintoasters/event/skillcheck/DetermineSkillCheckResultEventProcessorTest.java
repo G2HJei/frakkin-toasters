@@ -36,7 +36,7 @@ class DetermineSkillCheckResultEventProcessorTest extends EventTestHarness<Deter
         execute(new DetermineSkillCheckResultEvent());
 
         assertEquals(PASS, skillCheck.result());
-        assertFollowup(all(changeOfPlans(1), changeOfPlans(2), changeOfPlans(3)));
+        assertFollowup(all(changeOfPlans(1), changeOfPlans(2), changeOfPlans(3), resolve()));
     }
 
     @Test
@@ -47,6 +47,7 @@ class DetermineSkillCheckResultEventProcessorTest extends EventTestHarness<Deter
 
         assertEquals(FAIL, skillCheck.result());
         assertFalse(skillCheck.failResultPrevented());
+        assertFollowup(new ResolveSkillCheckResultEvent());
     }
 
     @Test
@@ -57,7 +58,7 @@ class DetermineSkillCheckResultEventProcessorTest extends EventTestHarness<Deter
         execute(new DetermineSkillCheckResultEvent());
 
         assertEquals(PASS, skillCheck.result());
-        assertFollowup(all(changeOfPlans(1), changeOfPlans(2), changeOfPlans(3)));
+        assertFollowup(all(changeOfPlans(1), changeOfPlans(2), changeOfPlans(3), resolve()));
     }
 
     @Test
@@ -68,7 +69,7 @@ class DetermineSkillCheckResultEventProcessorTest extends EventTestHarness<Deter
         execute(new DetermineSkillCheckResultEvent());
 
         assertEquals(PASS, skillCheck.result());
-        assertFollowup(all(changeOfPlans(1), changeOfPlans(2), changeOfPlans(3)));
+        assertFollowup(all(changeOfPlans(1), changeOfPlans(2), changeOfPlans(3), resolve()));
     }
 
     @Test
@@ -80,7 +81,7 @@ class DetermineSkillCheckResultEventProcessorTest extends EventTestHarness<Deter
         execute(new DetermineSkillCheckResultEvent());
 
         assertEquals(PASS, skillCheck.result());
-        assertFollowup(all(changeOfPlans(1), changeOfPlans(2), changeOfPlans(3)));
+        assertFollowup(all(changeOfPlans(1), changeOfPlans(2), changeOfPlans(3), resolve()));
     }
 
     @Test
@@ -92,6 +93,7 @@ class DetermineSkillCheckResultEventProcessorTest extends EventTestHarness<Deter
 
         assertEquals(FAIL, skillCheck.result());
         assertTrue(skillCheck.failResultPrevented());
+        assertFollowup(new ResolveSkillCheckResultEvent());
     }
 
     @Test
@@ -103,6 +105,7 @@ class DetermineSkillCheckResultEventProcessorTest extends EventTestHarness<Deter
 
         assertEquals(FAIL, skillCheck.result());
         assertFalse(skillCheck.failResultPrevented());
+        assertFollowup(new ResolveSkillCheckResultEvent());
     }
 
     @Test
@@ -115,6 +118,7 @@ class DetermineSkillCheckResultEventProcessorTest extends EventTestHarness<Deter
 
         assertEquals(FAIL, skillCheck.result());
         assertTrue(skillCheck.failResultPrevented());
+        assertFollowup(new ResolveSkillCheckResultEvent());
     }
 
     @Test
@@ -126,7 +130,7 @@ class DetermineSkillCheckResultEventProcessorTest extends EventTestHarness<Deter
 
         assertEquals(FAIL, skillCheck.result());
         assertFalse(skillCheck.failResultPrevented());
-        assertFollowup(new IronWillEvent());
+        assertFollowup(all(new IronWillEvent(), new ResolveSkillCheckResultEvent()));
     }
 
     @Test
@@ -136,7 +140,8 @@ class DetermineSkillCheckResultEventProcessorTest extends EventTestHarness<Deter
 
         execute(new DetermineSkillCheckResultEvent());
 
-        assertFollowup(all(single(new InstallUpgradesEvent(true)), changeOfPlans(1), changeOfPlans(2), changeOfPlans(3)));
+        assertFollowup(all(single(new InstallUpgradesEvent(true)), changeOfPlans(1), changeOfPlans(2), changeOfPlans(3),
+                resolve()));
     }
 
     @Test
@@ -146,7 +151,7 @@ class DetermineSkillCheckResultEventProcessorTest extends EventTestHarness<Deter
 
         execute(new DetermineSkillCheckResultEvent());
 
-        assertFollowup(new InstallUpgradesEvent(false));
+        assertFollowup(all(new InstallUpgradesEvent(false), new ResolveSkillCheckResultEvent()));
     }
 
     @Test
@@ -156,7 +161,8 @@ class DetermineSkillCheckResultEventProcessorTest extends EventTestHarness<Deter
 
         execute(new DetermineSkillCheckResultEvent());
 
-        assertFollowup(all(changeOfPlans(1), changeOfPlans(2), changeOfPlans(3), single(new ASecondChanceEvent())));
+        assertFollowup(all(changeOfPlans(1), changeOfPlans(2), changeOfPlans(3), resolve(),
+                single(new ASecondChanceEvent())));
     }
 
     @Test
@@ -168,7 +174,7 @@ class DetermineSkillCheckResultEventProcessorTest extends EventTestHarness<Deter
         execute(new DetermineSkillCheckResultEvent());
 
         assertEquals(PASS, skillCheck.result());
-        assertFollowup(all(changeOfPlans(1), changeOfPlans(2), changeOfPlans(3)));
+        assertFollowup(all(changeOfPlans(1), changeOfPlans(2), changeOfPlans(3), resolve()));
     }
 
     @Test
@@ -184,5 +190,9 @@ class DetermineSkillCheckResultEventProcessorTest extends EventTestHarness<Deter
 
     private static Followup changeOfPlans(int playerNumber) {
         return one(new PlayerDecisionEvent<>(playerNumber, ChangeOfPlansEvent.class), new NoOpEvent(playerNumber));
+    }
+
+    private static Followup resolve() {
+        return single(new ResolveSkillCheckResultEvent());
     }
 }

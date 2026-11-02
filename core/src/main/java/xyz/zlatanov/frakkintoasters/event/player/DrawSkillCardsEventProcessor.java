@@ -29,6 +29,7 @@ public class DrawSkillCardsEventProcessor extends EventProcessor<DrawSkillCardsE
         val selectionCount = selectionCount();
         return switch (event.drawLimit()) {
             case null -> true;
+            case DRAW_EXACTLY_1 -> selectionCount == 1;
             case DRAW_EXACTLY_2 -> selectionCount == 2;
             case DRAW_EXACTLY_3 -> selectionCount == 3;
             case DRAW_EXACTLY_5 -> selectionCount == 5;

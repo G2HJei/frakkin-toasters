@@ -26,6 +26,7 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckResult.PASS;
 public class SkillCheck implements SkillCheckView {
 
     private final SkillCheckType                type;
+    private       Integer                       targetPlayerNumber;
     private final Map<Integer, List<SkillCard>> playedBeforeSkillCheck = new LinkedHashMap<>();
     private       boolean                       playedBeforeRevealed   = false;
     private final Deck<SkillCard>               cards                  = new Deck<>();
@@ -37,6 +38,12 @@ public class SkillCheck implements SkillCheckView {
     private       SkillCheckResult              result;
     private       boolean                       passResultReplaced     = false; //by change of plans
     private       boolean                       failResultPrevented    = false; //by iron will
+
+    public SkillCheck targetPlayerNumber(int targetPlayerNumber) {
+        assert this.targetPlayerNumber == null : "Skill check target already chosen";
+        this.targetPlayerNumber = targetPlayerNumber;
+        return this;
+    }
 
     //todo handle already resolved mechanics and removing future events when skill check ability card is removed separately
     public SkillCheck remove(SkillCard card, Integer playerNumber) {

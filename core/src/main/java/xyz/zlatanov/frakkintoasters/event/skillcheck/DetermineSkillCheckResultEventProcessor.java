@@ -70,7 +70,8 @@ public class DetermineSkillCheckResultEventProcessor extends EventProcessor<Dete
         if (result == PASS) {
             followups.addAll(playOrPassDecisions(game, ChangeOfPlansEvent.class));
         }
-        //todo resolve the pass, partial pass or fail result, unless replaced by Change of Plans or prevented by Iron Will
+        // after the Change of Plans decisions, which may replace the pass result
+        followups.add(single(new ResolveSkillCheckResultEvent()));
         if (playedBefore(A_SECOND_CHANCE) && passedPrintedDifficultyBy(A_SECOND_CHANCE_MARGIN, strength)) {
             followups.add(single(new ASecondChanceEvent()));
         }

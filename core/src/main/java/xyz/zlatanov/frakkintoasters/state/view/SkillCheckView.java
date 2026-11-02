@@ -7,6 +7,12 @@ import java.util.List;
 public interface SkillCheckView {
     SkillCheckType type();
 
+    /**
+     * The player chosen by the location action that started this skill check (Administration, Admiral's Quarters,
+     * Airlock), {@code null} otherwise.
+     */
+    Integer targetPlayerNumber();
+
     DeckView<SkillCard> cards();
 
     DeckView<SkillCard> matchingPile();

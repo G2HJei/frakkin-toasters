@@ -60,7 +60,8 @@ Multi-module Gradle project with a single `core` module. Package root: `xyz.zlat
 - root - `EventProcessor` (base class for all processors), `Turn` (empty placeholder for the future engine)
 - `event/` - event records and their processors, grouped by area (`action`, `board`, `crisis`, `deck`, `endgame`,
   `location/{galactica,pegasus,colonialone,cylon}`, `loyalty`, `officials`, `player`, `ship`, `skillcheck`,
-  `skillcheck/ability`). Also `placeholder/` (events that need player input) and `constraint/` (`EventConstraint`)
+  `skillcheck/ability`, `skillcheck/result`). Also `placeholder/` (events that need player input) and `constraint/`
+  (`EventConstraint`)
 - `operation/` - game ops, the only code that should mutate state: `GameOps` (entry point) hands out `PlayerOps`,
   `ShipOps`, `GalacticaOps`, `PegasusOps`, `CylonFleetOps`, `SkillCheckOps`, `LoyaltyDeckOps`, `TitleOps`. They extend
   `AbstractOps`, which holds the `Game` (journal still a todo)
@@ -113,6 +114,20 @@ Class<T> action, List<EventConstraint>)` means "this player picks a concrete `T`
 
 `FollowupUtils` builds shared followup sequences, e.g. `beforeSkillCheckFollowups(game)`.
 
+### Skill Check Results
+
+`DetermineSkillCheckResultEventProcessor` queues a `ResolveSkillCheckResultEvent` after the Change of Plans decisions.
+Its processor returns `NONE` when Change of Plans replaced the pass result or Iron Will prevented the fail result.
+Otherwise it asks `SkillCheckResultFollowups` (in `event/skillcheck`) for the pass, partial pass or fail followup of
+the active `SkillCheckType`, as printed on the card. The helper resolves the players (current player, President,
+Admiral, the character chosen by a location action via `SkillCheckView.targetPlayerNumber()`) and board state at that
+moment. Its pass and fail switches list every type, so a new `SkillCheckType` doesn't compile until it's mapped.
+
+- An effect shared by 2 or more skill checks uses a generic event: an existing one when it fits (e.g.
+  `DamageGalacticaEvent`, `SendToSickbayEvent`), otherwise one in its area package (e.g. `LoseResourceEvent`).
+- An effect unique to one skill check uses a specialized event in `event/skillcheck/result`, named after the skill
+  check and result (e.g. `CrashLandingFailEvent`), with the card text in its comment.
+
 ### Followups
 
 Followups chain events using a recursive sealed interface with four variants:
@@ -136,8 +151,9 @@ return one(
 
 ### Event Constraints
 
-`EventConstraint` is a plain enum of extra rules that can be pinned onto an event (`DRAW_EXACTLY_2`, `DRAW_EXACTLY_3`,
-`DRAW_EXACTLY_5`, `MUST_LAUNCH_IN_VIPER`). A processor attaches them to a `PlayerDecisionEvent`, e.g.
+`EventConstraint` is a plain enum of extra rules that can be pinned onto an event (e.g. `DRAW_EXACTLY_2`,
+`DISCARD_EXACTLY_4`, `MUST_LAUNCH_IN_VIPER`, `DESTINATION_GALACTICA`). A processor attaches them to a
+`PlayerDecisionEvent`, e.g.
 `new PlayerDecisionEvent<>(n, DrawSkillCardsEvent.class, DRAW_EXACTLY_2)`, and they are forwarded to the concrete event
 when the decision is resolved.
 

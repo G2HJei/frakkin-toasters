@@ -35,6 +35,11 @@ public class SkillCheckOps extends GameOps {
         return this;
     }
 
+    public SkillCheckOps start(SkillCheckType type, int targetPlayerNumber) {
+        game.startSkillCheck(type).targetPlayerNumber(targetPlayerNumber);
+        return this;
+    }
+
     public void playBeforeSkillCheck(int playerNumber, List<SkillCard> skillCards) {
         game.player(playerNumber).skillCards().remove(skillCards);
         game.activeSkillCheck().playedBefore(playerNumber, skillCards);
