@@ -7,6 +7,8 @@ import xyz.zlatanov.frakkintoasters.state.ship.*;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.SICKBAY;
 import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.GALACTICA_SPACE;
+import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.BASESTAR_DAMAGE;
+import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.CIVILIAN_SHIPS;
 
 public class ShipOps extends GameOps {
 
@@ -82,7 +84,7 @@ public class ShipOps extends GameOps {
     private void damageInSpace() {
         val ship = galacticaBoard().shipInSpace(shipId, Ship.class);
         if (ship instanceof Basestar basestar) {
-            basestar.damage(game.decks().basestarDamage().draw());
+            basestar.damage(draw(BASESTAR_DAMAGE));
         } else {
             damageHumanFighter(galacticaBoard().shipInSpace(shipId, HumanFighter.class));
         }
@@ -129,7 +131,10 @@ public class ShipOps extends GameOps {
 
     private void destroyCylonShip(Ship ship) {
         if (ship instanceof Basestar basestar) {
-            game.decks().discard(basestar.damage());
+            if (!basestar.damage().isEmpty()) {
+                game.decks().discard(basestar.damage());
+                shuffle(BASESTAR_DAMAGE);
+            }
             basestar.clearDamage();
         }
         game.cylonShips().returned(ship);
@@ -161,8 +166,7 @@ public class ShipOps extends GameOps {
     public void escort() {
         val civ = galacticaBoard().shipInSpace(shipId, CivilianShip.class);
         galacticaBoard().remove(civ);
-        game.decks().civilianShips()
-                .addOnTop(civ)
-                .shuffle();
+        game.decks().civilianShips().addOnTop(civ);
+        shuffle(CIVILIAN_SHIPS);
     }
 }

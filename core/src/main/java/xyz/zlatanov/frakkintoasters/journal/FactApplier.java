@@ -1,9 +1,11 @@
 package xyz.zlatanov.frakkintoasters.journal;
 
+import xyz.zlatanov.frakkintoasters.journal.fact.DeckFact;
 import xyz.zlatanov.frakkintoasters.journal.fact.Fact;
 import xyz.zlatanov.frakkintoasters.journal.fact.GameFact;
 import xyz.zlatanov.frakkintoasters.journal.fact.TitleFact;
 import xyz.zlatanov.frakkintoasters.state.Game;
+
 
 /**
  * The only place that calls component write methods on behalf of a fact. Used for live play (through
@@ -16,13 +18,23 @@ public final class FactApplier {
 
     public static void apply(Game game, Fact fact) {
         switch (fact) {
+            case DeckFact f -> apply(game, f);
             case GameFact f -> apply(game, f);
             case TitleFact f -> apply(game, f);
         }
     }
 
+    private static void apply(Game game, DeckFact fact) {
+        switch (fact) {
+            case DeckFact.DeckShuffled f -> game.decks().deck(f.deck()).setDrawOrder(f.drawOrder());
+        }
+    }
+
     private static void apply(Game game, GameFact fact) {
         switch (fact) {
+            case GameFact.GameStarted f -> {
+                // the replayer already built the game from it
+            }
             case GameFact.StepChanged f -> game.step(f.step());
             case GameFact.TurnStarted f -> game.turn(f.turn());
             case GameFact.CurrentPlayerChanged f -> game.currentPlayerNumber(f.playerNumber());

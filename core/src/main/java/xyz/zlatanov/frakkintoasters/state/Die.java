@@ -1,11 +1,18 @@
 package xyz.zlatanov.frakkintoasters.state;
 
-import java.util.Random;
-
 public class Die {
 
-    public int roll() {
-        return new Random().nextInt(1, 9); //todo make deterministic
+    private final Randomness randomness;
 
+    public Die() {
+        this(new Randomness());
+    }
+
+    public Die(Randomness randomness) {
+        this.randomness = randomness;
+    }
+
+    public int roll() {
+        return randomness.nextInt(1, 9);
     }
 }

@@ -15,17 +15,13 @@ import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 import xyz.zlatanov.frakkintoasters.state.deck.DecksHolder;
 import xyz.zlatanov.frakkintoasters.state.ship.CylonShips;
-import xyz.zlatanov.frakkintoasters.state.ship.Ship;
-import xyz.zlatanov.frakkintoasters.state.ship.Viper;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheck;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
 import xyz.zlatanov.frakkintoasters.state.view.GameView;
 
 import java.util.*;
-import java.util.stream.IntStream;
 
 import static xyz.zlatanov.frakkintoasters.state.GameStep.SETUP;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
 
 @Builder
@@ -50,7 +46,9 @@ public class Game implements GameView {
     @Builder.Default
     private int                  turn                = 0;
     @Builder.Default
-    private Die                  die                 = new Die();
+    private Randomness           randomness          = new Randomness();
+    @Builder.Default
+    private Die                  die                 = new Die(); // own Randomness: a builder default can't see the other fields, so seed both for a deterministic game
     @Builder.Default
     private BoardsHolder         boards              = new BoardsHolder();
     @Builder.Default
@@ -120,17 +118,6 @@ public class Game implements GameView {
         return player(actingPlayerNumber());
     }
 
-    public Game setupGalacticaBoard() {
-        val galacticaBoard = boards.galactica();
-        val raiders = IntStream.range(0, 4).mapToObj(i -> cylonShips.raider()).map(Optional::orElseThrow).map(Ship.class::cast).toList();
-        boards.galactica()
-                .place(GALACTICA_SPACE_4_OCLOCK, galacticaBoard.removeFromReserves(Viper.class).orElseThrow()) // reserves are never empty during setup
-                .place(GALACTICA_SPACE_6_OCLOCK, galacticaBoard.removeFromReserves(Viper.class).orElseThrow()) // reserves are never empty during setup
-                .place(GALACTICA_SPACE_2_OCLOCK, List.of(decks.civilianShips().draw(), decks.civilianShips().draw()))
-                .place(GALACTICA_SPACE_8_OCLOCK, cylonShips.basestar().orElseThrow())
-                .place(GALACTICA_SPACE_8_OCLOCK, raiders);
-        return this;
-    }
 
     @Override
     public Location locate(Character character) {

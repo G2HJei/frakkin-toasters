@@ -35,9 +35,9 @@ public class FakeDeck<T> extends Deck<T> {
     }
 
     @Override
-    public Deck<T> shuffle() {
+    public Deck<T> setDrawOrder(java.util.List<? extends T> newOrder) {
         wasShuffled = true;
-        return super.shuffle();
+        return super.setDrawOrder(newOrder);
     }
 
     public FakeDeck<T> clear() {

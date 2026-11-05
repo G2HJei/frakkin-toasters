@@ -1,9 +1,10 @@
 package xyz.zlatanov.frakkintoasters.operation;
 
-import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.board.PegasusBoard;
+import xyz.zlatanov.frakkintoasters.state.damage.PegasusDamage;
+import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 
 public class PegasusOps extends BattlestarOps {
 
@@ -12,7 +13,7 @@ public class PegasusOps extends BattlestarOps {
     }
 
     public void damage() {
-        val pegasusDamage = game.decks().pegasusDamage().draw();
+        PegasusDamage pegasusDamage = draw(DeckId.PEGASUS_DAMAGE);
         damageLocation(Location.valueOf(pegasusDamage.name()));
     }
 

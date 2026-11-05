@@ -24,6 +24,14 @@ class DeckTest {
     }
 
     @Test
+    void shouldNotReshuffleOnItsOwnWhenDrawEmptiesTheDeck() {
+        deck.discard(card);
+        deck.draw();
+        assertTrue(deck.isEmpty());
+        assertEquals(1, deck.discardSize());
+    }
+
+    @Test
     void shouldDrawCardFromTopOfDeck() {
         deck.addToBottom(card);
         assertNotSame(card, deck.draw());
@@ -36,9 +44,9 @@ class DeckTest {
     }
 
     @Test
-    void shouldShuffleDeck() {
+    void shouldSetDrawOrderAndClearDiscardPile() {
         deck.discard(card);
-        deck.shuffle();
+        deck.setDrawOrder(List.of(card, deck.cards().getFirst()));
         assertEquals(2, deck.size());
         assertEquals(0, deck.discardSize());
     }
@@ -56,16 +64,6 @@ class DeckTest {
         deck.addOnTop(card);
         deck.reveal(card);
         assertTrue(deck.revealedCards().contains(card));
-    }
-
-    @Test
-    void shouldAutoShuffleWhenEmptyAfterDraw() {
-        val secondCard = new Card();
-        deck.discard(secondCard);
-
-        deck.draw();
-
-        assertEquals(List.of(secondCard), deck.cards());
     }
 
     @Test

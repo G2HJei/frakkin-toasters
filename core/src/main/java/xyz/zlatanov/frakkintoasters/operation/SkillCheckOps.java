@@ -2,6 +2,7 @@ package xyz.zlatanov.frakkintoasters.operation;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.Game;
+import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckResult;
@@ -10,6 +11,7 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
 import java.util.*;
 
 import static java.util.Comparator.comparing;
+import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.*;
 
 public class SkillCheckOps extends GameOps {
 
@@ -20,13 +22,13 @@ public class SkillCheckOps extends GameOps {
     public SkillCheckOps createDestinyDeck() {
         val decks = game.decks();
         decks.destiny()
-                .addOnTop(decks.politics().draw(2))
-                .addOnTop(decks.leadership().draw(2))
-                .addOnTop(decks.tactics().draw(2))
-                .addOnTop(decks.piloting().draw(2))
-                .addOnTop(decks.engineering().draw(2))
-                .addOnTop(decks.treachery().draw(2));
-        decks.destiny().shuffle();
+                .addOnTop(draw(POLITICS, 2))
+                .addOnTop(draw(LEADERSHIP, 2))
+                .addOnTop(draw(TACTICS, 2))
+                .addOnTop(draw(PILOTING, 2))
+                .addOnTop(draw(ENGINEERING, 2))
+                .addOnTop(draw(TREACHERY, 2));
+        shuffle(DeckId.DESTINY);
         return this;
     }
 
@@ -68,7 +70,7 @@ public class SkillCheckOps extends GameOps {
     }
 
     public SkillCard revealAndDiscardTreacheryCard() {
-        val card = game.decks().treachery().draw();
+        SkillCard card = draw(TREACHERY);
         game.decks().discard(card);
         return card;
     }
@@ -177,10 +179,10 @@ public class SkillCheckOps extends GameOps {
                         case ENGINEERING -> game.decks().engineering();
                         case TREACHERY -> game.decks().treachery();
                     };
-                    val cards = deck.draw(count);
+                    List<SkillCard> cards = draw(DeckId.of(color), count);
                     game.decks().destiny().addOnTop(cards);
                 });
-        game.decks().destiny().shuffle();
+        shuffle(DESTINY);
     }
 
     private Map<SkillCardColor, Integer> computeColorSelection(SkillCardColor[] skillCardColor) {

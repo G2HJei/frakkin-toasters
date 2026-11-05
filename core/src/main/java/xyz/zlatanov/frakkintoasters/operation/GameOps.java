@@ -1,11 +1,19 @@
 package xyz.zlatanov.frakkintoasters.operation;
 
 import lombok.val;
+import java.util.List;
+import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.*;
+import xyz.zlatanov.frakkintoasters.journal.fact.GameFact.*;
 import xyz.zlatanov.frakkintoasters.state.Game;
+import xyz.zlatanov.frakkintoasters.state.GameStep;
+import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 
 public class GameOps extends AbstractOps {
+
+    private static final List<DeckId> STARTING_DECKS = List.of(CIVILIAN_SHIPS, GALACTICA_DAMAGE, PEGASUS_DAMAGE, BASESTAR_DAMAGE,
+            DESTINATION, POLITICS, LEADERSHIP, TACTICS, PILOTING, ENGINEERING, TREACHERY, QUORUM, CRISIS, SUPER_CRISIS, MUTINY, MOTIVE);
 
     public GameOps(Game game) {
         super(game);
@@ -56,14 +64,38 @@ public class GameOps extends AbstractOps {
      * Lets a player other than the current one act (e.g. the target of an "Executive Order" card).
      */
     public void actingPlayer(int playerNumber) {
-        game.actingPlayerNumber(playerNumber == game.currentPlayerNumber() ? null : playerNumber);
+        record(new ActingPlayerChanged(playerNumber == game.currentPlayerNumber() ? null : playerNumber));
     }
 
     /**
      * The current player acts again.
      */
     public void resetActingPlayer() {
-        game.actingPlayerNumber(null);
+        record(new ActingPlayerChanged(null));
+    }
+
+    /**
+     * Starts the journal and shuffles the decks that exist from the start. Destiny and loyalty decks are created later.
+     */
+    public void startGame() {
+        record(new GameStarted(game.players().size(), game.objective()));
+        STARTING_DECKS.forEach(this::shuffle);
+    }
+
+    public void shuffleDeck(DeckId id) {
+        shuffle(id);
+    }
+
+    public void changeStep(GameStep step) {
+        record(new StepChanged(step));
+    }
+
+    public void startTurn(int turn) {
+        record(new TurnStarted(turn));
+    }
+
+    public void changeCurrentPlayer(int playerNumber) {
+        record(new CurrentPlayerChanged(playerNumber));
     }
 
     public int rollDie() {

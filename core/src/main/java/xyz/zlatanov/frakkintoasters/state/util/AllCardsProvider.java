@@ -29,7 +29,6 @@ public class AllCardsProvider {
         deck.addOnTop(new CivilianShip(2010, 0, 0, 1));
         deck.addOnTop(new CivilianShip(2011, 0, 1, 1));
         deck.addOnTop(new CivilianShip(2012, 1, 0, 1));
-        deck.shuffle();
         return deck;
     }
 
@@ -42,8 +41,7 @@ public class AllCardsProvider {
     public static <T extends Enum<T>> Deck<T> genericDeck(Class<T> clazz, boolean autoShuffle, T... repeatedCards) {
         return new Deck<T>(autoShuffle)
                 .addOnTop(Arrays.asList(clazz.getEnumConstants()))
-                .addOnTop(Arrays.asList(repeatedCards))
-                .shuffle();
+                .addOnTop(Arrays.asList(repeatedCards));
     }
 
     public static Deck<SkillCard> politicsCards() {
@@ -64,8 +62,7 @@ public class AllCardsProvider {
                 .addOnTop(skills(1, 4, POPULAR_INFLUENCE))
                 .addOnTop(skills(1, 5, NEGOTIATION))
                 .addOnTop(skills(1, 0, FORCE_THEIR_HAND))
-                .addOnTop(skills(1, 0, RED_TAPE))
-                .shuffle();
+                .addOnTop(skills(1, 0, RED_TAPE));
     }
 
     public static Deck<SkillCard> leadershipCards() {
@@ -86,8 +83,7 @@ public class AllCardsProvider {
                 .addOnTop(skills(1, 0, ALL_HANDS_ON_DECK))
                 .addOnTop(skills(1, 3, RESTORE_ORDER))
                 .addOnTop(skills(1, 4, RESTORE_ORDER))
-                .addOnTop(skills(1, 5, CHANGE_OF_PLANS))
-                .shuffle();
+                .addOnTop(skills(1, 5, CHANGE_OF_PLANS));
     }
 
     public static Deck<SkillCard> tacticsCards() {
@@ -108,8 +104,7 @@ public class AllCardsProvider {
                 .addOnTop(skills(1, 3, UNORTHODOX_PLAN))
                 .addOnTop(skills(1, 4, UNORTHODOX_PLAN))
                 .addOnTop(skills(1, 5, A_SECOND_CHANCE))
-                .addOnTop(skills(1, 0, QUICK_THINKING))
-                .shuffle();
+                .addOnTop(skills(1, 0, QUICK_THINKING));
     }
 
     public static Deck<SkillCard> pilotingCards() {
@@ -130,8 +125,7 @@ public class AllCardsProvider {
                 .addOnTop(skills(1, 0, DOGFIGHT))
                 .addOnTop(skills(1, 3, COMBAT_VETERAN))
                 .addOnTop(skills(1, 4, COMBAT_VETERAN))
-                .addOnTop(skills(1, 5, LAUNCH_RESERVES))
-                .shuffle();
+                .addOnTop(skills(1, 5, LAUNCH_RESERVES));
     }
 
     public static Deck<SkillCard> engineeringCards() {
@@ -152,8 +146,7 @@ public class AllCardsProvider {
                 .addOnTop(skills(1, 0, INSTALL_UPGRADES))
                 .addOnTop(skills(1, 3, RAPTOR_SPECIALIST))
                 .addOnTop(skills(1, 4, RAPTOR_SPECIALIST))
-                .addOnTop(skills(1, 5, TEST_THE_LIMITS))
-                .shuffle();
+                .addOnTop(skills(1, 5, TEST_THE_LIMITS));
     }
 
     public static Deck<SkillCard> treacheryCards() {
@@ -164,8 +157,7 @@ public class AllCardsProvider {
                 .addOnTop(skills(1, 3, A_BETTER_MACHINE))
                 .addOnTop(skills(1, 3, PERSONAL_VICES))
                 .addOnTop(skills(1, 4, VIOLENT_OUTBURSTS))
-                .addOnTop(skills(1, 5, EXPLOIT_A_WEAKNESS))
-                .shuffle();
+                .addOnTop(skills(1, 5, EXPLOIT_A_WEAKNESS));
     }
 
     private static List<SkillCard> skills(int quantity, int value, SkillCardType type) {

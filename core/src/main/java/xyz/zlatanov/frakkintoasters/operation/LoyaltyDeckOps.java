@@ -2,6 +2,7 @@ package xyz.zlatanov.frakkintoasters.operation;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.Game;
+import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 
@@ -37,7 +38,7 @@ public class LoyaltyDeckOps extends AbstractOps {
                         FINAL_FIVE_DAMAGE_GALACTICA_TWICE,
                         FINAL_FIVE_CYLON_SHIPS_ACTIVATE)
         );
-        deck.shuffle();
+        shuffle(DeckId.LOYALTY_NOT_CYLON);
         return this;
     }
 
@@ -54,7 +55,7 @@ public class LoyaltyDeckOps extends AbstractOps {
         if (withMutineer) {
             loyaltyDeck.addOnTop(MUTINEER);
         }
-        loyaltyDeck.shuffle();
+        shuffle(DeckId.LOYALTY);
         return this;
     }
 
@@ -63,8 +64,7 @@ public class LoyaltyDeckOps extends AbstractOps {
         val cylonLoyalties = Arrays.stream(values())
                 .filter(LoyaltyCard::isCylon)
                 .toList();
-        deck.addOnTop(cylonLoyalties);
-        deck.shuffle();
+        deck.setDrawOrder(game.randomness().shuffled(cylonLoyalties)); // todo phase 3: a temporary deck outside the game, so this shuffle and the draws from it are not logged yet
         return deck;
     }
 }

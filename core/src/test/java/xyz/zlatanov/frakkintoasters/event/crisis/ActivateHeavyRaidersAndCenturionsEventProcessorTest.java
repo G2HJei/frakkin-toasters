@@ -27,7 +27,7 @@ class ActivateHeavyRaidersAndCenturionsEventProcessorTest extends EventTestHarne
 
     @BeforeEach
     void setUp() {
-        game.setupGalacticaBoard();
+        ops.galactica().setUp();
         heavyRaider = heavyRaider();
         centurion = centurion();
     }

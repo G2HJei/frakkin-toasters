@@ -10,5 +10,5 @@ package xyz.zlatanov.frakkintoasters.journal.fact;
  * The records are grouped by area in the nested types of the area interfaces ({@link GameFact}, {@link TitleFact}, ...).
  * They all live in this package because a sealed hierarchy can't span packages outside a named module.
  */
-public sealed interface Fact permits GameFact, TitleFact {
+public sealed interface Fact permits DeckFact, GameFact, TitleFact {
 }

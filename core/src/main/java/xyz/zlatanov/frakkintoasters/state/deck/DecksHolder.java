@@ -6,6 +6,8 @@ import lombok.experimental.Accessors;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
+import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
+import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
 import xyz.zlatanov.frakkintoasters.state.card.MutinyCard;
 import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
@@ -16,11 +18,9 @@ import xyz.zlatanov.frakkintoasters.state.damage.PegasusDamage;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
-import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 import xyz.zlatanov.frakkintoasters.state.view.DecksHolderView;
 
 import java.util.List;
-import java.util.Optional;
 
 import static xyz.zlatanov.frakkintoasters.state.card.DestinationCard.*;
 import static xyz.zlatanov.frakkintoasters.state.util.AllCardsProvider.*;
@@ -65,6 +65,8 @@ public class DecksHolder implements DecksHolderView {
     private final Deck<LoyaltyCard>     loyaltyNotCylon = new Deck<>(false);
     @Builder.Default
     private final Deck<MutinyCard>      mutiny          = genericDeck(MutinyCard.class);
+    @Builder.Default
+    private final Deck<MotiveCard>      motive          = genericDeck(MotiveCard.class);
 
     public void discard(SkillCard... cards) {
         discard(List.of(cards));
@@ -91,18 +93,10 @@ public class DecksHolder implements DecksHolderView {
                 };
                 deck.discard(skillCard);
             }
-            case GalacticaDamage dmg -> {
-                galacticaDamage.addOnTop(dmg);
-                galacticaDamage.shuffle();
-            }
-            case BasestarDamage dmg -> {
-                basestarDamage.addOnTop(dmg);
-                basestarDamage.shuffle();
-            }
-            case PegasusDamage dmg -> {
-                pegasusDamage.addOnTop(dmg);
-                pegasusDamage.shuffle();
-            }
+            // damage cards go back on top; the calling op shuffles the deck (it has to be logged)
+            case GalacticaDamage dmg -> galacticaDamage.addOnTop(dmg);
+            case BasestarDamage dmg -> basestarDamage.addOnTop(dmg);
+            case PegasusDamage dmg -> pegasusDamage.addOnTop(dmg);
             case MutinyCard mutinyCard -> {
                 mutiny.discard(mutinyCard);
             }
@@ -112,16 +106,31 @@ public class DecksHolder implements DecksHolderView {
         }
     }
 
-    public Optional<SkillCard> drawSkillCard(SkillCardColor skillCardColor) {
-        return Optional.of(
-                switch (skillCardColor) {
-                    case POLITICS -> politics.draw();
-                    case LEADERSHIP -> leadership.draw();
-                    case TACTICS -> tactics.draw();
-                    case PILOTING -> piloting.draw();
-                    case ENGINEERING -> engineering.draw();
-                    case TREACHERY -> treachery.draw();
-                }
-        );
+    /**
+     * @return the deck with this id. The caller picks the card type
+     */
+    @SuppressWarnings("unchecked")
+    public <T> Deck<T> deck(DeckId id) {
+        return (Deck<T>) switch (id) {
+            case CIVILIAN_SHIPS -> civilianShips;
+            case GALACTICA_DAMAGE -> galacticaDamage;
+            case PEGASUS_DAMAGE -> pegasusDamage;
+            case BASESTAR_DAMAGE -> basestarDamage;
+            case DESTINATION -> destination;
+            case POLITICS -> politics;
+            case LEADERSHIP -> leadership;
+            case TACTICS -> tactics;
+            case PILOTING -> piloting;
+            case ENGINEERING -> engineering;
+            case TREACHERY -> treachery;
+            case DESTINY -> destiny;
+            case QUORUM -> quorum;
+            case CRISIS -> crisis;
+            case SUPER_CRISIS -> superCrisis;
+            case LOYALTY -> loyalty;
+            case LOYALTY_NOT_CYLON -> loyaltyNotCylon;
+            case MUTINY -> mutiny;
+            case MOTIVE -> motive;
+        };
     }
 }

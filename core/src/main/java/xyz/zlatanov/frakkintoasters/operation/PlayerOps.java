@@ -9,6 +9,7 @@ import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
 import xyz.zlatanov.frakkintoasters.state.card.MutinyCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
+import xyz.zlatanov.frakkintoasters.state.crisis.SuperCrisisCard;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.HumanFighter;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
@@ -17,7 +18,8 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 import java.util.Arrays;
 import java.util.List;
 
-import static xyz.zlatanov.frakkintoasters.state.util.AllCardsProvider.genericDeck;
+import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.*;
+
 
 public class PlayerOps extends GameOps {
 
@@ -61,36 +63,35 @@ public class PlayerOps extends GameOps {
 
     public void drawSkillCards(List<SkillCardColor> colors) {
         for (val color : colors) {
-            game.decks()
-                    .drawSkillCard(color)
-                    .ifPresent(player::gainSkillCards);
+            SkillCard draw = draw(of(color));
+            player.gainSkillCards(draw);
         }
     }
 
     public CrisisCard drawCrisisCard() {
-        return game.decks().crisis().draw();
+        return draw(CRISIS);
     }
 
     public PlayerOps drawSuperCrisisCard() {
-        val card = game.decks().superCrisis().draw();
+        SuperCrisisCard card = draw(SUPER_CRISIS);
         player.superCrisisCards()
                 .addOnTop(card);
         return this;
     }
 
     public void drawMutinyCard() {
-        val card = game.decks().mutiny().draw();
+        MutinyCard card = draw(MUTINY);
         player.mutinyCards().addOnTop(card);
         //todo if 2nd -> discard one and move to brig. Handle followup in engine not in each mutiny drawing event
     }
 
     public void drawMotiveCards() {
-        val motiveCards = genericDeck(MotiveCard.class).draw(2);
+        List<MotiveCard> motiveCards = draw(MOTIVE, 2);
         player.motiveCards().addOnTop(motiveCards);
     }
 
     public DestinationCard drawDestinationCard() {
-        return game.decks().destination().draw();
+        return draw(DESTINATION);
     }
 
     public void placeCrisisCardOnTop(CrisisCard card) {
