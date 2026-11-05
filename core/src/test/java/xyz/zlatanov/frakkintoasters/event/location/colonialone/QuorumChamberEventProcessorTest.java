@@ -22,7 +22,7 @@ class QuorumChamberEventProcessorTest extends EventTestHarness<QuorumChamberEven
         assertEquals(1, presidentHand.cards().size());
         assertFollowup(
                 one(
-                        new DrawQuorumCardEvent(1),
+                        new DrawQuorumCardEvent(),
                         new PlayerDecisionEvent<>(1, PlayQuorumCardEvent.class)));
     }
 

@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.state;
 
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -39,6 +40,8 @@ public class Game implements GameView {
     @Setter
     @Builder.Default
     private int                  currentPlayerNumber = 1;
+    @Getter(AccessLevel.NONE)
+    private Integer              actingPlayerNumber; // null means the current player is acting
     @Setter
     @Builder.Default
     private GameStep             step                = SETUP;
@@ -94,6 +97,24 @@ public class Game implements GameView {
     @Override
     public Player currentPlayer() {
         return player(currentPlayerNumber);
+    }
+
+    @Override
+    public int actingPlayerNumber() {
+        return actingPlayerNumber != null ? actingPlayerNumber : currentPlayerNumber;
+    }
+
+    /**
+     * @param actingPlayerNumber the player acting out of turn, or {@code null} when the current player is acting
+     */
+    public Game actingPlayerNumber(Integer actingPlayerNumber) {
+        this.actingPlayerNumber = actingPlayerNumber;
+        return this;
+    }
+
+    @Override
+    public Player actingPlayer() {
+        return player(actingPlayerNumber());
     }
 
     public Game setupGalacticaBoard() {

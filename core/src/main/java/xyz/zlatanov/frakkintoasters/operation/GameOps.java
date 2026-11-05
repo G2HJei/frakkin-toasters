@@ -52,6 +52,20 @@ public class GameOps extends AbstractOps {
         return new TitleOps(game);
     }
 
+    /**
+     * Lets a player other than the current one act (e.g. the target of an "Executive Order" card).
+     */
+    public void actingPlayer(int playerNumber) {
+        game.actingPlayerNumber(playerNumber == game.currentPlayerNumber() ? null : playerNumber);
+    }
+
+    /**
+     * The current player acts again.
+     */
+    public void resetActingPlayer() {
+        game.actingPlayerNumber(null);
+    }
+
     public int rollDie() {
         return game.die().roll();
     }

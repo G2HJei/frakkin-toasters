@@ -22,7 +22,7 @@ class SendToSickbayEventProcessorTest extends EventTestHarness<SendToSickbayEven
     void shouldSendTargetPlayerToSickbay() {
         moveTo(COMMAND, LEE_APOLLO_ADAMA);
 
-        execute(new SendToSickbayEvent(1, 2));
+        execute(new SendToSickbayEvent(2));
 
         assertEquals(SICKBAY, locate(LEE_APOLLO_ADAMA));
     }
@@ -45,7 +45,7 @@ class SendToSickbayEventProcessorTest extends EventTestHarness<SendToSickbayEven
     private void assertLandedInReserves(HumanFighter fighter) {
         ops.player(2).pilot(fighter.id());
 
-        execute(new SendToSickbayEvent(1, 2));
+        execute(new SendToSickbayEvent(2));
 
         assertEquals(SICKBAY, locate(LEE_APOLLO_ADAMA));
         assertTrue(galacticaBoard.reserves().contains(fighter));

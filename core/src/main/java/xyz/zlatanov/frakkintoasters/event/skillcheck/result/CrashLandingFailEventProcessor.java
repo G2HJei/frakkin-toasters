@@ -18,6 +18,6 @@ public class CrashLandingFailEventProcessor extends EventProcessor<CrashLandingF
         val currentPlayer = game.currentPlayerNumber();
         return one(
                 single(new LoseResourceEvent(FUEL, 1)),
-                all(new LoseResourceEvent(MORALE, 1), new SendToSickbayEvent(currentPlayer, currentPlayer)));
+                all(new LoseResourceEvent(MORALE, 1), new SendToSickbayEvent(currentPlayer)));
     }
 }

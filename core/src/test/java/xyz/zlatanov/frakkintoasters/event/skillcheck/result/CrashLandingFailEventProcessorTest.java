@@ -19,6 +19,6 @@ class CrashLandingFailEventProcessorTest extends EventTestHarness<CrashLandingFa
 
         assertFollowup(one(
                 single(new LoseResourceEvent(FUEL, 1)),
-                all(new LoseResourceEvent(MORALE, 1), new SendToSickbayEvent(2, 2))));
+                all(new LoseResourceEvent(MORALE, 1), new SendToSickbayEvent(2))));
     }
 }

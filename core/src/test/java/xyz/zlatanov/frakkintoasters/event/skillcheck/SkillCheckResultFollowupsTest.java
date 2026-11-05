@@ -107,7 +107,7 @@ class SkillCheckResultFollowupsTest extends TestHarness {
         moveTo(Location.COMMAND, KARA_STARBUCK_THRACE);
 
         assertEquals(all(single(new LoseResourceEvent(MORALE, 1)),
-                        all(new SendToSickbayEvent(1, ADMIRAL), new SendToSickbayEvent(1, OTHER))),
+                        all(new SendToSickbayEvent(ADMIRAL), new SendToSickbayEvent(OTHER))),
                 followup(SECURITY_BREACH, FAIL));
     }
 
@@ -134,7 +134,7 @@ class SkillCheckResultFollowupsTest extends TestHarness {
     void shouldSendTheChosenCharacterToTheBrig() {
         game.startSkillCheck(ADMIRALS_QUARTERS).targetPlayerNumber(OTHER).result(PASS);
 
-        assertEquals(single(new SendToBrigEvent(1, OTHER)), new SkillCheckResultFollowups(game).followup());
+        assertEquals(single(new SendToBrigEvent(OTHER)), new SkillCheckResultFollowups(game).followup());
     }
 
     @Test

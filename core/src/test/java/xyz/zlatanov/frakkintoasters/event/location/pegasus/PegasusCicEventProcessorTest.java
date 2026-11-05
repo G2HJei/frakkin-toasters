@@ -20,7 +20,7 @@ class PegasusCicEventProcessorTest extends EventTestHarness<PegasusCicEvent> {
     @BeforeEach
     void setUp() {
         basestar = basestarAt(GALACTICA_SPACE_2_OCLOCK);
-        event = new PegasusCicEvent(basestar.id());
+        event = new PegasusCicEvent(1, basestar.id());
     }
 
     @Test

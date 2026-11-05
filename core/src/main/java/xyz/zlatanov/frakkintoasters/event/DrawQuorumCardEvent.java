@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event;
 
-public record DrawQuorumCardEvent(int playerNumber) implements PlayerEvent {
+// The President draws a Quorum Card, so no player number is needed (see GameView.president()).
+public record DrawQuorumCardEvent() implements Event {
     //todo
 }

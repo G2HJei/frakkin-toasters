@@ -43,8 +43,8 @@ code. That includes:
 Next steps, in order:
 
 1. Complete the skill check sequence according to `skill-check.drawio`.
-2. Reanalyze existing events to decide which need to be a `PlayerEvent` (carry `playerNumber`) and where the current
-   player is enough. See the todos in `PlayerEvent` and `ActionEvent`.
+2. ~~Reanalyze existing events: `PlayerEvent` or current player.~~ Done. The engine still has to call `GameOps.actingPlayer`
+   for "Executive Order".
 3. Create the journal and tie it to the ops classes in `operation/` (`AbstractOps` has the todo). Follow the design in
    `refactor-game-view.md`.
 4. Create the game engine to drive the events and turns (`Turn` is a stub; there is no event-to-processor lookup in
@@ -92,8 +92,13 @@ Multi-module Gradle project with a single `core` module. Package root: `xyz.zlat
 ### Events and Processors
 
 Events are plain records with no logic. `Event` is an empty marker interface. `PlayerEvent` adds `playerNumber()`.
-`LocationEvent` adds `location()`. `ActionEvent extends PlayerEvent` is under review (see the todos in `PlayerEvent`
-and `ActionEvent`).
+`LocationEvent` adds `location()`. `ActionEvent extends PlayerEvent` marks the location actions.
+
+A `PlayerEvent` is for events whose player can differ from the current player (an "Executive Order" target, any player in a
+skill check, targets of an effect). An event that always involves the current player is a plain `Event` and reads
+`GameView.currentPlayer()`. `GameView.actingPlayer()` is the player taking an action or moving right now: the current
+player, unless another one acts during that turn (set it through `GameOps.actingPlayer(n)` and `resetActingPlayer()`).
+It never changes who the "current player" is for game effects such as skill checks.
 
 Each `XxxEvent` has an `XxxEventProcessor extends EventProcessor<XxxEvent>` in the same package. Keep that naming:
 `EventTestHarness` finds the processor by it. `EventProcessor.execute(Game, event)`:

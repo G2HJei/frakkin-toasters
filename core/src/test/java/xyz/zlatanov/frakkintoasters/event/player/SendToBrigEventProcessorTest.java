@@ -26,7 +26,7 @@ class SendToBrigEventProcessorTest extends EventTestHarness<SendToBrigEvent> {
 
     @Test
     void shouldSendTargetToBrig() {
-        execute(new SendToBrigEvent(1, 2));
+        execute(new SendToBrigEvent(2));
 
         assertEquals(BRIG, locate(LEE_APOLLO_ADAMA));
         assertEquals(HANGAR_DECK, locate(KARA_STARBUCK_THRACE));
@@ -37,7 +37,7 @@ class SendToBrigEventProcessorTest extends EventTestHarness<SendToBrigEvent> {
         val viper = viperAt(GALACTICA_SPACE_2_OCLOCK);
         ops.player(2).pilot(viper.id());
 
-        execute(new SendToBrigEvent(1, 2));
+        execute(new SendToBrigEvent(2));
 
         assertEquals(BRIG, locate(LEE_APOLLO_ADAMA));
         assertTrue(galacticaBoard.reserves().contains(viper));
@@ -48,21 +48,21 @@ class SendToBrigEventProcessorTest extends EventTestHarness<SendToBrigEvent> {
     void shouldRejectCharacterAlreadyInBrig() {
         moveTo(BRIG, LEE_APOLLO_ADAMA);
 
-        assertInvalid(new SendToBrigEvent(1, 2));
+        assertInvalid(new SendToBrigEvent(2));
     }
 
     @Test
     void shouldRejectRevealedCylon() {
         revealCylon();
 
-        assertInvalid(new SendToBrigEvent(2, 1));
+        assertInvalid(new SendToBrigEvent(1));
     }
 
     @Test
     void shouldStripAdmiralOfTitle() {
         admiral(WILLIAM_ADAMA);
 
-        execute(new SendToBrigEvent(1, 3));
+        execute(new SendToBrigEvent(3));
 
         assertFollowup(new DetermineNextAdmiralEvent());
     }
@@ -71,7 +71,7 @@ class SendToBrigEventProcessorTest extends EventTestHarness<SendToBrigEvent> {
     void shouldStripCagOfTitle() {
         cag(LEE_APOLLO_ADAMA);
 
-        execute(new SendToBrigEvent(1, 2));
+        execute(new SendToBrigEvent(2));
 
         assertFollowup(new DetermineNextCagEvent());
     }
@@ -81,7 +81,7 @@ class SendToBrigEventProcessorTest extends EventTestHarness<SendToBrigEvent> {
         admiral(LEE_APOLLO_ADAMA);
         cag(LEE_APOLLO_ADAMA);
 
-        execute(new SendToBrigEvent(1, 2));
+        execute(new SendToBrigEvent(2));
 
         assertFollowup(all(new DetermineNextAdmiralEvent(), new DetermineNextCagEvent()));
     }
@@ -90,7 +90,7 @@ class SendToBrigEventProcessorTest extends EventTestHarness<SendToBrigEvent> {
     void shouldKeepPresidentTitle() {
         president(LEE_APOLLO_ADAMA);
 
-        execute(new SendToBrigEvent(1, 2));
+        execute(new SendToBrigEvent(2));
 
         assertEquals(LEE_APOLLO_ADAMA, president());
     }

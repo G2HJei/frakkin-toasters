@@ -359,8 +359,8 @@ public class SkillCheckResultFollowups {
 
     private Event sendTo(Location destination, int playerNumber) {
         return switch (destination) {
-            case SICKBAY -> new SendToSickbayEvent(currentPlayer(), playerNumber);
-            case BRIG -> new SendToBrigEvent(currentPlayer(), playerNumber);
+            case SICKBAY -> new SendToSickbayEvent(playerNumber);
+            case BRIG -> new SendToBrigEvent(playerNumber);
             default -> throw new FrakCallTheAdmiralException();
         };
     }

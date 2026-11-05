@@ -1,7 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event.player;
 
-import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
+import xyz.zlatanov.frakkintoasters.event.Event;
 
-// Send a character to the "Brig". The player with playerNumber sends the character of targetPlayerNumber.
-public record SendToBrigEvent(int playerNumber, int targetPlayerNumber) implements PlayerEvent {
+// Send the character of targetPlayerNumber to the "Brig". Who decides is up to the wrapping PlayerDecisionEvent.
+public record SendToBrigEvent(int targetPlayerNumber) implements Event {
 }

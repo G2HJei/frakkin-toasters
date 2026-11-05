@@ -1,6 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event.location.cylon;
 
-import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
+import xyz.zlatanov.frakkintoasters.event.ActionEvent;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 
 // Human Fleet (Cylon location, Daybreak)
@@ -8,5 +8,5 @@ import xyz.zlatanov.frakkintoasters.state.board.Location;
 // draw 2 Skill Cards.
 // or
 // Action: Infiltrate Galactica.
-public record HumanFleetInfiltrateEvent(int playerNumber, Location galacticaLocation) implements PlayerEvent {
+public record HumanFleetInfiltrateEvent(int playerNumber, Location galacticaLocation) implements ActionEvent {
 }
