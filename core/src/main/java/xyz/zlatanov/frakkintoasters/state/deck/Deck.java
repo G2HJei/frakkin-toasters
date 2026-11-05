@@ -56,7 +56,7 @@ public class Deck<T> implements DeckView<T> {
     }
 
     public T draw() {
-        //todo what if empty?? make Optional<T>
+        // in practice, only civilian ships deck can be empty, so it has to be checked before drawing to keep this method return non-optional result
         val drawn = cards.removeFirst();
         if (autoShuffle && cards.isEmpty() && !discardedCards.isEmpty()) {
             shuffle();
