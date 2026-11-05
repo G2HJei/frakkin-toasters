@@ -28,7 +28,7 @@ public class GalacticaOps extends BattlestarOps {
         } else if (FOOD == galacticaDamage) {
             galacticaBoard().decreaseFood(1);
             game.decks().galacticaDamage()
-                    .addOnTop(FUEL)
+                    .addOnTop(FOOD)
                     .shuffle();
         } else {
             damageLocation(Location.valueOf(galacticaDamage.name()));
