@@ -99,6 +99,8 @@ public class GameOps extends AbstractOps {
     }
 
     public int rollDie() {
-        return game.die().roll();
+        int value = game.die().roll();
+        record(new DieRolled(value));
+        return value;
     }
 }

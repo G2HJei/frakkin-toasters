@@ -1,17 +1,18 @@
 package xyz.zlatanov.frakkintoasters.operation;
 
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.journal.fact.DeckFact.CardsAddedOnTop;
+import xyz.zlatanov.frakkintoasters.journal.fact.PlayerFact.CardsLost;
+import xyz.zlatanov.frakkintoasters.journal.fact.SkillCheckFact.*;
 import xyz.zlatanov.frakkintoasters.state.Game;
+import xyz.zlatanov.frakkintoasters.state.PlayerPile;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
-import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
-import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
-import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckResult;
-import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
+import xyz.zlatanov.frakkintoasters.state.skill.*;
 
 import java.util.*;
 
 import static java.util.Comparator.comparing;
-import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.*;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckPile.*;
 
 public class SkillCheckOps extends GameOps {
 
@@ -20,35 +21,32 @@ public class SkillCheckOps extends GameOps {
     }
 
     public SkillCheckOps createDestinyDeck() {
-        val decks = game.decks();
-        decks.destiny()
-                .addOnTop(draw(POLITICS, 2))
-                .addOnTop(draw(LEADERSHIP, 2))
-                .addOnTop(draw(TACTICS, 2))
-                .addOnTop(draw(PILOTING, 2))
-                .addOnTop(draw(ENGINEERING, 2))
-                .addOnTop(draw(TREACHERY, 2));
+        for (val color : SkillCardColor.values()) {
+            List<SkillCard> cards = draw(DeckId.of(color), 2);
+            record(new CardsAddedOnTop(DeckId.DESTINY, cards));
+        }
         shuffle(DeckId.DESTINY);
         return this;
     }
 
     public SkillCheckOps start(SkillCheckType type) {
-        game.startSkillCheck(type);
+        record(new SkillCheckStarted(type));
         return this;
     }
 
     public SkillCheckOps start(SkillCheckType type, int targetPlayerNumber) {
-        game.startSkillCheck(type).targetPlayerNumber(targetPlayerNumber);
+        record(new SkillCheckStarted(type));
+        record(new TargetChosen(targetPlayerNumber));
         return this;
     }
 
     public void playBeforeSkillCheck(int playerNumber, List<SkillCard> skillCards) {
-        game.player(playerNumber).skillCards().remove(skillCards);
-        game.activeSkillCheck().playedBefore(playerNumber, skillCards);
+        record(new CardsLost(playerNumber, PlayerPile.SKILL, skillCards));
+        record(new CardsPlayedBefore(playerNumber, skillCards));
     }
 
     public void revealPlayedBefore() {
-        game.activeSkillCheck().revealPlayedBefore();
+        record(new PlayedBeforeRevealed());
     }
 
     public List<SkillCard> playFromDestinyDeck(int count) {
@@ -56,22 +54,21 @@ public class SkillCheckOps extends GameOps {
     }
 
     public List<SkillCard> playFromDestinyDeck(int count, boolean faceUp) { //todo always 2? check rules
-        val destinyDeck = game.decks().destiny();
-        val cards = destinyDeck.draw(count);
+        List<SkillCard> cards = draw(DeckId.DESTINY, count);
         if (faceUp) {
             cards.forEach(this::addOnTopOfPile);
         } else {
-            game.activeSkillCheck().cards().addOnTop(cards);
+            record(new CardsPlaced(CARDS, cards, true));
         }
-        if (destinyDeck.isEmpty()) {
+        if (game.decks().destiny().isEmpty()) {
             createDestinyDeck();
         }
         return cards;
     }
 
     public SkillCard revealAndDiscardTreacheryCard() {
-        SkillCard card = draw(TREACHERY);
-        game.decks().discard(card);
+        SkillCard card = draw(DeckId.TREACHERY);
+        discardToDeck(card);
         return card;
     }
 
@@ -80,13 +77,12 @@ public class SkillCheckOps extends GameOps {
     }
 
     public void playCards(int playerNumber, List<SkillCard> cards) {
-        val skillCheck = game.activeSkillCheck();
         for (val card : cards) {
-            game.player(playerNumber).skillCards().remove(card);
-            if (skillCheck.cards().isEmpty()) {
+            record(new CardsLost(playerNumber, PlayerPile.SKILL, List.of(card)));
+            if (game.activeSkillCheck().cards().isEmpty()) {
                 addOnTopOfPile(card);
             } else {
-                skillCheck.cards().addOnTop(card);
+                record(new CardsPlaced(CARDS, List.of(card), true));
             }
         }
     }
@@ -102,38 +98,40 @@ public class SkillCheckOps extends GameOps {
     }
 
     public void discard(SkillCard card) {
-        game.activeSkillCheck().remove(card, null);
-        game.decks().discard(card);
+        record(new CardRemoved(card, null));
+        discardToDeck(card);
     }
 
     public void giveCardToPlayer(SkillCard card, int playerNumber) {
-        game.activeSkillCheck().remove(card, playerNumber);
+        record(new CardRemoved(card, playerNumber));
         player(playerNumber).receiveSkillCard(card);
     }
 
     public void declareEmergency() {
-        game.activeSkillCheck().declareEmergency();
+        record(new EmergencyDeclared());
     }
 
     public void totalStrength(int totalStrength) {
-        game.activeSkillCheck().totalStrength(totalStrength);
+        record(new TotalStrengthDetermined(totalStrength));
     }
 
     public void determineResult(SkillCheckResult result) {
-        game.activeSkillCheck().result(result);
+        record(new ResultDetermined(result));
     }
 
     public void replacePassResult() {
-        game.activeSkillCheck().replacePassResult();
+        record(new PassResultReplaced());
     }
 
     public void preventFailResult() {
-        game.activeSkillCheck().preventFailResult();
+        record(new FailResultPrevented());
     }
 
     private List<SkillCard> drawAllAndSort() {
-        val deck = game.activeSkillCheck().cards();
-        val all = new ArrayList<>(deck.draw(deck.size()));
+        val all = new ArrayList<>(game.activeSkillCheck().cards().cards());
+        if (!all.isEmpty()) {
+            record(new CardsDrawn(CARDS, all));
+        }
         all.sort(comparing((SkillCard card) -> card.type().color())
                 .thenComparing(SkillCard::value, Comparator.reverseOrder())
                 .thenComparing(SkillCard::type, Comparator.reverseOrder()));
@@ -142,24 +140,16 @@ public class SkillCheckOps extends GameOps {
 
     private void splitIntoPiles(List<SkillCard> sortedCards) {
         for (val card : sortedCards) {
-            addToBottomOfPile(card);
+            record(new CardsPlaced(pileOf(card), List.of(card), false));
         }
     }
 
     private void addOnTopOfPile(SkillCard card) {
-        if (matchesSkillCheckColors(card)) {
-            game.activeSkillCheck().matchingPile().addOnTop(card);
-        } else {
-            game.activeSkillCheck().nonMatchingPile().addOnTop(card);
-        }
+        record(new CardsPlaced(pileOf(card), List.of(card), true));
     }
 
-    private void addToBottomOfPile(SkillCard card) {
-        if (matchesSkillCheckColors(card)) {
-            game.activeSkillCheck().matchingPile().addToBottom(card);
-        } else {
-            game.activeSkillCheck().nonMatchingPile().addToBottom(card);
-        }
+    private SkillCheckPile pileOf(SkillCard card) {
+        return matchesSkillCheckColors(card) ? MATCHING : NON_MATCHING;
     }
 
     private boolean matchesSkillCheckColors(SkillCard card) {
@@ -171,18 +161,10 @@ public class SkillCheckOps extends GameOps {
         val selection = computeColorSelection(skillCardColor);
         selection.forEach(
                 (color, count) -> {
-                    val deck = switch (color) {
-                        case POLITICS -> game.decks().politics();
-                        case LEADERSHIP -> game.decks().leadership();
-                        case TACTICS -> game.decks().tactics();
-                        case PILOTING -> game.decks().piloting();
-                        case ENGINEERING -> game.decks().engineering();
-                        case TREACHERY -> game.decks().treachery();
-                    };
                     List<SkillCard> cards = draw(DeckId.of(color), count);
-                    game.decks().destiny().addOnTop(cards);
+                    record(new CardsAddedOnTop(DeckId.DESTINY, cards));
                 });
-        shuffle(DESTINY);
+        shuffle(DeckId.DESTINY);
     }
 
     private Map<SkillCardColor, Integer> computeColorSelection(SkillCardColor[] skillCardColor) {

@@ -1,10 +1,10 @@
 package xyz.zlatanov.frakkintoasters.operation;
 
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.journal.fact.DeckFact.CardsAddedOnTop;
 import xyz.zlatanov.frakkintoasters.state.Game;
-import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
-import xyz.zlatanov.frakkintoasters.state.deck.Deck;
+import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 
 import java.util.Arrays;
 import java.util.List;
@@ -20,8 +20,7 @@ public class LoyaltyDeckOps extends AbstractOps {
 
 
     public LoyaltyDeckOps createNotACylon() {
-        val deck = game.decks().loyaltyNotCylon();
-        deck.addOnTop(
+        record(new CardsAddedOnTop(DeckId.LOYALTY_NOT_CYLON,
                 //todo check correct vanilla non-cylon cards count
                 List.of(NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON,
                         NOT_CYLON_USE_CAUTION,
@@ -36,35 +35,30 @@ public class LoyaltyDeckOps extends AbstractOps {
                         FINAL_FIVE_YOU_ARE_EXECUTED,
                         FINAL_FIVE_THEY_ARE_EXECUTED,
                         FINAL_FIVE_DAMAGE_GALACTICA_TWICE,
-                        FINAL_FIVE_CYLON_SHIPS_ACTIVATE)
-        );
+                        FINAL_FIVE_CYLON_SHIPS_ACTIVATE)));
         shuffle(DeckId.LOYALTY_NOT_CYLON);
         return this;
     }
 
     public LoyaltyDeckOps create(int notCylonDraws, int cylonDraws, boolean withMutineer) {
-        val loyaltyDeck = game.decks().loyalty();
-        for (int i = 0; i < notCylonDraws; i++) {
-            val notACylonLoyalty = game.decks().loyaltyNotCylon().draw();
-            loyaltyDeck.addOnTop(notACylonLoyalty);
-        }
-        val cylonDeck = setupCylonDeck();
-        for (int i = 0; i < cylonDraws; i++) {
-            loyaltyDeck.addOnTop(cylonDeck.draw());
-        }
+        List<LoyaltyCard> notACylonLoyalties = draw(DeckId.LOYALTY_NOT_CYLON, notCylonDraws);
+        record(new CardsAddedOnTop(DeckId.LOYALTY, notACylonLoyalties));
+        record(new CardsAddedOnTop(DeckId.LOYALTY, drawCylonLoyalties(cylonDraws)));
         if (withMutineer) {
-            loyaltyDeck.addOnTop(MUTINEER);
+            record(new CardsAddedOnTop(DeckId.LOYALTY, List.of(MUTINEER)));
         }
         shuffle(DeckId.LOYALTY);
         return this;
     }
 
-    private Deck<LoyaltyCard> setupCylonDeck() {
-        val deck = new Deck<LoyaltyCard>();
+    /**
+     * The cylon loyalty cards are not a deck of the game: a random selection of them is dealt, and the chosen cards are
+     * what gets recorded.
+     */
+    private List<LoyaltyCard> drawCylonLoyalties(int count) {
         val cylonLoyalties = Arrays.stream(values())
                 .filter(LoyaltyCard::isCylon)
                 .toList();
-        deck.setDrawOrder(game.randomness().shuffled(cylonLoyalties)); // todo phase 3: a temporary deck outside the game, so this shuffle and the draws from it are not logged yet
-        return deck;
+        return game.randomness().shuffled(cylonLoyalties).subList(0, count);
     }
 }

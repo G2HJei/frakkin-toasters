@@ -39,6 +39,14 @@ public class SkillCheck implements SkillCheckView {
     private       boolean                       passResultReplaced     = false; //by change of plans
     private       boolean                       failResultPrevented    = false; //by iron will
 
+    public Deck<SkillCard> pile(SkillCheckPile pile) {
+        return switch (pile) {
+            case CARDS -> cards;
+            case MATCHING -> matchingPile;
+            case NON_MATCHING -> nonMatchingPile;
+        };
+    }
+
     public SkillCheck targetPlayerNumber(int targetPlayerNumber) {
         assert this.targetPlayerNumber == null : "Skill check target already chosen";
         this.targetPlayerNumber = targetPlayerNumber;

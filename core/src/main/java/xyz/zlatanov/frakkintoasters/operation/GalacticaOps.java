@@ -1,6 +1,10 @@
 package xyz.zlatanov.frakkintoasters.operation;
 
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.journal.fact.BoardFact.BoardingPartyAdvanced;
+import xyz.zlatanov.frakkintoasters.journal.fact.BoardFact.ResourceDecreased;
+import xyz.zlatanov.frakkintoasters.journal.fact.DeckFact.CardsAddedOnTop;
+import xyz.zlatanov.frakkintoasters.journal.fact.ShipFact.ShipMoved;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.GalacticaBoard;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
@@ -10,12 +14,12 @@ import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.IntStream;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
+import static xyz.zlatanov.frakkintoasters.state.board.Resource.*;
 import static xyz.zlatanov.frakkintoasters.state.damage.GalacticaDamage.FOOD;
 import static xyz.zlatanov.frakkintoasters.state.damage.GalacticaDamage.FUEL;
+import static xyz.zlatanov.frakkintoasters.state.ship.ShipZone.*;
 
 public class GalacticaOps extends BattlestarOps {
 
@@ -28,12 +32,12 @@ public class GalacticaOps extends BattlestarOps {
     public void damage() {
         GalacticaDamage galacticaDamage = draw(DeckId.GALACTICA_DAMAGE);
         if (FUEL == galacticaDamage) {
-            galacticaBoard().decreaseFuel(1);
-            game.decks().galacticaDamage().addOnTop(FUEL);
+            record(new ResourceDecreased(xyz.zlatanov.frakkintoasters.state.board.Resource.FUEL, 1));
+            record(new CardsAddedOnTop(DeckId.GALACTICA_DAMAGE, List.of(FUEL)));
             shuffle(DeckId.GALACTICA_DAMAGE);
         } else if (FOOD == galacticaDamage) {
-            galacticaBoard().decreaseFood(1);
-            game.decks().galacticaDamage().addOnTop(FOOD);
+            record(new ResourceDecreased(xyz.zlatanov.frakkintoasters.state.board.Resource.FOOD, 1));
+            record(new CardsAddedOnTop(DeckId.GALACTICA_DAMAGE, List.of(FOOD)));
             shuffle(DeckId.GALACTICA_DAMAGE);
         } else {
             damageLocation(Location.valueOf(galacticaDamage.name()));
@@ -41,59 +45,65 @@ public class GalacticaOps extends BattlestarOps {
     }
 
     /**
-     * Todo phase 3: still mutates the boards without facts.
+     * Places the starting ships.
      */
     public void setUp() {
-        val raiders = IntStream.range(0, 4).mapToObj(i -> game.cylonShips().raider()).map(Optional::orElseThrow).map(Ship.class::cast).toList();
-        CivilianShip civ1 = draw(DeckId.CIVILIAN_SHIPS);
-        CivilianShip civ2 = draw(DeckId.CIVILIAN_SHIPS);
-        galacticaBoard()
-                .place(GALACTICA_SPACE_4_OCLOCK, galacticaBoard().removeFromReserves(Viper.class).orElseThrow()) // reserves are never empty during setup
-                .place(GALACTICA_SPACE_6_OCLOCK, galacticaBoard().removeFromReserves(Viper.class).orElseThrow())
-                .place(GALACTICA_SPACE_2_OCLOCK, List.of(civ1, civ2))
-                .place(GALACTICA_SPACE_8_OCLOCK, game.cylonShips().basestar().orElseThrow())
-                .place(GALACTICA_SPACE_8_OCLOCK, raiders);
+        val vipers = galacticaBoard().reserves().stream()
+                .filter(s -> s.getClass() == Viper.class)
+                .limit(2)
+                .toList();
+        record(new ShipMoved(vipers.get(0).id(), RESERVES, GALACTICA_SPACE, GALACTICA_SPACE_4_OCLOCK));
+        record(new ShipMoved(vipers.get(1).id(), RESERVES, GALACTICA_SPACE, GALACTICA_SPACE_6_OCLOCK));
+        placeCivilianShip(GALACTICA_SPACE_2_OCLOCK);
+        placeCivilianShip(GALACTICA_SPACE_2_OCLOCK);
+        takeFromSupply(Basestar.class, GALACTICA_SPACE_8_OCLOCK);
+        for (int i = 0; i < 4; i++) {
+            takeFromSupply(Raider.class, GALACTICA_SPACE_8_OCLOCK);
+        }
     }
 
     public void decreasePopulation(int populationLost) {
-        galacticaBoard().decreasePopulation(populationLost);
+        record(new ResourceDecreased(POPULATION, populationLost));
     }
 
     public void decreaseMorale(int moraleLost) {
-        galacticaBoard().decreaseMorale(moraleLost);
+        record(new ResourceDecreased(MORALE, moraleLost));
     }
 
     public void advanceBoardingParty() {
-        galacticaBoard().advanceBoardingParty();
+        record(new BoardingPartyAdvanced());
     }
 
     public void destroyCenturion(int centurionId) {
-        val centurion = galacticaBoard().destroyCenturion(centurionId);
-        game.cylonShips().returnedCenturion(centurion);
+        record(new ShipMoved(centurionId, BOARDING_PARTY, CENTURION_SUPPLY, null));
     }
 
     public int launchHumanFighter(ShipType shipType, Location location, Integer unmannedViperId) {
-        val humanFighter = (switch (shipType) {
-            case VIPER -> galacticaBoard().removeFromReserves(Viper.class);
-            case VIPER_MARK_VII -> galacticaBoard().removeFromReserves(ViperMarkVII.class);
-            case ASSAULT_RAPTOR -> galacticaBoard().removeFromReserves(AssaultRaptor.class);
+        val shipClass = switch (shipType) {
+            case VIPER, VIPER_MARK_VII, ASSAULT_RAPTOR -> shipType.shipClass();
             default -> throw new FrakCallTheAdmiralException();
-        })
-                .map(HumanFighter.class::cast)
-                .orElseGet(() -> landUnmannedViper(unmannedViperId));
-        galacticaBoard().place(location, humanFighter);
-        return humanFighter.id();
+        };
+        val inReserves = galacticaBoard().reserves().stream()
+                .filter(s -> s.getClass() == shipClass)
+                .findFirst();
+        if (inReserves.isPresent()) {
+            val id = inReserves.get().id();
+            record(new ShipMoved(id, RESERVES, GALACTICA_SPACE, location));
+            return id;
+        }
+        // no such ship in reserves: the unmanned viper in space is relaunched from where it is
+        val unmanned = galacticaBoard().shipInSpace(unmannedViperId, HumanFighter.class);
+        record(new ShipMoved(unmanned.id(), GALACTICA_SPACE, GALACTICA_SPACE, location));
+        return unmanned.id();
     }
 
     public void placeCivilianShip(Location location) {
-        CivilianShip civ = draw(DeckId.CIVILIAN_SHIPS);
-        galacticaBoard().place(location, civ);
+        CivilianShip civ = game.decks().civilianShips().top(1).getFirst();
+        record(new ShipMoved(civ.id(), CIVILIAN_DECK, GALACTICA_SPACE, location));
     }
 
     public void placeRaider(Location location) {
-        game.cylonShips()
-                .raider()
-                .ifPresent(r -> galacticaBoard().place(location, r));
+        takeFromSupply(Raider.class, location);
     }
 
     @Override
@@ -101,9 +111,4 @@ public class GalacticaOps extends BattlestarOps {
         return galacticaBoard();
     }
 
-    private HumanFighter landUnmannedViper(Integer unmannedViperId) {
-        val ship = galacticaBoard().shipInSpace(unmannedViperId, HumanFighter.class);
-        galacticaBoard().addToReserves(ship);
-        return ship;
-    }
 }

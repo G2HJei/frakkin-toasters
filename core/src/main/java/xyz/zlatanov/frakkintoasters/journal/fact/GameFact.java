@@ -8,6 +8,9 @@ public sealed interface GameFact extends Fact {
     record GameStarted(int playerCount, ObjectiveCard objective) implements GameFact {
     }
 
+    record DieRolled(int value) implements GameFact {
+    }
+
     record StepChanged(GameStep step) implements GameFact {
     }
 

@@ -1,9 +1,15 @@
 package xyz.zlatanov.frakkintoasters.operation;
 
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.journal.fact.BoardFact.PursuitAdvanced;
+import xyz.zlatanov.frakkintoasters.journal.fact.BoardFact.PursuitReset;
+import xyz.zlatanov.frakkintoasters.journal.fact.ShipFact.ShipMoved;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
+import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
+import xyz.zlatanov.frakkintoasters.state.ship.HeavyRaider;
+import xyz.zlatanov.frakkintoasters.state.ship.Raider;
 import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 import xyz.zlatanov.frakkintoasters.state.ship.ShipType;
 import xyz.zlatanov.frakkintoasters.state.track.Pursuit;
@@ -11,6 +17,7 @@ import xyz.zlatanov.frakkintoasters.state.track.Pursuit;
 import java.util.HashMap;
 
 import static xyz.zlatanov.frakkintoasters.state.board.CylonFleetBoard.MOVE_TO_GALACTICA_MAP;
+import static xyz.zlatanov.frakkintoasters.state.ship.ShipZone.*;
 
 public class CylonFleetOps extends GameOps {
 
@@ -19,22 +26,23 @@ public class CylonFleetOps extends GameOps {
     }
 
     public Pursuit advancePursuit() {
-        return cylonFleetBoard().advancePursuit();
+        record(new PursuitAdvanced());
+        return cylonFleetBoard().pursuitTrack();
     }
 
     public void resetPursuit() {
-        cylonFleetBoard().resetPursuit();
+        record(new PursuitReset());
     }
 
     public void place(ShipType shipType, Location location) {
         val cylonShips = game.cylonShips();
         val ship = switch (shipType) {
-            case RAIDER -> cylonShips.raider();
-            case HEAVY_RAIDER -> cylonShips.heavyRaider();
-            case BASESTAR -> cylonShips.basestar();
+            case RAIDER -> cylonShips.next(Raider.class);
+            case HEAVY_RAIDER -> cylonShips.next(HeavyRaider.class);
+            case BASESTAR -> cylonShips.next(Basestar.class);
             default -> throw new FrakCallTheAdmiralException();
         };
-        cylonFleetBoard().place(location, ship.orElseThrow(FrakCallTheAdmiralException::new));
+        record(new ShipMoved(ship.orElseThrow(FrakCallTheAdmiralException::new).id(), CYLON_SUPPLY, CYLON_FLEET_SPACE, location));
     }
 
     public void moveShipsToGalactica() {
@@ -50,7 +58,6 @@ public class CylonFleetOps extends GameOps {
     }
 
     private void moveToGalactica(Ship ship, Location cylonFleetLocation) {
-        cylonFleetBoard().remove(ship);
-        galacticaBoard().place(MOVE_TO_GALACTICA_MAP.get(cylonFleetLocation), ship);
+        record(new ShipMoved(ship.id(), CYLON_FLEET_SPACE, GALACTICA_SPACE, MOVE_TO_GALACTICA_MAP.get(cylonFleetLocation)));
     }
 }

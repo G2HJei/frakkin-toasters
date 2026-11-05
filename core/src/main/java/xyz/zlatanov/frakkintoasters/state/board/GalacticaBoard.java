@@ -108,6 +108,11 @@ public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard, Gal
         return reservesFighter;
     }
 
+    public GalacticaBoard removeFromDamagedShips(Ship ship) {
+        damagedShips.remove(ship);
+        return this;
+    }
+
     public <T extends Viper> Optional<T> removeFromDamagedShips(Class<T> shipClass) {
         return removeFrom(damagedShips, shipClass);
     }

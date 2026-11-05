@@ -37,6 +37,17 @@ public class Player implements PlayerView {
     private       boolean               isInfiltrating          = false;
     private final Set<Integer>          revealedCivilianShipIds = new LinkedHashSet<>();
 
+    @SuppressWarnings("unchecked")
+    public <T> Deck<T> pile(PlayerPile pile) {
+        return (Deck<T>) switch (pile) {
+            case SKILL -> skillCards;
+            case MOTIVE -> motiveCards;
+            case LOYALTY -> loyaltyCards;
+            case MUTINY -> mutinyCards;
+            case SUPER_CRISIS -> superCrisisCards;
+        };
+    }
+
     public Player character(Character selection) {
         assert character == null; //todo use asserts in core to avoid throwing FrakCallTheAdmiralException(s) everywhere
         character = selection;

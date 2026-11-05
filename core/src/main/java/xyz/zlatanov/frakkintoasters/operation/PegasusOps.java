@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.operation;
 
+import xyz.zlatanov.frakkintoasters.journal.fact.BoardFact.EngineRoomActivated;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.board.PegasusBoard;
@@ -18,7 +19,7 @@ public class PegasusOps extends BattlestarOps {
     }
 
     public void activateEngineRoom() {
-        board().engineRoomActivated(true);
+        record(new EngineRoomActivated());
     }
 
     @Override

@@ -25,6 +25,16 @@ public class FakeDeck<T> extends Deck<T> {
     }
 
     @Override
+    public java.util.List<T> top(int n) {
+        for (int i = 0; i < n && !nextCards.isEmpty(); i++) {
+            T nextCard = nextCards.removeFirst();
+            cards.remove(nextCard);
+            cards.add(i, nextCard);
+        }
+        return super.top(n);
+    }
+
+    @Override
     public T draw() {
         if (!nextCards.isEmpty()) {
             T nextCard = nextCards.removeFirst();

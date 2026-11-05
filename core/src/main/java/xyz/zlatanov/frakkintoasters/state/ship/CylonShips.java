@@ -2,6 +2,7 @@ package xyz.zlatanov.frakkintoasters.state.ship;
 
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.view.CylonShipsView;
 
@@ -80,6 +81,60 @@ public class CylonShips implements CylonShipsView {
             case HEAVY_RAIDER -> heavyRaiders.size();
             default -> throw new FrakCallTheAdmiralException();
         };
+    }
+
+    /**
+     * @return the ship that the matching remover (e.g. {@link #raider()}) would hand out next, without removing it
+     */
+    public <T extends CylonShip> Optional<T> next(Class<T> type) {
+        val supply = supplyOf(type);
+        return supply.isEmpty() ? Optional.empty() : Optional.of(supply.getLast());
+    }
+
+    /**
+     * @return the centurion that {@link #centurion()} would hand out next, without removing it
+     */
+    public Optional<Centurion> nextCenturion() {
+        return centurions.isEmpty() ? Optional.empty() : Optional.of(centurions.getLast());
+    }
+
+    /**
+     * Removes the ship with this id from the supply.
+     */
+    public CylonShip take(int id) {
+        for (val supply : List.of(basestars, raiders, heavyRaiders)) {
+            for (val ship : supply) {
+                if (ship.id() == id) {
+                    supply.remove(ship);
+                    return ship;
+                }
+            }
+        }
+        throw new FrakCallTheAdmiralException();
+    }
+
+    /**
+     * Removes the centurion with this id from the supply.
+     */
+    public Centurion takeCenturion(int id) {
+        val centurion = centurions.stream()
+                .filter(c -> c.id() == id)
+                .findFirst()
+                .orElseThrow(FrakCallTheAdmiralException::new);
+        centurions.remove(centurion);
+        return centurion;
+    }
+
+    @SuppressWarnings("unchecked")  // the class token selects the list of exactly that ship type, so the cast is safe
+    private <T extends CylonShip> List<T> supplyOf(Class<T> type) {
+        if (type == Basestar.class) {
+            return (List<T>) basestars;
+        } else if (type == Raider.class) {
+            return (List<T>) raiders;
+        } else if (type == HeavyRaider.class) {
+            return (List<T>) heavyRaiders;
+        }
+        throw new FrakCallTheAdmiralException();
     }
 
     public CylonShips returned(Ship ship) {

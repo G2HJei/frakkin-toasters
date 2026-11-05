@@ -68,6 +68,24 @@ public class Deck<T> implements DeckView<T> {
         return autoShuffle;
     }
 
+    /**
+     * Removes the top n cards from the draw pile.
+     *
+     * @return the removed cards (first = top)
+     */
+    public List<T> removeTop(int n) {
+        val removed = new ArrayList<>(cards.subList(0, n));
+        cards.subList(0, n).clear();
+        return removed;
+    }
+
+    /**
+     * @return the top n cards (first = top) without drawing them.
+     */
+    public List<T> top(int n) {
+        return new ArrayList<>(cards.subList(0, n));
+    }
+
     public List<T> draw(int cards) {
         val result = new ArrayList<T>();
         while (cards-- > 0) {
@@ -121,7 +139,7 @@ public class Deck<T> implements DeckView<T> {
     public List<T> revealedCards() {
         return Collections.unmodifiableList(revealedCards);
     }
-    
+
     public Deck<T> setDrawOrder(List<? extends T> newOrder) {
         cards.clear();
         cards.addAll(newOrder);

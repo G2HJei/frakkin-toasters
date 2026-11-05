@@ -1,24 +1,28 @@
 package xyz.zlatanov.frakkintoasters.operation;
 
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.journal.fact.DeckFact.CardsAddedOnTop;
+import xyz.zlatanov.frakkintoasters.journal.fact.DeckFact.CardsAddedToBottom;
+import xyz.zlatanov.frakkintoasters.journal.fact.PlayerFact.*;
+import xyz.zlatanov.frakkintoasters.journal.fact.ShipFact.PilotChanged;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Player;
+import xyz.zlatanov.frakkintoasters.state.PlayerPile;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
+import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
 import xyz.zlatanov.frakkintoasters.state.card.MutinyCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.crisis.SuperCrisisCard;
-import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
+import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import xyz.zlatanov.frakkintoasters.state.ship.HumanFighter;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 
 import java.util.Arrays;
 import java.util.List;
-
-import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.*;
 
 
 public class PlayerOps extends GameOps {
@@ -31,23 +35,17 @@ public class PlayerOps extends GameOps {
     }
 
     public void selectCharacter(Character selectedCharacter) {
-        player.character(selectedCharacter);
+        record(new CharacterSelected(player.number(), selectedCharacter));
     }
 
     public void drawLoyaltyCards(int cardsToDraw) {
-        val loyaltyCards = game.decks().loyalty().draw(cardsToDraw);
-        player.loyaltyCards().addOnTop(loyaltyCards);
+        List<LoyaltyCard> loyaltyCards = draw(DeckId.LOYALTY, cardsToDraw);
+        gain(PlayerPile.LOYALTY, loyaltyCards);
     }
 
     public void moveTo(Location location) { //todo move to brig makes Admiral lose its title
         assert !location.isSpaceLocation();
-        val character = player.character();
-        game.boards().all().forEach(b -> b.remove(character));
-        game.boards().all().stream()
-                .filter(b -> b.locations().contains(location))
-                .findFirst()
-                .orElseThrow(FrakCallTheAdmiralException::new)
-                .place(location, character);
+        record(new CharacterMoved(player.character(), location));
     }
 
     public void sendTo(Location location) {
@@ -63,89 +61,88 @@ public class PlayerOps extends GameOps {
 
     public void drawSkillCards(List<SkillCardColor> colors) {
         for (val color : colors) {
-            SkillCard draw = draw(of(color));
-            player.gainSkillCards(draw);
+            SkillCard card = draw(DeckId.of(color));
+            gain(PlayerPile.SKILL, List.of(card));
         }
     }
 
     public CrisisCard drawCrisisCard() {
-        return draw(CRISIS);
+        return draw(DeckId.CRISIS);
     }
 
     public PlayerOps drawSuperCrisisCard() {
-        SuperCrisisCard card = draw(SUPER_CRISIS);
-        player.superCrisisCards()
-                .addOnTop(card);
+        SuperCrisisCard card = draw(DeckId.SUPER_CRISIS);
+        gain(PlayerPile.SUPER_CRISIS, List.of(card));
         return this;
     }
 
     public void drawMutinyCard() {
-        MutinyCard card = draw(MUTINY);
-        player.mutinyCards().addOnTop(card);
+        MutinyCard card = draw(DeckId.MUTINY);
+        gain(PlayerPile.MUTINY, List.of(card));
         //todo if 2nd -> discard one and move to brig. Handle followup in engine not in each mutiny drawing event
     }
 
     public void drawMotiveCards() {
-        List<MotiveCard> motiveCards = draw(MOTIVE, 2);
-        player.motiveCards().addOnTop(motiveCards);
+        List<MotiveCard> motiveCards = draw(DeckId.MOTIVE, 2);
+        gain(PlayerPile.MOTIVE, motiveCards);
     }
 
     public DestinationCard drawDestinationCard() {
-        return draw(DESTINATION);
+        return draw(DeckId.DESTINATION);
     }
 
     public void placeCrisisCardOnTop(CrisisCard card) {
-        game.decks().crisis().addOnTop(card);
+        record(new CardsAddedOnTop(DeckId.CRISIS, List.of(card)));
     }
 
     public void placeCrisisCardOnBottom(CrisisCard card) {
-        game.decks().crisis().addToBottom(card);
+        record(new CardsAddedToBottom(DeckId.CRISIS, List.of(card)));
     }
 
     public void placeDestinationCardOnTop(DestinationCard card) {
-        game.decks().destination().addOnTop(card);
+        record(new CardsAddedOnTop(DeckId.DESTINATION, List.of(card)));
     }
 
     public void placeDestinationCardOnBottom(DestinationCard card) {
-        game.decks().destination().addToBottom(card);
+        record(new CardsAddedToBottom(DeckId.DESTINATION, List.of(card)));
     }
 
     public PlayerOps discard(SkillCard... cards) {
-        player.skillCards()
-                .remove(cards);
-        game.decks().discard(cards);
+        record(new CardsLost(player.number(), PlayerPile.SKILL, List.of(cards)));
+        Arrays.stream(cards).forEach(this::discardToDeck);
         return this;
     }
 
     public void discard(MutinyCard... cards) {
-        player.mutinyCards()
-                .remove(cards);
-        game.decks().discard(Arrays.stream(cards).toList());
+        record(new CardsLost(player.number(), PlayerPile.MUTINY, List.of(cards)));
+        Arrays.stream(cards).forEach(this::discardToDeck);
     }
 
     public void infiltrateGalactica(Location infiltrateLocation) {
-        player.infiltrateGalactica();
+        record(new InfiltrationStarted(player.number()));
         moveTo(infiltrateLocation);
     }
 
     public void lookAtShip(Integer civId) {
-        player.revealedCivilianShipIds()
-                .add(civId);
+        record(new CivilianShipRevealed(player.number(), civId));
     }
 
     public void pilot(int humanFighterId) {
         val character = player.character();
-        galacticaBoard().remove(character);
-        galacticaBoard()
-                .shipInSpace(humanFighterId, HumanFighter.class)
-                .pilot(character);
+        galacticaBoard().shipInSpace(humanFighterId, HumanFighter.class); // fails when there is no such fighter
+        record(new CharacterRemovedFromBoards(character));
+        record(new PilotChanged(humanFighterId, character));
     }
 
     public void receiveSkillCard(SkillCard card) {
-        player.gainSkillCards(card);
+        gain(PlayerPile.SKILL, List.of(card));
     }
 
     public void gainMiracleToken() {
-        player.gainMiracleToken();
+        record(new MiracleTokenGained(player.number()));
+    }
+
+    private void gain(PlayerPile pile, List<?> cards) {
+        record(new CardsGained(player.number(), pile, cards));
     }
 }

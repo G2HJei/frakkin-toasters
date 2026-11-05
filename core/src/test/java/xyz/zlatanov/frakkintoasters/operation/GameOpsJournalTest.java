@@ -3,7 +3,10 @@ package xyz.zlatanov.frakkintoasters.operation;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.TestHarness;
+import xyz.zlatanov.frakkintoasters.journal.fact.DeckFact.CardsDrawn;
 import xyz.zlatanov.frakkintoasters.journal.fact.DeckFact.DeckShuffled;
+import xyz.zlatanov.frakkintoasters.journal.fact.PlayerFact.CardsGained;
+import xyz.zlatanov.frakkintoasters.state.PlayerPile;
 import xyz.zlatanov.frakkintoasters.journal.fact.GameFact.*;
 import xyz.zlatanov.frakkintoasters.journal.fact.TitleFact.*;
 import xyz.zlatanov.frakkintoasters.state.GameStep;
@@ -66,7 +69,11 @@ class GameOpsJournalTest extends TestHarness {
 
         ops.player(1).drawSkillCards(POLITICS);
 
-        assertEquals(List.of(new DeckShuffled(DeckId.POLITICS, List.of(discarded))), game.journal().facts());
+        val facts = game.journal().facts();
+        assertEquals(new CardsDrawn(DeckId.POLITICS, List.of(top)), facts.get(0));
+        assertEquals(new DeckShuffled(DeckId.POLITICS, List.of(discarded)), facts.get(1));
+        assertEquals(new CardsGained(1, PlayerPile.SKILL, List.of(top)), facts.get(2));
+        assertEquals(3, facts.size());
         assertEquals(List.of(discarded), politicsDeck.cards());
         assertEquals(0, politicsDeck.discardSize());
     }
