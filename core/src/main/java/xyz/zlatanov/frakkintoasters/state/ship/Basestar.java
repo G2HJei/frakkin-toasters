@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.state.ship;
 
+import xyz.zlatanov.frakkintoasters.state.Mutates;
 import xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage;
 import xyz.zlatanov.frakkintoasters.state.view.BasestarView;
 
@@ -22,6 +23,7 @@ public class Basestar implements BasestarView {
         return id;
     }
 
+    @Mutates
     public Basestar damage(BasestarDamage dmg) {
         damage.add(dmg);
         return this;
@@ -31,6 +33,7 @@ public class Basestar implements BasestarView {
         return Collections.unmodifiableList(damage);
     }
 
+    @Mutates
     public void clearDamage() {
         damage.clear();
     }

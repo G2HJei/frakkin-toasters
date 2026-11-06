@@ -45,8 +45,8 @@ Next steps, in order:
 1. Complete the skill check sequence according to `skill-check.drawio`.
 2. ~~Reanalyze existing events: `PlayerEvent` or current player.~~ Done. The engine still has to call `GameOps.actingPlayer`
    for "Executive Order".
-3. Create the journal and tie it to the ops classes in `operation/` (`AbstractOps` has the todo). Follow the design in
-   `refactor-game-view.md`.
+3. ~~Create the journal and tie it to the ops classes in `operation/`.~~ Done, see "Journal and Replay". Still open:
+   describers and per-viewer hiding, JSON serialization, and the pending followup queue (that one belongs to step 4).
 4. Create the game engine to drive the events and turns (`Turn` is a stub; there is no event-to-processor lookup in
    production code yet).
 5. Create a working frontend with the events that exist by then.
@@ -62,10 +62,14 @@ Multi-module Gradle project with a single `core` module. Package root: `xyz.zlat
   `location/{galactica,pegasus,colonialone,cylon}`, `loyalty`, `officials`, `player`, `ship`, `skillcheck`,
   `skillcheck/ability`, `skillcheck/result`). Also `placeholder/` (events that need player input) and `constraint/`
   (`EventConstraint`)
-- `operation/` - game ops, the only code that should mutate state: `GameOps` (entry point) hands out `PlayerOps`,
+- `operation/` - game ops, the only code that decides what changes: `GameOps` (entry point) hands out `PlayerOps`,
   `ShipOps`, `GalacticaOps`, `PegasusOps`, `CylonFleetOps`, `SkillCheckOps`, `LoyaltyDeckOps`, `TitleOps`. They extend
-  `AbstractOps`, which holds the `Game` (journal still a todo)
-- `state/` - game state model: `Game` (top level), `Player`, `Die` (d8), `GameStep`, `RemovedComponents`
+  `AbstractOps`, which holds the `Game` and the journal, and offers `record`, `draw`, `shuffle`. Ops record facts, they
+  never write to components
+- `journal/` - `Journal`, `JournalEntry`, `JournalWriter`, `FactApplier`, `ShipZones`, `GameReplayer`, and `fact/` with the
+  `Fact` records
+- `state/` - game state model: `Game` (top level), `Player`, `Die` (d8), `Randomness`, `GameStep`, `RemovedComponents`,
+  `PlayerPile`, and the `@Mutates` marker
 - `state/view/` - read-only view interfaces (`GameView`, `PlayerView`, `BoardsHolderView`, `SkillCheckView`, ...)
   implemented by the state classes. Processors read state only through these
 - `state/board/` - board hierarchy: `Board` (base, tracks characters by location) -> `BattlestarBoard` (adds damage
@@ -112,6 +116,8 @@ Each `XxxEvent` has an `XxxEventProcessor extends EventProcessor<XxxEvent>` in t
 `ops` is only set right before `process()`, so `init()` and `isValid()` can't change state. Processors read through
 `GameView` and write only through game ops. Game ops do mechanics, and processors make decisions (targets, rules
 branching, followups).
+
+Every state change leaves a fact in the journal, see "Journal and Replay".
 
 Placeholder events (`event/placeholder/`: `PlayerDecisionEvent`, `PlayQuorumCardEvent`, `PlaySuperCrisisCardEvent`)
 have no processor. They stand for a point where a player has to choose. `PlayerDecisionEvent<T>(playerNumber,
@@ -166,6 +172,37 @@ An event that supports a constraint has its own record component for it (e.g. `D
 when there is none). Its processor checks the constraint in `isValid()` and throws `FrakCallTheAdmiralException` for any
 constraint it doesn't support.
 
+### Journal and Replay
+
+The journal records exactly what the game ops did, so a game can be rebuilt from the journal alone (`journal-plan.md` has
+the design). It is fact-sourced: replay applies recorded facts, and never re-runs processors or needs randomness.
+
+- `Fact` (`journal/fact/`) is a sealed interface, grouped by area: `BoardFact`, `DeckFact`, `GameFact`, `PlayerFact`,
+  `ShipFact`, `SkillCheckFact`, `TitleFact`. The records are nested in the area interfaces, because a sealed hierarchy
+  can't span packages without a `module-info`. A new fact has to be handled in `FactApplier`'s exhaustive `switch`.
+- `Journal` is an append-only flat list of `ScopeOpened` / `FactRecorded` / `ScopeClosed`. Ops see it only as a
+  `JournalWriter`. Facts recorded while no scope is open go under `Journal.ROOT_SCOPE`. The engine will open a scope per
+  event, `EventTestHarness.execute` does it until then.
+- `FactApplier` is the only code that changes components. `AbstractOps.record(fact)` applies a fact and then appends it,
+  so live play and replay share one code path. `ShipZones` (same package) moves ships between zones by id.
+- `GameReplayer.replay(journal)` builds the game from the first fact, `GameStarted`, and applies the rest.
+
+Rules for facts and ops:
+
+1. **A fact applies exactly what it says and nothing more.** No cascades: `LocationDamaged` marks the damage, and the
+   Sickbay moves are separate `CharacterMoved` facts logged after it.
+2. **Every random or looked-up result goes into the fact**: drawn cards, the order after a shuffle, die values, ship ids.
+   Randomness comes from `Game.randomness()` (`Randomness`, seedable), never from `Collections.shuffle` or `new Random()`.
+3. **Ops never write to components.** They compute a fact from the current state and call `record(fact)`. Drawing is
+   `draw(DeckId)` (peek, record `CardsDrawn`, log the reshuffle when the draw empties a reshuffling deck), shuffling is
+   `shuffle(DeckId)`. A drawn card is in no pile until another fact says where it went.
+4. **Fact fields are complete and immutable.** Cards are listed in full. Hiding them is the describers' job (not built yet).
+5. **`@Mutates`** marks every component method that changes state. `ArchitectureTest` (ArchUnit) allows calls only from
+   `..journal..` and `..state..`, and checks that `..event..` and `..operation..` never call them. Tests are not
+   analyzed. Mutable collections that getters expose (e.g. `Board.characters()`) can't be marked, don't change state
+   through them.
+6. Ships and centurions are named by their fixed ids. Decks are built in canonical order and shuffled by `GameOps.startGame()`.
+
 ### Lombok Usage
 
 Uses Lombok extensively: `@Builder`, `@Getter`, `@Accessors(fluent = true)`, `@RequiredArgsConstructor`, `val`.
@@ -183,5 +220,8 @@ when possible.
   that it was `Followup.NONE`
 - `FakeDie` - test double for `Die` with `nextRoll(int)` to control randomness
 - `FakeDeck<T>` - test double for `Deck<T>` with `nextCard(T...)` to control draws
+- `GameSnapshot` (`journal/`) - turns a `Game` into comparable plain values. Replay tests compare a live game with its
+  replayed twin. `GameReplayerTest` has the scripted scenario that has to record every kind of fact
+- Op tests also assert the logged facts (`game.journal().facts()`), and `FactApplierTest` covers each fact
 - Tests follow the pattern: set up game state, execute the event, assert state changes and followups. Use real game ops
   in processor tests, not mocks, since processors may read their own changes

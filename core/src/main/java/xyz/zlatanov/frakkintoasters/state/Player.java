@@ -22,7 +22,7 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.CHIEF_GALEN
 import static xyz.zlatanov.frakkintoasters.state.character.CharacterType.CYLON_LEADER;
 
 @RequiredArgsConstructor
-@Getter
+@Getter //todo replace getters with explicit methods for View interface usage to ensure no modification is possible
 @Accessors(fluent = true)
 public class Player implements PlayerView {
 
@@ -48,12 +48,14 @@ public class Player implements PlayerView {
         };
     }
 
+    @Mutates
     public Player character(Character selection) {
         assert character == null; //todo use asserts in core to avoid throwing FrakCallTheAdmiralException(s) everywhere
         character = selection;
         return this;
     }
 
+    @Mutates
     public void gainSkillCards(SkillCard... cardsToAdd) {
         skillCards.addOnTop(Arrays.asList(cardsToAdd));
     }
@@ -63,6 +65,7 @@ public class Player implements PlayerView {
         return character == CHIEF_GALEN_TYROL ? 8 : 10;
     }
 
+    @Mutates
     public void exhaustMiracleToken() {
         if (!hasMiracleToken) {
             throw new FrakCallTheAdmiralException();
@@ -70,6 +73,7 @@ public class Player implements PlayerView {
         hasMiracleToken = false;
     }
 
+    @Mutates
     public void gainMiracleToken() {
         hasMiracleToken = true;
     }
@@ -94,11 +98,13 @@ public class Player implements PlayerView {
                 .anyMatch(LoyaltyCard::isCylon);
     }
 
+    @Mutates
     public void infiltrateGalactica() {
         assert character.type() == CYLON_LEADER;
         isInfiltrating = true;
     }
 
+    @Mutates
     public void endInfiltration() {
         assert character.type() == CYLON_LEADER;
         isInfiltrating = false;

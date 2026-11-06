@@ -1,11 +1,7 @@
 package xyz.zlatanov.frakkintoasters.state;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.Accessors;
-import lombok.val;
 import xyz.zlatanov.frakkintoasters.journal.Journal;
 import xyz.zlatanov.frakkintoasters.state.board.BoardsHolder;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
@@ -26,6 +22,7 @@ import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
 
 @Builder
 @Getter
+//todo replace getters/setters with explicit methods for View interface usage to ensure no modification is possible
 @Accessors(fluent = true)
 public class Game implements GameView {
     // todo separate counters in own classes?
@@ -34,15 +31,15 @@ public class Game implements GameView {
     private ObjectiveCard        objective           = KOBOL;
     @Builder.Default
     private Map<Integer, Player> players             = Map.of(1, new Player(1), 2, new Player(2), 3, new Player(3));
-    @Setter
+    @Setter(onMethod_ = @Mutates)
     @Builder.Default
     private int                  currentPlayerNumber = 1;
     @Getter(AccessLevel.NONE)
     private Integer              actingPlayerNumber; // null means the current player is acting
-    @Setter
+    @Setter(onMethod_ = @Mutates)
     @Builder.Default
     private GameStep             step                = SETUP;
-    @Setter
+    @Setter(onMethod_ = @Mutates)
     @Builder.Default
     private int                  turn                = 0;
     @Builder.Default
@@ -58,13 +55,13 @@ public class Game implements GameView {
     private CylonShips           cylonShips          = CylonShips.builder().build();
     @Builder.Default
     private int                  nukes               = 2;
-    @Setter
+    @Setter(onMethod_ = @Mutates)
     private Character            president;
     @Builder.Default
     private Deck<QuorumCard>     presidentHand       = new Deck<>(false);
-    @Setter
+    @Setter(onMethod_ = @Mutates)
     private Character            admiral;
-    @Setter
+    @Setter(onMethod_ = @Mutates)
     private Character            cag;
     @Builder.Default
     private RemovedComponents    removedComponents   = new RemovedComponents();
@@ -108,6 +105,7 @@ public class Game implements GameView {
     /**
      * @param actingPlayerNumber the player acting out of turn, or {@code null} when the current player is acting
      */
+    @Mutates
     public Game actingPlayerNumber(Integer actingPlayerNumber) {
         this.actingPlayerNumber = actingPlayerNumber;
         return this;
@@ -130,6 +128,7 @@ public class Game implements GameView {
         return locations.getFirst();
     }
 
+    @Mutates
     public SkillCheck startSkillCheck(SkillCheckType type) {
         activeSkillCheck = new SkillCheck(type);
         return activeSkillCheck;

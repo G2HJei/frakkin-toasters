@@ -6,6 +6,7 @@ import java.util.List;
 public class RemovedComponents {
     private final List<Object> items = new ArrayList<>();
 
+    @Mutates
     public void add(Object e) {
         items.add(e);
     }

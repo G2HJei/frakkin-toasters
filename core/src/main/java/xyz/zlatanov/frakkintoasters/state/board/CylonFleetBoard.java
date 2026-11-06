@@ -3,6 +3,7 @@ package xyz.zlatanov.frakkintoasters.state.board;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.state.Mutates;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 import xyz.zlatanov.frakkintoasters.state.track.Pursuit;
@@ -17,7 +18,7 @@ import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.CYLON_FLEET
 import static xyz.zlatanov.frakkintoasters.state.track.Pursuit.AUTO_ATTACK;
 import static xyz.zlatanov.frakkintoasters.state.track.Pursuit.START;
 
-@Getter
+@Getter //todo replace getters with explicit methods for View interface usage to ensure no modification is possible
 @Accessors(fluent = true)
 public class CylonFleetBoard implements Board, SpaceLocationsBoard, CylonFleetBoardView {
     public static final Map<Location, Location> MOVE_TO_GALACTICA_MAP = Map.of(
@@ -39,6 +40,7 @@ public class CylonFleetBoard implements Board, SpaceLocationsBoard, CylonFleetBo
         throw new UnsupportedOperationException();
     }
 
+    @Mutates
     public Pursuit advancePursuit() {
         assert pursuitTrack != AUTO_ATTACK;
         val current = pursuitTrack.ordinal();
@@ -46,6 +48,7 @@ public class CylonFleetBoard implements Board, SpaceLocationsBoard, CylonFleetBo
         return pursuitTrack;
     }
 
+    @Mutates
     public void resetPursuit() {
         pursuitTrack = START;
     }

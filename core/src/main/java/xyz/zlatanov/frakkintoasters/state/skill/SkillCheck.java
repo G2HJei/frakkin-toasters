@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.state.skill;
 
+import xyz.zlatanov.frakkintoasters.state.Mutates;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +48,7 @@ public class SkillCheck implements SkillCheckView {
         };
     }
 
+    @Mutates
     public SkillCheck targetPlayerNumber(int targetPlayerNumber) {
         assert this.targetPlayerNumber == null : "Skill check target already chosen";
         this.targetPlayerNumber = targetPlayerNumber;
@@ -54,6 +56,7 @@ public class SkillCheck implements SkillCheckView {
     }
 
     //todo handle already resolved mechanics and removing future events when skill check ability card is removed separately
+    @Mutates
     public SkillCheck remove(SkillCard card, Integer playerNumber) {
         if (Optional.ofNullable(playedBeforeSkillCheck.get(playerNumber))
                 .map(cards -> cards.contains(card))
@@ -69,11 +72,13 @@ public class SkillCheck implements SkillCheckView {
         return this;
     }
 
+    @Mutates
     public SkillCheck playedBefore(int playerNumber, List<SkillCard> cards) {
         playedBeforeSkillCheck.put(playerNumber, new ArrayList<>(cards));
         return this;
     }
 
+    @Mutates
     public void revealPlayedBefore() {
         playedBeforeRevealed = true;
     }
@@ -114,6 +119,7 @@ public class SkillCheck implements SkillCheckView {
                 .toList();
     }
 
+    @Mutates
     public SkillCheck resolved(SkillCardType cardType) {
         assert !resolvedAbilities.contains(cardType) : "Skill check abilities can be resolved once per skill check";
         resolvedAbilities.add(cardType);
@@ -125,29 +131,34 @@ public class SkillCheck implements SkillCheckView {
         return unmodifiableList(resolvedAbilities);
     }
 
+    @Mutates
     public void declareEmergency() {
         assert !emergencyDeclared : "Limit of 1 Declare Emergency per skill check";
         emergencyDeclared = true;
     }
 
+    @Mutates
     public SkillCheck totalStrength(int totalStrength) {
         assert this.totalStrength == null : "Skill check strength already totaled";
         this.totalStrength = totalStrength;
         return this;
     }
 
+    @Mutates
     public SkillCheck result(SkillCheckResult result) {
         assert this.result == null : "Skill check result already determined";
         this.result = result;
         return this;
     }
 
+    @Mutates
     public SkillCheck replacePassResult() {
         assert result == PASS && !passResultReplaced : "Only a pending pass result can be replaced";
         passResultReplaced = true;
         return this;
     }
 
+    @Mutates
     public SkillCheck preventFailResult() {
         assert result == FAIL && !failResultPrevented : "Only a pending fail result can be prevented";
         failResultPrevented = true;

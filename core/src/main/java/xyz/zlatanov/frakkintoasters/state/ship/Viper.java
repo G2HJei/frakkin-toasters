@@ -2,7 +2,9 @@ package xyz.zlatanov.frakkintoasters.state.ship;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Setter;
 import lombok.experimental.Accessors;
+import xyz.zlatanov.frakkintoasters.state.Mutates;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 
 @Data
@@ -10,5 +12,6 @@ import xyz.zlatanov.frakkintoasters.state.character.Character;
 @EqualsAndHashCode(of = "id")
 public class Viper implements HumanFighter {
     private final int       id;
+    @Setter(onMethod_ = @Mutates) //todo write stter, remove lombok annotation?
     private       Character pilot;
 }

@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.state.ship;
 
+import xyz.zlatanov.frakkintoasters.state.Mutates;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.val;
@@ -45,6 +46,7 @@ public class CylonShips implements CylonShipsView {
         return new CylonShipsBuilder();
     }
 
+    @Mutates
     public Optional<Basestar> basestar() {
         if (basestars.isEmpty()) {
             return Optional.empty();
@@ -52,6 +54,7 @@ public class CylonShips implements CylonShipsView {
         return Optional.of(basestars.removeLast());
     }
 
+    @Mutates
     public Optional<Raider> raider() {
         if (raiders.isEmpty()) {
             return Optional.empty();
@@ -59,6 +62,7 @@ public class CylonShips implements CylonShipsView {
         return Optional.of(raiders.removeLast());
     }
 
+    @Mutates
     public Optional<HeavyRaider> heavyRaider() {
         if (heavyRaiders.isEmpty()) {
             return Optional.empty();
@@ -66,6 +70,7 @@ public class CylonShips implements CylonShipsView {
         return Optional.of(heavyRaiders.removeLast());
     }
 
+    @Mutates
     public Optional<Centurion> centurion() {
         if (centurions.isEmpty()) {
             return Optional.empty();
@@ -101,6 +106,7 @@ public class CylonShips implements CylonShipsView {
     /**
      * Removes the ship with this id from the supply.
      */
+    @Mutates
     public CylonShip take(int id) {
         for (val supply : List.of(basestars, raiders, heavyRaiders)) {
             for (val ship : supply) {
@@ -116,6 +122,7 @@ public class CylonShips implements CylonShipsView {
     /**
      * Removes the centurion with this id from the supply.
      */
+    @Mutates
     public Centurion takeCenturion(int id) {
         val centurion = centurions.stream()
                 .filter(c -> c.id() == id)
@@ -137,6 +144,7 @@ public class CylonShips implements CylonShipsView {
         throw new FrakCallTheAdmiralException();
     }
 
+    @Mutates
     public CylonShips returned(Ship ship) {
         switch (ship) {
             case Basestar b -> basestars.add(b);
@@ -147,6 +155,7 @@ public class CylonShips implements CylonShipsView {
         return this;
     }
 
+    @Mutates
     public CylonShips returnedCenturion(Centurion centurion) {
         centurions.add(centurion);
         return this;

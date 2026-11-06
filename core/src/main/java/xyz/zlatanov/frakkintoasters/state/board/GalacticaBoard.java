@@ -3,6 +3,7 @@ package xyz.zlatanov.frakkintoasters.state.board;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.state.Mutates;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
@@ -18,7 +19,7 @@ import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.*;
 import static xyz.zlatanov.frakkintoasters.state.track.BoardingParty.HUMANS_LOSE;
 import static xyz.zlatanov.frakkintoasters.state.track.BoardingParty.START;
 
-@Getter
+@Getter //todo replace getters with explicit methods for View interface usage to ensure no modification is possible
 @Accessors(fluent = true)
 public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard, GalacticaBoardView {
     private       int                           fuel                 = 8;
@@ -60,6 +61,7 @@ public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard, Gal
                 .findFirst();
     }
 
+    @Mutates
     public void destroyColonialOne() {
         locations.remove(PRESS_ROOM);
         locations.remove(PRESIDENTS_OFFICE);
@@ -70,34 +72,41 @@ public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard, Gal
         colonialOneDestroyed = true;
     }
 
+    @Mutates
     public GalacticaBoard addToReserves(Ship ship) {
         return addToReserves(List.of(ship));
     }
 
+    @Mutates
     public GalacticaBoard addToReserves(List<Ship> ships) {
         reserves.addAll(ships);
         return this;
     }
 
+    @Mutates
     public GalacticaBoard addToDamagedShips(Viper ship) {
         return addToDamagedShips(List.of(ship));
     }
 
+    @Mutates
     public GalacticaBoard addToDamagedShips(List<Viper> ships) {
         damagedShips.addAll(ships);
         return this;
     }
 
 
+    @Mutates
     public <T extends Ship> Optional<T> removeFromReserves(Class<T> shipClass) {
         return removeFrom(reserves, shipClass);
     }
 
+    @Mutates
     public GalacticaBoard removeFromReserves(Ship ship) {
         reserves.remove(ship);
         return this;
     }
 
+    @Mutates
     public Optional<HumanFighter> removeFromReserves(int shipId) {
         val reservesFighter = reserves.stream()
                 .filter(s -> s instanceof HumanFighter)
@@ -108,20 +117,24 @@ public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard, Gal
         return reservesFighter;
     }
 
+    @Mutates
     public GalacticaBoard removeFromDamagedShips(Ship ship) {
         damagedShips.remove(ship);
         return this;
     }
 
+    @Mutates
     public <T extends Viper> Optional<T> removeFromDamagedShips(Class<T> shipClass) {
         return removeFrom(damagedShips, shipClass);
     }
 
+    @Mutates
     public GalacticaBoard boardGalactica(Centurion centurion) {
         boardingPartyTrack.put(centurion, START);
         return this;
     }
 
+    @Mutates
     public GalacticaBoard advanceBoardingParty() {
         assert !boardingPartyTrack.containsValue(HUMANS_LOSE);
         boardingPartyTrack.replaceAll(
@@ -130,6 +143,7 @@ public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard, Gal
         return this;
     }
 
+    @Mutates
     public GalacticaBoard advanceJumpPreparation() {
         val current = jumpPreparation.ordinal();
         val autoJump = JumpPreparation.values().length - 1;
@@ -138,6 +152,7 @@ public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard, Gal
         return this;
     }
 
+    @Mutates
     public Centurion destroyCenturion(int centurionId) {
         val centurion = boardingPartyTrack.keySet().stream()
                 .filter(c -> centurionId == c.id())
@@ -147,31 +162,37 @@ public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard, Gal
         return centurion;
     }
 
+    @Mutates
     public GalacticaBoard decreaseFood(int amount) {
         food = Math.max(0, food - amount);
         return this;
     }
 
+    @Mutates
     public GalacticaBoard increaseFood() {
         food++;
         return this;
     }
 
+    @Mutates
     public GalacticaBoard decreaseFuel(int amount) {
         fuel = Math.max(0, fuel - amount);
         return this;
     }
 
+    @Mutates
     public GalacticaBoard increaseFuel() {
         fuel++;
         return this;
     }
 
+    @Mutates
     public GalacticaBoard decreaseMorale(int amount) {
         morale = Math.max(0, morale - amount);
         return this;
     }
 
+    @Mutates
     public GalacticaBoard decreasePopulation(int amount) {
         population = Math.max(0, population - amount);
         return this;

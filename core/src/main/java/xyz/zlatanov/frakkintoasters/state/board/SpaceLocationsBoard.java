@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.state.board;
 
+import xyz.zlatanov.frakkintoasters.state.Mutates;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.Ship;
@@ -65,21 +66,25 @@ public interface SpaceLocationsBoard extends SpaceLocationsBoardView {
                 .toList();
     }
 
+    @Mutates
     default SpaceLocationsBoard place(Location in, Ship... ships) {
         return place(in, Arrays.stream(ships).toList());
     }
 
+    @Mutates
     default SpaceLocationsBoard place(Location in, List<Ship> ships) {
         ships.forEach(s -> place(in, s));
         return this;
     }
 
+    @Mutates
     default SpaceLocationsBoard place(Location in, Ship ship) {
         assert in.isSpaceLocation();
         shipsInSpace().put(ship, in);
         return this;
     }
 
+    @Mutates
     default SpaceLocationsBoard remove(Ship ship) {
         assert shipsInSpace().containsKey(ship);
         shipsInSpace().remove(ship);
