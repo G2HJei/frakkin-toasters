@@ -10,6 +10,10 @@ public class RemovedComponents {
         items.add(e);
     }
 
+    public List<Object> items() {
+        return List.copyOf(items);
+    }
+
     public boolean contains(Object o) {
         return items.contains(o);
     }
