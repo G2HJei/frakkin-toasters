@@ -42,7 +42,7 @@ public abstract class EventTestHarness<E extends Event> extends TestHarness {
     }
 
     protected void execute(E event) {
-        journal.openScope(event, game.actingPlayerNumber()); // the engine will do this later
+        journal.openScope(event, game.turn().actingPlayerNumber()); // the engine will do this later
         try {
             followup = eventProcessor.execute(game, event, ops);
         } finally {

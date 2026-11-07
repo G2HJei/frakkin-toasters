@@ -133,7 +133,7 @@ class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEv
     @MethodSource("hazardousLocationLimits")
     void shouldDrawLessCardsWhenInHazardousLocation(Location location, int limit) {
         moveTo(location, KARA_STARBUCK_THRACE);
-        game.step(RECEIVE_SKILLS);
+        game.turn().step(RECEIVE_SKILLS);
 
         execute(new DrawSkillCardsEvent(1, Map.of(TACTICS, limit)));
     }
@@ -149,7 +149,7 @@ class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEv
     @MethodSource("hazardousLocationLimits")
     void shouldNotDrawMoreThanHazardousLocationLimit(Location location, int limit) {
         moveTo(location, KARA_STARBUCK_THRACE);
-        game.step(RECEIVE_SKILLS);
+        game.turn().step(RECEIVE_SKILLS);
 
         assertInvalid(new DrawSkillCardsEvent(1, Map.of(TACTICS, ++limit)));
     }
@@ -157,7 +157,7 @@ class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEv
     @Test
     void shouldNotApplyHazardousLocationLimitToCharacterNotOnTheBoard() {
         player(2).character(KARL_HELO_AGATHON);
-        game.step(RECEIVE_SKILLS);
+        game.turn().step(RECEIVE_SKILLS);
 
         assertDoesNotThrow(() -> execute(new DrawSkillCardsEvent(2, Map.of(LEADERSHIP, 2))));
     }

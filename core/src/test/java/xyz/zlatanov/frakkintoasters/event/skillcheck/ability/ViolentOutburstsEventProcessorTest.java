@@ -33,7 +33,7 @@ class ViolentOutburstsEventProcessorTest extends EventTestHarness<ViolentOutburs
 
     @Test
     void shouldNotSendUnarrivedHeloToSickbay() {
-        game.currentPlayerNumber(2).turn(2);
+        game.turn().currentPlayerNumber(2).number(2);
         execute(new ViolentOutburstsEvent());
         assertTrue(game.locate(KARL_HELO_AGATHON).isEmpty());
     }
@@ -41,7 +41,7 @@ class ViolentOutburstsEventProcessorTest extends EventTestHarness<ViolentOutburs
     @Test
     void shouldSendHeloToSickbay() {
         moveTo(HANGAR_DECK, KARL_HELO_AGATHON);
-        game.currentPlayerNumber(2);
+        game.turn().currentPlayerNumber(2);
         execute(new ViolentOutburstsEvent());
         assertEquals(SICKBAY, locate(KARL_HELO_AGATHON));
     }

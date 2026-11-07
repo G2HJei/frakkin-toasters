@@ -87,10 +87,10 @@ public final class FactApplier {
             case GameFact.DieRolled ignored -> {
                 // the result is the fact, nothing to change
             }
-            case GameFact.StepChanged f -> game.step(f.step());
-            case GameFact.TurnStarted f -> game.turn(f.turn());
-            case GameFact.CurrentPlayerChanged f -> game.currentPlayerNumber(f.playerNumber());
-            case GameFact.ActingPlayerChanged f -> game.actingPlayerNumber(f.playerNumber());
+            case GameFact.StepChanged f -> game.turn().step(f.step());
+            case GameFact.TurnStarted f -> game.turn().number(f.turn());
+            case GameFact.CurrentPlayerChanged f -> game.turn().currentPlayerNumber(f.playerNumber());
+            case GameFact.ActingPlayerChanged f -> game.turn().actingPlayerNumber(f.playerNumber());
         }
     }
 

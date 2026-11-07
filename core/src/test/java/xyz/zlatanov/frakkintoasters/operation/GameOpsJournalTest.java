@@ -40,8 +40,8 @@ class GameOpsJournalTest extends TestHarness {
         assertEquals(List.of(new StepChanged(GameStep.RECEIVE_SKILLS), new TurnStarted(3), new CurrentPlayerChanged(2),
                 new ActingPlayerChanged(3), new ActingPlayerChanged(null), new AdmiralAssigned(Character.values()[0]),
                 new CagAssigned(Character.values()[1]), new PresidentAssigned(Character.values()[2])), journal.facts());
-        assertEquals(GameStep.RECEIVE_SKILLS, game.step());
-        assertEquals(3, game.turn());
+        assertEquals(GameStep.RECEIVE_SKILLS, game.turn().step());
+        assertEquals(3, game.turn().number());
         assertEquals(Character.values()[1], game.cag());
     }
 

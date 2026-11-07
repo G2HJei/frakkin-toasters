@@ -17,7 +17,6 @@ import xyz.zlatanov.frakkintoasters.state.view.GameView;
 
 import java.util.*;
 
-import static xyz.zlatanov.frakkintoasters.state.GameStep.SETUP;
 import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
 
 @Builder
@@ -26,45 +25,35 @@ import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
 @Accessors(fluent = true)
 public class Game implements GameView {
     // todo separate counters in own classes?
-    // todo add turns
     @Builder.Default
-    private ObjectiveCard        objective           = KOBOL;
+    private ObjectiveCard        objective         = KOBOL;
     @Builder.Default
-    private Map<Integer, Player> players             = Map.of(1, new Player(1), 2, new Player(2), 3, new Player(3));
-    @Setter(onMethod_ = @Mutates)
+    private Map<Integer, Player> players           = Map.of(1, new Player(1), 2, new Player(2), 3, new Player(3));
     @Builder.Default
-    private int                  currentPlayerNumber = 1;
-    @Getter(AccessLevel.NONE)
-    private Integer              actingPlayerNumber; // null means the current player is acting
-    @Setter(onMethod_ = @Mutates)
+    private Turn                 turn              = new Turn();
     @Builder.Default
-    private GameStep             step                = SETUP;
-    @Setter(onMethod_ = @Mutates)
+    private Randomness           randomness        = new Randomness();
     @Builder.Default
-    private int                  turn                = 0;
+    private Die                  die               = new Die(); // own Randomness: a builder default can't see the other fields, so seed both for a deterministic game
     @Builder.Default
-    private Randomness           randomness          = new Randomness();
+    private BoardsHolder         boards            = new BoardsHolder();
     @Builder.Default
-    private Die                  die                 = new Die(); // own Randomness: a builder default can't see the other fields, so seed both for a deterministic game
-    @Builder.Default
-    private BoardsHolder         boards              = new BoardsHolder();
-    @Builder.Default
-    private DecksHolder          decks               = DecksHolder.builder().build();
+    private DecksHolder          decks             = DecksHolder.builder().build();
     private SkillCheck           activeSkillCheck;
     @Builder.Default
-    private CylonShips           cylonShips          = CylonShips.builder().build();
+    private CylonShips           cylonShips        = CylonShips.builder().build();
     @Builder.Default
-    private int                  nukes               = 2;
+    private int                  nukes             = 2;
     @Setter(onMethod_ = @Mutates)
     private Character            president;
     @Builder.Default
-    private Deck<QuorumCard>     presidentHand       = new Deck<>(false);
+    private Deck<QuorumCard>     presidentHand     = new Deck<>(false);
     @Setter(onMethod_ = @Mutates)
     private Character            admiral;
     @Setter(onMethod_ = @Mutates)
     private Character            cag;
     @Builder.Default
-    private RemovedComponents    removedComponents   = new RemovedComponents();
+    private RemovedComponents    removedComponents = new RemovedComponents();
 
 
     public static GameBuilder builder() {
@@ -92,12 +81,12 @@ public class Game implements GameView {
 
     @Override
     public Player currentPlayer() {
-        return player(currentPlayerNumber);
+        return player(turn.currentPlayerNumber());
     }
 
     @Override
-    public int actingPlayerNumber() {
-        return actingPlayerNumber != null ? actingPlayerNumber : currentPlayerNumber;
+    public Player actingPlayer() {
+        return player(turn.actingPlayerNumber());
     }
 
     @Override
@@ -108,21 +97,6 @@ public class Game implements GameView {
                 .findFirst()
                 .orElseThrow(FrakCallTheAdmiralException::new);
     }
-
-    /**
-     * @param actingPlayerNumber the player acting out of turn, or {@code null} when the current player is acting
-     */
-    @Mutates
-    public Game actingPlayerNumber(Integer actingPlayerNumber) {
-        this.actingPlayerNumber = actingPlayerNumber;
-        return this;
-    }
-
-    @Override
-    public Player actingPlayer() {
-        return player(actingPlayerNumber());
-    }
-
 
     @Override
     public Optional<Location> locate(Character character) {

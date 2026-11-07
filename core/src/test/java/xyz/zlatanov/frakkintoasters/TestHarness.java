@@ -145,8 +145,7 @@ public abstract class TestHarness {
         this.mutinyDeck = new FakeDeck<>(template.decks().mutiny());
 
         this.game = Game.builder(template.players().size())
-                .currentPlayerNumber(template.currentPlayerNumber())
-                .step(template.step())
+                .turn(template.turn())
                 .objective(template.objective())
                 .boards(template.boards())
                 .cylonShips(template.cylonShips())

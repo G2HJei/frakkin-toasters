@@ -13,7 +13,7 @@ class CrashLandingFailEventProcessorTest extends EventTestHarness<CrashLandingFa
 
     @Test
     void shouldChooseBetweenFuelAndMoraleWithSickbay() {
-        game.currentPlayerNumber(2);
+        game.turn().currentPlayerNumber(2);
 
         execute(new CrashLandingFailEvent());
 

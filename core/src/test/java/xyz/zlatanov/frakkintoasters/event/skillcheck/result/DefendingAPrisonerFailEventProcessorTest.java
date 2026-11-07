@@ -10,7 +10,7 @@ class DefendingAPrisonerFailEventProcessorTest extends EventTestHarness<Defendin
 
     @BeforeEach
     void setUp() {
-        game.currentPlayerNumber(2);
+        game.turn().currentPlayerNumber(2);
     }
 
     @ParameterizedTest

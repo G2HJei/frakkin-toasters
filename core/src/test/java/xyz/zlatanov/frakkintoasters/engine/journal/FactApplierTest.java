@@ -191,13 +191,13 @@ class FactApplierTest {
         apply(new CurrentPlayerChanged(2));
         apply(new ActingPlayerChanged(3));
 
-        assertEquals(MOVEMENT, game.step());
-        assertEquals(4, game.turn());
-        assertEquals(2, game.currentPlayerNumber());
-        assertEquals(3, game.actingPlayerNumber());
+        assertEquals(MOVEMENT, game.turn().step());
+        assertEquals(4, game.turn().number());
+        assertEquals(2, game.turn().currentPlayerNumber());
+        assertEquals(3, game.turn().actingPlayerNumber());
 
         apply(new ActingPlayerChanged(null));
-        assertEquals(2, game.actingPlayerNumber());
+        assertEquals(2, game.turn().actingPlayerNumber());
     }
 
     /* PlayerFact */

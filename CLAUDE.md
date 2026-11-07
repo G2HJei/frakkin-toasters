@@ -47,9 +47,9 @@ Next steps, in order:
    for "Executive Order".
 3. ~~Create the journal and tie it to the ops classes in `operation/`.~~ Done, see "Journal and Replay". Still open:
    describers and per-viewer hiding, JSON serialization, and the pending followup queue (that one belongs to step 4).
-4. Create the game engine to drive the events and turns. `engine-plan.md` has the plan in phases. Phase 1 is done: the
-   journal moved out of `Game` into `engine/journal/`. `Turn` is still a stub, and there is no event-to-processor
-   lookup in production code yet.
+4. Create the game engine to drive the events and turns. `engine-plan.md` has the plan in phases. Phases 1 and 2 are
+   done: the journal moved out of `Game` into `engine/journal/`, and the turn state is grouped in `state/Turn`. There is
+   no event-to-processor lookup in production code yet.
 5. Create a working frontend with the events that exist by then.
 
 ## Project Structure
@@ -58,7 +58,7 @@ Multi-module Gradle project with a single `core` module. Package root: `xyz.zlat
 
 ### Key Packages
 
-- root - `EventProcessor` (base class for all processors), `Turn` (empty placeholder for the future engine)
+- root - `EventProcessor` (base class for all processors)
 - `event/` - event records and their processors, grouped by area (`action`, `board`, `crisis`, `deck`, `endgame`,
   `location/{galactica,pegasus,colonialone,cylon}`, `loyalty`, `officials`, `player`, `ship`, `skillcheck`,
   `skillcheck/ability`, `skillcheck/result`). Also `placeholder/` (events that need player input) and `constraint/`
@@ -69,10 +69,11 @@ Multi-module Gradle project with a single `core` module. Package root: `xyz.zlat
   they never write to components
 - `engine/journal/` - `Journal`, `JournalEntry`, `FactRecorder`, `FactApplier`, `ShipZones`, `GameReplayer`, and `fact/`
   with the `Fact` records. The rest of the engine will live in `engine/` too
-- `state/` - game state model: `Game` (top level), `Player`, `Die` (d8), `Randomness`, `GameStep`, `RemovedComponents`,
-  `PlayerPile`, and the `@Mutates` marker
-- `state/view/` - read-only view interfaces (`GameView`, `PlayerView`, `BoardsHolderView`, `SkillCheckView`, ...)
-  implemented by the state classes. Processors read state only through these
+- `state/` - game state model: `Game` (top level), `Turn` (turn number, `GameStep`, current and acting player, read
+  through `GameView.turn()`; `number` counts player turns, not rounds), `Player`, `Die` (d8), `Randomness`,
+  `RemovedComponents`, `PlayerPile`, and the `@Mutates` marker
+- `state/view/` - read-only view interfaces (`GameView`, `TurnView`, `PlayerView`, `BoardsHolderView`,
+  `SkillCheckView`, ...) implemented by the state classes. Processors read state only through these
 - `state/board/` - board hierarchy: `Board` (base, tracks characters by location) -> `BattlestarBoard` (adds damage
   tracking) -> `GalacticaBoard`/`PegasusBoard`. Also `CylonFleetBoard`, `SpaceLocationsBoard`, `BoardsHolder` (aggregates
   all boards). The `Location` enum defines all 34 board spaces in scope

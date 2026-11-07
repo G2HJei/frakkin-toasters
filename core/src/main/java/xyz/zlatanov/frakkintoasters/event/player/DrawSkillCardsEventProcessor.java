@@ -38,7 +38,7 @@ public class DrawSkillCardsEventProcessor extends EventProcessor<DrawSkillCardsE
     }
 
     private boolean meetsHazardousLocationReceiveSkillsStepRestrictions() {
-        if (game.step() != RECEIVE_SKILLS) {
+        if (game.turn().step() != RECEIVE_SKILLS) {
             return true;
         }
         val location = game.locate(player.character()).orElse(null);

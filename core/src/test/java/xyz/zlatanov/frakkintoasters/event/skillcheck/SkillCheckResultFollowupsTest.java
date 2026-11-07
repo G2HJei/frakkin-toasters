@@ -147,7 +147,7 @@ class SkillCheckResultFollowupsTest extends TestHarness {
 
     @Test
     void shouldResolveEachPlayerStartingWithTheCurrentPlayer() {
-        game.currentPlayerNumber(2);
+        game.turn().currentPlayerNumber(2);
 
         assertEquals(all(single(new LoseResourceEvent(MORALE, 1)),
                         all(discardAndDrawTreachery(2), discardAndDrawTreachery(3), discardAndDrawTreachery(1))),
@@ -165,7 +165,7 @@ class SkillCheckResultFollowupsTest extends TestHarness {
 
     @Test
     void shouldLookAtLoyaltyCardOfPresidentOrAdmiral() {
-        game.currentPlayerNumber(OTHER);
+        game.turn().currentPlayerNumber(OTHER);
 
         assertEquals(all(single(new LoseResourceEvent(MORALE, 1)),
                         one(new LookAtLoyaltyCardEvent(OTHER, PRESIDENT), new LookAtLoyaltyCardEvent(OTHER, ADMIRAL))),
@@ -174,7 +174,7 @@ class SkillCheckResultFollowupsTest extends TestHarness {
 
     @Test
     void shouldNotLookAtOwnLoyaltyCard() {
-        game.currentPlayerNumber(ADMIRAL);
+        game.turn().currentPlayerNumber(ADMIRAL);
 
         assertEquals(all(single(new LoseResourceEvent(MORALE, 1)),
                         single(new LookAtLoyaltyCardEvent(ADMIRAL, PRESIDENT))),

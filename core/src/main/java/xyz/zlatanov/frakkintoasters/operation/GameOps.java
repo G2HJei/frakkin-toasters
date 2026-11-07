@@ -65,7 +65,7 @@ public class GameOps extends AbstractOps {
      * Lets a player other than the current one act (e.g. the target of an "Executive Order" card).
      */
     public void actingPlayer(int playerNumber) {
-        record(new ActingPlayerChanged(playerNumber == game.currentPlayerNumber() ? null : playerNumber));
+        record(new ActingPlayerChanged(playerNumber == game.turn().currentPlayerNumber() ? null : playerNumber));
     }
 
     /**

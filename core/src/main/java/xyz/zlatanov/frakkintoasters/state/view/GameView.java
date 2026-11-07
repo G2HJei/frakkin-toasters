@@ -1,6 +1,5 @@
 package xyz.zlatanov.frakkintoasters.state.view;
 
-import xyz.zlatanov.frakkintoasters.state.GameStep;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
@@ -16,24 +15,16 @@ public interface GameView {
 
     PlayerView player(int playerNumber);
 
-    int currentPlayerNumber();
+    int playerNumber(Character character);
+
+    TurnView turn();
 
     PlayerView currentPlayer();
 
     /**
-     * The player who is taking an action or moving right now. It is the current player, except when someone else acts
-     * during that player's turn (e.g. the target of an "Executive Order" card). It does not change who the "current
-     * player" is for game effects, e.g. skill checks.
+     * @see TurnView#actingPlayerNumber()
      */
-    int actingPlayerNumber();
-
-    int playerNumber(Character character);
-
     PlayerView actingPlayer();
-
-    GameStep step();
-
-    int turn();
 
     BoardsHolderView boards();
 
