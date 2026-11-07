@@ -11,8 +11,8 @@ alone, from setup to either ending, and `restore` gives the same game at every p
 ```text
                              frontend / tests
                                     |
-         submit(player, event)      |      status()  Waiting | Finished
-         choose(player, option)     |      view()    GameView
+         submit(player, event)      |      status(player)  Waiting | Finished
+         choose(player, option)     |      view()          GameView
                                     v
 +-----------------------------------+--------------------------------------+
 |                                GameEngine                                |
@@ -64,7 +64,8 @@ alone, from setup to either ending, and `restore` gives the same game at every p
 
 The engine has two public moves. `submit` answers a pending decision with a concrete event, and `choose` picks an option
 of a pending `OneOf`. Both run the game forward until the next point where a player has to act, so after every call the
-engine is either `Waiting(PendingInput)` or `Finished(winner)`. There is no "running" state to observe.
+engine is either `Waiting(PendingInput)` or `Finished(winner)`. There is no "running" state to observe. `status` takes
+the viewing player, because the input of an interrupt window is secret (decision 8).
 
 `GameEngine.start(playerCount, randomness)` begins a game with `StartGameEvent` on the agenda, and
 `GameEngine.restore(journal)` rebuilds one. `PendingInput` isn't stored. It is read from the top of the agenda, so
@@ -150,6 +151,9 @@ in reverse order.
    that name a target, such as `SendToBrigEvent`, are plain `Event`s. It covers every `one(...)` in the code today. The
    engine throws `FrakCallTheAdmiralException` if the options name different players. `Followup` and its tests don't
    change.
+8. **Interrupt windows ask in secret.** Only the players holding a card for the window are asked. Everyone else sees a
+   plain "waiting", not who it is waiting for. Asking everyone before and after every die roll would make a Cylon attack
+   unplayable.
 
 ## Phase 1 - Detach the journal from `Game`
 
@@ -205,6 +209,9 @@ New in `engine/`: `GameEngine`, `Agenda`, `ProcessorRegistry`, `PendingInput`, `
 - **Input check**: the submitting player must match the pending input, and `decision.action().isInstance(event)` must
   hold, which also covers interface targets like `ActionEvent`. A submitted `PlayerEvent` must name that same player, or
   player 1 could submit a `DrawSkillCardsEvent` for player 3.
+- **`status(player)`**: everyone gets the `PendingInput`, unless it is secret. Then only the player who has to answer
+  gets it, and the others get a plain `Waiting`. Nothing is secret until phase 10, but the signature is there from the
+  start.
 - **Constraints**: a client must not be able to drop `DRAW_EXACTLY_2` by sending `drawLimit = null`. Add a
   `ConstrainedEvent` interface with `withConstraints(List<EventConstraint>)`, and have the engine overwrite whatever the
   client sent. `DrawSkillCardsEvent`, `DiscardSkillCardsEvent`, `LeaveBrigEvent` and `LaunchViperEvent` implement it.
@@ -347,17 +354,20 @@ has an event yet. They go in `event/interrupt/`.
 `submit`, `choose`, restore and rollback work unchanged. Its processor runs when the window opens, so it sees the hands
 as they are at that moment.
 
-- It asks each human player holding a card for that window, one at a time, clockwise from the current player:
-  `one(decision, NoOpEvent)`. Revealed Cylons can't use Skill Card abilities (rule 6.1.2.3), and Cylon Leaders count as
-  revealed unless Infiltrating (rule 6.2.1). `isHuman()` covers both.
+- It asks each human player holding a card for that window, one at a time, clockwise from the current player. The
+  question is a plain decision on `PlayInterruptCardEvent`, and playing no card means passing, as in
+  `PlayCardsBeforeSkillCheckEvent`. It isn't a `OneOf`, so there is only one kind of input to keep secret.
+- Revealed Cylons can't use Skill Card abilities (rule 6.1.2.3), and Cylon Leaders count as revealed unless Infiltrating
+  (rule 6.2.1). `isHuman()` covers both.
 - Played cards wait until everyone has answered. If two conflict, the current player picks which one stands and the
   other returns to its owner's hand (rule 13.3). This is the same shape as the before-skill-check cards, with
   `RevealCardsBeforeSkillCheckEvent` and `TiebreakCardsBeforeSkillCheckEvent`.
 - A window with no holders doesn't pause the game.
 
-**Who gets asked.** Only the holders. Asking everyone before and after every die roll would make a Cylon attack
-unplayable. Being asked does reveal that a player holds a card, so other players must only see that the game is waiting,
-not who it is waiting for. Per-viewer hiding has to cover this before the frontend ships.
+**Secrecy (decision 8).** `PlayInterruptCardEvent` implements a new `SecretEvent` marker, and `PendingInput` derives
+`secret()` from the decision's action, so restore needs nothing extra. While a secret input is pending, `status(player)`
+gives it only to the player who has to answer. A played card stays hidden until the window closes, and a pass is never
+shown. A window with no holders doesn't pause, so a pause still shows that someone holds a card, just not who.
 
 **Die rolls.** `ops.rollDie()` runs inside `process()`, so nothing can pause around it.
 
@@ -376,8 +386,9 @@ adds processors for `AttackViperEvent`, `AttackRaiderEvent`, `AttackHeavyRaiderE
 activations and Weapons Control already queue some of them. `RUN_INTERFERENCE` needs a counter that lasts for one raider
 activation.
 
-Acceptance tests: a held card pauses the game at its window, a window with no holders doesn't, two `STRATEGIC_PLANNING`
-cards on one roll go to the current player, and restore works at a pause inside a window.
+Acceptance tests: a held card pauses the game at its window, a window with no holders doesn't, the other players get a
+plain `Waiting` during a window, two `STRATEGIC_PLANNING` cards on one roll go to the current player, and restore works
+at a pause inside a window.
 
 ## Phase 11 - Crisis
 
@@ -412,5 +423,6 @@ Acceptance test: seeded games played to a Cylon win and to the Kobol end game, r
   plug in as new events.
 - Interrupts that aren't skill cards: character abilities such as Helo's reroll, and revealing a Motive Card in the
   middle of resolving something (rule 6.2.2.1). They can reuse the windows from phase 10.
-- Describers, per-viewer hiding, JSON serialization, and the frontend.
+- Describers, the rest of per-viewer hiding, JSON serialization, and the frontend. Describers have to keep a window's
+  answers hidden too, because the journal records them in full.
 - Concurrency. Callers serialize calls per game.

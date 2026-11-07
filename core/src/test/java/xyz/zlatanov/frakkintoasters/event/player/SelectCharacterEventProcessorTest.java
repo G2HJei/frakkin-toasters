@@ -76,12 +76,20 @@ class SelectCharacterEventProcessorTest extends EventTestHarness<SelectCharacter
     }
 
     @Test
+    void shouldAllowEveryTypeTiedForMostPlentiful() {
+        execute(select(LAURA_ROSLIN));
+        assertEquals(LAURA_ROSLIN, player(1).character());
+    }
+
+    @Test
     void shouldObserveCharacterTypeLimits() {
+        player(2).character(TORY_FOSTER);
         assertInvalid(select(LAURA_ROSLIN));
     }
 
     @Test
     void shouldObserveCharacterTypeLimits2() {
+        player(2).character(SAUL_TIGH);
         assertInvalid(select(HELENA_CAIN));
     }
 
