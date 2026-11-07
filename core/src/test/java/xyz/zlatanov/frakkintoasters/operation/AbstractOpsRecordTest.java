@@ -3,8 +3,8 @@ package xyz.zlatanov.frakkintoasters.operation;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.TestHarness;
-import xyz.zlatanov.frakkintoasters.journal.fact.GameFact.*;
-import xyz.zlatanov.frakkintoasters.journal.fact.TitleFact.*;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.GameFact.*;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.TitleFact.*;
 import xyz.zlatanov.frakkintoasters.state.GameStep;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 
@@ -17,7 +17,7 @@ class AbstractOpsRecordTest extends TestHarness {
     @Test
     void recordAppliesTheFactAndLogsIt() {
         val character = Character.values()[0];
-        new AbstractOps(game) {
+        new AbstractOps(game, recorder) {
             void run() {
                 record(new TurnStarted(7));
                 record(new StepChanged(GameStep.SETUP));
@@ -32,6 +32,6 @@ class AbstractOpsRecordTest extends TestHarness {
         assertEquals(3, game.actingPlayerNumber());
         assertEquals(character, game.president());
         assertEquals(List.of(new TurnStarted(7), new StepChanged(GameStep.SETUP), new CurrentPlayerChanged(2),
-                new ActingPlayerChanged(3), new PresidentAssigned(character)), game.journal().facts());
+                new ActingPlayerChanged(3), new PresidentAssigned(character)), journal.facts());
     }
 }

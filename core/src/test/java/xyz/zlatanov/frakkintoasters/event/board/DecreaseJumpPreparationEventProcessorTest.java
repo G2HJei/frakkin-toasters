@@ -2,7 +2,7 @@ package xyz.zlatanov.frakkintoasters.event.board;
 
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
-import xyz.zlatanov.frakkintoasters.journal.fact.BoardFact.JumpPreparationDecreased;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.JumpPreparationDecreased;
 
 import java.util.List;
 
@@ -19,7 +19,7 @@ class DecreaseJumpPreparationEventProcessorTest extends EventTestHarness<Decreas
         execute(new DecreaseJumpPreparationEvent());
 
         assertEquals(POSITION_1, galacticaBoard.jumpPreparation());
-        assertEquals(List.of(new JumpPreparationDecreased()), game.journal().facts());
+        assertEquals(List.of(new JumpPreparationDecreased()), journal.facts());
     }
 
     @Test

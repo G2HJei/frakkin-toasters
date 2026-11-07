@@ -36,7 +36,7 @@ class PlayFromDestinyDeckEventProcessorTest extends EventTestHarness<PlayFromDes
 
     @Test
     void shouldCreateNewDestinyDeckWhenEmpty() {
-        new CreateDestinyDeckEventProcessor().execute(game, new CreateDestinyDeckEvent());
+        new CreateDestinyDeckEventProcessor().execute(game, new CreateDestinyDeckEvent(), ops);
         destinyDeck.draw(10); //2 remaining
 
         execute(new PlayFromDestinyDeckEvent());

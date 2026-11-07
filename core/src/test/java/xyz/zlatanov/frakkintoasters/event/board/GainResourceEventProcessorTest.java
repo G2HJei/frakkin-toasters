@@ -2,7 +2,7 @@ package xyz.zlatanov.frakkintoasters.event.board;
 
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
-import xyz.zlatanov.frakkintoasters.journal.fact.BoardFact.ResourceIncreased;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.ResourceIncreased;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ class GainResourceEventProcessorTest extends EventTestHarness<GainResourceEvent>
         execute(new GainResourceEvent(POPULATION, 1));
 
         assertEquals(13, galacticaBoard.population());
-        assertEquals(List.of(new ResourceIncreased(POPULATION, 1)), game.journal().facts());
+        assertEquals(List.of(new ResourceIncreased(POPULATION, 1)), journal.facts());
     }
 
     @Test

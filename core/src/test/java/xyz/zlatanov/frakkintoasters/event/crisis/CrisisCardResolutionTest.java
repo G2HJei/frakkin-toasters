@@ -235,6 +235,6 @@ class CrisisCardResolutionTest extends TestHarness {
     private <E extends Event> Followup execute(E event) {
         val processorClass = Class.forName(event.getClass().getName() + "Processor");
         val processor = (EventProcessor<E>) processorClass.getDeclaredConstructor().newInstance();
-        return processor.execute(game, event);
+        return processor.execute(game, event, ops);
     }
 }

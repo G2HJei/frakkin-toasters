@@ -2,7 +2,6 @@ package xyz.zlatanov.frakkintoasters.state;
 
 import lombok.*;
 import lombok.experimental.Accessors;
-import xyz.zlatanov.frakkintoasters.journal.Journal;
 import xyz.zlatanov.frakkintoasters.state.board.BoardsHolder;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard;
@@ -66,8 +65,6 @@ public class Game implements GameView {
     private Character            cag;
     @Builder.Default
     private RemovedComponents    removedComponents   = new RemovedComponents();
-    @Builder.Default
-    private Journal              journal             = new Journal();
 
 
     public static GameBuilder builder() {

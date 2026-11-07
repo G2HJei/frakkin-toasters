@@ -3,8 +3,8 @@ package xyz.zlatanov.frakkintoasters.operation;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.TestHarness;
-import xyz.zlatanov.frakkintoasters.journal.fact.DeckFact.CardsDiscarded;
-import xyz.zlatanov.frakkintoasters.journal.fact.SkillCheckFact.*;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsDiscarded;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.SkillCheckFact.*;
 import xyz.zlatanov.frakkintoasters.state.PlayerPile;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
@@ -33,8 +33,8 @@ class SkillCheckOpsJournalTest extends TestHarness {
         assertEquals(List.of(
                 new SkillCheckStarted(type),
                 new TargetChosen(2),
-                new xyz.zlatanov.frakkintoasters.journal.fact.PlayerFact.CardsLost(1, PlayerPile.SKILL, List.of(card)),
-                new CardsPlaced(pile, List.of(card), true)), game.journal().facts());
+                new xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.CardsLost(1, PlayerPile.SKILL, List.of(card)),
+                new CardsPlaced(pile, List.of(card), true)), journal.facts());
         assertNoSkillCards(1);
         assertEquals(List.of(card), game.activeSkillCheck().pile(pile).cards());
     }
@@ -44,12 +44,12 @@ class SkillCheckOpsJournalTest extends TestHarness {
         game.player(1).gainSkillCards(card);
         ops.skillCheck().start(type);
         ops.skillCheck().playCards(1, card);
-        val before = game.journal().facts().size();
+        val before = journal.facts().size();
 
         ops.skillCheck().discard(card);
 
         assertEquals(List.of(new CardRemoved(card, null), new CardsDiscarded(DeckId.POLITICS, List.of(card))),
-                game.journal().facts().subList(before, game.journal().facts().size()));
+                journal.facts().subList(before, journal.facts().size()));
         assertEquals(List.of(card), politicsDeck.discardedCards());
     }
 
@@ -59,7 +59,7 @@ class SkillCheckOpsJournalTest extends TestHarness {
         destinyDeck.addOnTop(card, second);
         ops.skillCheck().start(type);
         ops.skillCheck().playFromDestinyDeck(2);
-        val before = game.journal().facts().size();
+        val before = journal.facts().size();
 
         ops.skillCheck().shuffleAndDivideCards();
 
@@ -67,7 +67,7 @@ class SkillCheckOpsJournalTest extends TestHarness {
                 new CardsDrawn(SkillCheckPile.CARDS, List.of(card, second)),
                 new CardsPlaced(pile, List.of(card), false),
                 new CardsPlaced(pile, List.of(second), false)),
-                game.journal().facts().subList(before, game.journal().facts().size()));
+                journal.facts().subList(before, journal.facts().size()));
         assertEquals(List.of(card, second), game.activeSkillCheck().pile(pile).cards());
     }
 }

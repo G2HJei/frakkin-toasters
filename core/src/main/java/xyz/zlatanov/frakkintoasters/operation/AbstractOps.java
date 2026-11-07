@@ -1,13 +1,12 @@
 package xyz.zlatanov.frakkintoasters.operation;
 
-import xyz.zlatanov.frakkintoasters.journal.FactApplier;
-import xyz.zlatanov.frakkintoasters.journal.JournalWriter;
-import xyz.zlatanov.frakkintoasters.journal.fact.DeckFact.CardsAddedOnTop;
-import xyz.zlatanov.frakkintoasters.journal.fact.DeckFact.CardsDiscarded;
-import xyz.zlatanov.frakkintoasters.journal.fact.DeckFact.CardsDrawn;
-import xyz.zlatanov.frakkintoasters.journal.fact.DeckFact.DeckShuffled;
-import xyz.zlatanov.frakkintoasters.journal.fact.Fact;
-import xyz.zlatanov.frakkintoasters.journal.fact.ShipFact.ShipMoved;
+import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedOnTop;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsDiscarded;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsDrawn;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.DeckShuffled;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.Fact;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.ShipFact.ShipMoved;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.CylonFleetBoard;
 import xyz.zlatanov.frakkintoasters.state.board.GalacticaBoard;
@@ -31,12 +30,12 @@ import static xyz.zlatanov.frakkintoasters.state.ship.ShipZone.GALACTICA_SPACE;
 
 public abstract class AbstractOps {
 
-    protected final Game          game;
-    protected final JournalWriter journal;
+    protected final Game         game;
+    protected final FactRecorder recorder;
 
-    protected AbstractOps(Game game) {
+    protected AbstractOps(Game game, FactRecorder recorder) {
         this.game = game;
-        this.journal = game.journal();
+        this.recorder = recorder;
     }
 
     /**
@@ -44,8 +43,7 @@ public abstract class AbstractOps {
      * from the current state and record it, and nothing else writes to the components.
      */
     protected void record(Fact fact) {
-        FactApplier.apply(game, fact);
-        journal.record(fact);
+        recorder.record(fact);
     }
 
     /**

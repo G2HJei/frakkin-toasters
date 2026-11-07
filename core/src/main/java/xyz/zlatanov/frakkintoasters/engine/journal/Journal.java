@@ -1,10 +1,10 @@
-package xyz.zlatanov.frakkintoasters.journal;
+package xyz.zlatanov.frakkintoasters.engine.journal;
 
+import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.FactRecorded;
+import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ScopeClosed;
+import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ScopeOpened;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.Fact;
 import xyz.zlatanov.frakkintoasters.event.Event;
-import xyz.zlatanov.frakkintoasters.journal.JournalEntry.FactRecorded;
-import xyz.zlatanov.frakkintoasters.journal.JournalEntry.ScopeClosed;
-import xyz.zlatanov.frakkintoasters.journal.JournalEntry.ScopeOpened;
-import xyz.zlatanov.frakkintoasters.journal.fact.Fact;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 
 import java.util.ArrayDeque;
@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * Append-only record of what the game ops did.
  */
-public class Journal implements JournalWriter {
+public class Journal {
 
     public static final int ROOT_SCOPE = 0;
 
@@ -45,7 +45,6 @@ public class Journal implements JournalWriter {
         entries.add(new ScopeClosed(openScopes.pop()));
     }
 
-    @Override
     public void record(Fact fact) {
         entries.add(new FactRecorded(currentScope(), fact));
     }

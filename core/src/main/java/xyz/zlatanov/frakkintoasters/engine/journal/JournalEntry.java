@@ -1,7 +1,7 @@
-package xyz.zlatanov.frakkintoasters.journal;
+package xyz.zlatanov.frakkintoasters.engine.journal;
 
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.Fact;
 import xyz.zlatanov.frakkintoasters.event.Event;
-import xyz.zlatanov.frakkintoasters.journal.fact.Fact;
 
 /**
  * One line of the journal. The journal is a flat list of entries, so it is easy to serialize later.

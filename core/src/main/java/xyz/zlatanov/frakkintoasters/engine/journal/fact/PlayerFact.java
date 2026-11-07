@@ -1,4 +1,4 @@
-package xyz.zlatanov.frakkintoasters.journal.fact;
+package xyz.zlatanov.frakkintoasters.engine.journal.fact;
 
 import xyz.zlatanov.frakkintoasters.state.PlayerPile;
 import xyz.zlatanov.frakkintoasters.state.board.Location;

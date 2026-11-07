@@ -2,6 +2,8 @@ package xyz.zlatanov.frakkintoasters;
 
 import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
+import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
+import xyz.zlatanov.frakkintoasters.engine.journal.Journal;
 import xyz.zlatanov.frakkintoasters.fake.FakeDeck;
 import xyz.zlatanov.frakkintoasters.fake.FakeDie;
 import xyz.zlatanov.frakkintoasters.operation.GameOps;
@@ -50,6 +52,16 @@ public abstract class TestHarness {
      * the game under test
      */
     protected Game game;
+
+    /**
+     * the journal of the game under test: every fact the ops record ends up here
+     */
+    protected Journal journal;
+
+    /**
+     * applies facts to the game under test and appends them to {@link #journal}
+     */
+    protected FactRecorder recorder;
 
     /**
      * game ops bound to the game under test
@@ -165,7 +177,9 @@ public abstract class TestHarness {
                         .mutiny(mutinyDeck)
                         .build())
                 .build();
-        this.ops = new GameOps(game);
+        this.journal = new Journal();
+        this.recorder = new FactRecorder(game, journal);
+        this.ops = new GameOps(game, recorder);
     }
 
     /* === UTILITY METHODS === */

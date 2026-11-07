@@ -1,8 +1,8 @@
-package xyz.zlatanov.frakkintoasters.journal;
+package xyz.zlatanov.frakkintoasters.engine.journal;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.journal.fact.Fact;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.Fact;
 import xyz.zlatanov.frakkintoasters.operation.GameOps;
 import xyz.zlatanov.frakkintoasters.state.Die;
 import xyz.zlatanov.frakkintoasters.state.Game;
@@ -22,10 +22,12 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.*;
 
 class GameReplayerTest {
 
+    private final Journal journal = new Journal(); // playScenario() records into it, each test gets a new one
+
     @Test
     void replayedGameEqualsTheLiveGame() {
         val live = playScenario();
-        val replayed = GameReplayer.replay(live.journal());
+        val replayed = GameReplayer.replay(journal);
         assertEquals(GameSnapshot.of(live), GameSnapshot.of(replayed));
     }
 
@@ -33,8 +35,8 @@ class GameReplayerTest {
     void replayDoesNotDependOnTheRandomnessOfTheReplayingGame() {
         val live = playScenario();
 
-        val first = GameReplayer.replay(live.journal(), Randomness.seeded(1));
-        val second = GameReplayer.replay(live.journal(), Randomness.seeded(2));
+        val first = GameReplayer.replay(journal, Randomness.seeded(1));
+        val second = GameReplayer.replay(journal, Randomness.seeded(2));
 
         assertEquals(GameSnapshot.of(live), GameSnapshot.of(first));
         assertEquals(GameSnapshot.of(live), GameSnapshot.of(second));
@@ -43,20 +45,19 @@ class GameReplayerTest {
     @Test
     void replayIgnoresScopes() {
         val live = playScenario();
-        val scopes = live.journal().entries().stream()
+        val scopes = journal.entries().stream()
                 .filter(e -> !(e instanceof JournalEntry.FactRecorded))
                 .count();
 
         assertTrue(scopes > 0);
-        assertEquals(GameSnapshot.of(live), GameSnapshot.of(GameReplayer.replay(live.journal())));
+        assertEquals(GameSnapshot.of(live), GameSnapshot.of(GameReplayer.replay(journal)));
     }
 
     @Test
     void aJournalHasToStartWithGameStarted() {
         assertThrows(IllegalArgumentException.class, () -> GameReplayer.replay(new Journal()));
 
-        val journal = new Journal();
-        journal.record(new xyz.zlatanov.frakkintoasters.journal.fact.GameFact.TurnStarted(1));
+        journal.record(new xyz.zlatanov.frakkintoasters.engine.journal.fact.GameFact.TurnStarted(1));
 
         assertThrows(IllegalArgumentException.class, () -> GameReplayer.replay(journal));
     }
@@ -66,16 +67,16 @@ class GameReplayerTest {
         val live = playScenario();
         val snapshot = GameSnapshot.of(live);
 
-        val replayed = GameReplayer.replay(live.journal());
+        val replayed = GameReplayer.replay(journal);
         replayed.boards().galactica().decreaseFuel(1);
         assertNotEquals(snapshot, GameSnapshot.of(replayed));
 
-        val replayed2 = GameReplayer.replay(live.journal());
+        val replayed2 = GameReplayer.replay(journal);
         val basestar = replayed2.boards().galactica().shipsInSpace(Basestar.class).getFirst();
         basestar.clearDamage(); // a Basestar equals by id only, the snapshot has to look at its damage
         assertNotEquals(snapshot, GameSnapshot.of(replayed2));
 
-        val replayed3 = GameReplayer.replay(live.journal());
+        val replayed3 = GameReplayer.replay(journal);
         replayed3.boards().galactica().shipsInSpace(HumanFighter.class).forEach(f -> f.pilot(FELIX_GAETA));
         assertNotEquals(snapshot, GameSnapshot.of(replayed3));
     }
@@ -83,7 +84,7 @@ class GameReplayerTest {
     @Test
     void theScenarioRecordsEveryKindOfFact() {
         val live = playScenario();
-        val recorded = live.journal().facts().stream().map(Object::getClass).collect(java.util.stream.Collectors.toSet());
+        val recorded = journal.facts().stream().map(Object::getClass).collect(java.util.stream.Collectors.toSet());
 
         val missing = java.util.Arrays.stream(Fact.class.getPermittedSubclasses())
                 .flatMap(area -> java.util.Arrays.stream(area.getPermittedSubclasses()))
@@ -104,8 +105,7 @@ class GameReplayerTest {
                 .randomness(Randomness.seeded(7))
                 .die(new Die(Randomness.seeded(8)))
                 .build();
-        val ops = new GameOps(game);
-        val journal = game.journal();
+        val ops = new GameOps(game, new FactRecorder(game, journal));
 
         // setup
         ops.startGame();

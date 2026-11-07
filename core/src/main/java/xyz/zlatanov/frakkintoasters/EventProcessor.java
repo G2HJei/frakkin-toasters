@@ -4,7 +4,6 @@ import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
 import xyz.zlatanov.frakkintoasters.operation.GameOps;
-import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
 import xyz.zlatanov.frakkintoasters.state.view.*;
 
@@ -20,11 +19,16 @@ public abstract class EventProcessor<T extends Event> {
     protected PegasusBoardView    pegasusBoard;
     protected CylonFleetBoardView cylonFleetBoard;
 
-    public final Followup execute(Game game, T event) {
+    /**
+     * @param game the game the event runs in
+     * @param ops  game ops bound to the same game. The processor gets them only after validation, so a rejected event
+     *             changes nothing
+     */
+    public final Followup execute(GameView game, T event, GameOps ops) {
         setContext(game, event);
         init();
         validate();
-        ops = new GameOps(game);
+        this.ops = ops;
         return process();
     }
 

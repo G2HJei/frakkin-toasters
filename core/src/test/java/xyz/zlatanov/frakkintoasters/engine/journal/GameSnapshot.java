@@ -1,4 +1,4 @@
-package xyz.zlatanov.frakkintoasters.journal;
+package xyz.zlatanov.frakkintoasters.engine.journal;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.Game;

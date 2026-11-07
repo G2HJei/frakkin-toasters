@@ -1,9 +1,10 @@
 package xyz.zlatanov.frakkintoasters.operation;
 
 import lombok.val;
-import xyz.zlatanov.frakkintoasters.journal.fact.BoardFact.PursuitAdvanced;
-import xyz.zlatanov.frakkintoasters.journal.fact.BoardFact.PursuitReset;
-import xyz.zlatanov.frakkintoasters.journal.fact.ShipFact.ShipMoved;
+import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.PursuitAdvanced;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.PursuitReset;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.ShipFact.ShipMoved;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
@@ -21,8 +22,8 @@ import static xyz.zlatanov.frakkintoasters.state.ship.ShipZone.*;
 
 public class CylonFleetOps extends GameOps {
 
-    CylonFleetOps(Game game) {
-        super(game);
+    CylonFleetOps(Game game, FactRecorder recorder) {
+        super(game, recorder);
     }
 
     public Pursuit advancePursuit() {

@@ -3,7 +3,8 @@ package xyz.zlatanov.frakkintoasters.operation;
 import lombok.val;
 import java.util.List;
 import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.*;
-import xyz.zlatanov.frakkintoasters.journal.fact.GameFact.*;
+import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.GameFact.*;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.GameStep;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
@@ -15,8 +16,8 @@ public class GameOps extends AbstractOps {
     private static final List<DeckId> STARTING_DECKS = List.of(CIVILIAN_SHIPS, GALACTICA_DAMAGE, PEGASUS_DAMAGE, BASESTAR_DAMAGE,
             DESTINATION, POLITICS, LEADERSHIP, TACTICS, PILOTING, ENGINEERING, TREACHERY, QUORUM, CRISIS, SUPER_CRISIS, MUTINY, MOTIVE);
 
-    public GameOps(Game game) {
-        super(game);
+    public GameOps(Game game, FactRecorder recorder) {
+        super(game, recorder);
     }
 
     public PlayerOps player(Character character) {
@@ -29,35 +30,35 @@ public class GameOps extends AbstractOps {
     }
 
     public PlayerOps player(int playerNumber) {
-        return new PlayerOps(game, playerNumber);
+        return new PlayerOps(game, recorder, playerNumber);
     }
 
     public ShipOps ship(int shipId) {
-        return new ShipOps(game, shipId);
+        return new ShipOps(game, recorder, shipId);
     }
 
     public GalacticaOps galactica() {
-        return new GalacticaOps(game);
+        return new GalacticaOps(game, recorder);
     }
 
     public PegasusOps pegasus() {
-        return new PegasusOps(game);
+        return new PegasusOps(game, recorder);
     }
 
     public CylonFleetOps cylonFleet() {
-        return new CylonFleetOps(game);
+        return new CylonFleetOps(game, recorder);
     }
 
     public SkillCheckOps skillCheck() {
-        return new SkillCheckOps(game);
+        return new SkillCheckOps(game, recorder);
     }
 
     public LoyaltyDeckOps loyaltyDeck() {
-        return new LoyaltyDeckOps(game);
+        return new LoyaltyDeckOps(game, recorder);
     }
 
     public TitleOps titles() {
-        return new TitleOps(game);
+        return new TitleOps(game, recorder);
     }
 
     /**

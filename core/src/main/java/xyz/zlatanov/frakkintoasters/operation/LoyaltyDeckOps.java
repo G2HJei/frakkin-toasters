@@ -1,7 +1,8 @@
 package xyz.zlatanov.frakkintoasters.operation;
 
 import lombok.val;
-import xyz.zlatanov.frakkintoasters.journal.fact.DeckFact.CardsAddedOnTop;
+import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedOnTop;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
@@ -14,8 +15,8 @@ import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.*;
 //todo maybe create SetupUpOps and move the code there
 public class LoyaltyDeckOps extends AbstractOps {
 
-    LoyaltyDeckOps(Game game) {
-        super(game);
+    LoyaltyDeckOps(Game game, FactRecorder recorder) {
+        super(game, recorder);
     }
 
 

@@ -1,9 +1,10 @@
 package xyz.zlatanov.frakkintoasters.operation;
 
 import lombok.val;
-import xyz.zlatanov.frakkintoasters.journal.fact.DeckFact.CardsAddedOnTop;
-import xyz.zlatanov.frakkintoasters.journal.fact.PlayerFact.CardsLost;
-import xyz.zlatanov.frakkintoasters.journal.fact.SkillCheckFact.*;
+import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedOnTop;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.CardsLost;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.SkillCheckFact.*;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.PlayerPile;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
@@ -16,8 +17,8 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckPile.*;
 
 public class SkillCheckOps extends GameOps {
 
-    SkillCheckOps(Game game) {
-        super(game);
+    SkillCheckOps(Game game, FactRecorder recorder) {
+        super(game, recorder);
     }
 
     public SkillCheckOps createDestinyDeck() {

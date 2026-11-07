@@ -3,12 +3,12 @@ package xyz.zlatanov.frakkintoasters.operation;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.TestHarness;
-import xyz.zlatanov.frakkintoasters.journal.fact.DeckFact.CardsDrawn;
-import xyz.zlatanov.frakkintoasters.journal.fact.DeckFact.DeckShuffled;
-import xyz.zlatanov.frakkintoasters.journal.fact.PlayerFact.CardsGained;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsDrawn;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.DeckShuffled;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.CardsGained;
 import xyz.zlatanov.frakkintoasters.state.PlayerPile;
-import xyz.zlatanov.frakkintoasters.journal.fact.GameFact.*;
-import xyz.zlatanov.frakkintoasters.journal.fact.TitleFact.*;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.GameFact.*;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.TitleFact.*;
 import xyz.zlatanov.frakkintoasters.state.GameStep;
 import xyz.zlatanov.frakkintoasters.state.Randomness;
 import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
@@ -39,7 +39,7 @@ class GameOpsJournalTest extends TestHarness {
 
         assertEquals(List.of(new StepChanged(GameStep.RECEIVE_SKILLS), new TurnStarted(3), new CurrentPlayerChanged(2),
                 new ActingPlayerChanged(3), new ActingPlayerChanged(null), new AdmiralAssigned(Character.values()[0]),
-                new CagAssigned(Character.values()[1]), new PresidentAssigned(Character.values()[2])), game.journal().facts());
+                new CagAssigned(Character.values()[1]), new PresidentAssigned(Character.values()[2])), journal.facts());
         assertEquals(GameStep.RECEIVE_SKILLS, game.step());
         assertEquals(3, game.turn());
         assertEquals(Character.values()[1], game.cag());
@@ -52,7 +52,7 @@ class GameOpsJournalTest extends TestHarness {
 
         ops.shuffleDeck(DeckId.POLITICS);
 
-        val fact = (DeckShuffled) game.journal().facts().getFirst();
+        val fact = (DeckShuffled) journal.facts().getFirst();
         assertEquals(DeckId.POLITICS, fact.deck());
         assertEquals(fact.drawOrder(), politicsDeck.cards());
         assertEquals(before.size() + 1, politicsDeck.size());
@@ -69,7 +69,7 @@ class GameOpsJournalTest extends TestHarness {
 
         ops.player(1).drawSkillCards(POLITICS);
 
-        val facts = game.journal().facts();
+        val facts = journal.facts();
         assertEquals(new CardsDrawn(DeckId.POLITICS, List.of(top)), facts.get(0));
         assertEquals(new DeckShuffled(DeckId.POLITICS, List.of(discarded)), facts.get(1));
         assertEquals(new CardsGained(1, PlayerPile.SKILL, List.of(top)), facts.get(2));
@@ -82,7 +82,7 @@ class GameOpsJournalTest extends TestHarness {
     void startGameLogsGameStartedAndShufflesTheStartingDecks() {
         ops.startGame();
 
-        val facts = game.journal().facts();
+        val facts = journal.facts();
         assertEquals(new GameStarted(3, KOBOL), facts.getFirst());
         assertTrue(facts.stream().skip(1).allMatch(DeckShuffled.class::isInstance));
         assertTrue(facts.stream().skip(1).map(DeckShuffled.class::cast).anyMatch(f -> f.deck() == DeckId.MOTIVE));

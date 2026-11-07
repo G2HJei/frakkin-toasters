@@ -1,7 +1,7 @@
-package xyz.zlatanov.frakkintoasters.journal;
+package xyz.zlatanov.frakkintoasters.engine.journal;
 
 import lombok.val;
-import xyz.zlatanov.frakkintoasters.journal.fact.*;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.*;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;

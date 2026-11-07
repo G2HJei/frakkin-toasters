@@ -1,7 +1,7 @@
-package xyz.zlatanov.frakkintoasters.journal;
+package xyz.zlatanov.frakkintoasters.engine.journal;
 
 import lombok.val;
-import xyz.zlatanov.frakkintoasters.journal.fact.GameFact.GameStarted;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.GameFact.GameStarted;
 import xyz.zlatanov.frakkintoasters.state.Die;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Randomness;

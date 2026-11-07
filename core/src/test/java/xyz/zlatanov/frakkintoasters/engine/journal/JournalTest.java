@@ -1,11 +1,11 @@
-package xyz.zlatanov.frakkintoasters.journal;
+package xyz.zlatanov.frakkintoasters.engine.journal;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.journal.JournalEntry.FactRecorded;
-import xyz.zlatanov.frakkintoasters.journal.JournalEntry.ScopeClosed;
-import xyz.zlatanov.frakkintoasters.journal.JournalEntry.ScopeOpened;
-import xyz.zlatanov.frakkintoasters.journal.fact.GameFact.TurnStarted;
+import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.FactRecorded;
+import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ScopeClosed;
+import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ScopeOpened;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.GameFact.TurnStarted;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 
 import java.util.List;

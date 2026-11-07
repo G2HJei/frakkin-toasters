@@ -1,10 +1,11 @@
 package xyz.zlatanov.frakkintoasters.operation;
 
 import lombok.val;
-import xyz.zlatanov.frakkintoasters.journal.fact.DeckFact.CardsAddedOnTop;
-import xyz.zlatanov.frakkintoasters.journal.fact.DeckFact.CardsAddedToBottom;
-import xyz.zlatanov.frakkintoasters.journal.fact.PlayerFact.*;
-import xyz.zlatanov.frakkintoasters.journal.fact.ShipFact.PilotChanged;
+import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedOnTop;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedToBottom;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.*;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.ShipFact.PilotChanged;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Player;
 import xyz.zlatanov.frakkintoasters.state.PlayerPile;
@@ -29,8 +30,8 @@ public class PlayerOps extends GameOps {
 
     private final Player player;
 
-    PlayerOps(Game game, int playerNumber) {
-        super(game);
+    PlayerOps(Game game, FactRecorder recorder, int playerNumber) {
+        super(game, recorder);
         this.player = game.player(playerNumber);
     }
 

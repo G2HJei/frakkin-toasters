@@ -55,7 +55,7 @@ class ChangeOfPlansEventProcessorTest extends EventTestHarness<ChangeOfPlansEven
     void shouldAllowAfterPoliticalProwessPassedTheCheck() {
         val politicalProwess = new SkillCard(6, POLITICAL_PROWESS);
         player(1).gainSkillCards(politicalProwess);
-        new PoliticalProwessEventProcessor().execute(game, new PoliticalProwessEvent(1, politicalProwess, true));
+        new PoliticalProwessEventProcessor().execute(game, new PoliticalProwessEvent(1, politicalProwess, true), ops);
 
         execute(new ChangeOfPlansEvent(3, CHANGE_OF_PLANS_5));
 

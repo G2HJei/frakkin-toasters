@@ -1,4 +1,4 @@
-package xyz.zlatanov.frakkintoasters.journal.fact;
+package xyz.zlatanov.frakkintoasters.engine.journal.fact;
 
 import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;

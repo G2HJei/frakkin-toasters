@@ -1,12 +1,13 @@
 package xyz.zlatanov.frakkintoasters.operation;
 
 import lombok.val;
-import xyz.zlatanov.frakkintoasters.journal.fact.BoardFact.ResourceDecreased;
-import xyz.zlatanov.frakkintoasters.journal.fact.DeckFact.CardsAddedOnTop;
-import xyz.zlatanov.frakkintoasters.journal.fact.ShipFact.BasestarDamageAttached;
-import xyz.zlatanov.frakkintoasters.journal.fact.ShipFact.BasestarDamageCleared;
-import xyz.zlatanov.frakkintoasters.journal.fact.ShipFact.PilotChanged;
-import xyz.zlatanov.frakkintoasters.journal.fact.ShipFact.ShipMoved;
+import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.ResourceDecreased;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedOnTop;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.ShipFact.BasestarDamageAttached;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.ShipFact.BasestarDamageCleared;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.ShipFact.PilotChanged;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.ShipFact.ShipMoved;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage;
@@ -25,8 +26,8 @@ public class ShipOps extends GameOps {
 
     private final int shipId;
 
-    ShipOps(Game game, int shipId) {
-        super(game);
+    ShipOps(Game game, FactRecorder recorder, int shipId) {
+        super(game, recorder);
         this.shipId = shipId;
     }
 

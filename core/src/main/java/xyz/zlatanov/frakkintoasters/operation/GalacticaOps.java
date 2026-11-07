@@ -1,12 +1,13 @@
 package xyz.zlatanov.frakkintoasters.operation;
 
 import lombok.val;
-import xyz.zlatanov.frakkintoasters.journal.fact.BoardFact.BoardingPartyAdvanced;
-import xyz.zlatanov.frakkintoasters.journal.fact.BoardFact.JumpPreparationDecreased;
-import xyz.zlatanov.frakkintoasters.journal.fact.BoardFact.ResourceDecreased;
-import xyz.zlatanov.frakkintoasters.journal.fact.BoardFact.ResourceIncreased;
-import xyz.zlatanov.frakkintoasters.journal.fact.DeckFact.CardsAddedOnTop;
-import xyz.zlatanov.frakkintoasters.journal.fact.ShipFact.ShipMoved;
+import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.BoardingPartyAdvanced;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.JumpPreparationDecreased;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.ResourceDecreased;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.ResourceIncreased;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedOnTop;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.ShipFact.ShipMoved;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.GalacticaBoard;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
@@ -27,8 +28,8 @@ import static xyz.zlatanov.frakkintoasters.state.ship.ShipZone.*;
 
 public class GalacticaOps extends BattlestarOps {
 
-    GalacticaOps(Game game) {
-        super(game);
+    GalacticaOps(Game game, FactRecorder recorder) {
+        super(game, recorder);
     }
 
     // todo certain effects destroy a random civ ship ( Misjump destination / Helena Cain miracle ability ). To handle this outside of ShipOps, probably GalacticaOps

@@ -38,6 +38,12 @@ class ArchitectureTest {
     @ArchTest
     static final ArchRule stateDoesNotDependOnOpsEventsOrTheEngine =
             noClasses().that().resideInAPackage("..state..")
-                    .should().dependOnClassesThat().resideInAnyPackage("..operation..", "..event..")
+                    .should().dependOnClassesThat().resideInAnyPackage("..operation..", "..event..", "..engine..")
                     .because("state is the bottom layer");
+
+    @ArchTest
+    static final ArchRule eventsDoNotDependOnTheEngine =
+            noClasses().that().resideInAPackage("..event..")
+                    .should().dependOnClassesThat().resideInAPackage("..engine..")
+                    .because("processors read through GameView and write only through game ops, they never see the journal");
 }

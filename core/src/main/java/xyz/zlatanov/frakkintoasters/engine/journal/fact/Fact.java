@@ -1,4 +1,4 @@
-package xyz.zlatanov.frakkintoasters.journal.fact;
+package xyz.zlatanov.frakkintoasters.engine.journal.fact;
 
 /**
  * One thing a game op did to the state, with the full result data. Applying the facts of a journal to a fresh game

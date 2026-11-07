@@ -3,11 +3,11 @@ package xyz.zlatanov.frakkintoasters.operation;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.TestHarness;
-import xyz.zlatanov.frakkintoasters.journal.fact.BoardFact.ResourceDecreased;
-import xyz.zlatanov.frakkintoasters.journal.fact.DeckFact.CardsAddedOnTop;
-import xyz.zlatanov.frakkintoasters.journal.fact.DeckFact.DeckShuffled;
-import xyz.zlatanov.frakkintoasters.journal.fact.PlayerFact.CharacterMoved;
-import xyz.zlatanov.frakkintoasters.journal.fact.ShipFact.*;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.ResourceDecreased;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedOnTop;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.DeckShuffled;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.CharacterMoved;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.ShipFact.*;
 import xyz.zlatanov.frakkintoasters.state.board.Resource;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 
@@ -31,7 +31,7 @@ class ShipOpsJournalTest extends TestHarness {
 
         assertEquals(List.of(
                 new ShipMoved(heavyRaider.id(), GALACTICA_SPACE, CYLON_SUPPLY, null),
-                new ShipMoved(centurion.id(), CENTURION_SUPPLY, BOARDING_PARTY, null)), game.journal().facts());
+                new ShipMoved(centurion.id(), CENTURION_SUPPLY, BOARDING_PARTY, null)), journal.facts());
         assertTrue(galacticaBoard.boardingPartyTrack().containsKey(centurion));
     }
 
@@ -42,7 +42,7 @@ class ShipOpsJournalTest extends TestHarness {
 
         ops.galactica().destroyCenturion(centurion.id());
 
-        assertEquals(List.of(new ShipMoved(centurion.id(), BOARDING_PARTY, CENTURION_SUPPLY, null)), game.journal().facts());
+        assertEquals(List.of(new ShipMoved(centurion.id(), BOARDING_PARTY, CENTURION_SUPPLY, null)), journal.facts());
         assertTrue(galacticaBoard.boardingPartyTrack().isEmpty());
         assertTrue(cylonShips.centurions().contains(centurion));
     }
@@ -53,7 +53,7 @@ class ShipOpsJournalTest extends TestHarness {
 
         ops.ship(raider.id()).destroy();
 
-        assertEquals(List.of(new ShipMoved(raider.id(), GALACTICA_SPACE, CYLON_SUPPLY, null)), game.journal().facts());
+        assertEquals(List.of(new ShipMoved(raider.id(), GALACTICA_SPACE, CYLON_SUPPLY, null)), journal.facts());
     }
 
     @Test
@@ -63,7 +63,7 @@ class ShipOpsJournalTest extends TestHarness {
 
         ops.ship(basestar.id()).destroy();
 
-        val facts = game.journal().facts();
+        val facts = journal.facts();
         assertEquals(new BasestarDamageCleared(basestar.id()), facts.get(0));
         assertEquals(new CardsAddedOnTop(DeckId.BASESTAR_DAMAGE, List.of(STRUCTURAL_DAMAGE)), facts.get(1));
         assertEquals(DeckId.BASESTAR_DAMAGE, ((DeckShuffled) facts.get(2)).deck());
@@ -82,7 +82,7 @@ class ShipOpsJournalTest extends TestHarness {
         assertEquals(List.of(
                 new PilotChanged(viper.id(), null),
                 new CharacterMoved(LOUANNE_KAT_KATRAINE, SICKBAY),
-                new ShipMoved(viper.id(), GALACTICA_SPACE, DAMAGED, null)), game.journal().facts());
+                new ShipMoved(viper.id(), GALACTICA_SPACE, DAMAGED, null)), journal.facts());
     }
 
     @Test
@@ -91,11 +91,11 @@ class ShipOpsJournalTest extends TestHarness {
 
         ops.ship(civ.id()).destroy();
 
-        val expected = new java.util.ArrayList<xyz.zlatanov.frakkintoasters.journal.fact.Fact>();
+        val expected = new java.util.ArrayList<xyz.zlatanov.frakkintoasters.engine.journal.fact.Fact>();
         if (civ.fuelCost() > 0) expected.add(new ResourceDecreased(Resource.FUEL, civ.fuelCost()));
         if (civ.moraleCost() > 0) expected.add(new ResourceDecreased(Resource.MORALE, civ.moraleCost()));
         if (civ.populationCost() > 0) expected.add(new ResourceDecreased(Resource.POPULATION, civ.populationCost()));
         expected.add(new ShipMoved(civ.id(), GALACTICA_SPACE, REMOVED, null));
-        assertEquals(expected, game.journal().facts());
+        assertEquals(expected, journal.facts());
     }
 }

@@ -1,14 +1,14 @@
-package xyz.zlatanov.frakkintoasters.journal;
+package xyz.zlatanov.frakkintoasters.engine.journal;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
-import xyz.zlatanov.frakkintoasters.journal.fact.*;
-import xyz.zlatanov.frakkintoasters.journal.fact.BoardFact.*;
-import xyz.zlatanov.frakkintoasters.journal.fact.DeckFact.*;
-import xyz.zlatanov.frakkintoasters.journal.fact.GameFact.*;
-import xyz.zlatanov.frakkintoasters.journal.fact.PlayerFact.*;
-import xyz.zlatanov.frakkintoasters.journal.fact.ShipFact.*;
-import xyz.zlatanov.frakkintoasters.journal.fact.TitleFact.*;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.*;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.*;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.*;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.GameFact.*;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.*;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.ShipFact.*;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.TitleFact.*;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.PlayerPile;
 import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
