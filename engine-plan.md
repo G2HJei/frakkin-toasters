@@ -392,9 +392,12 @@ at a pause inside a window.
 
 ## Phase 11 - Crisis
 
-`CrisisCard` is a bare enum. It needs its skill check type or event effect, its Cylon activation icon and its jump icon.
-Non-skill-check crisis effects aren't modeled at all.
+`ResolveCrisisCardEvent` and `CrisisCardFollowups` resolve 16 choice crises, and their `CrisisCard` constants list the
+chooser and both icons. The other constants are still bare. The remaining 28 event crises need their effects, and the
+skill check crises need their skill check type. Some of those let a title holder pick an alternate instruction instead
+of the skill check (rule 8.5.1.1).
 
+- The Crisis step and `ResolveCapricaCrisisCardEvent` queue `ResolveCrisisCardEvent`.
 - `Turn` keeps the Crisis Cards drawn this turn, through a new fact, and `TurnView` exposes them. The Activate Cylon
   Ships step, the Prepare for Jump step and the discard in `EndTurnEvent` (rule 8.8) read them.
 - A card chosen at Caprica counts for Prepare for Jump even on a revealed Cylon's turn (rule 6.1.3.4), so that step
@@ -407,7 +410,7 @@ Non-skill-check crisis effects aren't modeled at all.
 - `GameEnded` names the winning team. A Cylon Leader's own result comes from their Motive Cards (rules 2.3, 16.3).
 - `ExecuteEvent`'s processor covers the loss when no characters are left to select (rule 2.2). It depends on the
   execution, so it isn't a win check.
-- 42 event records have no processor today: the 3 placeholders, `NoOpEvent` and 38 real events. Phases 8 to 12 add the
+- 39 event records have no processor today: the 3 placeholders, `NoOpEvent` and 35 real events. Phases 8 to 12 add the
   ones they reach, and the registry test tracks the rest.
 
 Acceptance test: seeded games played to a Cylon win and to the Kobol end game, restoring at every pause.

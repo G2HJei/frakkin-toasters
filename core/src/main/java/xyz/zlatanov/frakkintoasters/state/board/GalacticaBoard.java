@@ -22,6 +22,8 @@ import static xyz.zlatanov.frakkintoasters.state.track.BoardingParty.START;
 @Getter //todo replace getters with explicit methods for View interface usage to ensure no modification is possible
 @Accessors(fluent = true)
 public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard, GalacticaBoardView {
+    private static final int RESOURCE_MAXIMUM = 15; // rule 13.2.1
+
     private       int                           fuel                 = 8;
     private       int                           food                 = 8;
     private       int                           morale               = 10;
@@ -153,6 +155,12 @@ public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard, Gal
     }
 
     @Mutates
+    public GalacticaBoard decreaseJumpPreparation() {
+        jumpPreparation = JumpPreparation.values()[Math.max(0, jumpPreparation.ordinal() - 1)];
+        return this;
+    }
+
+    @Mutates
     public Centurion destroyCenturion(int centurionId) {
         val centurion = boardingPartyTrack.keySet().stream()
                 .filter(c -> centurionId == c.id())
@@ -169,8 +177,8 @@ public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard, Gal
     }
 
     @Mutates
-    public GalacticaBoard increaseFood() {
-        food++;
+    public GalacticaBoard increaseFood(int amount) {
+        food = Math.min(RESOURCE_MAXIMUM, food + amount);
         return this;
     }
 
@@ -181,8 +189,8 @@ public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard, Gal
     }
 
     @Mutates
-    public GalacticaBoard increaseFuel() {
-        fuel++;
+    public GalacticaBoard increaseFuel(int amount) {
+        fuel = Math.min(RESOURCE_MAXIMUM, fuel + amount);
         return this;
     }
 
@@ -193,8 +201,20 @@ public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard, Gal
     }
 
     @Mutates
+    public GalacticaBoard increaseMorale(int amount) {
+        morale = Math.min(RESOURCE_MAXIMUM, morale + amount);
+        return this;
+    }
+
+    @Mutates
     public GalacticaBoard decreasePopulation(int amount) {
         population = Math.max(0, population - amount);
+        return this;
+    }
+
+    @Mutates
+    public GalacticaBoard increasePopulation(int amount) {
+        population = Math.min(RESOURCE_MAXIMUM, population + amount);
         return this;
     }
 

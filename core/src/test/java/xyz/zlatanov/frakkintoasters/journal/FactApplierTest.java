@@ -18,6 +18,7 @@ import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
 import xyz.zlatanov.frakkintoasters.state.skill.*;
 import xyz.zlatanov.frakkintoasters.state.track.BoardingParty;
+import xyz.zlatanov.frakkintoasters.state.track.JumpPreparation;
 import xyz.zlatanov.frakkintoasters.state.track.Pursuit;
 
 import java.util.List;
@@ -57,6 +58,30 @@ class FactApplierTest {
         assertEquals(7, galactica.food());
         assertEquals(8, galactica.morale());
         assertEquals(0, galactica.population());
+    }
+
+    @Test
+    void resourceIncreasedRaisesTheResourceButNotAboveTheMaximum() {
+        apply(new ResourceIncreased(FUEL, 3));
+        apply(new ResourceIncreased(FOOD, 1));
+        apply(new ResourceIncreased(MORALE, 2));
+        apply(new ResourceIncreased(POPULATION, 100));
+
+        val galactica = game.boards().galactica();
+        assertEquals(11, galactica.fuel());
+        assertEquals(9, galactica.food());
+        assertEquals(12, galactica.morale());
+        assertEquals(15, galactica.population());
+    }
+
+    @Test
+    void jumpPreparationDecreasedMovesTheFleetTokenBack() {
+        val galactica = game.boards().galactica();
+        galactica.advanceJumpPreparation();
+
+        apply(new JumpPreparationDecreased());
+
+        assertEquals(JumpPreparation.START, galactica.jumpPreparation());
     }
 
     @Test

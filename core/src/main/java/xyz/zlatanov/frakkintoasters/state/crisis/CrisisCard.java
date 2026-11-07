@@ -1,8 +1,21 @@
 package xyz.zlatanov.frakkintoasters.state.crisis;
 
+import lombok.Getter;
+import lombok.experimental.Accessors;
+
+import static xyz.zlatanov.frakkintoasters.state.crisis.CrisisChooser.*;
+import static xyz.zlatanov.frakkintoasters.state.crisis.CylonActivation.*;
+
+/**
+ * Every Crisis Card in scope. A constant lists what is printed on the card: who chooses a section, the Cylon activation
+ * icon and whether it has the "prepare for jump" icon. The effects of the sections are in {@code CrisisCardFollowups},
+ * because state doesn't know about events. Constants without these details aren't implemented yet.
+ */
+@Getter
+@Accessors(fluent = true)
 public enum CrisisCard {
     DETENTE,
-    RAIDERS_INBOUND,
+    RAIDERS_INBOUND(CAG, ACTIVATE_HEAVY_RAIDERS, false),
     RETURN_TO_DUTY,
     REVIEW_CAMERA_FOOTAGE,
     TRACED_BY_RADIATION,
@@ -20,12 +33,12 @@ public enum CrisisCard {
     GALACTICA_FALLING_APART,
     GIVE_IN_TO_DESPAIR,
     HYBRID_IN_PANIC,
-    CONTROVERSIAL_MANUSCRIPT,
+    CONTROVERSIAL_MANUSCRIPT(PRESIDENT, ACTIVATE_RAIDERS, true),
     GUILTY_CONSCIENCE,
     INCITEMENT_TO_MUTINY,
     INSUBORDINATE_CREW,
     ONE_LAST_COCKTAIL,
-    QUESTION_PROCEDURE,
+    QUESTION_PROCEDURE(PRESIDENT, ACTIVATE_BASESTARS, true),
     QUORUM_IN_UPROAR,
     RALLYING_SUPPORT,
     REACTOR_CRITICAL,
@@ -35,7 +48,7 @@ public enum CrisisCard {
     SECRET_MEETINGS,
     STARVATION_IN_DOGSVILLE,
     AIRLOCK_LEAK,
-    AMBUSHED_BY_THE_PRESS,
+    AMBUSHED_BY_THE_PRESS(PRESIDENT, ACTIVATE_RAIDERS, true),
     APPOINT_HEAD_OF_SECURITY,
     CENTURION_ASSAULT,
     CONSULT_THE_PRISONER,
@@ -45,12 +58,12 @@ public enum CrisisCard {
     GUILTY_CONCIENCE,
     HAUNTED_BY_THE_PAST,
     HERA_RESCUED,
-    HIDDEN_EXPLOSIVES,
+    HIDDEN_EXPLOSIVES(ADMIRAL, ACTIVATE_RAIDERS, true),
     HIDDEN_IDENTITY,
     IN_THE_RING,
     INTERROGATION,
     JOES_BAR,
-    LABOR_DISPUTE,
+    LABOR_DISPUTE(PRESIDENT, ACTIVATE_BASESTARS, false),
     MEDAL_OF_DISTINCTION,
     MYSTERIOUS_GUIDE,
     MYSTERIOUS_MESSAGE,
@@ -66,7 +79,7 @@ public enum CrisisCard {
     UNEXPLAINED_DEATHS,
     UNFAIR_BIAS,
     UNWELCOME_FACES,
-    WIDESPREAD_STARVATION,
+    WIDESPREAD_STARVATION(PRESIDENT, ACTIVATE_RAIDERS, true),
     A_TRAITOR_ACCUSED,
     ADMIRAL_GRILLED,
     ANALYZE_ENEMY_FIGHTER,
@@ -82,7 +95,7 @@ public enum CrisisCard {
     DECLARE_MARTIAL_LAW,
     DETECTOR_SABOTAGE,
     ELECTIONS_LOOM,
-    FOOD_SHORTAGE,
+    FOOD_SHORTAGE(PRESIDENT, ACTIVATE_RAIDERS, true),
     FORCED_WATER_MINING,
     FULFILLER_OF_PROPHECY,
     GUILT_BY_COLLUSION,
@@ -99,13 +112,13 @@ public enum CrisisCard {
     PRISON_LABOR,
     PRISONER_REVOLT,
     REQUESTED_RESIGNATION,
-    RESCUE_CAPRICA_SURVIVORS,
-    RESCUE_MISSION_BASESTAR,
-    RESCUE_MISSION_RAIDER,
+    RESCUE_CAPRICA_SURVIVORS(PRESIDENT, ACTIVATE_RAIDERS, true),
+    RESCUE_MISSION_BASESTAR(ADMIRAL, ACTIVATE_BASESTARS, true),
+    RESCUE_MISSION_RAIDER(ADMIRAL, ACTIVATE_RAIDERS, true),
     RESCUE_THE_FLEET,
     RESISTANCE,
-    RIOTS_JUMP,
-    RIOTS_NO_JUMP,
+    RIOTS_JUMP(ADMIRAL, ACTIVATE_BASESTARS, true),
+    RIOTS_NO_JUMP(ADMIRAL, LAUNCH_RAIDERS, false),
     SCOUTING_FOR_FUEL,
     SCOUTING_FOR_WATER,
     SECURITY_BREACH,
@@ -117,9 +130,9 @@ public enum CrisisCard {
     UNEXPECTED_REUNION,
     UNIDENTIFIED_SHIP,
     WATER_SABOTAGED,
-    WATER_SHORTAGE_BASESTAR_AND_JUMP,
-    WATER_SHORTAGE_BASESTAR_NO_JUMP,
-    WATER_SHORTAGE_RAIDERS,
+    WATER_SHORTAGE_BASESTAR_AND_JUMP(PRESIDENT, ACTIVATE_BASESTARS, true),
+    WATER_SHORTAGE_BASESTAR_NO_JUMP(PRESIDENT, ACTIVATE_BASESTARS, false),
+    WATER_SHORTAGE_RAIDERS(PRESIDENT, ACTIVATE_RAIDERS, true),
     WEAPONS_MALFUNCTION,
     WITCH_HUNT,
     A_GUILTY_VERDICT,
@@ -138,6 +151,20 @@ public enum CrisisCard {
     SUSPICIOUS_ELECTION_RESULTS,
     THE_BLACK_MARKET,
     TRAINING_SNAFU,
-    UNSETTLING_STORIES,
+    UNSETTLING_STORIES;
     //todo am I missing 3 crisis cards? According to the combined rules =- yes
+
+    private final CrisisChooser   chooser;
+    private final CylonActivation activation;
+    private final boolean         prepareForJump;
+
+    CrisisCard() {
+        this(null, null, false);
+    }
+
+    CrisisCard(CrisisChooser chooser, CylonActivation activation, boolean prepareForJump) {
+        this.chooser = chooser;
+        this.activation = activation;
+        this.prepareForJump = prepareForJump;
+    }
 }

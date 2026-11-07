@@ -6,7 +6,6 @@ import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
 import xyz.zlatanov.frakkintoasters.event.board.*;
-import xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint;
 import xyz.zlatanov.frakkintoasters.event.crisis.ActivateCylonBasestarsEvent;
 import xyz.zlatanov.frakkintoasters.event.crisis.ActivateHeavyRaidersAndCenturionsEvent;
 import xyz.zlatanov.frakkintoasters.event.crisis.ActivateRaidersEvent;
@@ -19,8 +18,6 @@ import xyz.zlatanov.frakkintoasters.event.player.*;
 import xyz.zlatanov.frakkintoasters.event.ship.*;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.result.*;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
-import xyz.zlatanov.frakkintoasters.state.board.Resource;
-import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
 import xyz.zlatanov.frakkintoasters.state.view.GameView;
@@ -35,6 +32,7 @@ import java.util.stream.IntStream;
 
 import static java.util.Comparator.comparingInt;
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
+import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.*;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.*;
 import static xyz.zlatanov.frakkintoasters.event.ship.DamageVipersEvent.Area.*;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
@@ -264,23 +262,15 @@ public class SkillCheckResultFollowups {
     }
 
     private int president() {
-        return playerNumber(game.president());
+        return playerNumber(game, game.president());
     }
 
     private int admiral() {
-        return playerNumber(game.admiral());
+        return playerNumber(game, game.admiral());
     }
 
     private int target() {
         return Optional.ofNullable(game.activeSkillCheck().targetPlayerNumber())
-                .orElseThrow(FrakCallTheAdmiralException::new);
-    }
-
-    private int playerNumber(Character character) {
-        return game.players().stream()
-                .filter(p -> character != null && p.character() == character)
-                .mapToInt(PlayerView::number)
-                .findFirst()
                 .orElseThrow(FrakCallTheAdmiralException::new);
     }
 
@@ -317,40 +307,8 @@ public class SkillCheckResultFollowups {
 
     /* events */
 
-    /**
-     * Like {@link Followup#all(Followup...)}, but skips the parts without effect, e.g. when nobody is in a location.
-     */
-    private static Followup allOf(Followup... followups) {
-        return all(Arrays.stream(followups)
-                .filter(followup -> !NONE.equals(followup))
-                .toArray(Followup[]::new));
-    }
-
-    private static Event lose(Resource resource, int amount) {
-        return new LoseResourceEvent(resource, amount);
-    }
-
-    private static Event gain(Resource resource, int amount) {
-        return new GainResourceEvent(resource, amount);
-    }
-
     private static Event treachery(int playerNumber, int count) {
         return new DrawSkillCardsOfColorEvent(playerNumber, TREACHERY, count);
-    }
-
-    private static Event discard(int playerNumber, int count) {
-        return new PlayerDecisionEvent<>(playerNumber, DiscardSkillCardsEvent.class, discardExactly(count));
-    }
-
-    private static EventConstraint discardExactly(int count) {
-        return switch (count) {
-            case 1 -> DISCARD_EXACTLY_1;
-            case 2 -> DISCARD_EXACTLY_2;
-            case 3 -> DISCARD_EXACTLY_3;
-            case 4 -> DISCARD_EXACTLY_4;
-            case 5 -> DISCARD_EXACTLY_5;
-            default -> throw new FrakCallTheAdmiralException();
-        };
     }
 
     private static Followup optional(int playerNumber, Event decision) {
@@ -368,7 +326,7 @@ public class SkillCheckResultFollowups {
     private Followup sendCharactersIn(Location destination, Location... locations) {
         return all(Arrays.stream(locations)
                 .flatMap(location -> game.boards().galactica().charactersIn(location).stream())
-                .map(this::playerNumber)
+                .map(character -> playerNumber(game, character))
                 .sorted()
                 .map(playerNumber -> sendTo(destination, playerNumber))
                 .toArray(Event[]::new));

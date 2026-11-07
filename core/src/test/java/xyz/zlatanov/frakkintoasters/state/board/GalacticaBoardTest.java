@@ -87,4 +87,25 @@ class GalacticaBoardTest {
         board.advanceJumpPreparation();
         assertEquals(START, board.jumpPreparation());
     }
+
+    @Test
+    void shouldDecreaseJumpPreparationButNotPastTheStart() {
+        board.advanceJumpPreparation().advanceJumpPreparation();
+
+        board.decreaseJumpPreparation();
+        assertEquals(POSITION_1, board.jumpPreparation());
+        board.decreaseJumpPreparation();
+        board.decreaseJumpPreparation();
+        assertEquals(START, board.jumpPreparation());
+    }
+
+    @Test
+    void shouldNotRaiseResourcesAboveTheMaximum() {
+        board.increaseFuel(100).increaseFood(100).increaseMorale(100).increasePopulation(100);
+
+        assertEquals(15, board.fuel());
+        assertEquals(15, board.food());
+        assertEquals(15, board.morale());
+        assertEquals(15, board.population());
+    }
 }

@@ -7,6 +7,7 @@ import xyz.zlatanov.frakkintoasters.operation.GameOps;
 import xyz.zlatanov.frakkintoasters.state.Die;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Randomness;
+import xyz.zlatanov.frakkintoasters.state.board.Resource;
 import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
@@ -200,6 +201,9 @@ class GameReplayerTest {
         ops.pegasus().activateEngineRoom();
         ops.galactica().decreasePopulation(2);
         ops.galactica().decreaseMorale(1);
+        ops.galactica().decreaseResource(Resource.FUEL, 1);
+        ops.galactica().increaseResource(Resource.FOOD, 2);
+        ops.galactica().decreaseJumpPreparation();
         ops.cylonFleet().place(ShipType.RAIDER, CYLON_FLEET_SPACE_1);
         ops.cylonFleet().place(ShipType.BASESTAR, CYLON_FLEET_SPACE_2);
         ops.cylonFleet().advancePursuit();

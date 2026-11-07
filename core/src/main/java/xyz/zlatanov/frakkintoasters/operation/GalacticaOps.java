@@ -2,12 +2,15 @@ package xyz.zlatanov.frakkintoasters.operation;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.journal.fact.BoardFact.BoardingPartyAdvanced;
+import xyz.zlatanov.frakkintoasters.journal.fact.BoardFact.JumpPreparationDecreased;
 import xyz.zlatanov.frakkintoasters.journal.fact.BoardFact.ResourceDecreased;
+import xyz.zlatanov.frakkintoasters.journal.fact.BoardFact.ResourceIncreased;
 import xyz.zlatanov.frakkintoasters.journal.fact.DeckFact.CardsAddedOnTop;
 import xyz.zlatanov.frakkintoasters.journal.fact.ShipFact.ShipMoved;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.GalacticaBoard;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
+import xyz.zlatanov.frakkintoasters.state.board.Resource;
 import xyz.zlatanov.frakkintoasters.state.damage.GalacticaDamage;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
@@ -69,6 +72,18 @@ public class GalacticaOps extends BattlestarOps {
 
     public void decreaseMorale(int moraleLost) {
         record(new ResourceDecreased(MORALE, moraleLost));
+    }
+
+    public void decreaseResource(Resource resource, int amount) {
+        record(new ResourceDecreased(resource, amount));
+    }
+
+    public void increaseResource(Resource resource, int amount) {
+        record(new ResourceIncreased(resource, amount));
+    }
+
+    public void decreaseJumpPreparation() {
+        record(new JumpPreparationDecreased());
     }
 
     public void advanceBoardingParty() {

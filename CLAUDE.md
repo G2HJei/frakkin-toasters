@@ -84,7 +84,7 @@ Multi-module Gradle project with a single `core` module. Package root: `xyz.zlat
   its card piles), `SkillCheckType`, `PlayedCard`
 - `state/card/` - card enums: `LoyaltyCard`, `QuorumCard`, `MutinyCard`, `ObjectiveCard`, `DestinationCard`,
   `MotiveCard`
-- `state/crisis/` - `CrisisCard`, `SuperCrisisCard`
+- `state/crisis/` - `CrisisCard` (with its printed `CrisisChooser` and `CylonActivation`), `SuperCrisisCard`
 - `state/damage/` - damage card enums: `GalacticaDamage`, `PegasusDamage`, `BasestarDamage`
 - `state/track/` - `BoardingParty`, `JumpPreparation`, `Pursuit`
 - `state/character/` - `Character` enum (33 BSG characters), `CharacterType` enum
@@ -123,7 +123,8 @@ Placeholder events (`event/placeholder/`: `PlayerDecisionEvent`, `PlayQuorumCard
 have no processor. They stand for a point where a player has to choose. `PlayerDecisionEvent<T>(playerNumber,
 Class<T> action, List<EventConstraint>)` means "this player picks a concrete `T` event".
 
-`FollowupUtils` builds shared followup sequences, e.g. `beforeSkillCheckFollowups(game)`.
+`FollowupUtils` builds shared followup sequences, e.g. `beforeSkillCheckFollowups(game)`, and holds the helpers that
+`SkillCheckResultFollowups` and `CrisisCardFollowups` share, e.g. `lose`, `gain` and `discard`.
 
 ### Skill Check Results
 
@@ -138,6 +139,22 @@ moment. Its pass and fail switches list every type, so a new `SkillCheckType` do
   `DamageGalacticaEvent`, `SendToSickbayEvent`), otherwise one in its area package (e.g. `LoseResourceEvent`).
 - An effect unique to one skill check uses a specialized event in `event/skillcheck/result`, named after the skill
   check and result (e.g. `CrashLandingFailEvent`), with the card text in its comment.
+
+### Crisis Cards
+
+`ResolveCrisisCardEvent(card)` resolves a Crisis Card. Nothing queues it yet, that comes with the Crisis step. So far it
+covers 16 choice crises (rule 8.5.2), and any other card throws `FrakCallTheAdmiralException`.
+
+A `CrisisCard` constant lists what is printed on the card: its `CrisisChooser`, its `CylonActivation` icon and whether it
+has the "prepare for jump" icon. `CrisisCardFollowups` (in `event/crisis`) holds the effects, grouped like
+`SkillCheckResultFollowups`:
+
+- `choice(card)` gives a `OneOf` of two `ChooseCrisisSectionEvent`s, one per section. They are `PlayerEvent`s that name
+  the chooser, because the engine derives who answers a `OneOf` from its options (decision 7 in `engine-plan.md`) and
+  most sections name no player. Don't put the effects of a section directly into the `one(...)`.
+- `followup(card, section)` gives the effects of the picked section.
+- An effect on the current player goes through `onCurrentPlayer`, because a revealed Cylon resolving the card at
+  "Caprica" ignores it (rule 6.1.2.1).
 
 ### Followups
 

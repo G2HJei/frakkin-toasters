@@ -43,6 +43,15 @@ public final class FactApplier {
                     case POPULATION -> galactica.decreasePopulation(f.amount());
                 }
             }
+            case BoardFact.ResourceIncreased f -> {
+                switch (f.resource()) {
+                    case FUEL -> galactica.increaseFuel(f.amount());
+                    case FOOD -> galactica.increaseFood(f.amount());
+                    case MORALE -> galactica.increaseMorale(f.amount());
+                    case POPULATION -> galactica.increasePopulation(f.amount());
+                }
+            }
+            case BoardFact.JumpPreparationDecreased ignored -> galactica.decreaseJumpPreparation();
             case BoardFact.LocationDamaged f -> {
                 val board = Stream.of(galactica, game.boards().pegasus())
                         .filter(b -> b.locations().contains(f.location()))
