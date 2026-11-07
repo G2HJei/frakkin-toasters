@@ -16,7 +16,8 @@ import xyz.zlatanov.frakkintoasters.state.ship.*;
 import java.util.List;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
-import static xyz.zlatanov.frakkintoasters.state.board.Resource.*;
+import static xyz.zlatanov.frakkintoasters.state.board.Resource.MORALE;
+import static xyz.zlatanov.frakkintoasters.state.board.Resource.POPULATION;
 import static xyz.zlatanov.frakkintoasters.state.damage.GalacticaDamage.FOOD;
 import static xyz.zlatanov.frakkintoasters.state.damage.GalacticaDamage.FUEL;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipZone.*;
@@ -57,7 +58,7 @@ public class GalacticaOps extends BattlestarOps {
         placeCivilianShip(GALACTICA_SPACE_2_OCLOCK);
         placeCivilianShip(GALACTICA_SPACE_2_OCLOCK);
         takeFromSupply(Basestar.class, GALACTICA_SPACE_8_OCLOCK);
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 3; i++) {
             takeFromSupply(Raider.class, GALACTICA_SPACE_8_OCLOCK);
         }
     }

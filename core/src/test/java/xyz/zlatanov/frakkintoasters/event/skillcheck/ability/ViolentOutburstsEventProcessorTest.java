@@ -19,30 +19,30 @@ class ViolentOutburstsEventProcessorTest extends EventTestHarness<ViolentOutburs
     }
 
     @Test
-    void shouldSendToBrig() {
+    void shouldSendToSickbay() {
         execute(new ViolentOutburstsEvent());
-        assertEquals(BRIG, game.locate(SHARON_BOOMER_VALERII));
+        assertEquals(SICKBAY, game.locate(SHARON_BOOMER_VALERII));
     }
 
     @Test
-    void shouldNotSendRevealedCylonToBrig() {
+    void shouldNotSendRevealedCylonToSickbay() {
         revealCylon();
         execute(new ViolentOutburstsEvent());
         assertEquals(ARMORY, game.locate(SHARON_BOOMER_VALERII));
     }
 
     @Test
-    void shouldNotSendUnarrivedHeloToBrig() {
+    void shouldNotSendUnarrivedHeloToSickbay() {
         game.currentPlayerNumber(2);
         execute(new ViolentOutburstsEvent());
         assertNull(galacticaBoard.characters().get(KARL_HELO_AGATHON));
     }
 
     @Test
-    void shouldSendHeloToBrig() {
+    void shouldSendHeloToSickbay() {
         game.currentPlayerNumber(2).turn(2);
         execute(new ViolentOutburstsEvent());
-        assertEquals(BRIG, game.locate(KARL_HELO_AGATHON));
+        assertEquals(SICKBAY, game.locate(KARL_HELO_AGATHON));
     }
 
     @Test
@@ -65,7 +65,7 @@ class ViolentOutburstsEventProcessorTest extends EventTestHarness<ViolentOutburs
 
         execute(new ViolentOutburstsEvent());
 
-        assertEquals(BRIG, game.locate(SHARON_BOOMER_VALERII));
+        assertEquals(SICKBAY, game.locate(SHARON_BOOMER_VALERII));
         assertTrue(galacticaBoard.reserves().contains(fighter));
         assertFalse(galacticaBoard.shipsInSpace().containsKey(fighter));
         assertNull(fighter.pilot());
