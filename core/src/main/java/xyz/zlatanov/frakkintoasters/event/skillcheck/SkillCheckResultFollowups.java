@@ -5,7 +5,9 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
-import xyz.zlatanov.frakkintoasters.event.board.*;
+import xyz.zlatanov.frakkintoasters.event.board.DecreaseJumpPreparationEvent;
+import xyz.zlatanov.frakkintoasters.event.board.IncreaseJumpPreparationEvent;
+import xyz.zlatanov.frakkintoasters.event.board.PlaceCenturionsEvent;
 import xyz.zlatanov.frakkintoasters.event.crisis.ActivateCylonBasestarsEvent;
 import xyz.zlatanov.frakkintoasters.event.crisis.ActivateHeavyRaidersAndCenturionsEvent;
 import xyz.zlatanov.frakkintoasters.event.crisis.ActivateRaidersEvent;
@@ -262,11 +264,11 @@ public class SkillCheckResultFollowups {
     }
 
     private int president() {
-        return playerNumber(game, game.president());
+        return game.playerNumber(game.president());
     }
 
     private int admiral() {
-        return playerNumber(game, game.admiral());
+        return game.playerNumber(game.admiral());
     }
 
     private int target() {
@@ -326,7 +328,7 @@ public class SkillCheckResultFollowups {
     private Followup sendCharactersIn(Location destination, Location... locations) {
         return all(Arrays.stream(locations)
                 .flatMap(location -> game.boards().galactica().charactersIn(location).stream())
-                .map(character -> playerNumber(game, character))
+                .map(game::playerNumber)
                 .sorted()
                 .map(playerNumber -> sendTo(destination, playerNumber))
                 .toArray(Event[]::new));

@@ -11,7 +11,6 @@ import xyz.zlatanov.frakkintoasters.event.skillcheck.PlayCardsBeforeSkillCheckEv
 import xyz.zlatanov.frakkintoasters.event.skillcheck.ResolveCardsBeforeSkillCheckEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.ability.*;
 import xyz.zlatanov.frakkintoasters.state.board.Resource;
-import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.view.GameView;
@@ -47,15 +46,6 @@ public class FollowupUtils {
 
     public static Event discard(int playerNumber, int count) {
         return new PlayerDecisionEvent<>(playerNumber, DiscardSkillCardsEvent.class, discardExactly(count));
-    }
-
-    //todo move to GameView
-    public static int playerNumber(GameView game, Character character) {
-        return game.players().stream()
-                .filter(p -> character != null && p.character() == character)
-                .mapToInt(PlayerView::number)
-                .findFirst()
-                .orElseThrow(FrakCallTheAdmiralException::new);
     }
 
     public static Followup beforeSkillCheckFollowups(GameView game) {

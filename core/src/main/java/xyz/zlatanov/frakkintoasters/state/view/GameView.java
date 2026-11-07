@@ -27,6 +27,8 @@ public interface GameView {
      */
     int actingPlayerNumber();
 
+    int playerNumber(Character character);
+
     PlayerView actingPlayer();
 
     GameStep step();

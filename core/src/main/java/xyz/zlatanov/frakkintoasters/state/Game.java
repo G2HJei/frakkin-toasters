@@ -10,6 +10,7 @@ import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 import xyz.zlatanov.frakkintoasters.state.deck.DecksHolder;
+import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.CylonShips;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheck;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
@@ -100,6 +101,15 @@ public class Game implements GameView {
     @Override
     public int actingPlayerNumber() {
         return actingPlayerNumber != null ? actingPlayerNumber : currentPlayerNumber;
+    }
+
+    @Override
+    public int playerNumber(Character character) {
+        return players.entrySet().stream()
+                .filter(e -> e.getValue().character() == character)
+                .mapToInt(Map.Entry::getKey)
+                .findFirst()
+                .orElseThrow(FrakCallTheAdmiralException::new);
     }
 
     /**

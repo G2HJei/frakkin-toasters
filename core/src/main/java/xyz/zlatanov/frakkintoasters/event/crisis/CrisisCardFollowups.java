@@ -101,15 +101,15 @@ public class CrisisCardFollowups {
     }
 
     private int president() {
-        return playerNumber(game, game.president());
+        return game.playerNumber(game.president());
     }
 
     private int admiral() {
-        return playerNumber(game, game.admiral());
+        return game.playerNumber(game.admiral());
     }
 
     private int cag() {
-        return playerNumber(game, game.cag());
+        return game.playerNumber(game.cag());
     }
 
     /* events */
