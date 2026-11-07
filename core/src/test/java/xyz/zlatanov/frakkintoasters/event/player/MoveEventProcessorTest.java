@@ -32,6 +32,11 @@ class MoveEventProcessorTest extends EventTestHarness<MoveEvent> {
     }
 
     @Test
+    void shouldNotMoveCharacterWhoIsNotOnTheBoard() {
+        assertInvalid(new MoveEvent(1, RESEARCH_LAB, null));
+    }
+
+    @Test
     void shouldMoveWithinSameShip() {
         moveTo(ADMIRALS_QUARTERS, KARA_STARBUCK_THRACE);
         execute(new MoveEvent(1, RESEARCH_LAB, null));

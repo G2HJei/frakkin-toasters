@@ -179,7 +179,7 @@ public abstract class TestHarness {
     }
 
     protected Location locate(Character character) {
-        return game.locate(character);
+        return game.locate(character).orElseThrow();
     }
 
     protected Location locate(Ship ship) {

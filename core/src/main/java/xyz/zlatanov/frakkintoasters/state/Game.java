@@ -118,14 +118,14 @@ public class Game implements GameView {
 
 
     @Override
-    public Location locate(Character character) {
+    public Optional<Location> locate(Character character) {
         val locations = boards.all().stream()
                 .map(board -> board.locate(character))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();
-        assert locations.size() == 1;
-        return locations.getFirst();
+        assert locations.size() <= 1;
+        return locations.stream().findFirst();
     }
 
     @Mutates

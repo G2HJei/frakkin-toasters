@@ -137,8 +137,8 @@ in reverse order.
 3. **The engine holds no game rules.** Steps, skips and exceptions are decisions, so they belong in processors, as
    `CLAUDE.md` already says. The turn events live in `event/turn/` and `WinChecks` in `event/endgame/`, and the engine
    only runs them.
-4. **One pending input at a time.** Every "each player" sequence in the code is already sequential, so nothing needs
-   parallel decisions.
+4. **One pending input at a time.** Every "each player" sequence in the code is already sequential, and interrupt
+   windows ask one player at a time too, so nothing needs parallel decisions.
 5. **The journal rebuilds everything.** Facts rebuild `Game`, including its `Turn`, and scope entries rebuild the
    agenda. This closes the gap `journal-plan.md` left open for unresolved followups.
 6. **`submit` and `choose` are all-or-nothing.** Validation runs before the scope opens, so a plain rejection touches
@@ -199,7 +199,7 @@ New in `engine/`: `GameEngine`, `Agenda`, `ProcessorRegistry`, `PendingInput`, `
 
 - **`ProcessorRegistry`**: finds `XxxEventProcessor` by the naming convention, as `EventTestHarness` does, and creates a
   new instance per execution, because processors hold per-event fields. A test checks that every concrete event has a
-  processor, against an allow-list of the known gaps. By the end of phase 11 the list holds only the placeholders and
+  processor, against an allow-list of the known gaps. By the end of phase 12 the list holds only the placeholders and
   what "Not in this plan" excludes.
 - **`NoOpEvent`**: gets a trivial processor, so the run loop has no special case.
 - **Input check**: the submitting player must match the pending input, and `decision.action().isInstance(event)` must
@@ -243,7 +243,8 @@ The first playable slice. New `event/turn/` events, each with a processor and te
 1. `ops.startGame()`, `ops.galactica().setUp()` and `CreateDestinyDeckEvent` (rules A3.4, A3.5). Nothing in main calls
    `setUp()` yet.
 2. A random first player, recorded as a fact (rule A3.7.1).
-3. `SelectCharacterEvent` decisions, clockwise from the first player (rule A3.7.2).
+3. `SelectCharacterEvent` decisions, clockwise from the first player (rule A3.7.2). A character with a choice of setup
+   locations picks one through `PlaceInSetupLocationEvent`.
 4. Titles through the `DetermineNext...` events, then the President draws a Quorum Card (rule A3.7.3).
 5. `CreateLoyaltyDeckEvent` (rule A3.8).
 6. Starting Skill Cards: 3 each, except the first player, who draws on their first turn, and Cylon Leaders, who draw 2
@@ -255,25 +256,21 @@ The turn events:
 - One event per step, recording `StepChanged`. Movement and Action are optional. The Action step offers a location
   action, `ActivateViperEvent` for a pilot (it isn't an `ActionEvent`), or doing nothing (rule 8.4).
 - Each step applies its own exceptions. Revealed Cylons and characters in the Brig skip Crisis, and revealed Cylons skip
-  Activate Cylon Ships (rules 8.5, 8.6). Prepare for Jump isn't skipped on their turn (rule 6.1.3.4), see phase 10.
+  Activate Cylon Ships (rules 8.5, 8.6). Prepare for Jump isn't skipped on their turn (rule 6.1.3.4), see phase 11.
 - `DiscardStepEvent`: every player over 10 Skill Cards or 10 Quorum Cards discards down to 10, not only the current
   player (rule 8.8).
-- `EndTurnEvent`: checks resources, passes the current player token, returns the next `StartTurnEvent`.
+- `EndTurnEvent`: checks resources, passes the current player token, returns the next `StartTurnEvent`. This is the only
+  resource check (rule 16.1). A resource can reach 0 during a turn, as FTL Control can with population, and recover
+  before the turn ends.
 
-Crisis is a stub here (draw the card, discard it) until phase 10. The acceptance test plays several full turns through
+Crisis is a stub here (draw the card, discard it) until phase 11. The acceptance test plays several full turns through
 `submit` and `choose` alone.
 
-Two existing bugs block this phase:
-
-- **First placement.** `Game.locate` throws for a character who isn't on the board. `SelectCharacterEventProcessor`
-  queues a `MoveEvent` for characters with a choice of starting locations, and `MoveEventProcessor.isValid()` calls
-  `locate` on a character who isn't placed yet. The null check in its `startingArea()` is dead code. Fixing `locate`
-  isn't enough, because the area rule would then demand a discard, so first placement needs its own event.
-- **Stranded Helo.** Vanilla Helo starts off the board on purpose (`shouldNotPlaceVanillaHelo`), so
-  `DrawSkillCardsEventProcessor` and `MoveEventProcessor` hit the same `locate` error on his first turn.
-  `ViolentOutburstsEventProcessor` treats a turn number above 1 as "Helo has arrived", which is wrong for any Helo who
-  isn't the first player, and he can be Stranded again after an execution (rule A2.1.1.10). Stranded has to be state on
-  the player.
+**Stranded Helo.** His character sheet keeps him off the board until the start of his 2nd turn, when `StartTurnEvent`
+places him on the Hangar Deck. While `game.locate` is empty he can't move, be moved or take actions, so the Movement and
+Action steps skip him, and `SendToBrigEvent` and `SendToSickbayEvent` leave him alone, as
+`ViolentOutburstsEventProcessor` already does. Finding his 2nd turn needs a count of his own turns, because
+`Turn.number` counts everyone's. After an execution he is Stranded for his player's next turn (rule A2.1.1.10).
 
 ## Phase 7 - Validate player input
 
@@ -305,8 +302,8 @@ checks. It covers the immediate Cylon wins from rule 16.1: a centurion at the en
 more damaged Galactica locations. `ActivateHeavyRaidersAndCenturionsEventProcessor` already queues the first one. Remove
 that, so the check lives in one place.
 
-**End of game.** Add a `GameEnded(winner)` fact and `Game.outcome()`. Merge `CylonVictoryEvent` and `CylonsWinEvent`
-into one event with a processor. When the outcome is set, the run loop clears the agenda and reports `Finished`.
+**End of game.** Add a `GameEnded(winner)` fact and `Game.outcome()`, and give `CylonsWinEvent` a processor. When the
+outcome is set, the run loop clears the agenda and reports `Finished`.
 
 **Second Mutiny Card.** This can't be a check on the state, even though the `todo` in `PlayerOps.drawMutinyCard()` asks
 the engine to handle it. Rule 5.2.3.2 moves the player to the Brig unless told otherwise, and a check only sees two
@@ -332,7 +329,57 @@ Roadmap step 1 isn't finished. The processors exist but aren't chained.
 Acceptance test: a skill check runs from the action that starts it to `EndSkillCheckEvent` through `submit` and
 `choose`.
 
-## Phase 10 - Crisis
+## Phase 10 - Interrupt cards
+
+Six skill cards are played in response to something, outside the Action step. All six are in `SkillCardType`, and none
+has an event yet. They go in `event/interrupt/`.
+
+| Card                 | Window                                    | Effect                                      |
+|----------------------|-------------------------------------------|---------------------------------------------|
+| `STRATEGIC_PLANNING` | Before a die roll                         | +2, one per roll                            |
+| `CALCULATIONS`       | After a die roll                          | +1 or -1, one per roll                      |
+| `EVASIVE_MANOEUVRES` | After a viper is attacked                 | Reroll, -2 if the viper is piloted          |
+| `RUN_INTERFERENCE`   | Before raiders activate                   | The first 4 raiders in your area miss       |
+| `BEST_OF_THE_BEST`   | Before a piloted viper attacks            | Roll, destroy that many raiders in its area |
+| `MAJOR_VICTORY`      | After you destroy a basestar or centurion | Roll, 5 or more gains 1 morale, one a turn  |
+
+**Windows.** `OpenInterruptWindowEvent(window)` is an ordinary queued event, so the engine needs no new input, and
+`submit`, `choose`, restore and rollback work unchanged. Its processor runs when the window opens, so it sees the hands
+as they are at that moment.
+
+- It asks each human player holding a card for that window, one at a time, clockwise from the current player:
+  `one(decision, NoOpEvent)`. Revealed Cylons can't use Skill Card abilities (rule 6.1.2.3), and Cylon Leaders count as
+  revealed unless Infiltrating (rule 6.2.1). `isHuman()` covers both.
+- Played cards wait until everyone has answered. If two conflict, the current player picks which one stands and the
+  other returns to its owner's hand (rule 13.3). This is the same shape as the before-skill-check cards, with
+  `RevealCardsBeforeSkillCheckEvent` and `TiebreakCardsBeforeSkillCheckEvent`.
+- A window with no holders doesn't pause the game.
+
+**Who gets asked.** Only the holders. Asking everyone before and after every die roll would make a Cylon attack
+unplayable. Being asked does reveal that a player holds a card, so other players must only see that the game is waiting,
+not who it is waiting for. Per-viewer hiding has to cover this before the frontend ships.
+
+**Die rolls.** `ops.rollDie()` runs inside `process()`, so nothing can pause around it.
+
+- Add `RollDieEvent` and a `FollowupUtils` helper that returns `all(window before, RollDieEvent, window after, result)`.
+- The 8 processors that call `ops.rollDie()` split in two: the event queues the roll, and a new result event does what
+  came after it.
+- `Turn` holds the current `DieRoll`, because the result event runs after a pause. `DieRolled` starts changing state,
+  where `FactApplier` ignores it today, and a new fact records modifiers. The window before a roll starts a new one.
+- Modifiers survive a reroll (rule A2.1.1.10). The total is clamped to 1-8 after all of them (rule 13.1).
+- An `ArchitectureTest` rule lets only `RollDieEventProcessor` call `GameOps.rollDie()`, so a new roll can't skip the
+  windows.
+
+**Attacks.** Four of the six cards hang on attacks that don't exist yet, which is why this phase comes before Crisis. It
+adds processors for `AttackViperEvent`, `AttackRaiderEvent`, `AttackHeavyRaiderEvent`, `AttackBasestarEvent`,
+`AttackGalacticaEvent`, `ActivateViperEvent` and `DestroyRaidersEvent`, with the windows in from the start. Cylon
+activations and Weapons Control already queue some of them. `RUN_INTERFERENCE` needs a counter that lasts for one raider
+activation.
+
+Acceptance tests: a held card pauses the game at its window, a window with no holders doesn't, two `STRATEGIC_PLANNING`
+cards on one roll go to the current player, and restore works at a pause inside a window.
+
+## Phase 11 - Crisis
 
 `CrisisCard` is a bare enum. It needs its skill check type or event effect, its Cylon activation icon and its jump icon.
 Non-skill-check crisis effects aren't modeled at all.
@@ -341,40 +388,29 @@ Non-skill-check crisis effects aren't modeled at all.
   Ships step, the Prepare for Jump step and the discard in `EndTurnEvent` (rule 8.8) read them.
 - A card chosen at Caprica counts for Prepare for Jump even on a revealed Cylon's turn (rule 6.1.3.4), so that step
   can't depend on the Crisis step having run.
-- Cylon activations already queue `AttackViperEvent` and `AttackGalacticaEvent`, which have no processors.
 
-## Phase 11 - Jump and Kobol
+## Phase 12 - Jump and Kobol
 
 - `JumpingTheFleetEvent` has no processor, and no code tracks distance. That blocks the Sleeper Agent phase at 4
   distance and the end game after 8 (rule 12.4), including the unrevealed Personal Goal check (rule 16.2).
 - `GameEnded` names the winning team. A Cylon Leader's own result comes from their Motive Cards (rules 2.3, 16.3).
 - `ExecuteEvent`'s processor covers the loss when no characters are left to select (rule 2.2). It depends on the
   execution, so it isn't a win check.
-- 43 event records have no processor today: the 3 placeholders, `NoOpEvent` and 39 real events. Phases 8 to 11 add the
+- 42 event records have no processor today: the 3 placeholders, `NoOpEvent` and 38 real events. Phases 8 to 12 add the
   ones they reach, and the registry test tracks the rest.
 
 Acceptance test: seeded games played to a Cylon win and to the Kobol end game, restoring at every pause.
 
-## Phase 12 - Docs
+## Phase 13 - Docs
 
 - Update `CLAUDE.md`: packages, architecture, roadmap. `Turn` moves from the root package description to `state/`.
 - Replace the diagram in `README.md`, and add this plan to "Design Documents".
 
 ## Not in this plan
 
-- **Interrupts.** No event exists yet for reactive cards such as Strategic Planning or Evasive Manoeuvres, and a Cylon
-  Leader can reveal a Motive Card in the middle of resolving something (rule 6.2.2.1). `ops.rollDie()` runs inside
-  `process()` in 8 processors, so nothing can pause before a roll. The seam is to split those events in two and put a
-  window of `OneOf`s between them, which the agenda already supports. Offering a window only to the players holding the
-  card would reveal their hands, so this needs its own design.
-- Executive Order, Cylon reveal, Quorum and Super Crisis cards, and skill card actions. They plug in as new events.
+- Executive Order and the other `Action:` and `Movement:` skill cards, Cylon reveal, Quorum and Super Crisis cards. They
+  plug in as new events.
+- Interrupts that aren't skill cards: character abilities such as Helo's reroll, and revealing a Motive Card in the
+  middle of resolving something (rule 6.2.2.1). They can reuse the windows from phase 10.
 - Describers, per-viewer hiding, JSON serialization, and the frontend.
 - Concurrency. Callers serialize calls per game.
-
-## Open questions
-
-1. **FTL Control and population.** `FTLControlEventProcessor` queues a Cylon victory as soon as population reaches 0.
-   Rule 16.1 only ends the game if a resource is still at 0 at the end of the turn. It should probably always jump and
-   leave the check to `EndTurnEvent`.
-2. **Interrupt windows.** When should they be designed? They change how die rolls work in 8 processors, and phase 10
-   adds the attack events, so designing them before phase 10 would be cheaper.

@@ -27,6 +27,9 @@ public class MoveEventProcessor extends EventProcessor<MoveEvent> {
 
     @Override
     public boolean isValid() {
+        if (game.locate(player.character()).isEmpty()) {
+            return false; // e.g. a "Stranded" Karl "Helo" Agathon
+        }
         val isEligibleLocation = isEligibleLocation();
         val shouldDiscardCard = !Objects.equals(startingArea(), targetArea());
         val isDiscardingCard = discardCard != null;
@@ -40,7 +43,7 @@ public class MoveEventProcessor extends EventProcessor<MoveEvent> {
             ops.player(player.number()).discard(discardCard);
         }
         val playerCharacter = player.character();
-        val isPiloting = game.locate(playerCharacter).isSpaceLocation();
+        val isPiloting = currentLocation().isSpaceLocation();
         val isStayingInSpace = destination.isSpaceLocation();
         if (isPiloting) {
             val ship = galacticaBoard.pilotedFighter(player.character()).orElseThrow();
@@ -83,11 +86,7 @@ public class MoveEventProcessor extends EventProcessor<MoveEvent> {
     }
 
     private LocationsArea startingArea() {
-        val currLocation = currentLocation();
-        if (currLocation == null) {
-            return null;
-        }
-        return getLocationArea(currLocation);
+        return getLocationArea(currentLocation());
     }
 
     private LocationsArea targetArea() {
@@ -102,6 +101,6 @@ public class MoveEventProcessor extends EventProcessor<MoveEvent> {
     }
 
     private Location currentLocation() {
-        return game.locate(player.character());
+        return game.locate(player.character()).orElseThrow(FrakCallTheAdmiralException::new);
     }
 }

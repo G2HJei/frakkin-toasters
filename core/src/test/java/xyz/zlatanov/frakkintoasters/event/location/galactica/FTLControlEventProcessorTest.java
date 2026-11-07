@@ -3,7 +3,6 @@ package xyz.zlatanov.frakkintoasters.event.location.galactica;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
-import xyz.zlatanov.frakkintoasters.event.CylonVictoryEvent;
 import xyz.zlatanov.frakkintoasters.event.JumpingTheFleetEvent;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,13 +33,15 @@ class FTLControlEventProcessorTest extends EventTestHarness<FTLControlEvent> {
     }
 
     @Test
-    void shouldEndGame() {
+    void shouldJumpEvenWhenPopulationReachesZero() {
         nextRoll(6);
         galacticaBoard
                 .advanceJumpPreparation()
                 .decreasePopulation(11);
 
         execute(new FTLControlEvent(1));
-        assertFollowup(new CylonVictoryEvent());
+
+        assertEquals(0, galacticaBoard.population());
+        assertFollowup(new JumpingTheFleetEvent());
     }
 }

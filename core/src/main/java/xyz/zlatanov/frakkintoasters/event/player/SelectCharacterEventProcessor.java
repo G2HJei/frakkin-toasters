@@ -122,7 +122,7 @@ public class SelectCharacterEventProcessor extends EventProcessor<SelectCharacte
 
     private Followup multipleSetupOptionsFollowup() {
         return one(Arrays.stream(selectedCharacter.setup())
-                .map(loc -> (Event) new MoveEvent(event.playerNumber(), loc, null))
+                .map(loc -> (Event) new PlaceInSetupLocationEvent(event.playerNumber(), loc))
                 .toArray(Event[]::new));
     }
 

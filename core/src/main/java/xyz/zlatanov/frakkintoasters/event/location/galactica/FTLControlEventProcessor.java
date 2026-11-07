@@ -2,7 +2,6 @@ package xyz.zlatanov.frakkintoasters.event.location.galactica;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
-import xyz.zlatanov.frakkintoasters.event.CylonVictoryEvent;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.JumpingTheFleetEvent;
 
@@ -19,8 +18,6 @@ public class FTLControlEventProcessor extends EventProcessor<FTLControlEvent> {
             val lostPop = galacticaBoard.jumpPreparation().lostPopulation();
             ops.galactica().decreasePopulation(lostPop);
         }
-        return galacticaBoard.population() > 0
-                ? single(new JumpingTheFleetEvent())
-                : single(new CylonVictoryEvent());
+        return single(new JumpingTheFleetEvent());
     }
 }

@@ -47,14 +47,14 @@ class SelectCharacterEventProcessorTest extends EventTestHarness<SelectCharacter
 
         assertFollowup(
                 one(
-                        new MoveEvent(1, PEGASUS_CIC, null),
-                        new MoveEvent(1, COMMAND, null)));
+                        new PlaceInSetupLocationEvent(1, PEGASUS_CIC),
+                        new PlaceInSetupLocationEvent(1, COMMAND)));
     }
 
     @Test
     void shouldNotPlaceVanillaHelo() {
         execute(select(KARL_HELO_AGATHON));
-        assertThrows(AssertionError.class, () -> locate(KARL_HELO_AGATHON));
+        assertTrue(game.locate(KARL_HELO_AGATHON).isEmpty());
     }
 
     @Test

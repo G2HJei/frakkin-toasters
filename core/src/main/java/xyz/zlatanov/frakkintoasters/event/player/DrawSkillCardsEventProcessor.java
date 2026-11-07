@@ -41,10 +41,10 @@ public class DrawSkillCardsEventProcessor extends EventProcessor<DrawSkillCardsE
         if (game.step() != RECEIVE_SKILLS) {
             return true;
         }
-        val location = game.locate(player.character());
+        val location = game.locate(player.character()).orElse(null);
         return switch (location) {
             case SICKBAY, RESURRECTION_SHIP -> selectionCount() == 1;
-            default -> true;
+            case null, default -> true;
         };
     }
 

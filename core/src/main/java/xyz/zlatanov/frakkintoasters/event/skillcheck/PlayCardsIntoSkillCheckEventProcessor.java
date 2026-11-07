@@ -9,7 +9,7 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.BRIG;
 public class PlayCardsIntoSkillCheckEventProcessor extends EventProcessor<PlayCardsIntoSkillCheckEvent> {
     @Override
     protected boolean isValid() {
-        val inBrig = game.locate(player.character()) == BRIG;
+        val inBrig = game.locate(player.character()).filter(BRIG::equals).isPresent();
         val cardsCount = event.skillCards().size();
         val maxCards = inBrig || !player.isHuman() ? 1
                 : player.isInfiltrating() ? 2

@@ -155,6 +155,14 @@ class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEv
     }
 
     @Test
+    void shouldNotApplyHazardousLocationLimitToCharacterNotOnTheBoard() {
+        player(2).character(KARL_HELO_AGATHON);
+        game.step(RECEIVE_SKILLS);
+
+        assertDoesNotThrow(() -> execute(new DrawSkillCardsEvent(2, Map.of(LEADERSHIP, 2))));
+    }
+
+    @Test
     void shouldNotApplyReceiveSkillGameStepRestrictionOnOtherSteps() {
         assertDoesNotThrow(() -> execute(new DrawSkillCardsEvent(1, Map.of(TACTICS, 2))));
 

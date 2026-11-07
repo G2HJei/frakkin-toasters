@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.DANNA_BIERS;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.KARL_HELO_AGATHON;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType.ADMIRALS_QUARTERS;
 
@@ -51,6 +52,19 @@ class PlayCardsIntoSkillCheckEventProcessorTest extends EventTestHarness<PlayCar
                 new SkillCard(1, DOGFIGHT),
                 new SkillCard(2, EXECUTIVE_ORDER),
                 new SkillCard(3, FULL_THROTTLE))));
+    }
+
+    @Test
+    void shouldNotLimitCardsOfCharacterNotOnTheBoard() {
+        val firstCard = new SkillCard(1, DOGFIGHT);
+        val secondCard = new SkillCard(2, EXECUTIVE_ORDER);
+        player(2).character(KARL_HELO_AGATHON);
+        player(2).skillCards().addOnTop(firstCard);
+        player(2).skillCards().addOnTop(secondCard);
+
+        execute(new PlayCardsIntoSkillCheckEvent(2, List.of(firstCard, secondCard)));
+
+        assertTrue(game.activeSkillCheck().cards().cards().containsAll(List.of(firstCard, secondCard)));
     }
 
     @Test

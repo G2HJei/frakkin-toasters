@@ -6,6 +6,7 @@ import xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface GameView {
 
@@ -46,5 +47,8 @@ public interface GameView {
 
     Character cag();
 
-    Location locate(Character character);
+    /**
+     * @return the location of the character, empty while it is not on the board (e.g. a "Stranded" Karl "Helo" Agathon)
+     */
+    Optional<Location> locate(Character character);
 }
