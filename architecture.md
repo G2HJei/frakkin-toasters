@@ -44,6 +44,9 @@
 
 # Game engine
 
+The game engine runs the game forward until a player has to act or the game has ended. The engine knows no game rules:
+it runs the events on the agenda, and the processors decide.
+
 ## Target design
 
 ```text
@@ -200,3 +203,12 @@ ROOT (0)
       `-- scope 3  C                    parent = 1
            `-- f3
 ```
+
+# Agenda
+
+The followups waiting to run. It is a stack, because followups run depth first: if all (A, B) is queued and A queues C,
+then C runs before B.
+
+The engine determines the EngineStatus from it to determine if the game is finished or is waiting for something to
+happen - either a player action or a choice.
+

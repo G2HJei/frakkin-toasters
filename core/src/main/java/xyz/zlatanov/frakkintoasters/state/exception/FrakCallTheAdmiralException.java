@@ -8,4 +8,8 @@ public class FrakCallTheAdmiralException extends RuntimeException {
     public FrakCallTheAdmiralException(String message) {
         super(message);
     }
+
+    public FrakCallTheAdmiralException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

@@ -46,11 +46,11 @@ Next steps, in order:
    `GameOps.actingPlayer`
    for "Executive Order".
 3. ~~Create the journal and tie it to the ops classes in `operation/`.~~ Done, see "Journal and Replay". Still open:
-   describers and per-viewer hiding, JSON serialization, and the pending followup queue (that one belongs to step 4).
-4. Create the game engine to drive the events and turns. `engine-plan.md` has the plan in phases. Phases 1 to 3 are
-   done: the journal moved out of `Game` into `engine/journal/`, the turn state is grouped in `state/Turn`, and the
-   journal and processors are ready for the engine (explicit scope parents, followups and choices in the journal,
-   `prepare`/`run`). There is no event-to-processor lookup in production code yet.
+   describers and per-viewer hiding, and JSON serialization. The pending followups are the engine's `Agenda`.
+4. Create the game engine to drive the events and turns. `engine-plan.md` has the plan in phases. Phases 1 to 4 are
+   done: the journal moved out of `Game` into `engine/journal/`, the turn state is grouped in `state/Turn`, the journal
+   and processors are ready for the engine, and `GameEngine` runs events through `submit` and `choose` (see "Engine").
+   Next is phase 5: `restore` and rollback.
 5. Create a working frontend with the events that exist by then.
 
 ## Project Structure
@@ -63,12 +63,14 @@ Multi-module Gradle project with a single `core` module. Package root: `xyz.zlat
 - `event/` - event records and their processors, grouped by area (`action`, `board`, `crisis`, `deck`, `endgame`,
   `location/{galactica,pegasus,colonialone,cylon}`, `loyalty`, `officials`, `player`, `ship`, `skillcheck`,
   `skillcheck/ability`, `skillcheck/result`). Also `placeholder/` (events that need player input) and `constraint/`
-  (`EventConstraint`)
+  (`EventConstraint`, `ConstrainedEvent`)
 - `operation/` - game ops, the only code that decides what changes: `GameOps` (entry point) hands out `PlayerOps`,
   `ShipOps`, `GalacticaOps`, `PegasusOps`, `CylonFleetOps`, `SkillCheckOps`, `LoyaltyDeckOps`, `TitleOps`. They extend
   `AbstractOps`, which holds the `Game` and a `FactRecorder`, and offers `record`, `draw`, `shuffle`. Ops record facts,
   they never write to components
-- `engine/` - `ScopeActor` (who a journal scope is logged under). The rest of the engine will live here too
+- `engine/` - `GameEngine` (runs a game, see "Engine"), `Agenda` (stack of pending followups), `ProcessorRegistry`
+  (maps each event class to its processor, scanned once from the classpath), `PendingInput` and
+  `EngineStatus` (what the game waits for), `ScopeActor` (who a journal scope is logged under)
 - `engine/journal/` - `Journal`, `JournalEntry`, `FactRecorder`, `FactApplier`, `ShipZones`, `GameReplayer`, and `fact/`
   with the `Fact` records
 - `state/` - game state model: `Game` (top level), `Turn` (turn number, `GameStep`, current and acting player, read
@@ -111,7 +113,7 @@ player, unless another one acts during that turn (set it through `GameOps.acting
 It never changes who the "current player" is for game effects such as skill checks.
 
 Each `XxxEvent` has an `XxxEventProcessor extends EventProcessor<XxxEvent>` in the same package. Keep that naming:
-`EventTestHarness` finds the processor by it. A processor runs one event, in two calls:
+`ProcessorRegistry` and `EventTestHarness` find the processor by it. A processor runs one event, in two calls:
 
 1. `prepare(GameView, event)` sets the context (`game`, `event`, and helper views `galacticaBoard`, `pegasusBoard`,
    `cylonFleetBoard`, plus `player` when the event is a `PlayerEvent`), calls `init()` (optional setup, marked for
@@ -192,13 +194,34 @@ ResolveCapricaCrisisEvent(playerNumber)));
 
 `EventConstraint` is a plain enum of extra rules that can be pinned onto an event (e.g. `DRAW_EXACTLY_2`,
 `DISCARD_EXACTLY_4`, `MUST_LAUNCH_IN_VIPER`, `DESTINATION_GALACTICA`). A processor attaches them to a
-`PlayerDecisionEvent`, e.g.
-`new PlayerDecisionEvent<>(n, DrawSkillCardsEvent.class, DRAW_EXACTLY_2)`, and they are forwarded to the concrete event
-when the decision is resolved.
+`PlayerDecisionEvent`, e.g. `new PlayerDecisionEvent<>(n, DrawSkillCardsEvent.class, DRAW_EXACTLY_2)`. When the
+decision is answered, the engine copies them onto the submitted event with `ConstrainedEvent.withConstraints`,
+replacing whatever the client sent, so a client can't drop one.
 
-An event that supports a constraint has its own record component for it (e.g. `DrawSkillCardsEvent.drawLimit`, `null`
-when there is none). Its processor checks the constraint in `isValid()` and throws `FrakCallTheAdmiralException` for any
-constraint it doesn't support.
+An event that supports a constraint implements `ConstrainedEvent` and has its own record component for it (e.g.
+`DrawSkillCardsEvent.drawLimit`, `null` when there is none, or `LaunchViperEvent.mustLaunchInViper`). Its processor
+checks the constraint in `isValid()` and throws `FrakCallTheAdmiralException` for any constraint it doesn't support.
+`DrawSkillCardsEvent`, `DiscardSkillCardsEvent`, `LeaveBrigEvent` and `LaunchViperEvent` implement it.
+
+### Engine
+
+`GameEngine` runs a game. `submit(player, event)` answers the pending `PlayerDecisionEvent` with a concrete event, and
+`choose(player, option)` picks an option of the pending `OneOf`. Both run the game forward until a player has to act
+again, so `status(player)` is always `Waiting(PendingInput)` or `Finished`. It holds no game rules: processors decide.
+There is no `start` or `restore` yet. A package-private constructor takes the first event, and `GameEngineTest` uses
+the test-only `ScriptEvent` for it.
+
+- `Agenda` is a stack of `(followup, parentScope)` frames, so followups run depth first. Pushing flattens a followup:
+  `None` adds nothing and `AllOf` pushes its children in reverse, so every frame is a `Single` or a `OneOf`.
+- The run loop takes the event on top, gets a new processor from `ProcessorRegistry`, `prepare`s it, opens its scope,
+  runs it, closes the scope with the followup and pushes that. It stops at a `PlayerDecisionEvent` or a `OneOf`.
+- The chooser of a `OneOf` is the player of the `PlayerEvent`s in its options, otherwise the current player (decision 7
+  in `engine-plan.md`). Options that name different players are a bug.
+- Input check: the right player, `decision.action().isInstance(event)` (so `ActionEvent` takes any location action),
+  and a submitted `PlayerEvent` names the submitter.
+- Rejected input throws `InvalidActionException` and changes nothing. A queued event that fails validation or has no
+  processor, and a decision nobody can answer (e.g. on `PlayQuorumCardEvent`), throw `FrakCallTheAdmiralException`.
+  Until phase 5 adds rollback, anything thrown after an input was accepted stops the game, and every later call throws.
 
 ### Journal and Replay
 
@@ -211,14 +234,14 @@ the design). It is fact-sourced: replay applies recorded facts, and never re-run
   sealed hierarchy can't span packages without a `module-info`. A new fact has to be handled in `FactApplier`'s
   exhaustive `switch`.
 - `Journal` is an append-only flat list of `ScopeOpened(scopeId, parentId, event, actor)` / `FactRecorded` /
-  `ScopeClosed(scopeId, followup)` / `ChoiceMade(scopeId, chooser, option)`. It isn't part of `Game`: the engine will
-  own it, and until then whoever builds the ops does (`TestHarness`, `GameReplayerTest`). Ops never see it, they get a
-  `FactRecorder(game, journal)`.
+  `ScopeClosed(scopeId, followup)` / `ChoiceMade(scopeId, chooser, option)`. It isn't part of `Game`: `GameEngine`
+  owns it, and outside the engine whoever builds the ops does (`TestHarness`, `GameReplayerTest`). Ops never see it,
+  they get a `FactRecorder(game, journal)`.
 - At most one scope is open at a time. A followup runs after its parent's scope has closed, so
   `openScope(event, actor, parentId)` takes the parent explicitly, and `closeScope(followup)` records what the event
   queued. `recordChoice` logs the answer to a `OneOf` between events, under the scope that queued it. Facts recorded
-  while no scope is open go under `Journal.ROOT_SCOPE`. The engine will open a scope per event,
-  `EventTestHarness.execute` does it until then, after `prepare`.
+  while no scope is open go under `Journal.ROOT_SCOPE`. `GameEngine` opens a scope per event after `prepare`, and so
+  does `EventTestHarness.execute`.
 - The scope's `actor` is the player who submitted the event. For a queued event, `ScopeActor.ofQueued` (`engine/`)
   gives the event's player for a `PlayerEvent`, otherwise the acting player.
 - `FactApplier` is the only code that changes components. `FactRecorder.record(fact)`, which `AbstractOps.record` calls,
@@ -268,5 +291,8 @@ when possible.
 - `GameSnapshot` (`engine/journal/`) - turns a `Game` into comparable plain values. Replay tests compare a live game
   with its replayed twin. `GameReplayerTest` has the scripted scenario that has to record every kind of fact
 - Op tests also assert the logged facts (`journal.facts()`), and `FactApplierTest` covers each fact
+- `GameEngineTest` plays a script of real events through `submit` and `choose`, started by the test-only `ScriptEvent`
+  (it calls `ops.startGame()` and queues the script). The registry finds test processors such as
+  `ScriptEventProcessor` too, because it scans the whole classpath
 - Tests follow the pattern: set up game state, execute the event, assert state changes and followups. Use real game ops
   in processor tests, not mocks, since processors may read their own changes
