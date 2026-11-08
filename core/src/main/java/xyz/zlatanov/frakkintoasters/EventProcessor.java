@@ -4,6 +4,7 @@ import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
 import xyz.zlatanov.frakkintoasters.operation.GameOps;
+import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
 import xyz.zlatanov.frakkintoasters.state.view.*;
 
@@ -11,7 +12,7 @@ public abstract class EventProcessor<T extends Event> {
 
     protected GameView game;
     protected T        event;
-    protected GameOps  ops; //set right before process(), so init() and isValid() can't change state
+    protected GameOps  ops; //set by run(), so init() and isValid() can't change state
 
     //utility fields improving event processors' readability
     protected PlayerView          player;
@@ -19,15 +20,33 @@ public abstract class EventProcessor<T extends Event> {
     protected PegasusBoardView    pegasusBoard;
     protected CylonFleetBoardView cylonFleetBoard;
 
+    private boolean prepared;
+
     /**
+     * Sets the context and validates the event. It has no ops, so a rejected event changes nothing.
+     *
      * @param game the game the event runs in
-     * @param ops  game ops bound to the same game. The processor gets them only after validation, so a rejected event
-     *             changes nothing
+     * @return this processor, for {@link #run}
+     * @throws InvalidActionException if the event isn't valid
      */
-    public final Followup execute(GameView game, T event, GameOps ops) {
+    public final EventProcessor<T> prepare(GameView game, T event) {
         setContext(game, event);
         init();
         validate();
+        prepared = true;
+        return this;
+    }
+
+    /**
+     * Processes the event that {@link #prepare} accepted.
+     *
+     * @param ops game ops bound to the game {@link #prepare} got
+     * @return what the event queued
+     */
+    public final Followup run(GameOps ops) {
+        if (!prepared || this.ops != null) {
+            throw new FrakCallTheAdmiralException();
+        }
         this.ops = ops;
         return process();
     }
@@ -43,7 +62,9 @@ public abstract class EventProcessor<T extends Event> {
     }
 
     private void setContext(GameView game, T event) {
-        assert this.game == null && this.event == null;
+        if (this.game != null) {
+            throw new FrakCallTheAdmiralException();
+        }
         this.game = game;
         this.event = event;
         this.galacticaBoard = game.boards().galactica();

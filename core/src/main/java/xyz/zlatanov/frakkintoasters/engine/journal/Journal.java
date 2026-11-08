@@ -1,48 +1,51 @@
 package xyz.zlatanov.frakkintoasters.engine.journal;
 
+import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ChoiceMade;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.FactRecorded;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ScopeClosed;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ScopeOpened;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.Fact;
 import xyz.zlatanov.frakkintoasters.event.Event;
+import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.List;
 
 /**
- * Append-only record of what the game ops did.
+ * Append-only record of what the game ops did. At most one scope is open at a time: a followup runs after its parent's
+ * scope has closed, so the parent is passed in explicitly.
  */
 public class Journal {
 
     public static final int ROOT_SCOPE = 0;
 
     private final List<JournalEntry> entries     = new ArrayList<>();
-    private final Deque<Integer>     openScopes  = new ArrayDeque<>();
+    private       int                openScope   = ROOT_SCOPE;
     private       int                lastScopeId = ROOT_SCOPE;
 
     /**
-     * Opens a scope nested in the innermost open one.
-     *
+     * @param parentId the scope of the event that queued this one, {@link #ROOT_SCOPE} if none
      * @return the id of the new scope
      */
-    public int openScope(Event event, int actor) {
-        int scopeId = ++lastScopeId;
-        entries.add(new ScopeOpened(scopeId, currentScope(), event, actor));
-        openScopes.push(scopeId);
-        return scopeId;
+    public int openScope(Event event, int actor, int parentId) {
+        if (openScope != ROOT_SCOPE) {
+            throw new FrakCallTheAdmiralException();
+        }
+        openScope = ++lastScopeId;
+        entries.add(new ScopeOpened(openScope, parentId, event, actor));
+        return openScope;
     }
 
     /**
-     * Closes the innermost open scope.
+     * @param followup what the event queued
      */
-    public void closeScope() {
-        if (openScopes.isEmpty()) {
+    public void closeScope(Followup followup) {
+        if (openScope == ROOT_SCOPE) {
             throw new FrakCallTheAdmiralException();
         }
-        entries.add(new ScopeClosed(openScopes.pop()));
+        entries.add(new ScopeClosed(openScope, followup));
+        openScope = ROOT_SCOPE;
     }
 
     public void record(Fact fact) {
@@ -50,10 +53,23 @@ public class Journal {
     }
 
     /**
-     * @return the innermost open scope, or {@link #ROOT_SCOPE}
+     * Records the answer to a {@link Followup.OneOf}. A choice is made between events, so no scope may be open.
+     *
+     * @param scopeId the scope of the event that queued the {@code OneOf}
+     * @param option  the picked option
+     */
+    public void recordChoice(int scopeId, int chooser, Followup option) {
+        if (openScope != ROOT_SCOPE) {
+            throw new FrakCallTheAdmiralException();
+        }
+        entries.add(new ChoiceMade(scopeId, chooser, option));
+    }
+
+    /**
+     * @return the open scope, or {@link #ROOT_SCOPE}
      */
     public int currentScope() {
-        return openScopes.isEmpty() ? ROOT_SCOPE : openScopes.peek();
+        return openScope;
     }
 
     public List<JournalEntry> entries() {
@@ -71,7 +87,7 @@ public class Journal {
     }
 
     /**
-     * @return the facts recorded directly under the scope, not those of nested scopes
+     * @return the facts recorded under the scope
      */
     public List<Fact> facts(int scopeId) {
         return entries.stream()

@@ -13,7 +13,7 @@ public class QuickThinkingEventProcessor extends EventProcessor<QuickThinkingEve
     @Override
     public Followup process() {
         if (event.cardToRemove() != null) {
-            ops.skillCheck().giveCardToPlayer(event.cardToRemove(), game.currentPlayerNumber());
+            ops.skillCheck().giveCardToPlayer(event.cardToRemove(), game.turn().currentPlayerNumber());
         }
         return Followup.NONE;
     }

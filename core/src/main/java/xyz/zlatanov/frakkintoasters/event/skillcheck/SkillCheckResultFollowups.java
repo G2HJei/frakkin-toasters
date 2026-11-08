@@ -260,7 +260,7 @@ public class SkillCheckResultFollowups {
     /* players */
 
     private int currentPlayer() {
-        return game.currentPlayerNumber();
+        return game.turn().currentPlayerNumber();
     }
 
     private int president() {

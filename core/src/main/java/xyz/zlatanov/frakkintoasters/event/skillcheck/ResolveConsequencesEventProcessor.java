@@ -16,8 +16,8 @@ public class ResolveConsequencesEventProcessor extends EventProcessor<ResolveCon
     public Followup process() {
         return switch (game.activeSkillCheck().type()) {
             case DIVISIVE_BEHAVIOR, IN_THE_RING ->
-                    single(new PlayerDecisionEvent<>(game.currentPlayerNumber(), SendToSickbayEvent.class));
-            case HAUNTED_BY_THE_PAST -> single(new GiveTitlesToNextInLineEvent(game.currentPlayerNumber()));
+                    single(new PlayerDecisionEvent<>(game.turn().currentPlayerNumber(), SendToSickbayEvent.class));
+            case HAUNTED_BY_THE_PAST -> single(new GiveTitlesToNextInLineEvent(game.turn().currentPlayerNumber()));
             case POWER_FAILURE -> single(new DamageGalacticaEvent());
             case THREAT_OF_SUPER_NOVA -> single(new ActivateCylonBasestarsEvent());
             case FIRE_ALL_MISSILES -> all(new DamageGalacticaEvent(), new DamageGalacticaEvent());

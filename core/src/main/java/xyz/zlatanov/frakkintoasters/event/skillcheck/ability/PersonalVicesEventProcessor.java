@@ -15,16 +15,16 @@ public class PersonalVicesEventProcessor extends EventProcessor<PersonalVicesEve
     }
 
     private void drawTreachery() {
-        var drawingPlayer = game.currentPlayerNumber();
+        var drawingPlayer = game.turn().currentPlayerNumber();
         do {
             ops.player(drawingPlayer).drawSkillCards(TREACHERY);
             drawingPlayer = drawingPlayer == game.players().size() ? 1 : drawingPlayer + 1;
-        } while (drawingPlayer != game.currentPlayerNumber());
+        } while (drawingPlayer != game.turn().currentPlayerNumber());
     }
 
     private void drawMutiny() {
         if (game.currentPlayer().isHuman()) {
-            ops.player(game.currentPlayerNumber()).drawMutinyCard();
+            ops.player(game.turn().currentPlayerNumber()).drawMutinyCard();
         }
     }
 }

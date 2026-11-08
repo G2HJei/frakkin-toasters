@@ -13,7 +13,7 @@ public class RevealCardsBeforeSkillCheckEventProcessor extends EventProcessor<Re
     public Followup process() {
         ops.skillCheck().revealPlayedBefore();
         return shouldTieBreak() ?
-                single(new PlayerDecisionEvent<>(game.currentPlayerNumber(), TiebreakCardsBeforeSkillCheckEvent.class))
+                single(new PlayerDecisionEvent<>(game.turn().currentPlayerNumber(), TiebreakCardsBeforeSkillCheckEvent.class))
                 : NONE;
     }
 

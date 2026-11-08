@@ -15,7 +15,7 @@ public class CrashLandingFailEventProcessor extends EventProcessor<CrashLandingF
     // The Admiral chooses.
     @Override
     public Followup process() {
-        val currentPlayer = game.currentPlayerNumber();
+        val currentPlayer = game.turn().currentPlayerNumber();
         return one(
                 single(new LoseResourceEvent(FUEL, 1)),
                 all(new LoseResourceEvent(MORALE, 1), new SendToSickbayEvent(currentPlayer)));

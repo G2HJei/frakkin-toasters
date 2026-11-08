@@ -11,7 +11,7 @@ public class InstallUpgradesEventProcessor extends EventProcessor<InstallUpgrade
 
     @Override
     public Followup process() {
-        ops.player(game.currentPlayerNumber())
+        ops.player(game.turn().currentPlayerNumber())
                 .drawSkillCards(event.skillCheckPassed()
                         ? List.of(ENGINEERING, ENGINEERING)
                         : List.of(ENGINEERING));

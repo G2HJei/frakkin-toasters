@@ -12,7 +12,7 @@ public class DefendingAPrisonerFailEventProcessor extends EventProcessor<Defendi
     @Override
     public Followup process() {
         return ops.rollDie() <= 4
-                ? single(new ExecuteEvent(game.currentPlayerNumber()))
+                ? single(new ExecuteEvent(game.turn().currentPlayerNumber()))
                 : NONE;
     }
 }

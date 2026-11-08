@@ -3,6 +3,7 @@ package xyz.zlatanov.frakkintoasters.engine.journal;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.Fact;
+import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
 import xyz.zlatanov.frakkintoasters.operation.GameOps;
 import xyz.zlatanov.frakkintoasters.state.Die;
 import xyz.zlatanov.frakkintoasters.state.Game;
@@ -14,6 +15,7 @@ import xyz.zlatanov.frakkintoasters.state.ship.*;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static xyz.zlatanov.frakkintoasters.event.Followup.*;
 import static xyz.zlatanov.frakkintoasters.state.GameStep.CRISIS;
 import static xyz.zlatanov.frakkintoasters.state.GameStep.RECEIVE_SKILLS;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
@@ -43,13 +45,13 @@ class GameReplayerTest {
     }
 
     @Test
-    void replayIgnoresScopes() {
+    void replayIgnoresScopesAndChoices() {
         val live = playScenario();
-        val scopes = journal.entries().stream()
-                .filter(e -> !(e instanceof JournalEntry.FactRecorded))
-                .count();
+        val entries = journal.entries();
 
-        assertTrue(scopes > 0);
+        assertTrue(entries.stream().anyMatch(JournalEntry.ScopeOpened.class::isInstance));
+        assertTrue(entries.stream().anyMatch(JournalEntry.ScopeClosed.class::isInstance));
+        assertTrue(entries.stream().anyMatch(JournalEntry.ChoiceMade.class::isInstance));
         assertEquals(GameSnapshot.of(live), GameSnapshot.of(GameReplayer.replay(journal)));
     }
 
@@ -140,8 +142,8 @@ class GameReplayerTest {
         ops.player(2).discard(game.player(2).skillCards().cards().getFirst());
         ops.player(1).discard(game.player(1).mutinyCards().cards().getFirst());
 
-        // a skill check, in an event scope
-        journal.openScope(null, 1);
+        // a skill check, in an event scope, then a choice the event queued
+        val scope = journal.openScope(null, 1, Journal.ROOT_SCOPE);
         ops.skillCheck().start(SkillCheckType.values()[0], 2);
         val played = game.player(1).skillCards().cards().getFirst();
         ops.skillCheck().playBeforeSkillCheck(1, java.util.List.of(played));
@@ -158,7 +160,9 @@ class GameReplayerTest {
                 ? game.activeSkillCheck().nonMatchingPile().cards().getFirst()
                 : game.activeSkillCheck().matchingPile().cards().getFirst();
         ops.skillCheck().discard(inPile);
-        journal.closeScope();
+        val option = single(new NoOpEvent(1));
+        journal.closeScope(one(option, NONE));
+        journal.recordChoice(scope, 1, option);
         ops.skillCheck().start(SkillCheckType.values()[1]); // a second check, that fails and is prevented
         ops.skillCheck().determineResult(xyz.zlatanov.frakkintoasters.state.skill.SkillCheckResult.FAIL);
         ops.skillCheck().preventFailResult();

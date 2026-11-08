@@ -35,21 +35,22 @@ code. That includes:
 
 - `skill-check.drawio` - the full skill check sequence: before-check cards, playing cards in, abilities, result,
   consequences, and the optional followup events.
-- `refactor-game-view.md` - the target design for `GameView` + game ops + journal + describers + engine, including the
-  rules game ops must follow (one call is one fact, always log, no decisions inside ops, etc.).
+- `architecture.md` - the target design for the `GameView` + game ops + journal + describers + engine and the journal.
 
 ## Roadmap
 
 Next steps, in order:
 
 1. Complete the skill check sequence according to `skill-check.drawio`.
-2. ~~Reanalyze existing events: `PlayerEvent` or current player.~~ Done. The engine still has to call `GameOps.actingPlayer`
+2. ~~Reanalyze existing events: `PlayerEvent` or current player.~~ Done. The engine still has to call
+   `GameOps.actingPlayer`
    for "Executive Order".
 3. ~~Create the journal and tie it to the ops classes in `operation/`.~~ Done, see "Journal and Replay". Still open:
    describers and per-viewer hiding, JSON serialization, and the pending followup queue (that one belongs to step 4).
-4. Create the game engine to drive the events and turns. `engine-plan.md` has the plan in phases. Phases 1 and 2 are
-   done: the journal moved out of `Game` into `engine/journal/`, and the turn state is grouped in `state/Turn`. There is
-   no event-to-processor lookup in production code yet.
+4. Create the game engine to drive the events and turns. `engine-plan.md` has the plan in phases. Phases 1 to 3 are
+   done: the journal moved out of `Game` into `engine/journal/`, the turn state is grouped in `state/Turn`, and the
+   journal and processors are ready for the engine (explicit scope parents, followups and choices in the journal,
+   `prepare`/`run`). There is no event-to-processor lookup in production code yet.
 5. Create a working frontend with the events that exist by then.
 
 ## Project Structure
@@ -67,15 +68,17 @@ Multi-module Gradle project with a single `core` module. Package root: `xyz.zlat
   `ShipOps`, `GalacticaOps`, `PegasusOps`, `CylonFleetOps`, `SkillCheckOps`, `LoyaltyDeckOps`, `TitleOps`. They extend
   `AbstractOps`, which holds the `Game` and a `FactRecorder`, and offers `record`, `draw`, `shuffle`. Ops record facts,
   they never write to components
+- `engine/` - `ScopeActor` (who a journal scope is logged under). The rest of the engine will live here too
 - `engine/journal/` - `Journal`, `JournalEntry`, `FactRecorder`, `FactApplier`, `ShipZones`, `GameReplayer`, and `fact/`
-  with the `Fact` records. The rest of the engine will live in `engine/` too
+  with the `Fact` records
 - `state/` - game state model: `Game` (top level), `Turn` (turn number, `GameStep`, current and acting player, read
   through `GameView.turn()`; `number` counts player turns, not rounds), `Player`, `Die` (d8), `Randomness`,
   `RemovedComponents`, `PlayerPile`, and the `@Mutates` marker
 - `state/view/` - read-only view interfaces (`GameView`, `TurnView`, `PlayerView`, `BoardsHolderView`,
   `SkillCheckView`, ...) implemented by the state classes. Processors read state only through these
 - `state/board/` - board hierarchy: `Board` (base, tracks characters by location) -> `BattlestarBoard` (adds damage
-  tracking) -> `GalacticaBoard`/`PegasusBoard`. Also `CylonFleetBoard`, `SpaceLocationsBoard`, `BoardsHolder` (aggregates
+  tracking) -> `GalacticaBoard`/`PegasusBoard`. Also `CylonFleetBoard`, `SpaceLocationsBoard`, `BoardsHolder`
+  (aggregates
   all boards). The `Location` enum defines all 34 board spaces in scope
 - `state/ship/` - `Ship` interface with implementations: `Viper`, `ViperMarkVII`, `Raptor`, `AssaultRaptor`,
   `Basestar`, `Raider`, `HeavyRaider`, `Centurion`, `CivilianShip`. `CylonShips` manages the Cylon ship supply. Ships
@@ -100,24 +103,25 @@ Multi-module Gradle project with a single `core` module. Package root: `xyz.zlat
 Events are plain records with no logic. `Event` is an empty marker interface. `PlayerEvent` adds `playerNumber()`.
 `LocationEvent` adds `location()`. `ActionEvent extends PlayerEvent` marks the location actions.
 
-A `PlayerEvent` is for events whose player can differ from the current player (an "Executive Order" target, any player in a
+A `PlayerEvent` is for events whose player can differ from the current player (an "Executive Order" target, any player
+in a
 skill check, targets of an effect). An event that always involves the current player is a plain `Event` and reads
 `GameView.currentPlayer()`. `GameView.actingPlayer()` is the player taking an action or moving right now: the current
 player, unless another one acts during that turn (set it through `GameOps.actingPlayer(n)` and `resetActingPlayer()`).
 It never changes who the "current player" is for game effects such as skill checks.
 
 Each `XxxEvent` has an `XxxEventProcessor extends EventProcessor<XxxEvent>` in the same package. Keep that naming:
-`EventTestHarness` finds the processor by it. `EventProcessor.execute(GameView, event, GameOps)`:
+`EventTestHarness` finds the processor by it. A processor runs one event, in two calls:
 
-1. sets the context: `game` (a `GameView`), `event`, and helper views `galacticaBoard`, `pegasusBoard`,
-   `cylonFleetBoard`, plus `player` when the event is a `PlayerEvent`
-2. calls `init()` (optional setup, marked for removal)
-3. calls `isValid()` and throws `InvalidActionException` if it returns false
-4. sets `ops` to the `GameOps` it was given and calls `process()`, which mutates state through `ops` and returns a
-   `Followup`
+1. `prepare(GameView, event)` sets the context (`game`, `event`, and helper views `galacticaBoard`, `pegasusBoard`,
+   `cylonFleetBoard`, plus `player` when the event is a `PlayerEvent`), calls `init()` (optional setup, marked for
+   removal), then `isValid()`, and throws `InvalidActionException` if it returns false. It returns the processor.
+2. `run(GameOps)` sets `ops` and calls `process()`, which mutates state through `ops` and returns a `Followup`. It
+   throws `FrakCallTheAdmiralException` unless `prepare` accepted the event, and on a second call.
 
-`ops` is only set right before `process()`, so `init()` and `isValid()` can't change state. The caller builds the ops,
-so a processor never sees the concrete `Game` or the journal. Processors read through `GameView` and write only through
+`ops` is only set by `run`, so `init()` and `isValid()` can't change state, and the caller can validate before it opens
+the event's journal scope. The caller builds the ops, so a processor never sees the concrete `Game` or the journal.
+Processors read through `GameView` and write only through
 game ops. Game ops do mechanics, and processors make decisions (targets, rules branching, followups).
 
 Every state change leaves a fact in the journal, see "Journal and Replay".
@@ -148,7 +152,8 @@ moment. Its pass and fail switches list every type, so a new `SkillCheckType` do
 `ResolveCrisisCardEvent(card)` resolves a Crisis Card. Nothing queues it yet, that comes with the Crisis step. So far it
 covers 16 choice crises (rule 8.5.2), and any other card throws `FrakCallTheAdmiralException`.
 
-A `CrisisCard` constant lists what is printed on the card: its `CrisisChooser`, its `CylonActivation` icon and whether it
+A `CrisisCard` constant lists what is printed on the card: its `CrisisChooser`, its `CylonActivation` icon and whether
+it
 has the "prepare for jump" icon. `CrisisCardFollowups` (in `event/crisis`) holds the effects, grouped like
 `SkillCheckResultFollowups`:
 
@@ -176,8 +181,11 @@ nested `Followup` varargs, so you can write "choose between a single event or a 
 ```java
 return one(
         single(new PlaySuperCrisisCardEvent(playerNumber)),
-        all(new DrawCrisisCardsEvent(playerNumber),
-                new ResolveCapricaCrisisEvent(playerNumber)));
+
+all(new DrawCrisisCardsEvent(playerNumber),
+                new
+
+ResolveCapricaCrisisEvent(playerNumber)));
 ```
 
 ### Event Constraints
@@ -194,17 +202,25 @@ constraint it doesn't support.
 
 ### Journal and Replay
 
-The journal records exactly what the game ops did, so a game can be rebuilt from the journal alone (`journal-plan.md` has
+The journal records exactly what the game ops did, so a game can be rebuilt from the journal alone (`journal-plan.md`
+has
 the design). It is fact-sourced: replay applies recorded facts, and never re-runs processors or needs randomness.
 
 - `Fact` (`engine/journal/fact/`) is a sealed interface, grouped by area: `BoardFact`, `DeckFact`, `GameFact`,
   `PlayerFact`, `ShipFact`, `SkillCheckFact`, `TitleFact`. The records are nested in the area interfaces, because a
   sealed hierarchy can't span packages without a `module-info`. A new fact has to be handled in `FactApplier`'s
   exhaustive `switch`.
-- `Journal` is an append-only flat list of `ScopeOpened` / `FactRecorded` / `ScopeClosed`. It isn't part of `Game`: the
-  engine will own it, and until then whoever builds the ops does (`TestHarness`, `GameReplayerTest`). Ops never see it,
-  they get a `FactRecorder(game, journal)`. Facts recorded while no scope is open go under `Journal.ROOT_SCOPE`. The
-  engine will open a scope per event, `EventTestHarness.execute` does it until then.
+- `Journal` is an append-only flat list of `ScopeOpened(scopeId, parentId, event, actor)` / `FactRecorded` /
+  `ScopeClosed(scopeId, followup)` / `ChoiceMade(scopeId, chooser, option)`. It isn't part of `Game`: the engine will
+  own it, and until then whoever builds the ops does (`TestHarness`, `GameReplayerTest`). Ops never see it, they get a
+  `FactRecorder(game, journal)`.
+- At most one scope is open at a time. A followup runs after its parent's scope has closed, so
+  `openScope(event, actor, parentId)` takes the parent explicitly, and `closeScope(followup)` records what the event
+  queued. `recordChoice` logs the answer to a `OneOf` between events, under the scope that queued it. Facts recorded
+  while no scope is open go under `Journal.ROOT_SCOPE`. The engine will open a scope per event,
+  `EventTestHarness.execute` does it until then, after `prepare`.
+- The scope's `actor` is the player who submitted the event. For a queued event, `ScopeActor.ofQueued` (`engine/`)
+  gives the event's player for a `PlayerEvent`, otherwise the acting player.
 - `FactApplier` is the only code that changes components. `FactRecorder.record(fact)`, which `AbstractOps.record` calls,
   applies a fact and then appends it, so live play and replay share one code path. `ShipZones` (same package) moves
   ships between zones by id.
@@ -214,18 +230,22 @@ Rules for facts and ops:
 
 1. **A fact applies exactly what it says and nothing more.** No cascades: `LocationDamaged` marks the damage, and the
    Sickbay moves are separate `CharacterMoved` facts logged after it.
-2. **Every random or looked-up result goes into the fact**: drawn cards, the order after a shuffle, die values, ship ids.
-   Randomness comes from `Game.randomness()` (`Randomness`, seedable), never from `Collections.shuffle` or `new Random()`.
+2. **Every random or looked-up result goes into the fact**: drawn cards, the order after a shuffle, die values, ship
+   ids.
+   Randomness comes from `Game.randomness()` (`Randomness`, seedable), never from `Collections.shuffle` or
+   `new Random()`.
 3. **Ops never write to components.** They compute a fact from the current state and call `record(fact)`. Drawing is
    `draw(DeckId)` (peek, record `CardsDrawn`, log the reshuffle when the draw empties a reshuffling deck), shuffling is
    `shuffle(DeckId)`. A drawn card is in no pile until another fact says where it went.
-4. **Fact fields are complete and immutable.** Cards are listed in full. Hiding them is the describers' job (not built yet).
+4. **Fact fields are complete and immutable.** Cards are listed in full. Hiding them is the describers' job (not built
+   yet).
 5. **`@Mutates`** marks every component method that changes state. `ArchitectureTest` (ArchUnit) allows calls only from
    `..journal..` and `..state..`, and checks that `..event..` and `..operation..` never call them. Tests are not
    analyzed. Mutable collections that getters expose (e.g. `Board.characters()`) can't be marked, don't change state
    through them. Two more rules keep the layers apart: `..state..` depends on none of `..operation..`, `..event..` and
    `..engine..`, and `..event..` doesn't depend on `..engine..`.
-6. Ships and centurions are named by their fixed ids. Decks are built in canonical order and shuffled by `GameOps.startGame()`.
+6. Ships and centurions are named by their fixed ids. Decks are built in canonical order and shuffled by
+   `GameOps.startGame()`.
 
 ### Lombok Usage
 

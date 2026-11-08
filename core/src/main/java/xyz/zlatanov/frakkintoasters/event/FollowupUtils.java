@@ -102,11 +102,11 @@ public class FollowupUtils {
 
     private static List<Event> addPlayerDecisions(GameView game, Class<? extends PlayerEvent> eventClass) {
         val playerEvents = new ArrayList<Event>();
-        var decidingPlayer = game.currentPlayerNumber();
+        var decidingPlayer = game.turn().currentPlayerNumber();
         do {
             decidingPlayer = decidingPlayer >= game.players().size() ? 1 : ++decidingPlayer;
             playerEvents.add(new PlayerDecisionEvent<>(decidingPlayer, eventClass));
-        } while (decidingPlayer != game.currentPlayerNumber());
+        } while (decidingPlayer != game.turn().currentPlayerNumber());
         return playerEvents;
     }
 }

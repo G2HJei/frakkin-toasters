@@ -4,6 +4,8 @@ import lombok.SneakyThrows;
 import lombok.val;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import xyz.zlatanov.frakkintoasters.engine.ScopeActor;
+import xyz.zlatanov.frakkintoasters.engine.journal.Journal;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.FollowupUtils;
@@ -41,12 +43,16 @@ public abstract class EventTestHarness<E extends Event> extends TestHarness {
         assertEquals(expected, followup);
     }
 
+    // Runs the event the way the engine runs a queued one: validation before the scope opens, so a rejection logs nothing.
     protected void execute(E event) {
-        journal.openScope(event, game.turn().actingPlayerNumber()); // the engine will do this later
+        eventProcessor.prepare(game, event);
+        journal.openScope(event, ScopeActor.ofQueued(game, event), Journal.ROOT_SCOPE);
+        var queued = Followup.NONE;
         try {
-            followup = eventProcessor.execute(game, event, ops);
+            queued = eventProcessor.run(ops);
+            followup = queued;
         } finally {
-            journal.closeScope();
+            journal.closeScope(queued);
         }
     }
 
