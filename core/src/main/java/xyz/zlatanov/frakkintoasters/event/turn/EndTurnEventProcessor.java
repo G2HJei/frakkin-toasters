@@ -13,6 +13,7 @@ public class EndTurnEventProcessor extends EventProcessor<EndTurnEvent> {
 
     @Override
     public Followup process() {
+        ops.discardCrisisCards(); // the Crisis Cards drawn this turn (rule 8.8)
         if (resourceDepleted()) {
             return single(new CylonsWinEvent());
         }

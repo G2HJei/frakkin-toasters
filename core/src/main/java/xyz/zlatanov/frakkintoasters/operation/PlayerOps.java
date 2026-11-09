@@ -4,7 +4,6 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedOnTop;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedToBottom;
-import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsDiscarded;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.*;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.ShipFact.PilotChanged;
 import xyz.zlatanov.frakkintoasters.state.Game;
@@ -99,10 +98,6 @@ public class PlayerOps extends GameOps {
 
     public void placeCrisisCardOnBottom(CrisisCard card) {
         record(new CardsAddedToBottom(DeckId.CRISIS, List.of(card)));
-    }
-
-    public void discardCrisisCard(CrisisCard card) {
-        record(new CardsDiscarded(DeckId.CRISIS, List.of(card)));
     }
 
     public void placeDestinationCardOnTop(DestinationCard card) {

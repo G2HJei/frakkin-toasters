@@ -1,11 +1,15 @@
 package xyz.zlatanov.frakkintoasters.event.turn;
 
+import lombok.val;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.event.endgame.CylonsWinEvent;
 import xyz.zlatanov.frakkintoasters.state.board.Resource;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -20,6 +24,18 @@ class EndTurnEventProcessorTest extends EventTestHarness<EndTurnEvent> {
         execute(new EndTurnEvent());
 
         assertEquals(next, game.turn().currentPlayerNumber());
+        assertFollowup(new StartTurnEvent());
+    }
+
+    @Test
+    void theCrisisCardsOfTheTurnAreDiscarded() {
+        ops.playCrisisCard(ops.player(1).drawCrisisCard());
+        val card = game.turn().crisisCards().getFirst();
+
+        execute(new EndTurnEvent());
+
+        assertEquals(List.of(), game.turn().crisisCards());
+        assertEquals(List.of(card), crisisDeck.discardedCards()); // "He discards any Crisis Cards drawn this turn" (rule 8.8)
         assertFollowup(new StartTurnEvent());
     }
 

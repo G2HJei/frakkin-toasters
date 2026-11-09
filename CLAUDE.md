@@ -75,8 +75,8 @@ Multi-module Gradle project with a single `core` module. Package root: `xyz.zlat
   logged under)
 - `engine/journal/` - `Journal`, `JournalEntry`, `FactRecorder`, `FactApplier`, `ShipZones`, `GameReplayer`, and `fact/`
   with the `Fact` records
-- `state/` - game state model: `Game` (top level), `Turn` (turn number, `GameStep`, current and acting player, read
-  through `GameView.turn()`; `number` counts player turns, not rounds), `Player` (`turns()` counts the player's own
+- `state/` - game state model: `Game` (top level), `Turn` (turn number, `GameStep`, current and acting player, the
+  Crisis Cards of the turn, read through `GameView.turn()`; `number` counts player turns, not rounds), `Player` (`turns()` counts the player's own
   turns), `Die` (d8), `Randomness`,
   `RemovedComponents`, `PlayerPile`, and the `@Mutates` marker
 - `state/view/` - read-only view interfaces (`GameView`, `TurnView`, `PlayerView`, `BoardsHolderView`,
@@ -156,8 +156,8 @@ moment. Its pass and fail switches list every type, so a new `SkillCheckType` do
 ### Crisis Cards
 
 `ResolveCrisisCardEvent(card)` resolves a Crisis Card. Nothing queues it yet: until phase 11 of `engine-plan.md`, the
-Crisis step draws a card and discards it. So far it covers 16 choice crises (rule 8.5.2), and any other card throws
-`FrakCallTheAdmiralException`.
+Crisis step only draws a card and keeps it with the turn (see "Turn Loop"). So far it covers 16 choice crises (rule
+8.5.2), and any other card throws `FrakCallTheAdmiralException`.
 
 A `CrisisCard` constant lists what is printed on the card: its `CrisisChooser`, its `CylonActivation` icon and whether
 it
@@ -257,10 +257,15 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
   `ActivateViperEvent` instead of a location action.
 - `DiscardStepEvent` asks every player over the hand limit, clockwise from the current player, with
   `DISCARD_DOWN_TO_HAND_LIMIT`: Skill Cards over `handLimit()`, and the President's Quorum Cards.
+- The Crisis Cards of a turn stay with it, in `TurnView.crisisCards()` (`GameOps.playCrisisCard`), for the icons the
+  later steps read. `EndTurnEvent` discards them (rule 8.8).
+- `PrepareForJumpStepEvent` happens only when a Crisis Card of the turn has the "prepare for jump" icon, because with
+  the Kobol objective the icon is all the step does. It queues an `IncreaseJumpPreparationEvent` per icon, and the
+  Mutineer draws a Mutiny Card (rule 8.7.1). `IncreaseJumpPreparationEvent` queues `JumpingTheFleetEvent` when the
+  token moves past `MINUS_1`: the track has no "Auto Jump" space, the token goes back to `START`.
 - `EndTurnEvent` is the only resource check (rule 16.1). It queues `CylonsWinEvent` at 0, otherwise it passes the
   current player token to the left and queues the next `StartTurnEvent`.
-- Stubs until phase 11: the Crisis step draws a Crisis Card and discards it, and the Activate Cylon Ships and Prepare for
-  Jump steps do nothing.
+- Stubs until phase 11: the Crisis step doesn't resolve its card, and the Activate Cylon Ships step does nothing.
 - A Stranded Karl "Helo" Agathon is off the board until `StartTurnEvent` puts him on the Hangar Deck at his player's
   2nd turn (`PlayerView.turns()`). Until then the Movement and Action steps skip him, and `SendToBrigEvent` and
   `SendToSickbayEvent` leave him alone.

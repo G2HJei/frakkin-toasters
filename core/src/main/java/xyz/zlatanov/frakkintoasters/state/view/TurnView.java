@@ -1,6 +1,9 @@
 package xyz.zlatanov.frakkintoasters.state.view;
 
 import xyz.zlatanov.frakkintoasters.state.GameStep;
+import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
+
+import java.util.List;
 
 public interface TurnView {
 
@@ -19,4 +22,9 @@ public interface TurnView {
      * player" is for game effects, e.g. skill checks.
      */
     int actingPlayerNumber();
+
+    /**
+     * The Crisis Cards resolved this turn. They stay with the turn until it ends, when they are discarded (rule 8.8).
+     */
+    List<CrisisCard> crisisCards();
 }

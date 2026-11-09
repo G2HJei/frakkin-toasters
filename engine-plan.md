@@ -268,7 +268,11 @@ The turn events:
   character abilities that change the count, like "Family Commitments" and "Grieving".
 - Each step applies its own exceptions. Revealed Cylons and characters in the Brig skip Crisis, and revealed Cylons skip
   Activate Cylon Ships (rules 8.5, 8.6). A skipped step records no `StepChanged`. A character in the Brig gets no
-  Movement choice (rule 9.2). Prepare for Jump isn't skipped on their turn (rule 6.1.3.4), see phase 11.
+  Movement choice (rule 9.2). Prepare for Jump isn't skipped on their turn (rule 6.1.3.4).
+- Prepare for Jump, with the Kobol objective only: each "prepare for jump" icon on the turn's Crisis Cards queues an
+  `IncreaseJumpPreparationEvent`, which now has a processor and queues `JumpingTheFleetEvent` at Auto Jump. The
+  Mutineer then draws a Mutiny Card (rule 8.7.1). Without an icon there is no step, because the evacuation icon of rule
+  8.7.2 belongs to New Caprica.
 - `DiscardStepEvent`: every player over 10 Skill Cards or 10 Quorum Cards discards down to 10, not only the current
   player (rule 8.8). The limit is `handLimit()`, which is 8 for Chief Tyrol. The count can be more than 5, so the
   decisions carry a new `DISCARD_DOWN_TO_HAND_LIMIT` constraint. The President's Quorum Cards go through a new
@@ -277,8 +281,9 @@ The turn events:
   resource check (rule 16.1). A resource can reach 0 during a turn, as FTL Control can with population, and recover
   before the turn ends. At 0 it returns `CylonsWinEvent`, which gets its processor in phase 8.
 
-Crisis is a stub here (draw the card, discard it) until phase 11. The acceptance test plays several full turns through
-`submit` and `choose` alone.
+Crisis is a stub here until phase 11: it draws the card without resolving it. `Turn` keeps the card, through a
+`CrisisCardPlayed` fact, and `TurnView.crisisCards()` exposes it for the icons. `EndTurnEvent` discards it (rule 8.8).
+The acceptance test plays several full turns through `submit` and `choose` alone.
 
 **Stranded Helo.** His character sheet keeps him off the board until the start of his 2nd turn, when `StartTurnEvent`
 places him on the Hangar Deck. While `game.locate` is empty he can't move, be moved or take actions, so the Movement and
@@ -407,10 +412,10 @@ skill check crises need their skill check type. Some of those let a title holder
 of the skill check (rule 8.5.1.1).
 
 - The Crisis step and `ResolveCapricaCrisisCardEvent` queue `ResolveCrisisCardEvent`.
-- `Turn` keeps the Crisis Cards drawn this turn, through a new fact, and `TurnView` exposes them. The Activate Cylon
-  Ships step, the Prepare for Jump step and the discard in `EndTurnEvent` (rule 8.8) read them.
-- A card chosen at Caprica counts for Prepare for Jump even on a revealed Cylon's turn (rule 6.1.3.4), so that step
-  can't depend on the Crisis step having run.
+- `Turn` keeps the Crisis Cards of the turn since phase 6, and the Prepare for Jump step and `EndTurnEvent` read them.
+  The Activate Cylon Ships step still has to.
+- A card chosen at Caprica counts for Prepare for Jump even on a revealed Cylon's turn (rule 6.1.3.4), so
+  `ResolveCapricaCrisisCardEvent` plays it into the turn with `GameOps.playCrisisCard`, like the Crisis step.
 
 ## Phase 12 - Jump and Kobol
 

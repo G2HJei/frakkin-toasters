@@ -12,6 +12,7 @@ import xyz.zlatanov.frakkintoasters.engine.journal.fact.TitleFact.*;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.PlayerPile;
 import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
+import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
@@ -72,6 +73,13 @@ class FactApplierTest {
         assertEquals(9, galactica.food());
         assertEquals(12, galactica.morale());
         assertEquals(15, galactica.population());
+    }
+
+    @Test
+    void jumpPreparationIncreasedMovesTheFleetTokenAhead() {
+        apply(new JumpPreparationIncreased());
+
+        assertEquals(JumpPreparation.POSITION_1, game.boards().galactica().jumpPreparation());
     }
 
     @Test
@@ -198,6 +206,14 @@ class FactApplierTest {
 
         apply(new ActingPlayerChanged(null));
         assertEquals(2, game.turn().actingPlayerNumber());
+
+        apply(new CrisisCardPlayed(CrisisCard.RAIDERS_INBOUND));
+        apply(new CrisisCardPlayed(CrisisCard.LABOR_DISPUTE));
+        assertEquals(List.of(CrisisCard.RAIDERS_INBOUND, CrisisCard.LABOR_DISPUTE), game.turn().crisisCards());
+
+        apply(new CrisisCardsCleared(List.of(CrisisCard.RAIDERS_INBOUND)));
+        assertEquals(List.of(CrisisCard.LABOR_DISPUTE), game.turn().crisisCards());
+        assertEquals(List.of(), game.decks().crisis().discardedCards()); // the discard pile is a separate CardsDiscarded
     }
 
     /* PlayerFact */

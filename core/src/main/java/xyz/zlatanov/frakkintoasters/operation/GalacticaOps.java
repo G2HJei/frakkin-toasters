@@ -4,6 +4,7 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.BoardingPartyAdvanced;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.JumpPreparationDecreased;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.JumpPreparationIncreased;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.ResourceDecreased;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.ResourceIncreased;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedOnTop;
@@ -81,6 +82,10 @@ public class GalacticaOps extends BattlestarOps {
 
     public void increaseResource(Resource resource, int amount) {
         record(new ResourceIncreased(resource, amount));
+    }
+
+    public void increaseJumpPreparation() {
+        record(new JumpPreparationIncreased());
     }
 
     public void decreaseJumpPreparation() {

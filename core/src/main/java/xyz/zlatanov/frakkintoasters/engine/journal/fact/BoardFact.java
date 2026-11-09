@@ -14,6 +14,9 @@ public sealed interface BoardFact extends Fact {
     record ResourceIncreased(Resource resource, int amount) implements BoardFact {
     }
 
+    record JumpPreparationIncreased() implements BoardFact {
+    }
+
     record JumpPreparationDecreased() implements BoardFact {
     }
 

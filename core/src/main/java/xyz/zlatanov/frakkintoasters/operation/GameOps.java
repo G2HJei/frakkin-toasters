@@ -2,11 +2,13 @@ package xyz.zlatanov.frakkintoasters.operation;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsDiscarded;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.GameFact.*;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.OwnTurnStarted;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.GameStep;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
+import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 
@@ -101,6 +103,18 @@ public class GameOps extends AbstractOps {
 
     public void changeCurrentPlayer(int playerNumber) {
         record(new CurrentPlayerChanged(playerNumber));
+    }
+
+    public void playCrisisCard(CrisisCard card) {
+        record(new CrisisCardPlayed(card));
+    }
+
+    public void discardCrisisCards() {
+        val cards = List.copyOf(game.turn().crisisCards());
+        if (!cards.isEmpty()) {
+            record(new CrisisCardsCleared(cards));
+            record(new CardsDiscarded(CRISIS, cards));
+        }
     }
 
     /**

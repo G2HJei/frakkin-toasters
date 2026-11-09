@@ -2,6 +2,9 @@ package xyz.zlatanov.frakkintoasters.engine.journal.fact;
 
 import xyz.zlatanov.frakkintoasters.state.GameStep;
 import xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard;
+import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
+
+import java.util.List;
 
 public sealed interface GameFact extends Fact {
 
@@ -21,5 +24,14 @@ public sealed interface GameFact extends Fact {
     }
 
     record ActingPlayerChanged(Integer playerNumber) implements GameFact {
+    }
+
+    record CrisisCardPlayed(CrisisCard card) implements GameFact {
+    }
+
+    record CrisisCardsCleared(List<CrisisCard> cards) implements GameFact {
+        public CrisisCardsCleared {
+            cards = List.copyOf(cards);
+        }
     }
 }

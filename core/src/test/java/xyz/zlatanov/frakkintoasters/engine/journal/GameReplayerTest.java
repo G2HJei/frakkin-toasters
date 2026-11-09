@@ -139,6 +139,10 @@ class GameReplayerTest {
         ops.player(2).drawSuperCrisisCard();
         CrisisCard crisis = ops.player(1).drawCrisisCard();
         ops.player(1).placeCrisisCardOnBottom(crisis);
+        ops.playCrisisCard(ops.player(1).drawCrisisCard());
+        ops.playCrisisCard(ops.player(1).drawCrisisCard());
+        ops.discardCrisisCards();
+        ops.playCrisisCard(ops.player(1).drawCrisisCard()); // stays with the turn
         DestinationCard destination = ops.player(2).drawDestinationCard();
         ops.player(2).placeDestinationCardOnTop(destination);
         ops.player(2).discard(game.player(2).skillCards().cards().getFirst());
@@ -209,6 +213,8 @@ class GameReplayerTest {
         ops.galactica().decreaseMorale(1);
         ops.galactica().decreaseResource(Resource.FUEL, 1);
         ops.galactica().increaseResource(Resource.FOOD, 2);
+        ops.galactica().increaseJumpPreparation();
+        ops.galactica().increaseJumpPreparation();
         ops.galactica().decreaseJumpPreparation();
         ops.cylonFleet().place(ShipType.RAIDER, CYLON_FLEET_SPACE_1);
         ops.cylonFleet().place(ShipType.BASESTAR, CYLON_FLEET_SPACE_2);

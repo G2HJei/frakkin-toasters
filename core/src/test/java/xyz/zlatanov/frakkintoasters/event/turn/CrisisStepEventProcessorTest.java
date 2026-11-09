@@ -15,9 +15,8 @@ import static xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard.RAIDERS_INBOU
 
 class CrisisStepEventProcessorTest extends EventTestHarness<CrisisStepEvent> {
 
-    // Until the card is resolved, it goes straight to the discard pile.
     @Test
-    void theCurrentPlayerDrawsACrisisCard() {
+    void theCurrentPlayerDrawsACrisisCardThatStaysWithTheTurn() {
         player(1).character(KARA_STARBUCK_THRACE);
         moveTo(HANGAR_DECK, KARA_STARBUCK_THRACE);
         crisisDeck.nextCard(RAIDERS_INBOUND);
@@ -25,7 +24,8 @@ class CrisisStepEventProcessorTest extends EventTestHarness<CrisisStepEvent> {
         execute(new CrisisStepEvent());
 
         assertEquals(CRISIS, game.turn().step());
-        assertEquals(List.of(RAIDERS_INBOUND), crisisDeck.discardedCards());
+        assertEquals(List.of(RAIDERS_INBOUND), game.turn().crisisCards());
+        assertEquals(0, crisisDeck.discardSize()); // until the end of the turn (rule 8.8)
     }
 
     // "Exceptions: Revealed Cylons and characters in the Brig do not perform this step." (rule 8.5)
@@ -65,7 +65,7 @@ class CrisisStepEventProcessorTest extends EventTestHarness<CrisisStepEvent> {
 
         execute(new CrisisStepEvent());
 
-        assertEquals(1, crisisDeck.discardSize());
+        assertEquals(1, game.turn().crisisCards().size());
     }
 
     @Test
@@ -74,7 +74,7 @@ class CrisisStepEventProcessorTest extends EventTestHarness<CrisisStepEvent> {
 
         execute(new CrisisStepEvent());
 
-        assertEquals(1, crisisDeck.discardSize());
+        assertEquals(1, game.turn().crisisCards().size());
     }
 
     private void assertNoCrisisStep() {
@@ -85,5 +85,6 @@ class CrisisStepEventProcessorTest extends EventTestHarness<CrisisStepEvent> {
         assertEquals(SETUP, game.turn().step());
         assertEquals(deck, crisisDeck.cards());
         assertEquals(0, crisisDeck.discardSize());
+        assertEquals(List.of(), game.turn().crisisCards());
     }
 }

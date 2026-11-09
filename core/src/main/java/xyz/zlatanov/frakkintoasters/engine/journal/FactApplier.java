@@ -51,6 +51,7 @@ public final class FactApplier {
                     case POPULATION -> galactica.increasePopulation(f.amount());
                 }
             }
+            case BoardFact.JumpPreparationIncreased ignored -> galactica.advanceJumpPreparation();
             case BoardFact.JumpPreparationDecreased ignored -> galactica.decreaseJumpPreparation();
             case BoardFact.LocationDamaged f -> {
                 val board = Stream.of(galactica, game.boards().pegasus())
@@ -91,6 +92,8 @@ public final class FactApplier {
             case GameFact.TurnStarted f -> game.turn().number(f.turn());
             case GameFact.CurrentPlayerChanged f -> game.turn().currentPlayerNumber(f.playerNumber());
             case GameFact.ActingPlayerChanged f -> game.turn().actingPlayerNumber(f.playerNumber());
+            case GameFact.CrisisCardPlayed f -> game.turn().playCrisisCard(f.card());
+            case GameFact.CrisisCardsCleared f -> game.turn().removeCrisisCards(f.cards());
         }
     }
 

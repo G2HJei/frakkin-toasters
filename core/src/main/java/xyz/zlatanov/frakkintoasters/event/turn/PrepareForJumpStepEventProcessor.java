@@ -1,18 +1,44 @@
 package xyz.zlatanov.frakkintoasters.event.turn;
 
+import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
+import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.board.IncreaseJumpPreparationEvent;
+import xyz.zlatanov.frakkintoasters.event.player.DrawMutinyCardEvent;
+import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
+import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
+
+import java.util.ArrayList;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.NONE;
+import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.state.GameStep.PREPARE_FOR_JUMP;
+import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.MUTINEER;
 
 public class PrepareForJumpStepEventProcessor extends EventProcessor<PrepareForJumpStepEvent> {
 
-    // Not skipped on a revealed Cylon's turn: a Crisis Card chosen at "Caprica" can have the icon (rule 6.1.3.4).
     @Override
     public Followup process() {
+        // Not skipped on a revealed Cylon's turn: a Crisis Card chosen at "Caprica" counts too (rule 6.1.3.4).
+        val followups = new ArrayList<Event>();
+        game.turn().crisisCards().stream()
+                .filter(CrisisCard::prepareForJump)
+                .forEach(card -> followups.add(new IncreaseJumpPreparationEvent())); // one space per icon (rule 8.7)
+        if (followups.isEmpty()) {
+            // With the Kobol objective the step has nothing else to do, so it only happens for an icon (rule 8.1).
+            return NONE;
+        }
         ops.changeStep(PREPARE_FOR_JUMP);
-        // todo advance the Jump Preparation track for each "prepare for jump" icon on the Crisis Cards drawn this turn
-        return NONE;
+        val current = game.currentPlayer();
+        if (isMutineer(current)) {
+            followups.add(new DrawMutinyCardEvent(current.number())); // once, for one or more icons (rule 8.7.1)
+        }
+        return all(followups.toArray(Event[]::new));
+    }
+
+    private static boolean isMutineer(PlayerView player) {
+        val loyaltyCards = player.loyaltyCards();
+        return loyaltyCards.cards().contains(MUTINEER) || loyaltyCards.revealedCards().contains(MUTINEER);
     }
 }

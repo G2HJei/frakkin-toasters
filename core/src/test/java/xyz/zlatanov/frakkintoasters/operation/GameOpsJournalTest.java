@@ -72,13 +72,28 @@ class GameOpsJournalTest extends TestHarness {
     }
 
     @Test
-    void aDiscardedCrisisCardGoesToTheDiscardPile() {
+    void aPlayedCrisisCardStaysWithTheTurnUntilItIsDiscarded() {
         val card = ops.player(1).drawCrisisCard();
 
-        ops.player(1).discardCrisisCard(card);
+        ops.playCrisisCard(card);
 
-        assertEquals(new CardsDiscarded(DeckId.CRISIS, List.of(card)), journal.facts().getLast());
+        assertEquals(new CrisisCardPlayed(card), journal.facts().getLast());
+        assertEquals(List.of(card), game.turn().crisisCards());
+
+        ops.discardCrisisCards();
+
+        val facts = journal.facts();
+        assertEquals(List.of(new CrisisCardsCleared(List.of(card)), new CardsDiscarded(DeckId.CRISIS, List.of(card))),
+                facts.subList(facts.size() - 2, facts.size()));
+        assertEquals(List.of(), game.turn().crisisCards());
         assertEquals(List.of(card), crisisDeck.discardedCards());
+    }
+
+    @Test
+    void aTurnWithoutCrisisCardsDiscardsNothing() {
+        ops.discardCrisisCards();
+
+        assertEquals(List.of(), journal.facts());
     }
 
     @Test

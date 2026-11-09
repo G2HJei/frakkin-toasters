@@ -22,9 +22,9 @@ public class CrisisStepEventProcessor extends EventProcessor<CrisisStepEvent> {
             return NONE;
         }
         ops.changeStep(CRISIS);
-        // todo resolve the card, and keep it for the icons and the discard at the end of the turn (rule 8.8)
-        val player = ops.player(current.number());
-        player.discardCrisisCard(player.drawCrisisCard());
+        // The card stays with the turn for its icons, until EndTurnEvent discards it (rule 8.8).
+        ops.playCrisisCard(ops.player(current.number()).drawCrisisCard());
+        // todo resolve the card
         return NONE;
     }
 }

@@ -29,6 +29,7 @@ public record GameSnapshot(Map<String, Object> values) {
         s.put("turn", game.turn().number());
         s.put("currentPlayer", game.turn().currentPlayerNumber());
         s.put("actingPlayer", game.turn().actingPlayerNumber());
+        s.put("turnCrisisCards", new ArrayList<>(game.turn().crisisCards()));
         s.put("president", game.president());
         s.put("admiral", game.admiral());
         s.put("cag", game.cag());
