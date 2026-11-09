@@ -246,28 +246,36 @@ The first playable slice. New `event/turn/` events, each with a processor and te
 
 `StartGameEvent` follows the setup sequence in rule A3.1, minus what the Kobol objective doesn't use:
 
-1. `ops.startGame()`, `ops.galactica().setUp()` and `CreateDestinyDeckEvent` (rules A3.4, A3.5). Nothing in main calls
-   `setUp()` yet.
-2. A random first player, recorded as a fact (rule A3.7.1).
+1. `ops.startGame()`, `ops.galactica().setUp()` and `CreateDestinyDeckEvent` (rules A3.4, A3.5).
+2. A random first player, recorded as a `CurrentPlayerChanged` fact by `GameOps.chooseFirstPlayer()` (rule A3.7.1).
 3. `SelectCharacterEvent` decisions, clockwise from the first player (rule A3.7.2). A character with a choice of setup
-   locations picks one through `PlaceInSetupLocationEvent`.
+   locations picks one through `PlaceInSetupLocationEvent`. Athena starts the game Infiltrating (rule 6.2.1.1), so
+   `SelectCharacterEventProcessor` records it.
 4. Titles through the `DetermineNext...` events, then the President draws a Quorum Card (rule A3.7.3).
-5. `CreateLoyaltyDeckEvent` (rule A3.8).
-6. Starting Skill Cards: 3 each, except the first player, who draws on their first turn, and Cylon Leaders, who draw 2
-   (Athena draws 3) (rule A3.9).
+5. `CreateLoyaltyDeckEvent` (rule A3.8). It dealt a Loyalty Card to a Cylon Leader too, now it doesn't (rule A3.8.5).
+6. `ReceiveStartingSkillsEvent`: 3 Skill Cards each, except the first player, who draws on their first turn, and Cylon
+   Leaders, who draw 2 unless Infiltrating, like Athena (rule A3.9). It runs after the selection, because the counts
+   depend on the characters.
 
 The turn events:
 
-- `StartTurnEvent`: records the turn and returns the steps as one `all(...)`.
+- `StartTurnEvent`: records the turn and returns the steps and `EndTurnEvent` as one `all(...)`.
 - One event per step, recording `StepChanged`. Movement and Action are optional. The Action step offers a location
   action, `ActivateViperEvent` for a pilot (it isn't an `ActionEvent`), or doing nothing (rule 8.4).
+  `ActivateViperEvent` gets its processor in phase 10.
+- The Receive Skills step asks for exactly the skill set's count, so it adds `DRAW_EXACTLY_4` (Gaius Baltar draws 4). It
+  covers Sickbay and the Resurrection Ship (1 card), revealed Cylons (2) and Infiltrating (1 more), but not the
+  character abilities that change the count, like "Family Commitments" and "Grieving".
 - Each step applies its own exceptions. Revealed Cylons and characters in the Brig skip Crisis, and revealed Cylons skip
-  Activate Cylon Ships (rules 8.5, 8.6). Prepare for Jump isn't skipped on their turn (rule 6.1.3.4), see phase 11.
+  Activate Cylon Ships (rules 8.5, 8.6). A skipped step records no `StepChanged`. A character in the Brig gets no
+  Movement choice (rule 9.2). Prepare for Jump isn't skipped on their turn (rule 6.1.3.4), see phase 11.
 - `DiscardStepEvent`: every player over 10 Skill Cards or 10 Quorum Cards discards down to 10, not only the current
-  player (rule 8.8).
+  player (rule 8.8). The limit is `handLimit()`, which is 8 for Chief Tyrol. The count can be more than 5, so the
+  decisions carry a new `DISCARD_DOWN_TO_HAND_LIMIT` constraint. The President's Quorum Cards go through a new
+  `DiscardQuorumCardsEvent`.
 - `EndTurnEvent`: checks resources, passes the current player token, returns the next `StartTurnEvent`. This is the only
   resource check (rule 16.1). A resource can reach 0 during a turn, as FTL Control can with population, and recover
-  before the turn ends.
+  before the turn ends. At 0 it returns `CylonsWinEvent`, which gets its processor in phase 8.
 
 Crisis is a stub here (draw the card, discard it) until phase 11. The acceptance test plays several full turns through
 `submit` and `choose` alone.
@@ -276,7 +284,9 @@ Crisis is a stub here (draw the card, discard it) until phase 11. The acceptance
 places him on the Hangar Deck. While `game.locate` is empty he can't move, be moved or take actions, so the Movement and
 Action steps skip him, and `SendToBrigEvent` and `SendToSickbayEvent` leave him alone, as
 `ViolentOutburstsEventProcessor` already does. Finding his 2nd turn needs a count of his own turns, because
-`Turn.number` counts everyone's. After an execution he is Stranded for his player's next turn (rule A2.1.1.10).
+`Turn.number` counts everyone's: `PlayerView.turns()`, which `GameOps.startTurn()` counts with an `OwnTurnStarted`
+fact. After an execution he is Stranded for his player's next turn (rule A2.1.1.10), so the execution has to restart the
+count. That waits for executions.
 
 ## Phase 7 - Validate player input
 

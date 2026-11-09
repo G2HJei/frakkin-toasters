@@ -4,7 +4,6 @@ import lombok.NoArgsConstructor;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.event.board.GainResourceEvent;
 import xyz.zlatanov.frakkintoasters.event.board.LoseResourceEvent;
-import xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.DiscardSkillCardsEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.PlayCardsBeforeSkillCheckEvent;
@@ -19,6 +18,7 @@ import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static lombok.AccessLevel.PRIVATE;
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
@@ -42,6 +42,17 @@ public class FollowupUtils {
 
     public static Event gain(Resource resource, int amount) {
         return new GainResourceEvent(resource, amount);
+    }
+
+    /**
+     * @return every player, clockwise from the given one. The current player token passes to the left (rule 8.1), so
+     * clockwise is the order of the player numbers
+     */
+    public static List<PlayerView> playersFrom(GameView game, int firstPlayerNumber) {
+        val count = game.players().size();
+        return IntStream.range(0, count)
+                .<PlayerView>mapToObj(i -> game.player((firstPlayerNumber - 1 + i) % count + 1))
+                .toList();
     }
 
     public static Event discard(int playerNumber, int count) {
@@ -85,17 +96,6 @@ public class FollowupUtils {
                  IRON_WILL,
                  ALL_HANDS_ON_DECK,
                  ESTABLISH_NETWORK -> Followup.NONE;
-            default -> throw new FrakCallTheAdmiralException();
-        };
-    }
-
-    private static EventConstraint discardExactly(int count) {
-        return switch (count) {
-            case 1 -> DISCARD_EXACTLY_1;
-            case 2 -> DISCARD_EXACTLY_2;
-            case 3 -> DISCARD_EXACTLY_3;
-            case 4 -> DISCARD_EXACTLY_4;
-            case 5 -> DISCARD_EXACTLY_5;
             default -> throw new FrakCallTheAdmiralException();
         };
     }

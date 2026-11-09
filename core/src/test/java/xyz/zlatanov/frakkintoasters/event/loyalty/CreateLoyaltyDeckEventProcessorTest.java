@@ -81,6 +81,17 @@ class CreateLoyaltyDeckEventProcessorTest extends EventTestHarness<CreateLoyalty
         assertEquals(1, player(3).loyaltyCards().size());
     }
 
+    // A Cylon Leader gets Motive Cards instead (rule A3.8.5).
+    @Test
+    void shouldDealNoLoyaltyCardToACylonLeader() {
+        setUpGame(4);
+        pickCharacters(true);
+
+        execute(event);
+
+        assertEquals(java.util.List.of(1, 1, 1, 0), game.players().stream().map(p -> p.loyaltyCards().size()).toList());
+    }
+
     @Test
     void shouldFollowUpWithRevealMutineerAction() {
         setUpGame(4);

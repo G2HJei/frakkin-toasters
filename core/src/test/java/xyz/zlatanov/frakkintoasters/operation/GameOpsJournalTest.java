@@ -3,13 +3,16 @@ package xyz.zlatanov.frakkintoasters.operation;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.TestHarness;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsDiscarded;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsDrawn;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.OwnTurnStarted;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.DeckShuffled;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.CardsGained;
 import xyz.zlatanov.frakkintoasters.state.PlayerPile;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.GameFact.*;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.TitleFact.*;
 import xyz.zlatanov.frakkintoasters.state.GameStep;
+import xyz.zlatanov.frakkintoasters.state.Player;
 import xyz.zlatanov.frakkintoasters.state.Randomness;
 import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
@@ -29,20 +32,69 @@ class GameOpsJournalTest extends TestHarness {
     @Test
     void stateChangesAreRecordedAsFacts() {
         ops.changeStep(GameStep.RECEIVE_SKILLS);
-        ops.startTurn(3);
         ops.changeCurrentPlayer(2);
+        ops.startTurn();
         ops.actingPlayer(3);
         ops.resetActingPlayer();
         ops.titles().assignAdmiral(Character.values()[0]);
         ops.titles().assignCag(Character.values()[1]);
         ops.titles().assignPresident(Character.values()[2]);
 
-        assertEquals(List.of(new StepChanged(GameStep.RECEIVE_SKILLS), new TurnStarted(3), new CurrentPlayerChanged(2),
-                new ActingPlayerChanged(3), new ActingPlayerChanged(null), new AdmiralAssigned(Character.values()[0]),
-                new CagAssigned(Character.values()[1]), new PresidentAssigned(Character.values()[2])), journal.facts());
+        assertEquals(List.of(new StepChanged(GameStep.RECEIVE_SKILLS), new CurrentPlayerChanged(2), new TurnStarted(1),
+                new OwnTurnStarted(2), new ActingPlayerChanged(3), new ActingPlayerChanged(null),
+                new AdmiralAssigned(Character.values()[0]), new CagAssigned(Character.values()[1]),
+                new PresidentAssigned(Character.values()[2])), journal.facts());
         assertEquals(GameStep.RECEIVE_SKILLS, game.turn().step());
-        assertEquals(3, game.turn().number());
+        assertEquals(1, game.turn().number());
+        assertEquals(1, game.player(2).turns());
         assertEquals(Character.values()[1], game.cag());
+    }
+
+    @Test
+    void theNextTurnCountsForTheGameAndTheCurrentPlayer() {
+        ops.startTurn();
+        ops.changeCurrentPlayer(2);
+        ops.startTurn();
+        ops.changeCurrentPlayer(1);
+        ops.startTurn();
+
+        assertEquals(3, game.turn().number());
+        assertEquals(List.of(2, 1, 0), game.players().stream().map(Player::turns).toList());
+    }
+
+    @Test
+    void theFirstPlayerIsRandomAndRecorded() {
+        val first = ops.chooseFirstPlayer();
+
+        assertEquals(List.of(new CurrentPlayerChanged(first)), journal.facts());
+        assertEquals(first, game.turn().currentPlayerNumber());
+        assertTrue(first >= 1 && first <= 3);
+    }
+
+    @Test
+    void aDiscardedCrisisCardGoesToTheDiscardPile() {
+        val card = ops.player(1).drawCrisisCard();
+
+        ops.player(1).discardCrisisCard(card);
+
+        assertEquals(new CardsDiscarded(DeckId.CRISIS, List.of(card)), journal.facts().getLast());
+        assertEquals(List.of(card), crisisDeck.discardedCards());
+    }
+
+    @Test
+    void discardedQuorumCardsLeaveThePresidentsHandForTheDiscardPile() {
+        ops.titles().drawQuorumCard();
+        ops.titles().drawQuorumCard();
+        val discarded = presidentHand.cards().getFirst();
+        val kept = presidentHand.cards().getLast();
+
+        ops.titles().discardQuorumCards(List.of(discarded));
+
+        val facts = journal.facts();
+        assertEquals(List.of(new PresidentQuorumCardsLost(List.of(discarded)),
+                new CardsDiscarded(DeckId.QUORUM, List.of(discarded))), facts.subList(facts.size() - 2, facts.size()));
+        assertEquals(List.of(kept), presidentHand.cards());
+        assertEquals(List.of(discarded), quorumDeck.discardedCards());
     }
 
     @Test

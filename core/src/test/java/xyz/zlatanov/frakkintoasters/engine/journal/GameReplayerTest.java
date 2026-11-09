@@ -121,13 +121,15 @@ class GameReplayerTest {
         ops.titles().assignAdmiral(FELIX_GAETA);
         ops.titles().assignCag(LOUANNE_KAT_KATRAINE);
         ops.titles().drawQuorumCard();
+        ops.titles().drawQuorumCard();
+        ops.titles().discardQuorumCards(java.util.List.of(game.presidentHand().cards().getFirst()));
         ops.loyaltyDeck().createNotACylon().create(2, 1, false);
         ops.player(1).drawLoyaltyCards(1);
         ops.skillCheck().createDestinyDeck();
         ops.galactica().setUp();
-        ops.changeStep(RECEIVE_SKILLS);
-        ops.startTurn(1);
         ops.changeCurrentPlayer(1);
+        ops.startTurn();
+        ops.changeStep(RECEIVE_SKILLS);
 
         // draws
         ops.player(1).drawSkillCards(POLITICS, LEADERSHIP, TACTICS, PILOTING, ENGINEERING);

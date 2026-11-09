@@ -112,6 +112,7 @@ public final class FactApplier {
             case PlayerFact.InfiltrationStarted f -> game.player(f.playerNumber()).infiltrateGalactica();
             case PlayerFact.CivilianShipRevealed f ->
                     game.player(f.playerNumber()).revealedCivilianShipIds().add(f.shipId());
+            case PlayerFact.OwnTurnStarted f -> game.player(f.playerNumber()).countTurn();
         }
     }
 
@@ -160,6 +161,7 @@ public final class FactApplier {
             case TitleFact.AdmiralAssigned f -> game.admiral(f.character());
             case TitleFact.CagAssigned f -> game.cag(f.character());
             case TitleFact.PresidentQuorumCardGained f -> game.presidentHand().addOnTop(f.card());
+            case TitleFact.PresidentQuorumCardsLost f -> remove(game.presidentHand(), f.cards());
         }
     }
 

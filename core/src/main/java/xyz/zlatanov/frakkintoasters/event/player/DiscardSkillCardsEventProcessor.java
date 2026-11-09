@@ -49,6 +49,7 @@ public class DiscardSkillCardsEventProcessor extends EventProcessor<DiscardSkill
             case DISCARD_EXACTLY_3 -> discardsExactly(3);
             case DISCARD_EXACTLY_4 -> discardsExactly(4);
             case DISCARD_EXACTLY_5 -> discardsExactly(5);
+            case DISCARD_DOWN_TO_HAND_LIMIT -> player.skillCards().size() - event.cards().size() == player.handLimit();
             default -> throw new FrakCallTheAdmiralException();
         };
     }

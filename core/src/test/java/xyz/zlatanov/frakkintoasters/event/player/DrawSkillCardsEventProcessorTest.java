@@ -15,9 +15,11 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DRAW_EXACTLY_1;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DRAW_EXACTLY_2;
+import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DRAW_EXACTLY_4;
 import static xyz.zlatanov.frakkintoasters.state.GameStep.RECEIVE_SKILLS;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
@@ -122,6 +124,17 @@ class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEv
         leadershipDeck.nextCard(leadershipCard);
         execute(new DrawSkillCardsEvent(1, Map.of(LEADERSHIP, 1), DRAW_EXACTLY_1));
         assertSkillCards(1, leadershipCard);
+    }
+
+    @Test
+    void shouldValidateDrawExactly4Constraint() {
+        execute(new DrawSkillCardsEvent(1, Map.of(TACTICS, 2, PILOTING, 2), DRAW_EXACTLY_4));
+        assertEquals(4, player(1).skillCards().size());
+    }
+
+    @Test
+    void shouldFailDrawExactly4ConstraintWhenTotalIsNot4() {
+        assertInvalid(new DrawSkillCardsEvent(1, Map.of(TACTICS, 2, PILOTING, 1), DRAW_EXACTLY_4));
     }
 
     @Test

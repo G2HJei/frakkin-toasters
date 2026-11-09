@@ -40,4 +40,7 @@ public sealed interface PlayerFact extends Fact {
 
     record CivilianShipRevealed(int playerNumber, int shipId) implements PlayerFact {
     }
+
+    record OwnTurnStarted(int playerNumber) implements PlayerFact {
+    }
 }

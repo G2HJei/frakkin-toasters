@@ -20,12 +20,17 @@ public class SendToBrigEventProcessor extends EventProcessor<SendToBrigEvent> {
         return target.isHuman() && !galacticaBoard.charactersIn(BRIG).contains(target.character());
     }
 
-    // The Admiral and the CAG lose their titles in the "Brig", the President keeps hers (rule 4.4).
+
     @Override
     public Followup process() {
         val character = game.player(event.targetPlayerNumber()).character();
+        if (game.locate(character).isEmpty()) {
+            // A character who isn't on the board can't be moved, e.g. a "Stranded" Karl "Helo" Agathon.
+            return Followup.NONE;
+        }
         ops.player(event.targetPlayerNumber()).sendTo(BRIG);
         val followups = new ArrayList<Event>();
+        // The Admiral and the CAG lose their titles in the "Brig", the President keeps hers (rule 4.4).
         if (character == game.admiral()) {
             followups.add(new DetermineNextAdmiralEvent());
         }

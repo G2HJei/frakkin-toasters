@@ -46,6 +46,7 @@ public record GameSnapshot(Map<String, Object> values) {
             s.put(prefix + "miracleToken", player.hasMiracleToken());
             s.put(prefix + "infiltrating", player.isInfiltrating());
             s.put(prefix + "revealedCivilianShips", new ArrayList<>(player.revealedCivilianShipIds()));
+            s.put(prefix + "turns", player.turns());
         }
         galactica(s, game.boards().galactica());
         val pegasus = game.boards().pegasus();

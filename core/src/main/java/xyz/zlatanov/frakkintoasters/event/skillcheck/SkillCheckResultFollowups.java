@@ -32,7 +32,6 @@ import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
-import static java.util.Comparator.comparingInt;
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
 import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.*;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.*;
@@ -284,16 +283,7 @@ public class SkillCheckResultFollowups {
      * All players in turn order, starting with the current player.
      */
     private List<PlayerView> playersFromCurrent() {
-        List<? extends PlayerView> players = game.players().stream()
-                .sorted(comparingInt(PlayerView::number))
-                .toList();
-        val first = IntStream.range(0, players.size())
-                .filter(i -> players.get(i).number() == currentPlayer())
-                .findFirst()
-                .orElseThrow(FrakCallTheAdmiralException::new);
-        return IntStream.range(0, players.size())
-                .<PlayerView>mapToObj(i -> players.get((first + i) % players.size()))
-                .toList();
+        return playersFrom(game, currentPlayer());
     }
 
     private Followup eachPlayer(IntFunction<Followup> followup) {

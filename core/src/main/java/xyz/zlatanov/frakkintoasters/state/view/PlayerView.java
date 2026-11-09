@@ -32,4 +32,9 @@ public interface PlayerView {
     boolean isHuman();
 
     boolean isRevealedCylon();
+
+    /**
+     * Counts the turns this player has started, the one under way included. {@link TurnView#number()} counts everyone's.
+     */
+    int turns();
 }

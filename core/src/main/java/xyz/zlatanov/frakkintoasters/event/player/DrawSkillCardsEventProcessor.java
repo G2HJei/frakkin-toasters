@@ -32,6 +32,7 @@ public class DrawSkillCardsEventProcessor extends EventProcessor<DrawSkillCardsE
             case DRAW_EXACTLY_1 -> selectionCount == 1;
             case DRAW_EXACTLY_2 -> selectionCount == 2;
             case DRAW_EXACTLY_3 -> selectionCount == 3;
+            case DRAW_EXACTLY_4 -> selectionCount == 4;
             case DRAW_EXACTLY_5 -> selectionCount == 5;
             default -> throw new FrakCallTheAdmiralException();
         };

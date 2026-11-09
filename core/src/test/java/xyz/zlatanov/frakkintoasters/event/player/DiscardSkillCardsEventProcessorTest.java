@@ -12,7 +12,9 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DISCARD_DOWN_TO_HAND_LIMIT;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DISCARD_EXACTLY_2;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.CHIEF_GALEN_TYROL;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DISCARD_EXACTLY_3;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 
@@ -77,6 +79,41 @@ class DiscardSkillCardsEventProcessorTest extends EventTestHarness<DiscardSkillC
     }
 
     @Test
+    void shouldDiscardDownToTheHandLimit() {
+        player(1).gainSkillCards(repairs(9)); // 12 cards
+
+        execute(new DiscardSkillCardsEvent(1, List.of(politics, leadership), DISCARD_DOWN_TO_HAND_LIMIT));
+
+        assertEquals(10, player(1).skillCards().size());
+    }
+
+    @Test
+    void shouldRejectStayingOverTheHandLimit() {
+        player(1).gainSkillCards(repairs(9));
+
+        assertInvalid(new DiscardSkillCardsEvent(1, List.of(politics), DISCARD_DOWN_TO_HAND_LIMIT));
+    }
+
+    @Test
+    void shouldRejectDiscardingBelowTheHandLimit() {
+        player(1).gainSkillCards(repairs(9));
+
+        assertInvalid(new DiscardSkillCardsEvent(1, List.of(politics, leadership, engineering), DISCARD_DOWN_TO_HAND_LIMIT));
+    }
+
+    // "Reckless - Your hand limit is 8 (instead of 10)."
+    @Test
+    void shouldDiscardDownToTheHandLimitOfTheCharacter() {
+        player(2).character(CHIEF_GALEN_TYROL);
+        val hand = repairs(9);
+        player(2).gainSkillCards(hand);
+
+        execute(new DiscardSkillCardsEvent(2, List.of(hand[0]), DISCARD_DOWN_TO_HAND_LIMIT));
+
+        assertEquals(8, player(2).skillCards().size());
+    }
+
+    @Test
     void shouldRejectSameCardTwice() {
         assertInvalid(new DiscardSkillCardsEvent(1, List.of(politics, politics), DISCARD_EXACTLY_2));
     }
@@ -112,5 +149,11 @@ class DiscardSkillCardsEventProcessorTest extends EventTestHarness<DiscardSkillC
         execute(new DiscardSkillCardsEvent(1, List.of(treachery)));
 
         assertSkillCards(1, politics, leadership, engineering);
+    }
+
+    private static SkillCard[] repairs(int count) {
+        return java.util.stream.IntStream.range(0, count)
+                .mapToObj(i -> new SkillCard(100 + i, REPAIR))
+                .toArray(SkillCard[]::new);
     }
 }

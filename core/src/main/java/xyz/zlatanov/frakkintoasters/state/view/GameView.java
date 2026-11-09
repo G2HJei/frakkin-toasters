@@ -2,6 +2,7 @@ package xyz.zlatanov.frakkintoasters.state.view;
 
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard;
+import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 
 import java.util.List;
@@ -35,6 +36,8 @@ public interface GameView {
     int nukes();
 
     Character president();
+
+    DeckView<QuorumCard> presidentHand();
 
     Character admiral();
 

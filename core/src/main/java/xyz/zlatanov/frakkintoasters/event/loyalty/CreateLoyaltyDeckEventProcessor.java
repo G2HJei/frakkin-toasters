@@ -42,6 +42,9 @@ public class CreateLoyaltyDeckEventProcessor extends EventProcessor<CreateLoyalt
 
     private void dealLoyaltyCards() {
         for (val player : game.players()) {
+            if (player.character().type() == CYLON_LEADER) {
+                continue;    // A Cylon Leader gets Motive Cards instead (rule A3.8.5).
+            }
             val cardsToDraw = player.character() == GAIUS_BALTAR ? 2 : 1;
             ops.player(player.number()).drawLoyaltyCards(cardsToDraw);
         }
@@ -90,13 +93,6 @@ public class CreateLoyaltyDeckEventProcessor extends EventProcessor<CreateLoyalt
                 .map(PlayerView::character)
                 .filter(CHARACTERS_WITH_EXTRA_CARDS::contains)
                 .count();
-    }
-
-    private List<Character> getSelectedCharacters() {
-        return game.players()
-                .stream()
-                .map(PlayerView::character)
-                .toList();
     }
 
     private static int notCylonDraws(int playerCount, boolean hasCylonLeader) {

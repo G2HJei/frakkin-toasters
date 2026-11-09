@@ -36,6 +36,7 @@ public class Player implements PlayerView {
     private       boolean               hasMiracleToken         = true;
     private       boolean               isInfiltrating          = false;
     private final Set<Integer>          revealedCivilianShipIds = new LinkedHashSet<>();
+    private       int                   turns                   = 0;
 
     @SuppressWarnings("unchecked")
     public <T> Deck<T> pile(PlayerPile pile) {
@@ -58,6 +59,11 @@ public class Player implements PlayerView {
     @Mutates
     public void gainSkillCards(SkillCard... cardsToAdd) {
         skillCards.addOnTop(Arrays.asList(cardsToAdd));
+    }
+
+    @Mutates
+    public void countTurn() {
+        turns++;
     }
 
     @Override

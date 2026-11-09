@@ -117,7 +117,12 @@ public class SelectCharacterEventProcessor extends EventProcessor<SelectCharacte
 
     private void moveToSetup() {
         val setupLocation = selectedCharacter.setup()[0];
-        ops.player(selectedCharacter).moveTo(setupLocation);
+        if (selectedCharacter == SHARON_ATHENA_AGATHON) {
+            // Sharon "Athena" Agathon starts the game Infiltrating (rule 6.2.1.1).
+            ops.player(selectedCharacter).infiltrateGalactica(setupLocation);
+        } else {
+            ops.player(selectedCharacter).moveTo(setupLocation);
+        }
     }
 
     private Followup multipleSetupOptionsFollowup() {

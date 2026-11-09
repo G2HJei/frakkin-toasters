@@ -58,6 +58,22 @@ class SelectCharacterEventProcessorTest extends EventTestHarness<SelectCharacter
     }
 
     @Test
+    void athenaStartsTheGameInfiltrating() {
+        execute(select(SHARON_ATHENA_AGATHON));
+
+        assertTrue(player(1).isInfiltrating());
+        assertEquals(HANGAR_DECK, locate(SHARON_ATHENA_AGATHON));
+    }
+
+    @Test
+    void anotherCylonLeaderStartsTheGameRevealed() {
+        execute(select(CAVIL));
+
+        assertFalse(player(1).isInfiltrating());
+        assertEquals(CYLON_FLEET, locate(CAVIL));
+    }
+
+    @Test
     void shouldFollowupForApollo() {
         execute(select(LEE_APOLLO_ADAMA));
         assertFollowup(new PlayerDecisionEvent<>(1, LaunchViperEvent.class));

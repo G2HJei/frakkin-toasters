@@ -47,10 +47,11 @@ Next steps, in order:
    for "Executive Order".
 3. ~~Create the journal and tie it to the ops classes in `operation/`.~~ Done, see "Journal and Replay". Still open:
    describers and per-viewer hiding, and JSON serialization. The pending followups are the engine's `Agenda`.
-4. Create the game engine to drive the events and turns. `engine-plan.md` has the plan in phases. Phases 1 to 5 are
+4. Create the game engine to drive the events and turns. `engine-plan.md` has the plan in phases. Phases 1 to 6 are
    done: the journal moved out of `Game` into `engine/journal/`, the turn state is grouped in `state/Turn`, the journal
-   and processors are ready for the engine, `GameEngine` runs events through `submit` and `choose`, and it restores a
-   game from its journal and rolls back a failed input (see "Engine"). Next is phase 6: the turn loop.
+   and processors are ready for the engine, `GameEngine` runs events through `submit` and `choose`, it restores a
+   game from its journal and rolls back a failed input (see "Engine"), and `GameEngine.start` sets up a game and plays
+   its turns (see "Turn Loop"). Next is phase 7: validate player input.
 5. Create a working frontend with the events that exist by then.
 
 ## Project Structure
@@ -62,8 +63,8 @@ Multi-module Gradle project with a single `core` module. Package root: `xyz.zlat
 - root - `EventProcessor` (base class for all processors)
 - `event/` - event records and their processors, grouped by area (`action`, `board`, `crisis`, `deck`, `endgame`,
   `location/{galactica,pegasus,colonialone,cylon}`, `loyalty`, `officials`, `player`, `ship`, `skillcheck`,
-  `skillcheck/ability`, `skillcheck/result`). Also `placeholder/` (events that need player input) and `constraint/`
-  (`EventConstraint`, `ConstrainedEvent`)
+  `skillcheck/ability`, `skillcheck/result`, `turn`). Also `placeholder/` (events that need player input) and
+  `constraint/` (`EventConstraint`, `ConstrainedEvent`)
 - `operation/` - game ops, the only code that decides what changes: `GameOps` (entry point) hands out `PlayerOps`,
   `ShipOps`, `GalacticaOps`, `PegasusOps`, `CylonFleetOps`, `SkillCheckOps`, `LoyaltyDeckOps`, `TitleOps`. They extend
   `AbstractOps`, which holds the `Game` and a `FactRecorder`, and offers `record`, `draw`, `shuffle`. Ops record facts,
@@ -75,7 +76,8 @@ Multi-module Gradle project with a single `core` module. Package root: `xyz.zlat
 - `engine/journal/` - `Journal`, `JournalEntry`, `FactRecorder`, `FactApplier`, `ShipZones`, `GameReplayer`, and `fact/`
   with the `Fact` records
 - `state/` - game state model: `Game` (top level), `Turn` (turn number, `GameStep`, current and acting player, read
-  through `GameView.turn()`; `number` counts player turns, not rounds), `Player`, `Die` (d8), `Randomness`,
+  through `GameView.turn()`; `number` counts player turns, not rounds), `Player` (`turns()` counts the player's own
+  turns), `Die` (d8), `Randomness`,
   `RemovedComponents`, `PlayerPile`, and the `@Mutates` marker
 - `state/view/` - read-only view interfaces (`GameView`, `TurnView`, `PlayerView`, `BoardsHolderView`,
   `SkillCheckView`, ...) implemented by the state classes. Processors read state only through these
@@ -134,7 +136,8 @@ have no processor. They stand for a point where a player has to choose. `PlayerD
 Class<T> action, List<EventConstraint>)` means "this player picks a concrete `T` event".
 
 `FollowupUtils` builds shared followup sequences, e.g. `beforeSkillCheckFollowups(game)`, and holds the helpers that
-`SkillCheckResultFollowups` and `CrisisCardFollowups` share, e.g. `lose`, `gain` and `discard`.
+`SkillCheckResultFollowups` and `CrisisCardFollowups` share, e.g. `lose`, `gain` and `discard`. `playersFrom(game, n)`
+lists the players clockwise from player `n`, which is the order of the player numbers.
 
 ### Skill Check Results
 
@@ -152,8 +155,9 @@ moment. Its pass and fail switches list every type, so a new `SkillCheckType` do
 
 ### Crisis Cards
 
-`ResolveCrisisCardEvent(card)` resolves a Crisis Card. Nothing queues it yet, that comes with the Crisis step. So far it
-covers 16 choice crises (rule 8.5.2), and any other card throws `FrakCallTheAdmiralException`.
+`ResolveCrisisCardEvent(card)` resolves a Crisis Card. Nothing queues it yet: until phase 11 of `engine-plan.md`, the
+Crisis step draws a card and discards it. So far it covers 16 choice crises (rule 8.5.2), and any other card throws
+`FrakCallTheAdmiralException`.
 
 A `CrisisCard` constant lists what is printed on the card: its `CrisisChooser`, its `CylonActivation` icon and whether
 it
@@ -194,7 +198,8 @@ ResolveCapricaCrisisEvent(playerNumber)));
 ### Event Constraints
 
 `EventConstraint` is a plain enum of extra rules that can be pinned onto an event (e.g. `DRAW_EXACTLY_2`,
-`DISCARD_EXACTLY_4`, `MUST_LAUNCH_IN_VIPER`, `DESTINATION_GALACTICA`). A processor attaches them to a
+`DISCARD_EXACTLY_4`, `DISCARD_DOWN_TO_HAND_LIMIT`, `MUST_LAUNCH_IN_VIPER`, `DESTINATION_GALACTICA`), and
+`drawExactly(n)` and `discardExactly(n)` give the counted ones. A processor attaches them to a
 `PlayerDecisionEvent`, e.g. `new PlayerDecisionEvent<>(n, DrawSkillCardsEvent.class, DRAW_EXACTLY_2)`. When the
 decision is answered, the engine copies them onto the submitted event with `ConstrainedEvent.withConstraints`,
 replacing whatever the client sent, so a client can't drop one.
@@ -202,15 +207,16 @@ replacing whatever the client sent, so a client can't drop one.
 An event that supports a constraint implements `ConstrainedEvent` and has its own record component for it (e.g.
 `DrawSkillCardsEvent.drawLimit`, `null` when there is none, or `LaunchViperEvent.mustLaunchInViper`). Its processor
 checks the constraint in `isValid()` and throws `FrakCallTheAdmiralException` for any constraint it doesn't support.
-`DrawSkillCardsEvent`, `DiscardSkillCardsEvent`, `LeaveBrigEvent` and `LaunchViperEvent` implement it.
+`DrawSkillCardsEvent`, `DiscardSkillCardsEvent`, `DiscardQuorumCardsEvent`, `LeaveBrigEvent` and `LaunchViperEvent`
+implement it.
 
 ### Engine
 
 `GameEngine` runs a game. `submit(player, event)` answers the pending `PlayerDecisionEvent` with a concrete event, and
 `choose(player, option)` picks an option of the pending `OneOf`. Both run the game forward until a player has to act
 again, so `status(player)` is always `Waiting(PendingInput)` or `Finished`. It holds no game rules: processors decide.
-There is no `start` yet. A package-private constructor takes the first event, and `GameEngineTest` uses the test-only
-`ScriptEvent` for it.
+`GameEngine.start(playerCount, randomness)` begins a game with `StartGameEvent` (see "Turn Loop"). A package-private
+constructor takes any first event, and `GameEngineTest` uses the test-only `ScriptEvent` for it.
 
 - `Agenda` is a stack of `(followup, parentScope)` frames, so followups run depth first. Pushing flattens a followup:
   `None` adds nothing and `AllOf` pushes its children in reverse, so every frame is a `Single` or a `OneOf`.
@@ -232,6 +238,32 @@ There is no `start` yet. A package-private constructor takes the first event, an
   `AgendaReplayer` folds the scope entries through the `Agenda` moves of the run loop (`ScopeOpened` takes the top
   event, `ScopeClosed` pushes its followup, `ChoiceMade` selects the option). The first event's `ScopeOpened` finds an
   empty agenda. A journal that doesn't match those moves or doesn't end at a pause throws `IllegalArgumentException`.
+
+### Turn Loop
+
+The setup and the turns are ordinary events in `event/turn/`, so the engine knows nothing about steps. Each is a plain
+`Event` about the current player.
+
+- `StartGameEvent` follows rule A3.1 for the Kobol objective: `ops.startGame()`, `ops.galactica().setUp()`, a random
+  first player (`GameOps.chooseFirstPlayer`), then queues `CreateDestinyDeckEvent`, the `SelectCharacterEvent`
+  decisions clockwise from the first player, the three `DetermineNext...` events, `CreateLoyaltyDeckEvent`,
+  `ReceiveStartingSkillsEvent` (everyone but the first player) and the first `StartTurnEvent`.
+- `StartTurnEvent` records the turn (`GameOps.startTurn()` counts it for the game and the current player) and queues
+  one event per step, then `EndTurnEvent`: `ReceiveSkillsStepEvent`, `MovementStepEvent`, `ActionStepEvent`,
+  `CrisisStepEvent`, `ActivateCylonShipsStepEvent`, `PrepareForJumpStepEvent`, `DiscardStepEvent`.
+- Each step records `StepChanged` and applies its own exceptions. A step a player doesn't have records nothing: revealed
+  Cylons (and Cylon Leaders who aren't Infiltrating, see `isHuman()`) have no Crisis and no Activate Cylon Ships step,
+  and characters in the "Brig" no Crisis step. Movement and Action are a `OneOf` with a `NoOpEvent`. A pilot gets
+  `ActivateViperEvent` instead of a location action.
+- `DiscardStepEvent` asks every player over the hand limit, clockwise from the current player, with
+  `DISCARD_DOWN_TO_HAND_LIMIT`: Skill Cards over `handLimit()`, and the President's Quorum Cards.
+- `EndTurnEvent` is the only resource check (rule 16.1). It queues `CylonsWinEvent` at 0, otherwise it passes the
+  current player token to the left and queues the next `StartTurnEvent`.
+- Stubs until phase 11: the Crisis step draws a Crisis Card and discards it, and the Activate Cylon Ships and Prepare for
+  Jump steps do nothing.
+- A Stranded Karl "Helo" Agathon is off the board until `StartTurnEvent` puts him on the Hangar Deck at his player's
+  2nd turn (`PlayerView.turns()`). Until then the Movement and Action steps skip him, and `SendToBrigEvent` and
+  `SendToSickbayEvent` leave him alone.
 
 ### Journal and Replay
 
@@ -306,5 +338,7 @@ when possible.
   `ScriptEventProcessor` too, because it scans the whole classpath. At every pause, `restore` has to give the same
   `GameSnapshot` and statuses. The test-only `FailingEvent` changes the game and then throws, to test rollback. Engine
   tests use a seeded `Randomness`, not `FakeDeck`, because restore rebuilds the real decks
+- `TurnLoopTest` plays a seeded game from `GameEngine.start` through several full turns, restoring at every pause. Its
+  inputs are relative to the first player the seed picks
 - Tests follow the pattern: set up game state, execute the event, assert state changes and followups. Use real game ops
   in processor tests, not mocks, since processors may read their own changes

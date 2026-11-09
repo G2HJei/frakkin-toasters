@@ -32,6 +32,19 @@ class SendToBrigEventProcessorTest extends EventTestHarness<SendToBrigEvent> {
         assertEquals(HANGAR_DECK, locate(KARA_STARBUCK_THRACE));
     }
 
+    // "Stranded - ... While not on the game board, you may not move, be moved, or take actions." The title stays.
+    @Test
+    void shouldLeaveACharacterOffTheBoardAlone() {
+        setUpGame();
+        player(1).character(KARL_HELO_AGATHON);
+        admiral(KARL_HELO_AGATHON);
+
+        execute(new SendToBrigEvent(1));
+
+        assertTrue(game.locate(KARL_HELO_AGATHON).isEmpty());
+        assertEquals(KARL_HELO_AGATHON, admiral());
+    }
+
     @Test
     void shouldLandPilotedViper() {
         val viper = viperAt(GALACTICA_SPACE_2_OCLOCK);

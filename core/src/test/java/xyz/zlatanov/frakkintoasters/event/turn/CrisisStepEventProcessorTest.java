@@ -1,0 +1,89 @@
+package xyz.zlatanov.frakkintoasters.event.turn;
+
+import lombok.val;
+import org.junit.jupiter.api.Test;
+import xyz.zlatanov.frakkintoasters.EventTestHarness;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static xyz.zlatanov.frakkintoasters.state.GameStep.CRISIS;
+import static xyz.zlatanov.frakkintoasters.state.GameStep.SETUP;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
+import static xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard.RAIDERS_INBOUND;
+
+class CrisisStepEventProcessorTest extends EventTestHarness<CrisisStepEvent> {
+
+    // Until the card is resolved, it goes straight to the discard pile.
+    @Test
+    void theCurrentPlayerDrawsACrisisCard() {
+        player(1).character(KARA_STARBUCK_THRACE);
+        moveTo(HANGAR_DECK, KARA_STARBUCK_THRACE);
+        crisisDeck.nextCard(RAIDERS_INBOUND);
+
+        execute(new CrisisStepEvent());
+
+        assertEquals(CRISIS, game.turn().step());
+        assertEquals(List.of(RAIDERS_INBOUND), crisisDeck.discardedCards());
+    }
+
+    // "Exceptions: Revealed Cylons and characters in the Brig do not perform this step." (rule 8.5)
+    @Test
+    void aRevealedCylonHasNoCrisisStep() {
+        player(1).character(KARA_STARBUCK_THRACE);
+        moveTo(CAPRICA, KARA_STARBUCK_THRACE);
+        revealCylon();
+
+        assertNoCrisisStep();
+    }
+
+    @Test
+    void aCharacterInTheBrigHasNoCrisisStep() {
+        player(1).character(KARA_STARBUCK_THRACE);
+        moveTo(BRIG, KARA_STARBUCK_THRACE);
+
+        assertNoCrisisStep();
+    }
+
+    // A Cylon Leader counts as revealed (rule 6.2.1).
+    @Test
+    void aCylonLeaderHasNoCrisisStep() {
+        setUpGame(4);
+        player(1).character(CAVIL);
+        moveTo(CYLON_FLEET, CAVIL);
+
+        assertNoCrisisStep();
+    }
+
+    // "An Infiltrating Cylon Leader draws a Crisis Card at the end of his turn." (rule 6.2.3.4)
+    @Test
+    void anInfiltratingCylonLeaderDrawsACrisisCard() {
+        setUpGame(4);
+        player(1).character(SHARON_ATHENA_AGATHON).infiltrateGalactica();
+        moveTo(HANGAR_DECK, SHARON_ATHENA_AGATHON);
+
+        execute(new CrisisStepEvent());
+
+        assertEquals(1, crisisDeck.discardSize());
+    }
+
+    @Test
+    void strandedHeloDrawsACrisisCard() {
+        player(1).character(KARL_HELO_AGATHON);
+
+        execute(new CrisisStepEvent());
+
+        assertEquals(1, crisisDeck.discardSize());
+    }
+
+    private void assertNoCrisisStep() {
+        val deck = List.copyOf(crisisDeck.cards());
+
+        execute(new CrisisStepEvent());
+
+        assertEquals(SETUP, game.turn().step());
+        assertEquals(deck, crisisDeck.cards());
+        assertEquals(0, crisisDeck.discardSize());
+    }
+}

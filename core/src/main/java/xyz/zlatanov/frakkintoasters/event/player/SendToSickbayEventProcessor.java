@@ -9,7 +9,10 @@ public class SendToSickbayEventProcessor extends EventProcessor<SendToSickbayEve
 
     @Override
     public Followup process() {
-        ops.player(event.targetPlayerNumber()).sendTo(SICKBAY);
+        if (game.locate(game.player(event.targetPlayerNumber()).character()).isPresent()) {
+            // A character who isn't on the board can't be moved, e.g. a "Stranded" Karl "Helo" Agathon.
+            ops.player(event.targetPlayerNumber()).sendTo(SICKBAY);
+        }
         return Followup.NONE;
     }
 }

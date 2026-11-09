@@ -1,15 +1,18 @@
 package xyz.zlatanov.frakkintoasters.operation;
 
 import lombok.val;
-import java.util.List;
-import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.*;
 import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.GameFact.*;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.OwnTurnStarted;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.GameStep;
-import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
+import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
+
+import java.util.List;
+
+import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.*;
 
 public class GameOps extends AbstractOps {
 
@@ -91,12 +94,23 @@ public class GameOps extends AbstractOps {
         record(new StepChanged(step));
     }
 
-    public void startTurn(int turn) {
-        record(new TurnStarted(turn));
+    public void startTurn() {
+        record(new TurnStarted(game.turn().number() + 1));
+        record(new OwnTurnStarted(game.turn().currentPlayerNumber()));
     }
 
     public void changeCurrentPlayer(int playerNumber) {
         record(new CurrentPlayerChanged(playerNumber));
+    }
+
+    /**
+     * @return the first player
+     */
+    public int chooseFirstPlayer() {
+        // The current player token is a random player(rule A3 .7 .1).
+        int first = game.randomness().nextInt(1, game.players().size() + 1);
+        changeCurrentPlayer(first);
+        return first;
     }
 
     public int rollDie() {

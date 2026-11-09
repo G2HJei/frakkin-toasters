@@ -264,6 +264,16 @@ class FactApplierTest {
         assertEquals(java.util.Set.of(2005), game.player(2).revealedCivilianShipIds());
     }
 
+    @Test
+    void ownTurnStartedCountsATurnForThePlayerOnly() {
+        apply(new OwnTurnStarted(2));
+        apply(new OwnTurnStarted(2));
+
+        assertEquals(2, game.player(2).turns());
+        assertEquals(0, game.player(1).turns());
+        assertEquals(0, game.turn().number());
+    }
+
     /* ShipFact */
 
     @Test
@@ -461,5 +471,17 @@ class FactApplierTest {
         assertEquals(GAIUS_BALTAR, game.admiral());
         assertEquals(LOUANNE_KAT_KATRAINE, game.cag());
         assertEquals(List.of(QuorumCard.values()[0]), game.presidentHand().cards());
+    }
+
+    // The discard pile is a separate CardsDiscarded fact.
+    @Test
+    void presidentQuorumCardsLostLeaveTheHandOnly() {
+        apply(new PresidentQuorumCardGained(QuorumCard.values()[0]));
+        apply(new PresidentQuorumCardGained(QuorumCard.values()[1]));
+
+        apply(new PresidentQuorumCardsLost(List.of(QuorumCard.values()[0])));
+
+        assertEquals(List.of(QuorumCard.values()[1]), game.presidentHand().cards());
+        assertEquals(List.of(), game.decks().quorum().discardedCards());
     }
 }

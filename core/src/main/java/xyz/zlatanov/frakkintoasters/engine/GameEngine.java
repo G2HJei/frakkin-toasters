@@ -16,6 +16,7 @@ import xyz.zlatanov.frakkintoasters.event.Followup.Single;
 import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
 import xyz.zlatanov.frakkintoasters.event.constraint.ConstrainedEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
+import xyz.zlatanov.frakkintoasters.event.turn.StartGameEvent;
 import xyz.zlatanov.frakkintoasters.operation.GameOps;
 import xyz.zlatanov.frakkintoasters.state.Die;
 import xyz.zlatanov.frakkintoasters.state.Game;
@@ -52,6 +53,10 @@ public class GameEngine {
 
     private GameEngine(Journal journal) {
         rebuild(journal);
+    }
+
+    public static GameEngine start(int playerCount, Randomness randomness) {
+        return new GameEngine(playerCount, randomness, new StartGameEvent());
     }
 
     /**
