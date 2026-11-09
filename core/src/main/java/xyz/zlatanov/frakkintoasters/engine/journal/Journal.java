@@ -1,5 +1,7 @@
 package xyz.zlatanov.frakkintoasters.engine.journal;
 
+import lombok.NoArgsConstructor;
+import lombok.val;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ChoiceMade;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.FactRecorded;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ScopeClosed;
@@ -16,6 +18,7 @@ import java.util.List;
  * Append-only record of what the game ops did. At most one scope is open at a time: a followup runs after its parent's
  * scope has closed, so the parent is passed in explicitly.
  */
+@NoArgsConstructor
 public class Journal {
 
     public static final int ROOT_SCOPE = 0;
@@ -23,6 +26,22 @@ public class Journal {
     private final List<JournalEntry> entries     = new ArrayList<>();
     private       int                openScope   = ROOT_SCOPE;
     private       int                lastScopeId = ROOT_SCOPE;
+
+    /**
+     * A journal that goes on from the entries, e.g. to restore a game. New scopes get the next ids.
+     */
+    public Journal(List<JournalEntry> entries) {
+        this.entries.addAll(entries);
+        lastScopeId = entries.stream()
+                .filter(ScopeOpened.class::isInstance)
+                .mapToInt(JournalEntry::scopeId)
+                .max()
+                .orElse(ROOT_SCOPE);
+        val lastScopeClosed = entries.stream().anyMatch(e -> e instanceof ScopeClosed && e.scopeId() == lastScopeId);
+        if (lastScopeId != ROOT_SCOPE && !lastScopeClosed) {
+            throw new IllegalArgumentException("The entries end inside scope " + lastScopeId);
+        }
+    }
 
     /**
      * @param parentId the scope of the event that queued this one, {@link #ROOT_SCOPE} if none
@@ -74,6 +93,10 @@ public class Journal {
 
     public List<JournalEntry> entries() {
         return List.copyOf(entries);
+    }
+
+    public int size() {
+        return entries.size();
     }
 
     /**

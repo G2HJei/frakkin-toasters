@@ -25,17 +25,15 @@ public final class ProcessorRegistry {
     private static final String                        ROOT_PACKAGE = EventProcessor.class.getPackageName();
     private static final Map<Class<?>, Constructor<?>> CONSTRUCTORS = findConstructors();
 
-    public static boolean hasProcessor(Class<? extends Event> eventClass) {
-        return CONSTRUCTORS.containsKey(eventClass);
-    }
-
     /**
      * @return a new processor for the event. A processor holds the context of one event, so it should not be reused
      */
     @SneakyThrows
     @SuppressWarnings("unchecked")
     public static <E extends Event> EventProcessor<E> create(E event) {
-        return (EventProcessor<E>) CONSTRUCTORS.get(event.getClass()).newInstance();
+        val constructor = CONSTRUCTORS.get(event.getClass());
+        assert constructor != null; // all events must have a processor (or are under development)
+        return (EventProcessor<E>) constructor.newInstance();
     }
 
     // The root package can be in several classpath roots, e.g. the main and the test classes.

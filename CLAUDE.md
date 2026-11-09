@@ -47,10 +47,10 @@ Next steps, in order:
    for "Executive Order".
 3. ~~Create the journal and tie it to the ops classes in `operation/`.~~ Done, see "Journal and Replay". Still open:
    describers and per-viewer hiding, and JSON serialization. The pending followups are the engine's `Agenda`.
-4. Create the game engine to drive the events and turns. `engine-plan.md` has the plan in phases. Phases 1 to 4 are
+4. Create the game engine to drive the events and turns. `engine-plan.md` has the plan in phases. Phases 1 to 5 are
    done: the journal moved out of `Game` into `engine/journal/`, the turn state is grouped in `state/Turn`, the journal
-   and processors are ready for the engine, and `GameEngine` runs events through `submit` and `choose` (see "Engine").
-   Next is phase 5: `restore` and rollback.
+   and processors are ready for the engine, `GameEngine` runs events through `submit` and `choose`, and it restores a
+   game from its journal and rolls back a failed input (see "Engine"). Next is phase 6: the turn loop.
 5. Create a working frontend with the events that exist by then.
 
 ## Project Structure
@@ -68,9 +68,10 @@ Multi-module Gradle project with a single `core` module. Package root: `xyz.zlat
   `ShipOps`, `GalacticaOps`, `PegasusOps`, `CylonFleetOps`, `SkillCheckOps`, `LoyaltyDeckOps`, `TitleOps`. They extend
   `AbstractOps`, which holds the `Game` and a `FactRecorder`, and offers `record`, `draw`, `shuffle`. Ops record facts,
   they never write to components
-- `engine/` - `GameEngine` (runs a game, see "Engine"), `Agenda` (stack of pending followups), `ProcessorRegistry`
-  (maps each event class to its processor, scanned once from the classpath), `PendingInput` and
-  `EngineStatus` (what the game waits for), `ScopeActor` (who a journal scope is logged under)
+- `engine/` - `GameEngine` (runs a game, see "Engine"), `Agenda` (stack of pending followups), `AgendaReplayer`
+  (rebuilds the agenda from a journal), `ProcessorRegistry` (maps each event class to its processor, scanned once from
+  the classpath), `PendingInput` and `EngineStatus` (what the game waits for), `ScopeActor` (who a journal scope is
+  logged under)
 - `engine/journal/` - `Journal`, `JournalEntry`, `FactRecorder`, `FactApplier`, `ShipZones`, `GameReplayer`, and `fact/`
   with the `Fact` records
 - `state/` - game state model: `Game` (top level), `Turn` (turn number, `GameStep`, current and acting player, read
@@ -208,8 +209,8 @@ checks the constraint in `isValid()` and throws `FrakCallTheAdmiralException` fo
 `GameEngine` runs a game. `submit(player, event)` answers the pending `PlayerDecisionEvent` with a concrete event, and
 `choose(player, option)` picks an option of the pending `OneOf`. Both run the game forward until a player has to act
 again, so `status(player)` is always `Waiting(PendingInput)` or `Finished`. It holds no game rules: processors decide.
-There is no `start` or `restore` yet. A package-private constructor takes the first event, and `GameEngineTest` uses
-the test-only `ScriptEvent` for it.
+There is no `start` yet. A package-private constructor takes the first event, and `GameEngineTest` uses the test-only
+`ScriptEvent` for it.
 
 - `Agenda` is a stack of `(followup, parentScope)` frames, so followups run depth first. Pushing flattens a followup:
   `None` adds nothing and `AllOf` pushes its children in reverse, so every frame is a `Single` or a `OneOf`.
@@ -219,9 +220,18 @@ the test-only `ScriptEvent` for it.
   in `engine-plan.md`). Options that name different players are a bug.
 - Input check: the right player, `decision.action().isInstance(event)` (so `ActionEvent` takes any location action),
   and a submitted `PlayerEvent` names the submitter.
-- Rejected input throws `InvalidActionException` and changes nothing. A queued event that fails validation or has no
-  processor, and a decision nobody can answer (e.g. on `PlayQuorumCardEvent`), throw `FrakCallTheAdmiralException`.
-  Until phase 5 adds rollback, anything thrown after an input was accepted stops the game, and every later call throws.
+- Rejected input throws `InvalidActionException` and changes nothing. A queued event that fails validation and a
+  decision with constraints its event can't carry throw `FrakCallTheAdmiralException`. Every concrete event class has to
+  have a processor, and `ProcessorRegistry.create` asserts it. The engine doesn't check for one, so the events without
+  one (e.g. `PlayQuorumCardEvent`) are still under development.
+- Rollback: anything thrown after an input was accepted rolls the call back, and the engine rethrows it as a
+  `FrakCallTheAdmiralException`. `advance` notes the journal's size, and on failure `rebuild`s the engine from the
+  entries before it. The same input stays pending. `view()` and `journal()` return new objects
+  afterwards, so callers ask again.
+- `GameEngine.restore(journal)` rebuilds a game from a copy of the journal: `GameReplayer` applies the facts and
+  `AgendaReplayer` folds the scope entries through the `Agenda` moves of the run loop (`ScopeOpened` takes the top
+  event, `ScopeClosed` pushes its followup, `ChoiceMade` selects the option). The first event's `ScopeOpened` finds an
+  empty agenda. A journal that doesn't match those moves or doesn't end at a pause throws `IllegalArgumentException`.
 
 ### Journal and Replay
 
@@ -293,6 +303,8 @@ when possible.
 - Op tests also assert the logged facts (`journal.facts()`), and `FactApplierTest` covers each fact
 - `GameEngineTest` plays a script of real events through `submit` and `choose`, started by the test-only `ScriptEvent`
   (it calls `ops.startGame()` and queues the script). The registry finds test processors such as
-  `ScriptEventProcessor` too, because it scans the whole classpath
+  `ScriptEventProcessor` too, because it scans the whole classpath. At every pause, `restore` has to give the same
+  `GameSnapshot` and statuses. The test-only `FailingEvent` changes the game and then throws, to test rollback. Engine
+  tests use a seeded `Randomness`, not `FakeDeck`, because restore rebuilds the real decks
 - Tests follow the pattern: set up game state, execute the event, assert state changes and followups. Use real game ops
   in processor tests, not mocks, since processors may read their own changes

@@ -5,6 +5,7 @@ import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.engine.PendingInput.AwaitingChoice;
 import xyz.zlatanov.frakkintoasters.engine.PendingInput.AwaitingDecision;
 import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
+import xyz.zlatanov.frakkintoasters.engine.journal.GameReplayer;
 import xyz.zlatanov.frakkintoasters.engine.journal.Journal;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
@@ -23,7 +24,6 @@ import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
 import xyz.zlatanov.frakkintoasters.state.view.GameView;
 
-import java.lang.reflect.Modifier;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -32,24 +32,40 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 
 public class GameEngine {
 
-    private final Game    game;
-    private final Journal journal = new Journal();
-    private final GameOps ops;
-    private final Agenda  agenda  = new Agenda();
-
-    private FrakCallTheAdmiralException failure; // something threw after an input was accepted, so the game can't go on
+    // A rollback replaces these, see advance().
+    private Journal journal;
+    private Game    game;
+    private GameOps ops;
+    private Agenda  agenda;
 
     GameEngine(int playerCount, Randomness randomness, Event first) {
+        journal = new Journal();
         game = Game.builder(playerCount)
                 .randomness(randomness)
                 .die(new Die(randomness))
                 .build();
         ops = new GameOps(game, new FactRecorder(game, journal));
-        advance(() -> agenda.push(single(first), ROOT_SCOPE));
+        agenda = new Agenda();
+        agenda.push(single(first), ROOT_SCOPE);
+        runToNextInput();
+    }
+
+    private GameEngine(Journal journal) {
+        rebuild(journal);
+    }
+
+    /**
+     * Rebuilds a game from its journal. The engine gets a copy of the journal, so the two games go on independently. The
+     * facts hold every random result, so the restored game needs no randomness of the original.
+     *
+     * @throws IllegalArgumentException if the journal doesn't start with {@code GameStarted}, doesn't match the moves of
+     *                                  the run loop or doesn't end at a pause
+     */
+    public static GameEngine restore(Journal journal) {
+        return new GameEngine(new Journal(journal.entries()));
     }
 
     public EngineStatus status(int player) {
-        ensureRunning();
         val pendingInput = pending();
         if (pendingInput.isEmpty()) {
             return EngineStatus.finished();
@@ -66,10 +82,10 @@ public class GameEngine {
      *
      * @throws InvalidActionException      if the event doesn't answer the decision or isn't valid. Nothing changes, and
      *                                     the decision stays pending
-     * @throws FrakCallTheAdmiralException if anything fails after the event was accepted. The game stops
+     * @throws FrakCallTheAdmiralException if anything fails after the event was accepted. The game rolls back to before
+     *                                     the call, and the decision stays pending
      */
     public void submit(int player, Event event) {
-        ensureRunning();
         val frame = agenda.top().orElseThrow(() -> new InvalidActionException("The game is over"));
         val decision = getDecision(player, event, frame);
         val answerEvent = event instanceof ConstrainedEvent constrained
@@ -88,10 +104,10 @@ public class GameEngine {
      *
      * @throws InvalidActionException      if there is no such option for the player. Nothing changes, and the choice
      *                                     stays pending
-     * @throws FrakCallTheAdmiralException if anything fails after the option was picked. The game stops
+     * @throws FrakCallTheAdmiralException if anything fails after the option was picked. The game rolls back to before
+     *                                     the call, and the choice stays pending
      */
     public void choose(int player, Followup option) {
-        ensureRunning();
         val frame = agenda.top().orElseThrow(() -> new InvalidActionException("The game is over"));
         if (!(frame.followup() instanceof OneOf oneOf)) {
             throw new InvalidActionException("No choice is pending");
@@ -109,24 +125,42 @@ public class GameEngine {
         });
     }
 
+    /**
+     * @return the game. A rollback replaces it, so ask again after a {@link FrakCallTheAdmiralException}
+     */
     public GameView view() {
         return game;
     }
 
+    /**
+     * @return the journal. A rollback replaces it, so ask again after a {@link FrakCallTheAdmiralException}
+     */
     public Journal journal() {
         return journal;
     }
 
+    // All or nothing (decision 6 in engine-plan.md). Facts apply as they are recorded, so a failure rebuilds the game
+    // from the journal as it stood before the input. Only a failure pays for the replay.
     private void advance(Runnable acceptedInput) {
+        val entriesBefore = journal.size();
         try {
             acceptedInput.run();
             runToNextInput();
         } catch (RuntimeException e) {
-            failure = e instanceof FrakCallTheAdmiralException bug
+            rebuild(new Journal(journal.entries().subList(0, entriesBefore)));
+            throw e instanceof FrakCallTheAdmiralException bug
                     ? bug
-                    : new FrakCallTheAdmiralException("The game stopped: " + e.getMessage(), e);
-            throw failure;
+                    : new FrakCallTheAdmiralException("Rolled back: " + e.getMessage(), e);
         }
+    }
+
+    private void rebuild(Journal journal) {
+        val rebuiltGame = GameReplayer.replay(journal);
+        val rebuiltAgenda = AgendaReplayer.replay(journal);
+        this.journal = journal;
+        game = rebuiltGame;
+        ops = new GameOps(game, new FactRecorder(game, journal));
+        agenda = rebuiltAgenda;
     }
 
     private PlayerDecisionEvent<?> getDecision(int player, Event event, Agenda.Frame frame) {
@@ -150,7 +184,7 @@ public class GameEngine {
             val frame = agenda.top().orElseThrow();
             switch (frame.followup()) {
                 case Single(PlayerDecisionEvent<?> decision) -> {
-                    requireAnswerable(decision);
+                    requireCarriesConstraints(decision);
                     return;
                 }
                 case Single(Event event) -> runQueued(event, frame.parentScope());
@@ -209,22 +243,11 @@ public class GameEngine {
         };
     }
 
-    // Waiting on a decision nobody can answer would wait forever.
-    private static void requireAnswerable(PlayerDecisionEvent<?> decision) {
+    // submit() copies the constraints onto the answer, so an answer that can't carry them would drop them.
+    private static void requireCarriesConstraints(PlayerDecisionEvent<?> decision) {
         val action = decision.action();
-        val concrete = !action.isInterface() && !Modifier.isAbstract(action.getModifiers());
-        if (concrete && !ProcessorRegistry.hasProcessor(action)) {
-            throw new FrakCallTheAdmiralException("Nothing can answer " + decision + ", " + action.getSimpleName()
-                    + " has no processor");
-        }
         if (!decision.eventConstraints().isEmpty() && !ConstrainedEvent.class.isAssignableFrom(action)) {
             throw new FrakCallTheAdmiralException(action.getSimpleName() + " can't carry the constraints of " + decision);
-        }
-    }
-
-    private void ensureRunning() {
-        if (failure != null) {
-            throw new FrakCallTheAdmiralException("The game stopped after an error", failure);
         }
     }
 }

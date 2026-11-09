@@ -120,13 +120,13 @@ check depends on this: everything a result queues has to finish before `EndSkill
 queue would run `B` first, so the agenda is a stack of `(followup, parentScope)` frames, and `AllOf` pushes its children
 in reverse order.
 
-| Top of the agenda                | What the run loop does                                 |
-|----------------------------------|--------------------------------------------------------|
-| `None`                           | Pops it                                                |
-| `AllOf`                          | Pops it and pushes the children                        |
-| `Single(event)`                  | Pops it and executes the event                         |
-| `Single(PlayerDecisionEvent)`    | Stops: `Waiting(AwaitingDecision)`                     |
-| `OneOf`                          | Stops: `Waiting(AwaitingChoice)`                       |
+| Top of the agenda             | What the run loop does             |
+|-------------------------------|------------------------------------|
+| `None`                        | Pops it                            |
+| `AllOf`                       | Pops it and pushes the children    |
+| `Single(event)`               | Pops it and executes the event     |
+| `Single(PlayerDecisionEvent)` | Stops: `Waiting(AwaitingDecision)` |
+| `OneOf`                       | Stops: `Waiting(AwaitingChoice)`   |
 
 ## Decisions
 
@@ -202,9 +202,7 @@ A small refactor, with no behavior change. It follows the pattern of `boards()`.
 New in `engine/`: `GameEngine`, `Agenda`, `ProcessorRegistry`, `PendingInput`, `EngineStatus`.
 
 - **`ProcessorRegistry`**: finds `XxxEventProcessor` by the naming convention, as `EventTestHarness` does, and creates a
-  new instance per execution, because processors hold per-event fields. A test checks that every concrete event has a
-  processor, against an allow-list of the known gaps. By the end of phase 12 the list holds only the placeholders and
-  what "Not in this plan" excludes.
+  new instance per execution, because processors hold per-event fields.
 - **`NoOpEvent`**: gets a trivial processor, so the run loop has no special case.
 - **Input check**: the submitting player must match the pending input, and `decision.action().isInstance(event)` must
   hold, which also covers interface targets like `ActionEvent`. A submitted `PlayerEvent` must name that same player, or
@@ -219,9 +217,9 @@ New in `engine/`: `GameEngine`, `Agenda`, `ProcessorRegistry`, `PendingInput`, `
 - **Errors**: input that fails the check or `isValid()` gets `InvalidActionException`, and the input stays pending. A
   queued event that fails validation is a bug: `FrakCallTheAdmiralException`. Until phase 5 adds the rollback, any
   exception after validation stops the game.
-- **Dead ends**: a decision on an event with no processor can't be answered, so the run loop throws when it reaches one
-  instead of waiting forever. `QuorumChamberEvent`'s `PlayQuorumCardEvent` option behaves like this until Quorum cards
-  exist. With phase 5, the failed `choose` rolls back and the player can pick the other option.
+- **Events without a processor**: every concrete event has to have a processor, and `ProcessorRegistry.create` asserts
+  it. The engine doesn't check for one, so an event without one is still under development, like `QuorumChamberEvent`'s
+  `PlayQuorumCardEvent` option until Quorum cards exist.
 
 A package-private constructor takes the first event, so phases 4 and 5 can test real events before `StartGameEvent`
 exists.
@@ -235,8 +233,9 @@ choices, rejected input and a clean journal after rejection.
   methods the run loop uses: `ScopeOpened` takes the top event, `ScopeClosed` pushes its followup, `ChoiceMade` selects
   the option. The first `ScopeOpened` finds an empty agenda, because `start` pushed that event.
 - Rollback: `submit` and `choose` note the journal's size. If anything throws, the engine rebuilds itself from the
-  entries before that point, keeps its `Randomness` and rethrows. The replay cost is only paid on failure. `Game` is a
-  new object afterwards, so callers ask for `view()` again.
+  entries before that point and rethrows. The facts hold every random result, so the rebuilt game needs none of the old
+  randomness. The replay cost is only paid on failure. `Game` is a new object afterwards, so callers ask for `view()`
+  again.
 - Engine tests use a seeded `Randomness`, not `FakeDeck`, because restore rebuilds the real decks.
 - Acceptance tests: at every pause of a scripted game, `restore(engine.journal())` gives the same `GameSnapshot` and the
   same `PendingInput`. An event that throws in the middle of a chain leaves both unchanged.
@@ -411,7 +410,7 @@ of the skill check (rule 8.5.1.1).
 - `ExecuteEvent`'s processor covers the loss when no characters are left to select (rule 2.2). It depends on the
   execution, so it isn't a win check.
 - 39 event records have no processor today: the 3 placeholders, `NoOpEvent` and 35 real events. Phases 8 to 12 add the
-  ones they reach, and the registry test tracks the rest.
+  ones they reach.
 
 Acceptance test: seeded games played to a Cylon win and to the Kobol end game, restoring at every pause.
 

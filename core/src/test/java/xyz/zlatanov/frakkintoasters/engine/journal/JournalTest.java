@@ -80,4 +80,23 @@ class JournalTest {
         val scope = journal.openScope(null, 1, ROOT_SCOPE);
         assertThrows(FrakCallTheAdmiralException.class, () -> journal.recordChoice(scope, 1, NONE));
     }
+
+    @Test
+    void aCopyGoesOnWithTheNextScopeIdAndLeavesTheOriginalAlone() {
+        val first = journal.openScope(new NoOpEvent(1), 1, ROOT_SCOPE);
+        journal.closeScope(NONE);
+
+        val copy = new Journal(journal.entries());
+        val second = copy.openScope(new NoOpEvent(2), 1, first);
+
+        assertEquals(first + 1, second);
+        assertEquals(3, copy.size());
+        assertEquals(2, journal.size());
+    }
+
+    @Test
+    void aCopyCantStartInsideAScope() {
+        journal.openScope(new NoOpEvent(1), 1, ROOT_SCOPE);
+        assertThrows(IllegalArgumentException.class, () -> new Journal(journal.entries()));
+    }
 }

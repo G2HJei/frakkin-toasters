@@ -6,7 +6,8 @@ import org.junit.jupiter.api.function.Executable;
 import xyz.zlatanov.frakkintoasters.engine.EngineStatus.Finished;
 import xyz.zlatanov.frakkintoasters.engine.PendingInput.AwaitingChoice;
 import xyz.zlatanov.frakkintoasters.engine.PendingInput.AwaitingDecision;
-import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry;
+import xyz.zlatanov.frakkintoasters.engine.journal.GameSnapshot;
+import xyz.zlatanov.frakkintoasters.engine.journal.Journal;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ChoiceMade;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.FactRecorded;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ScopeClosed;
@@ -15,14 +16,13 @@ import xyz.zlatanov.frakkintoasters.event.ActionEvent;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
 import xyz.zlatanov.frakkintoasters.event.board.LoseResourceEvent;
-import xyz.zlatanov.frakkintoasters.event.endgame.CylonsWinEvent;
 import xyz.zlatanov.frakkintoasters.event.location.galactica.ResearchLabEvent;
-import xyz.zlatanov.frakkintoasters.event.placeholder.PlayQuorumCardEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.DrawSkillCardsEvent;
 import xyz.zlatanov.frakkintoasters.event.player.LeaveBrigEvent;
 import xyz.zlatanov.frakkintoasters.event.player.PlaceInSetupLocationEvent;
 import xyz.zlatanov.frakkintoasters.event.player.SelectCharacterEvent;
+import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Randomness;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
@@ -31,9 +31,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.stream.IntStream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.engine.journal.Journal.ROOT_SCOPE;
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DRAW_EXACTLY_2;
@@ -65,6 +66,14 @@ class GameEngineTest {
             single(PLAYER_2_DRAWS_2),
             FUEL_OR_FOOD,
             single(new NoOpEvent(3)));
+
+    // The answers that play SCRIPT to the end, one per pause.
+    private static final List<Consumer<GameEngine>> INPUTS = List.of(
+            engine -> engine.submit(1, new SelectCharacterEvent(1, HELENA_CAIN)),
+            engine -> engine.choose(1, single(new PlaceInSetupLocationEvent(1, COMMAND))),
+            engine -> engine.submit(2, new SelectCharacterEvent(2, LAURA_ROSLIN)),
+            engine -> engine.submit(2, new DrawSkillCardsEvent(2, Map.of(POLITICS, 2))),
+            engine -> engine.choose(1, single(new LoseResourceEvent(FUEL, 1))));
 
     private GameEngine engine = start(SCRIPT);
 
@@ -212,33 +221,76 @@ class GameEngineTest {
         assertThrows(InvalidActionException.class, () -> engine.choose(1, single(new NoOpEvent(1))));
     }
 
-    /* bugs */
+    /* restore */
 
     @Test
-    void aQueuedEventThatFailsValidationStopsTheGame() {
+    void restoreGivesTheSameGameAtEveryPause() {
+        assertRestoresTheSameGame();
+        for (val input : INPUTS) {
+            input.accept(engine);
+            assertRestoresTheSameGame();
+        }
+        assertEquals(new Finished(), GameEngine.restore(engine.journal()).status(1));
+    }
+
+    // The restored journal goes on with the next scope ids, and the original doesn't see what the restored game adds.
+    @Test
+    void aRestoredGameGoesOnLikeTheOriginal() {
+        val fullJournal = start(SCRIPT);
+        INPUTS.forEach(input -> input.accept(fullJournal));
+
+        for (int pause = 0; pause < INPUTS.size(); pause++) {
+            val restored = GameEngine.restore(engine.journal());
+            INPUTS.subList(pause, INPUTS.size()).forEach(input -> input.accept(restored));
+            assertEquals(fullJournal.journal().entries(), restored.journal().entries(), "restored at pause " + pause);
+
+            INPUTS.get(pause).accept(engine);
+        }
+        assertEquals(fullJournal.journal().entries(), engine.journal().entries());
+    }
+
+    // The picked option hasn't run yet.
+    @Test
+    void aJournalThatEndsInTheMiddleOfARunCantBeRestored() {
+        playScript();
+        val entries = engine.journal().entries();
+        val choice = new ChoiceMade(2, 1, single(new PlaceInSetupLocationEvent(1, COMMAND)));
+        val upToTheChoice = new Journal(entries.subList(0, entries.indexOf(choice) + 1));
+
+        assertThrows(IllegalArgumentException.class, () -> GameEngine.restore(upToTheChoice));
+    }
+
+    /* rollback: a bug after the input was accepted */
+
+    @Test
+    void anEventThatThrowsInTheMiddleOfAChainRollsBackTheWholeInput() {
+        engine = start(all(single(PLAYER_1_SELECTS), single(new LoseResourceEvent(FOOD, 1)), single(new FailingEvent())));
+
+        val failure = assertRolledBack(() -> engine.submit(1, new SelectCharacterEvent(1, SAUL_TIGH)));
+
+        assertInstanceOf(IllegalStateException.class, failure.getCause());
+        assertEquals(Optional.empty(), engine.view().locate(SAUL_TIGH));
+    }
+
+    @Test
+    void aQueuedEventThatFailsValidationRollsBackTheInput() {
         engine = start(all(single(PLAYER_1_SELECTS), single(new LeaveBrigEvent(1, COMMAND))));
 
-        assertThrows(FrakCallTheAdmiralException.class, () -> engine.submit(1, new SelectCharacterEvent(1, SAUL_TIGH)));
-        assertStopped();
+        assertRolledBack(() -> engine.submit(1, new SelectCharacterEvent(1, SAUL_TIGH)));
     }
 
     @Test
-    void aQueuedEventWithoutAProcessorStopsTheGame() {
-        engine = start(one(new NoOpEvent(1), new CylonsWinEvent()));
+    void aChoiceThatRolledBackCanBeAnsweredWithTheOtherOption() {
+        val failing = single(new FailingEvent());
+        engine = start(one(single(new NoOpEvent(1)), failing));
 
-        assertThrows(FrakCallTheAdmiralException.class, () -> engine.choose(1, single(new CylonsWinEvent())));
-        assertStopped();
+        assertRolledBack(() -> engine.choose(1, failing));
+        engine.choose(1, single(new NoOpEvent(1)));
+
+        assertEquals(new Finished(), engine.status(1));
     }
 
-    // QuorumChamberEvent offers this until Quorum Cards exist.
-    @Test
-    void aDecisionNobodyCanAnswerStopsTheGame() {
-        val playQuorumCard = single(new PlayerDecisionEvent<>(1, PlayQuorumCardEvent.class));
-        engine = start(one(single(new NoOpEvent(1)), playQuorumCard));
-
-        assertThrows(FrakCallTheAdmiralException.class, () -> engine.choose(1, playQuorumCard));
-        assertStopped();
-    }
+    /* bugs before the first pause */
 
     @Test
     void aDecisionCanHaveConstraintsOnlyOnAConstrainedEvent() {
@@ -256,32 +308,49 @@ class GameEngineTest {
     }
 
     private void playScript() {
-        engine.submit(1, new SelectCharacterEvent(1, HELENA_CAIN));
-        engine.choose(1, single(new PlaceInSetupLocationEvent(1, COMMAND)));
-        engine.submit(2, new SelectCharacterEvent(2, LAURA_ROSLIN));
-        engine.submit(2, new DrawSkillCardsEvent(2, Map.of(POLITICS, 2)));
-        engine.choose(1, single(new LoseResourceEvent(FUEL, 1)));
+        INPUTS.forEach(input -> input.accept(engine));
     }
 
     private void assertWaitingFor(PendingInput expected) {
         assertEquals(EngineStatus.waiting(expected), engine.status(1));
     }
 
-    // Nothing changes, and the same input stays pending.
-    private void assertRejected(Executable input) {
-        List<JournalEntry> entries = engine.journal().entries();
-        val status = engine.status(1);
+    private void assertRestoresTheSameGame() {
+        val restored = GameEngine.restore(engine.journal());
 
-        assertThrows(InvalidActionException.class, input);
-
-        assertEquals(entries, engine.journal().entries());
-        assertEquals(status, engine.status(1));
+        assertEquals(snapshot(engine), snapshot(restored));
+        assertEquals(statuses(engine), statuses(restored));
     }
 
-    private void assertStopped() {
-        assertThrows(FrakCallTheAdmiralException.class, () -> engine.status(1));
-        assertThrows(FrakCallTheAdmiralException.class, () -> engine.submit(1, new NoOpEvent(1)));
-        assertThrows(FrakCallTheAdmiralException.class, () -> engine.choose(1, single(new NoOpEvent(1))));
+    private void assertRejected(Executable input) {
+        assertNothingChanges(InvalidActionException.class, input);
+    }
+
+    private FrakCallTheAdmiralException assertRolledBack(Executable input) {
+        return assertNothingChanges(FrakCallTheAdmiralException.class, input);
+    }
+
+    // The game and the journal are as before the input, and the same input stays pending.
+    private <T extends RuntimeException> T assertNothingChanges(Class<T> thrown, Executable input) {
+        val entries = engine.journal().entries();
+        val snapshot = snapshot(engine);
+        val statuses = statuses(engine);
+
+        val failure = assertThrows(thrown, input);
+
+        assertEquals(entries, engine.journal().entries());
+        assertEquals(snapshot, snapshot(engine));
+        assertEquals(statuses, statuses(engine));
+        return failure;
+    }
+
+    // The view is the game itself.
+    private static GameSnapshot snapshot(GameEngine engine) {
+        return GameSnapshot.of((Game) engine.view());
+    }
+
+    private static List<EngineStatus> statuses(GameEngine engine) {
+        return IntStream.rangeClosed(1, 3).mapToObj(engine::status).toList();
     }
 
     private static Set<Followup> options(Followup choice) {
