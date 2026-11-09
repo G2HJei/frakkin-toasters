@@ -8,6 +8,11 @@ import xyz.zlatanov.frakkintoasters.state.card.MutinyCard;
 public class DiscardDownTo1MutinyCardEventProcessor extends EventProcessor<DiscardDownTo1MutinyCardEvent> {
 
     @Override
+    protected boolean isValid() {
+        return player.mutinyCards().cards().contains(event.cardToKeep());
+    }
+
+    @Override
     public Followup process() {
         val mutinyCardDeck = player.mutinyCards();
         val cardsToDiscard = mutinyCardDeck

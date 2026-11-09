@@ -10,10 +10,8 @@ import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.GameStep.ACTION;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_4_OCLOCK;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.HANGAR_DECK;
-import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
-import static xyz.zlatanov.frakkintoasters.state.character.Character.KARL_HELO_AGATHON;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 
 class ActionStepEventProcessorTest extends EventTestHarness<ActionStepEvent> {
 
@@ -47,5 +45,44 @@ class ActionStepEventProcessorTest extends EventTestHarness<ActionStepEvent> {
         execute(new ActionStepEvent());
 
         assertEquals(ACTION, game.turn().step());
+    }
+
+    // Choosing to act would leave him without a legal answer.
+    @Test
+    void aCharacterInSickbayHasNoActionToTake() {
+        player(1).character(KARA_STARBUCK_THRACE);
+        moveTo(SICKBAY, KARA_STARBUCK_THRACE);
+
+        execute(new ActionStepEvent());
+
+        assertEquals(ACTION, game.turn().step());
+    }
+
+    @Test
+    void aDamagedLocationHasNoActionToTake() {
+        player(1).character(KARA_STARBUCK_THRACE);
+        moveTo(HANGAR_DECK, KARA_STARBUCK_THRACE);
+        galacticaBoard.damage(HANGAR_DECK);
+
+        execute(new ActionStepEvent());
+    }
+
+    @Test
+    void ftlControlHasNoActionToTakeInTheRedZone() {
+        player(1).character(FELIX_GAETA);
+        moveTo(FTL_CONTROL, FELIX_GAETA);
+
+        execute(new ActionStepEvent());
+    }
+
+    @Test
+    void ftlControlHasAnActionToTakeOutOfTheRedZone() {
+        player(1).character(FELIX_GAETA);
+        moveTo(FTL_CONTROL, FELIX_GAETA);
+        galacticaBoard.advanceJumpPreparation().advanceJumpPreparation().advanceJumpPreparation();
+
+        execute(new ActionStepEvent());
+
+        assertFollowup(one(new PlayerDecisionEvent<>(1, ActionEvent.class), new NoOpEvent(1)));
     }
 }

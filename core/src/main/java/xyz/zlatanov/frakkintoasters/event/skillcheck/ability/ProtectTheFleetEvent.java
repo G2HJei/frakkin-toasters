@@ -29,7 +29,8 @@ public record ProtectTheFleetEvent(int playerNumber,
         return new ProtectTheFleetEvent(playerNumber, null, null, humanFighterId, null, attackCylonShipId, null);
     }
 
-    public static ProtectTheFleetEvent escort(int playerNumber, int escortCivilianShipId) {
-        return new ProtectTheFleetEvent(playerNumber, null, null, null, null, null, escortCivilianShipId);
+    // The viper escorts a civilian ship in its own space area.
+    public static ProtectTheFleetEvent escort(int playerNumber, int humanFighterId, int escortCivilianShipId) {
+        return new ProtectTheFleetEvent(playerNumber, null, null, humanFighterId, null, null, escortCivilianShipId);
     }
 }

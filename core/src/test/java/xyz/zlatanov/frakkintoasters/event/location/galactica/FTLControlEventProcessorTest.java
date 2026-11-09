@@ -6,11 +6,15 @@ import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.event.JumpingTheFleetEvent;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.FTL_CONTROL;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.FELIX_GAETA;
 
 class FTLControlEventProcessorTest extends EventTestHarness<FTLControlEvent> {
 
     @BeforeEach
     void setUp() {
+        player(1).character(FELIX_GAETA);
+        moveTo(FTL_CONTROL, FELIX_GAETA);
         galacticaBoard
                 .advanceJumpPreparation()
                 .advanceJumpPreparation()
@@ -43,5 +47,11 @@ class FTLControlEventProcessorTest extends EventTestHarness<FTLControlEvent> {
 
         assertEquals(0, galacticaBoard.population());
         assertFollowup(new JumpingTheFleetEvent());
+    }
+
+    @Test
+    void shouldNotJumpFromTheRedZone() {
+        galacticaBoard.decreaseJumpPreparation();
+        assertInvalid(new FTLControlEvent(1));
     }
 }

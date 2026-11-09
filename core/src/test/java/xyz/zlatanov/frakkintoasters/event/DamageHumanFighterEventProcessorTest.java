@@ -55,4 +55,15 @@ class DamageHumanFighterEventProcessorTest extends EventTestHarness<DamageHumanF
         assertFalse(galacticaBoard.damagedShips().contains(assaultRaptor));
         assertTrue(game.removedComponents().contains(assaultRaptor));
     }
+
+    @Test
+    void shouldDamageAViperInSpaceOrInTheReserves() {
+        val damagedViper = galacticaBoard.damagedShips().iterator().next();
+        assertInvalid(new DamageHumanFighterEvent(damagedViper.id()));
+    }
+
+    @Test
+    void shouldNotDamageARaptor() {
+        assertInvalid(new DamageHumanFighterEvent(11));
+    }
 }

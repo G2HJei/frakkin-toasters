@@ -62,6 +62,9 @@ public abstract class AbstractOps {
      */
     protected <T> T draw(DeckId id) {
         Deck<T> deck = game.decks().deck(id);
+        if (deck.autoShuffle() && deck.isEmpty() && deck.discardSize() > 0) {
+            shuffle(id); // the cards were discarded after a draw emptied the pile
+        }
         T card = deck.top(1).getFirst();
         record(new CardsDrawn(id, List.of(card)));
         if (deck.autoShuffle() && deck.isEmpty() && deck.discardSize() > 0) {

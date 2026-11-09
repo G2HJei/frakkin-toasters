@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event.location.colonialone;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.event.DrawQuorumCardEvent;
@@ -8,13 +9,20 @@ import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.QUORUM_CHAMBER;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.LAURA_ROSLIN;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.TOM_ZAREK;
 
 class QuorumChamberEventProcessorTest extends EventTestHarness<QuorumChamberEvent> {
 
+    @BeforeEach
+    void setUpAtLocation() {
+        player(1).character(LAURA_ROSLIN);
+        moveTo(QUORUM_CHAMBER, LAURA_ROSLIN);
+    }
+
     @Test
     void shouldDrawQuorumCardAndFollowup() {
-        player(1).character(LAURA_ROSLIN);
         president(LAURA_ROSLIN);
 
         execute(new QuorumChamberEvent(1));
@@ -26,4 +34,9 @@ class QuorumChamberEventProcessorTest extends EventTestHarness<QuorumChamberEven
                         new PlayerDecisionEvent<>(1, PlayQuorumCardEvent.class)));
     }
 
+    @Test
+    void shouldOnlyBeUsedByThePresident() {
+        president(TOM_ZAREK);
+        assertInvalid(new QuorumChamberEvent(1));
+    }
 }

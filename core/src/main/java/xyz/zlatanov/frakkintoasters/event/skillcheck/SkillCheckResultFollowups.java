@@ -35,6 +35,7 @@ import java.util.stream.IntStream;
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
 import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.*;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.*;
+import static xyz.zlatanov.frakkintoasters.event.officials.MakePresidentEventProcessor.canBecomePresident;
 import static xyz.zlatanov.frakkintoasters.event.ship.DamageVipersEvent.Area.*;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.board.Resource.*;
@@ -173,8 +174,7 @@ public class SkillCheckResultFollowups {
             case CENTURION_ASSAULT -> all(new DestroyRaptorEvent(), sendTo(SICKBAY, currentPlayer()));
             case SET_A_TRAP -> all(new PlaceCenturionsEvent(1), sendTo(SICKBAY, currentPlayer()));
             case A_TRAITOR_ACCUSED -> single(new PlayerDecisionEvent<>(currentPlayer(), SendToBrigEvent.class));
-            case WITCH_HUNT ->
-                    all(lose(MORALE, 1), new PlayerDecisionEvent<>(currentPlayer(), SendToSickbayEvent.class));
+            case WITCH_HUNT -> allOf(single(lose(MORALE, 1)), chooseCharacterForSickbay(game));
             case SECURITY_BREACH -> allOf(single(lose(MORALE, 1)), sendCharactersIn(SICKBAY, COMMAND));
             case MISSING_G4_EXPLOSIVES -> allOf(single(lose(FOOD, 1)), sendCharactersIn(Location.BRIG, ARMORY));
             case WEAPONS_MALFUNCTION ->
@@ -183,7 +183,7 @@ public class SkillCheckResultFollowups {
             case DETECTOR_SABOTAGE ->
                     allOf(sendCharactersIn(SICKBAY, RESEARCH_LAB), single(new KeepCrisisCardInPlayEvent(type)));
             case BOMB_ON_COLONIAL_1 -> allOf(single(lose(MORALE, 2)),
-                    sendCharactersIn(SICKBAY, PRESS_ROOM, PRESIDENTS_OFFICE, Location.ADMINISTRATION),
+                    sendCharactersIn(SICKBAY, QUORUM_CHAMBER, PRESS_ROOM, PRESIDENTS_OFFICE, Location.ADMINISTRATION),
                     single(new KeepCrisisCardInPlayEvent(type)));
             case CONSULT_THE_PRISONER ->
                     allOf(eachPlayer(p -> single(discard(p, 1))), single(sendTo(Location.BRIG, currentPlayer())));
@@ -215,8 +215,7 @@ public class SkillCheckResultFollowups {
             case INCITEMENT_TO_MUTINY -> single(new ShuffleTreacheryIntoDestinyDeckEvent(4));
             // loyalty and titles
             case CYLON_SCREENINGS -> allOf(single(lose(MORALE, 1)), lookAtLoyaltyCardOfPresidentOrAdmiral());
-            case PRISONER_REVOLT ->
-                    all(lose(POPULATION, 1), new PlayerDecisionEvent<>(president(), MakePresidentEvent.class));
+            case PRISONER_REVOLT -> allOf(single(lose(POPULATION, 1)), presidentChoosesAnotherPresident());
             case A_DESPERATE_PACT -> all(lose(MORALE, 1), new DetermineNextPresidentEvent(president()));
             // galactica, jump preparation and boarding party
             case THREAT_OF_SUPER_NOVA -> all(lose(POPULATION, 1), new DamageGalacticaEvent());
@@ -322,6 +321,12 @@ public class SkillCheckResultFollowups {
                 .sorted()
                 .map(playerNumber -> sendTo(destination, playerNumber))
                 .toArray(Event[]::new));
+    }
+
+    // Only asked when another player can take the title, so the decision has an answer.
+    private Followup presidentChoosesAnotherPresident() {
+        val anyoneEligible = game.players().stream().anyMatch(p -> canBecomePresident(game, p.character()));
+        return anyoneEligible ? single(new PlayerDecisionEvent<>(president(), MakePresidentEvent.class)) : NONE;
     }
 
     private Followup eachPlayerDiscardsAndDrawsTreachery() {

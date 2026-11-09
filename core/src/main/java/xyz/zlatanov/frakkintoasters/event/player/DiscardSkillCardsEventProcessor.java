@@ -7,7 +7,6 @@ import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.NONE;
@@ -22,7 +21,7 @@ public class DiscardSkillCardsEventProcessor extends EventProcessor<DiscardSkill
 
     @Override
     protected boolean isValid() {
-        return cardsInHand() && meetsDiscardLimit();
+        return holdsSkillCards(event.cards()) && meetsDiscardLimit();
     }
 
     @Override
@@ -33,12 +32,6 @@ public class DiscardSkillCardsEventProcessor extends EventProcessor<DiscardSkill
         }
         ops.player(player.number()).discard(cards.toArray(SkillCard[]::new));
         return drawsMutinyCard() ? single(new DrawMutinyCardEvent(player.number())) : NONE;
-    }
-
-    private boolean cardsInHand() {
-        val cards = event.cards();
-        return new HashSet<>(cards).size() == cards.size()
-                && new HashSet<>(player.skillCards().cards()).containsAll(cards);
     }
 
     private boolean meetsDiscardLimit() {

@@ -6,6 +6,7 @@ import xyz.zlatanov.frakkintoasters.event.board.GainResourceEvent;
 import xyz.zlatanov.frakkintoasters.event.board.LoseResourceEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.DiscardSkillCardsEvent;
+import xyz.zlatanov.frakkintoasters.event.player.SendToSickbayEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.PlayCardsBeforeSkillCheckEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.ResolveCardsBeforeSkillCheckEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.ability.*;
@@ -23,6 +24,7 @@ import java.util.stream.IntStream;
 import static lombok.AccessLevel.PRIVATE;
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.*;
+import static xyz.zlatanov.frakkintoasters.event.player.SendToSickbayEventProcessor.canBeChosenForSickbay;
 
 @NoArgsConstructor(access = PRIVATE)
 public class FollowupUtils {
@@ -57,6 +59,17 @@ public class FollowupUtils {
 
     public static Event discard(int playerNumber, int count) {
         return new PlayerDecisionEvent<>(playerNumber, DiscardSkillCardsEvent.class, discardExactly(count));
+    }
+
+    /**
+     * @return the current player's choice of a character to send to "Sickbay", out of those he can choose (rule
+     * 9.3.2), {@link Followup#NONE} when there is nobody to choose
+     */
+    public static Followup chooseCharacterForSickbay(GameView game) {
+        return one(playersFrom(game, game.turn().currentPlayerNumber()).stream()
+                .filter(player -> canBeChosenForSickbay(game, player.number()))
+                .map(player -> new SendToSickbayEvent(player.number()))
+                .toArray(Event[]::new));
     }
 
     public static Followup beforeSkillCheckFollowups(GameView game) {

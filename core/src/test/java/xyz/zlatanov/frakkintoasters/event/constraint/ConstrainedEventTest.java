@@ -51,7 +51,7 @@ class ConstrainedEventTest {
 
     @Test
     void aViperLaunchMapsItsConstraintOntoTheFlag() {
-        val launch = new LaunchViperEvent(VIPER, GALACTICA_SPACE_6_OCLOCK, KARA_STARBUCK_THRACE, null, true);
+        val launch = new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_6_OCLOCK, KARA_STARBUCK_THRACE, null, true);
 
         assertTrue(launch.withConstraints(List.of(MUST_LAUNCH_IN_VIPER)).mustLaunchInViper());
         assertFalse(launch.withConstraints(List.of()).mustLaunchInViper());

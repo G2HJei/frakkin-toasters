@@ -1,6 +1,9 @@
 package xyz.zlatanov.frakkintoasters.event.location.cylon;
 
 import xyz.zlatanov.frakkintoasters.event.ActionEvent;
+import xyz.zlatanov.frakkintoasters.state.board.Location;
+
+import static xyz.zlatanov.frakkintoasters.state.board.Location.CAPRICA;
 
 // Caprica (Cylon location, Daybreak)
 // Action: Play 1 of your Super Crisis Cards or draw 2 Crisis Cards, choose 1 to resolve, and place the other on the
@@ -8,4 +11,8 @@ import xyz.zlatanov.frakkintoasters.event.ActionEvent;
 // *No "Activate Cylon Ships" step.
 public record CapricaDrawAndResolveCrisisCardsEvent(int playerNumber) implements ActionEvent {
 
+    @Override
+    public Location location() {
+        return CAPRICA;
+    }
 }

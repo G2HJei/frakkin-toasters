@@ -1,6 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event.location.cylon;
 
 import lombok.val;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -16,13 +17,21 @@ import xyz.zlatanov.frakkintoasters.state.ship.ShipType;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
+import static xyz.zlatanov.frakkintoasters.state.board.Location.CYLON_FLEET;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_4_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.CAVIL;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.HEAVY_RAIDER;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.RAIDER;
 
 
 class CylonFleetEventProcessorTest extends EventTestHarness<CylonFleetEvent> {
+
+    @BeforeEach
+    void setUpAtLocation() {
+        player(1).character(CAVIL);
+        moveTo(CYLON_FLEET, CAVIL);
+    }
 
     @Test
     void shouldLaunch2RaidersAndHeavyRaiderFromSingleBasestar() {

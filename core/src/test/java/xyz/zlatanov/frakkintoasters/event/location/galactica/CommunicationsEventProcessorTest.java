@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.ANASTASIA_DEE_DUALLA;
 
 class CommunicationsEventProcessorTest extends EventTestHarness<CommunicationsEvent> {
 
@@ -23,6 +24,8 @@ class CommunicationsEventProcessorTest extends EventTestHarness<CommunicationsEv
 
     @BeforeEach
     void setUp() {
+        player(1).character(ANASTASIA_DEE_DUALLA);
+        moveTo(COMMUNICATIONS, ANASTASIA_DEE_DUALLA);
         civ1 = civilianShip();
         civ2 = civilianShip();
         id1 = civ1.id();
@@ -51,18 +54,37 @@ class CommunicationsEventProcessorTest extends EventTestHarness<CommunicationsEv
     }
 
     @Test
-    void shouldProceedWithRevealingOnlyOneCivilianShip() {
+    void shouldRevealTheOnlyCivilianShipInSpace() {
         galacticaBoard.place(GALACTICA_SPACE_4_OCLOCK, civ1);
-        execute(new CommunicationsEvent(2, id1, null));
+        execute(new CommunicationsEvent(1, null, id1));
         assertFollowup(all(
-                one(new NoOpEvent(2),
+                one(new NoOpEvent(1),
                         new MoveCivilianShipEvent(id1, GALACTICA_SPACE_2_OCLOCK),
                         new MoveCivilianShipEvent(id1, GALACTICA_SPACE_6_OCLOCK))));
     }
 
     @Test
-    void shouldDoNothingWhenNoCivilianShipSelected() {
-        execute(new CommunicationsEvent(3, null, null));
+    void shouldDoNothingWhenNoCivilianShipIsInSpace() {
+        execute(new CommunicationsEvent(1, null, null));
     }
 
+    @Test
+    void shouldLookAt2CivilianShipsWhenThereAreThatMany() {
+        galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, civ1);
+        galacticaBoard.place(GALACTICA_SPACE_6_OCLOCK, civ2);
+        assertInvalid(new CommunicationsEvent(1, id1, null));
+    }
+
+    @Test
+    void shouldNotLookAtTheSameCivilianShipTwice() {
+        galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, civ1);
+        galacticaBoard.place(GALACTICA_SPACE_6_OCLOCK, civ2);
+        assertInvalid(new CommunicationsEvent(1, id1, id1));
+    }
+
+    @Test
+    void shouldOnlyLookAtCivilianShipsInSpace() {
+        galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, civ1);
+        assertInvalid(new CommunicationsEvent(1, id2, null));
+    }
 }

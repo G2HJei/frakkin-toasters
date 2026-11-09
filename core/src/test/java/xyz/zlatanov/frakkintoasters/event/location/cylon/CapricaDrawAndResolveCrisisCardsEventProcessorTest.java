@@ -1,14 +1,23 @@
 package xyz.zlatanov.frakkintoasters.event.location.cylon;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.event.ResolveCapricaCrisisCardEvent;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.CAPRICA;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.CAPRICA_SIX;
 import static xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard.AIRLOCK_LEAK;
 import static xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard.DETENTE;
 
 class CapricaDrawAndResolveCrisisCardsEventProcessorTest extends EventTestHarness<CapricaDrawAndResolveCrisisCardsEvent> {
+
+    @BeforeEach
+    void setUpAtLocation() {
+        player(1).character(CAPRICA_SIX);
+        moveTo(CAPRICA, CAPRICA_SIX);
+    }
 
     @Test
     void shouldFollowUpWithOneOfTheCrisisCards() {

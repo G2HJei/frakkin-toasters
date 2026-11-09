@@ -14,7 +14,7 @@ public class PlayCardsIntoSkillCheckEventProcessor extends EventProcessor<PlayCa
         val maxCards = inBrig || !player.isHuman() ? 1
                 : player.isInfiltrating() ? 2
                 : Integer.MAX_VALUE;
-        return cardsCount <= maxCards;
+        return holdsSkillCards(event.skillCards()) && cardsCount <= maxCards;
     }
 
     @Override

@@ -59,4 +59,25 @@ class DogfightEventProcessorTest extends EventTestHarness<DogfightEvent> {
         assertEquals(List.of(MAJOR_VICTORY_4), skillCheck.matchingPile().cards());
         assertEquals(List.of(DOGFIGHT_0), skillCheck.nonMatchingPile().cards());
     }
+
+    @Test
+    void shouldNotRemoveTheDogfightCardItResolves() {
+        assertInvalid(new DogfightEvent(1, RESERVES_VIPER, DOGFIGHT_0));
+    }
+
+    @Test
+    void shouldRemoveACardInTheCheck() {
+        assertInvalid(new DogfightEvent(1, RESERVES_VIPER, new SkillCard(1, MAJOR_VICTORY)));
+    }
+
+    @Test
+    void shouldDamageAViperInSpaceOrInTheReserves() {
+        val damagedViper = galacticaBoard.damagedShips().iterator().next();
+        assertInvalid(new DogfightEvent(1, damagedViper.id(), MAJOR_VICTORY_4));
+    }
+
+    @Test
+    void shouldNameBothTheViperAndTheCard() {
+        assertInvalid(new DogfightEvent(1, RESERVES_VIPER, null));
+    }
 }

@@ -31,6 +31,7 @@ class PlayCardsIntoSkillCheckEventProcessorTest extends EventTestHarness<PlayCar
     @Test
     void shouldAllowUpToOneCardForCharactersInBrig() {
         moveTo(BRIG, KARA_STARBUCK_THRACE);
+        player(1).gainSkillCards(new SkillCard(1, DOGFIGHT), new SkillCard(2, EXECUTIVE_ORDER));
         assertInvalid(new PlayCardsIntoSkillCheckEvent(1, List.of(
                 new SkillCard(1, DOGFIGHT),
                 new SkillCard(2, EXECUTIVE_ORDER))));
@@ -39,6 +40,7 @@ class PlayCardsIntoSkillCheckEventProcessorTest extends EventTestHarness<PlayCar
     @Test
     void shouldAllowUpToOneCardForRevealedCylon() {
         revealCylon();
+        player(1).gainSkillCards(new SkillCard(1, DOGFIGHT), new SkillCard(2, EXECUTIVE_ORDER));
         assertInvalid(new PlayCardsIntoSkillCheckEvent(1, List.of(
                 new SkillCard(1, DOGFIGHT),
                 new SkillCard(2, EXECUTIVE_ORDER))));
@@ -48,6 +50,7 @@ class PlayCardsIntoSkillCheckEventProcessorTest extends EventTestHarness<PlayCar
     void shouldAllowUpToTwoCardsForInfiltrator() {
         player(2).character(DANNA_BIERS).infiltrateGalactica();
         moveTo(ADMINISTRATION, DANNA_BIERS);
+        player(2).gainSkillCards(new SkillCard(1, DOGFIGHT), new SkillCard(2, EXECUTIVE_ORDER), new SkillCard(3, FULL_THROTTLE));
         assertInvalid(new PlayCardsIntoSkillCheckEvent(2, List.of(
                 new SkillCard(1, DOGFIGHT),
                 new SkillCard(2, EXECUTIVE_ORDER),
@@ -75,5 +78,11 @@ class PlayCardsIntoSkillCheckEventProcessorTest extends EventTestHarness<PlayCar
         execute(new PlayCardsIntoSkillCheckEvent(1, List.of(contribution)));
 
         assertTrue(game.activeSkillCheck().cards().cards().contains(contribution));
+    }
+
+    @Test
+    void shouldPlayCardsInHand() {
+        player(1).gainSkillCards(new SkillCard(1, DOGFIGHT));
+        assertInvalid(new PlayCardsIntoSkillCheckEvent(1, List.of(new SkillCard(1, DOGFIGHT), new SkillCard(1, DOGFIGHT))));
     }
 }

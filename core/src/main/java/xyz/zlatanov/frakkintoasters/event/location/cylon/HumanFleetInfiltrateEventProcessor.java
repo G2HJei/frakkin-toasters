@@ -1,18 +1,18 @@
 package xyz.zlatanov.frakkintoasters.event.location.cylon;
 
 import lombok.val;
-import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.location.LocationActionProcessor;
 
 import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.GALACTICA;
 import static xyz.zlatanov.frakkintoasters.state.character.CharacterType.CYLON_LEADER;
 
-public class HumanFleetInfiltrateEventProcessor extends EventProcessor<HumanFleetInfiltrateEvent> {
+public class HumanFleetInfiltrateEventProcessor extends LocationActionProcessor<HumanFleetInfiltrateEvent> {
     @Override
-    public boolean isValid() {
+    protected boolean isValidAction() {
         val location = event.galacticaLocation();
         return player.character().type() == CYLON_LEADER
-                && GALACTICA.locations().contains(location)
+                && location != null && GALACTICA.locations().contains(location)
                 && !location.isHazardousLocation();
     }
 

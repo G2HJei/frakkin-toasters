@@ -1,16 +1,22 @@
 package xyz.zlatanov.frakkintoasters.event.location.colonialone;
 
-import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.DrawQuorumCardEvent;
 import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.location.LocationActionProcessor;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayQuorumCardEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
+import xyz.zlatanov.frakkintoasters.state.view.GameView;
+import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 
-public class QuorumChamberEventProcessor extends EventProcessor<QuorumChamberEvent> {
+public class QuorumChamberEventProcessor extends LocationActionProcessor<QuorumChamberEvent> {
 
-    // todo verify acting player is the president
+    // "If you are the President"
+    public static boolean canAct(GameView game, PlayerView player) {
+        return player.character() == game.president();
+    } //todo put canAct in the LocationActionProcessor ?
+
     @Override
     public Followup process() {
         ops.titles().drawQuorumCard();

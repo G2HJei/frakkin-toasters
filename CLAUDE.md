@@ -47,11 +47,12 @@ Next steps, in order:
    for "Executive Order".
 3. ~~Create the journal and tie it to the ops classes in `operation/`.~~ Done, see "Journal and Replay". Still open:
    describers and per-viewer hiding, and JSON serialization. The pending followups are the engine's `Agenda`.
-4. Create the game engine to drive the events and turns. `engine-plan.md` has the plan in phases. Phases 1 to 6 are
+4. Create the game engine to drive the events and turns. `engine-plan.md` has the plan in phases. Phases 1 to 7 are
    done: the journal moved out of `Game` into `engine/journal/`, the turn state is grouped in `state/Turn`, the journal
    and processors are ready for the engine, `GameEngine` runs events through `submit` and `choose`, it restores a
-   game from its journal and rolls back a failed input (see "Engine"), and `GameEngine.start` sets up a game and plays
-   its turns (see "Turn Loop"). Next is phase 7: validate player input.
+   game from its journal and rolls back a failed input (see "Engine"), `GameEngine.start` sets up a game and plays
+   its turns (see "Turn Loop"), and processors check what players submit (see "Validation"). Next is phase 8: end of
+   game and Mutiny.
 5. Create a working frontend with the events that exist by then.
 
 ## Project Structure
@@ -64,7 +65,8 @@ Multi-module Gradle project with a single `core` module. Package root: `xyz.zlat
 - `event/` - event records and their processors, grouped by area (`action`, `board`, `crisis`, `deck`, `endgame`,
   `location/{galactica,pegasus,colonialone,cylon}`, `loyalty`, `officials`, `player`, `ship`, `skillcheck`,
   `skillcheck/ability`, `skillcheck/result`, `turn`). Also `placeholder/` (events that need player input) and
-  `constraint/` (`EventConstraint`, `ConstrainedEvent`)
+  `constraint/` (`EventConstraint`, `ConstrainedEvent`). `location/` holds `LocationActionProcessor` (base of the
+  location action processors) and `LocationActions` (whether a location's action can be taken, see "Validation")
 - `operation/` - game ops, the only code that decides what changes: `GameOps` (entry point) hands out `PlayerOps`,
   `ShipOps`, `GalacticaOps`, `PegasusOps`, `CylonFleetOps`, `SkillCheckOps`, `LoyaltyDeckOps`, `TitleOps`. They extend
   `AbstractOps`, which holds the `Game` and a `FactRecorder`, and offers `record`, `draw`, `shuffle`. Ops record facts,
@@ -80,11 +82,12 @@ Multi-module Gradle project with a single `core` module. Package root: `xyz.zlat
   turns), `Die` (d8), `Randomness`,
   `RemovedComponents`, `PlayerPile`, and the `@Mutates` marker
 - `state/view/` - read-only view interfaces (`GameView`, `TurnView`, `PlayerView`, `BoardsHolderView`,
-  `SkillCheckView`, ...) implemented by the state classes. Processors read state only through these
+  `BattlestarBoardView` (damaged locations), `DecksHolderView` (Skill Cards left to draw), `SkillCheckView`, ...)
+  implemented by the state classes. Processors read state only through these
 - `state/board/` - board hierarchy: `Board` (base, tracks characters by location) -> `BattlestarBoard` (adds damage
   tracking) -> `GalacticaBoard`/`PegasusBoard`. Also `CylonFleetBoard`, `SpaceLocationsBoard`, `BoardsHolder`
   (aggregates
-  all boards). The `Location` enum defines all 34 board spaces in scope
+  all boards). The `Location` enum defines all 35 board spaces in scope, Colonial One as in Daybreak
 - `state/ship/` - `Ship` interface with implementations: `Viper`, `ViperMarkVII`, `Raptor`, `AssaultRaptor`,
   `Basestar`, `Raider`, `HeavyRaider`, `Centurion`, `CivilianShip`. `CylonShips` manages the Cylon ship supply. Ships
   have unique integer IDs
@@ -106,7 +109,8 @@ Multi-module Gradle project with a single `core` module. Package root: `xyz.zlat
 ### Events and Processors
 
 Events are plain records with no logic. `Event` is an empty marker interface. `PlayerEvent` adds `playerNumber()`.
-`LocationEvent` adds `location()`. `ActionEvent extends PlayerEvent` marks the location actions.
+`LocationEvent` adds `location()`. `ActionEvent extends PlayerEvent` marks the location actions, and its `location()`
+names the location whose action it is.
 
 A `PlayerEvent` is for events whose player can differ from the current player (an "Executive Order" target, any player
 in a
@@ -210,6 +214,30 @@ checks the constraint in `isValid()` and throws `FrakCallTheAdmiralException` fo
 `DrawSkillCardsEvent`, `DiscardSkillCardsEvent`, `DiscardQuorumCardsEvent`, `LeaveBrigEvent` and `LaunchViperEvent`
 implement it.
 
+### Validation
+
+`isValid()` is the only rule check a submitted event gets, so a processor checks everything the client sent: that the
+players, ships and cards it names exist and are where they have to be, and the rules of the action. A queued event goes
+through the same check, and failing it there is a bug. So a rule that only binds a player's choice can't go in
+`isValid()` when the event is also queued directly. The processor that asks offers the legal options as a `one(...)`
+instead, e.g. `FollowupUtils.chooseCharacterForSickbay` (rule 9.3.2).
+
+- Location action processors extend `LocationActionProcessor`. Its final `isValid()` checks that the player is at
+  `event.location()` and that `LocationActions.canAct` allows the action, then calls `isValidAction()` for the details
+  of the event. `LocationActions` is an exhaustive switch over `Location`, so a new location doesn't compile until it's
+  mapped. A damaged location has no action (rule 11.7.2.2), and a location with preconditions asks the static `canAct`
+  of its processor, e.g. FTL Control out of the red zone.
+- A rule that another processor or a followup needs too is a public static check on its processor, e.g.
+  `SendToBrigEventProcessor.canBeSentToBrig` or `MakePresidentEventProcessor.canBecomePresident`.
+- `EventProcessor.isPlayer(n)` checks a player number from the client, and `holdsSkillCards(cards)` the hand. It counts
+  copies, because the decks hold equal cards.
+- A decision must always have a legal answer, or the game waits forever. A processor queues one only when an answer
+  exists, and an optional one goes in a `one(decision, NoOpEvent)`.
+- A Skill Card color with no cards in its deck and discard pile can't be drawn (rule 8.2.2.5,
+  `DecksHolderView.skillCardsLeft`). `DrawSkillCardsEvent` may draw fewer than its `DRAW_EXACTLY_n` only when no other
+  card fits, and fixed-color draws take what is left.
+- Clients may send null fields, so a check that would throw on one rejects it instead.
+
 ### Engine
 
 `GameEngine` runs a game. `submit(player, event)` answers the pending `PlayerDecisionEvent` with a concrete event, and
@@ -254,7 +282,8 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
 - Each step records `StepChanged` and applies its own exceptions. A step a player doesn't have records nothing: revealed
   Cylons (and Cylon Leaders who aren't Infiltrating, see `isHuman()`) have no Crisis and no Activate Cylon Ships step,
   and characters in the "Brig" no Crisis step. Movement and Action are a `OneOf` with a `NoOpEvent`. A pilot gets
-  `ActivateViperEvent` instead of a location action.
+  `ActivateViperEvent` instead of a location action, and a character whose location has no action he can take (e.g. in
+  "Sickbay", see `LocationActions`) gets no Action choice.
 - `DiscardStepEvent` asks every player over the hand limit, clockwise from the current player, with
   `DISCARD_DOWN_TO_HAND_LIMIT`: Skill Cards over `handLimit()`, and the President's Quorum Cards.
 - The Crisis Cards of a turn stay with it, in `TurnView.crisisCards()` (`GameOps.playCrisisCard`), for the icons the
@@ -332,9 +361,11 @@ when possible.
 - `EventTestHarness<E>` - base class for processor tests. Name the test `XxxEventProcessorTest` in the processor's
   package and the harness creates the processor by reflection. Use `execute(event)`, `assertFollowup(...)`,
   `assertInvalid(event)`, `assertSkillCheckTriggered(type)`. If a test doesn't assert a followup, the harness checks
-  that it was `Followup.NONE`
+  that it was `Followup.NONE`. Players start without a character: a location action test gives one and `moveTo`s the
+  location first. A character can be set only once
 - `FakeDie` - test double for `Die` with `nextRoll(int)` to control randomness
-- `FakeDeck<T>` - test double for `Deck<T>` with `nextCard(T...)` to control draws
+- `FakeDeck<T>` - test double for `Deck<T>` with `nextCard(T...)` to control draws, and `clear()` to empty the draw
+  pile
 - `GameSnapshot` (`engine/journal/`) - turns a `Game` into comparable plain values. Replay tests compare a live game
   with its replayed twin. `GameReplayerTest` has the scripted scenario that has to record every kind of fact
 - Op tests also assert the logged facts (`journal.facts()`), and `FactApplierTest` covers each fact

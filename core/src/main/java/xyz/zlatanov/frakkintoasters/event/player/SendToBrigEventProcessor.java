@@ -6,6 +6,7 @@ import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.officials.DetermineNextAdmiralEvent;
 import xyz.zlatanov.frakkintoasters.event.officials.DetermineNextCagEvent;
+import xyz.zlatanov.frakkintoasters.state.view.GameView;
 
 import java.util.ArrayList;
 
@@ -13,13 +14,16 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.BRIG;
 
 public class SendToBrigEventProcessor extends EventProcessor<SendToBrigEvent> {
 
-    // A character already in the "Brig" or a revealed Cylon can't be sent there (rule 9.2.3).
     @Override
     protected boolean isValid() {
-        val target = game.player(event.targetPlayerNumber());
-        return target.isHuman() && !galacticaBoard.charactersIn(BRIG).contains(target.character());
+        return isPlayer(event.targetPlayerNumber()) && canBeSentToBrig(game, event.targetPlayerNumber());
     }
 
+    // A character already in the "Brig" or a revealed Cylon can't be sent there (rule 9.2.3).
+    public static boolean canBeSentToBrig(GameView game, int playerNumber) {
+        val target = game.player(playerNumber);
+        return target.isHuman() && !game.boards().galactica().charactersIn(BRIG).contains(target.character());
+    }
 
     @Override
     public Followup process() {

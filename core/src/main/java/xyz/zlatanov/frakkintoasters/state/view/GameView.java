@@ -29,6 +29,8 @@ public interface GameView {
 
     BoardsHolderView boards();
 
+    DecksHolderView decks();
+
     SkillCheckView activeSkillCheck();
 
     CylonShipsView cylonShips();

@@ -16,6 +16,7 @@ import xyz.zlatanov.frakkintoasters.event.ActionEvent;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
 import xyz.zlatanov.frakkintoasters.event.board.LoseResourceEvent;
+import xyz.zlatanov.frakkintoasters.event.location.galactica.CommandEvent;
 import xyz.zlatanov.frakkintoasters.event.location.galactica.ResearchLabEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.DrawSkillCardsEvent;
@@ -203,9 +204,10 @@ class GameEngineTest {
     @Test
     void aDecisionOnAnInterfaceTakesAnyEventThatImplementsIt() {
         engine = start(all(single(PLAYER_1_SELECTS), single(new PlayerDecisionEvent<>(1, ActionEvent.class))));
-        engine.submit(1, new SelectCharacterEvent(1, SAUL_TIGH));
+        engine.submit(1, new SelectCharacterEvent(1, GAIUS_BALTAR));
 
         assertRejected(() -> engine.submit(1, new NoOpEvent(1)));
+        assertRejected(() -> engine.submit(1, new CommandEvent(1))); // Gaius Baltar is in the "Research Lab"
         engine.submit(1, new ResearchLabEvent(1, ENGINEERING));
 
         assertEquals(1, engine.view().player(1).skillCards().size());

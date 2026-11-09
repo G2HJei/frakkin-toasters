@@ -19,6 +19,7 @@ public enum Location {
     BRIG,
 
     //colonial one
+    QUORUM_CHAMBER,
     PRESS_ROOM,
     PRESIDENTS_OFFICE,
     ADMINISTRATION,

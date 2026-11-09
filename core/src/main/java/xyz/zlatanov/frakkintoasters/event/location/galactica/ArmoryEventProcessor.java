@@ -1,12 +1,21 @@
 package xyz.zlatanov.frakkintoasters.event.location.galactica;
 
 import lombok.val;
-import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.location.LocationActionProcessor;
+import xyz.zlatanov.frakkintoasters.state.view.GameView;
 
-public class ArmoryEventProcessor extends EventProcessor<ArmoryEvent> {
+public class ArmoryEventProcessor extends LocationActionProcessor<ArmoryEvent> {
 
-    //validate centurion with centurionId is on the boarding track
+    public static boolean canAct(GameView game) {
+        return !game.boards().galactica().boardingPartyTrack().isEmpty();
+    }
+
+    @Override
+    protected boolean isValidAction() {
+        return galacticaBoard.boardingPartyTrack().keySet().stream().anyMatch(c -> c.id() == event.centurionId());
+    }
+
     @Override
     public Followup process() {
         val roll = ops.rollDie();

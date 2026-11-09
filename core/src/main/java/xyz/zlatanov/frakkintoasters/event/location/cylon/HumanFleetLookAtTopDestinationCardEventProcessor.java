@@ -1,8 +1,8 @@
 package xyz.zlatanov.frakkintoasters.event.location.cylon;
 
 import lombok.val;
-import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.location.LocationActionProcessor;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.DrawSkillCardsEvent;
 import xyz.zlatanov.frakkintoasters.event.player.PlaceDestinationCardAtBottomEvent;
@@ -11,7 +11,7 @@ import xyz.zlatanov.frakkintoasters.event.player.PlaceDestinationCardOnTopEvent;
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DRAW_EXACTLY_2;
 
-public class HumanFleetLookAtTopDestinationCardEventProcessor extends EventProcessor<HumanFleetLookAtTopDestinationCardEvent> {
+public class HumanFleetLookAtTopDestinationCardEventProcessor extends LocationActionProcessor<HumanFleetLookAtTopDestinationCardEvent> {
     @Override
     public Followup process() {
         val playerNumber = event.playerNumber();

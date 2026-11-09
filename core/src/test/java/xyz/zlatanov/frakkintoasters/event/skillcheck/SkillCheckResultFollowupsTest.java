@@ -18,11 +18,13 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckResult;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.*;
 import static xyz.zlatanov.frakkintoasters.state.board.Resource.*;
+import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.CYLON_SEND_TO_BRIG;
 import static xyz.zlatanov.frakkintoasters.state.card.MutinyCard.WEAPONS_ARMED;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.TREACHERY;
@@ -96,6 +98,15 @@ class SkillCheckResultFollowupsTest extends TestHarness {
     }
 
     @Test
+    void shouldKeepThePresidentWhenNobodyElseCanTakeTheTitle() {
+        Stream.of(ADMIRAL, OTHER).forEach(cylon -> player(cylon).loyaltyCards()
+                .addOnTop(CYLON_SEND_TO_BRIG)
+                .reveal(CYLON_SEND_TO_BRIG));
+
+        assertEquals(single(new LoseResourceEvent(POPULATION, 1)), followup(PRISONER_REVOLT, FAIL));
+    }
+
+    @Test
     void shouldLetTheAdmiralOptionallySendToBrig() {
         assertEquals(one(new PlayerDecisionEvent<>(ADMIRAL, SendToBrigEvent.class), new NoOpEvent(ADMIRAL)),
                 followup(FAMILIAR_FACE, PASS));
@@ -109,6 +120,16 @@ class SkillCheckResultFollowupsTest extends TestHarness {
         assertEquals(all(single(new LoseResourceEvent(MORALE, 1)),
                         all(new SendToSickbayEvent(ADMIRAL), new SendToSickbayEvent(OTHER))),
                 followup(SECURITY_BREACH, FAIL));
+    }
+
+    // The character already in "Sickbay" can't be chosen (rule 9.3.2).
+    @Test
+    void shouldLetTheCurrentPlayerChooseACharacterForSickbay() {
+        moveTo(Location.SICKBAY, LAURA_ROSLIN);
+
+        assertEquals(all(single(new LoseResourceEvent(MORALE, 1)),
+                        one(new SendToSickbayEvent(ADMIRAL), new SendToSickbayEvent(OTHER))),
+                followup(WITCH_HUNT, FAIL));
     }
 
     @Test

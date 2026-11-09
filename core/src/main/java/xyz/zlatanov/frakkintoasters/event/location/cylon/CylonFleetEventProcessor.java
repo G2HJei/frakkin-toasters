@@ -1,20 +1,20 @@
 package xyz.zlatanov.frakkintoasters.event.location.cylon;
 
 import lombok.val;
-import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.crisis.ActivateHeavyRaidersAndCenturionsEvent;
 import xyz.zlatanov.frakkintoasters.event.crisis.ActivateRaidersEvent;
+import xyz.zlatanov.frakkintoasters.event.location.LocationActionProcessor;
 import xyz.zlatanov.frakkintoasters.state.view.BasestarView;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.HEAVY_RAIDER;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.RAIDER;
 
-public class CylonFleetEventProcessor extends EventProcessor<CylonFleetEvent> {
+public class CylonFleetEventProcessor extends LocationActionProcessor<CylonFleetEvent> {
 
     @Override
-    public boolean isValid() {
+    protected boolean isValidAction() {
         val shipType = event.typeToActivate();
         return shipType == null
                 || shipType == RAIDER

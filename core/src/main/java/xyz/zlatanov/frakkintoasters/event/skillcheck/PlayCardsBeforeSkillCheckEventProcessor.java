@@ -10,11 +10,11 @@ import java.util.HashSet;
 
 public class PlayCardsBeforeSkillCheckEventProcessor extends EventProcessor<PlayCardsBeforeSkillCheckEvent> {
 
-    //todo validate no duplicates and either reckless/restore order
-
-
     @Override
     protected boolean isValid() {
+        if (!holdsSkillCards(event.skillCards())) {
+            return false;
+        }
         val playableBeforeSkillCheck = event.skillCards().stream()
                 .map(SkillCard::type)
                 .allMatch(SkillCardType::playableBeforeSkillCheck);

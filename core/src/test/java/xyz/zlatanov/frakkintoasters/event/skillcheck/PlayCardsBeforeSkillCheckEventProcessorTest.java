@@ -27,16 +27,25 @@ class PlayCardsBeforeSkillCheckEventProcessorTest extends EventTestHarness<PlayC
 
     @Test
     void shouldNotAllowInvalidCards() {
+        player(1).gainSkillCards(new SkillCard(0, DOGFIGHT));
         assertInvalid(new PlayCardsBeforeSkillCheckEvent(1, new SkillCard(0, DOGFIGHT)));
     }
 
     @Test
     void shouldNotAllowDuplicates() {
+        player(1).gainSkillCards(restoreOrder, restoreOrder);
         assertInvalid(new PlayCardsBeforeSkillCheckEvent(1, restoreOrder, restoreOrder));
     }
 
     @Test
     void shouldNotAllowRecklessAndRestoreOrder() {
+        player(1).gainSkillCards(restoreOrder, recklessCard);
         assertInvalid(new PlayCardsBeforeSkillCheckEvent(1, restoreOrder, recklessCard));
+    }
+
+    @Test
+    void shouldPlayCardsInHand() {
+        game.startSkillCheck(ADMIRALS_QUARTERS);
+        assertInvalid(new PlayCardsBeforeSkillCheckEvent(1, restoreOrder));
     }
 }

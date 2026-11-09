@@ -34,4 +34,16 @@ class DrawSkillCardsOfColorEventProcessorTest extends EventTestHarness<DrawSkill
 
         assertSkillCards(2, politics);
     }
+
+    // "Players will be unable to draw cards of that type until some of that type of cards have been discarded."
+    @Test
+    void shouldDrawOnlyTheCardsLeft() {
+        val bait = new SkillCard(1, BAIT);
+        treacheryDeck.clear();
+        game.decks().discard(bait);
+
+        execute(new DrawSkillCardsOfColorEvent(1, TREACHERY, 2));
+
+        assertSkillCards(1, bait);
+    }
 }

@@ -8,6 +8,7 @@ import xyz.zlatanov.frakkintoasters.state.character.Character;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
+import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.MUST_LAUNCH_IN_VIPER;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 
@@ -76,7 +77,7 @@ class SelectCharacterEventProcessorTest extends EventTestHarness<SelectCharacter
     @Test
     void shouldFollowupForApollo() {
         execute(select(LEE_APOLLO_ADAMA));
-        assertFollowup(new PlayerDecisionEvent<>(1, LaunchViperEvent.class));
+        assertFollowup(new PlayerDecisionEvent<>(1, LaunchViperEvent.class, MUST_LAUNCH_IN_VIPER));
     }
 
     @Test

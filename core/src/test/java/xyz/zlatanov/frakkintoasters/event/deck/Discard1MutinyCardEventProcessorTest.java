@@ -6,6 +6,7 @@ import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static xyz.zlatanov.frakkintoasters.state.card.MutinyCard.PANIC;
+import static xyz.zlatanov.frakkintoasters.state.card.MutinyCard.WEAPONS_ARMED;
 
 class Discard1MutinyCardEventProcessorTest extends EventTestHarness<Discard1MutinyCardEvent> {
 
@@ -17,5 +18,11 @@ class Discard1MutinyCardEventProcessorTest extends EventTestHarness<Discard1Muti
 
         assertTrue(player(1).mutinyCards().isEmpty());
         assertEquals(PANIC, mutinyDeck.lastDiscarded());
+    }
+
+    @Test
+    void shouldDiscardACardInHand() {
+        player(1).mutinyCards().addOnTop(PANIC);
+        assertInvalid(new Discard1MutinyCardEvent(1, WEAPONS_ARMED));
     }
 }

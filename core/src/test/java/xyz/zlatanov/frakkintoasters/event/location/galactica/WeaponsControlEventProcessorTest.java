@@ -1,6 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event.location.galactica;
 
 import lombok.val;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.event.AttackBasestarEvent;
@@ -9,8 +10,15 @@ import xyz.zlatanov.frakkintoasters.event.AttackRaiderEvent;
 
 import static xyz.zlatanov.frakkintoasters.event.AttackBasestarEvent.Attacker.GALACTICA;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.TOM_ZAREK_ALT;
 
 class WeaponsControlEventProcessorTest extends EventTestHarness<WeaponsControlEvent> {
+
+    @BeforeEach
+    void setUpAtLocation() {
+        player(1).character(TOM_ZAREK_ALT);
+        moveTo(WEAPONS_CONTROL, TOM_ZAREK_ALT);
+    }
 
     @Test
     void shouldFollowupWithAttackRaiderEvent() {
@@ -43,5 +51,17 @@ class WeaponsControlEventProcessorTest extends EventTestHarness<WeaponsControlEv
         execute(new WeaponsControlEvent(1, basestarId));
 
         assertFollowup(new AttackBasestarEvent(GALACTICA, basestarId));
+    }
+
+    @Test
+    void shouldNotBeUsedWhileDamaged() {
+        val raider = raiderAt(GALACTICA_SPACE_2_OCLOCK);
+        galacticaBoard.damage(WEAPONS_CONTROL);
+        assertInvalid(new WeaponsControlEvent(1, raider.id()));
+    }
+
+    @Test
+    void shouldOnlyAttackACylonShipInSpace() {
+        assertInvalid(new WeaponsControlEvent(1, raider().id()));
     }
 }

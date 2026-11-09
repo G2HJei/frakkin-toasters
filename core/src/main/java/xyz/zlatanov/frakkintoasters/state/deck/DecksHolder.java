@@ -18,6 +18,7 @@ import xyz.zlatanov.frakkintoasters.state.damage.PegasusDamage;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 import xyz.zlatanov.frakkintoasters.state.view.DecksHolderView;
 
 import java.util.List;
@@ -110,6 +111,12 @@ public class DecksHolder implements DecksHolderView {
      * @return the deck with this id. The caller picks the card type
      */
     @SuppressWarnings("unchecked")
+    @Override
+    public int skillCardsLeft(SkillCardColor color) {
+        Deck<SkillCard> deck = deck(DeckId.of(color));
+        return deck.size() + deck.discardSize();
+    }
+
     public <T> Deck<T> deck(DeckId id) {
         return (Deck<T>) switch (id) {
             case CIVILIAN_SHIPS -> civilianShips;

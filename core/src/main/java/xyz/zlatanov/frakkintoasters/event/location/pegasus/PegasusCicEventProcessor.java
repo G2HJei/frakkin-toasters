@@ -1,15 +1,25 @@
 package xyz.zlatanov.frakkintoasters.event.location.pegasus;
 
 import lombok.val;
-import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.location.LocationActionProcessor;
 import xyz.zlatanov.frakkintoasters.event.ship.DamagePegasusEvent;
 import xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage;
 import xyz.zlatanov.frakkintoasters.state.view.BasestarView;
+import xyz.zlatanov.frakkintoasters.state.view.GameView;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 
-public class PegasusCicEventProcessor extends EventProcessor<PegasusCicEvent> {
+public class PegasusCicEventProcessor extends LocationActionProcessor<PegasusCicEvent> {
+
+    public static boolean canAct(GameView game) {
+        return !game.boards().galactica().shipsInSpace(BasestarView.class).isEmpty();
+    }
+
+    @Override
+    protected boolean isValidAction() {
+        return findBasestar() != null;
+    }
 
     @Override
     public Followup process() {
@@ -29,7 +39,7 @@ public class PegasusCicEventProcessor extends EventProcessor<PegasusCicEvent> {
     private void damageBasestar() {
         val basestar = findBasestar();
         if (basestar == null) {
-            return;
+            return; // the first damage destroyed it
         }
         ops.ship(basestar.id()).damage();
         if (countHits(basestar) > 2) {

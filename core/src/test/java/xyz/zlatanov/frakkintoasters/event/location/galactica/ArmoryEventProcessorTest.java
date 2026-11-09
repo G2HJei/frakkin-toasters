@@ -14,8 +14,16 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.ARMORY;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.SAMUEL_T_ANDERS;
 
 class ArmoryEventProcessorTest extends EventTestHarness<ArmoryEvent> {
+
+    @BeforeEach
+    void setUpAtLocation() {
+        player(1).character(SAMUEL_T_ANDERS);
+        moveTo(ARMORY, SAMUEL_T_ANDERS);
+    }
 
     Centurion centurion;
     int       centurionId;
@@ -61,4 +69,8 @@ class ArmoryEventProcessorTest extends EventTestHarness<ArmoryEvent> {
         assertEquals(4 - centurionsOnBoard, cylonShips.centurions().size());
     }
 
+    @Test
+    void shouldAttackACenturionOnTheBoardingPartyTrack() {
+        assertInvalid(new ArmoryEvent(1, centurion().id()));
+    }
 }

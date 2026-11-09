@@ -295,25 +295,48 @@ count. That waits for executions.
 
 ## Phase 7 - Validate player input
 
-`isValid()` is the only rule check a submitted event gets, and only 22 of 95 processors have one. A bad submit now rolls
-back instead of killing the game, but nothing stops a legal-looking one from cheating.
+`isValid()` is the only rule check a submitted event gets, and only 22 of 95 processors had one. A bad submit rolled
+back instead of killing the game, but nothing stopped a legal-looking one from cheating.
 
-- **Location actions.** None of the 21 `ActionEvent` processors checks that the player is at the location or that it
-  isn't damaged (rule 11.7.2.2), and 16 have no `isValid()` at all. Add `location()` to `ActionEvent` and a
-  `LocationActionProcessor` base class with the shared checks. The board views don't expose damage yet. 18 of those
-  processor tests never call `moveTo`, so their setup changes.
-- **Decision targets.** 10 have no `isValid()`: `DamageHumanFighterEvent`, `DestroyCivilianShipEvent`,
-  `Discard1MutinyCardEvent`, `DiscardDownTo1MutinyCardEvent`, `DogfightEvent`, `ExploitAWeaknessEvent`,
-  `ForceTheirHandEvent`, `MakePresidentEvent`, `ProtectTheFleetEvent`, `SendToSickbayEvent`.
-- **Decisions that lose their context.** `MainBatteriesEventProcessor` asks for a `DestroyCivilianShipEvent`, but the
-  ship has to be in the targeted space area, and the event can't know that. Use `one(...)` with concrete events when the
-  options are few, as `ActivateRaiderEventProcessor` does, and a constraint when they aren't (`DestroyRaidersEvent`
-  takes a subset).
-- **`LaunchViperEvent`** isn't a `PlayerEvent`, so its processor can't check the pilot against the deciding player. It
-  has a `todo` for this. Making it a `PlayerEvent` closes that.
-- **A decision must always have a legal answer**, or the game waits forever. A processor queues one only if an answer
-  exists. `HangarDeckEventProcessor` queues a mandatory launch without checking that a viper is available, and
-  `DrawSkillCardsEvent` has no answer when a deck and its discard pile are empty (rule 8.2.2.5).
+- **Location actions.** `ActionEvent` names its `location()`, and the 20 location processors extend
+  `LocationActionProcessor`. Its final `isValid()` checks that the player is at the location and that
+  `LocationActions.canAct` allows the action, then calls `isValidAction()` for the details of the event.
+  `LocationActions` is an exhaustive switch over `Location`. A damaged location has no action (rule 11.7.2.2), and
+  neither do Sickbay, the Brig, Administration, the Airlock and the Basestar Bridge until phase 9 gives them theirs. The
+  other cases call a static `canAct` on the location's processor, which holds the preconditions that don't depend on the
+  event: FTL Control out of the red zone, the President at the Quorum Chamber, a pilot and a viper at the Hangar Deck
+  (rule 11.2). `BattlestarBoardView.isDamaged` exposes the damage. The Daybreak Colonial One has 4 locations, so
+  `Location` gains `QUORUM_CHAMBER`.
+- **Decision targets.** The 10 got an `isValid()`. Where another processor or a followup needs the same rule, it is a
+  static check on the processor: `canBeSentToBrig`, `canBeDamaged`, `canBeChosenForSickbay`, `canBecomePresident`,
+  `canLaunchFromReserves`. `EventProcessor` has `isPlayer(n)` and `holdsSkillCards(cards)`. The second counts copies,
+  because the decks hold equal cards, e.g. 8 "Executive Order" 1s: the discards and Engine Room rejected two equal cards,
+  and playing cards before or into a skill check didn't check the hand at all. `ProtectTheFleetEvent.escort` names the
+  escorting viper, and the ability needs 3 piloting strength in the check.
+- **Choosing a character for Sickbay.** Rule 9.3.2 rules out a character already there, a revealed Cylon and one off
+  the board. `SendToSickbayEvent` is also queued directly, e.g. for the current player, where a rejection would be a
+  bug, so its `isValid()` only checks the player. The choices (Witch Hunt, Divisive Behavior, In the Ring) are a
+  `one(...)` of the characters who can be chosen, from `FollowupUtils.chooseCharacterForSickbay`. A character in the
+  Brig stays there.
+- **Main Batteries.** The civilian ship and the viper are a `one(...)` of the ships in the chosen space area. Raiders are
+  all alike, so the processor picks the ones it destroys, and there is no decision or constraint. The chooser is the
+  current player (decision 7), who is the acting player until Executive Order exists.
+- **`LaunchViperEvent`** is a `PlayerEvent`, and the pilot has to be the player's own character. Apollo's setup launch
+  carries `MUST_LAUNCH_IN_VIPER` ("Launch and pilot a viper").
+- **A decision always has a legal answer**, or the game would wait forever:
+  - The Action step asks for a location action only when `LocationActions.canAct`. Before, a player in Sickbay who
+    chose to act had no answer.
+  - The Hangar Deck needs a viper, and its 1 more action is `ActivateViperEvent`, because the pilot is in space.
+  - Command's 2 activations are optional ("up to 2").
+  - Press Room asks the target to keep 1 Mutiny Card only when he has 2, and the player to discard one only when he has
+    one.
+  - Prisoner Revolt asks the President only when another player can take the title.
+  - Draws follow rule 8.2.2.5: a color with no cards in its deck and discard pile can't be drawn, and
+    `DecksHolderView.skillCardsLeft` counts them. `DrawSkillCardsEvent` may draw fewer than its constraint only when no
+    other card fits. It assigns each card to a skill set option, so options that share a color work (Helena Cain,
+    Samuel Anders), and Cylon Leaders draw from their skill set (rule 6.2.1.1). Fixed-color draws take what is left,
+    and a draw from an empty pile shuffles the discard pile in first.
+- Fields a client sends empty are rejected where a check would have thrown.
 
 ## Phase 8 - End of game and Mutiny
 
@@ -345,7 +368,9 @@ Roadmap step 1 isn't finished. The processors exist but aren't chained.
   `ResolveConsequencesEvent`.
 - `EndSkillCheckEvent` from `skill-check.drawio` doesn't exist, and `activeSkillCheck` is never cleared.
 - Only Admiral's Quarters starts a skill check. The Administration, Airlock and Brig locations have skill check types
-  and results but no action event, and the Basestar Bridge has no action event either.
+  and results but no action event, and the Basestar Bridge has no action event either. `LocationActions` says they have
+  no action until then. The Administration action has to check its target with `canBecomePresident`, or its pass
+  result queues an invalid `MakePresidentEvent`.
 
 Acceptance test: a skill check runs from the action that starts it to `EndSkillCheckEvent` through `submit` and
 `choose`.
@@ -397,8 +422,9 @@ shown. A window with no holders doesn't pause, so a pause still shows that someo
 **Attacks.** Four of the six cards hang on attacks that don't exist yet, which is why this phase comes before Crisis. It
 adds processors for `AttackViperEvent`, `AttackRaiderEvent`, `AttackHeavyRaiderEvent`, `AttackBasestarEvent`,
 `AttackGalacticaEvent`, `ActivateViperEvent` and `DestroyRaidersEvent`, with the windows in from the start. Cylon
-activations and Weapons Control already queue some of them. `RUN_INTERFERENCE` needs a counter that lasts for one raider
-activation.
+activations and Weapons Control already queue some of them. Protect the Fleet attacks any Cylon ship with an
+`AttackBasestarEvent`, so it needs the raider and heavy raider attacks too. `RUN_INTERFERENCE` needs a counter that
+lasts for one raider activation.
 
 Acceptance tests: a held card pauses the game at its window, a window with no holders doesn't, the other players get a
 plain `Waiting` during a window, two `STRATEGIC_PLANNING` cards on one roll go to the current player, and restore works

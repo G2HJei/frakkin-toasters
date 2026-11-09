@@ -1,6 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event.location.cylon;
 
 import lombok.val;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.event.Followup;
@@ -13,9 +14,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DRAW_EXACTLY_2;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.HUMAN_FLEET;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.LEOBEN_CONOY;
 import static xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard.DETENTE;
 
 class HumanFleetLookAtTopCrisisCardEventProcessorTest extends EventTestHarness<HumanFleetLookAtTopCrisisCardEvent> {
+
+    @BeforeEach
+    void setUpAtLocation() {
+        player(1).character(LEOBEN_CONOY);
+        moveTo(HUMAN_FLEET, LEOBEN_CONOY);
+    }
     @Test
     void shouldDrawCardAndFollowUpWithPlacementChoiceAndSkillDraw() {
         crisisDeck.nextCard(DETENTE);

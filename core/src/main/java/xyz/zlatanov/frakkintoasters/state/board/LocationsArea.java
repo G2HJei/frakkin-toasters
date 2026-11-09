@@ -31,6 +31,7 @@ public enum LocationsArea {
             GALACTICA_SPACE_8_OCLOCK,
             GALACTICA_SPACE_10_OCLOCK),
     COLONIAL_ONE(
+            QUORUM_CHAMBER,
             PRESS_ROOM,
             PRESIDENTS_OFFICE,
             ADMINISTRATION),

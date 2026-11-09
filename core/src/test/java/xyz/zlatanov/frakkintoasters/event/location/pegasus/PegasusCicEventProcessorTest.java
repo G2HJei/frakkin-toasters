@@ -10,9 +10,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.PEGASUS_CIC;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.HELENA_CAIN;
 import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.*;
 
 class PegasusCicEventProcessorTest extends EventTestHarness<PegasusCicEvent> {
+
+    @BeforeEach
+    void setUpAtLocation() {
+        player(1).character(HELENA_CAIN);
+        moveTo(PEGASUS_CIC, HELENA_CAIN);
+    }
 
     Basestar        basestar;
     PegasusCicEvent event;
@@ -68,4 +76,8 @@ class PegasusCicEventProcessorTest extends EventTestHarness<PegasusCicEvent> {
         assertEquals(4, basestarDamageDeck.cards().size());
     }
 
+    @Test
+    void shouldChooseABasestarInSpace() {
+        assertInvalid(new PegasusCicEvent(1, basestar().id()));
+    }
 }

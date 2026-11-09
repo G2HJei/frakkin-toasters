@@ -24,4 +24,8 @@ class DestroyCivilianShipEventProcessorTest extends EventTestHarness<DestroyCivi
         assertTrue(game.removedComponents().contains(civilianShip));
     }
 
+    @Test
+    void shouldDestroyACivilianShipInSpace() {
+        assertInvalid(new DestroyCivilianShipEvent(civilianShip().id()));
+    }
 }

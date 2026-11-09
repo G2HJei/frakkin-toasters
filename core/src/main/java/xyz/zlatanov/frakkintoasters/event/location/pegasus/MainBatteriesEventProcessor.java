@@ -1,20 +1,29 @@
 package xyz.zlatanov.frakkintoasters.event.location.pegasus;
 
 import lombok.val;
-import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.DamageHumanFighterEvent;
 import xyz.zlatanov.frakkintoasters.event.DestroyRaidersEvent;
+import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
-import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
+import xyz.zlatanov.frakkintoasters.event.location.LocationActionProcessor;
 import xyz.zlatanov.frakkintoasters.event.ship.DestroyCivilianShipEvent;
 import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
 import xyz.zlatanov.frakkintoasters.state.ship.Raider;
 import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 
+import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toSet;
+import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
+import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.GALACTICA_SPACE;
 
-public class MainBatteriesEventProcessor extends EventProcessor<MainBatteriesEvent> {
+public class MainBatteriesEventProcessor extends LocationActionProcessor<MainBatteriesEvent> {
+
+    @Override
+    protected boolean isValidAction() {
+        return event.spaceLocation() != null && GALACTICA_SPACE.locations().contains(event.spaceLocation());
+    }
+
     @Override
     public Followup process() {
         val roll = ops.rollDie();
@@ -29,37 +38,31 @@ public class MainBatteriesEventProcessor extends EventProcessor<MainBatteriesEve
         }
     }
 
-
+    // The options are the ships in the chosen space area, which a decision on the bare event couldn't keep.
     private Followup destroyCivilianShip() {
-        val civilians = galacticaBoard.shipsIn(event.spaceLocation(), CivilianShip.class);
-        if (civilians.isEmpty()) {
-            return Followup.NONE;
-        }
-        if (civilians.size() == 1) {
-            return single(new DestroyCivilianShipEvent(civilians.getFirst().id()));
-        }
-        return single(new PlayerDecisionEvent<>(event.playerNumber(), DestroyCivilianShipEvent.class));
+        return one(galacticaBoard.shipsIn(event.spaceLocation(), CivilianShip.class)
+                .stream()
+                .sorted(comparingInt(Ship::id))
+                .map(civilianShip -> new DestroyCivilianShipEvent(civilianShip.id()))
+                .toArray(Event[]::new));
     }
 
     private Followup damageViper() {
-        val humanFighters = galacticaBoard.humanFightersIn(event.spaceLocation());
-        if (humanFighters.isEmpty()) {
-            return Followup.NONE;
-        }
-        if (humanFighters.size() == 1) {
-            return single(new DamageHumanFighterEvent(humanFighters.getFirst().id()));
-        }
-        return single(new PlayerDecisionEvent<>(event.playerNumber(), DamageHumanFighterEvent.class));
+        return one(galacticaBoard.humanFightersIn(event.spaceLocation())
+                .stream()
+                .sorted(comparingInt(Ship::id))
+                .map(humanFighter -> new DamageHumanFighterEvent(humanFighter.id()))
+                .toArray(Event[]::new));
     }
 
+    // Raiders are all alike, so nobody has to choose which ones are destroyed.
     private Followup destroyRaiders(int count) {
-        val raiders = galacticaBoard.shipsIn(event.spaceLocation(), Raider.class);
-        if (raiders.isEmpty()) {
-            return Followup.NONE;
-        }
-        if (raiders.size() <= count) {
-            return single(new DestroyRaidersEvent(raiders.stream().map(Ship::id).collect(toSet())));
-        }
-        return single(new PlayerDecisionEvent<>(event.playerNumber(), DestroyRaidersEvent.class));
+        val raiderIds = galacticaBoard.shipsIn(event.spaceLocation(), Raider.class)
+                .stream()
+                .map(Ship::id)
+                .sorted()
+                .limit(count)
+                .collect(toSet());
+        return raiderIds.isEmpty() ? Followup.NONE : single(new DestroyRaidersEvent(raiderIds));
     }
 }

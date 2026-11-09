@@ -38,4 +38,9 @@ class ForceTheirHandEventProcessorTest extends EventTestHarness<ForceTheirHandEv
         assertNoSkillCards(1);
         assertEquals(List.of(card), game.activeSkillCheck().nonMatchingPile().cards());
     }
+
+    @Test
+    void shouldPlayACardInHand() {
+        assertInvalid(new ForceTheirHandEvent(1, new SkillCard(0, CALCULATIONS)));
+    }
 }

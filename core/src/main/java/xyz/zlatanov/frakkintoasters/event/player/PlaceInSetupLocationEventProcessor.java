@@ -9,7 +9,7 @@ public class PlaceInSetupLocationEventProcessor extends EventProcessor<PlaceInSe
 
     @Override
     protected boolean isValid() {
-        return game.locate(player.character()).isEmpty()
+        return event.location() != null && game.locate(player.character()).isEmpty()
                 && List.of(player.character().setup()).contains(event.location());
     }
 

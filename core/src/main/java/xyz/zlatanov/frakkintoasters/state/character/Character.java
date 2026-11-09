@@ -9,6 +9,7 @@ import java.util.Set;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.CharacterType.*;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.PILOTING;
 
 @RequiredArgsConstructor
 @Getter
@@ -56,5 +57,10 @@ public enum Character {
         this.type = type;
         skillSet = SkillSetOption.skillSet(skills);
         this.setup = setup;
+    }
+
+    // Every character with piloting in his skill set can pilot a viper (rule 11.2).
+    public boolean canPilot() {
+        return skillSet.stream().anyMatch(option -> option.colors().contains(PILOTING));
     }
 }

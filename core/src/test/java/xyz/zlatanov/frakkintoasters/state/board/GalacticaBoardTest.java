@@ -23,7 +23,7 @@ class GalacticaBoardTest {
     @Test
     void shouldDestroyColonialOne() {
         board.destroyColonialOne();
-        assertTrue(board.locations().stream().noneMatch(l -> Set.of(PRESS_ROOM, PRESIDENTS_OFFICE, ADMINISTRATION).contains(l)));
+        assertTrue(board.locations().stream().noneMatch(l -> Set.of(QUORUM_CHAMBER, PRESS_ROOM, PRESIDENTS_OFFICE, ADMINISTRATION).contains(l)));
         assertTrue(board.colonialOneDestroyed());
     }
 

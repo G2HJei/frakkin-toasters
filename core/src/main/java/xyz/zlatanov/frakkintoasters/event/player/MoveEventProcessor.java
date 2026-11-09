@@ -27,7 +27,7 @@ public class MoveEventProcessor extends EventProcessor<MoveEvent> {
 
     @Override
     public boolean isValid() {
-        if (game.locate(player.character()).isEmpty()) {
+        if (destination == null || game.locate(player.character()).isEmpty()) {
             return false; // e.g. a "Stranded" Karl "Helo" Agathon
         }
         val isEligibleLocation = isEligibleLocation();

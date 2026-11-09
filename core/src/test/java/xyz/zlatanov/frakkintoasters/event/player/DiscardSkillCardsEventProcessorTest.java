@@ -156,4 +156,14 @@ class DiscardSkillCardsEventProcessorTest extends EventTestHarness<DiscardSkillC
                 .mapToObj(i -> new SkillCard(100 + i, REPAIR))
                 .toArray(SkillCard[]::new);
     }
+
+    // The decks hold equal cards, e.g. 8 "Executive Order" 1s.
+    @Test
+    void shouldDiscardEqualCards() {
+        player(1).gainSkillCards(leadership);
+
+        execute(new DiscardSkillCardsEvent(1, List.of(leadership, leadership), DISCARD_EXACTLY_2));
+
+        assertSkillCards(1, politics, engineering);
+    }
 }

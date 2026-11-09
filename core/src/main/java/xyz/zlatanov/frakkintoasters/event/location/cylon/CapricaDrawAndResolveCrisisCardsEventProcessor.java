@@ -1,13 +1,13 @@
 package xyz.zlatanov.frakkintoasters.event.location.cylon;
 
 import lombok.val;
-import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.ResolveCapricaCrisisCardEvent;
+import xyz.zlatanov.frakkintoasters.event.location.LocationActionProcessor;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 
-public class CapricaDrawAndResolveCrisisCardsEventProcessor extends EventProcessor<CapricaDrawAndResolveCrisisCardsEvent> {
+public class CapricaDrawAndResolveCrisisCardsEventProcessor extends LocationActionProcessor<CapricaDrawAndResolveCrisisCardsEvent> {
 
 
     @Override

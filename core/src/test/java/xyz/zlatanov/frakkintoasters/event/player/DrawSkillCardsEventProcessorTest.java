@@ -20,12 +20,15 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DRAW_EXACTLY_1;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DRAW_EXACTLY_2;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DRAW_EXACTLY_4;
+import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DRAW_EXACTLY_5;
+import static xyz.zlatanov.frakkintoasters.state.GameStep.MOVEMENT;
 import static xyz.zlatanov.frakkintoasters.state.GameStep.RECEIVE_SKILLS;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.AT_ANY_COST;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.BAIT;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.LAUNCH_SCOUT;
 
 class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEvent> {
 
@@ -181,4 +184,70 @@ class DrawSkillCardsEventProcessorTest extends EventTestHarness<DrawSkillCardsEv
 
     }
 
+    // Options can share a color: "2xL, 2xTa, 1xTa/L".
+    @Test
+    void shouldFillOptionsThatShareAColor() {
+        player(2).character(HELENA_CAIN);
+
+        execute(new DrawSkillCardsEvent(2, Map.of(LEADERSHIP, 3, TACTICS, 2), DRAW_EXACTLY_5));
+
+        assertEquals(5, player(2).skillCards().size());
+    }
+
+    @Test
+    void shouldNotOverfillOptionsThatShareAColor() {
+        player(2).character(HELENA_CAIN);
+        assertInvalid(new DrawSkillCardsEvent(2, Map.of(LEADERSHIP, 4, TACTICS, 1), DRAW_EXACTLY_5));
+    }
+
+    // "Players will be unable to draw cards of that type until some of that type of cards have been discarded."
+    @Test
+    void shouldDrawFewerWhenADeckAndItsDiscardPileAreEmpty() {
+        tacticsDeck.clear();
+
+        execute(new DrawSkillCardsEvent(1, Map.of(PILOTING, 2, LEADERSHIP, 1), DRAW_EXACTLY_5));
+
+        assertEquals(3, player(1).skillCards().size());
+    }
+
+    @Test
+    void shouldNotDrawFromAnEmptyDeck() {
+        tacticsDeck.clear();
+        assertInvalid(new DrawSkillCardsEvent(1, Map.of(TACTICS, 1, PILOTING, 2, LEADERSHIP, 1), DRAW_EXACTLY_4));
+    }
+
+    @Test
+    void shouldDrawFromTheDiscardPileOfAnEmptyDeck() {
+        tacticsDeck.clear();
+        game.decks().discard(new SkillCard(1, LAUNCH_SCOUT));
+
+        execute(new DrawSkillCardsEvent(1, Map.of(TACTICS, 1), DRAW_EXACTLY_1));
+
+        assertSkillCards(1, new SkillCard(1, LAUNCH_SCOUT));
+    }
+
+    @Test
+    void shouldDrawTheOtherColorOfAnOptionWhenOneRunsOut() {
+        leadershipDeck.clear();
+        assertInvalid(new DrawSkillCardsEvent(1, Map.of(TACTICS, 2, PILOTING, 2), DRAW_EXACTLY_5));
+    }
+
+    // Cylon Leaders draw from their skill set (rule 6.2.1.1): "1xL, 1xTr/E".
+    @Test
+    void shouldNotLetACylonLeaderDrawOutsideHisSkillSet() {
+        player(2).character(CAPRICA_SIX);
+        assertInvalid(new DrawSkillCardsEvent(2, Map.of(POLITICS, 1, TACTICS, 1), DRAW_EXACTLY_2));
+    }
+
+    @Test
+    void shouldGiveAnInfiltratingCylonLeaderNoExtraCardOutsideTheReceiveSkillsStep() {
+        player(2).character(CAPRICA_SIX).infiltrateGalactica();
+        game.turn().step(MOVEMENT);
+        assertInvalid(new DrawSkillCardsEvent(2, Map.of(LEADERSHIP, 2), DRAW_EXACTLY_2));
+    }
+
+    @Test
+    void shouldNotDrawANegativeCount() {
+        assertInvalid(new DrawSkillCardsEvent(1, Map.of(TACTICS, 3, PILOTING, -1)));
+    }
 }

@@ -65,12 +65,10 @@ public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard, Gal
 
     @Mutates
     public void destroyColonialOne() {
-        locations.remove(PRESS_ROOM);
-        locations.remove(PRESIDENTS_OFFICE);
-        locations.remove(ADMINISTRATION);
-        charactersIn(PRESS_ROOM).forEach(c -> place(SICKBAY, c));
-        charactersIn(PRESIDENTS_OFFICE).forEach(c -> place(SICKBAY, c));
-        charactersIn(ADMINISTRATION).forEach(c -> place(SICKBAY, c));
+        for (val location : COLONIAL_ONE.locations()) {
+            charactersIn(location).forEach(c -> place(SICKBAY, c));
+            locations.remove(location);
+        }
         colonialOneDestroyed = true;
     }
 

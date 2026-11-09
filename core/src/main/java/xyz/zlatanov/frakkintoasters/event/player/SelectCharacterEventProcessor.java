@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
+import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.MUST_LAUNCH_IN_VIPER;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.character.CharacterType.CYLON_LEADER;
 import static xyz.zlatanov.frakkintoasters.state.character.CharacterType.SUPPORT;
@@ -134,7 +135,8 @@ public class SelectCharacterEventProcessor extends EventProcessor<SelectCharacte
     private Followup specialSetupFollowup() {
         return switch (selectedCharacter) {
             case KARL_HELO_AGATHON -> Followup.NONE;
-            case LEE_APOLLO_ADAMA -> single(new PlayerDecisionEvent<>(event.playerNumber(), LaunchViperEvent.class));
+            case LEE_APOLLO_ADAMA -> // "Setup: Launch and pilot a viper"
+                    single(new PlayerDecisionEvent<>(event.playerNumber(), LaunchViperEvent.class, MUST_LAUNCH_IN_VIPER));
             default -> throw new FrakCallTheAdmiralException();
         };
     }

@@ -27,7 +27,7 @@ public class LeaveBrigEventProcessor extends EventProcessor<LeaveBrigEvent> {
     // As with normal movement, the character can't move to space, a hazardous location or a Cylon location.
     private boolean isEligibleDestination() {
         val destination = event.destination();
-        return !destination.isSpaceLocation()
+        return destination != null && !destination.isSpaceLocation()
                 && !destination.isHazardousLocation()
                 && !destination.isCylonLocation();
     }

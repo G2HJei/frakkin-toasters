@@ -1,12 +1,17 @@
 package xyz.zlatanov.frakkintoasters;
 
+import lombok.val;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
 import xyz.zlatanov.frakkintoasters.operation.GameOps;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.view.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class EventProcessor<T extends Event> {
 
@@ -59,6 +64,17 @@ public abstract class EventProcessor<T extends Event> {
 
     protected boolean isValid() {
         return true;
+    }
+
+    // A player number sent by a client may name nobody.
+    protected boolean isPlayer(Integer playerNumber) {
+        return playerNumber != null && playerNumber >= 1 && game.players().size() >= playerNumber;
+    }
+
+    // Each card takes one copy out of the player's hand, because the decks hold equal cards (8 "Executive Order" 1s).
+    protected boolean holdsSkillCards(List<SkillCard> cards) {
+        val hand = new ArrayList<>(player.skillCards().cards());
+        return cards != null && cards.stream().allMatch(hand::remove);
     }
 
     private void setContext(GameView game, T event) {

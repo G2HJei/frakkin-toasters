@@ -16,7 +16,7 @@ import java.util.Set;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_4_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_6_OCLOCK;
 
-public interface GalacticaBoardView extends BoardView, SpaceLocationsBoardView {
+public interface GalacticaBoardView extends BattlestarBoardView, SpaceLocationsBoardView {
 
     List<Location> VIPER_LAUNCH_SPACES = List.of(GALACTICA_SPACE_4_OCLOCK, GALACTICA_SPACE_6_OCLOCK);
 

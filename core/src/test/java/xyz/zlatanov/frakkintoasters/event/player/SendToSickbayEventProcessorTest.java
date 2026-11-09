@@ -63,4 +63,19 @@ class SendToSickbayEventProcessorTest extends EventTestHarness<SendToSickbayEven
         assertFalse(galacticaBoard.shipsInSpace().containsKey(fighter));
         assertNull(fighter.pilot());
     }
+
+    // "If a character is in the "Brig", and a card sends him to "Sickbay" he is not moved from the "Brig"" (rule 9.3.2)
+    @Test
+    void shouldLeaveACharacterInTheBrig() {
+        moveTo(BRIG, LEE_APOLLO_ADAMA);
+
+        execute(new SendToSickbayEvent(2));
+
+        assertEquals(BRIG, locate(LEE_APOLLO_ADAMA));
+    }
+
+    @Test
+    void shouldSendSomeoneWhoIsPlaying() {
+        assertInvalid(new SendToSickbayEvent(4));
+    }
 }
