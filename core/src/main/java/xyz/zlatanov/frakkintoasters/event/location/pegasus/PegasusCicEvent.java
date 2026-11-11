@@ -1,6 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event.location.pegasus;
 
-import xyz.zlatanov.frakkintoasters.event.ActionEvent;
+import xyz.zlatanov.frakkintoasters.event.LocationEvent;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.PEGASUS_CIC;
@@ -10,7 +10,7 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.PEGASUS_CIC;
 // 1-3: Damage Pegasus
 // 4-6: Damage basestar
 // 7-8: Damage basestar twice
-public record PegasusCicEvent(int playerNumber, int basestarId) implements ActionEvent {
+public record PegasusCicEvent(int playerNumber, int basestarId) implements LocationEvent {
 
     @Override
     public Location location() {

@@ -65,8 +65,8 @@ Multi-module Gradle project with a single `core` module. Package root: `xyz.zlat
 - `event/` - event records and their processors, grouped by area (`action`, `board`, `crisis`, `deck`, `endgame`,
   `location/{galactica,pegasus,colonialone,cylon}`, `loyalty`, `officials`, `player`, `ship`, `skillcheck`,
   `skillcheck/ability`, `skillcheck/result`, `turn`). Also `placeholder/` (events that need player input) and
-  `constraint/` (`EventConstraint`, `ConstrainedEvent`). `location/` holds `LocationActionProcessor` (base of the
-  location action processors) and `LocationActions` (whether a location's action can be taken, see "Validation")
+  `constraint/` (`EventConstraint`, `ConstrainedEvent`). `location/` holds `LocationActionProcessor`, the base of the
+  location action processors
 - `operation/` - game ops, the only code that decides what changes: `GameOps` (entry point) hands out `PlayerOps`,
   `ShipOps`, `GalacticaOps`, `PegasusOps`, `CylonFleetOps`, `SkillCheckOps`, `LoyaltyDeckOps`, `TitleOps`. They extend
   `AbstractOps`, which holds the `Game` and a `FactRecorder`, and offers `record`, `draw`, `shuffle`. Ops record facts,
@@ -109,8 +109,9 @@ Multi-module Gradle project with a single `core` module. Package root: `xyz.zlat
 ### Events and Processors
 
 Events are plain records with no logic. `Event` is an empty marker interface. `PlayerEvent` adds `playerNumber()`.
-`LocationEvent` adds `location()`. `ActionEvent extends PlayerEvent` marks the location actions, and its `location()`
-names the location whose action it is.
+`ActionEvent extends PlayerEvent` marks an action a player takes in the Action step. `LocationEvent extends ActionEvent`
+marks the action of a location and names it with `location()`. Its static `canAct` says whether a player can take the
+action of a location at all (see "Validation").
 
 A `PlayerEvent` is for events whose player can differ from the current player (an "Executive Order" target, any player
 in a
@@ -223,10 +224,10 @@ through the same check, and failing it there is a bug. So a rule that only binds
 instead, e.g. `FollowupUtils.chooseCharacterForSickbay` (rule 9.3.2).
 
 - Location action processors extend `LocationActionProcessor`. Its final `isValid()` checks that the player is at
-  `event.location()` and that `LocationActions.canAct` allows the action, then calls `isValidAction()` for the details
-  of the event. `LocationActions` is an exhaustive switch over `Location`, so a new location doesn't compile until it's
-  mapped. A damaged location has no action (rule 11.7.2.2), and a location with preconditions asks the static `canAct`
-  of its processor, e.g. FTL Control out of the red zone.
+  `event.location()` and that `LocationEvent.canAct` allows the action, then calls `isValidAction()` for the details
+  of the event. `LocationEvent.canAct` is an exhaustive switch over `Location`, so a new location doesn't compile until
+  it's mapped. A damaged location has no action (rule 11.7.2.2), and a location with preconditions asks the static
+  `canAct` of its processor, e.g. FTL Control out of the red zone.
 - A rule that another processor or a followup needs too is a public static check on its processor, e.g.
   `SendToBrigEventProcessor.canBeSentToBrig` or `MakePresidentEventProcessor.canBecomePresident`.
 - `EventProcessor.isPlayer(n)` checks a player number from the client, and `holdsSkillCards(cards)` the hand. It counts
@@ -283,7 +284,7 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
   Cylons (and Cylon Leaders who aren't Infiltrating, see `isHuman()`) have no Crisis and no Activate Cylon Ships step,
   and characters in the "Brig" no Crisis step. Movement and Action are a `OneOf` with a `NoOpEvent`. A pilot gets
   `ActivateViperEvent` instead of a location action, and a character whose location has no action he can take (e.g. in
-  "Sickbay", see `LocationActions`) gets no Action choice.
+  "Sickbay", see `LocationEvent.canAct`) gets no Action choice.
 - `DiscardStepEvent` asks every player over the hand limit, clockwise from the current player, with
   `DISCARD_DOWN_TO_HAND_LIMIT`: Skill Cards over `handLimit()`, and the President's Quorum Cards.
 - The Crisis Cards of a turn stay with it, in `TurnView.crisisCards()` (`GameOps.playCrisisCard`), for the icons the

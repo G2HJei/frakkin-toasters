@@ -298,10 +298,12 @@ count. That waits for executions.
 `isValid()` is the only rule check a submitted event gets, and only 22 of 95 processors had one. A bad submit rolled
 back instead of killing the game, but nothing stopped a legal-looking one from cheating.
 
-- **Location actions.** `ActionEvent` names its `location()`, and the 20 location processors extend
+- **Location actions.** The location actions implement a new `LocationEvent extends ActionEvent`, which names their
+  `location()`, and leaves `ActionEvent` for any action. The old `LocationEvent` named a destination, and
+  `LaunchViperEvent` and `MoveCivilianShipEvent` no longer implement it. The 20 location processors extend
   `LocationActionProcessor`. Its final `isValid()` checks that the player is at the location and that
-  `LocationActions.canAct` allows the action, then calls `isValidAction()` for the details of the event.
-  `LocationActions` is an exhaustive switch over `Location`. A damaged location has no action (rule 11.7.2.2), and
+  `LocationEvent.canAct` allows the action, then calls `isValidAction()` for the details of the event.
+  `LocationEvent.canAct` is an exhaustive switch over `Location`. A damaged location has no action (rule 11.7.2.2), and
   neither do Sickbay, the Brig, Administration, the Airlock and the Basestar Bridge until phase 9 gives them theirs. The
   other cases call a static `canAct` on the location's processor, which holds the preconditions that don't depend on the
   event: FTL Control out of the red zone, the President at the Quorum Chamber, a pilot and a viper at the Hangar Deck
@@ -310,21 +312,21 @@ back instead of killing the game, but nothing stopped a legal-looking one from c
 - **Decision targets.** The 10 got an `isValid()`. Where another processor or a followup needs the same rule, it is a
   static check on the processor: `canBeSentToBrig`, `canBeDamaged`, `canBeChosenForSickbay`, `canBecomePresident`,
   `canLaunchFromReserves`. `EventProcessor` has `isPlayer(n)` and `holdsSkillCards(cards)`. The second counts copies,
-  because the decks hold equal cards, e.g. 8 "Executive Order" 1s: the discards and Engine Room rejected two equal cards,
-  and playing cards before or into a skill check didn't check the hand at all. `ProtectTheFleetEvent.escort` names the
-  escorting viper, and the ability needs 3 piloting strength in the check.
+  because the decks hold equal cards, e.g. 8 "Executive Order" 1s: the discards and Engine Room rejected two equal
+  cards, and playing cards before or into a skill check didn't check the hand at all. `ProtectTheFleetEvent.escort`
+  names the escorting viper, and the ability needs 3 piloting strength in the check.
 - **Choosing a character for Sickbay.** Rule 9.3.2 rules out a character already there, a revealed Cylon and one off
   the board. `SendToSickbayEvent` is also queued directly, e.g. for the current player, where a rejection would be a
   bug, so its `isValid()` only checks the player. The choices (Witch Hunt, Divisive Behavior, In the Ring) are a
   `one(...)` of the characters who can be chosen, from `FollowupUtils.chooseCharacterForSickbay`. A character in the
   Brig stays there.
-- **Main Batteries.** The civilian ship and the viper are a `one(...)` of the ships in the chosen space area. Raiders are
-  all alike, so the processor picks the ones it destroys, and there is no decision or constraint. The chooser is the
+- **Main Batteries.** The civilian ship and the viper are a `one(...)` of the ships in the chosen space area. Raiders
+  are all alike, so the processor picks the ones it destroys, and there is no decision or constraint. The chooser is the
   current player (decision 7), who is the acting player until Executive Order exists.
 - **`LaunchViperEvent`** is a `PlayerEvent`, and the pilot has to be the player's own character. Apollo's setup launch
   carries `MUST_LAUNCH_IN_VIPER` ("Launch and pilot a viper").
 - **A decision always has a legal answer**, or the game would wait forever:
-  - The Action step asks for a location action only when `LocationActions.canAct`. Before, a player in Sickbay who
+  - The Action step asks for a location action only when `LocationEvent.canAct`. Before, a player in Sickbay who
     chose to act had no answer.
   - The Hangar Deck needs a viper, and its 1 more action is `ActivateViperEvent`, because the pilot is in space.
   - Command's 2 activations are optional ("up to 2").
@@ -368,9 +370,9 @@ Roadmap step 1 isn't finished. The processors exist but aren't chained.
   `ResolveConsequencesEvent`.
 - `EndSkillCheckEvent` from `skill-check.drawio` doesn't exist, and `activeSkillCheck` is never cleared.
 - Only Admiral's Quarters starts a skill check. The Administration, Airlock and Brig locations have skill check types
-  and results but no action event, and the Basestar Bridge has no action event either. `LocationActions` says they have
-  no action until then. The Administration action has to check its target with `canBecomePresident`, or its pass
-  result queues an invalid `MakePresidentEvent`.
+  and results but no action event, and the Basestar Bridge has no action event either. `LocationEvent.canAct` says
+  they have no action until then. The Administration action has to check its target with `canBecomePresident`, or its
+  pass result queues an invalid `MakePresidentEvent`.
 
 Acceptance test: a skill check runs from the action that starts it to `EndSkillCheckEvent` through `submit` and
 `choose`.

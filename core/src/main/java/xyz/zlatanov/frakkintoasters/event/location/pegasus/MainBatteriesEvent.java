@@ -1,6 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event.location.pegasus;
 
-import xyz.zlatanov.frakkintoasters.event.ActionEvent;
+import xyz.zlatanov.frakkintoasters.event.LocationEvent;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.MAIN_BATTERIES;
@@ -11,7 +11,7 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.MAIN_BATTERIES;
 // 2-3: Damage 1 viper
 // 4-6: Destroy 2 raiders
 // 7-8: Destroy 4 raiders
-public record MainBatteriesEvent(int playerNumber, Location spaceLocation) implements ActionEvent {
+public record MainBatteriesEvent(int playerNumber, Location spaceLocation) implements LocationEvent {
 
     @Override
     public Location location() {

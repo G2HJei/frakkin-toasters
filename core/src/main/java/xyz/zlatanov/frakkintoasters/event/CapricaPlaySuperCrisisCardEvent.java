@@ -10,7 +10,7 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.CAPRICA;
 // bottom of the deck.*
 // *No "Activate Cylon Ships" step.
 public record CapricaPlaySuperCrisisCardEvent(int playerNumber,
-                                              SuperCrisisCard superCrisisCard) implements ActionEvent {
+                                              SuperCrisisCard superCrisisCard) implements LocationEvent {
 
     //todo follow up with chosen card's specific event
 

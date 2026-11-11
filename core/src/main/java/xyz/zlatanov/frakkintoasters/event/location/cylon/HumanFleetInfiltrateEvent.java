@@ -1,6 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event.location.cylon;
 
-import xyz.zlatanov.frakkintoasters.event.ActionEvent;
+import xyz.zlatanov.frakkintoasters.event.LocationEvent;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.HUMAN_FLEET;
@@ -10,7 +10,7 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.HUMAN_FLEET;
 // draw 2 Skill Cards.
 // or
 // Action: Infiltrate Galactica.
-public record HumanFleetInfiltrateEvent(int playerNumber, Location galacticaLocation) implements ActionEvent {
+public record HumanFleetInfiltrateEvent(int playerNumber, Location galacticaLocation) implements LocationEvent {
 
     @Override
     public Location location() {

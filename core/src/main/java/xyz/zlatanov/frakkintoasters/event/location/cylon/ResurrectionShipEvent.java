@@ -1,6 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event.location.cylon;
 
-import xyz.zlatanov.frakkintoasters.event.ActionEvent;
+import xyz.zlatanov.frakkintoasters.event.LocationEvent;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.RESURRECTION_SHIP;
@@ -8,7 +8,7 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.RESURRECTION_SHI
 // Resurrection Ship (Cylon location, Daybreak)
 // Draw only 1 Skill Card during your Draw Skill Cards step.
 // Action: Draw 1 Super Crisis Card.
-public record ResurrectionShipEvent(int playerNumber) implements ActionEvent {
+public record ResurrectionShipEvent(int playerNumber) implements LocationEvent {
 
     @Override
     public Location location() {

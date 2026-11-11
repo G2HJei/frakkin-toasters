@@ -15,14 +15,14 @@ public class QuorumChamberEventProcessor extends LocationActionProcessor<QuorumC
     // "If you are the President"
     public static boolean canAct(GameView game, PlayerView player) {
         return player.character() == game.president();
-    } //todo put canAct in the LocationActionProcessor ?
+    }
 
     @Override
     public Followup process() {
         ops.titles().drawQuorumCard();
 
-        return one(
-                new DrawQuorumCardEvent(), // todo this should be player decision
+        return one(// todo this should be aligned to the actual location text
+                new DrawQuorumCardEvent(),
                 new PlayerDecisionEvent<>(event.playerNumber(), PlayQuorumCardEvent.class));
     }
 }

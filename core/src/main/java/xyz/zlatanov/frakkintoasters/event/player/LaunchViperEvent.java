@@ -1,6 +1,5 @@
 package xyz.zlatanov.frakkintoasters.event.player;
 
-import xyz.zlatanov.frakkintoasters.event.LocationEvent;
 import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
 import xyz.zlatanov.frakkintoasters.event.constraint.ConstrainedEvent;
 import xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint;
@@ -17,7 +16,7 @@ import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.MUST
 // constraint, as the mustLaunchInViper flag.
 public record LaunchViperEvent(int playerNumber, ShipType shipType, Location location, Character pilot,
                                Integer unmannedViperId,
-                               boolean mustLaunchInViper) implements PlayerEvent, LocationEvent, ConstrainedEvent {
+                               boolean mustLaunchInViper) implements PlayerEvent, ConstrainedEvent {
     public LaunchViperEvent(int playerNumber, ShipType shipType, Location location) {
         this(playerNumber, shipType, location, null, null, false);
     }

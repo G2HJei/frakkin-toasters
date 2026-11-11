@@ -7,7 +7,7 @@ import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.NONE;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
-import static xyz.zlatanov.frakkintoasters.event.location.LocationActions.canAct;
+import static xyz.zlatanov.frakkintoasters.event.LocationEvent.canAct;
 import static xyz.zlatanov.frakkintoasters.state.GameStep.ACTION;
 
 public class ActionStepEventProcessor extends EventProcessor<ActionStepEvent> {
