@@ -7,6 +7,7 @@ import xyz.zlatanov.frakkintoasters.engine.journal.fact.GameFact.*;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.OwnTurnStarted;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.GameStep;
+import xyz.zlatanov.frakkintoasters.state.Team;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
@@ -125,6 +126,10 @@ public class GameOps extends AbstractOps {
         int first = game.randomness().nextInt(1, game.players().size() + 1);
         changeCurrentPlayer(first);
         return first;
+    }
+
+    public void endGame(Team winner) {
+        record(new GameEnded(winner));
     }
 
     public int rollDie() {

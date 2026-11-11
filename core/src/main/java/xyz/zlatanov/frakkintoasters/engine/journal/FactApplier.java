@@ -94,6 +94,7 @@ public final class FactApplier {
             case GameFact.ActingPlayerChanged f -> game.turn().actingPlayerNumber(f.playerNumber());
             case GameFact.CrisisCardPlayed f -> game.turn().playCrisisCard(f.card());
             case GameFact.CrisisCardsCleared f -> game.turn().removeCrisisCards(f.cards());
+            case GameFact.GameEnded f -> game.end(f.winner());
         }
     }
 

@@ -25,6 +25,7 @@ public record GameSnapshot(Map<String, Object> values) {
     public static GameSnapshot of(Game game) {
         val s = new TreeMap<String, Object>();
         s.put("objective", game.objective());
+        s.put("outcome", game.outcome());
         s.put("step", game.turn().step());
         s.put("turn", game.turn().number());
         s.put("currentPlayer", game.turn().currentPlayerNumber());

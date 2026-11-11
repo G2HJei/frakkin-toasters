@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.state.view;
 
+import xyz.zlatanov.frakkintoasters.state.Team;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard;
 import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
@@ -49,4 +50,6 @@ public interface GameView {
      * @return the location of the character, empty while it is not on the board (e.g. a "Stranded" Karl "Helo" Agathon)
      */
     Optional<Location> locate(Character character);
+
+    Optional<Team> outcome();
 }

@@ -8,6 +8,7 @@ import xyz.zlatanov.frakkintoasters.operation.GameOps;
 import xyz.zlatanov.frakkintoasters.state.Die;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Randomness;
+import xyz.zlatanov.frakkintoasters.state.Team;
 import xyz.zlatanov.frakkintoasters.state.board.Resource;
 import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
@@ -239,6 +240,7 @@ class GameReplayerTest {
         ops.rollDie();
         ops.rollDie();
         ops.changeStep(CRISIS);
+        ops.endGame(Team.CYLONS);
 
         return game;
     }

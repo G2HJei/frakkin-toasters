@@ -6,16 +6,15 @@ import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.board.AdvancePursuitTrackEvent;
-import xyz.zlatanov.frakkintoasters.event.endgame.CylonsWinEvent;
 import xyz.zlatanov.frakkintoasters.event.ship.PlaceShipOnCylonFleetBoardEvent;
 import xyz.zlatanov.frakkintoasters.state.ship.Centurion;
 import xyz.zlatanov.frakkintoasters.state.ship.HeavyRaider;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.HEAVY_RAIDER;
+import static xyz.zlatanov.frakkintoasters.state.track.BoardingParty.HUMANS_LOSE;
 import static xyz.zlatanov.frakkintoasters.state.track.BoardingParty.POSITION_1;
 import static xyz.zlatanov.frakkintoasters.state.track.BoardingParty.START;
 
@@ -99,14 +98,17 @@ class ActivateHeavyRaidersAndCenturionsEventProcessorTest extends EventTestHarne
                         new AdvancePursuitTrackEvent()));
     }
 
+    // The engine's WinChecks end the game, so the processor queues nothing for it.
     @Test
-    void shouldEndGameIfBoardingPartyReachEnd() {
+    void shouldAdvanceACenturionToTheEndOfTheTrack() {
         galacticaBoard.boardGalactica(centurion)
                 .advanceBoardingParty()
                 .advanceBoardingParty()
                 .advanceBoardingParty();
-        execute(new ActivateHeavyRaidersAndCenturionsEvent());
-        assertFollowup(one(new CylonsWinEvent()));
+
+        execute(event);
+
+        assertEquals(HUMANS_LOSE, galacticaBoard.boardingPartyTrack().get(centurion));
     }
 
     void boardGalactica(Centurion centurion) {

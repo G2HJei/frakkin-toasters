@@ -1,6 +1,7 @@
 package xyz.zlatanov.frakkintoasters.engine.journal.fact;
 
 import xyz.zlatanov.frakkintoasters.state.GameStep;
+import xyz.zlatanov.frakkintoasters.state.Team;
 import xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 
@@ -33,5 +34,8 @@ public sealed interface GameFact extends Fact {
         public CrisisCardsCleared {
             cards = List.copyOf(cards);
         }
+    }
+
+    record GameEnded(Team winner) implements GameFact {
     }
 }

@@ -30,7 +30,7 @@ public class PressRoomEventProcessor extends LocationActionProcessor<PressRoomEv
 
     @Override
     public Followup process() {
-        ops.player(event.targetPlayer()).drawMutinyCard();
+        ops.player(event.targetPlayer()).drawMutinyCard(); // not a DrawMutinyCardEvent, he doesn't move to the "Brig"
         return allOf(keepOneMutinyCard(), mayDiscardAMutinyCard());
     }
 

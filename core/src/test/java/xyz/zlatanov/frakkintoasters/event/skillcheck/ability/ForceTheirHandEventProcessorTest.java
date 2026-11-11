@@ -4,12 +4,12 @@ import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
+import xyz.zlatanov.frakkintoasters.event.player.DrawMutinyCardEvent;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.CALCULATIONS;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType.ADMIRALS_QUARTERS;
@@ -25,7 +25,7 @@ class ForceTheirHandEventProcessorTest extends EventTestHarness<ForceTheirHandEv
     @Test
     void shouldDrawMutinyCard() {
         execute(new ForceTheirHandEvent(1, null));
-        assertFalse(player(1).mutinyCards().cards().isEmpty());
+        assertFollowup(new DrawMutinyCardEvent(1));
     }
 
     @Test

@@ -1,5 +1,7 @@
 package xyz.zlatanov.frakkintoasters.engine;
 
+import xyz.zlatanov.frakkintoasters.state.Team;
+
 import java.util.Optional;
 
 public sealed interface EngineStatus {
@@ -10,7 +12,7 @@ public sealed interface EngineStatus {
     record Waiting(Optional<PendingInput> input) implements EngineStatus {
     }
 
-    record Finished() implements EngineStatus {
+    record Finished(Team winner) implements EngineStatus {
     }
 
     static EngineStatus waiting() {
@@ -21,7 +23,7 @@ public sealed interface EngineStatus {
         return new Waiting(Optional.of(input));
     }
 
-    static EngineStatus finished() {
-        return new Finished();
+    static EngineStatus finished(Team winner) {
+        return new Finished(winner);
     }
 }

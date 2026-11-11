@@ -11,12 +11,10 @@ import xyz.zlatanov.frakkintoasters.state.Player;
 import xyz.zlatanov.frakkintoasters.state.PlayerPile;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
-import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
 import xyz.zlatanov.frakkintoasters.state.card.MutinyCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
-import xyz.zlatanov.frakkintoasters.state.crisis.SuperCrisisCard;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import xyz.zlatanov.frakkintoasters.state.ship.HumanFighter;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
@@ -40,7 +38,7 @@ public class PlayerOps extends GameOps {
     }
 
     public void drawLoyaltyCards(int cardsToDraw) {
-        List<LoyaltyCard> loyaltyCards = draw(DeckId.LOYALTY, cardsToDraw);
+        val loyaltyCards = draw(DeckId.LOYALTY, cardsToDraw);
         gain(PlayerPile.LOYALTY, loyaltyCards);
     }
 
@@ -72,15 +70,14 @@ public class PlayerOps extends GameOps {
     }
 
     public PlayerOps drawSuperCrisisCard() {
-        SuperCrisisCard card = draw(DeckId.SUPER_CRISIS);
+        val card = draw(DeckId.SUPER_CRISIS);
         gain(PlayerPile.SUPER_CRISIS, List.of(card));
         return this;
     }
 
     public void drawMutinyCard() {
-        MutinyCard card = draw(DeckId.MUTINY);
-        gain(PlayerPile.MUTINY, List.of(card));
-        //todo if 2nd -> discard one and move to brig. Handle followup in engine not in each mutiny drawing event
+        val card = draw(DeckId.MUTINY);
+        gain(PlayerPile.MUTINY, List.of(card)); // DrawMutinyCardEventProcessor sends a player to the "Brig"
     }
 
     public void drawMotiveCards() {

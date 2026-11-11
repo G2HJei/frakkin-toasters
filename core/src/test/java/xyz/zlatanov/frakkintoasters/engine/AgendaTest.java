@@ -83,6 +83,15 @@ class AgendaTest {
         assertEquals(Optional.of(new Frame(event(1), 7)), agenda.top());
     }
 
+    @Test
+    void clearingTheAgendaDropsEveryFrame() {
+        agenda.push(all(event(1), one(event(2), event(3))), 7);
+
+        agenda.clear();
+
+        assertTrue(agenda.isEmpty());
+    }
+
     private static Followup event(int n) {
         return single(new NoOpEvent(n));
     }

@@ -47,12 +47,12 @@ Next steps, in order:
    for "Executive Order".
 3. ~~Create the journal and tie it to the ops classes in `operation/`.~~ Done, see "Journal and Replay". Still open:
    describers and per-viewer hiding, and JSON serialization. The pending followups are the engine's `Agenda`.
-4. Create the game engine to drive the events and turns. `engine-plan.md` has the plan in phases. Phases 1 to 7 are
+4. Create the game engine to drive the events and turns. `engine-plan.md` has the plan in phases. Phases 1 to 8 are
    done: the journal moved out of `Game` into `engine/journal/`, the turn state is grouped in `state/Turn`, the journal
    and processors are ready for the engine, `GameEngine` runs events through `submit` and `choose`, it restores a
    game from its journal and rolls back a failed input (see "Engine"), `GameEngine.start` sets up a game and plays
-   its turns (see "Turn Loop"), and processors check what players submit (see "Validation"). Next is phase 8: end of
-   game and Mutiny.
+   its turns (see "Turn Loop"), processors check what players submit (see "Validation"), and the Cylons can win (see
+   "End of Game and Mutiny"). Next is phase 9: skill check wiring.
 5. Create a working frontend with the events that exist by then.
 
 ## Project Structure
@@ -79,7 +79,7 @@ Multi-module Gradle project with a single `core` module. Package root: `xyz.zlat
   with the `Fact` records
 - `state/` - game state model: `Game` (top level), `Turn` (turn number, `GameStep`, current and acting player, the
   Crisis Cards of the turn, read through `GameView.turn()`; `number` counts player turns, not rounds), `Player` (`turns()` counts the player's own
-  turns), `Die` (d8), `Randomness`,
+  turns), `Team` (the winner in `GameView.outcome()`), `Die` (d8), `Randomness`,
   `RemovedComponents`, `PlayerPile`, and the `@Mutates` marker
 - `state/view/` - read-only view interfaces (`GameView`, `TurnView`, `PlayerView`, `BoardsHolderView`,
   `BattlestarBoardView` (damaged locations), `DecksHolderView` (Skill Cards left to draw), `SkillCheckView`, ...)
@@ -243,14 +243,17 @@ instead, e.g. `FollowupUtils.chooseCharacterForSickbay` (rule 9.3.2).
 
 `GameEngine` runs a game. `submit(player, event)` answers the pending `PlayerDecisionEvent` with a concrete event, and
 `choose(player, option)` picks an option of the pending `OneOf`. Both run the game forward until a player has to act
-again, so `status(player)` is always `Waiting(PendingInput)` or `Finished`. It holds no game rules: processors decide.
+again, so `status(player)` is always `Waiting(PendingInput)` or `Finished(winner)`. It holds no game rules: processors
+decide.
 `GameEngine.start(playerCount, randomness)` begins a game with `StartGameEvent` (see "Turn Loop"). A package-private
 constructor takes any first event, and `GameEngineTest` uses the test-only `ScriptEvent` for it.
 
 - `Agenda` is a stack of `(followup, parentScope)` frames, so followups run depth first. Pushing flattens a followup:
   `None` adds nothing and `AllOf` pushes its children in reverse, so every frame is a `Single` or a `OneOf`.
 - The run loop takes the event on top, gets a new processor from `ProcessorRegistry`, `prepare`s it, opens its scope,
-  runs it, closes the scope with the followup and pushes that. It stops at a `PlayerDecisionEvent` or a `OneOf`.
+  runs it, puts the result of `WinChecks` before the followup, closes the scope with both and pushes them. It stops at a
+  `PlayerDecisionEvent` or a `OneOf`, and clears the agenda once the game has an outcome. Only that empties the
+  agenda: running out of events before the game ends throws `FrakCallTheAdmiralException`.
 - The chooser of a `OneOf` is the player of the `PlayerEvent`s in its options, otherwise the current player (decision 7
   in `engine-plan.md`). Options that name different players are a bug.
 - Input check: the right player, `decision.action().isInstance(event)` (so `ActionEvent` takes any location action),
@@ -265,8 +268,9 @@ constructor takes any first event, and `GameEngineTest` uses the test-only `Scri
   afterwards, so callers ask again.
 - `GameEngine.restore(journal)` rebuilds a game from a copy of the journal: `GameReplayer` applies the facts and
   `AgendaReplayer` folds the scope entries through the `Agenda` moves of the run loop (`ScopeOpened` takes the top
-  event, `ScopeClosed` pushes its followup, `ChoiceMade` selects the option). The first event's `ScopeOpened` finds an
-  empty agenda. A journal that doesn't match those moves or doesn't end at a pause throws `IllegalArgumentException`.
+  event, `ScopeClosed` pushes its followup, `ChoiceMade` selects the option, and the scope with a `GameEnded` fact
+  clears the agenda when it closes). The first event's `ScopeOpened` finds an empty agenda. A journal that doesn't match
+  those moves, or ends neither at a pause nor with the end of the game, throws `IllegalArgumentException`.
 
 ### Turn Loop
 
@@ -299,6 +303,19 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
 - A Stranded Karl "Helo" Agathon is off the board until `StartTurnEvent` puts him on the Hangar Deck at his player's
   2nd turn (`PlayerView.turns()`). Until then the Movement and Action steps skip him, and `SendToBrigEvent` and
   `SendToSickbayEvent` leave him alone.
+
+### End of Game and Mutiny
+
+- `WinChecks` (`event/endgame/`) holds the Cylon wins that happen at once (rule 16.1): a centurion at the end of the
+  Boarding Party track, and 6 damaged Galactica locations. The engine asks after every event, and `ScopeClosed` records
+  the result with the event's followup, so restore never runs the checks. The resource check stays in `EndTurnEvent`.
+- `CylonsWinEvent` records `GameEnded(winner)` (`GameOps.endGame`), and `GameView.outcome()` gives the winning `Team`,
+  which `Finished(winner)` reports. A test script that plays to the end has to end the game, e.g. with a
+  `CylonsWinEvent`.
+- To draw a Mutiny Card, queue a `DrawMutinyCardEvent`. Its processor sends the player to the "Brig" on the second card
+  (the Mutineer on the third, `PlayerView.isMutineer()`), and asks for a `Discard1MutinyCardEvent` per card over the
+  limit (rules 5.2.3.2 and 5.2.3.3). In the "Brig" and off the board (a Stranded Helo) the player only discards. Only
+  the Press Room calls `PlayerOps.drawMutinyCard()`, because its target doesn't move.
 
 ### Journal and Replay
 

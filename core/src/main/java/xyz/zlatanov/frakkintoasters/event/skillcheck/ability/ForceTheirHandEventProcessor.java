@@ -3,8 +3,12 @@ package xyz.zlatanov.frakkintoasters.event.skillcheck.ability;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.player.DrawMutinyCardEvent;
 
 import java.util.List;
+
+import static xyz.zlatanov.frakkintoasters.event.Followup.NONE;
+import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 
 public class ForceTheirHandEventProcessor extends EventProcessor<ForceTheirHandEvent> {
 
@@ -18,10 +22,9 @@ public class ForceTheirHandEventProcessor extends EventProcessor<ForceTheirHandE
     public Followup process() {
         val card = event.skillCard();
         if (card == null) {
-            ops.player(player.number()).drawMutinyCard();
-        } else {
-            ops.skillCheck().playCards(player.number(), card);
+            return single(new DrawMutinyCardEvent(player.number()));
         }
-        return Followup.NONE;
+        ops.skillCheck().playCards(player.number(), card);
+        return NONE;
     }
 }

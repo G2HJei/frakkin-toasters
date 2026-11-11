@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.MUTINEER;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.CHIEF_GALEN_TYROL;
 import static xyz.zlatanov.frakkintoasters.state.character.CharacterType.CYLON_LEADER;
 
@@ -102,6 +103,12 @@ public class Player implements PlayerView {
         return loyaltyCards.revealedCards()
                 .stream()
                 .anyMatch(LoyaltyCard::isCylon);
+    }
+
+    @Override
+    public boolean isMutineer() {
+        // The Mutineer reveals the card when receiving it (rule 5.2.1).
+        return loyaltyCards.cards().contains(MUTINEER) || loyaltyCards.revealedCards().contains(MUTINEER);
     }
 
     @Mutates

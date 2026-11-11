@@ -4,7 +4,6 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.board.AdvancePursuitTrackEvent;
-import xyz.zlatanov.frakkintoasters.event.endgame.CylonsWinEvent;
 import xyz.zlatanov.frakkintoasters.event.ship.PlaceShipOnCylonFleetBoardEvent;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.ship.HeavyRaider;
@@ -13,10 +12,8 @@ import xyz.zlatanov.frakkintoasters.state.view.BasestarView;
 import java.util.List;
 import java.util.Map;
 
-import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.HEAVY_RAIDER;
-import static xyz.zlatanov.frakkintoasters.state.track.BoardingParty.HUMANS_LOSE;
 import static xyz.zlatanov.frakkintoasters.state.view.GalacticaBoardView.VIPER_LAUNCH_SPACES;
 
 public class ActivateHeavyRaidersAndCenturionsEventProcessor extends EventProcessor<ActivateHeavyRaidersAndCenturionsEvent> {
@@ -33,10 +30,7 @@ public class ActivateHeavyRaidersAndCenturionsEventProcessor extends EventProces
         val basestars = galacticaBoard.shipsInSpace(BasestarView.class);
         val noCenturionsInPlay = galacticaBoard.boardingPartyTrack().isEmpty();
 
-        ops.galactica().advanceBoardingParty();
-        if (galacticaBoard.boardingPartyTrack().containsValue(HUMANS_LOSE)) {
-            return one(new CylonsWinEvent());
-        }
+        ops.galactica().advanceBoardingParty(); // the engine's WinChecks end the game when a centurion reaches the end
         if (heavyRaiders.isEmpty() && basestars.isEmpty() && noCenturionsInPlay) {
             return Followup.all(
                     new PlaceShipOnCylonFleetBoardEvent(HEAVY_RAIDER),

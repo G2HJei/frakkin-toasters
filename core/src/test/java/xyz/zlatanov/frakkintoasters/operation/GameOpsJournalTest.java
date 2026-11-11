@@ -14,6 +14,7 @@ import xyz.zlatanov.frakkintoasters.engine.journal.fact.TitleFact.*;
 import xyz.zlatanov.frakkintoasters.state.GameStep;
 import xyz.zlatanov.frakkintoasters.state.Player;
 import xyz.zlatanov.frakkintoasters.state.Randomness;
+import xyz.zlatanov.frakkintoasters.state.Team;
 import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
@@ -21,6 +22,7 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard.KOBOL;
@@ -87,6 +89,14 @@ class GameOpsJournalTest extends TestHarness {
                 facts.subList(facts.size() - 2, facts.size()));
         assertEquals(List.of(), game.turn().crisisCards());
         assertEquals(List.of(card), crisisDeck.discardedCards());
+    }
+
+    @Test
+    void theEndOfTheGameIsRecorded() {
+        ops.endGame(Team.CYLONS);
+
+        assertEquals(List.of(new GameEnded(Team.CYLONS)), journal.facts());
+        assertEquals(Optional.of(Team.CYLONS), game.outcome());
     }
 
     @Test

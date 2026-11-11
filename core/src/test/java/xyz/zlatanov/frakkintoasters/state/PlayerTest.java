@@ -7,6 +7,7 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.CYLON_SEND_TO_BRIG;
+import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.MUTINEER;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.REPAIR;
 
@@ -50,6 +51,17 @@ class PlayerTest {
         xo.loyaltyCards().reveal(CYLON_SEND_TO_BRIG);
         assertTrue(xo.isRevealedCylon());
         assertFalse(xo.isHuman());
+    }
+
+    @Test
+    void shouldBeTheMutineerWithTheMutineerCardHiddenOrRevealed() {
+        assertFalse(xo.isMutineer());
+
+        xo.loyaltyCards().addOnTop(MUTINEER);
+        assertTrue(xo.isMutineer());
+
+        xo.loyaltyCards().reveal(MUTINEER);
+        assertTrue(xo.isMutineer());
     }
 
     @Test

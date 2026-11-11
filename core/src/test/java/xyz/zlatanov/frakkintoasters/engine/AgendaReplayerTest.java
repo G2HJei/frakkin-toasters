@@ -4,6 +4,7 @@ import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.engine.Agenda.Frame;
 import xyz.zlatanov.frakkintoasters.engine.journal.Journal;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.GameFact.GameEnded;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.GameFact.TurnStarted;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
@@ -15,6 +16,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.engine.journal.Journal.ROOT_SCOPE;
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
+import static xyz.zlatanov.frakkintoasters.state.Team.CYLONS;
 
 class AgendaReplayerTest {
 
@@ -34,9 +36,17 @@ class AgendaReplayerTest {
         journal.recordChoice(first, 1, decision);
         assertEquals(Optional.of(new Frame(decision, first)), AgendaReplayer.replay(journal).top());
 
-        journal.openScope(new NoOpEvent(1), 1, first); // the answer to the decision
+        journal.openScope(new NoOpEvent(1), 1, first); // the answer to the decision, which ends the game
+        journal.record(new GameEnded(CYLONS));
         journal.closeScope(NONE);
         assertTrue(AgendaReplayer.replay(journal).isEmpty());
+    }
+
+    @Test
+    void aJournalCantRunOutOfEventsBeforeTheGameEnds() {
+        journal.openScope(new NoOpEvent(1), 1, ROOT_SCOPE);
+        journal.closeScope(NONE);
+        assertDoesntFit();
     }
 
     @Test
@@ -98,9 +108,31 @@ class AgendaReplayerTest {
     }
 
     @Test
+    void theEndOfTheGameClearsTheAgenda() {
+        endTheGameWithEvent3Pending();
+        assertTrue(AgendaReplayer.replay(journal).isEmpty());
+    }
+
+    @Test
+    void nothingRunsAfterTheGameEnded() {
+        endTheGameWithEvent3Pending();
+        journal.openScope(new NoOpEvent(3), 1, ROOT_SCOPE);
+        journal.closeScope(NONE);
+        assertDoesntFit();
+    }
+
+    @Test
     void aJournalCantEndInsideAScope() {
         journal.openScope(new NoOpEvent(1), 1, ROOT_SCOPE);
         assertDoesntFit();
+    }
+
+    private void endTheGameWithEvent3Pending() {
+        val first = journal.openScope(new NoOpEvent(1), 1, ROOT_SCOPE);
+        journal.closeScope(all(event(2), event(3)));
+        journal.openScope(new NoOpEvent(2), 1, first);
+        journal.record(new GameEnded(CYLONS));
+        journal.closeScope(NONE);
     }
 
     private void assertDoesntFit() {

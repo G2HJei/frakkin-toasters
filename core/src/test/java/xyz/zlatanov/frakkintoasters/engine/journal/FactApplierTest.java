@@ -23,9 +23,11 @@ import xyz.zlatanov.frakkintoasters.state.track.JumpPreparation;
 import xyz.zlatanov.frakkintoasters.state.track.Pursuit;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.state.GameStep.MOVEMENT;
+import static xyz.zlatanov.frakkintoasters.state.Team.CYLONS;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.board.Resource.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
@@ -214,6 +216,15 @@ class FactApplierTest {
         apply(new CrisisCardsCleared(List.of(CrisisCard.RAIDERS_INBOUND)));
         assertEquals(List.of(CrisisCard.LABOR_DISPUTE), game.turn().crisisCards());
         assertEquals(List.of(), game.decks().crisis().discardedCards()); // the discard pile is a separate CardsDiscarded
+    }
+
+    @Test
+    void gameEndedSetsTheOutcome() {
+        assertEquals(Optional.empty(), game.outcome());
+
+        apply(new GameEnded(CYLONS));
+
+        assertEquals(Optional.of(CYLONS), game.outcome());
     }
 
     /* PlayerFact */

@@ -52,4 +52,8 @@ public class Agenda {
     public boolean isEmpty() {
         return frames.isEmpty();
     }
+
+    public void clear() {
+        frames.clear();
+    }
 }

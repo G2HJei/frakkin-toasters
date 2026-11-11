@@ -15,6 +15,7 @@ import xyz.zlatanov.frakkintoasters.event.Followup.OneOf;
 import xyz.zlatanov.frakkintoasters.event.Followup.Single;
 import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
 import xyz.zlatanov.frakkintoasters.event.constraint.ConstrainedEvent;
+import xyz.zlatanov.frakkintoasters.event.endgame.WinChecks;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.turn.StartGameEvent;
 import xyz.zlatanov.frakkintoasters.operation.GameOps;
@@ -30,6 +31,7 @@ import java.util.stream.Stream;
 
 import static xyz.zlatanov.frakkintoasters.engine.journal.Journal.ROOT_SCOPE;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
+import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.allOf;
 
 public class GameEngine {
 
@@ -64,7 +66,7 @@ public class GameEngine {
      * facts hold every random result, so the restored game needs no randomness of the original.
      *
      * @throws IllegalArgumentException if the journal doesn't start with {@code GameStarted}, doesn't match the moves of
-     *                                  the run loop or doesn't end at a pause
+     *                                  the run loop or ends neither at a pause nor with the end of the game
      */
     public static GameEngine restore(Journal journal) {
         return new GameEngine(new Journal(journal.entries()));
@@ -73,7 +75,8 @@ public class GameEngine {
     public EngineStatus status(int player) {
         val pendingInput = pending();
         if (pendingInput.isEmpty()) {
-            return EngineStatus.finished();
+            // runToNextInput leaves nothing pending only once the game has ended
+            return EngineStatus.finished(game.outcome().orElseThrow(FrakCallTheAdmiralException::new));
         }
         val input = pendingInput.get();
         val secretlyWaitingOtherPlayer = input.secret() && input.player() != player;
@@ -200,6 +203,10 @@ public class GameEngine {
                 default -> throw new FrakCallTheAdmiralException("The agenda holds only events and choices");
             }
         }
+        // Only the end of the game empties the agenda, every turn queues the next one.
+        if (game.outcome().isEmpty()) {
+            throw new FrakCallTheAdmiralException("Nothing is left to run, but the game goes on");
+        }
     }
 
     // A processor put a queued event there, so if it doesn't run, that's a bug.
@@ -216,9 +223,14 @@ public class GameEngine {
 
     private void run(EventProcessor<?> processor, Event event, int actor, int parentScope) {
         val scope = journal.openScope(event, actor, parentScope);
-        val followup = processor.run(ops);
+        val queued = processor.run(ops);
+        // A win runs before what the event queued. The journal records both, so restore never runs the checks.
+        val followup = allOf(WinChecks.check(game), queued);
         journal.closeScope(followup);
         agenda.push(followup, scope);
+        if (game.outcome().isPresent()) {
+            agenda.clear(); // AgendaReplayer does the same at the scope that ended the game
+        }
     }
 
     private Optional<PendingInput> pending() {

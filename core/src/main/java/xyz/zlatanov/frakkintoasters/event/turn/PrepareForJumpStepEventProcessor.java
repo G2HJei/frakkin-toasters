@@ -7,14 +7,12 @@ import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.board.IncreaseJumpPreparationEvent;
 import xyz.zlatanov.frakkintoasters.event.player.DrawMutinyCardEvent;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
-import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
 
 import java.util.ArrayList;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.NONE;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.state.GameStep.PREPARE_FOR_JUMP;
-import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.MUTINEER;
 
 public class PrepareForJumpStepEventProcessor extends EventProcessor<PrepareForJumpStepEvent> {
 
@@ -31,14 +29,9 @@ public class PrepareForJumpStepEventProcessor extends EventProcessor<PrepareForJ
         }
         ops.changeStep(PREPARE_FOR_JUMP);
         val current = game.currentPlayer();
-        if (isMutineer(current)) {
+        if (current.isMutineer()) {
             followups.add(new DrawMutinyCardEvent(current.number())); // once, for one or more icons (rule 8.7.1)
         }
         return all(followups.toArray(Event[]::new));
-    }
-
-    private static boolean isMutineer(PlayerView player) {
-        val loyaltyCards = player.loyaltyCards();
-        return loyaltyCards.cards().contains(MUTINEER) || loyaltyCards.revealedCards().contains(MUTINEER);
     }
 }

@@ -54,6 +54,8 @@ public class Game implements GameView {
     private Character            cag;
     @Builder.Default
     private RemovedComponents    removedComponents = new RemovedComponents();
+    @Getter(AccessLevel.NONE)
+    private Team                 winner; // null while the game goes on
 
 
     public static GameBuilder builder() {
@@ -107,6 +109,17 @@ public class Game implements GameView {
                 .toList();
         assert locations.size() <= 1;
         return locations.stream().findFirst();
+    }
+
+    @Override
+    public Optional<Team> outcome() {
+        return Optional.ofNullable(winner);
+    }
+
+    @Mutates
+    public void end(Team winner) {
+        assert this.winner == null; // a game ends once
+        this.winner = winner;
     }
 
     @Mutates

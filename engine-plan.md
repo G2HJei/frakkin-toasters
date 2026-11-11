@@ -345,18 +345,24 @@ back instead of killing the game, but nothing stopped a legal-looking one from c
 **Win checks.** After `process()`, the run loop asks `WinChecks` (reads the views, returns a `Followup`). The result
 goes on top of the event's own followup, and `ScopeClosed` records the combined followup, so restore never re-runs the
 checks. It covers the immediate Cylon wins from rule 16.1: a centurion at the end of the Boarding Party track, and 6 or
-more damaged Galactica locations. `ActivateHeavyRaidersAndCenturionsEventProcessor` already queues the first one. Remove
-that, so the check lives in one place.
+more damaged Galactica locations. `ActivateHeavyRaidersAndCenturionsEventProcessor` queued the first one. That is gone,
+so the check lives in one place. Once the game has an outcome the checks return nothing.
 
-**End of game.** Add a `GameEnded(winner)` fact and `Game.outcome()`, and give `CylonsWinEvent` a processor. When the
-outcome is set, the run loop clears the agenda and reports `Finished`.
+**End of game.** A `GameEnded(winner)` fact names a `Team`, and `GameView.outcome()` reads it. `CylonsWinEvent` has a
+processor. When the outcome is set, the run loop clears the agenda and reports `Finished(winner)`. Nothing else
+empties the agenda: if it runs out of events before the game ends, the run loop throws `FrakCallTheAdmiralException`,
+so an input rolls back. `AgendaReplayer` clears the agenda when the scope with the `GameEnded` fact closes, rejects any
+scope after it, and rejects a journal that runs out of events without one.
 
 **Second Mutiny Card.** This can't be a check on the state, even though the `todo` in `PlayerOps.drawMutinyCard()` asks
 the engine to handle it. Rule 5.2.3.2 moves the player to the Brig unless told otherwise, and a check only sees two
 cards. Press Room says otherwise, a Stranded Helo discards without moving (rule A2.1.1.10), and the Mutineer moves on
 the third card (rule 5.2.3.3).
 
-- Put it in `DrawMutinyCardEventProcessor`, including keeping one card while in the Brig.
+- Put it in `DrawMutinyCardEventProcessor`, including keeping one card while in the Brig. The Mutineer keeps two, and
+  `PlayerView.isMutineer()` replaces the check in `PrepareForJumpStepEventProcessor`. Over the limit the player moves to
+  the Brig, then discards each extra card through a `Discard1MutinyCardEvent` decision. In the Brig, or off the board
+  as a Stranded Helo, he only discards.
 - `ExploitAWeaknessEventProcessor`, `ForceTheirHandEventProcessor` and `PersonalVicesEventProcessor` return a
   `DrawMutinyCardEvent` instead of calling the op.
 - `PressRoomEventProcessor` keeps calling the op, because it is the exception.

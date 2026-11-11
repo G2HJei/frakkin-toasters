@@ -34,6 +34,11 @@ public interface PlayerView {
     boolean isRevealedCylon();
 
     /**
+     * Has the "You Are the Mutineer" Loyalty Card (rule 5.2).
+     */
+    boolean isMutineer();
+
+    /**
      * Counts the turns this player has started, the one under way included. {@link TurnView#number()} counts everyone's.
      */
     int turns();
