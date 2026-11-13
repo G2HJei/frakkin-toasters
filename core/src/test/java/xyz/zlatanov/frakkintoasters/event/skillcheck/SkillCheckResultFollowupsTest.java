@@ -159,10 +159,19 @@ class SkillCheckResultFollowupsTest extends TestHarness {
     }
 
     @Test
-    void shouldGiveThePresidentTitleToTheChosenCharacter() {
-        game.startSkillCheck(ADMINISTRATION).targetPlayerNumber(OTHER).result(PASS);
+    void shouldExecuteTheChosenCharacter() {
+        game.startSkillCheck(AIRLOCK).targetPlayerNumber(OTHER).result(PASS);
 
-        assertEquals(single(new MakePresidentEvent(KARA_STARBUCK_THRACE)),
+        assertEquals(single(new ExecuteEvent(OTHER)), new SkillCheckResultFollowups(game).followup());
+    }
+
+    // "A character passing the Skill Check to leave the Brig can move to any location on Galactica (only)." (rule 9.2.4)
+    @Test
+    void shouldLetTheCharacterWhoPassedLeaveTheBrigForGalactica() {
+        moveTo(Location.BRIG, KARA_STARBUCK_THRACE);
+        game.startSkillCheck(BRIG).targetPlayerNumber(OTHER).result(PASS);
+
+        assertEquals(single(new PlayerDecisionEvent<>(OTHER, LeaveBrigEvent.class, DESTINATION_GALACTICA)),
                 new SkillCheckResultFollowups(game).followup());
     }
 

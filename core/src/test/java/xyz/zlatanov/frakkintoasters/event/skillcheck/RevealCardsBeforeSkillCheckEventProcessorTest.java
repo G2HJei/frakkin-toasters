@@ -10,7 +10,7 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static xyz.zlatanov.frakkintoasters.event.Followup.single;
+import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType.ADMIRALS_QUARTERS;
 
@@ -58,12 +58,15 @@ class RevealCardsBeforeSkillCheckEventProcessorTest extends EventTestHarness<Rev
         addPlayedBefore(2, INVESTIGATIVE_COMMITTEE);
 
         execute(new RevealCardsBeforeSkillCheckEvent());
+
+        assertFollowup(new ResolveCardsBeforeSkillCheckEvent());
     }
 
     @Test
     void shouldRevealCardsBeforeSkillCheck() {
         execute(new RevealCardsBeforeSkillCheckEvent());
         assertTrue(game.activeSkillCheck().playedBeforeRevealed());
+        assertFollowup(new ResolveCardsBeforeSkillCheckEvent());
     }
 
     private void addPlayedBefore(int playerNumber, SkillCardType skillCardType) {
@@ -71,7 +74,8 @@ class RevealCardsBeforeSkillCheckEventProcessorTest extends EventTestHarness<Rev
     }
 
     private void assertTieBreak() {
-        assertFollowup(single(new PlayerDecisionEvent<>(1, TiebreakCardsBeforeSkillCheckEvent.class)));
+        assertFollowup(all(new PlayerDecisionEvent<>(1, TiebreakCardsBeforeSkillCheckEvent.class),
+                new ResolveCardsBeforeSkillCheckEvent()));
     }
 
 }

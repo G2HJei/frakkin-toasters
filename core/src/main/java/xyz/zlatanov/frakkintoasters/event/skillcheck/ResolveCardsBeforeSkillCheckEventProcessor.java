@@ -14,6 +14,7 @@ import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
 import java.util.ArrayList;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
+import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.eachPlayerFromTheLeft;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.GUTS_AND_INITIATIVE;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.SUPPORT_THE_PEOPLE;
 
@@ -36,6 +37,8 @@ public class ResolveCardsBeforeSkillCheckEventProcessor extends EventProcessor<R
         if (!cardInPlay(GUTS_AND_INITIATIVE)) {
             followUps.add(single(new PlayFromDestinyDeckEvent()));
         }
+        followUps.add(eachPlayerFromTheLeft(game, PlayCardsIntoSkillCheckEvent.class));
+        followUps.add(single(new ShuffleAndDivideCardsEvent()));
         return all(followUps.toArray(Followup[]::new));
     }
 

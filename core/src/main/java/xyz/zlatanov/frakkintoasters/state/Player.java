@@ -57,6 +57,14 @@ public class Player implements PlayerView {
         return this;
     }
 
+    // An executed character leaves the game, and the player chooses a new one, whose turns count from 0.
+    @Mutates
+    public void removeCharacter() {
+        assert character != null;
+        character = null;
+        turns = 0;
+    }
+
     @Mutates
     public void gainSkillCards(SkillCard... cardsToAdd) {
         skillCards.addOnTop(Arrays.asList(cardsToAdd));

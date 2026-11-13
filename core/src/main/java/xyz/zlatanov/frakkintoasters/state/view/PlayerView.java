@@ -39,7 +39,8 @@ public interface PlayerView {
     boolean isMutineer();
 
     /**
-     * Counts the turns this player has started, the one under way included. {@link TurnView#number()} counts everyone's.
+     * Counts the turns this player has started with his character, the one under way included. An execution starts it
+     * again for the new character. {@link TurnView#number()} counts everyone's.
      */
     int turns();
 }

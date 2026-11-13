@@ -27,4 +27,10 @@ public interface TurnView {
      * The Crisis Cards resolved this turn. They stay with the turn until it ends, when they are discarded (rule 8.8).
      */
     List<CrisisCard> crisisCards();
+
+    /**
+     * The turn ended before its steps did, e.g. when the current player was executed (rule 7.1). The steps left don't
+     * happen, except the Discard step: the hand limit applies at the end of every turn.
+     */
+    boolean endedEarly();
 }

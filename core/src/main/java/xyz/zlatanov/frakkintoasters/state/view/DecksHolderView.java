@@ -9,4 +9,6 @@ public interface DecksHolderView {
      * shuffled in when the draw pile runs out. With none left, nobody can draw that color (rule 8.2.2.5)
      */
     int skillCardsLeft(SkillCardColor color);
+
+    int civilianShipsLeft();
 }

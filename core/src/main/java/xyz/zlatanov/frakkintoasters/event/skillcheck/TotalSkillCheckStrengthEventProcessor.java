@@ -7,7 +7,6 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 
 import java.util.ArrayList;
-import java.util.stream.Stream;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
@@ -35,8 +34,8 @@ public class TotalSkillCheckStrengthEventProcessor extends EventProcessor<TotalS
         val totalStrength = matchingStrength + nonMatchingStrength + allHandsOnDeckBonus();
         ops.skillCheck().totalStrength(totalStrength);
         val followups = new ArrayList<Followup>();
-        // reducing the difficulty is pointless when the printed difficulty is already reached
-        if (totalStrength < skillCheck.type().difficulty()) {
+        // reducing the difficulty is pointless when the strength already reaches it
+        if (totalStrength < DetermineSkillCheckResultEventProcessor.difficulty(game)) {
             followups.addAll(playOrPassDecisions(game, DeclareEmergencyEvent.class));
         }
         followups.add(single(new DetermineSkillCheckResultEvent()));
@@ -63,9 +62,7 @@ public class TotalSkillCheckStrengthEventProcessor extends EventProcessor<TotalS
         if (!skillCheck.resolvedAbilities().contains(ALL_HANDS_ON_DECK)) {
             return 0;
         }
-        val zeroStrengthCards = Stream.concat(
-                        skillCheck.matchingPile().cards().stream(),
-                        skillCheck.nonMatchingPile().cards().stream())
+        val zeroStrengthCards = skillCheck.dividedCards().stream()
                 .filter(card -> skillCheck.cardValue(card) == 0)
                 .count();
         return (int) zeroStrengthCards;

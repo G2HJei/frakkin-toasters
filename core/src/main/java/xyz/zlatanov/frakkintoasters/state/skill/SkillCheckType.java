@@ -19,10 +19,9 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.*;
 @Getter
 @Accessors(fluent = true)
 public enum SkillCheckType {
-    // game board locations (rule 10.3.3)
-    ADMINISTRATION(5, POLITICS, LEADERSHIP),
+    // game board locations (rule 10.3.3). The Daybreak "Administration" on the Colonial One overlay has no skill check.
     ADMIRALS_QUARTERS(7, LEADERSHIP, TACTICS),
-    AIRLOCK(12, POLITICS, TACTICS, TREACHERY), //todo reduce the difficulty by 4 when the chosen character is in the Brig
+    AIRLOCK(12, POLITICS, TACTICS, TREACHERY), // 4 less on a character in the "Brig", see DetermineSkillCheckResultEventProcessor
     BRIG(7, POLITICS, TACTICS),
 
     // Galactica crises
@@ -146,8 +145,7 @@ public enum SkillCheckType {
     private final Integer              partialPass;
     private final List<SkillCardColor> skillCheckColors;
 
-    private static final Set<SkillCheckType> LOCATION_SKILL_CHECKS = Set.of(
-            ADMINISTRATION, ADMIRALS_QUARTERS, AIRLOCK, BRIG);
+    private static final Set<SkillCheckType> LOCATION_SKILL_CHECKS = Set.of(ADMIRALS_QUARTERS, AIRLOCK, BRIG);
 
     SkillCheckType(int difficulty, SkillCardColor... colors) {
         this(difficulty, null, colors);

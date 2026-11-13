@@ -226,7 +226,7 @@ class CrisisCardResolutionTest extends TestHarness {
         val limit = decision.eventConstraints().getFirst();
         val count = Integer.parseInt(limit.name().substring(limit.name().lastIndexOf('_') + 1));
         val hand = player(decision.playerNumber()).skillCards().cards();
-        val cards = List.copyOf(hand.subList(0, Math.min(count, hand.size())));
+        val cards = hand.subList(0, Math.min(count, hand.size()));
         return new DiscardSkillCardsEvent(decision.playerNumber(), cards, limit);
     }
 

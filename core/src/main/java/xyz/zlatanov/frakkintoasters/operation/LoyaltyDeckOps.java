@@ -5,12 +5,13 @@ import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedOnTop;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
-import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.*;
+import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.LOYALTY;
+import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.LOYALTY_NOT_CYLON;
 
 //todo maybe create SetupUpOps and move the code there
 public class LoyaltyDeckOps extends AbstractOps {
@@ -21,7 +22,7 @@ public class LoyaltyDeckOps extends AbstractOps {
 
 
     public LoyaltyDeckOps createNotACylon() {
-        record(new CardsAddedOnTop(DeckId.LOYALTY_NOT_CYLON,
+        record(new CardsAddedOnTop(LOYALTY_NOT_CYLON,
                 //todo check correct vanilla non-cylon cards count
                 List.of(NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON,
                         NOT_CYLON_USE_CAUTION,
@@ -37,18 +38,29 @@ public class LoyaltyDeckOps extends AbstractOps {
                         FINAL_FIVE_THEY_ARE_EXECUTED,
                         FINAL_FIVE_DAMAGE_GALACTICA_TWICE,
                         FINAL_FIVE_CYLON_SHIPS_ACTIVATE)));
-        shuffle(DeckId.LOYALTY_NOT_CYLON);
+        shuffle(LOYALTY_NOT_CYLON);
         return this;
     }
 
     public LoyaltyDeckOps create(int notCylonDraws, int cylonDraws, boolean withMutineer) {
-        List<LoyaltyCard> notACylonLoyalties = draw(DeckId.LOYALTY_NOT_CYLON, notCylonDraws);
-        record(new CardsAddedOnTop(DeckId.LOYALTY, notACylonLoyalties));
-        record(new CardsAddedOnTop(DeckId.LOYALTY, drawCylonLoyalties(cylonDraws)));
+        List<LoyaltyCard> notACylonLoyalties = draw(LOYALTY_NOT_CYLON, notCylonDraws);
+        record(new CardsAddedOnTop(LOYALTY, notACylonLoyalties));
+        record(new CardsAddedOnTop(LOYALTY, drawCylonLoyalties(cylonDraws)));
         if (withMutineer) {
-            record(new CardsAddedOnTop(DeckId.LOYALTY, List.of(MUTINEER)));
+            record(new CardsAddedOnTop(LOYALTY, List.of(MUTINEER)));
         }
-        shuffle(DeckId.LOYALTY);
+        shuffle(LOYALTY);
+        return this;
+    }
+
+    /**
+     * Adds a "You Are Not a Cylon" card to the Loyalty deck and shuffles it, e.g. before dealing a card to the player of
+     * an executed human (rule 7.1).
+     */
+    public LoyaltyDeckOps addNotACylon() {
+        LoyaltyCard card = draw(LOYALTY_NOT_CYLON);
+        record(new CardsAddedOnTop(LOYALTY, List.of(card)));
+        shuffle(LOYALTY);
         return this;
     }
 

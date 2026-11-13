@@ -2,11 +2,7 @@ package xyz.zlatanov.frakkintoasters.operation;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
-import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.BoardingPartyAdvanced;
-import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.JumpPreparationDecreased;
-import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.JumpPreparationIncreased;
-import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.ResourceDecreased;
-import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.ResourceIncreased;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.*;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedOnTop;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.ShipFact.ShipMoved;
 import xyz.zlatanov.frakkintoasters.state.Game;
@@ -14,7 +10,6 @@ import xyz.zlatanov.frakkintoasters.state.board.GalacticaBoard;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.board.Resource;
 import xyz.zlatanov.frakkintoasters.state.damage.GalacticaDamage;
-import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
 
@@ -23,8 +18,7 @@ import java.util.List;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.board.Resource.MORALE;
 import static xyz.zlatanov.frakkintoasters.state.board.Resource.POPULATION;
-import static xyz.zlatanov.frakkintoasters.state.damage.GalacticaDamage.FOOD;
-import static xyz.zlatanov.frakkintoasters.state.damage.GalacticaDamage.FUEL;
+import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.GALACTICA_DAMAGE;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipZone.*;
 
 public class GalacticaOps extends BattlestarOps {
@@ -36,15 +30,30 @@ public class GalacticaOps extends BattlestarOps {
     // todo certain effects destroy a random civ ship ( Misjump destination / Helena Cain miracle ability ). To handle this outside of ShipOps, probably GalacticaOps
 
     public void damage() {
-        GalacticaDamage galacticaDamage = draw(DeckId.GALACTICA_DAMAGE);
-        if (FUEL == galacticaDamage) {
-            record(new ResourceDecreased(xyz.zlatanov.frakkintoasters.state.board.Resource.FUEL, 1));
-            record(new CardsAddedOnTop(DeckId.GALACTICA_DAMAGE, List.of(FUEL)));
-            shuffle(DeckId.GALACTICA_DAMAGE);
-        } else if (FOOD == galacticaDamage) {
-            record(new ResourceDecreased(xyz.zlatanov.frakkintoasters.state.board.Resource.FOOD, 1));
-            record(new CardsAddedOnTop(DeckId.GALACTICA_DAMAGE, List.of(FOOD)));
-            shuffle(DeckId.GALACTICA_DAMAGE);
+        resolveDamage(draw(GALACTICA_DAMAGE));
+    }
+
+    /**
+     * @return the drawn damage tokens, which are in no pile until resolved or returned
+     */
+    public List<GalacticaDamage> drawDamage(int count) {
+        return draw(GALACTICA_DAMAGE, count);
+    }
+
+    public void returnDamage(GalacticaDamage galacticaDamage) {
+        record(new CardsAddedOnTop(GALACTICA_DAMAGE, List.of(galacticaDamage)));
+        shuffle(GALACTICA_DAMAGE);
+    }
+
+    public void resolveDamage(GalacticaDamage galacticaDamage) {
+        if (GalacticaDamage.FUEL == galacticaDamage) {
+            record(new ResourceDecreased(Resource.FUEL, 1));
+            record(new CardsAddedOnTop(GALACTICA_DAMAGE, List.of(GalacticaDamage.FUEL)));
+            shuffle(GALACTICA_DAMAGE);
+        } else if (GalacticaDamage.FOOD == galacticaDamage) {
+            record(new ResourceDecreased(Resource.FOOD, 1));
+            record(new CardsAddedOnTop(GALACTICA_DAMAGE, List.of(GalacticaDamage.FOOD)));
+            shuffle(GALACTICA_DAMAGE);
         } else {
             damageLocation(Location.valueOf(galacticaDamage.name()));
         }

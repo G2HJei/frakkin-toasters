@@ -70,7 +70,7 @@ public class ProtectTheFleetEventProcessor extends EventProcessor<ProtectTheFlee
 
     private int pilotingStrength() {
         val skillCheck = game.activeSkillCheck();
-        return Stream.concat(skillCheck.matchingPile().cards().stream(), skillCheck.nonMatchingPile().cards().stream())
+        return skillCheck.dividedCards().stream()
                 .filter(card -> card.type().color() == PILOTING)
                 .mapToInt(skillCheck::cardValue)
                 .sum();

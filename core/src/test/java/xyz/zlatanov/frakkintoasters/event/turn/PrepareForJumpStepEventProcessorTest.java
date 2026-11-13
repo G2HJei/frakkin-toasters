@@ -15,6 +15,7 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBU
 import static xyz.zlatanov.frakkintoasters.state.character.Character.WILLIAM_ADAMA;
 import static xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard.CONTROVERSIAL_MANUSCRIPT;
 import static xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard.LABOR_DISPUTE;
+import static xyz.zlatanov.frakkintoasters.state.GameStep.SETUP;
 
 class PrepareForJumpStepEventProcessorTest extends EventTestHarness<PrepareForJumpStepEvent> {
 
@@ -93,5 +94,16 @@ class PrepareForJumpStepEventProcessorTest extends EventTestHarness<PrepareForJu
         execute(new PrepareForJumpStepEvent());
 
         assertFollowup(new IncreaseJumpPreparationEvent());
+    }
+
+    // The turn ended early, e.g. the current player was executed (rule 7.1), so the step doesn't happen.
+    @Test
+    void shouldNotHappenAfterTheTurnEndedEarly() {
+        ops.playCrisisCard(CONTROVERSIAL_MANUSCRIPT); // a "prepare for jump" icon
+        ops.endTurnEarly();
+
+        execute(new PrepareForJumpStepEvent());
+
+        assertEquals(SETUP, game.turn().step());
     }
 }

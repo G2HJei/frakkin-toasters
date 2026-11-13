@@ -117,6 +117,11 @@ public class DecksHolder implements DecksHolderView {
         return deck.size() + deck.discardSize();
     }
 
+    @Override
+    public int civilianShipsLeft() {
+        return civilianShips.size();
+    }
+
     public <T> Deck<T> deck(DeckId id) {
         return (Deck<T>) switch (id) {
             case CIVILIAN_SHIPS -> civilianShips;

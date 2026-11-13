@@ -6,46 +6,42 @@ import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 
-import java.util.List;
+import java.util.ArrayList;
 
-import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
+import static xyz.zlatanov.frakkintoasters.event.Followup.all;
+import static xyz.zlatanov.frakkintoasters.event.Followup.single;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.RESTORE_ORDER;
 
 public class ShuffleAndDivideCardsEventProcessor extends EventProcessor<ShuffleAndDivideCardsEvent> {
 
-    private static final List<SkillCardType> CARDS_WITH_SKILL_CHECK_ABILITY = List.of(
-            //daybreak
-            INSTALL_UPGRADES,
-            ALL_HANDS_ON_DECK,
-            DOGFIGHT,
-            FORCE_THEIR_HAND,
-            QUICK_THINKING,
-            A_BETTER_MACHINE,
-            BAIT,
-            DRADIS_CONTACT,
-            EXPLOIT_A_WEAKNESS,
-            PERSONAL_VICES,
-            VIOLENT_OUTBURSTS,
-
-            //exodus
-            ESTABLISH_NETWORK,
-            IRON_WILL,
-            PROTECT_THE_FLEET,
-            RED_TAPE,
-            TRUST_INSTINCTS
-    );
-
     @Override
     public Followup process() {
-        val cards = ops.skillCheck().shuffleAndDivideCards();
-        return buildFollowup(cards);
+        val cardsWithAbilities = ops.skillCheck().shuffleAndDivideCards().stream()
+                .filter(SkillCard::hasSkillCheckAbility)
+                .toList();
+        val followups = new ArrayList<Followup>();
+        // "Restore Order": "Do not resolve skill check abilities while resolving this skill check."
+        if (!cardsWithAbilities.isEmpty() && !playedBefore(RESTORE_ORDER)) {
+            followups.add(single(new DetermineSkillCheckAbilitiesOrderEvent(game.turn().currentPlayerNumber(), cardsWithAbilities)));
+        }
+        // The skill check ability icon triggers the "consequence" result of a crisis, whatever happens to the
+        // ability (rule 10.4.3).
+        if (!cardsWithAbilities.isEmpty()) {
+            followups.add(single(new ResolveConsequencesEvent()));
+        }
+        // After all skill abilities (rule 10.4.4).
+        if (reckless()) {
+            followups.add(single(new DrawAndResolveRecklessCardsEvent()));
+        }
+        followups.add(single(new TotalSkillCheckStrengthEvent()));
+        return all(followups.toArray(Followup[]::new));
     }
 
-    private Followup buildFollowup(List<SkillCard> cards) {
-        val cardsWithAbilities = cards.stream()
-                .filter(c -> CARDS_WITH_SKILL_CHECK_ABILITY.contains(c.type()))
-                .toList();
-        return cardsWithAbilities.isEmpty()
-                ? Followup.NONE
-                : Followup.single(new DetermineSkillCheckAbilitiesOrderEvent(game.turn().currentPlayerNumber(), cardsWithAbilities));
+    private boolean reckless() {
+        return game.activeSkillCheck().playedBeforeSkillCheck().stream().anyMatch(card -> card.type().reckless());
+    }
+
+    private boolean playedBefore(SkillCardType type) {
+        return game.activeSkillCheck().playedBeforeSkillCheck().stream().anyMatch(card -> card.type() == type);
     }
 }

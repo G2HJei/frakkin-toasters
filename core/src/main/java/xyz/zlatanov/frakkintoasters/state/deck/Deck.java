@@ -107,12 +107,12 @@ public class Deck<T> implements DeckView<T> {
 
     @Override
     public List<T> cards() {
-        return Collections.unmodifiableList(cards);
+        return List.copyOf(cards);
     }
 
     @Override
     public List<T> discardedCards() {
-        return Collections.unmodifiableList(discardedCards);
+        return List.copyOf(discardedCards);
     }
 
     @Override
@@ -151,7 +151,7 @@ public class Deck<T> implements DeckView<T> {
 
     @Override
     public List<T> revealedCards() {
-        return Collections.unmodifiableList(revealedCards);
+        return List.copyOf(revealedCards);
     }
 
     @Mutates

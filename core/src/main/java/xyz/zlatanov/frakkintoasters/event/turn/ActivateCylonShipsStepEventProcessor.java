@@ -10,7 +10,7 @@ public class ActivateCylonShipsStepEventProcessor extends EventProcessor<Activat
 
     @Override
     public Followup process() {
-        if (!game.currentPlayer().isHuman()) {
+        if (game.turn().endedEarly() || !game.currentPlayer().isHuman()) {
             // Revealed Cylons have no Activate Cylon Ships step (rules 8.6, 6.1.3).
             return NONE;
         }

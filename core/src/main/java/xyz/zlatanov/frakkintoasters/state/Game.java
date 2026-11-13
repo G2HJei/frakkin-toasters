@@ -127,4 +127,10 @@ public class Game implements GameView {
         activeSkillCheck = new SkillCheck(type);
         return activeSkillCheck;
     }
+
+    @Mutates
+    public void endSkillCheck() {
+        assert activeSkillCheck != null;
+        activeSkillCheck = null;
+    }
 }

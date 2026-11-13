@@ -91,7 +91,7 @@ public class SkillCheckOps extends GameOps {
     public List<SkillCard> shuffleAndDivideCards() {
         val cards = drawAllAndSort();
         splitIntoPiles(cards);
-        return List.copyOf(cards);
+        return cards;
     }
 
     public void discard(List<SkillCard> cards) {
@@ -106,6 +106,10 @@ public class SkillCheckOps extends GameOps {
     public void giveCardToPlayer(SkillCard card, int playerNumber) {
         record(new CardRemoved(card, playerNumber));
         player(playerNumber).receiveSkillCard(card);
+    }
+
+    public void resolveAbility(SkillCardType type) {
+        record(new AbilityResolved(type));
     }
 
     public void declareEmergency() {
@@ -126,6 +130,25 @@ public class SkillCheckOps extends GameOps {
 
     public void preventFailResult() {
         record(new FailResultPrevented());
+    }
+
+    public void end() {
+        val skillCheck = game.activeSkillCheck();
+        // All Skill Cards of the check go to their discard piles (rule 10.3.1), the cards played before it too.
+        for (val player : game.players()) {
+            for (val card : skillCheck.playedBeforeSkillCheck(player.number())) {
+                record(new CardRemoved(card, player.number()));
+                discardToDeck(card);
+            }
+        }
+        // Face-down cards are left only when the check wasn't made, e.g. after "Political Prowess".
+        val faceDown = skillCheck.cards().cards();
+        if (!faceDown.isEmpty()) {
+            record(new CardsDrawn(CARDS, faceDown));
+            faceDown.forEach(this::discardToDeck);
+        }
+        skillCheck.dividedCards().forEach(this::discard);
+        record(new SkillCheckEnded());
     }
 
     private List<SkillCard> drawAllAndSort() {

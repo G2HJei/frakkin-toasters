@@ -2,6 +2,7 @@ package xyz.zlatanov.frakkintoasters.engine.journal.fact;
 
 import xyz.zlatanov.frakkintoasters.state.PlayerPile;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
+import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 
 import java.util.List;
@@ -20,6 +21,10 @@ public sealed interface PlayerFact extends Fact {
     record CharacterRemovedFromBoards(Character character) implements PlayerFact {
     }
 
+    // The character leaves the game, e.g. when executed: the player has none until he chooses a new one.
+    record CharacterRemoved(int playerNumber, Character character) implements PlayerFact {
+    }
+
     record CardsGained(int playerNumber, PlayerPile pile, List<?> cards) implements PlayerFact {
         public CardsGained {
             cards = List.copyOf(cards);
@@ -35,7 +40,16 @@ public sealed interface PlayerFact extends Fact {
     record MiracleTokenGained(int playerNumber) implements PlayerFact {
     }
 
+    record MiracleTokenLost(int playerNumber) implements PlayerFact {
+    }
+
+    record LoyaltyCardRevealed(int playerNumber, LoyaltyCard card) implements PlayerFact {
+    }
+
     record InfiltrationStarted(int playerNumber) implements PlayerFact {
+    }
+
+    record InfiltrationEnded(int playerNumber) implements PlayerFact {
     }
 
     record CivilianShipRevealed(int playerNumber, int shipId) implements PlayerFact {

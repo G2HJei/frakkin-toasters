@@ -89,7 +89,8 @@ public final class FactApplier {
                 // the result is the fact, nothing to change
             }
             case GameFact.StepChanged f -> game.turn().step(f.step());
-            case GameFact.TurnStarted f -> game.turn().number(f.turn());
+            case GameFact.TurnStarted f -> game.turn().start(f.turn());
+            case GameFact.TurnEndedEarly ignored -> game.turn().endEarly();
             case GameFact.CurrentPlayerChanged f -> game.turn().currentPlayerNumber(f.playerNumber());
             case GameFact.ActingPlayerChanged f -> game.turn().actingPlayerNumber(f.playerNumber());
             case GameFact.CrisisCardPlayed f -> game.turn().playCrisisCard(f.card());
@@ -110,10 +111,17 @@ public final class FactApplier {
                         .place(f.to(), f.character());
             }
             case PlayerFact.CharacterRemovedFromBoards f -> game.boards().all().forEach(b -> b.remove(f.character()));
+            case PlayerFact.CharacterRemoved f -> {
+                game.player(f.playerNumber()).removeCharacter();
+                game.removedComponents().add(f.character());
+            }
             case PlayerFact.CardsGained f -> addOnTop(game.player(f.playerNumber()).pile(f.pile()), f.cards());
             case PlayerFact.CardsLost f -> remove(game.player(f.playerNumber()).pile(f.pile()), f.cards());
             case PlayerFact.MiracleTokenGained f -> game.player(f.playerNumber()).gainMiracleToken();
+            case PlayerFact.MiracleTokenLost f -> game.player(f.playerNumber()).exhaustMiracleToken();
+            case PlayerFact.LoyaltyCardRevealed f -> game.player(f.playerNumber()).loyaltyCards().reveal(f.card());
             case PlayerFact.InfiltrationStarted f -> game.player(f.playerNumber()).infiltrateGalactica();
+            case PlayerFact.InfiltrationEnded f -> game.player(f.playerNumber()).endInfiltration();
             case PlayerFact.CivilianShipRevealed f ->
                     game.player(f.playerNumber()).revealedCivilianShipIds().add(f.shipId());
             case PlayerFact.OwnTurnStarted f -> game.player(f.playerNumber()).countTurn();
@@ -151,11 +159,13 @@ public final class FactApplier {
                 assertSame(f.cards(), pile.removeTop(f.cards().size()));
             }
             case SkillCheckFact.CardRemoved f -> game.activeSkillCheck().remove(f.card(), f.playerNumber());
+            case SkillCheckFact.AbilityResolved f -> game.activeSkillCheck().resolved(f.type());
             case SkillCheckFact.EmergencyDeclared ignored -> game.activeSkillCheck().declareEmergency();
             case SkillCheckFact.TotalStrengthDetermined f -> game.activeSkillCheck().totalStrength(f.totalStrength());
             case SkillCheckFact.ResultDetermined f -> game.activeSkillCheck().result(f.result());
             case SkillCheckFact.PassResultReplaced ignored -> game.activeSkillCheck().replacePassResult();
             case SkillCheckFact.FailResultPrevented ignored -> game.activeSkillCheck().preventFailResult();
+            case SkillCheckFact.SkillCheckEnded ignored -> game.endSkillCheck();
         }
     }
 

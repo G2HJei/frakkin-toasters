@@ -5,7 +5,6 @@ import xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage;
 import xyz.zlatanov.frakkintoasters.state.view.BasestarView;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,7 +29,7 @@ public class Basestar implements BasestarView {
     }
 
     public List<BasestarDamage> damage() {
-        return Collections.unmodifiableList(damage);
+        return List.copyOf(damage);
     }
 
     @Mutates

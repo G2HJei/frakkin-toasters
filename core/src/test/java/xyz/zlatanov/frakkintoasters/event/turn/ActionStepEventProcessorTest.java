@@ -12,6 +12,7 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.GameStep.ACTION;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
+import static xyz.zlatanov.frakkintoasters.state.GameStep.SETUP;
 
 class ActionStepEventProcessorTest extends EventTestHarness<ActionStepEvent> {
 
@@ -84,5 +85,17 @@ class ActionStepEventProcessorTest extends EventTestHarness<ActionStepEvent> {
         execute(new ActionStepEvent());
 
         assertFollowup(one(new PlayerDecisionEvent<>(1, ActionEvent.class), new NoOpEvent(1)));
+    }
+
+    // The turn ended early, e.g. the current player was executed (rule 7.1), so the step doesn't happen.
+    @Test
+    void shouldNotHappenAfterTheTurnEndedEarly() {
+        player(1).character(KARA_STARBUCK_THRACE);
+        moveTo(HANGAR_DECK, KARA_STARBUCK_THRACE);
+        ops.endTurnEarly();
+
+        execute(new ActionStepEvent());
+
+        assertEquals(SETUP, game.turn().step());
     }
 }

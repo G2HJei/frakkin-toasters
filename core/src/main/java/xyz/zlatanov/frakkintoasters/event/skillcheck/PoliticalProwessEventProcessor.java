@@ -4,8 +4,6 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 
-import static xyz.zlatanov.frakkintoasters.event.Followup.all;
-import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.playOrPassDecisions;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.POLITICAL_PROWESS;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckResult.FAIL;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckResult.PASS;
@@ -24,10 +22,9 @@ public class PoliticalProwessEventProcessor extends EventProcessor<PoliticalProw
     @Override
     public Followup process() {
         ops.player(player.number()).discard(event.politicalProwessCard());
+        // MakeSkillCheckEvent then skips the check and resolves the result.
         ops.skillCheck().determineResult(event.pass() ? PASS : FAIL);
-        return event.pass()
-                ? all(playOrPassDecisions(game, ChangeOfPlansEvent.class).toArray(Followup[]::new))
-                : Followup.NONE;
+        return Followup.NONE;
     }
 
     private boolean skillCheckNotMadeYet() {

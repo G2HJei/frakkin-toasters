@@ -6,8 +6,6 @@ import xyz.zlatanov.frakkintoasters.event.DamageHumanFighterEvent;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
-import java.util.stream.Stream;
-
 import static xyz.zlatanov.frakkintoasters.event.DamageHumanFighterEventProcessor.canBeDamaged;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.DOGFIGHT;
@@ -37,8 +35,7 @@ public class DogfightEventProcessor extends EventProcessor<DogfightEvent> {
 
     // "1 other card": the "Dogfight" card being resolved stays, so removing a "Dogfight" card takes a second copy.
     private boolean isOtherCardInTheCheck(SkillCard card) {
-        val skillCheck = game.activeSkillCheck();
-        val copies = Stream.concat(skillCheck.matchingPile().cards().stream(), skillCheck.nonMatchingPile().cards().stream())
+        val copies = game.activeSkillCheck().dividedCards().stream()
                 .filter(card::equals)
                 .count();
         return copies > (card.type() == DOGFIGHT ? 1 : 0);

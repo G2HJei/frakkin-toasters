@@ -41,7 +41,8 @@ code. That includes:
 
 Next steps, in order:
 
-1. Complete the skill check sequence according to `skill-check.drawio`.
+1. ~~Complete the skill check sequence according to `skill-check.drawio`.~~ Done in phase 9 of `engine-plan.md`, see
+   "Skill Check Sequence".
 2. ~~Reanalyze existing events: `PlayerEvent` or current player.~~ Done. The engine still has to call
    `GameOps.actingPlayer`
    for "Executive Order".
@@ -51,8 +52,9 @@ Next steps, in order:
    done: the journal moved out of `Game` into `engine/journal/`, the turn state is grouped in `state/Turn`, the journal
    and processors are ready for the engine, `GameEngine` runs events through `submit` and `choose`, it restores a
    game from its journal and rolls back a failed input (see "Engine"), `GameEngine.start` sets up a game and plays
-   its turns (see "Turn Loop"), processors check what players submit (see "Validation"), and the Cylons can win (see
-   "End of Game and Mutiny"). Next is phase 9: skill check wiring.
+   its turns (see "Turn Loop"), processors check what players submit (see "Validation"), the Cylons can win (see
+   "End of Game and Mutiny"), and a skill check runs from the action that starts it to its end, with every location
+   action in scope (see "Skill Check Sequence" and "Execution"). Next is phase 10: interrupt cards.
 5. Create a working frontend with the events that exist by then.
 
 ## Project Structure
@@ -82,7 +84,7 @@ Multi-module Gradle project with a single `core` module. Package root: `xyz.zlat
   turns), `Team` (the winner in `GameView.outcome()`), `Die` (d8), `Randomness`,
   `RemovedComponents`, `PlayerPile`, and the `@Mutates` marker
 - `state/view/` - read-only view interfaces (`GameView`, `TurnView`, `PlayerView`, `BoardsHolderView`,
-  `BattlestarBoardView` (damaged locations), `DecksHolderView` (Skill Cards left to draw), `SkillCheckView`, ...)
+  `BattlestarBoardView` (damaged locations), `DecksHolderView` (Skill Cards and civilian ships left), `SkillCheckView`, ...)
   implemented by the state classes. Processors read state only through these
 - `state/board/` - board hierarchy: `Board` (base, tracks characters by location) -> `BattlestarBoard` (adds damage
   tracking) -> `GalacticaBoard`/`PegasusBoard`. Also `CylonFleetBoard`, `SpaceLocationsBoard`, `BoardsHolder`
@@ -143,6 +145,31 @@ Class<T> action, List<EventConstraint>)` means "this player picks a concrete `T`
 `FollowupUtils` builds shared followup sequences, e.g. `beforeSkillCheckFollowups(game)`, and holds the helpers that
 `SkillCheckResultFollowups` and `CrisisCardFollowups` share, e.g. `lose`, `gain` and `discard`. `playersFrom(game, n)`
 lists the players clockwise from player `n`, which is the order of the player numbers.
+
+### Skill Check Sequence
+
+Each step of `skill-check.drawio` is an event, and each step's processor queues the next one, so a step decides from
+the state at that moment what follows.
+
+- A location action or (from phase 11) a Crisis Card calls `ops.skillCheck().start(type)` and returns
+  `FollowupUtils.beforeSkillCheckFollowups(game)`: a "Political Prowess" decision per player for a location check,
+  then `MakeSkillCheckEvent`. That skips the check when "Political Prowess" decided it, and otherwise asks for the
+  cards played before the check, from the player to the left of the current player (`eachPlayerFromTheLeft`).
+- `RevealCardsBeforeSkillCheckEvent` (and a tiebreak), `ResolveCardsBeforeSkillCheckEvent` (Support the People, the
+  Destiny cards, the cards played into the check), `ShuffleAndDivideCardsEvent` (the abilities unless "Restore
+  Order" was played, the "consequence" when a card with the ability icon was played in, a Reckless check's Treachery
+  cards), `TotalSkillCheckStrengthEvent` (Declare Emergency), `DetermineSkillCheckResultEvent`, then the result, and
+  `EndSkillCheckEvent` last.
+- `DetermineSkillCheckAbilitiesOrderEvent` records each ability it resolves (`AbilityResolved`), once per check. Iron
+  Will, Install Upgrades, All Hands on Deck and Establish Network act through that record.
+- `EndSkillCheckEvent` runs after everything the result queued: it discards the cards of the check, the ones played
+  before it too, and records `SkillCheckEnded`, which clears `GameView.activeSkillCheck()`.
+- `DetermineSkillCheckResultEventProcessor.difficulty(game)` is the difficulty so far: Declare Emergency, Jury Rigged,
+  and 4 less at the "Airlock" on a character in the "Brig".
+- The game board skill checks are the "Admiral's Quarters", the "Brig" and the "Airlock" (rule 10.3.3). The Daybreak
+  "Administration" has no skill check: it draws a Mutiny Card, and `ReplaceMutinousPresidentEvent` then lets the
+  player choose a new President if the President holds one. `SkillCheckView.targetPlayerNumber()` is the character the
+  location check is about, the player himself at the "Brig".
 
 ### Skill Check Results
 
@@ -299,10 +326,13 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
   token moves past `MINUS_1`: the track has no "Auto Jump" space, the token goes back to `START`.
 - `EndTurnEvent` is the only resource check (rule 16.1). It queues `CylonsWinEvent` at 0, otherwise it passes the
   current player token to the left and queues the next `StartTurnEvent`.
+- `GameOps.endTurnEarly()` (`TurnEndedEarly`) ends a turn before its steps do, e.g. when the current player is
+  executed. The Movement, Action, Crisis, Activate Cylon Ships and Prepare for Jump steps that are left then do nothing,
+  the Discard step and `EndTurnEvent` still happen. `TurnStarted` clears `TurnView.endedEarly()`.
 - Stubs until phase 11: the Crisis step doesn't resolve its card, and the Activate Cylon Ships step does nothing.
 - A Stranded Karl "Helo" Agathon is off the board until `StartTurnEvent` puts him on the Hangar Deck at his player's
-  2nd turn (`PlayerView.turns()`). Until then the Movement and Action steps skip him, and `SendToBrigEvent` and
-  `SendToSickbayEvent` leave him alone.
+  2nd turn (`PlayerView.turns()`, which an execution starts again for the new character). Until then the Movement and
+  Action steps skip him, and `SendToBrigEvent` and `SendToSickbayEvent` leave him alone.
 
 ### End of Game and Mutiny
 
@@ -316,6 +346,22 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
   (the Mutineer on the third, `PlayerView.isMutineer()`), and asks for a `Discard1MutinyCardEvent` per card over the
   limit (rules 5.2.3.2 and 5.2.3.3). In the "Brig" and off the board (a Stranded Helo) the player only discards. Only
   the Press Room calls `PlayerOps.drawMutinyCard()`, because its target doesn't move.
+
+### Execution
+
+`ExecuteEvent(playerNumber)` follows rule 7.1. Its player carries out the steps, so he is the player of the event.
+`ExecuteEventProcessor.canBeExecuted` allows humans only: a revealed Cylon ignores it (rule 6.1.2.1).
+
+- The player discards his Skill and Mutiny Cards and his miracle token.
+- A human: lose 1 morale, the character leaves the game (`CharacterRemoved`, into `GameView.removedComponents()`), the
+  Loyalty Cards are discarded but the Mutineer card stays, and the player chooses a new character. Once the game is
+  under way, `SelectCharacterEventProcessor.canBeSelected` allows any type but a Cylon Leader, and never an executed
+  character or its other version. `FinishExecutionEvent` then adds a "You Are Not a Cylon" card to the Loyalty deck and
+  deals one, and hands on the titles the executed character held. No character left to choose: `CylonsWinEvent`.
+- A hidden Cylon reveals a "You Are a Cylon" card (`LoyaltyCardRevealed`), gives his other Loyalty Cards to a human
+  (`GiveLoyaltyCardsEvent`) and the Mutineer card too (`PassMutineerCardEvent`), moves to the "Resurrection Ship" and
+  loses his titles. An Infiltrating Cylon Leader only goes back to the "Resurrection Ship" (`InfiltrationEnded`).
+- The executed current player's turn ends early (see "Turn Loop").
 
 ### Journal and Replay
 
@@ -361,7 +407,11 @@ Rules for facts and ops:
    analyzed. Mutable collections that getters expose (e.g. `Board.characters()`) can't be marked, don't change state
    through them. Two more rules keep the layers apart: `..state..` depends on none of `..operation..`, `..event..` and
    `..engine..`, and `..event..` doesn't depend on `..engine..`.
-6. Ships and centurions are named by their fixed ids. Decks are built in canonical order and shuffled by
+6. **State getters return lists as copies** (`List.copyOf`), so a list a caller holds stays as it was when a later fact
+   changes the state, e.g. a loop that discards the cards it iterates. `GalacticaBoard.reserves()` and
+   `boardingPartyTrack()` stay unmodifiable views, because `Set.copyOf` and `Map.copyOf` don't keep the iteration
+   order the ops pick ships by.
+7. Ships and centurions are named by their fixed ids. Decks are built in canonical order and shuffled by
    `GameOps.startGame()`.
 
 ### Lombok Usage
@@ -394,5 +444,7 @@ when possible.
   tests use a seeded `Randomness`, not `FakeDeck`, because restore rebuilds the real decks
 - `TurnLoopTest` plays a seeded game from `GameEngine.start` through several full turns, restoring at every pause. Its
   inputs are relative to the first player the seed picks
+- `LocationSkillCheckTest` runs the "Admiral's Quarters", "Brig" and "Airlock" skill checks from the action to
+  `EndSkillCheckEvent` through `submit` and `choose`, restoring at every pause
 - Tests follow the pattern: set up game state, execute the event, assert state changes and followups. Use real game ops
   in processor tests, not mocks, since processors may read their own changes

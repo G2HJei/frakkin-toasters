@@ -3,6 +3,7 @@ package xyz.zlatanov.frakkintoasters.event;
 import xyz.zlatanov.frakkintoasters.event.location.colonialone.PressRoomEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.location.colonialone.QuorumChamberEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.location.galactica.*;
+import xyz.zlatanov.frakkintoasters.event.location.pegasus.AirlockEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.location.pegasus.EngineRoomEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.location.pegasus.PegasusCicEventProcessor;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
@@ -46,10 +47,11 @@ public interface LocationEvent extends ActionEvent {
             case QUORUM_CHAMBER -> QuorumChamberEventProcessor.canAct(game, player);
             case PEGASUS_CIC -> PegasusCicEventProcessor.canAct(game);
             case ENGINE_ROOM -> EngineRoomEventProcessor.canAct(player);
+            case AIRLOCK -> AirlockEventProcessor.canAct(game);
             case COMMAND, COMMUNICATIONS, PRESIDENTS_OFFICE, MAIN_BATTERIES, CAPRICA, CYLON_FLEET, HUMAN_FLEET,
-                 RESURRECTION_SHIP -> true;
-            // No action. The "Brig", "Administration", "Airlock" and "Basestar Bridge" actions come with phase 9.
-            case SICKBAY, BRIG, ADMINISTRATION, AIRLOCK, BASESTAR_BRIDGE -> false;
+                 RESURRECTION_SHIP, BASESTAR_BRIDGE, BRIG, ADMINISTRATION -> true;
+            // No action.
+            case SICKBAY -> false;
             case GALACTICA_SPACE_12_OCLOCK, GALACTICA_SPACE_2_OCLOCK, GALACTICA_SPACE_4_OCLOCK, GALACTICA_SPACE_6_OCLOCK,
                  GALACTICA_SPACE_8_OCLOCK, GALACTICA_SPACE_10_OCLOCK, CYLON_FLEET_SPACE_1, CYLON_FLEET_SPACE_2,
                  CYLON_FLEET_SPACE_3, CYLON_FLEET_SPACE_4, CYLON_FLEET_SPACE_5_6, CYLON_FLEET_SPACE_7_8 -> false;

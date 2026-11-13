@@ -159,6 +159,7 @@ class GameReplayerTest {
         ops.skillCheck().playFromDestinyDeck(2);
         ops.skillCheck().playFromDestinyDeck(1, true);
         ops.skillCheck().shuffleAndDivideCards();
+        ops.skillCheck().resolveAbility(xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.IRON_WILL);
         ops.skillCheck().declareEmergency();
         ops.skillCheck().totalStrength(5);
         ops.skillCheck().determineResult(xyz.zlatanov.frakkintoasters.state.skill.SkillCheckResult.PASS);
@@ -167,6 +168,7 @@ class GameReplayerTest {
                 ? game.activeSkillCheck().nonMatchingPile().cards().getFirst()
                 : game.activeSkillCheck().matchingPile().cards().getFirst();
         ops.skillCheck().discard(inPile);
+        ops.skillCheck().end(); // discards the card played before it and what is left in the piles
         val option = single(new NoOpEvent(1));
         journal.closeScope(one(option, NONE));
         journal.recordChoice(scope, 1, option);
@@ -240,6 +242,13 @@ class GameReplayerTest {
         ops.rollDie();
         ops.rollDie();
         ops.changeStep(CRISIS);
+
+        // an execution's facts
+        ops.player(3).endInfiltration();
+        ops.player(1).loseMiracleToken();
+        ops.player(1).revealLoyaltyCard(game.player(1).loyaltyCards().cards().getFirst());
+        ops.player(2).removeCharacter();
+        ops.endTurnEarly();
         ops.endGame(Team.CYLONS);
 
         return game;

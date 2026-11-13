@@ -12,6 +12,7 @@ import static xyz.zlatanov.frakkintoasters.state.GameStep.SETUP;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard.RAIDERS_INBOUND;
+import static xyz.zlatanov.frakkintoasters.state.GameStep.SETUP;
 
 class CrisisStepEventProcessorTest extends EventTestHarness<CrisisStepEvent> {
 
@@ -78,7 +79,7 @@ class CrisisStepEventProcessorTest extends EventTestHarness<CrisisStepEvent> {
     }
 
     private void assertNoCrisisStep() {
-        val deck = List.copyOf(crisisDeck.cards());
+        val deck = crisisDeck.cards();
 
         execute(new CrisisStepEvent());
 
@@ -86,5 +87,17 @@ class CrisisStepEventProcessorTest extends EventTestHarness<CrisisStepEvent> {
         assertEquals(deck, crisisDeck.cards());
         assertEquals(0, crisisDeck.discardSize());
         assertEquals(List.of(), game.turn().crisisCards());
+    }
+
+    // The turn ended early, e.g. the current player was executed (rule 7.1), so the step doesn't happen.
+    @Test
+    void shouldNotHappenAfterTheTurnEndedEarly() {
+        player(1).character(KARA_STARBUCK_THRACE);
+        moveTo(HANGAR_DECK, KARA_STARBUCK_THRACE);
+        ops.endTurnEarly();
+
+        execute(new CrisisStepEvent());
+
+        assertEquals(SETUP, game.turn().step());
     }
 }

@@ -11,6 +11,7 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.MUST_LAUNCH_IN_VIPER;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
+import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.VIPER;
 
 
 class SelectCharacterEventProcessorTest extends EventTestHarness<SelectCharacterEvent> {
@@ -137,6 +138,57 @@ class SelectCharacterEventProcessorTest extends EventTestHarness<SelectCharacter
     void shoudlForbidNonCylonLeaderIn7PlayerGame() {
         setup7playerGame();
         assertInvalid(select(WILLIAM_ADAMA));
+    }
+
+    @Test
+    void shouldNotSelectASecondCharacter() {
+        player(1).character(WILLIAM_ADAMA);
+        assertInvalid(select(SAUL_TIGH));
+    }
+
+    /* after an execution */
+
+    // "He may choose any character without regard to character type" (rule 7.1). With 3 political leaders taken, the
+    // type isn't the most plentiful any more.
+    @Test
+    void shouldIgnoreTheCharacterTypeAfterAnExecution() {
+        player(2).character(LEE_ADAMA);
+        player(3).character(TOM_ZAREK);
+        player(4).character(LAURA_ROSLIN);
+        assertFalse(SelectCharacterEventProcessor.canBeSelected(game, ELLEN_TIGH)); // at setup
+
+        game.turn().number(5);
+        execute(select(ELLEN_TIGH));
+
+        assertEquals(ELLEN_TIGH, player(1).character());
+    }
+
+    // "This character may no longer be used during the game."
+    @Test
+    void shouldNotSelectAnExecutedCharacterOrItsOtherVersion() {
+        game.turn().number(5);
+        game.removedComponents().add(GAIUS_BALTAR);
+
+        assertFalse(SelectCharacterEventProcessor.canBeSelected(game, GAIUS_BALTAR_ALT));
+        assertInvalid(select(GAIUS_BALTAR));
+    }
+
+    @Test
+    void shouldNotSelectACylonLeaderAfterAnExecution() {
+        game.turn().number(5);
+        assertInvalid(select(CAVIL));
+    }
+
+    // "If there are no vipers available in the reserves, he is instead placed on the "Hangar Deck."" (rule A2.1.1.12)
+    @Test
+    void shouldPlaceApolloOnTheHangarDeckWithoutAViperInTheReserves() {
+        for (int i = 0; i < 6; i++) {
+            ops.galactica().launchHumanFighter(VIPER, GALACTICA_SPACE_4_OCLOCK, null);
+        }
+
+        execute(select(LEE_APOLLO_ADAMA));
+
+        assertEquals(HANGAR_DECK, locate(LEE_APOLLO_ADAMA));
     }
 
     private void setup7playerGame() {

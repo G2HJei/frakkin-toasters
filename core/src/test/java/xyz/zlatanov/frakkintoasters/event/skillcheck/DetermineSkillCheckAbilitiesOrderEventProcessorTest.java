@@ -6,6 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.SkillCheckFact.AbilityResolved;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.ability.*;
@@ -15,17 +16,20 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType.ADMIRALS_QUARTERS;
 
 class DetermineSkillCheckAbilitiesOrderEventProcessorTest extends EventTestHarness<DetermineSkillCheckAbilitiesOrderEvent> {
 
     @BeforeEach
     void setUp() {
         player(1).character(KARA_STARBUCK_THRACE);
+        game.startSkillCheck(ADMIRALS_QUARTERS);
     }
 
     public static Stream<Arguments> shouldFollowupWithCardEvents() {
@@ -83,5 +87,29 @@ class DetermineSkillCheckAbilitiesOrderEventProcessorTest extends EventTestHarne
                 new SkillCard(0, DOGFIGHT)
         )));
         assertFollowup(single(new PlayerDecisionEvent<>(1, DogfightEvent.class)));
+        assertEquals(List.of(DOGFIGHT), game.activeSkillCheck().resolvedAbilities());
+    }
+
+    // The strength and result read these later.
+    @Test
+    void shouldRecordTheAbilitiesWithoutAnEventAsResolved() {
+        execute(new DetermineSkillCheckAbilitiesOrderEvent(1, List.of(
+                new SkillCard(1, IRON_WILL),
+                new SkillCard(1, ESTABLISH_NETWORK),
+                new SkillCard(1, RED_TAPE))));
+
+        assertFollowup(new RedTapeEvent());
+        assertEquals(List.of(IRON_WILL, ESTABLISH_NETWORK, RED_TAPE), game.activeSkillCheck().resolvedAbilities());
+        assertEquals(List.of(new AbilityResolved(IRON_WILL), new AbilityResolved(ESTABLISH_NETWORK),
+                new AbilityResolved(RED_TAPE)), journal.facts());
+    }
+
+    @Test
+    void shouldNotResolveAnAbilityTwiceInACheck() {
+        game.activeSkillCheck().resolved(RED_TAPE);
+
+        execute(new DetermineSkillCheckAbilitiesOrderEvent(1, List.of(new SkillCard(1, RED_TAPE))));
+
+        assertEquals(List.of(RED_TAPE), game.activeSkillCheck().resolvedAbilities());
     }
 }

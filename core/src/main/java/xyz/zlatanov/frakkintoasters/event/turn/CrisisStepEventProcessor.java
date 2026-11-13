@@ -16,7 +16,8 @@ public class CrisisStepEventProcessor extends EventProcessor<CrisisStepEvent> {
     @Override
     public Followup process() {
         val current = game.currentPlayer();
-        if (!current.isHuman()// An Infiltrating Cylon Leader counts as human, so has Crisis step(rule 6.2.3.4).
+        if (game.turn().endedEarly()
+                || !current.isHuman()// An Infiltrating Cylon Leader counts as human, so has Crisis step(rule 6.2.3.4).
                 // Revealed Cylons and characters in the "Brig" have no Crisis step (rules 8.5, 6.1.3).
                 || game.locate(current.character()).equals(Optional.of(BRIG))) {
             return NONE;

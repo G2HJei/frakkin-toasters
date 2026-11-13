@@ -10,13 +10,13 @@ import xyz.zlatanov.frakkintoasters.engine.journal.fact.ShipFact.PilotChanged;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.ShipFact.ShipMoved;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
+import xyz.zlatanov.frakkintoasters.state.board.LocationsArea;
 import xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
 
 import java.util.ArrayList;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.SICKBAY;
-import xyz.zlatanov.frakkintoasters.state.board.LocationsArea;
 import static xyz.zlatanov.frakkintoasters.state.board.Resource.*;
 import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.BASESTAR_DAMAGE;
 import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.CIVILIAN_SHIPS;
@@ -151,11 +151,17 @@ public class ShipOps extends GameOps {
     }
 
     public void land(Location destination) {
-        val ship = galacticaBoard().shipInSpace(shipId, HumanFighter.class);
-        val pilot = ship.pilot();
-        record(new PilotChanged(shipId, null));
-        record(new ShipMoved(shipId, GALACTICA_SPACE, RESERVES, null));
+        val pilot = galacticaBoard().shipInSpace(shipId, HumanFighter.class).pilot();
+        returnToReserves();
         player(pilot).moveTo(destination);
+    }
+
+    public void returnToReserves() {
+        val ship = galacticaBoard().shipInSpace(shipId, HumanFighter.class);
+        if (ship.pilot() != null) {
+            record(new PilotChanged(shipId, null));
+        }
+        record(new ShipMoved(shipId, GALACTICA_SPACE, RESERVES, null));
     }
 
     public void escort() {

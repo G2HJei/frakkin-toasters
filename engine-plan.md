@@ -326,18 +326,20 @@ back instead of killing the game, but nothing stopped a legal-looking one from c
 - **`LaunchViperEvent`** is a `PlayerEvent`, and the pilot has to be the player's own character. Apollo's setup launch
   carries `MUST_LAUNCH_IN_VIPER` ("Launch and pilot a viper").
 - **A decision always has a legal answer**, or the game would wait forever:
-  - The Action step asks for a location action only when `LocationEvent.canAct`. Before, a player in Sickbay who
-    chose to act had no answer.
-  - The Hangar Deck needs a viper, and its 1 more action is `ActivateViperEvent`, because the pilot is in space.
-  - Command's 2 activations are optional ("up to 2").
-  - Press Room asks the target to keep 1 Mutiny Card only when he has 2, and the player to discard one only when he has
-    one.
-  - Prisoner Revolt asks the President only when another player can take the title.
-  - Draws follow rule 8.2.2.5: a color with no cards in its deck and discard pile can't be drawn, and
-    `DecksHolderView.skillCardsLeft` counts them. `DrawSkillCardsEvent` may draw fewer than its constraint only when no
-    other card fits. It assigns each card to a skill set option, so options that share a color work (Helena Cain,
-    Samuel Anders), and Cylon Leaders draw from their skill set (rule 6.2.1.1). Fixed-color draws take what is left,
-    and a draw from an empty pile shuffles the discard pile in first.
+    - The Action step asks for a location action only when `LocationEvent.canAct`. Before, a player in Sickbay who
+      chose to act had no answer.
+    - The Hangar Deck needs a viper, and its 1 more action is `ActivateViperEvent`, because the pilot is in space.
+    - Command's 2 activations are optional ("up to 2").
+    - Press Room asks the target to keep 1 Mutiny Card only when he has 2, and the player to discard one only when he
+      has
+      one.
+    - Prisoner Revolt asks the President only when another player can take the title.
+    - Draws follow rule 8.2.2.5: a color with no cards in its deck and discard pile can't be drawn, and
+      `DecksHolderView.skillCardsLeft` counts them. `DrawSkillCardsEvent` may draw fewer than its constraint only when
+      no
+      other card fits. It assigns each card to a skill set option, so options that share a color work (Helena Cain,
+      Samuel Anders), and Cylon Leaders draw from their skill set (rule 6.2.1.1). Fixed-color draws take what is left,
+      and a draw from an empty pile shuffles the discard pile in first.
 - Fields a client sends empty are rejected where a check would have thrown.
 
 ## Phase 8 - End of game and Mutiny
@@ -369,19 +371,54 @@ the third card (rule 5.2.3.3).
 
 ## Phase 9 - Skill check wiring
 
-Roadmap step 1 isn't finished. The processors exist but aren't chained.
+Roadmap step 1 wasn't finished: the processors existed but weren't chained, `activeSkillCheck` was never cleared, and
+only the Admiral's Quarters had an action.
 
-- Nothing queues `PoliticalProwessEvent`, `RevealCardsBeforeSkillCheckEvent`, `PlayCardsIntoSkillCheckEvent`,
-  `ShuffleAndDivideCardsEvent`, `TotalSkillCheckStrengthEvent`, `DrawAndResolveRecklessCardsEvent` or
-  `ResolveConsequencesEvent`.
-- `EndSkillCheckEvent` from `skill-check.drawio` doesn't exist, and `activeSkillCheck` is never cleared.
-- Only Admiral's Quarters starts a skill check. The Administration, Airlock and Brig locations have skill check types
-  and results but no action event, and the Basestar Bridge has no action event either. `LocationEvent.canAct` says
-  they have no action until then. The Administration action has to check its target with `canBecomePresident`, or its
-  pass result queues an invalid `MakePresidentEvent`.
+**The sequence.** Each step's processor queues the next one, as `skill-check.drawio` draws them, so every branch reads
+the state of its own moment.
 
-Acceptance test: a skill check runs from the action that starts it to `EndSkillCheckEvent` through `submit` and
-`choose`.
+- The start of a check queues a "Political Prowess" decision per player for a location check, then
+  `MakeSkillCheckEvent`. It goes straight to the result when "Political Prowess" decided it. Otherwise the cards played
+  before the check, the reveal and tiebreak, Support the People, the Destiny cards, the cards played into the check
+  (from
+  the player to the left of the current player, rule 10.3.1), the shuffle, the abilities, the consequence, the Reckless
+  Treachery cards, the total, Declare Emergency, the result, Change of Plans, A Second Chance.
+- `EndSkillCheckEvent` comes last, after everything the result queued: it discards the cards of the check, those played
+  before it too, and records `SkillCheckEnded`.
+- The abilities that change the strength or the result (Iron Will, Install Upgrades, All Hands on Deck, Establish
+  Network) were read from `resolvedAbilities`, which nothing filled. `DetermineSkillCheckAbilitiesOrderEvent` records
+  an `AbilityResolved` fact per ability, once per check (rule 10.4.2).
+- "Restore Order" skips the abilities, and the consequence follows the ability icon, not the ability (rule 10.4.3).
+- The Airlock is 4 easier on a character in the Brig. `DetermineSkillCheckResultEventProcessor.difficulty` holds every
+  reduction, and the Declare Emergency decisions use it too.
+
+**The locations.** The game board skill checks in scope are the Admiral's Quarters, the Brig and the Airlock (rule
+10.3.3).
+
+- The Brig passes to a Galactica location (rule 9.2.4), so the pass result carries `DESTINATION_GALACTICA`, and the
+  target is the player in the Brig rather than the current player.
+- The Airlock pass executes, so `ExecuteEvent` got its processor (rule 7.1), with the loss when no character is left
+  (rule 7.2). A human leaves the game and his player chooses a new character, of any type once the game is under way.
+  A Cylon reveals, hands his other Loyalty Cards and the Mutineer card to humans, and resurrects. The current player's
+  turn ends early (`TurnEndedEarly`): the steps left do nothing but the Discard step. An execution starts the count of
+  `PlayerView.turns()` again, for a Helo selected then (rule A2.1.1.10).
+- The plan had the base game Administration, which gives the President title on a pass. The Daybreak Colonial One
+  overlay replaces it (rule A2.2.3) with "Draw 1 Mutiny Card. If the President has any Mutiny Cards, choose a player to
+  gain the President title." So `SkillCheckType.ADMINISTRATION` is gone, and the action is `AdministrationEvent` plus
+  `ReplaceMutinousPresidentEvent`, which checks the President after the draw.
+- The Basestar Bridge resolves 2 of its 4 abilities, one at a time (rule 9.7): the action names the first, and a
+  `OneOf` offers the other three once it is resolved. `PlaceCivilianShipEvent` got its processor with the CAG's
+  placement rule (rule 4.4.3.1), which also fixes the Pursuit track's civilian ships.
+- An acceptance test found Violent Outbursts moving the current player out of the Brig, against rule 9.3.2.
+
+Acceptance test: `LocationSkillCheckTest` runs the Admiral's Quarters, Brig and Airlock checks from the action to
+`EndSkillCheckEvent` through `submit` and `choose`, restoring at every pause. The Airlock one plays a turn: the
+execution, the new character, and the turn going on to the next player's.
+
+Left for later: the order of the abilities is the order of the cards, not the current player's choice, and a card
+removed by Dogfight or Quick Thinking still resolves its ability (the `todo` in `SkillCheck.remove`). Quorum Cards
+in play ("Accept Prophecy"), Final Five cards revealed by an execution, and the Sleeper Agent rules of an execution
+(Boomer, Baltar, the hand-off limit after 7 distance) wait for their features.
 
 ## Phase 10 - Interrupt cards
 
@@ -419,7 +456,7 @@ shown. A window with no holders doesn't pause, so a pause still shows that someo
 **Die rolls.** `ops.rollDie()` runs inside `process()`, so nothing can pause around it.
 
 - Add `RollDieEvent` and a `FollowupUtils` helper that returns `all(window before, RollDieEvent, window after, result)`.
-- The 8 processors that call `ops.rollDie()` split in two: the event queues the roll, and a new result event does what
+- The 9 processors that call `ops.rollDie()` split in two: the event queues the roll, and a new result event does what
   came after it.
 - `Turn` holds the current `DieRoll`, because the result event runs after a pause. `DieRolled` starts changing state,
   where `FactApplier` ignores it today, and a new fact records modifiers. The window before a roll starts a new one.
@@ -456,9 +493,10 @@ of the skill check (rule 8.5.1.1).
 - `JumpingTheFleetEvent` has no processor, and no code tracks distance. That blocks the Sleeper Agent phase at 4
   distance and the end game after 8 (rule 12.4), including the unrevealed Personal Goal check (rule 16.2).
 - `GameEnded` names the winning team. A Cylon Leader's own result comes from their Motive Cards (rules 2.3, 16.3).
-- `ExecuteEvent`'s processor covers the loss when no characters are left to select (rule 2.2). It depends on the
-  execution, so it isn't a win check.
-- 39 event records have no processor today: the 3 placeholders, `NoOpEvent` and 35 real events. Phases 8 to 12 add the
+- The execution reaches the Sleeper Agent phase too: Boomer's and Baltar's extra Loyalty Cards, and no hand-off of
+  Loyalty Cards after 7 distance (rules 6.1.1, 7.1, A2.1.1.6). `ExecuteEvent`'s processor has the loss when no
+  characters are left to select since phase 9 (rule 7.2).
+- 34 event records have no processor after phase 9: the 3 placeholders and 31 real events. Phases 10 to 12 add the
   ones they reach.
 
 Acceptance test: seeded games played to a Cylon win and to the Kobol end game, restoring at every pause.

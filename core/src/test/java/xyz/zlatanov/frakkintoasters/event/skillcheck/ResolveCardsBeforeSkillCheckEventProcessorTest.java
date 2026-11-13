@@ -3,6 +3,7 @@ package xyz.zlatanov.frakkintoasters.event.skillcheck;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
+import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.DrawSkillCardsEvent;
@@ -30,13 +31,27 @@ class ResolveCardsBeforeSkillCheckEventProcessorTest extends EventTestHarness<Re
     @Test
     void shouldFollowUpWithDestinyDeckWhenNoCardPlayed() {
         execute(new ResolveCardsBeforeSkillCheckEvent());
-        assertFollowup(new PlayFromDestinyDeckEvent());
+        assertFollowup(all(single(new PlayFromDestinyDeckEvent()), playCardsInto(), shuffleAndDivide()));
+    }
+
+    // Starting with the player to the left of the current player, and ending with the current player (rule 10.3.1).
+    @Test
+    void shouldLetEachPlayerPlayCardsIntoTheCheckFromTheLeftOfTheCurrentPlayer() {
+        ops.changeCurrentPlayer(2);
+        execute(new ResolveCardsBeforeSkillCheckEvent());
+        assertFollowup(all(
+                single(new PlayFromDestinyDeckEvent()),
+                all(new PlayerDecisionEvent<>(3, PlayCardsIntoSkillCheckEvent.class),
+                        new PlayerDecisionEvent<>(1, PlayCardsIntoSkillCheckEvent.class),
+                        new PlayerDecisionEvent<>(2, PlayCardsIntoSkillCheckEvent.class)),
+                shuffleAndDivide()));
     }
 
     @Test
     void shouldNotPlayFromDestinyDeckWhenGutsAndInitiativeIsInPlay() {
         addPlayedBefore(1, GUTS_AND_INITIATIVE);
         execute(new ResolveCardsBeforeSkillCheckEvent());
+        assertFollowup(all(playCardsInto(), shuffleAndDivide()));
     }
 
     @Test
@@ -49,7 +64,9 @@ class ResolveCardsBeforeSkillCheckEventProcessorTest extends EventTestHarness<Re
         assertFollowup(
                 all(
                         one(new PlayerDecisionEvent<>(3, DrawSkillCardsEvent.class, DRAW_EXACTLY_2), new NoOpEvent(3)),
-                        single(new PlayFromDestinyDeckEvent())
+                        single(new PlayFromDestinyDeckEvent()),
+                        playCardsInto(),
+                        shuffleAndDivide()
                 )
         );
     }
@@ -64,9 +81,22 @@ class ResolveCardsBeforeSkillCheckEventProcessorTest extends EventTestHarness<Re
 
         assertFollowup(
                 all(
-                        one(new PlayerDecisionEvent<>(2, DrawSkillCardsEvent.class, DRAW_EXACTLY_2), new NoOpEvent(2))
+                        one(new PlayerDecisionEvent<>(2, DrawSkillCardsEvent.class, DRAW_EXACTLY_2), new NoOpEvent(2)),
+                        playCardsInto(),
+                        shuffleAndDivide()
                 )
         );
+    }
+
+    private static Followup playCardsInto() {
+        return all(
+                new PlayerDecisionEvent<>(2, PlayCardsIntoSkillCheckEvent.class),
+                new PlayerDecisionEvent<>(3, PlayCardsIntoSkillCheckEvent.class),
+                new PlayerDecisionEvent<>(1, PlayCardsIntoSkillCheckEvent.class));
+    }
+
+    private static Followup shuffleAndDivide() {
+        return single(new ShuffleAndDivideCardsEvent());
     }
 
     private void addPlayedBefore(int playerNumber, SkillCardType skillCardType) {

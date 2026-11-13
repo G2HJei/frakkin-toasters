@@ -8,21 +8,45 @@ import xyz.zlatanov.frakkintoasters.event.skillcheck.ability.IronWillEvent;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckResult;
+import xyz.zlatanov.frakkintoasters.state.view.GameView;
+import xyz.zlatanov.frakkintoasters.state.view.SkillCheckView;
 
 import java.util.ArrayList;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.playOrPassDecisions;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.BRIG;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckResult.*;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType.AIRLOCK;
 
 public class DetermineSkillCheckResultEventProcessor extends EventProcessor<DetermineSkillCheckResultEvent> {
 
     private static final int DECLARE_EMERGENCY_REDUCTION = 2;
     private static final int JURY_RIGGED_REDUCTION       = 4;
+    private static final int AIRLOCK_BRIG_REDUCTION      = 4;
     private static final int IRON_WILL_MARGIN            = 4;
     private static final int A_SECOND_CHANCE_MARGIN      = 4;
+
+    /**
+     * @return the difficulty of the active skill check, with what reduces it so far
+     */
+    public static int difficulty(GameView game) {
+        val skillCheck = game.activeSkillCheck();
+        // "Declare Emergency" and "Jury Rigged" reduce the difficulty, but never the partial pass number.
+        return skillCheck.type().difficulty()
+                - (skillCheck.emergencyDeclared() ? DECLARE_EMERGENCY_REDUCTION : 0)
+                - (playedBefore(skillCheck, JURY_RIGGED) ? JURY_RIGGED_REDUCTION : 0)
+                - (airlockOnPrisoner(game) ? AIRLOCK_BRIG_REDUCTION : 0);
+    }
+
+    // Airlock: "Reduce the difficulty of this check by 4 if the character is in the "Brig.""
+    private static boolean airlockOnPrisoner(GameView game) {
+        val skillCheck = game.activeSkillCheck();
+        return skillCheck.type() == AIRLOCK
+                && game.locate(game.player(skillCheck.targetPlayerNumber()).character()).filter(BRIG::equals).isPresent();
+    }
 
     @Override
     protected boolean isValid() {
@@ -34,21 +58,13 @@ public class DetermineSkillCheckResultEventProcessor extends EventProcessor<Dete
     @Override
     public Followup process() {
         val strength = game.activeSkillCheck().totalStrength();
-        val difficulty = difficulty();
+        val difficulty = difficulty(game);
         val result = result(strength, difficulty);
         ops.skillCheck().determineResult(result);
         if (result == FAIL && abilityResolved(IRON_WILL) && strength >= difficulty - IRON_WILL_MARGIN) {
             ops.skillCheck().preventFailResult();
         }
         return followup(result, strength);
-    }
-
-    // "Declare Emergency" and "Jury Rigged" reduce the difficulty, but never the partial pass number
-    private int difficulty() {
-        val skillCheck = game.activeSkillCheck();
-        return skillCheck.type().difficulty()
-                - (skillCheck.emergencyDeclared() ? DECLARE_EMERGENCY_REDUCTION : 0)
-                - (playedBefore(JURY_RIGGED) ? JURY_RIGGED_REDUCTION : 0);
     }
 
     private SkillCheckResult result(int strength, int difficulty) {
@@ -72,9 +88,11 @@ public class DetermineSkillCheckResultEventProcessor extends EventProcessor<Dete
         }
         // after the Change of Plans decisions, which may replace the pass result
         followups.add(single(new ResolveSkillCheckResultEvent()));
-        if (playedBefore(A_SECOND_CHANCE) && passedPrintedDifficultyBy(A_SECOND_CHANCE_MARGIN, strength)) {
+        if (playedBefore(game.activeSkillCheck(), A_SECOND_CHANCE) && passedPrintedDifficultyBy(A_SECOND_CHANCE_MARGIN, strength)) {
             followups.add(single(new ASecondChanceEvent()));
         }
+        // after everything the result queued
+        followups.add(single(new EndSkillCheckEvent()));
         return all(followups.toArray(Followup[]::new));
     }
 
@@ -86,8 +104,8 @@ public class DetermineSkillCheckResultEventProcessor extends EventProcessor<Dete
         return game.activeSkillCheck().resolvedAbilities().contains(type);
     }
 
-    private boolean playedBefore(SkillCardType type) {
-        return game.activeSkillCheck().playedBeforeSkillCheck().stream()
+    private static boolean playedBefore(SkillCheckView skillCheck, SkillCardType type) {
+        return skillCheck.playedBeforeSkillCheck().stream()
                 .map(SkillCard::type)
                 .anyMatch(type::equals);
     }

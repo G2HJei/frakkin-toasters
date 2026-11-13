@@ -15,10 +15,14 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.BRIG;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.RESEARCH_LAB;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.GAIUS_BALTAR;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckResult.FAIL;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckResult.PASS;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType.ADMIRALS_QUARTERS;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType.AIRLOCK;
 
 class DetermineSkillCheckResultEventProcessorTest extends EventTestHarness<DetermineSkillCheckResultEvent> {
 
@@ -36,7 +40,7 @@ class DetermineSkillCheckResultEventProcessorTest extends EventTestHarness<Deter
         execute(new DetermineSkillCheckResultEvent());
 
         assertEquals(PASS, skillCheck.result());
-        assertFollowup(all(changeOfPlans(1), changeOfPlans(2), changeOfPlans(3), resolve()));
+        assertFollowup(all(changeOfPlans(1), changeOfPlans(2), changeOfPlans(3), resolve(), end()));
     }
 
     @Test
@@ -47,7 +51,7 @@ class DetermineSkillCheckResultEventProcessorTest extends EventTestHarness<Deter
 
         assertEquals(FAIL, skillCheck.result());
         assertFalse(skillCheck.failResultPrevented());
-        assertFollowup(new ResolveSkillCheckResultEvent());
+        assertFollowup(all(resolve(), end()));
     }
 
     @Test
@@ -58,7 +62,7 @@ class DetermineSkillCheckResultEventProcessorTest extends EventTestHarness<Deter
         execute(new DetermineSkillCheckResultEvent());
 
         assertEquals(PASS, skillCheck.result());
-        assertFollowup(all(changeOfPlans(1), changeOfPlans(2), changeOfPlans(3), resolve()));
+        assertFollowup(all(changeOfPlans(1), changeOfPlans(2), changeOfPlans(3), resolve(), end()));
     }
 
     @Test
@@ -69,7 +73,7 @@ class DetermineSkillCheckResultEventProcessorTest extends EventTestHarness<Deter
         execute(new DetermineSkillCheckResultEvent());
 
         assertEquals(PASS, skillCheck.result());
-        assertFollowup(all(changeOfPlans(1), changeOfPlans(2), changeOfPlans(3), resolve()));
+        assertFollowup(all(changeOfPlans(1), changeOfPlans(2), changeOfPlans(3), resolve(), end()));
     }
 
     @Test
@@ -81,7 +85,7 @@ class DetermineSkillCheckResultEventProcessorTest extends EventTestHarness<Deter
         execute(new DetermineSkillCheckResultEvent());
 
         assertEquals(PASS, skillCheck.result());
-        assertFollowup(all(changeOfPlans(1), changeOfPlans(2), changeOfPlans(3), resolve()));
+        assertFollowup(all(changeOfPlans(1), changeOfPlans(2), changeOfPlans(3), resolve(), end()));
     }
 
     @Test
@@ -93,7 +97,7 @@ class DetermineSkillCheckResultEventProcessorTest extends EventTestHarness<Deter
 
         assertEquals(FAIL, skillCheck.result());
         assertTrue(skillCheck.failResultPrevented());
-        assertFollowup(new ResolveSkillCheckResultEvent());
+        assertFollowup(all(resolve(), end()));
     }
 
     @Test
@@ -105,7 +109,7 @@ class DetermineSkillCheckResultEventProcessorTest extends EventTestHarness<Deter
 
         assertEquals(FAIL, skillCheck.result());
         assertFalse(skillCheck.failResultPrevented());
-        assertFollowup(new ResolveSkillCheckResultEvent());
+        assertFollowup(all(resolve(), end()));
     }
 
     @Test
@@ -118,7 +122,7 @@ class DetermineSkillCheckResultEventProcessorTest extends EventTestHarness<Deter
 
         assertEquals(FAIL, skillCheck.result());
         assertTrue(skillCheck.failResultPrevented());
-        assertFollowup(new ResolveSkillCheckResultEvent());
+        assertFollowup(all(resolve(), end()));
     }
 
     @Test
@@ -130,7 +134,7 @@ class DetermineSkillCheckResultEventProcessorTest extends EventTestHarness<Deter
 
         assertEquals(FAIL, skillCheck.result());
         assertFalse(skillCheck.failResultPrevented());
-        assertFollowup(all(new IronWillEvent(), new ResolveSkillCheckResultEvent()));
+        assertFollowup(all(new IronWillEvent(), new ResolveSkillCheckResultEvent(), new EndSkillCheckEvent()));
     }
 
     @Test
@@ -141,7 +145,7 @@ class DetermineSkillCheckResultEventProcessorTest extends EventTestHarness<Deter
         execute(new DetermineSkillCheckResultEvent());
 
         assertFollowup(all(single(new InstallUpgradesEvent(true)), changeOfPlans(1), changeOfPlans(2), changeOfPlans(3),
-                resolve()));
+                resolve(), end()));
     }
 
     @Test
@@ -151,7 +155,7 @@ class DetermineSkillCheckResultEventProcessorTest extends EventTestHarness<Deter
 
         execute(new DetermineSkillCheckResultEvent());
 
-        assertFollowup(all(new InstallUpgradesEvent(false), new ResolveSkillCheckResultEvent()));
+        assertFollowup(all(new InstallUpgradesEvent(false), new ResolveSkillCheckResultEvent(), new EndSkillCheckEvent()));
     }
 
     @Test
@@ -162,7 +166,7 @@ class DetermineSkillCheckResultEventProcessorTest extends EventTestHarness<Deter
         execute(new DetermineSkillCheckResultEvent());
 
         assertFollowup(all(changeOfPlans(1), changeOfPlans(2), changeOfPlans(3), resolve(),
-                single(new ASecondChanceEvent())));
+                single(new ASecondChanceEvent()), end()));
     }
 
     @Test
@@ -174,7 +178,32 @@ class DetermineSkillCheckResultEventProcessorTest extends EventTestHarness<Deter
         execute(new DetermineSkillCheckResultEvent());
 
         assertEquals(PASS, skillCheck.result());
-        assertFollowup(all(changeOfPlans(1), changeOfPlans(2), changeOfPlans(3), resolve()));
+        assertFollowup(all(changeOfPlans(1), changeOfPlans(2), changeOfPlans(3), resolve(), end()));
+    }
+
+    // Airlock: "Reduce the difficulty of this check by 4 if the character is in the "Brig.""
+    @Test
+    void shouldReduceTheAirlockDifficultyBy4OnACharacterInTheBrig() {
+        player(2).character(GAIUS_BALTAR);
+        moveTo(BRIG, GAIUS_BALTAR);
+        game.startSkillCheck(AIRLOCK).targetPlayerNumber(2).totalStrength(8);
+
+        execute(new DetermineSkillCheckResultEvent());
+
+        assertEquals(PASS, game.activeSkillCheck().result());
+        assertFollowup(all(changeOfPlans(1), changeOfPlans(2), changeOfPlans(3), resolve(), end()));
+    }
+
+    @Test
+    void shouldKeepTheAirlockDifficultyOnACharacterOutOfTheBrig() {
+        player(2).character(GAIUS_BALTAR);
+        moveTo(RESEARCH_LAB, GAIUS_BALTAR);
+        game.startSkillCheck(AIRLOCK).targetPlayerNumber(2).totalStrength(11);
+
+        execute(new DetermineSkillCheckResultEvent());
+
+        assertEquals(FAIL, game.activeSkillCheck().result());
+        assertFollowup(all(resolve(), end()));
     }
 
     @Test
@@ -194,5 +223,9 @@ class DetermineSkillCheckResultEventProcessorTest extends EventTestHarness<Deter
 
     private static Followup resolve() {
         return single(new ResolveSkillCheckResultEvent());
+    }
+
+    private static Followup end() {
+        return single(new EndSkillCheckEvent());
     }
 }

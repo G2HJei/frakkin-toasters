@@ -8,8 +8,8 @@ public interface SkillCheckView {
     SkillCheckType type();
 
     /**
-     * The player chosen by the location action that started this skill check (Administration, Admiral's Quarters,
-     * Airlock), {@code null} otherwise.
+     * The player the location action that started this skill check is about: the character chosen at the "Admiral's
+     * Quarters" or the "Airlock", or the one in the "Brig". {@code null} for other skill checks.
      */
     Integer targetPlayerNumber();
 
@@ -18,6 +18,11 @@ public interface SkillCheckView {
     DeckView<SkillCard> matchingPile();
 
     DeckView<SkillCard> nonMatchingPile();
+
+    /**
+     * The cards of the matching pile, then those of the non-matching pile, once the cards are shuffled and divided.
+     */
+    List<SkillCard> dividedCards();
 
     boolean playedBeforeRevealed();
 

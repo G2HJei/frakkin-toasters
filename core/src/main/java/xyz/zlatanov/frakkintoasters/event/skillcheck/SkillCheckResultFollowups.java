@@ -67,10 +67,12 @@ public class SkillCheckResultFollowups {
     private Followup pass(SkillCheckType type) {
         return switch (type) {
             // game board locations, acting on the character chosen by the location action
-            case ADMINISTRATION -> single(new MakePresidentEvent(game.player(target()).character()));
             case ADMIRALS_QUARTERS -> single(sendTo(Location.BRIG, target()));
             case AIRLOCK -> single(new ExecuteEvent(target()));
-            case BRIG -> single(new PlayerDecisionEvent<>(currentPlayer(), LeaveBrigEvent.class));
+            // "Pass this skill check to move to any location", on Galactica only (rule 9.2.4)
+            case BRIG -> inBrig(game.player(target()))
+                    ? single(new PlayerDecisionEvent<>(target(), LeaveBrigEvent.class, DESTINATION_GALACTICA))
+                    : NONE;
             // resources
             case COLONIAL_DAY, IN_THE_RING, JOES_BAR -> single(gain(MORALE, 1));
             case FORCED_WATER_MINING, SCOUTING_FOR_WATER, THE_BLACK_MARKET -> single(gain(FOOD, 1));
@@ -251,7 +253,7 @@ public class SkillCheckResultFollowups {
             case HUMAN_PRISONER -> single(new HumanPrisonerFailEvent());
             case THE_FARM -> all(lose(FOOD, 1), lose(POPULATION, 1), new KeepCrisisCardInPlayEvent(type));
             // no effect
-            case ADMINISTRATION, ADMIRALS_QUARTERS, AIRLOCK, BRIG -> NONE;
+            case ADMIRALS_QUARTERS, AIRLOCK, BRIG -> NONE;
         };
     }
 

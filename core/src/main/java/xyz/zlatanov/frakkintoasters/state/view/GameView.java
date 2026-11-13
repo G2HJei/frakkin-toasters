@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.state.view;
 
+import xyz.zlatanov.frakkintoasters.state.RemovedComponents;
 import xyz.zlatanov.frakkintoasters.state.Team;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard;
@@ -52,4 +53,9 @@ public interface GameView {
     Optional<Location> locate(Character character);
 
     Optional<Team> outcome();
+
+    /**
+     * The components out of the game, e.g. destroyed ships and executed characters.
+     */
+    RemovedComponents removedComponents();
 }

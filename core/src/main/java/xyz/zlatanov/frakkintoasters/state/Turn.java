@@ -8,7 +8,6 @@ import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.view.TurnView;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static xyz.zlatanov.frakkintoasters.state.GameStep.SETUP;
@@ -26,6 +25,18 @@ public class Turn implements TurnView {
     private       Integer          actingPlayerNumber; // null means the current player is acting
     @Getter(AccessLevel.NONE)
     private final List<CrisisCard> crisisCards         = new ArrayList<>();
+    private       boolean          endedEarly          = false;
+
+    @Mutates
+    public void start(int number) {
+        this.number = number;
+        endedEarly = false;
+    }
+
+    @Mutates
+    public void endEarly() {
+        endedEarly = true;
+    }
 
     @Override
     public int actingPlayerNumber() {
@@ -43,7 +54,7 @@ public class Turn implements TurnView {
 
     @Override
     public List<CrisisCard> crisisCards() {
-        return Collections.unmodifiableList(crisisCards);
+        return List.copyOf(crisisCards);
     }
 
     @Mutates

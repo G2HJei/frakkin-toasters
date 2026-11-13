@@ -13,6 +13,8 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.BRIG;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.HANGAR_DECK;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARL_HELO_AGATHON;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.HANGAR_DECK;
+import static xyz.zlatanov.frakkintoasters.state.GameStep.SETUP;
 
 class MovementStepEventProcessorTest extends EventTestHarness<MovementStepEvent> {
 
@@ -46,5 +48,17 @@ class MovementStepEventProcessorTest extends EventTestHarness<MovementStepEvent>
         execute(new MovementStepEvent());
 
         assertEquals(MOVEMENT, game.turn().step());
+    }
+
+    // The turn ended early, e.g. the current player was executed (rule 7.1), so the step doesn't happen.
+    @Test
+    void shouldNotHappenAfterTheTurnEndedEarly() {
+        player(1).character(KARA_STARBUCK_THRACE);
+        moveTo(HANGAR_DECK, KARA_STARBUCK_THRACE);
+        ops.endTurnEarly();
+
+        execute(new MovementStepEvent());
+
+        assertEquals(SETUP, game.turn().step());
     }
 }

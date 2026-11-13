@@ -26,8 +26,8 @@ public class StartTurnEventProcessor extends EventProcessor<StartTurnEvent> {
     }
 
     // Stranded: "At the start of your 2nd turn, place your character on the Hangar Deck location." His own turns,
-    // because the turn number counts everyone's.
-    // todo an execution restarts the count: a Helo selected then is Stranded for his player's next turn (rule A2.1.1.10)
+    // because the turn number counts everyone's. An execution restarts the count, so a Helo selected then is Stranded
+    // for his player's next turn (rule A2.1.1.10).
     private void placeStrandedHelo() {
         val current = game.currentPlayer();
         if (current.character() == KARL_HELO_AGATHON

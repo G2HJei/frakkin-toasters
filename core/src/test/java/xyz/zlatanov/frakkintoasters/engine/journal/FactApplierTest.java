@@ -11,6 +11,7 @@ import xyz.zlatanov.frakkintoasters.engine.journal.fact.ShipFact.*;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.TitleFact.*;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.PlayerPile;
+import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage;
@@ -209,6 +210,11 @@ class FactApplierTest {
         apply(new ActingPlayerChanged(null));
         assertEquals(2, game.turn().actingPlayerNumber());
 
+        apply(new TurnEndedEarly());
+        assertTrue(game.turn().endedEarly());
+        apply(new TurnStarted(5));
+        assertFalse(game.turn().endedEarly()); // a new turn is under way
+
         apply(new CrisisCardPlayed(CrisisCard.RAIDERS_INBOUND));
         apply(new CrisisCardPlayed(CrisisCard.LABOR_DISPUTE));
         assertEquals(List.of(CrisisCard.RAIDERS_INBOUND, CrisisCard.LABOR_DISPUTE), game.turn().crisisCards());
@@ -299,6 +305,47 @@ class FactApplierTest {
         assertEquals(2, game.player(2).turns());
         assertEquals(0, game.player(1).turns());
         assertEquals(0, game.turn().number());
+    }
+
+    // An executed character leaves the game: his player has none, and the turns count again for the next one.
+    @Test
+    void characterRemovedTakesTheCharacterOutOfTheGame() {
+        apply(new CharacterSelected(2, FELIX_GAETA));
+        apply(new OwnTurnStarted(2));
+
+        apply(new CharacterRemoved(2, FELIX_GAETA));
+
+        assertNull(game.player(2).character());
+        assertEquals(0, game.player(2).turns());
+        assertTrue(game.removedComponents().contains(FELIX_GAETA));
+    }
+
+    @Test
+    void miracleTokenLostSpendsTheToken() {
+        apply(new MiracleTokenLost(1));
+
+        assertFalse(game.player(1).hasMiracleToken());
+    }
+
+    @Test
+    void loyaltyCardRevealedTurnsTheCardFaceup() {
+        apply(new CardsGained(1, PlayerPile.LOYALTY, List.of(LoyaltyCard.CYLON_DAMAGE_GALACTICA, LoyaltyCard.NOT_CYLON)));
+
+        apply(new LoyaltyCardRevealed(1, LoyaltyCard.CYLON_DAMAGE_GALACTICA));
+
+        assertEquals(List.of(LoyaltyCard.NOT_CYLON), game.player(1).loyaltyCards().cards());
+        assertEquals(List.of(LoyaltyCard.CYLON_DAMAGE_GALACTICA), game.player(1).loyaltyCards().revealedCards());
+        assertTrue(game.player(1).isRevealedCylon());
+    }
+
+    @Test
+    void infiltrationEndedReturnsTheCylonLeader() {
+        apply(new CharacterSelected(1, AARON_DORAL));
+        apply(new InfiltrationStarted(1));
+
+        apply(new InfiltrationEnded(1));
+
+        assertFalse(game.player(1).isInfiltrating());
     }
 
     /* ShipFact */
@@ -483,6 +530,24 @@ class FactApplierTest {
         apply(new SkillCheckFact.FailResultPrevented());
 
         assertTrue(check.failResultPrevented());
+    }
+
+    @Test
+    void abilityResolved() {
+        val check = startCheck();
+
+        apply(new SkillCheckFact.AbilityResolved(SkillCardType.IRON_WILL));
+
+        assertEquals(List.of(SkillCardType.IRON_WILL), check.resolvedAbilities());
+    }
+
+    @Test
+    void skillCheckEndedClearsTheCheck() {
+        startCheck();
+
+        apply(new SkillCheckFact.SkillCheckEnded());
+
+        assertNull(game.activeSkillCheck());
     }
 
     /* TitleFact */

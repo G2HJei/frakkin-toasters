@@ -15,11 +15,14 @@ public class AdvancePursuitTrackEventProcessor extends EventProcessor<AdvancePur
     @Override
     public Followup process() {
         val pursuit = ops.cylonFleet().advancePursuit();
+        // Only the civilian ships that are left, so each decision has an answer.
+        val civilianShipsLeft = game.decks().civilianShipsLeft();
         switch (pursuit) {
             case ONE_CIVILIAN_SHIP:
-                return single(decisionEvent());
+                return civilianShipsLeft > 0 ? single(decisionEvent()) : Followup.NONE;
             case TWO_CIVILIAN_SHIPS:
-                return all(decisionEvent(), decisionEvent());
+                return civilianShipsLeft > 1 ? all(decisionEvent(), decisionEvent())
+                        : civilianShipsLeft > 0 ? single(decisionEvent()) : Followup.NONE;
             case AUTO_ATTACK:
                 transferAllShipsToMainBoard();
             default:

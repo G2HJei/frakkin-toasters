@@ -7,8 +7,10 @@ import xyz.zlatanov.frakkintoasters.event.board.LoseResourceEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.DiscardSkillCardsEvent;
 import xyz.zlatanov.frakkintoasters.event.player.SendToSickbayEvent;
+import xyz.zlatanov.frakkintoasters.event.skillcheck.MakeSkillCheckEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.PlayCardsBeforeSkillCheckEvent;
-import xyz.zlatanov.frakkintoasters.event.skillcheck.ResolveCardsBeforeSkillCheckEvent;
+import xyz.zlatanov.frakkintoasters.event.skillcheck.PoliticalProwessEvent;
+import xyz.zlatanov.frakkintoasters.event.skillcheck.RevealCardsBeforeSkillCheckEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.ability.*;
 import xyz.zlatanov.frakkintoasters.state.board.Resource;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
@@ -20,10 +22,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static lombok.AccessLevel.PRIVATE;
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
-import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.*;
+import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.discardExactly;
 import static xyz.zlatanov.frakkintoasters.event.player.SendToSickbayEventProcessor.canBeChosenForSickbay;
 
 @NoArgsConstructor(access = PRIVATE)
@@ -72,11 +75,37 @@ public class FollowupUtils {
                 .toArray(Event[]::new));
     }
 
+    /**
+     * @return what follows the start of a skill check, see {@code skill-check.drawio}. Before a skill check triggered by
+     * a location, each player may play "Political Prowess" to decide it without making it
+     */
     public static Followup beforeSkillCheckFollowups(GameView game) {
-        val followupEvents = new ArrayList<Event>();
-        followupEvents.addAll(addPlayerDecisions(game, PlayCardsBeforeSkillCheckEvent.class));
-        followupEvents.add(new ResolveCardsBeforeSkillCheckEvent());
-        return all(followupEvents.toArray(Event[]::new));
+        val followups = new ArrayList<Followup>();
+        if (game.activeSkillCheck().type().triggeredByLocation()) {
+            followups.addAll(playOrPassDecisions(game, PoliticalProwessEvent.class));
+        }
+        followups.add(single(new MakeSkillCheckEvent()));
+        return all(followups.toArray(Followup[]::new));
+    }
+
+    /**
+     * Each player may play cards before the skill check, then they are revealed together.
+     */
+    public static Followup playCardsBeforeSkillCheck(GameView game) {
+        return all(
+                eachPlayerFromTheLeft(game, PlayCardsBeforeSkillCheckEvent.class),
+                single(new RevealCardsBeforeSkillCheckEvent()));
+    }
+
+    /**
+     * @return a decision for each player, starting with the player to the left of the current player and ending with
+     * the current player, as players play Skill Cards into a skill check (rule 10.3.1)
+     */
+    public static Followup eachPlayerFromTheLeft(GameView game, Class<? extends PlayerEvent> eventClass) {
+        val fromTheCurrent = playersFrom(game, game.turn().currentPlayerNumber());
+        return all(Stream.concat(fromTheCurrent.stream().skip(1), Stream.of(fromTheCurrent.getFirst()))
+                .map(player -> new PlayerDecisionEvent<>(player.number(), eventClass))
+                .toArray(Event[]::new));
     }
 
     /**
@@ -111,15 +140,5 @@ public class FollowupUtils {
                  ESTABLISH_NETWORK -> Followup.NONE;
             default -> throw new FrakCallTheAdmiralException();
         };
-    }
-
-    private static List<Event> addPlayerDecisions(GameView game, Class<? extends PlayerEvent> eventClass) {
-        val playerEvents = new ArrayList<Event>();
-        var decidingPlayer = game.turn().currentPlayerNumber();
-        do {
-            decidingPlayer = decidingPlayer >= game.players().size() ? 1 : ++decidingPlayer;
-            playerEvents.add(new PlayerDecisionEvent<>(decidingPlayer, eventClass));
-        } while (decidingPlayer != game.turn().currentPlayerNumber());
-        return playerEvents;
     }
 }

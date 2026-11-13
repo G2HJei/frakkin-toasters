@@ -18,6 +18,9 @@ public class MovementStepEventProcessor extends EventProcessor<MovementStepEvent
 
     @Override
     public Followup process() {
+        if (game.turn().endedEarly()) {
+            return NONE;
+        }
         ops.changeStep(MOVEMENT);
         val current = game.currentPlayer();
         val location = game.locate(current.character());

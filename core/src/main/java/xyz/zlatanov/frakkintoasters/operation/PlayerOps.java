@@ -4,6 +4,7 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedOnTop;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedToBottom;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsDiscarded;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.*;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.ShipFact.PilotChanged;
 import xyz.zlatanov.frakkintoasters.state.Game;
@@ -11,6 +12,7 @@ import xyz.zlatanov.frakkintoasters.state.Player;
 import xyz.zlatanov.frakkintoasters.state.PlayerPile;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
+import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
 import xyz.zlatanov.frakkintoasters.state.card.MutinyCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
@@ -138,6 +140,44 @@ public class PlayerOps extends GameOps {
 
     public void gainMiracleToken() {
         record(new MiracleTokenGained(player.number()));
+    }
+
+    public void loseMiracleToken() {
+        if (player.hasMiracleToken()) {
+            record(new MiracleTokenLost(player.number()));
+        }
+    }
+
+    public void revealLoyaltyCard(LoyaltyCard card) {
+        record(new LoyaltyCardRevealed(player.number(), card));
+    }
+
+    public void discardLoyaltyCards(List<LoyaltyCard> cards) {
+        if (!cards.isEmpty()) {
+            record(new CardsLost(player.number(), PlayerPile.LOYALTY, cards));
+            record(new CardsDiscarded(DeckId.LOYALTY, cards));
+        }
+    }
+
+    public void giveLoyaltyCards(int recipientPlayerNumber, List<LoyaltyCard> cards) {
+        record(new CardsLost(player.number(), PlayerPile.LOYALTY, cards));
+        record(new CardsGained(recipientPlayerNumber, PlayerPile.LOYALTY, cards));
+    }
+
+    /**
+     * Takes the character out of the game, e.g. after an execution. A viper he pilots goes back to the "Reserves".
+     */
+    public void removeCharacter() {
+        val character = player.character();
+        galacticaBoard().pilotedFighter(character).ifPresent(fighter -> ship(fighter.id()).returnToReserves());
+        if (game.locate(character).isPresent()) {
+            record(new CharacterRemovedFromBoards(character));
+        }
+        record(new CharacterRemoved(player.number(), character));
+    }
+
+    public void endInfiltration() {
+        record(new InfiltrationEnded(player.number()));
     }
 
     private void gain(PlayerPile pile, List<?> cards) {

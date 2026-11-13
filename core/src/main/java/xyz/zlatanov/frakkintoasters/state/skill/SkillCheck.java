@@ -13,7 +13,6 @@ import xyz.zlatanov.frakkintoasters.state.view.SkillCheckView;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.groupingBy;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.ENGINEERING;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.ESTABLISH_NETWORK;
@@ -46,6 +45,11 @@ public class SkillCheck implements SkillCheckView {
             case MATCHING -> matchingPile;
             case NON_MATCHING -> nonMatchingPile;
         };
+    }
+
+    @Override
+    public List<SkillCard> dividedCards() {
+        return Stream.concat(matchingPile.cards().stream(), nonMatchingPile.cards().stream()).toList();
     }
 
     @Mutates
@@ -98,7 +102,7 @@ public class SkillCheck implements SkillCheckView {
 
     @Override
     public List<SkillCard> playedBeforeSkillCheck(int playerNumber) {
-        return unmodifiableList(playedBeforeSkillCheck.getOrDefault(playerNumber, List.of()));
+        return List.copyOf(playedBeforeSkillCheck.getOrDefault(playerNumber, List.of()));
     }
 
     @Override
@@ -128,7 +132,7 @@ public class SkillCheck implements SkillCheckView {
 
     @Override
     public List<SkillCardType> resolvedAbilities() {
-        return unmodifiableList(resolvedAbilities);
+        return List.copyOf(resolvedAbilities);
     }
 
     @Mutates

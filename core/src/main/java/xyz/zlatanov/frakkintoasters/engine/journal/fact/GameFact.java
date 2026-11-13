@@ -21,6 +21,9 @@ public sealed interface GameFact extends Fact {
     record TurnStarted(int turn) implements GameFact {
     }
 
+    record TurnEndedEarly() implements GameFact {
+    }
+
     record CurrentPlayerChanged(int playerNumber) implements GameFact {
     }
 

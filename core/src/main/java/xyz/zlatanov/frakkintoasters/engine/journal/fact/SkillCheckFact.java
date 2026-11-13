@@ -1,6 +1,7 @@
 package xyz.zlatanov.frakkintoasters.engine.journal.fact;
 
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckPile;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckResult;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
@@ -42,6 +43,9 @@ public sealed interface SkillCheckFact extends Fact {
     record CardRemoved(SkillCard card, Integer playerNumber) implements SkillCheckFact {
     }
 
+    record AbilityResolved(SkillCardType type) implements SkillCheckFact {
+    }
+
     record EmergencyDeclared() implements SkillCheckFact {
     }
 
@@ -55,5 +59,8 @@ public sealed interface SkillCheckFact extends Fact {
     }
 
     record FailResultPrevented() implements SkillCheckFact {
+    }
+
+    record SkillCheckEnded() implements SkillCheckFact {
     }
 }

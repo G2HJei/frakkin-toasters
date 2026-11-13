@@ -36,6 +36,6 @@ class SkillCheckTypeTest {
                 .filter(SkillCheckType::triggeredByLocation)
                 .collect(toSet());
 
-        assertEquals(Set.of(ADMINISTRATION, ADMIRALS_QUARTERS, AIRLOCK, BRIG), triggeredByLocation);
+        assertEquals(Set.of(ADMIRALS_QUARTERS, AIRLOCK, BRIG), triggeredByLocation);
     }
 }

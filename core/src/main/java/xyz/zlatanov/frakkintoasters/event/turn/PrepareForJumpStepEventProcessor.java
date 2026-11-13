@@ -18,6 +18,9 @@ public class PrepareForJumpStepEventProcessor extends EventProcessor<PrepareForJ
 
     @Override
     public Followup process() {
+        if (game.turn().endedEarly()) {
+            return NONE;
+        }
         // Not skipped on a revealed Cylon's turn: a Crisis Card chosen at "Caprica" counts too (rule 6.1.3.4).
         val followups = new ArrayList<Event>();
         game.turn().crisisCards().stream()

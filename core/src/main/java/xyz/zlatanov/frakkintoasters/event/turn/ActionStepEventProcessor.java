@@ -21,6 +21,9 @@ public class ActionStepEventProcessor extends EventProcessor<ActionStepEvent> {
     // as well as any component action - character sheet, cards, locations - aanything with "Action:" on it.
     @Override
     public Followup process() {
+        if (game.turn().endedEarly()) {
+            return NONE;
+        }
         ops.changeStep(ACTION);
         val current = game.currentPlayer();
         if (game.locate(current.character()).isEmpty()) {

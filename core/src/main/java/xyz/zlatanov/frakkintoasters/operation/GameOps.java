@@ -102,6 +102,13 @@ public class GameOps extends AbstractOps {
         record(new OwnTurnStarted(game.turn().currentPlayerNumber()));
     }
 
+    /**
+     * Ends the turn before its steps do, e.g. when the current player was executed (rule 7.1).
+     */
+    public void endTurnEarly() {
+        record(new TurnEndedEarly());
+    }
+
     public void changeCurrentPlayer(int playerNumber) {
         record(new CurrentPlayerChanged(playerNumber));
     }
@@ -111,7 +118,7 @@ public class GameOps extends AbstractOps {
     }
 
     public void discardCrisisCards() {
-        val cards = List.copyOf(game.turn().crisisCards());
+        val cards = game.turn().crisisCards();
         if (!cards.isEmpty()) {
             record(new CrisisCardsCleared(cards));
             record(new CardsDiscarded(CRISIS, cards));

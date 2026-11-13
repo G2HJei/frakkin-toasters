@@ -24,6 +24,14 @@ class ViolentOutburstsEventProcessorTest extends EventTestHarness<ViolentOutburs
         assertEquals(SICKBAY, locate(SHARON_BOOMER_VALERII));
     }
 
+    // "If a character is in the "Brig", and a card sends him to "Sickbay" he is not moved from the "Brig"." (rule 9.3.2)
+    @Test
+    void shouldNotMoveACharacterOutOfTheBrig() {
+        moveTo(BRIG, SHARON_BOOMER_VALERII);
+        execute(new ViolentOutburstsEvent());
+        assertEquals(BRIG, locate(SHARON_BOOMER_VALERII));
+    }
+
     @Test
     void shouldNotSendRevealedCylonToSickbay() {
         revealCylon();
