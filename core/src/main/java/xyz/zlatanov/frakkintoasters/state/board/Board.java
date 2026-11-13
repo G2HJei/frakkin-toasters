@@ -1,7 +1,6 @@
 package xyz.zlatanov.frakkintoasters.state.board;
 
 import xyz.zlatanov.frakkintoasters.state.Mutates;
-import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.view.BoardView;
 
@@ -18,26 +17,14 @@ public interface Board extends BoardView {
     Map<Character, Location> characters();
 
     @Mutates
-    default void place(Location to, Character... characterToPlace) {
-        assert locations().contains(to) && !to.isSpaceLocation();
-        for (val c : characterToPlace) {
-            characters().put(c, to);
-        }
-    }
+    void place(Location to, Character character);
+
+    @Mutates
+    void remove(Character character);
 
     @Override
     default Optional<Location> locate(Character character) {
         return Optional.ofNullable(characters().get(character));
-    }
-
-    @Mutates
-    default void remove(Character character) {
-        remove(List.of(character));
-    }
-
-    @Mutates
-    default void remove(List<Character> charactersToRemove) {
-        charactersToRemove.forEach(c -> characters().remove(c));
     }
 
     @Override

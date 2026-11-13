@@ -1,7 +1,5 @@
 package xyz.zlatanov.frakkintoasters.state.board;
 
-import lombok.Getter;
-import lombok.experimental.Accessors;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.Mutates;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
@@ -10,6 +8,7 @@ import xyz.zlatanov.frakkintoasters.state.ship.*;
 import xyz.zlatanov.frakkintoasters.state.track.BoardingParty;
 import xyz.zlatanov.frakkintoasters.state.track.JumpPreparation;
 import xyz.zlatanov.frakkintoasters.state.view.GalacticaBoardView;
+import xyz.zlatanov.frakkintoasters.state.view.HumanFighterView;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -22,8 +21,6 @@ import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.*;
 import static xyz.zlatanov.frakkintoasters.state.track.BoardingParty.HUMANS_LOSE;
 import static xyz.zlatanov.frakkintoasters.state.track.BoardingParty.START;
 
-@Getter //todo replace getters with explicit methods for View interface usage to ensure no modification is possible
-@Accessors(fluent = true)
 public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard, GalacticaBoardView {
     private static final int RESOURCE_MAXIMUM = 15; // rule 13.2.1
 
@@ -33,17 +30,72 @@ public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard, Gal
     private       int                               population           = 12;
     private       JumpPreparation                   jumpPreparation      = JumpPreparation.START;
     private       boolean                           colonialOneDestroyed = false;
-    private final Map<Character, Location>          characters           = new HashMap<>();
-    private final Set<Location>                     damagedLocations     = new HashSet<>();
-    private final Set<Location>                     locations            = new HashSet<>(Stream.of(GALACTICA.locations(), GALACTICA_SPACE.locations(), COLONIAL_ONE.locations(), CYLON_LOCATIONS.locations().stream().filter(l -> l != BASESTAR_BRIDGE).toList()).flatMap(Collection::stream).toList());
-    private final TreeSet<Ship>                     reserves             = Stream.of(new Viper(1), new Viper(2), new Viper(3), new Viper(4), new Viper(5), new Viper(6), new Raptor(11), new Raptor(12), new Raptor(13), new Raptor(14), new AssaultRaptor(21)).collect(toCollection(() -> new TreeSet<>(comparingInt(Ship::id))));
-    private final Set<Viper>                        damagedShips         = new HashSet<>(Set.of(new ViperMarkVII(71), new ViperMarkVII(72), new ViperMarkVII(73), new ViperMarkVII(74)));
-    private final Map<Ship, Location>               shipsInSpace         = new HashMap<>();
+    // Declared with their concrete types, so the getters' copies keep the order: new TreeSet<>(TreeSet) keeps the
+    // comparator, and EnumSet.copyOf(EnumSet) works on an empty set too.
+    private final EnumMap<Character, Location>      characters           = new EnumMap<>(Character.class);
+    private final EnumSet<Location>                 damagedLocations     = EnumSet.noneOf(Location.class);
+    private final EnumSet<Location>                 locations            = Stream.of(GALACTICA.locations(), GALACTICA_SPACE.locations(), COLONIAL_ONE.locations(), CYLON_LOCATIONS.locations().stream().filter(l -> l != BASESTAR_BRIDGE).toList()).flatMap(Collection::stream).collect(toCollection(() -> EnumSet.noneOf(Location.class)));
+    private final TreeSet<Ship>                     reserves             = Stream.of(new Viper(1), new Viper(2), new Viper(3), new Viper(4), new Viper(5), new Viper(6), new Raptor(11), new Raptor(12), new Raptor(13), new Raptor(14), new AssaultRaptor(21)).collect(toCollection(() -> new TreeSet<>(Ship.BY_ID)));
+    private final TreeSet<Viper>                    damagedShips         = Stream.<Viper>of(new ViperMarkVII(71), new ViperMarkVII(72), new ViperMarkVII(73), new ViperMarkVII(74)).collect(toCollection(() -> new TreeSet<>(Ship.BY_ID)));
+    private final TreeMap<Ship, Location>           shipsInSpace         = new TreeMap<>(Ship.BY_ID);
     private final TreeMap<Centurion, BoardingParty> boardingPartyTrack   = new TreeMap<>(comparingInt(Centurion::id));
+
+    @Override
+    public int fuel() {
+        return fuel;
+    }
+
+    @Override
+    public int food() {
+        return food;
+    }
+
+    @Override
+    public int morale() {
+        return morale;
+    }
+
+    @Override
+    public int population() {
+        return population;
+    }
+
+    @Override
+    public JumpPreparation jumpPreparation() {
+        return jumpPreparation;
+    }
+
+    public boolean colonialOneDestroyed() {
+        return colonialOneDestroyed;
+    }
+
+    @Override
+    public Set<Location> locations() {
+        return EnumSet.copyOf(locations);
+    }
+
+    @Override
+    public Map<Character, Location> characters() {
+        return new EnumMap<>(characters);
+    }
+
+    @Override
+    public Set<Location> damagedLocations() {
+        return EnumSet.copyOf(damagedLocations);
+    }
 
     @Override
     public Set<Ship> reserves() {
         return new TreeSet<>(reserves);
+    }
+
+    public Set<Viper> damagedShips() {
+        return new TreeSet<>(damagedShips);
+    }
+
+    @Override
+    public Map<Ship, Location> shipsInSpace() {
+        return new TreeMap<>(shipsInSpace);
     }
 
     @Override
@@ -53,17 +105,54 @@ public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard, Gal
 
     @Override
     public Optional<Location> locate(Character character) {
-        return Optional.ofNullable(characters().get(character))
+        return Optional.ofNullable(characters.get(character))
                 .or(() -> pilotedFighter(character).map(shipsInSpace::get));
     }
 
     @Override
-    public Optional<HumanFighter> pilotedFighter(Character character) {
+    public Optional<HumanFighterView> pilotedFighter(Character character) {
         return shipsInSpace.keySet()
                 .stream()
-                .filter(s -> s instanceof HumanFighter fighter && fighter.pilot() == character)
-                .map(HumanFighter.class::cast)
+                .filter(s -> s instanceof HumanFighterView fighter && fighter.pilot() == character)
+                .map(HumanFighterView.class::cast)
                 .findFirst();
+    }
+
+    @Mutates
+    @Override
+    public void place(Location to, Character character) {
+        assert locations.contains(to) && !to.isSpaceLocation();
+        characters.put(character, to);
+    }
+
+    @Mutates
+    @Override
+    public void remove(Character character) {
+        characters.remove(character);
+    }
+
+    @Mutates
+    @Override
+    public GalacticaBoard damage(Location location) {
+        assert locations.contains(location);
+        damagedLocations.add(location);
+        return this;
+    }
+
+    @Mutates
+    @Override
+    public GalacticaBoard place(Location in, Ship ship) {
+        assert in.isSpaceLocation();
+        shipsInSpace.put(ship, in);
+        return this;
+    }
+
+    @Mutates
+    @Override
+    public GalacticaBoard remove(Ship ship) {
+        assert shipsInSpace.containsKey(ship);
+        shipsInSpace.remove(ship);
+        return this;
     }
 
     @Mutates

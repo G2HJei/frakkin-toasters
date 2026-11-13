@@ -9,16 +9,12 @@ public interface BattlestarBoard extends Board, BattlestarBoardView {
 
     Set<Location> damagedLocations();
 
+    @Mutates
+    BattlestarBoard damage(Location location);
+
     @Override
     default boolean isDamaged(Location location) {
         return damagedLocations().contains(location);
-    }
-
-    @Mutates
-    default BattlestarBoard damage(Location location) {
-        assert locations().contains(location);
-        damagedLocations().add(location);
-        return this;
     }
 
     //todo add repair to be used by the corresponding engineering(?) card

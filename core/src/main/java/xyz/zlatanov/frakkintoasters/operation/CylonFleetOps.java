@@ -15,8 +15,6 @@ import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 import xyz.zlatanov.frakkintoasters.state.ship.ShipType;
 import xyz.zlatanov.frakkintoasters.state.track.Pursuit;
 
-import java.util.HashMap;
-
 import static xyz.zlatanov.frakkintoasters.state.board.CylonFleetBoard.MOVE_TO_GALACTICA_MAP;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipZone.*;
 
@@ -47,8 +45,7 @@ public class CylonFleetOps extends GameOps {
     }
 
     public void moveShipsToGalactica() {
-        new HashMap<>(cylonFleetBoard().shipsInSpace())
-                .forEach(this::moveToGalactica);
+        cylonFleetBoard().shipsInSpace().forEach(this::moveToGalactica);
     }
 
     public void moveShipsToGalactica(ShipType shipType, Location from) {

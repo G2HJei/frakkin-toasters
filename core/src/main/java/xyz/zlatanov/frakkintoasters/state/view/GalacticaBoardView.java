@@ -3,7 +3,6 @@ package xyz.zlatanov.frakkintoasters.state.view;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.ship.Centurion;
-import xyz.zlatanov.frakkintoasters.state.ship.HumanFighter;
 import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 import xyz.zlatanov.frakkintoasters.state.track.BoardingParty;
 import xyz.zlatanov.frakkintoasters.state.track.JumpPreparation;
@@ -34,5 +33,5 @@ public interface GalacticaBoardView extends BattlestarBoardView, SpaceLocationsB
 
     Map<Centurion, BoardingParty> boardingPartyTrack();
 
-    Optional<HumanFighter> pilotedFighter(Character character);
+    Optional<HumanFighterView> pilotedFighter(Character character);
 }

@@ -7,12 +7,17 @@ import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 import xyz.zlatanov.frakkintoasters.state.view.HumanFighterView;
 import xyz.zlatanov.frakkintoasters.state.view.SpaceLocationsBoardView;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 public interface SpaceLocationsBoard extends SpaceLocationsBoardView {
     Map<Ship, Location> shipsInSpace();
+
+    @Mutates
+    SpaceLocationsBoard place(Location in, Ship ship);
+
+    @Mutates
+    SpaceLocationsBoard remove(Ship ship);
 
     @Override
     default Location locate(Ship ship) {
@@ -64,31 +69,6 @@ public interface SpaceLocationsBoard extends SpaceLocationsBoardView {
                 .filter(HumanFighterView.class::isInstance)
                 .map(HumanFighterView.class::cast)
                 .toList();
-    }
-
-    @Mutates
-    default SpaceLocationsBoard place(Location in, Ship... ships) {
-        return place(in, Arrays.stream(ships).toList());
-    }
-
-    @Mutates
-    default SpaceLocationsBoard place(Location in, List<Ship> ships) {
-        ships.forEach(s -> place(in, s));
-        return this;
-    }
-
-    @Mutates
-    default SpaceLocationsBoard place(Location in, Ship ship) {
-        assert in.isSpaceLocation();
-        shipsInSpace().put(ship, in);
-        return this;
-    }
-
-    @Mutates
-    default SpaceLocationsBoard remove(Ship ship) {
-        assert shipsInSpace().containsKey(ship);
-        shipsInSpace().remove(ship);
-        return this;
     }
 
     // concrete classes match exactly (Viper excludes ViperMarkVII), interfaces match any implementation

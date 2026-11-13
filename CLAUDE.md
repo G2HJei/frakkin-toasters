@@ -404,13 +404,16 @@ Rules for facts and ops:
    yet).
 5. **`@Mutates`** marks every component method that changes state. `ArchitectureTest` (ArchUnit) allows calls only from
    `..journal..` and `..state..`, and checks that `..event..` and `..operation..` never call them. Tests are not
-   analyzed. Mutable collections that getters expose (e.g. `Board.characters()`) can't be marked, don't change state
-   through them. Two more rules keep the layers apart: `..state..` depends on none of `..operation..`, `..event..` and
-   `..engine..`, and `..event..` doesn't depend on `..engine..`.
+   analyzed. Mutable collections that getters expose (e.g. `CylonShips.raiders()`) can't be marked, don't change
+   state through them. Two more rules keep the layers apart: `..state..` depends on none of `..operation..`,
+   `..event..` and `..engine..`, and `..event..` doesn't depend on `..engine..`.
 6. **State getters return copies.** Lists are `List.copyOf`, so a list a caller holds stays as it was when a later fact
-   changes the state, e.g. a loop that discards the cards it iterates. `GalacticaBoard.reserves()` and
-   `boardingPartyTrack()` are `TreeSet`/`TreeMap` copies ordered by id, because `Set.copyOf` and `Map.copyOf` keep no
-   order, and the ops take the first ship of a kind from the reserves, the one with the lowest id.
+   changes the state, e.g. a loop that discards the cards it iterates. The boards return every collection as a sorted
+   copy: `EnumSet`/`EnumMap` for locations and characters, `TreeSet`/`TreeMap` by id (`Ship.BY_ID`) for ships and
+   centurions, because `Set.copyOf` and `Map.copyOf` keep no order, and the ops take the first ship of a kind from the
+   reserves, the one with the lowest id. The Galactica view hands out no mutable object (`pilotedFighter` gives a
+   `HumanFighterView`). The board interfaces have no default writers: each board implements `place` and `remove` (one
+   character or one ship) and `damage` (one location) itself, so each change has exactly one public method.
 7. Ships and centurions are named by their fixed ids. Decks are built in canonical order and shuffled by
    `GameOps.startGame()`.
 

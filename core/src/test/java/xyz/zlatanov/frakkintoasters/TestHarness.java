@@ -254,7 +254,10 @@ public abstract class TestHarness {
     }
 
     protected void place(Location location, Ship... ships) {
-        getSpaceLocationsBoard(location).place(location, ships);
+        val board = getSpaceLocationsBoard(location);
+        for (val ship : ships) {
+            board.place(location, ship);
+        }
     }
 
     protected Basestar basestarAt(Location location) {
