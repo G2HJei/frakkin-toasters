@@ -67,7 +67,7 @@ public abstract class EventProcessor<T extends Event> {
     }
 
     // A player number sent by a client may name nobody.
-    protected boolean isPlayer(Integer playerNumber) { //todo centralize isPlayer method calls ti outside of isValid()
+    protected boolean isPlayer(Integer playerNumber) {
         return playerNumber != null && playerNumber >= 1 && game.players().size() >= playerNumber;
     }
 

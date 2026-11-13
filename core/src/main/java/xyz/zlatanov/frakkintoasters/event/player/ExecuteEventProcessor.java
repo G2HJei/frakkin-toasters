@@ -36,7 +36,7 @@ public class ExecuteEventProcessor extends EventProcessor<ExecuteEvent> {
 
     @Override
     protected boolean isValid() {
-        return isPlayer(event.playerNumber()) && canBeExecuted(game, event.playerNumber());
+        return canBeExecuted(game, event.playerNumber());
     }
 
     @Override
