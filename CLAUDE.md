@@ -407,10 +407,10 @@ Rules for facts and ops:
    analyzed. Mutable collections that getters expose (e.g. `Board.characters()`) can't be marked, don't change state
    through them. Two more rules keep the layers apart: `..state..` depends on none of `..operation..`, `..event..` and
    `..engine..`, and `..event..` doesn't depend on `..engine..`.
-6. **State getters return lists as copies** (`List.copyOf`), so a list a caller holds stays as it was when a later fact
+6. **State getters return copies.** Lists are `List.copyOf`, so a list a caller holds stays as it was when a later fact
    changes the state, e.g. a loop that discards the cards it iterates. `GalacticaBoard.reserves()` and
-   `boardingPartyTrack()` stay unmodifiable views, because `Set.copyOf` and `Map.copyOf` don't keep the iteration
-   order the ops pick ships by.
+   `boardingPartyTrack()` are `TreeSet`/`TreeMap` copies ordered by id, because `Set.copyOf` and `Map.copyOf` keep no
+   order, and the ops take the first ship of a kind from the reserves, the one with the lowest id.
 7. Ships and centurions are named by their fixed ids. Decks are built in canonical order and shuffled by
    `GameOps.startGame()`.
 
