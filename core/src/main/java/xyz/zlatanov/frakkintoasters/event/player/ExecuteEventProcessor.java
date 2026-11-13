@@ -42,12 +42,13 @@ public class ExecuteEventProcessor extends EventProcessor<ExecuteEvent> {
     @Override
     public Followup process() {
         discardCards();
-        val cylonCard = player.loyaltyCards().cards().stream().filter(LoyaltyCard::isCylon).findFirst();
+        val cylonCards = player.loyaltyCards().cards().stream().filter(LoyaltyCard::isCylon).toList();
         Followup followup;
         if (player.character().type() == CYLON_LEADER) {
             followup = cylonLeader();
-        } else if (cylonCard.isPresent()) {
-            followup = cylon(cylonCard.get());
+        } else if (!cylonCards.isEmpty()) {
+            //todo verify which "You Are a Cylon" card is revealed in case player has more than one
+            followup = cylon(cylonCards.getFirst());
         } else {
             followup = human();
         }
@@ -84,7 +85,6 @@ public class ExecuteEventProcessor extends EventProcessor<ExecuteEvent> {
 
     // He reveals a "You Are a Cylon" card without taking its action, hands his other Loyalty Cards and the Mutineer
     // card to humans of his choice, and resurrects like a revealed Cylon, without a Super Crisis Card.
-    //todo verify which "You Are a Cylon" card is revealed in case player has more than one
     private Followup cylon(LoyaltyCard cylonCard) {
         val playerNumber = player.number();
         ops.player(playerNumber).revealLoyaltyCard(cylonCard);
