@@ -16,6 +16,7 @@ import xyz.zlatanov.frakkintoasters.state.Player;
 import xyz.zlatanov.frakkintoasters.state.Randomness;
 import xyz.zlatanov.frakkintoasters.state.Team;
 import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
+import xyz.zlatanov.frakkintoasters.state.card.MutinyCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
@@ -102,6 +103,14 @@ class GameOpsJournalTest extends TestHarness {
     @Test
     void aTurnWithoutCrisisCardsDiscardsNothing() {
         ops.discardCrisisCards();
+
+        assertEquals(List.of(), journal.facts());
+    }
+
+    @Test
+    void discardingNoCardsRecordsNothing() {
+        ops.player(1).discard(new SkillCard[0]);
+        ops.player(1).discard(new MutinyCard[0]);
 
         assertEquals(List.of(), journal.facts());
     }

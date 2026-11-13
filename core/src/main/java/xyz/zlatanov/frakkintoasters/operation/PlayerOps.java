@@ -108,14 +108,18 @@ public class PlayerOps extends GameOps {
     }
 
     public PlayerOps discard(SkillCard... cards) {
-        record(new CardsLost(player.number(), PlayerPile.SKILL, List.of(cards)));
-        Arrays.stream(cards).forEach(this::discardToDeck);
+        if (cards.length > 0) {
+            record(new CardsLost(player.number(), PlayerPile.SKILL, List.of(cards)));
+            Arrays.stream(cards).forEach(this::discardToDeck);
+        }
         return this;
     }
 
     public void discard(MutinyCard... cards) {
-        record(new CardsLost(player.number(), PlayerPile.MUTINY, List.of(cards)));
-        Arrays.stream(cards).forEach(this::discardToDeck);
+        if (cards.length > 0) {
+            record(new CardsLost(player.number(), PlayerPile.MUTINY, List.of(cards)));
+            Arrays.stream(cards).forEach(this::discardToDeck);
+        }
     }
 
     public void infiltrateGalactica(Location infiltrateLocation) {

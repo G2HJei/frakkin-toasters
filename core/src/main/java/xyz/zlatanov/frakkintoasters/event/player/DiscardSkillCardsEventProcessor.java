@@ -1,6 +1,5 @@
 package xyz.zlatanov.frakkintoasters.event.player;
 
-import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
@@ -26,11 +25,7 @@ public class DiscardSkillCardsEventProcessor extends EventProcessor<DiscardSkill
 
     @Override
     public Followup process() {
-        val cards = event.cards();
-        if (cards.isEmpty()) {
-            return NONE;
-        }
-        ops.player(player.number()).discard(cards.toArray(SkillCard[]::new));
+        ops.player(player.number()).discard(event.cards().toArray(SkillCard[]::new));
         return drawsMutinyCard() ? single(new DrawMutinyCardEvent(player.number())) : NONE;
     }
 

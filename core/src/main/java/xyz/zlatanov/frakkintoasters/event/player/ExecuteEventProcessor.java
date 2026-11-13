@@ -64,14 +64,8 @@ public class ExecuteEventProcessor extends EventProcessor<ExecuteEvent> {
     // unaffected)."
     private void discardCards() {
         val playerOps = ops.player(player.number());
-        val skillCards = player.skillCards().cards();
-        if (!skillCards.isEmpty()) {
-            playerOps.discard(skillCards.toArray(SkillCard[]::new));
-        }
-        val mutinyCards = player.mutinyCards().cards();
-        if (!mutinyCards.isEmpty()) {
-            playerOps.discard(mutinyCards.toArray(MutinyCard[]::new));
-        }
+        playerOps.discard(player.skillCards().cards().toArray(SkillCard[]::new));
+        playerOps.discard(player.mutinyCards().cards().toArray(MutinyCard[]::new));
         playerOps.loseMiracleToken();
     }
 
