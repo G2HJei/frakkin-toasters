@@ -1,59 +1,104 @@
 package xyz.zlatanov.frakkintoasters.event.skillcheck;
 
+import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
-import xyz.zlatanov.frakkintoasters.engine.journal.fact.SkillCheckFact.AbilityResolved;
-import xyz.zlatanov.frakkintoasters.event.Followup;
-import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
-import xyz.zlatanov.frakkintoasters.event.skillcheck.ability.*;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
-import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCheck;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static xyz.zlatanov.frakkintoasters.event.Followup.all;
-import static xyz.zlatanov.frakkintoasters.event.Followup.single;
+import static xyz.zlatanov.frakkintoasters.event.Followup.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType.ADMIRALS_QUARTERS;
 
 class DetermineSkillCheckAbilitiesOrderEventProcessorTest extends EventTestHarness<DetermineSkillCheckAbilitiesOrderEvent> {
 
+    SkillCard dogfight         = new SkillCard(0, DOGFIGHT);
+    SkillCard redTape          = new SkillCard(0, RED_TAPE);
+    SkillCard establishNetwork = new SkillCard(1, ESTABLISH_NETWORK);
+    SkillCheck skillCheck;
+
     @BeforeEach
     void setUp() {
         player(1).character(KARA_STARBUCK_THRACE);
-        game.startSkillCheck(ADMIRALS_QUARTERS);
+        skillCheck = game.startSkillCheck(ADMIRALS_QUARTERS);
     }
 
-    public static Stream<Arguments> shouldFollowupWithCardEvents() {
-        return Stream.of(
-                arguments(DOGFIGHT, single(new PlayerDecisionEvent<>(1, DogfightEvent.class))),
-                arguments(FORCE_THEIR_HAND, single(new PlayerDecisionEvent<>(1, ForceTheirHandEvent.class))),
-                arguments(QUICK_THINKING, single(new PlayerDecisionEvent<>(1, QuickThinkingEvent.class))),
-                arguments(A_BETTER_MACHINE, single(new ABetterMachineEvent())),
-                arguments(BAIT, single(new BaitEvent())),
-                arguments(DRADIS_CONTACT, single(new DradisContactEvent())),
-                arguments(EXPLOIT_A_WEAKNESS, single(new PlayerDecisionEvent<>(1, ExploitAWeaknessEvent.class))),
-                arguments(PERSONAL_VICES, single(new PersonalVicesEvent())),
-                arguments(VIOLENT_OUTBURSTS, single(new ViolentOutburstsEvent())),
-                arguments(PROTECT_THE_FLEET, single(new PlayerDecisionEvent<>(1, ProtectTheFleetEvent.class))),
-                arguments(RED_TAPE, single(new RedTapeEvent())),
-                arguments(TRUST_INSTINCTS, single(new TrustInstinctsEvent()))
-        );
+    @Test
+    void shouldResolveTheOnlyAbilityAndThenLookAgain() {
+        val event = inTheCheck(dogfight);
+
+        execute(event);
+
+        assertFollowup(all(single(new ResolveSkillCheckAbilityEvent(DOGFIGHT)), single(event)));
     }
 
-    @ParameterizedTest
-    @MethodSource
-    void shouldFollowupWithCardEvents(SkillCardType skillCardType, Followup expected) {
-        execute(new DetermineSkillCheckAbilitiesOrderEvent(1, List.of(new SkillCard(0, skillCardType))));
-        assertFollowup(expected);
+    @Test
+    void shouldLetTheCurrentPlayerChooseWhichAbilityResolvesNext() {
+        val event = inTheCheck(dogfight, redTape, establishNetwork);
+
+        execute(event);
+
+        assertFollowup(all(
+                one(new ResolveSkillCheckAbilityEvent(DOGFIGHT),
+                        new ResolveSkillCheckAbilityEvent(RED_TAPE),
+                        new ResolveSkillCheckAbilityEvent(ESTABLISH_NETWORK)),
+                single(event)));
+    }
+
+    @Test
+    void shouldOfferAnAbilityOnceForSeveralCopies() {
+        val event = inTheCheck(dogfight, dogfight);
+
+        execute(event);
+
+        assertFollowup(all(single(new ResolveSkillCheckAbilityEvent(DOGFIGHT)), single(event)));
+    }
+
+    @Test
+    void shouldNotOfferAResolvedAbility() {
+        val event = inTheCheck(dogfight, redTape);
+        skillCheck.resolved(DOGFIGHT);
+
+        execute(event);
+
+        assertFollowup(all(single(new ResolveSkillCheckAbilityEvent(RED_TAPE)), single(event)));
+    }
+
+    // Rule 10.4.2: a card removed before its ability is resolved doesn't resolve it.
+    @Test
+    void shouldNotOfferTheAbilityOfACardRemovedBeforeItResolved() {
+        val event = inTheCheck(dogfight, establishNetwork);
+        skillCheck.resolved(DOGFIGHT);
+        skillCheck.remove(establishNetwork, null);
+
+        execute(event);
+
+        assertEquals(List.of(DOGFIGHT), skillCheck.resolvedAbilities());
+    }
+
+    @Test
+    void shouldOfferTheAbilityWhileACopyIsStillInTheCheck() {
+        val event = inTheCheck(dogfight, establishNetwork, establishNetwork);
+        skillCheck.resolved(DOGFIGHT);
+        skillCheck.remove(establishNetwork, null);
+
+        execute(event);
+
+        assertFollowup(all(single(new ResolveSkillCheckAbilityEvent(ESTABLISH_NETWORK)), single(event)));
+    }
+
+    @Test
+    void shouldEndWhenEveryAbilityResolved() {
+        val event = inTheCheck(dogfight, redTape);
+        skillCheck.resolved(DOGFIGHT);
+        skillCheck.resolved(RED_TAPE);
+
+        execute(event);
     }
 
     @Test
@@ -61,55 +106,23 @@ class DetermineSkillCheckAbilitiesOrderEventProcessorTest extends EventTestHarne
         execute(new DetermineSkillCheckAbilitiesOrderEvent(1, List.of()));
     }
 
+    // Each ability records itself when it resolves.
     @Test
-    void shouldNotFollowupForceTheirHandWhenCurrentPlayerNonHuman() {
-        revealCylon();
-        execute(new DetermineSkillCheckAbilitiesOrderEvent(1, List.of(
-                new SkillCard(0, FORCE_THEIR_HAND))));
-    }
+    void shouldRecordNothing() {
+        val event = inTheCheck(dogfight, establishNetwork);
 
-    @Test
-    void shouldFollowupWithMultipleEvents() {
-        execute(new DetermineSkillCheckAbilitiesOrderEvent(1, List.of(
-                new SkillCard(0, FORCE_THEIR_HAND),
-                new SkillCard(0, RED_TAPE)
-        )));
+        execute(event);
+
         assertFollowup(all(
-                single(new PlayerDecisionEvent<>(1, ForceTheirHandEvent.class)),
-                single(new RedTapeEvent())
-        ));
+                one(new ResolveSkillCheckAbilityEvent(DOGFIGHT), new ResolveSkillCheckAbilityEvent(ESTABLISH_NETWORK)),
+                single(event)));
+        assertEquals(List.of(), journal.facts());
     }
 
-    @Test
-    void shouldFollowUpOnlyOncePerSkillCardType() {
-        execute(new DetermineSkillCheckAbilitiesOrderEvent(1, List.of(
-                new SkillCard(0, DOGFIGHT),
-                new SkillCard(0, DOGFIGHT)
-        )));
-        assertFollowup(single(new PlayerDecisionEvent<>(1, DogfightEvent.class)));
-        assertEquals(List.of(DOGFIGHT), game.activeSkillCheck().resolvedAbilities());
-    }
-
-    // The strength and result read these later.
-    @Test
-    void shouldRecordTheAbilitiesWithoutAnEventAsResolved() {
-        execute(new DetermineSkillCheckAbilitiesOrderEvent(1, List.of(
-                new SkillCard(1, IRON_WILL),
-                new SkillCard(1, ESTABLISH_NETWORK),
-                new SkillCard(1, RED_TAPE))));
-
-        assertFollowup(new RedTapeEvent());
-        assertEquals(List.of(IRON_WILL, ESTABLISH_NETWORK, RED_TAPE), game.activeSkillCheck().resolvedAbilities());
-        assertEquals(List.of(new AbilityResolved(IRON_WILL), new AbilityResolved(ESTABLISH_NETWORK),
-                new AbilityResolved(RED_TAPE)), journal.facts());
-    }
-
-    @Test
-    void shouldNotResolveAnAbilityTwiceInACheck() {
-        game.activeSkillCheck().resolved(RED_TAPE);
-
-        execute(new DetermineSkillCheckAbilitiesOrderEvent(1, List.of(new SkillCard(1, RED_TAPE))));
-
-        assertEquals(List.of(RED_TAPE), game.activeSkillCheck().resolvedAbilities());
+    private DetermineSkillCheckAbilitiesOrderEvent inTheCheck(SkillCard... cards) {
+        for (val card : cards) {
+            skillCheck.matchingPile().addOnTop(card);
+        }
+        return new DetermineSkillCheckAbilitiesOrderEvent(1, List.of(cards));
     }
 }

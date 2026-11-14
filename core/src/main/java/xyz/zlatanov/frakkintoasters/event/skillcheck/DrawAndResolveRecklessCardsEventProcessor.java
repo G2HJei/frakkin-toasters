@@ -21,6 +21,6 @@ public class DrawAndResolveRecklessCardsEventProcessor extends EventProcessor<Dr
     }
 
     private Followup abilityFollowup(SkillCard card) {
-        return FollowupUtils.skillCheckAbilityFollowup(game.currentPlayer(), card);
+        return FollowupUtils.skillCheckAbilityFollowup(game.currentPlayer(), card.type());
     }
 }

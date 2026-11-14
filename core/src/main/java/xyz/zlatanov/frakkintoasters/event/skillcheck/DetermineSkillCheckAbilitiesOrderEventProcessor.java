@@ -4,27 +4,30 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
-import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 
-import java.util.LinkedHashMap;
-
-import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.allOf;
-import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.skillCheckAbilityFollowup;
+import static xyz.zlatanov.frakkintoasters.event.Followup.*;
 
 public class DetermineSkillCheckAbilitiesOrderEventProcessor extends EventProcessor<DetermineSkillCheckAbilitiesOrderEvent> {
 
     @Override
     public Followup process() {
-        // "Do not resolve the same Skill Check Ability more than once" (rule 10.4.2), so one card per type.
-        val cardsByType = new LinkedHashMap<SkillCardType, SkillCard>();
-        event.cardsWithAbilities().stream()
+        val skillCheck = game.activeSkillCheck();
+        val abilitiesLeft = event.cardsWithAbilities().stream()
                 .filter(SkillCard::hasSkillCheckAbility)
-                .filter(card -> !game.activeSkillCheck().resolvedAbilities().contains(card.type()))
-                .forEach(card -> cardsByType.putIfAbsent(card.type(), card));
-        // The abilities that change the strength or the result take effect later, when the check reads them.
-        cardsByType.keySet().forEach(ops.skillCheck()::resolveAbility);
-        return allOf(cardsByType.values().stream()
-                .map(card -> skillCheckAbilityFollowup(player, card))
-                .toArray(Followup[]::new));
+                // "If the current player removes a Skill Card before its skill check ability is resolved, he does not
+                // resolve that ability" (rule 10.4.2).
+                .filter(skillCheck.dividedCards()::contains)
+                .map(SkillCard::type)
+                // "Do not resolve the same Skill Check Ability more than once" (rule 10.4.2).
+                .filter(type -> !skillCheck.resolvedAbilities().contains(type))
+                .distinct()
+                .map(type -> single(new ResolveSkillCheckAbilityEvent(type)))
+                .toArray(Followup[]::new);
+        if (abilitiesLeft.length == 0) {
+            return NONE;
+        }
+        // The current player resolves them "in the order of his choosing", one at a time, so the next pick sees what
+        // this one changed.
+        return all(one(abilitiesLeft), single(event));
     }
 }

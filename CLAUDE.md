@@ -160,8 +160,12 @@ the state at that moment what follows.
   Order" was played, the "consequence" when a card with the ability icon was played in, a Reckless check's Treachery
   cards), `TotalSkillCheckStrengthEvent` (Declare Emergency), `DetermineSkillCheckResultEvent`, then the result, and
   `EndSkillCheckEvent` last.
-- `DetermineSkillCheckAbilitiesOrderEvent` records each ability it resolves (`AbilityResolved`), once per check. Iron
-  Will, Install Upgrades, All Hands on Deck and Establish Network act through that record.
+- The current player resolves the abilities one at a time, in his order (rule 10.4.2).
+  `DetermineSkillCheckAbilitiesOrderEvent` offers the ones left as a `OneOf` of `ResolveSkillCheckAbilityEvent`s and
+  queues itself after the pick, so an ability whose card was removed first doesn't resolve. Only the cards from the
+  shuffle count, and Trust Instincts sends the cards it adds through the same loop. `ResolveSkillCheckAbilityEvent`
+  records `AbilityResolved`, once per check. Iron Will, Install Upgrades, All Hands on Deck and Establish Network act
+  through that record.
 - `EndSkillCheckEvent` runs after everything the result queued: it discards the cards of the check, the ones played
   before it too, and records `SkillCheckEnded`, which clears `GameView.activeSkillCheck()`.
 - `DetermineSkillCheckResultEventProcessor.difficulty(game)` is the difficulty so far: Declare Emergency, Jury Rigged,

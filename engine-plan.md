@@ -415,10 +415,11 @@ Acceptance test: `LocationSkillCheckTest` runs the Admiral's Quarters, Brig and 
 `EndSkillCheckEvent` through `submit` and `choose`, restoring at every pause. The Airlock one plays a turn: the
 execution, the new character, and the turn going on to the next player's.
 
-Left for later: the order of the abilities is the order of the cards, not the current player's choice, and a card
-removed by Dogfight or Quick Thinking still resolves its ability (the `todo` in `SkillCheck.remove`). Quorum Cards
-in play ("Accept Prophecy"), Final Five cards revealed by an execution, and the Sleeper Agent rules of an execution
-(Boomer, Baltar, the hand-off limit after 7 distance) wait for their features.
+Fixed later: the abilities resolve one at a time in the current player's order, so a card removed before its ability
+resolves doesn't resolve it (`ResolveSkillCheckAbilityEvent`, see "Skill Check Sequence" in `CLAUDE.md`).
+
+Left for later: Quorum Cards in play ("Accept Prophecy"), Final Five cards revealed by an execution, and the Sleeper
+Agent rules of an execution (Boomer, Baltar, the hand-off limit after 7 distance) wait for their features.
 
 ## Phase 10 - Interrupt cards
 

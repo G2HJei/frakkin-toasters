@@ -3,11 +3,12 @@ package xyz.zlatanov.frakkintoasters.event.skillcheck.ability;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
-import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
+import xyz.zlatanov.frakkintoasters.event.skillcheck.DetermineSkillCheckAbilitiesOrderEvent;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType.ADMIRALS_QUARTERS;
 
@@ -32,11 +33,18 @@ class TrustInstinctsEventProcessorTest extends EventTestHarness<TrustInstinctsEv
         assertTrue(game.activeSkillCheck().nonMatchingPile().cards().contains(nonMatchingCard));
     }
 
+    // "Resolve Skill Check Abilities on these cards", like any other card in the check.
     @Test
-    void shouldFollowUpWithSkillCheckAbility() {
+    void shouldResolveTheAbilitiesOfTheAddedCards() {
         destinyDeck.nextCard(matchingCard, abilityCard);
         execute(new TrustInstinctsEvent());
-        assertFollowup(all(new PlayerDecisionEvent<>(1, DogfightEvent.class)));
+        assertFollowup(new DetermineSkillCheckAbilitiesOrderEvent(1, List.of(abilityCard)));
+    }
+
+    @Test
+    void shouldNotFollowupWithoutAnAbilityCard() {
+        destinyDeck.nextCard(matchingCard, nonMatchingCard);
+        execute(new TrustInstinctsEvent());
     }
 
 }

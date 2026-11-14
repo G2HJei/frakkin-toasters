@@ -59,7 +59,6 @@ public class SkillCheck implements SkillCheckView {
         return this;
     }
 
-    //todo handle already resolved mechanics and removing future events when skill check ability card is removed separately
     @Mutates
     public SkillCheck remove(SkillCard card, Integer playerNumber) {
         if (Optional.ofNullable(playedBeforeSkillCheck.get(playerNumber))

@@ -14,7 +14,7 @@ import xyz.zlatanov.frakkintoasters.event.skillcheck.RevealCardsBeforeSkillCheck
 import xyz.zlatanov.frakkintoasters.event.skillcheck.ability.*;
 import xyz.zlatanov.frakkintoasters.state.board.Resource;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
-import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 import xyz.zlatanov.frakkintoasters.state.view.GameView;
 import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
 
@@ -118,8 +118,8 @@ public class FollowupUtils {
                 .toList();
     }
 
-    public static Followup skillCheckAbilityFollowup(PlayerView player, SkillCard skillCard) {
-        return switch (skillCard.type()) {
+    public static Followup skillCheckAbilityFollowup(PlayerView player, SkillCardType type) {
+        return switch (type) {
             case DOGFIGHT -> single(new PlayerDecisionEvent<>(player.number(), DogfightEvent.class));
             case FORCE_THEIR_HAND -> player.isHuman()
                     ? single(new PlayerDecisionEvent<>(player.number(), ForceTheirHandEvent.class))

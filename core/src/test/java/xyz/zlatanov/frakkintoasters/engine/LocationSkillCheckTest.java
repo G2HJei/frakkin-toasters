@@ -42,6 +42,8 @@ import static xyz.zlatanov.frakkintoasters.state.Team.CYLONS;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.*;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.RED_TAPE;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.TRUST_INSTINCTS;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckResult.PASS;
 
 /**
@@ -97,6 +99,7 @@ class LocationSkillCheckTest {
         passPoliticalProwess();
         playNothingBefore();
         playEverythingInto(); // player 1 plays one card only
+        resolveRedTapeFirst();
         finishTheCheck();
 
         assertWaitingFor(new AwaitingDecision(new PlayerDecisionEvent<>(1, LeaveBrigEvent.class, DESTINATION_GALACTICA)));
@@ -138,6 +141,7 @@ class LocationSkillCheckTest {
         passPoliticalProwess();
         playNothingBefore();
         playEverythingInto();
+        resolveRedTapeFirst();
         val morale = engine.view().boards().galactica().morale();
         finishTheCheck();
 
@@ -186,6 +190,14 @@ class LocationSkillCheckTest {
             val cards = inBrig ? hand.subList(0, 1) : hand;
             play(engine -> engine.submit(player, new PlayCardsIntoSkillCheckEvent(player, cards)));
         }
+    }
+
+    // The current player resolves the abilities in the order of his choosing (rule 10.4.2). "Red Tape" goes first, so it
+    // discards before "Trust Instincts" adds its cards, and "Trust Instincts" is then the only one left.
+    private void resolveRedTapeFirst() {
+        assertWaitingFor(new AwaitingChoice(1, Set.of(
+                single(new ResolveSkillCheckAbilityEvent(RED_TAPE)), single(new ResolveSkillCheckAbilityEvent(TRUST_INSTINCTS)))));
+        play(engine -> engine.choose(1, single(new ResolveSkillCheckAbilityEvent(RED_TAPE))));
     }
 
     // The strength reaches the difficulty, so nobody is asked to "Declare Emergency", and nobody plays "Change of
