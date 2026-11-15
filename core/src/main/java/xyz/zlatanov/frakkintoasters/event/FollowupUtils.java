@@ -4,6 +4,8 @@ import lombok.NoArgsConstructor;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.event.board.GainResourceEvent;
 import xyz.zlatanov.frakkintoasters.event.board.LoseResourceEvent;
+import xyz.zlatanov.frakkintoasters.event.interrupt.OpenInterruptWindowEvent;
+import xyz.zlatanov.frakkintoasters.event.interrupt.RollDieEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.DiscardSkillCardsEvent;
 import xyz.zlatanov.frakkintoasters.event.player.SendToSickbayEvent;
@@ -14,6 +16,9 @@ import xyz.zlatanov.frakkintoasters.event.skillcheck.RevealCardsBeforeSkillCheck
 import xyz.zlatanov.frakkintoasters.event.skillcheck.ability.*;
 import xyz.zlatanov.frakkintoasters.state.board.Resource;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
+import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow;
+import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow.AfterDieRoll;
+import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow.BeforeDieRoll;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 import xyz.zlatanov.frakkintoasters.state.view.GameView;
 import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
@@ -58,6 +63,18 @@ public class FollowupUtils {
         return IntStream.range(0, count)
                 .<PlayerView>mapToObj(i -> game.player((firstPlayerNumber - 1 + i) % count + 1))
                 .toList();
+    }
+
+    /**
+     * @return a die roll with the interrupt windows around it, then the event that reads its result from
+     * {@code TurnView.dieRoll()}
+     */
+    public static Followup rollDie(Event result) {
+        return rollDie(new BeforeDieRoll(), new AfterDieRoll(), result);
+    }
+
+    public static Followup rollDie(InterruptWindow before, InterruptWindow after, Event result) {
+        return all(new OpenInterruptWindowEvent(before), new RollDieEvent(), new OpenInterruptWindowEvent(after), result);
     }
 
     public static Event discard(int playerNumber, int count) {

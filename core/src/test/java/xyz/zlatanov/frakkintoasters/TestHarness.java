@@ -187,6 +187,13 @@ public abstract class TestHarness {
         die.nextRoll(result);
     }
 
+    // The die as a result event finds it: the window before the roll started it, and RollDieEvent rolled it.
+    protected void rolled(int value) {
+        ops.startDieRoll();
+        nextRoll(value);
+        ops.rollDie();
+    }
+
     protected void moveTo(Location location, Character character) {
         ops.player(character).moveTo(location);
     }

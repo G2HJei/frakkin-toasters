@@ -11,6 +11,8 @@ import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
 import xyz.zlatanov.frakkintoasters.state.ship.Raider;
 import xyz.zlatanov.frakkintoasters.state.ship.Viper;
 
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
@@ -127,4 +129,25 @@ class ActivateRaiderEventProcessorTest extends EventTestHarness<ActivateRaiderEv
         assertFollowup(new AttackViperEvent(raider.id(), unmannedViper.id()));
     }
 
+
+    // "Run Interference": "The first 4 raiders activating in your space area automatically miss (do not roll for them)."
+    @Test
+    void shouldMissWhileRunInterferenceCoversItsSpaceArea() {
+        place(GALACTICA_SPACE_4_OCLOCK, raider, pilotedViper);
+        ops.interrupts().raidersWillMiss(GALACTICA_SPACE_4_OCLOCK, 2);
+
+        execute(event);
+
+        assertEquals(Map.of(GALACTICA_SPACE_4_OCLOCK, 1), game.turn().raidersToMiss());
+    }
+
+    @Test
+    void shouldAttackOnceRunInterferenceCoversAnotherSpaceArea() {
+        place(GALACTICA_SPACE_4_OCLOCK, raider, pilotedViper);
+        ops.interrupts().raidersWillMiss(GALACTICA_SPACE_6_OCLOCK, 2);
+
+        execute(event);
+
+        assertFollowup(new AttackViperEvent(raider.id(), pilotedViper.id()));
+    }
 }

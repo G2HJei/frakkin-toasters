@@ -12,6 +12,8 @@ import xyz.zlatanov.frakkintoasters.state.Team;
 import xyz.zlatanov.frakkintoasters.state.board.Resource;
 import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
+import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow.BeforeRaidersActivate;
+import xyz.zlatanov.frakkintoasters.state.interrupt.PlayedInterruptCard;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
 
@@ -22,6 +24,7 @@ import static xyz.zlatanov.frakkintoasters.state.GameStep.RECEIVE_SKILLS;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.*;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.STRATEGIC_PLANNING;
 
 class GameReplayerTest {
 
@@ -237,11 +240,26 @@ class GameReplayerTest {
         ops.player(2).gainMiracleToken();
         ops.player(2).sendTo(SICKBAY);
         ops.actingPlayer(3);
+        ops.startDieRoll();
         ops.rollDie();
         ops.resetActingPlayer();
+        ops.playOnDieRoll(STRATEGIC_PLANNING, 2);
         ops.rollDie();
         ops.rollDie();
         ops.changeStep(CRISIS);
+
+        // an interrupt window: one card goes back to the hand, the other takes effect
+        val hand = game.player(1).skillCards().cards();
+        val returned = new PlayedInterruptCard(1, hand.get(0), null);
+        val resolved = new PlayedInterruptCard(1, hand.get(1), null);
+        ops.interrupts().openWindow(new BeforeRaidersActivate());
+        ops.interrupts().play(returned);
+        ops.interrupts().play(resolved);
+        ops.interrupts().returnToHand(returned);
+        ops.interrupts().resolve(resolved);
+        ops.interrupts().closeWindow();
+        ops.interrupts().raidersWillMiss(GALACTICA_SPACE_6_OCLOCK, 2);
+        ops.interrupts().raiderMissed(GALACTICA_SPACE_6_OCLOCK);
 
         // an execution's facts
         ops.player(3).endInfiltration();

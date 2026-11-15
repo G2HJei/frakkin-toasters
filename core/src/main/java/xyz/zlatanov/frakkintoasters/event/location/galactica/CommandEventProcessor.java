@@ -6,15 +6,18 @@ import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
 import xyz.zlatanov.frakkintoasters.event.location.LocationActionProcessor;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 
-import static xyz.zlatanov.frakkintoasters.event.Followup.all;
-import static xyz.zlatanov.frakkintoasters.event.Followup.one;
+import static xyz.zlatanov.frakkintoasters.event.ActivateViperEventProcessor.canActivateUnmanned;
+import static xyz.zlatanov.frakkintoasters.event.Followup.*;
 
 public class CommandEventProcessor extends LocationActionProcessor<CommandEvent> {
 
-    // "Up to 2", so the player may stop after each one, e.g. when no unmanned viper is left.
     @Override
     public Followup process() {
-        return all(activateUnmannedViper(), activateUnmannedViper());
+        if (!canActivateUnmanned(game)) {
+            // The decision would have no answer. An activation leaves a viper to activate, so this covers both.
+            return NONE;
+        }
+        return all(activateUnmannedViper(), activateUnmannedViper()); // "up to 2", so the player may stop after each
     }
 
     private Followup activateUnmannedViper() {

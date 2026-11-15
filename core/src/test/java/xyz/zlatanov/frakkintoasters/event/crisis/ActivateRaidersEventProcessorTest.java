@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.board.AdvancePursuitTrackEvent;
+import xyz.zlatanov.frakkintoasters.event.interrupt.OpenInterruptWindowEvent;
+import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow.BeforeRaidersActivate;
 import xyz.zlatanov.frakkintoasters.event.ship.PlaceShipOnCylonFleetBoardEvent;
 import xyz.zlatanov.frakkintoasters.state.ship.Raider;
 
@@ -42,14 +44,14 @@ class ActivateRaidersEventProcessorTest extends EventTestHarness<ActivateRaiders
     }
 
     @Test
-    void shouldActivateRaidersOneByOne() {
+    void shouldActivateRaidersOneByOneAfterRunInterference() {
         val raider1 = raiderAt(GALACTICA_SPACE_2_OCLOCK);
         val raider2 = raiderAt(GALACTICA_SPACE_6_OCLOCK);
 
         execute(new ActivateRaidersEvent());
 
         assertFollowup(
-                all(
+                all(new OpenInterruptWindowEvent(new BeforeRaidersActivate()),
                         new ActivateRaiderEvent(raider1.id()),
                         new ActivateRaiderEvent(raider2.id())));
     }

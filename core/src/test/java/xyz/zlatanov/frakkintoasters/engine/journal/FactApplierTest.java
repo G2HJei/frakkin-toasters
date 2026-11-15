@@ -6,6 +6,7 @@ import xyz.zlatanov.frakkintoasters.engine.journal.fact.*;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.*;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.*;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.GameFact.*;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.InterruptFact.*;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.*;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.ShipFact.*;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.TitleFact.*;
@@ -17,6 +18,10 @@ import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
+import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow.AfterBasestarOrCenturionDestroyed;
+import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow.AfterDieRoll;
+import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow.BeforeDieRoll;
+import xyz.zlatanov.frakkintoasters.state.interrupt.PlayedInterruptCard;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
 import xyz.zlatanov.frakkintoasters.state.skill.*;
 import xyz.zlatanov.frakkintoasters.state.track.BoardingParty;
@@ -24,6 +29,7 @@ import xyz.zlatanov.frakkintoasters.state.track.JumpPreparation;
 import xyz.zlatanov.frakkintoasters.state.track.Pursuit;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,16 +39,18 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.board.Resource.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipZone.*;
-import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.CONSOLIDATE_POWER;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 
 /**
  * Applies each kind of fact to a prepared state and checks the result.
  */
 class FactApplierTest {
 
-    Game      game  = Game.builder().build();
-    SkillCard card  = new SkillCard(3, CONSOLIDATE_POWER);
-    SkillCard other = new SkillCard(1, CONSOLIDATE_POWER);
+    Game      game              = Game.builder().build();
+    SkillCard card              = new SkillCard(3, CONSOLIDATE_POWER);
+    SkillCard other             = new SkillCard(1, CONSOLIDATE_POWER);
+    SkillCard strategicPlanning = new SkillCard(3, STRATEGIC_PLANNING);
+    SkillCard majorVictory      = new SkillCard(1, MAJOR_VICTORY);
 
     void apply(Fact fact) {
         FactApplier.apply(game, fact);
@@ -186,13 +194,67 @@ class FactApplierTest {
     /* GameFact */
 
     @Test
-    void gameStartedAndDieRolledChangeNothing() {
+    void gameStartedChangesNothing() {
         val before = GameSnapshot.of(game);
 
         apply(new GameStarted(3, game.objective()));
-        apply(new DieRolled(5));
 
         assertEquals(before, GameSnapshot.of(game));
+    }
+
+    @Test
+    void dieRollFactsStartRollAndModifyTheRoll() {
+        apply(new DieRollStarted());
+        assertNull(game.turn().dieRoll().value());
+
+        apply(new DieRollCardPlayed(STRATEGIC_PLANNING, 2));
+        apply(new DieRolled(5));
+        apply(new DieRollCardPlayed(CALCULATIONS, 1));
+        assertEquals(5, game.turn().dieRoll().value());
+        assertEquals(List.of(STRATEGIC_PLANNING, CALCULATIONS), game.turn().dieRoll().cards());
+        assertEquals(8, game.turn().dieRoll().result());
+
+        apply(new DieRolled(1)); // a reroll keeps the cards played on the roll
+        assertEquals(4, game.turn().dieRoll().result());
+
+        apply(new DieRollStarted());
+        assertEquals(List.of(), game.turn().dieRoll().cards());
+    }
+
+    @Test
+    void dieRollResultIsBetween1And8() {
+        apply(new DieRollStarted());
+        apply(new DieRolled(7));
+        apply(new DieRollCardPlayed(STRATEGIC_PLANNING, 2));
+        assertEquals(8, game.turn().dieRoll().result());
+
+        apply(new DieRollStarted());
+        apply(new DieRolled(2));
+        apply(new DieRollCardPlayed(EVASIVE_MANOEUVRES, -2));
+        apply(new DieRollCardPlayed(CALCULATIONS, -1));
+        assertEquals(1, game.turn().dieRoll().result());
+    }
+
+    @Test
+    void dieRolledNeedsAStartedRoll() {
+        assertThrows(FrakCallTheAdmiralException.class, () -> apply(new DieRolled(5)));
+    }
+
+    @Test
+    void turnStartedForgetsTheDieRollAndTheInterruptCardsOfTheTurn() {
+        apply(new DieRollStarted());
+        apply(new RaidersWillMiss(GALACTICA_SPACE_4_OCLOCK, 4));
+        val played = new PlayedInterruptCard(2, majorVictory, null);
+        apply(new InterruptWindowOpened(new AfterBasestarOrCenturionDestroyed()));
+        apply(new InterruptCardPlayed(played));
+        apply(new InterruptCardResolved(played));
+        apply(new InterruptWindowClosed());
+
+        apply(new TurnStarted(2));
+
+        assertNull(game.turn().dieRoll());
+        assertEquals(List.of(), game.turn().resolvedInterruptCards());
+        assertEquals(Map.of(), game.turn().raidersToMiss());
     }
 
     @Test
@@ -231,6 +293,53 @@ class FactApplierTest {
         apply(new GameEnded(CYLONS));
 
         assertEquals(Optional.of(CYLONS), game.outcome());
+    }
+
+    /* InterruptFact */
+
+    @Test
+    void interruptCardsGoIntoTheOpenWindowAndLeaveItWhenReturnedOrResolved() {
+        val returned = new PlayedInterruptCard(1, strategicPlanning, null);
+        val resolved = new PlayedInterruptCard(2, strategicPlanning, null);
+
+        apply(new InterruptWindowOpened(new BeforeDieRoll()));
+        apply(new InterruptCardPlayed(returned));
+        apply(new InterruptCardPlayed(resolved));
+        assertEquals(Optional.of(new BeforeDieRoll()), game.turn().interruptWindow());
+        assertEquals(List.of(returned, resolved), game.turn().windowCards());
+
+        apply(new InterruptCardReturned(returned));
+        apply(new InterruptCardResolved(resolved));
+        assertEquals(List.of(), game.turn().windowCards());
+        assertEquals(List.of(STRATEGIC_PLANNING), game.turn().resolvedInterruptCards());
+        assertEquals(0, game.player(1).skillCards().size()); // the hand and the discard pile are separate facts
+
+        apply(new InterruptWindowClosed());
+        assertEquals(Optional.empty(), game.turn().interruptWindow());
+    }
+
+    @Test
+    void anInterruptWindowClosesOnlyOnceItsCardsAreGone() {
+        apply(new InterruptWindowOpened(new BeforeDieRoll()));
+        apply(new InterruptCardPlayed(new PlayedInterruptCard(1, strategicPlanning, null)));
+
+        assertThrows(FrakCallTheAdmiralException.class, () -> apply(new InterruptWindowClosed()));
+        assertThrows(FrakCallTheAdmiralException.class, () -> apply(new InterruptWindowOpened(new AfterDieRoll())));
+        assertThrows(FrakCallTheAdmiralException.class,
+                () -> apply(new InterruptCardResolved(new PlayedInterruptCard(2, strategicPlanning, null))));
+    }
+
+    @Test
+    void raidersMissUntilTheCountRunsOut() {
+        apply(new RaidersWillMiss(GALACTICA_SPACE_4_OCLOCK, 2));
+        apply(new RaidersWillMiss(GALACTICA_SPACE_6_OCLOCK, 1));
+
+        apply(new RaiderMissed(GALACTICA_SPACE_4_OCLOCK));
+        apply(new RaiderMissed(GALACTICA_SPACE_6_OCLOCK));
+        assertEquals(Map.of(GALACTICA_SPACE_4_OCLOCK, 1), game.turn().raidersToMiss());
+
+        apply(new RaiderMissed(GALACTICA_SPACE_4_OCLOCK));
+        assertEquals(Map.of(), game.turn().raidersToMiss());
     }
 
     /* PlayerFact */

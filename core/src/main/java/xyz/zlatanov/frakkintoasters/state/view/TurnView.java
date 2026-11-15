@@ -1,9 +1,15 @@
 package xyz.zlatanov.frakkintoasters.state.view;
 
 import xyz.zlatanov.frakkintoasters.state.GameStep;
+import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
+import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow;
+import xyz.zlatanov.frakkintoasters.state.interrupt.PlayedInterruptCard;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public interface TurnView {
 
@@ -33,4 +39,30 @@ public interface TurnView {
      * happen, except the Discard step: the hand limit applies at the end of every turn.
      */
     boolean endedEarly();
+
+    /**
+     * The latest die roll of the turn, {@code null} before the first. The window before a roll starts it, and its result
+     * event reads it.
+     */
+    DieRollView dieRoll();
+
+    /**
+     * The interrupt window that is open, while its players answer.
+     */
+    Optional<InterruptWindow> interruptWindow();
+
+    /**
+     * The cards played into the open window. They stay face down until the window closes.
+     */
+    List<PlayedInterruptCard> windowCards();
+
+    /**
+     * The interrupt cards that took effect this turn, for "Major Victory", which is limited to 1 a turn.
+     */
+    List<SkillCardType> resolvedInterruptCards();
+
+    /**
+     * "Run Interference": how many of the raiders activating in a space area still miss, during a raider activation.
+     */
+    Map<Location, Integer> raidersToMiss();
 }

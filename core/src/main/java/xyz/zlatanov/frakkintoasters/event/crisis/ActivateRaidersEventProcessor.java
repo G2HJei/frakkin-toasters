@@ -5,13 +5,16 @@ import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.board.AdvancePursuitTrackEvent;
+import xyz.zlatanov.frakkintoasters.event.interrupt.OpenInterruptWindowEvent;
 import xyz.zlatanov.frakkintoasters.event.ship.PlaceShipOnCylonFleetBoardEvent;
+import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow.BeforeRaidersActivate;
 import xyz.zlatanov.frakkintoasters.state.ship.Raider;
 import xyz.zlatanov.frakkintoasters.state.view.BasestarView;
 import xyz.zlatanov.frakkintoasters.state.view.GalacticaBoardView;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.GALACTICA_SPACE;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.RAIDER;
@@ -41,10 +44,11 @@ public class ActivateRaidersEventProcessor extends EventProcessor<ActivateRaider
     }
 
     private Followup activateRaidersOneByOne(List<Raider> raiders, GalacticaBoardView galactica) {
-        return Followup.all(
-                raiders.stream()
-                        .map(r -> new ActivateRaiderEvent(r.id()))
-                        .toArray(Event[]::new));
+        //noinspection SuspiciousToArrayCall
+        return Followup.all(Stream.concat(
+                        Stream.of(new OpenInterruptWindowEvent(new BeforeRaidersActivate())), // "Run Interference"
+                        raiders.stream().map(r -> new ActivateRaiderEvent(r.id())))
+                .toArray(Event[]::new));
     }
 
     private Followup launchRaiders(List<BasestarView> basestars) {

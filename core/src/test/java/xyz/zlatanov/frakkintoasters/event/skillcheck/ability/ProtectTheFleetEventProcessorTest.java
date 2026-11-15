@@ -4,16 +4,16 @@ import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
-import xyz.zlatanov.frakkintoasters.event.AttackBasestarEvent;
-import xyz.zlatanov.frakkintoasters.event.MoveShipEvent;
+import xyz.zlatanov.frakkintoasters.event.AttackCylonShipEvent;
+import xyz.zlatanov.frakkintoasters.event.ViperActivation;
 import xyz.zlatanov.frakkintoasters.event.player.LaunchViperEvent;
 import xyz.zlatanov.frakkintoasters.state.ship.AssaultRaptor;
 import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheck;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static xyz.zlatanov.frakkintoasters.event.AttackBasestarEvent.Attacker.VIPER;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
@@ -34,7 +34,7 @@ class ProtectTheFleetEventProcessorTest extends EventTestHarness<ProtectTheFleet
 
     @Test
     void shouldDoNothing() {
-        execute(new ProtectTheFleetEvent(1, null, null, null, null, null, null));
+        execute(ProtectTheFleetEvent.decline(1));
     }
 
     @Test
@@ -51,7 +51,7 @@ class ProtectTheFleetEventProcessorTest extends EventTestHarness<ProtectTheFleet
     void shouldMoveHumanFighter() {
         val viper = viperMarkVIIAt(GALACTICA_SPACE_4_OCLOCK);
         execute(ProtectTheFleetEvent.move(1, viper.id(), GALACTICA_SPACE_2_OCLOCK));
-        assertFollowup(one(new MoveShipEvent(viper.id(), GALACTICA_SPACE_2_OCLOCK)));
+        assertEquals(GALACTICA_SPACE_2_OCLOCK, locate(viper));
     }
 
     @Test
@@ -61,7 +61,17 @@ class ProtectTheFleetEventProcessorTest extends EventTestHarness<ProtectTheFleet
 
         execute(ProtectTheFleetEvent.attack(1, viper.id(), bs.id()));
 
-        assertFollowup(one(new AttackBasestarEvent(VIPER, bs.id())));
+        assertFollowup(AttackCylonShipEvent.byFighter(viper.id(), bs.id()));
+    }
+
+    @Test
+    void shouldAttackARaider() {
+        val viper = viperAt(GALACTICA_SPACE_10_OCLOCK);
+        val raider = raiderAt(GALACTICA_SPACE_10_OCLOCK);
+
+        execute(ProtectTheFleetEvent.attack(1, viper.id(), raider.id()));
+
+        assertFollowup(AttackCylonShipEvent.byFighter(viper.id(), raider.id()));
     }
 
     @Test
@@ -123,6 +133,6 @@ class ProtectTheFleetEventProcessorTest extends EventTestHarness<ProtectTheFleet
         val viper = viperAt(GALACTICA_SPACE_2_OCLOCK);
         val civ = civilianShipAt(GALACTICA_SPACE_2_OCLOCK);
 
-        assertInvalid(new ProtectTheFleetEvent(1, null, null, viper.id(), GALACTICA_SPACE_4_OCLOCK, null, civ.id()));
+        assertInvalid(new ProtectTheFleetEvent(1, new ViperActivation(null, null, viper.id(), GALACTICA_SPACE_4_OCLOCK, null, civ.id())));
     }
 }

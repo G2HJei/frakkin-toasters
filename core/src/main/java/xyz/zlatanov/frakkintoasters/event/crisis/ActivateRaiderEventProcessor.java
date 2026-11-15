@@ -30,6 +30,10 @@ public class ActivateRaiderEventProcessor extends EventProcessor<ActivateRaiderE
 
         val humanFighters = galacticaBoard.humanFightersIn(location);
         if (!humanFighters.isEmpty()) {
+            if (game.turn().raidersToMiss().containsKey(location)) {
+                ops.interrupts().raiderMissed(location); // "Run Interference": it misses, without a roll
+                return Followup.NONE;
+            }
             return attackViper(raider, humanFighters);
         }
 

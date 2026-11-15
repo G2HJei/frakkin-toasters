@@ -36,7 +36,7 @@ class ActionStepEventProcessorTest extends EventTestHarness<ActionStepEvent> {
 
         execute(new ActionStepEvent());
 
-        assertFollowup(one(new ActivateViperEvent(1), new NoOpEvent(1)));
+        assertFollowup(one(new PlayerDecisionEvent<>(1, ActivateViperEvent.class), new NoOpEvent(1)));
     }
 
     @Test

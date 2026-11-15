@@ -4,9 +4,14 @@ import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
+import xyz.zlatanov.frakkintoasters.event.interrupt.RollDieEventProcessor;
+import xyz.zlatanov.frakkintoasters.operation.GameOps;
 import xyz.zlatanov.frakkintoasters.state.Mutates;
 
 import static com.tngtech.archunit.core.domain.JavaCall.Predicates.target;
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.assignableTo;
+import static com.tngtech.archunit.core.domain.properties.HasName.Predicates.name;
+import static com.tngtech.archunit.core.domain.properties.HasOwner.Predicates.With.owner;
 import static com.tngtech.archunit.core.domain.properties.CanBeAnnotated.Predicates.annotatedWith;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
@@ -40,6 +45,12 @@ class ArchitectureTest {
             noClasses().that().resideInAPackage("..state..")
                     .should().dependOnClassesThat().resideInAnyPackage("..operation..", "..event..", "..engine..")
                     .because("state is the bottom layer");
+
+    @ArchTest
+    static final ArchRule onlyRollDieEventProcessorRollsTheDie =
+            noClasses().that().doNotHaveFullyQualifiedName(RollDieEventProcessor.class.getName())
+                    .should().callMethodWhere(target(name("rollDie")).and(target(owner(assignableTo(GameOps.class)))))
+                    .because("a die roll goes through FollowupUtils.rollDie, so the interrupt windows around it open");
 
     @ArchTest
     static final ArchRule eventsDoNotDependOnTheEngine =

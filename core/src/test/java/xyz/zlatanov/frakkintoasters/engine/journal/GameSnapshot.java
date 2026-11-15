@@ -12,6 +12,7 @@ import xyz.zlatanov.frakkintoasters.state.ship.HumanFighter;
 import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheck;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckPile;
+import xyz.zlatanov.frakkintoasters.state.view.DieRollView;
 
 import java.util.*;
 
@@ -32,6 +33,11 @@ public record GameSnapshot(Map<String, Object> values) {
         s.put("actingPlayer", game.turn().actingPlayerNumber());
         s.put("turnCrisisCards", new ArrayList<>(game.turn().crisisCards()));
         s.put("turnEndedEarly", game.turn().endedEarly());
+        s.put("dieRoll", dieRoll(game.turn().dieRoll()));
+        s.put("interruptWindow", game.turn().interruptWindow());
+        s.put("windowCards", new ArrayList<>(game.turn().windowCards()));
+        s.put("resolvedInterruptCards", new ArrayList<>(game.turn().resolvedInterruptCards()));
+        s.put("raidersToMiss", new TreeMap<>(game.turn().raidersToMiss()));
         s.put("president", game.president());
         s.put("admiral", game.admiral());
         s.put("cag", game.cag());
@@ -93,6 +99,10 @@ public record GameSnapshot(Map<String, Object> values) {
         result.put("discarded", new ArrayList<>(deck.discardedCards()));
         result.put("revealed", new ArrayList<>(deck.revealedCards()));
         return result;
+    }
+
+    private static Object dieRoll(DieRollView dieRoll) {
+        return dieRoll == null ? null : List.of(String.valueOf(dieRoll.value()), dieRoll.cards(), dieRoll.modifier());
     }
 
     private static Object skillCheck(SkillCheck check) {

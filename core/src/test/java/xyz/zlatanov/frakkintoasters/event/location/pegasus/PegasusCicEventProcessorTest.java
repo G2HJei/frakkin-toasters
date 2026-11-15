@@ -3,77 +3,29 @@ package xyz.zlatanov.frakkintoasters.event.location.pegasus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
-import xyz.zlatanov.frakkintoasters.event.ship.DamagePegasusEvent;
 import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static xyz.zlatanov.frakkintoasters.event.Followup.single;
+import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.rollDie;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.PEGASUS_CIC;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.HELENA_CAIN;
-import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.*;
 
 class PegasusCicEventProcessorTest extends EventTestHarness<PegasusCicEvent> {
 
-    @BeforeEach
-    void setUpAtLocation() {
-        player(1).character(HELENA_CAIN);
-        moveTo(PEGASUS_CIC, HELENA_CAIN);
-    }
-
-    Basestar        basestar;
-    PegasusCicEvent event;
+    Basestar basestar;
 
     @BeforeEach
     void setUp() {
+        player(1).character(HELENA_CAIN);
+        moveTo(PEGASUS_CIC, HELENA_CAIN);
         basestar = basestarAt(GALACTICA_SPACE_2_OCLOCK);
-        event = new PegasusCicEvent(1, basestar.id());
     }
 
     @Test
-    void shouldDamagePegasus() {
-        nextRoll(3);
-        execute(event);
-        assertFollowup(single(new DamagePegasusEvent()));
-    }
+    void shouldRollForTheChosenBasestar() {
+        execute(new PegasusCicEvent(1, basestar.id()));
 
-    @Test
-    void shouldDamageBasestar() {
-        basestarDamageDeck.nextCard(DISABLED_WEAPONS);
-        nextRoll(5);
-
-        execute(event);
-
-        assertEquals(1, basestar.damage().size());
-        assertTrue(basestar.damage().contains(DISABLED_WEAPONS));
-        assertEquals(3, basestarDamageDeck.cards().size());
-
-    }
-
-    @Test
-    void shouldDamageBasestarTwice() {
-        basestarDamageDeck.nextCard(DISABLED_WEAPONS, STRUCTURAL_DAMAGE);
-        nextRoll(8);
-
-        execute(event);
-
-        assertEquals(2, basestar.damage().size());
-        assertEquals(2, basestarDamageDeck.cards().size());
-
-    }
-
-    @Test
-    void shouldDamageOnlyOnceIfDestroyed() {
-        basestarDamageDeck.nextCard(CRITICAL_HIT);
-        basestar.damage(basestarDamageDeck.draw());
-        nextRoll(8);
-
-        execute(event);
-
-        assertNoShips(GALACTICA_SPACE_2_OCLOCK);
-        assertTrue(basestar.damage().isEmpty());
-        assertEquals(4, basestarDamageDeck.cards().size());
+        assertFollowup(rollDie(new PegasusCicResultEvent(basestar.id())));
     }
 
     @Test

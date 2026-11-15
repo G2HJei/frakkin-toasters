@@ -33,7 +33,7 @@ class HangarDeckEventProcessorTest extends EventTestHarness<HangarDeckEvent> {
                         single(
                                 new PlayerDecisionEvent<>(1, LaunchViperEvent.class, MUST_LAUNCH_IN_VIPER)),
                         one(
-                                new ActivateViperEvent(1),
+                                new PlayerDecisionEvent<>(1, ActivateViperEvent.class),
                                 new NoOpEvent(1))));
     }
 
@@ -55,7 +55,7 @@ class HangarDeckEventProcessorTest extends EventTestHarness<HangarDeckEvent> {
                         single(
                                 new PlayerDecisionEvent<>(1, LaunchViperEvent.class, MUST_LAUNCH_IN_VIPER)),
                         one(
-                                new ActivateViperEvent(1),
+                                new PlayerDecisionEvent<>(1, ActivateViperEvent.class),
                                 new NoOpEvent(1))));
     }
 

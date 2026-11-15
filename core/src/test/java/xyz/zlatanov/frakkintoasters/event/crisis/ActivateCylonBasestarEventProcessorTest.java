@@ -3,53 +3,40 @@ package xyz.zlatanov.frakkintoasters.event.crisis;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
-import xyz.zlatanov.frakkintoasters.event.Followup;
-import xyz.zlatanov.frakkintoasters.event.ship.DamageGalacticaEvent;
-import xyz.zlatanov.frakkintoasters.event.ship.DamagePegasusEvent;
+import xyz.zlatanov.frakkintoasters.event.AttackGalacticaEvent;
 import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 
-import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_8_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.DISABLED_WEAPONS;
 import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.STRUCTURAL_DAMAGE;
 
 class ActivateCylonBasestarEventProcessorTest extends EventTestHarness<ActivateCylonBasestarEvent> {
 
-    Basestar                   basestar;
-    ActivateCylonBasestarEvent event;
+    Basestar basestar;
 
     @BeforeEach
     void setUp() {
         basestar = basestarAt(GALACTICA_SPACE_8_OCLOCK);
-        event = new ActivateCylonBasestarEvent(basestar.id());
     }
 
     @Test
-    void shouldDoNothingOnLowRoll() {
-        nextRoll(3);
-        execute(event);
-    }
-
-    @Test
-    void shouldFollowupWithDamageDecisionOnHighRoll() {
-        nextRoll(4);
-        execute(event);
-        assertFollowup(Followup.one(new DamageGalacticaEvent(), new DamagePegasusEvent()));
+    void shouldAttackGalactica() {
+        execute(new ActivateCylonBasestarEvent(basestar.id()));
+        assertFollowup(new AttackGalacticaEvent(basestar.id()));
     }
 
     @Test
     void shouldNotAttackWhenBasestarHasDisabledWeapons() {
         basestar.damage(DISABLED_WEAPONS);
-        execute(event);
+        execute(new ActivateCylonBasestarEvent(basestar.id()));
     }
 
     @Test
     void shouldStillAttackWhenBasestarHasNonDisabledWeaponsDamage() {
         basestar.damage(STRUCTURAL_DAMAGE);
-        nextRoll(5);
 
-        execute(event);
+        execute(new ActivateCylonBasestarEvent(basestar.id()));
 
-        assertFollowup(one(new DamageGalacticaEvent(), new DamagePegasusEvent()));
+        assertFollowup(new AttackGalacticaEvent(basestar.id()));
     }
 }

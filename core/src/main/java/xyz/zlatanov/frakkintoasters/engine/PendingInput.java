@@ -1,6 +1,7 @@
 package xyz.zlatanov.frakkintoasters.engine;
 
 import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.SecretEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 
 import java.util.Set;
@@ -20,7 +21,7 @@ public sealed interface PendingInput {
 
         @Override
         public boolean secret() {
-            return false;
+            return SecretEvent.class.isAssignableFrom(decision.action());
         }
     }
 

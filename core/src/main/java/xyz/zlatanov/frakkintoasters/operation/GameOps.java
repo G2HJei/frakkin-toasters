@@ -12,6 +12,7 @@ import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 
 import java.util.List;
 
@@ -65,6 +66,10 @@ public class GameOps extends AbstractOps {
 
     public TitleOps titles() {
         return new TitleOps(game, recorder);
+    }
+
+    public InterruptOps interrupts() {
+        return new InterruptOps(game, recorder);
     }
 
     /**
@@ -139,9 +144,24 @@ public class GameOps extends AbstractOps {
         record(new GameEnded(winner));
     }
 
+    /**
+     * Starts a new die roll, before the cards played on it. The window before the roll does it.
+     */
+    public void startDieRoll() {
+        record(new DieRollStarted());
+    }
+
+    /**
+     * Rolls the die of the roll that was started, or rerolls it. Only {@code RollDieEventProcessor} calls it, so no roll
+     * skips the interrupt windows around it.
+     */
     public int rollDie() {
         int value = game.die().roll();
         record(new DieRolled(value));
         return value;
+    }
+
+    public void playOnDieRoll(SkillCardType card, int modifier) {
+        record(new DieRollCardPlayed(card, modifier));
     }
 }

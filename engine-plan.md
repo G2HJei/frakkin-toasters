@@ -476,6 +476,28 @@ Acceptance tests: a held card pauses the game at its window, a window with no ho
 plain `Waiting` during a window, two `STRATEGIC_PLANNING` cards on one roll go to the current player, and restore works
 at a pause inside a window.
 
+**As built.** `InterruptWindowTest` covers the acceptance tests, plus a pass and an "Evasive Maneuvers" reroll. Where it
+differs from the plan above:
+
+- The windows are a sealed set of records in `state/interrupt/`, because `Turn` holds the open one and the state can't
+  see `event/`. The window after a viper is attacked carries the viper, for the -2 of "Evasive Maneuvers".
+- `CloseInterruptWindowEvent` settles the conflicts and resolves the cards, and queues itself again after a
+  `TiebreakInterruptCardsEvent`, instead of separate reveal and resolve events. Cards of a type conflict, "Run
+  Interference" only in the same space area.
+- "Best of the Best" doesn't get a window of its own. The window before a piloted viper's attack roll takes it with
+  "Strategic Planning", it is recorded on the `DieRoll`, and the attack's result destroys raiders instead. A separate
+  window couldn't cancel the attack roll that was already queued.
+- "Calculations" is once per roll, a reroll included, so it reads the `DieRoll`. "Evasive Maneuvers" opens the window
+  again on the new roll, and subtracts 2 once however often the roll is rerolled.
+- "Run Interference" counts at most the raiders in the area, so nothing is left over after the activation. "Major
+  Victory" is for the acting player, and `TurnView.resolvedInterruptCards()` keeps its limit of one a turn.
+- `AttackRaiderEvent`, `AttackHeavyRaiderEvent` and `AttackBasestarEvent` became one `AttackCylonShipEvent`, so the
+  Attack Table for Cylon ships is in one place. The basestar attack queues a new `DamageBasestarEvent`, which destroys
+  it at 3 damage. `ActivateCylonBasestarEvent` attacks through `AttackGalacticaEvent`.
+- `ActivateViperEvent` and `ProtectTheFleetEvent` share a `ViperActivation`. The move is done in place, so
+  `MoveShipEvent` is gone. "Command" offers its activations only when a viper can be activated.
+- 26 event records have no processor after phase 10: the 3 placeholders and 23 real events.
+
 ## Phase 11 - Crisis
 
 `ResolveCrisisCardEvent` and `CrisisCardFollowups` resolve 16 choice crises, and their `CrisisCard` constants list the

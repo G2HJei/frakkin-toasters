@@ -31,7 +31,7 @@ public class ActionStepEventProcessor extends EventProcessor<ActionStepEvent> {
         }
         val playerNumber = current.number();
         if (galacticaBoard.pilotedFighter(current.character()).isPresent()) {
-            return one(new ActivateViperEvent(playerNumber), new NoOpEvent(playerNumber));
+            return one(new PlayerDecisionEvent<>(playerNumber, ActivateViperEvent.class), new NoOpEvent(playerNumber));
         }
         return canAct(game, current)
                 ? one(new PlayerDecisionEvent<>(playerNumber, ActionEvent.class), new NoOpEvent(playerNumber))

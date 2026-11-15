@@ -4,11 +4,8 @@ import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
-import xyz.zlatanov.frakkintoasters.event.AttackBasestarEvent;
-import xyz.zlatanov.frakkintoasters.event.AttackHeavyRaiderEvent;
-import xyz.zlatanov.frakkintoasters.event.AttackRaiderEvent;
+import xyz.zlatanov.frakkintoasters.event.AttackCylonShipEvent;
 
-import static xyz.zlatanov.frakkintoasters.event.AttackBasestarEvent.Attacker.GALACTICA;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.TOM_ZAREK_ALT;
 
@@ -21,36 +18,12 @@ class WeaponsControlEventProcessorTest extends EventTestHarness<WeaponsControlEv
     }
 
     @Test
-    void shouldFollowupWithAttackRaiderEvent() {
-        val raider = raider();
-        val raiderId = raider.id();
-        place(GALACTICA_SPACE_2_OCLOCK, raider);
+    void shouldAttackWithGalactica() {
+        val heavyRaider = heavyRaiderAt(GALACTICA_SPACE_4_OCLOCK);
 
-        execute(new WeaponsControlEvent(1, raiderId));
+        execute(new WeaponsControlEvent(1, heavyRaider.id()));
 
-        assertFollowup(new AttackRaiderEvent(raiderId));
-    }
-
-    @Test
-    void shouldFollowupWithAttackHeavyRaiderEvent() {
-        val hRaider = heavyRaider();
-        val hRaiderId = hRaider.id();
-        place(GALACTICA_SPACE_4_OCLOCK, hRaider);
-
-        execute(new WeaponsControlEvent(1, hRaiderId));
-
-        assertFollowup(new AttackHeavyRaiderEvent(hRaiderId));
-    }
-
-    @Test
-    void shouldFollowupWithAttackBasestarEvent() {
-        val basestar = basestar();
-        val basestarId = basestar.id();
-        place(GALACTICA_SPACE_6_OCLOCK, basestar);
-
-        execute(new WeaponsControlEvent(1, basestarId));
-
-        assertFollowup(new AttackBasestarEvent(GALACTICA, basestarId));
+        assertFollowup(AttackCylonShipEvent.byGalactica(heavyRaider.id()));
     }
 
     @Test

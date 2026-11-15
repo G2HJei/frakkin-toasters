@@ -1,9 +1,10 @@
 package xyz.zlatanov.frakkintoasters.event.location.galactica;
 
-import lombok.val;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.location.LocationActionProcessor;
 import xyz.zlatanov.frakkintoasters.state.view.GameView;
+
+import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.rollDie;
 
 public class ArmoryEventProcessor extends LocationActionProcessor<ArmoryEvent> {
 
@@ -18,10 +19,6 @@ public class ArmoryEventProcessor extends LocationActionProcessor<ArmoryEvent> {
 
     @Override
     public Followup process() {
-        val roll = ops.rollDie();
-        if (roll >= 7) {
-            ops.galactica().destroyCenturion(event.centurionId());
-        }
-        return Followup.NONE;
+        return rollDie(new ArmoryResultEvent(event.centurionId()));
     }
 }

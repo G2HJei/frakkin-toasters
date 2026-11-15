@@ -2,6 +2,7 @@ package xyz.zlatanov.frakkintoasters.engine.journal;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.*;
+import xyz.zlatanov.frakkintoasters.state.DieRoll;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
@@ -25,6 +26,7 @@ public final class FactApplier {
             case BoardFact f -> apply(game, f);
             case DeckFact f -> apply(game, f);
             case GameFact f -> apply(game, f);
+            case InterruptFact f -> apply(game, f);
             case PlayerFact f -> apply(game, f);
             case ShipFact f -> apply(game, f);
             case SkillCheckFact f -> apply(game, f);
@@ -85,9 +87,9 @@ public final class FactApplier {
             case GameFact.GameStarted ignored -> {
                 // the replayer already built the game from it
             }
-            case GameFact.DieRolled ignored -> {
-                // the result is the fact, nothing to change
-            }
+            case GameFact.DieRollStarted ignored -> game.turn().startDieRoll();
+            case GameFact.DieRolled f -> dieRoll(game).roll(f.value());
+            case GameFact.DieRollCardPlayed f -> dieRoll(game).play(f.card(), f.modifier());
             case GameFact.StepChanged f -> game.turn().step(f.step());
             case GameFact.TurnStarted f -> game.turn().start(f.turn());
             case GameFact.TurnEndedEarly ignored -> game.turn().endEarly();
@@ -96,6 +98,19 @@ public final class FactApplier {
             case GameFact.CrisisCardPlayed f -> game.turn().playCrisisCard(f.card());
             case GameFact.CrisisCardsCleared f -> game.turn().removeCrisisCards(f.cards());
             case GameFact.GameEnded f -> game.end(f.winner());
+        }
+    }
+
+    private static void apply(Game game, InterruptFact fact) {
+        val turn = game.turn();
+        switch (fact) {
+            case InterruptFact.InterruptWindowOpened f -> turn.openInterruptWindow(f.window());
+            case InterruptFact.InterruptCardPlayed f -> turn.playInterruptCard(f.card());
+            case InterruptFact.InterruptCardReturned f -> turn.returnInterruptCard(f.card());
+            case InterruptFact.InterruptCardResolved f -> turn.resolveInterruptCard(f.card());
+            case InterruptFact.InterruptWindowClosed ignored -> turn.closeInterruptWindow();
+            case InterruptFact.RaidersWillMiss f -> turn.raidersWillMiss(f.area(), f.count());
+            case InterruptFact.RaiderMissed f -> turn.raiderMissed(f.area());
         }
     }
 
@@ -177,6 +192,14 @@ public final class FactApplier {
             case TitleFact.PresidentQuorumCardGained f -> game.presidentHand().addOnTop(f.card());
             case TitleFact.PresidentQuorumCardsLost f -> remove(game.presidentHand(), f.cards());
         }
+    }
+
+    private static DieRoll dieRoll(Game game) {
+        val dieRoll = game.turn().dieRoll();
+        if (dieRoll == null) {
+            throw new FrakCallTheAdmiralException("No die roll was started");
+        }
+        return dieRoll;
     }
 
     private static Basestar basestar(Game game, int id) {

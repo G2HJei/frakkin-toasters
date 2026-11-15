@@ -48,13 +48,14 @@ Next steps, in order:
    for "Executive Order".
 3. ~~Create the journal and tie it to the ops classes in `operation/`.~~ Done, see "Journal and Replay". Still open:
    describers and per-viewer hiding, and JSON serialization. The pending followups are the engine's `Agenda`.
-4. Create the game engine to drive the events and turns. `engine-plan.md` has the plan in phases. Phases 1 to 8 are
+4. Create the game engine to drive the events and turns. `engine-plan.md` has the plan in phases. Phases 1 to 10 are
    done: the journal moved out of `Game` into `engine/journal/`, the turn state is grouped in `state/Turn`, the journal
    and processors are ready for the engine, `GameEngine` runs events through `submit` and `choose`, it restores a
    game from its journal and rolls back a failed input (see "Engine"), `GameEngine.start` sets up a game and plays
    its turns (see "Turn Loop"), processors check what players submit (see "Validation"), the Cylons can win (see
-   "End of Game and Mutiny"), and a skill check runs from the action that starts it to its end, with every location
-   action in scope (see "Skill Check Sequence" and "Execution"). Next is phase 10: interrupt cards.
+   "End of Game and Mutiny"), a skill check runs from the action that starts it to its end, with every location
+   action in scope (see "Skill Check Sequence" and "Execution"), and the six interrupt Skill Cards are played in
+   secret windows around die rolls and attacks (see "Interrupt Cards" and "Combat"). Next is phase 11: Crisis.
 5. Create a working frontend with the events that exist by then.
 
 ## Project Structure
@@ -65,12 +66,14 @@ Multi-module Gradle project with a single `core` module. Package root: `xyz.zlat
 
 - root - `EventProcessor` (base class for all processors)
 - `event/` - event records and their processors, grouped by area (`action`, `board`, `crisis`, `deck`, `endgame`,
-  `location/{galactica,pegasus,colonialone,cylon}`, `loyalty`, `officials`, `player`, `ship`, `skillcheck`,
-  `skillcheck/ability`, `skillcheck/result`, `turn`). Also `placeholder/` (events that need player input) and
+  `interrupt`, `location/{galactica,pegasus,colonialone,cylon}`, `loyalty`, `officials`, `player`, `ship`,
+  `skillcheck`, `skillcheck/ability`, `skillcheck/result`, `turn`). The attacks and the viper activation are in the root
+  package. Also `placeholder/` (events that need player input) and
   `constraint/` (`EventConstraint`, `ConstrainedEvent`). `location/` holds `LocationActionProcessor`, the base of the
   location action processors
 - `operation/` - game ops, the only code that decides what changes: `GameOps` (entry point) hands out `PlayerOps`,
-  `ShipOps`, `GalacticaOps`, `PegasusOps`, `CylonFleetOps`, `SkillCheckOps`, `LoyaltyDeckOps`, `TitleOps`. They extend
+  `ShipOps`, `GalacticaOps`, `PegasusOps`, `CylonFleetOps`, `SkillCheckOps`, `LoyaltyDeckOps`, `TitleOps`,
+  `InterruptOps`. They extend
   `AbstractOps`, which holds the `Game` and a `FactRecorder`, and offers `record`, `draw`, `shuffle`. Ops record facts,
   they never write to components
 - `engine/` - `GameEngine` (runs a game, see "Engine"), `Agenda` (stack of pending followups), `AgendaReplayer`
@@ -80,10 +83,13 @@ Multi-module Gradle project with a single `core` module. Package root: `xyz.zlat
 - `engine/journal/` - `Journal`, `JournalEntry`, `FactRecorder`, `FactApplier`, `ShipZones`, `GameReplayer`, and `fact/`
   with the `Fact` records
 - `state/` - game state model: `Game` (top level), `Turn` (turn number, `GameStep`, current and acting player, the
-  Crisis Cards of the turn, read through `GameView.turn()`; `number` counts player turns, not rounds), `Player` (`turns()` counts the player's own
-  turns), `Team` (the winner in `GameView.outcome()`), `Die` (d8), `Randomness`,
+  Crisis Cards of the turn, the `DieRoll`, the open interrupt window and its cards, read through `GameView.turn()`;
+  `number` counts player turns, not rounds), `Player` (`turns()` counts the player's own turns), `Team` (the winner in
+  `GameView.outcome()`), `Die` (d8), `DieRoll` (a roll with the cards played on it), `Randomness`,
   `RemovedComponents`, `PlayerPile`, and the `@Mutates` marker
-- `state/view/` - read-only view interfaces (`GameView`, `TurnView`, `PlayerView`, `BoardsHolderView`,
+- `state/interrupt/` - `InterruptWindow` (the windows, as sealed records with the cards each takes) and
+  `PlayedInterruptCard`
+- `state/view/` - read-only view interfaces (`GameView`, `TurnView`, `DieRollView`, `PlayerView`, `BoardsHolderView`,
   `BattlestarBoardView` (damaged locations), `DecksHolderView` (Skill Cards and civilian ships left), `SkillCheckView`, ...)
   implemented by the state classes. Processors read state only through these
 - `state/board/` - board hierarchy: `Board` (base, tracks characters by location) -> `BattlestarBoard` (adds damage
@@ -317,8 +323,8 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
   `CrisisStepEvent`, `ActivateCylonShipsStepEvent`, `PrepareForJumpStepEvent`, `DiscardStepEvent`.
 - Each step records `StepChanged` and applies its own exceptions. A step a player doesn't have records nothing: revealed
   Cylons (and Cylon Leaders who aren't Infiltrating, see `isHuman()`) have no Crisis and no Activate Cylon Ships step,
-  and characters in the "Brig" no Crisis step. Movement and Action are a `OneOf` with a `NoOpEvent`. A pilot gets
-  `ActivateViperEvent` instead of a location action, and a character whose location has no action he can take (e.g. in
+  and characters in the "Brig" no Crisis step. Movement and Action are a `OneOf` with a `NoOpEvent`. A pilot gets an
+  `ActivateViperEvent` decision instead of a location action, and a character whose location has no action he can take (e.g. in
   "Sickbay", see `LocationEvent.canAct`) gets no Action choice.
 - `DiscardStepEvent` asks every player over the hand limit, clockwise from the current player, with
   `DISCARD_DOWN_TO_HAND_LIMIT`: Skill Cards over `handLimit()`, and the President's Quorum Cards.
@@ -367,6 +373,58 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
   loses his titles. An Infiltrating Cylon Leader only goes back to the "Resurrection Ship" (`InfiltrationEnded`).
 - The executed current player's turn ends early (see "Turn Loop").
 
+### Interrupt Cards
+
+Six Skill Cards are played in response to something, outside the Action step: "Strategic Planning", "Calculations",
+"Evasive Maneuvers", "Run Interference", "Best of the Best" and "Major Victory". They are played in interrupt windows,
+in `event/interrupt/`.
+
+- `InterruptWindow` (`state/interrupt/`) is a sealed set of records, one per window, and `cards()` lists the card types
+  each takes: before a die roll, before a piloted viper's attack roll, after a die roll, after a viper is attacked,
+  before raiders activate, after a basestar or centurion is destroyed.
+- `OpenInterruptWindowEvent(window)` is an ordinary queued event. Its processor asks, as the hands are at that moment,
+  each player who can play a card for the window, one at a time and clockwise from the current player
+  (`PlayInterruptCardEventProcessor.canPlay`: humans only, rule 6.1.2.3, plus each card's own condition). The question
+  is a decision on `PlayInterruptCardEvent`, and no card means a pass. Without holders the window doesn't open and the
+  game doesn't pause.
+- `PlayInterruptCardEvent` is a `SecretEvent`, so `PendingInput.secret()` is true while it is pending, and
+  `GameEngine.status` shows it only to the player who answers. The others get a plain `Waiting`.
+- `CloseInterruptWindowEvent` runs once everyone has answered. Two cards of a type conflict ("Run Interference" only in
+  the same space area), and the current player keeps one with a `TiebreakInterruptCardsEvent` (rule 13.3), the other
+  goes back to its owner's hand. Then each card resolves in play order (`InterruptCardResolved`, into the discard pile)
+  and the window closes. Windows never nest: a window closes before what its cards queue runs.
+- Die rolls: `FollowupUtils.rollDie(result)` returns `all(window before, RollDieEvent, window after, result)`, and the
+  result event reads `TurnView.dieRoll()`. The window before a roll starts a new `DieRoll` (`DieRollStarted`), and
+  `DieRollCardPlayed(card, modifier)` records each card that takes effect on it. A reroll is another `DieRolled` and
+  keeps the cards (rule A2.1.1.10). The result is clamped to 1-8 after all of them (rule 13.1). An `ArchitectureTest`
+  rule lets only `RollDieEventProcessor` call `GameOps.rollDie()`.
+- A processor that rolls queues the roll, and a `XxxResultEvent` in its package does what the roll decides, e.g.
+  `ArmoryEvent` and `ArmoryResultEvent`.
+- Card effects: "Strategic Planning" +2, "Calculations" +1 or -1 once per roll. "Evasive Maneuvers" queues a reroll and
+  the same window again, -2 once for a piloted viper. "Best of the Best" marks the attack's own roll, and the attack's
+  result destroys that many raiders instead (`DestroyRaidersEventProcessor.destroyRaidersIn`). "Run Interference"
+  records `RaidersWillMiss(area, count)`, at most the raiders there, and `ActivateRaiderEventProcessor` counts them
+  down with `RaiderMissed`. "Major Victory" is for the acting player, once a turn (`TurnView.resolvedInterruptCards()`),
+  and rolls for 1 morale. `TurnStarted` clears the roll, the resolved cards and the misses.
+
+### Combat
+
+The attacks follow the Attack Table (rule 11.6), each split into the attack, which queues the roll with its windows,
+and its result.
+
+- `AttackViperEvent(raiderId, humanFighterId)`: a raider attacks a viper or an assault raptor. The window after the
+  roll takes "Evasive Maneuvers".
+- `AttackGalacticaEvent(cylonShipId)`: a raider or a basestar. A hit is a `one(DamageGalacticaEvent,
+  DamagePegasusEvent)`. `ActivateCylonBasestarEvent` queues it unless the weapons are disabled.
+- `AttackCylonShipEvent(humanFighterId, cylonShipId)`: a fighter, or Galactica with "Weapons Control" (`byGalactica`),
+  attacks a raider, a heavy raider or a basestar. A piloted fighter's roll gets the "Best of the Best" window. A hit on
+  a basestar is a `DamageBasestarEvent`, which destroys it at 3 damage (a critical hit counts 2) and opens the "Major
+  Victory" window. "Structural Damage" adds 2.
+- `ActivateViperEvent(playerNumber, ViperActivation)`: one option of rule 11.1.1. A pilot activates his own viper,
+  anyone else an unmanned one. `ProtectTheFleetEvent` takes the same `ViperActivation`, for an unmanned viper, and both
+  use `ActivateViperEventProcessor.isValidActivation` and `activate`. The Action step and the "Hangar Deck" offer the
+  activation as a decision, and "Command" only when `canActivateUnmanned`.
+
 ### Journal and Replay
 
 The journal records exactly what the game ops did, so a game can be rebuilt from the journal alone (`journal-plan.md`
@@ -374,7 +432,7 @@ has
 the design). It is fact-sourced: replay applies recorded facts, and never re-runs processors or needs randomness.
 
 - `Fact` (`engine/journal/fact/`) is a sealed interface, grouped by area: `BoardFact`, `DeckFact`, `GameFact`,
-  `PlayerFact`, `ShipFact`, `SkillCheckFact`, `TitleFact`. The records are nested in the area interfaces, because a
+  `InterruptFact`, `PlayerFact`, `ShipFact`, `SkillCheckFact`, `TitleFact`. The records are nested in the area interfaces, because a
   sealed hierarchy can't span packages without a `module-info`. A new fact has to be handled in `FactApplier`'s
   exhaustive `switch`.
 - `Journal` is an append-only flat list of `ScopeOpened(scopeId, parentId, event, actor)` / `FactRecorded` /
@@ -438,7 +496,8 @@ when possible.
   `assertInvalid(event)`, `assertSkillCheckTriggered(type)`. If a test doesn't assert a followup, the harness checks
   that it was `Followup.NONE`. Players start without a character: a location action test gives one and `moveTo`s the
   location first. A character can be set only once
-- `FakeDie` - test double for `Die` with `nextRoll(int)` to control randomness
+- `FakeDie` - test double for `Die` with `nextRoll(int)` to control randomness. A result event test calls
+  `rolled(int)` first, which starts and rolls a `DieRoll` the way the window and `RollDieEvent` do
 - `FakeDeck<T>` - test double for `Deck<T>` with `nextCard(T...)` to control draws, and `clear()` to empty the draw
   pile
 - `GameSnapshot` (`engine/journal/`) - turns a `Game` into comparable plain values. Replay tests compare a live game
@@ -453,5 +512,8 @@ when possible.
   inputs are relative to the first player the seed picks
 - `LocationSkillCheckTest` runs the "Admiral's Quarters", "Brig" and "Airlock" skill checks from the action to
   `EndSkillCheckEvent` through `submit` and `choose`, restoring at every pause
+- `InterruptWindowTest` plays interrupt windows through `submit`, restoring at every pause: the secret status, a pass,
+  a tiebreak, an "Evasive Maneuvers" reroll. The test-only `GiveSkillCardEvent` and `PlaceRaiderEvent` set up the
+  hands and the board, which a seeded game can't choose
 - Tests follow the pattern: set up game state, execute the event, assert state changes and followups. Use real game ops
   in processor tests, not mocks, since processors may read their own changes

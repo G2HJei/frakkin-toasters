@@ -31,7 +31,7 @@ public class HangarDeckEventProcessor extends LocationActionProcessor<HangarDeck
                         new PlayerDecisionEvent<>(player.number(), LaunchViperEvent.class, MUST_LAUNCH_IN_VIPER)),
                 one(
                         // The launched pilot is in space, so his 1 more action can't be a location action: he activates his viper.
-                        new ActivateViperEvent(player.number()),
+                        new PlayerDecisionEvent<>(player.number(), ActivateViperEvent.class),
                         new NoOpEvent(player.number())));
     }
 }

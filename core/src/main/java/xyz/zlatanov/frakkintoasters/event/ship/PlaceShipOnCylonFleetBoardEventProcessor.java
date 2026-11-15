@@ -5,32 +5,19 @@ import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 
-import java.util.Map;
 import java.util.TreeSet;
 
-import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
+import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.rollDie;
 
 public class PlaceShipOnCylonFleetBoardEventProcessor extends EventProcessor<PlaceShipOnCylonFleetBoardEvent> {
-
-    private static final Map<Integer, Location> placementMap = Map.of(
-            1, CYLON_FLEET_SPACE_1,
-            2, CYLON_FLEET_SPACE_2,
-            3, CYLON_FLEET_SPACE_3,
-            4, CYLON_FLEET_SPACE_4,
-            5, CYLON_FLEET_SPACE_5_6,
-            6, CYLON_FLEET_SPACE_5_6,
-            7, CYLON_FLEET_SPACE_7_8,
-            8, CYLON_FLEET_SPACE_7_8
-    );
 
     @Override
     public Followup process() {
         val shipType = event.cylonShipType();
         if (game.cylonShips().available(shipType) > 0) {
-            ops.cylonFleet().place(shipType, placementMap.get(ops.rollDie()));
-        } else {
-            ops.cylonFleet().moveShipsToGalactica(shipType, findLocationToTransferFrom());
+            return rollDie(new PlaceShipOnCylonFleetBoardResultEvent(shipType)); // the placement die roll (rule 11.4.1.1)
         }
+        ops.cylonFleet().moveShipsToGalactica(shipType, findLocationToTransferFrom()); // out of ships (rule 11.4.1.2)
         return Followup.NONE;
     }
 
@@ -41,5 +28,4 @@ public class PlaceShipOnCylonFleetBoardEventProcessor extends EventProcessor<Pla
                 .forEach(ship -> locationsWithShip.add(cylonFleetBoard.locate(ship)));
         return locationsWithShip.getLast();
     }
-
 }
