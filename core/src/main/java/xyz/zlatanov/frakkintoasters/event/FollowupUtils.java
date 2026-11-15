@@ -8,6 +8,8 @@ import xyz.zlatanov.frakkintoasters.event.interrupt.OpenInterruptWindowEvent;
 import xyz.zlatanov.frakkintoasters.event.interrupt.RollDieEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.DiscardSkillCardsEvent;
+import xyz.zlatanov.frakkintoasters.event.player.DrawSkillCardsOfColorEvent;
+import xyz.zlatanov.frakkintoasters.event.player.PlaceCivilianShipEvent;
 import xyz.zlatanov.frakkintoasters.event.player.SendToSickbayEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.MakeSkillCheckEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.PlayCardsBeforeSkillCheckEvent;
@@ -25,6 +27,7 @@ import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -32,6 +35,7 @@ import java.util.stream.Stream;
 import static lombok.AccessLevel.PRIVATE;
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.discardExactly;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.TREACHERY;
 import static xyz.zlatanov.frakkintoasters.event.player.SendToSickbayEventProcessor.canBeChosenForSickbay;
 
 @NoArgsConstructor(access = PRIVATE)
@@ -79,6 +83,28 @@ public class FollowupUtils {
 
     public static Event discard(int playerNumber, int count) {
         return new PlayerDecisionEvent<>(playerNumber, DiscardSkillCardsEvent.class, discardExactly(count));
+    }
+
+    public static Event treachery(int playerNumber, int count) {
+        return new DrawSkillCardsOfColorEvent(playerNumber, TREACHERY, count);
+    }
+
+    /**
+     * @return the decision, or doing nothing instead
+     */
+    public static Followup optional(int playerNumber, Event decision) {
+        return one(decision, new NoOpEvent(playerNumber));
+    }
+
+    /**
+     * @return the CAG's placements of civilian ships, one at a time (rule 4.4.3.1). Only for the ships that are left, so
+     * each decision has an answer
+     */
+    public static Followup placeCivilianShips(GameView game, int count) {
+        val cag = game.playerNumber(game.cag());
+        val placements = Collections.nCopies(Math.min(count, game.decks().civilianShipsLeft()),
+                single(new PlayerDecisionEvent<>(cag, PlaceCivilianShipEvent.class)));
+        return all(placements.toArray(Followup[]::new));
     }
 
     /**

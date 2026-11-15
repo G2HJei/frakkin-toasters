@@ -103,10 +103,10 @@ public class SkillCheckResultFollowups {
             case FOOTAGE_TRANSMITTED -> eachPlayer(p -> single(treachery(p, 1)));
             case CONSULT_THE_HYBRID -> all(new DrawMutinyCardEvent(currentPlayer()), new ConsultTheHybridPassEvent());
             // cylon ships
-            case FLEET_MOBILIZATION -> all(new ActivateRaidersEvent(), new LaunchRaidersEvent());
+            case FLEET_MOBILIZATION -> all(new ActivateCylonBasestarsEvent(), new LaunchRaidersEvent());
             // unique to one skill check
             case ANALYZE_ENEMY_FIGHTER -> single(new AnalyzeEnemyFighterPassEvent());
-            case LEGENDARY_DISCOVERY -> single(new LegendaryDiscoveryPassEvent());
+            case LEGENDARY_DISCOVERY -> single(new KeepCrisisCardInPlayEvent(type)); // it counts as 1 distance
             case STANDOFF_WITH_PEGASUS -> single(new StandoffWithPegasusPassEvent());
             case CYLON_GENOCIDE -> single(new CylonGenocidePassEvent());
             case MYSTERIOUS_MESSAGE -> single(new MysteriousMessagePassEvent());
@@ -135,7 +135,7 @@ public class SkillCheckResultFollowups {
             case HANGAR_ACCIDENT, PRISONER_REVOLT, THE_OLYMPIC_CARRIER -> single(lose(POPULATION, 1));
             case RESISTANCE, THE_FARM -> single(lose(FOOD, 1));
             case GIVE_IN_TO_DESPAIR -> all(lose(FOOD, 1), treachery(currentPlayer(), 3));
-            case LOSS_OF_A_FRIEND, HYBRID_IN_PANIC -> single(discard(currentPlayer(), 2));
+            case LOSS_OF_A_FRIEND, HYBRID_IN_PANIC -> onCurrentPlayer(discard(currentPlayer(), 2));
             case REVIEW_GALACTICAS_LOGS -> single(discard(admiral(), 3));
             case AN_OFFER_OF_PEACE, INCITEMENT_TO_MUTINY -> single(new ShuffleTreacheryIntoDestinyDeckEvent(2));
             case CYLON_INTRUDERS -> single(new PlaceCenturionsEvent(1));
@@ -188,21 +188,24 @@ public class SkillCheckResultFollowups {
                     sendCharactersIn(SICKBAY, QUORUM_CHAMBER, PRESS_ROOM, PRESIDENTS_OFFICE, Location.ADMINISTRATION),
                     single(new KeepCrisisCardInPlayEvent(type)));
             case CONSULT_THE_PRISONER ->
-                    allOf(eachPlayer(p -> single(discard(p, 1))), single(sendTo(Location.BRIG, currentPlayer())));
+                    allOf(eachHuman(p -> single(discard(p, 1))), single(sendTo(Location.BRIG, currentPlayer())));
             // skill cards
             case ADMIRAL_GRILLED -> all(lose(MORALE, 1), discard(admiral(), 2));
             case ELECTIONS_LOOM -> all(lose(MORALE, 1), discard(president(), 4));
-            case LOSS_OF_A_FRIEND -> all(lose(MORALE, 1), discard(currentPlayer(), 2));
+            case LOSS_OF_A_FRIEND -> allOf(single(lose(MORALE, 1)), onCurrentPlayer(discard(currentPlayer(), 2)));
             case REVIEW_GALACTICAS_LOGS -> all(lose(MORALE, 1), discard(admiral(), 5));
-            case RELIGIOUS_TURMOIL -> allOf(single(lose(MORALE, 1)), eachPlayer(p -> single(discard(p, 1))));
+            case RELIGIOUS_TURMOIL -> allOf(single(lose(MORALE, 1)), eachHuman(p -> single(discard(p, 1))));
             case MEDICAL_BREAKTHROUGH, REUNITE_THE_FLEET, UNSETTLING_STORIES ->
                     allOf(single(lose(MORALE, 1)), eachPlayerDiscardsAndDrawsTreachery());
-            case UNEXPECTED_REUNION -> all(lose(MORALE, 1), new DiscardAllSkillCardsEvent(currentPlayer()));
+            case UNEXPECTED_REUNION ->
+                    allOf(single(lose(MORALE, 1)), onCurrentPlayer(new DiscardAllSkillCardsEvent(currentPlayer())));
             case FAMILIAR_FACE -> all(lose(MORALE, 1), new DiscardAllSkillCardsEvent(admiral()));
-            case MYSTERIOUS_GUIDE -> all(lose(FUEL, 1), new DiscardAllSkillCardsEvent(currentPlayer()));
-            case UNFAIR_BIAS -> all(new DamageGalacticaEvent(), new DiscardAllSkillCardsEvent(currentPlayer()));
-            case GUILTY_CONSCIENCE -> single(new DiscardRandomSkillCardsEvent(currentPlayer(), 3));
-            case HAUNTED_BY_THE_PAST -> eachPlayer(p -> single(new DiscardRandomSkillCardsEvent(p, 1)));
+            case MYSTERIOUS_GUIDE ->
+                    allOf(single(lose(FUEL, 1)), onCurrentPlayer(new DiscardAllSkillCardsEvent(currentPlayer())));
+            case UNFAIR_BIAS -> allOf(single(new DamageGalacticaEvent()),
+                    onCurrentPlayer(new DiscardAllSkillCardsEvent(currentPlayer())));
+            case GUILTY_CONSCIENCE -> onCurrentPlayer(new DiscardRandomSkillCardsEvent(currentPlayer(), 3));
+            case HAUNTED_BY_THE_PAST -> eachHuman(p -> single(new DiscardRandomSkillCardsEvent(p, 1)));
             case QUORUM_IN_UPROAR ->
                     all(new QuorumInUproarFailEvent(), new DiscardRandomSkillCardsEvent(president(), 2));
             case INSUBORDINATE_CREW -> allOf(single(lose(MORALE, 1)),
@@ -232,24 +235,24 @@ public class SkillCheckResultFollowups {
             case LEGENDARY_DISCOVERY -> all(lose(FOOD, 1), new DestroyRaptorEvent());
             case HERA_RESCUED -> all(lose(MORALE, 2), new DestroyRaptorEvent());
             case RAPTOR_MALFUNCTION -> all(new DamageGalacticaEvent(), new DestroyRaptorEvent());
-            case CYLON_TRACKING_DEVICE -> all(new DestroyRaptorEvent(), new CylonTrackingDeviceFailEvent());
+            case CYLON_TRACKING_DEVICE -> all(new DestroyRaptorEvent(), new PlaceShipsEvent(1, 0, 2));
             case HANGAR_ACCIDENT -> all(lose(POPULATION, 1), new DamageVipersEvent(2, RESERVES));
             case STANDOFF_WITH_PEGASUS -> all(lose(POPULATION, 1), lose(MORALE, 1), new DamageVipersEvent(1, SPACE));
             case TRAINING_SNAFU -> single(new DamageVipersEvent(3, SPACE_OR_RESERVES));
             case BOMB_THREAT -> all(lose(MORALE, 1), new DrawAndDestroyCivilianShipsEvent(1));
             case FIRE_ALL_MISSILES -> single(new DrawAndDestroyCivilianShipsEvent(2));
             // cylon ships
-            case MYSTERIOUS_MESSAGE -> all(new LaunchRaidersEvent(), new ActivateRaidersEvent());
-            case CYLON_GENOCIDE -> all(lose(MORALE, 1), new ActivateRaidersEvent(), new LaunchRaidersEvent(),
+            case MYSTERIOUS_MESSAGE -> all(new LaunchRaidersEvent(), new ActivateCylonBasestarsEvent());
+            case CYLON_GENOCIDE -> all(lose(MORALE, 1), new ActivateCylonBasestarsEvent(), new LaunchRaidersEvent(),
                     new ActivateHeavyRaidersAndCenturionsEvent());
-            case FLEET_MOBILIZATION -> all(lose(MORALE, 1), new ActivateRaidersEvent(),
-                    new ActivateCylonBasestarsEvent(), new ActivateHeavyRaidersAndCenturionsEvent(),
+            case FLEET_MOBILIZATION -> all(lose(MORALE, 1), new ActivateCylonBasestarsEvent(),
+                    new ActivateRaidersEvent(), new ActivateHeavyRaidersAndCenturionsEvent(),
                     new LaunchRaidersEvent());
             // unique to one skill check
             case CRASH_LANDING -> single(new CrashLandingFailEvent());
             case KEEP_TABS_ON_VISITOR -> single(new KeepTabsOnVisitorFailEvent());
             case DEFENDING_A_PRISONER -> all(lose(MORALE, 1), new DefendingAPrisonerFailEvent());
-            case THE_PASSAGE -> single(new ThePassageFailEvent());
+            case THE_PASSAGE -> single(new DestroyCivilianShipsEvent(2));
             case HUMAN_PRISONER -> single(new HumanPrisonerFailEvent());
             case THE_FARM -> all(lose(FOOD, 1), lose(POPULATION, 1), new KeepCrisisCardInPlayEvent(type));
             // no effect
@@ -291,6 +294,11 @@ public class SkillCheckResultFollowups {
         return each(p -> true, followup);
     }
 
+    // A revealed Cylon ignores the penalties of a skill check (rule 6.1.2.1), e.g. "each player discards 1 Skill Card".
+    private Followup eachHuman(IntFunction<Followup> followup) {
+        return each(PlayerView::isHuman, followup);
+    }
+
     private Followup each(Predicate<PlayerView> filter, IntFunction<Followup> followup) {
         return all(playersFromCurrent().stream()
                 .filter(filter)
@@ -300,15 +308,17 @@ public class SkillCheckResultFollowups {
 
     /* events */
 
-    private static Event treachery(int playerNumber, int count) {
-        return new DrawSkillCardsOfColorEvent(playerNumber, TREACHERY, count);
+    // A revealed Cylon ignores the penalties of a skill check (rule 6.1.2.1). Only the current player can be one, when he
+    // resolves a Crisis Card at "Caprica".
+    private Followup onCurrentPlayer(Event penalty) {
+        return game.currentPlayer().isHuman() ? single(penalty) : NONE;
     }
 
-    private static Followup optional(int playerNumber, Event decision) {
-        return one(decision, new NoOpEvent(playerNumber));
-    }
-
+    // A revealed Cylon ignores being sent to "Sickbay" or the "Brig" (rule 6.1.2.1), e.g. at "Caprica".
     private Event sendTo(Location destination, int playerNumber) {
+        if (!game.player(playerNumber).isHuman()) {
+            return new NoOpEvent(playerNumber);
+        }
         return switch (destination) {
             case SICKBAY -> new SendToSickbayEvent(playerNumber);
             case BRIG -> new SendToBrigEvent(playerNumber);
@@ -332,7 +342,7 @@ public class SkillCheckResultFollowups {
     }
 
     private Followup eachPlayerDiscardsAndDrawsTreachery() {
-        return eachPlayer(p -> all(discard(p, 1), treachery(p, 1)));
+        return eachHuman(p -> all(discard(p, 1), treachery(p, 1)));
     }
 
     private Followup lookAtLoyaltyCardOfPresidentOrAdmiral() {

@@ -211,6 +211,52 @@ class SkillCheckResultFollowupsTest extends TestHarness {
                 followup(CYLON_SCREENINGS, FAIL));
     }
 
+    /* revealed Cylons ignore the penalties (rule 6.1.2.1) */
+
+    // A revealed Cylon is the current player when he resolves a Crisis Card at "Caprica".
+    @Test
+    void shouldNotPenalizeARevealedCylonWhoIsTheCurrentPlayer() {
+        revealCylon(OTHER);
+        game.turn().currentPlayerNumber(OTHER);
+
+        assertEquals(NONE, followup(GUILTY_CONSCIENCE, FAIL));
+        assertEquals(NONE, followup(HYBRID_IN_PANIC, PARTIAL_PASS));
+        assertEquals(single(new LoseResourceEvent(MORALE, 1)), followup(LOSS_OF_A_FRIEND, FAIL));
+        assertEquals(single(new LoseResourceEvent(MORALE, 1)), followup(UNEXPECTED_REUNION, FAIL));
+        assertEquals(single(new NoOpEvent(OTHER)), followup(CYLON_ACCUSATION, FAIL)); // not to the "Brig"
+    }
+
+    @Test
+    void shouldStillPenalizeAHumanCurrentPlayer() {
+        assertEquals(single(new DiscardRandomSkillCardsEvent(ADMIRAL, 3)), followup(GUILTY_CONSCIENCE, FAIL));
+        assertEquals(all(new LoseResourceEvent(MORALE, 1), new DiscardAllSkillCardsEvent(ADMIRAL)),
+                followup(UNEXPECTED_REUNION, FAIL));
+    }
+
+    // "Each player discards 1 Skill Card": the humans do.
+    @Test
+    void shouldOnlyLetTheHumansDiscardWhenEachPlayerDoes() {
+        revealCylon(OTHER);
+
+        assertEquals(all(single(new LoseResourceEvent(MORALE, 1)), all(discard1(ADMIRAL), discard1(PRESIDENT))),
+                followup(RELIGIOUS_TURMOIL, FAIL));
+        assertEquals(all(new DiscardRandomSkillCardsEvent(ADMIRAL, 1), new DiscardRandomSkillCardsEvent(PRESIDENT, 1)),
+                followup(HAUNTED_BY_THE_PAST, FAIL));
+        assertEquals(all(single(new LoseResourceEvent(MORALE, 1)),
+                        all(discardAndDrawTreachery(ADMIRAL), discardAndDrawTreachery(PRESIDENT))),
+                followup(UNSETTLING_STORIES, FAIL));
+    }
+
+    private void revealCylon(int playerNumber) {
+        player(playerNumber).loyaltyCards()
+                .addOnTop(CYLON_SEND_TO_BRIG)
+                .reveal(CYLON_SEND_TO_BRIG);
+    }
+
+    private static Followup discard1(int playerNumber) {
+        return single(new PlayerDecisionEvent<>(playerNumber, DiscardSkillCardsEvent.class, DISCARD_EXACTLY_1));
+    }
+
     private Followup followup(SkillCheckType type, SkillCheckResult result) {
         game.startSkillCheck(type).result(result);
         return new SkillCheckResultFollowups(game).followup();

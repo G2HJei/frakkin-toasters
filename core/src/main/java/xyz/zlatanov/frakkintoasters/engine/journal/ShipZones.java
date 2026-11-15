@@ -53,6 +53,14 @@ final class ShipZones {
                 fleet.remove(ship);
                 return ship;
             }
+            case REMOVED: {
+                val ship = game.removedComponents().items().stream()
+                        .filter(item -> item instanceof Ship s && s.id() == id)
+                        .findFirst()
+                        .orElseThrow(FrakCallTheAdmiralException::new);
+                game.removedComponents().remove(ship);
+                return ship;
+            }
             case BOARDING_PARTY:
                 return galactica.destroyCenturion(id);
             default:

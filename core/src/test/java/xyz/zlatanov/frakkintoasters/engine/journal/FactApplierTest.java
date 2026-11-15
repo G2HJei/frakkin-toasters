@@ -14,6 +14,7 @@ import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.PlayerPile;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
+import xyz.zlatanov.frakkintoasters.state.card.SeenLoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
@@ -51,6 +52,8 @@ class FactApplierTest {
     SkillCard other             = new SkillCard(1, CONSOLIDATE_POWER);
     SkillCard strategicPlanning = new SkillCard(3, STRATEGIC_PLANNING);
     SkillCard majorVictory      = new SkillCard(1, MAJOR_VICTORY);
+
+    static final SkillCheckType DETECTOR_SABOTAGE_CHECK = SkillCheckType.DETECTOR_SABOTAGE;
 
     void apply(Fact fact) {
         FactApplier.apply(game, fact);
@@ -287,6 +290,37 @@ class FactApplierTest {
     }
 
     @Test
+    void crisisCardKeptInPlayIsRemembered() {
+        assertEquals(List.of(), game.crisisCardsInPlay());
+
+        apply(new CrisisCardKeptInPlay(DETECTOR_SABOTAGE_CHECK));
+
+        assertEquals(List.of(DETECTOR_SABOTAGE_CHECK), game.crisisCardsInPlay());
+    }
+
+    @Test
+    void returnToCrisisStepChangedSetsTheFlagOfTheTurnAndANewTurnClearsIt() {
+        assertFalse(game.turn().returnsToCrisisStep());
+
+        apply(new ReturnToCrisisStepChanged(true));
+        assertTrue(game.turn().returnsToCrisisStep());
+
+        apply(new ReturnToCrisisStepChanged(false));
+        assertFalse(game.turn().returnsToCrisisStep());
+
+        apply(new ReturnToCrisisStepChanged(true));
+        apply(new TurnStarted(2));
+        assertFalse(game.turn().returnsToCrisisStep());
+    }
+
+    @Test
+    void nukeDiscardedTakesAwayOneToken() {
+        apply(new NukeDiscarded());
+
+        assertEquals(1, game.nukes());
+    }
+
+    @Test
     void gameEndedSetsTheOutcome() {
         assertEquals(Optional.empty(), game.outcome());
 
@@ -388,6 +422,18 @@ class FactApplierTest {
         apply(new MiracleTokenGained(1));
 
         assertTrue(game.player(1).hasMiracleToken());
+    }
+
+    // Only the player who looked knows the card, and the card stays where it is.
+    @Test
+    void loyaltyCardSeenIsKnownToTheViewerOnly() {
+        apply(new CardsGained(2, PlayerPile.LOYALTY, List.of(LoyaltyCard.NOT_CYLON)));
+
+        apply(new LoyaltyCardSeen(1, 2, LoyaltyCard.NOT_CYLON));
+
+        assertEquals(List.of(new SeenLoyaltyCard(2, LoyaltyCard.NOT_CYLON)), game.player(1).seenLoyaltyCards());
+        assertEquals(List.of(), game.player(2).seenLoyaltyCards());
+        assertEquals(List.of(LoyaltyCard.NOT_CYLON), game.player(2).loyaltyCards().cards());
     }
 
     @Test

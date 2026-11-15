@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.state;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
@@ -7,6 +8,8 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
 import xyz.zlatanov.frakkintoasters.state.card.MutinyCard;
+import xyz.zlatanov.frakkintoasters.state.card.SeenLoyaltyCard;
+import xyz.zlatanov.frakkintoasters.state.card.SeenLoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.crisis.SuperCrisisCard;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
@@ -14,8 +17,10 @@ import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.MUTINEER;
@@ -38,6 +43,8 @@ public class Player implements PlayerView {
     private       boolean               isInfiltrating          = false;
     private final Set<Integer>          revealedCivilianShipIds = new LinkedHashSet<>();
     private       int                   turns                   = 0;
+    @Getter(AccessLevel.NONE)
+    private final List<SeenLoyaltyCard>  seenLoyaltyCards       = new ArrayList<>();
 
     @SuppressWarnings("unchecked")
     public <T> Deck<T> pile(PlayerPile pile) {
@@ -68,6 +75,16 @@ public class Player implements PlayerView {
     @Mutates
     public void gainSkillCards(SkillCard... cardsToAdd) {
         skillCards.addOnTop(Arrays.asList(cardsToAdd));
+    }
+
+    @Override
+    public List<SeenLoyaltyCard> seenLoyaltyCards() {
+        return List.copyOf(seenLoyaltyCards);
+    }
+
+    @Mutates
+    public void seeLoyaltyCard(SeenLoyaltyCard card) {
+        seenLoyaltyCards.add(card);
     }
 
     @Mutates

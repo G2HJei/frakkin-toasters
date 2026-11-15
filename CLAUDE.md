@@ -48,14 +48,15 @@ Next steps, in order:
    for "Executive Order".
 3. ~~Create the journal and tie it to the ops classes in `operation/`.~~ Done, see "Journal and Replay". Still open:
    describers and per-viewer hiding, and JSON serialization. The pending followups are the engine's `Agenda`.
-4. Create the game engine to drive the events and turns. `engine-plan.md` has the plan in phases. Phases 1 to 10 are
+4. Create the game engine to drive the events and turns. `engine-plan.md` has the plan in phases. Phases 1 to 11 are
    done: the journal moved out of `Game` into `engine/journal/`, the turn state is grouped in `state/Turn`, the journal
    and processors are ready for the engine, `GameEngine` runs events through `submit` and `choose`, it restores a
    game from its journal and rolls back a failed input (see "Engine"), `GameEngine.start` sets up a game and plays
    its turns (see "Turn Loop"), processors check what players submit (see "Validation"), the Cylons can win (see
    "End of Game and Mutiny"), a skill check runs from the action that starts it to its end, with every location
    action in scope (see "Skill Check Sequence" and "Execution"), and the six interrupt Skill Cards are played in
-   secret windows around die rolls and attacks (see "Interrupt Cards" and "Combat"). Next is phase 11: Crisis.
+   secret windows around die rolls and attacks (see "Interrupt Cards" and "Combat"), and the Crisis step resolves every
+   Crisis Card and activates the Cylon ships by its icon (see "Crisis Cards"). Next is phase 12: Jump and Kobol.
 5. Create a working frontend with the events that exist by then.
 
 ## Project Structure
@@ -83,8 +84,8 @@ Multi-module Gradle project with a single `core` module. Package root: `xyz.zlat
 - `engine/journal/` - `Journal`, `JournalEntry`, `FactRecorder`, `FactApplier`, `ShipZones`, `GameReplayer`, and `fact/`
   with the `Fact` records
 - `state/` - game state model: `Game` (top level), `Turn` (turn number, `GameStep`, current and acting player, the
-  Crisis Cards of the turn, the `DieRoll`, the open interrupt window and its cards, read through `GameView.turn()`;
-  `number` counts player turns, not rounds), `Player` (`turns()` counts the player's own turns), `Team` (the winner in
+  Crisis Cards of the turn and whether it returns to the Crisis step, the `DieRoll`, the open interrupt window and its
+  cards, read through `GameView.turn()`; `number` counts player turns, not rounds), `Player` (`turns()` counts the player's own turns), `Team` (the winner in
   `GameView.outcome()`), `Die` (d8), `DieRoll` (a roll with the cards played on it), `Randomness`,
   `RemovedComponents`, `PlayerPile`, and the `@Mutates` marker
 - `state/interrupt/` - `InterruptWindow` (the windows, as sealed records with the cards each takes) and
@@ -157,7 +158,8 @@ lists the players clockwise from player `n`, which is the order of the player nu
 Each step of `skill-check.drawio` is an event, and each step's processor queues the next one, so a step decides from
 the state at that moment what follows.
 
-- A location action or (from phase 11) a Crisis Card calls `ops.skillCheck().start(type)` and returns
+- A location action or a Crisis Card (`ResolveCrisisCardEventProcessor`, `ChooseCrisisSectionEventProcessor`) calls
+  `ops.skillCheck().start(type)` and returns
   `FollowupUtils.beforeSkillCheckFollowups(game)`: a "Political Prowess" decision per player for a location check,
   then `MakeSkillCheckEvent`. That skips the check when "Political Prowess" decided it, and otherwise asks for the
   cards played before the check, from the player to the left of the current player (`eachPlayerFromTheLeft`).
@@ -194,24 +196,47 @@ moment. Its pass and fail switches list every type, so a new `SkillCheckType` do
   `DamageGalacticaEvent`, `SendToSickbayEvent`), otherwise one in its area package (e.g. `LoseResourceEvent`).
 - An effect unique to one skill check uses a specialized event in `event/skillcheck/result`, named after the skill
   check and result (e.g. `CrashLandingFailEvent`), with the card text in its comment.
+- A revealed Cylon ignores the penalties (rule 6.1.2.1). The current player is one when he resolves a Crisis Card at
+  "Caprica", so his penalties go through `onCurrentPlayer` and `sendTo`, and "each player" ones through `eachHuman`. A
+  result event that targets him checks it too, e.g. `DefendingAPrisonerFailResultEventProcessor` queues no execution.
 
 ### Crisis Cards
 
-`ResolveCrisisCardEvent(card)` resolves a Crisis Card. Nothing queues it yet: until phase 11 of `engine-plan.md`, the
-Crisis step only draws a card and keeps it with the turn (see "Turn Loop"). So far it covers 16 choice crises (rule
-8.5.2), and any other card throws `FrakCallTheAdmiralException`.
+`ResolveCrisisCardEvent(card)` resolves a Crisis Card. The Crisis step queues it for the card it draws, and so does
+`ResolveCapricaCrisisCardEvent` for the one a Cylon chooses at "Caprica". The deck has 136 cards (the Cylon attack
+cards are left out, rule A2.7.2), and every one resolves: the Cylon Fleet crises, the base game, Pegasus, Exodus and
+Daybreak.
 
-A `CrisisCard` constant lists what is printed on the card: its `CrisisChooser`, its `CylonActivation` icon and whether
-it
-has the "prepare for jump" icon. `CrisisCardFollowups` (in `event/crisis`) holds the effects, grouped like
-`SkillCheckResultFollowups`:
+A `CrisisCard` constant lists what is printed on the card: its `SkillCheckType` (`null` for an event crisis), its
+`CrisisChooser`, its `CylonActivation` icon and whether it has the "prepare for jump" icon. The images in
+`materials/images` are the source. An event crisis always has a chooser, and a skill check crisis has one
+(`CURRENT_PLAYER`, `PRESIDENT`, `ADMIRAL` or `CAG`) when it gives an alternate instruction to carry out instead of the
+skill check (rule 8.5.1.1). A skill check crisis without a chooser starts its check straight away.
+
+`CrisisCardFollowups` (in `event/crisis`) holds the effects, grouped like `SkillCheckResultFollowups`. A card has two
+sections, `TOP` and `BOTTOM`. On a skill check crisis the top is the skill check and the bottom the alternate
+instruction.
 
 - `choice(card)` gives a `OneOf` of two `ChooseCrisisSectionEvent`s, one per section. They are `PlayerEvent`s that name
   the chooser, because the engine derives who answers a `OneOf` from its options (decision 7 in `engine-plan.md`) and
-  most sections name no player. Don't put the effects of a section directly into the `one(...)`.
-- `followup(card, section)` gives the effects of the picked section.
+  most sections name no player. Don't put the effects of a section directly into the `one(...)`. A section a card
+  forbids isn't offered: the "nuke token" sections of "Abandon Galactica" and "Build Cylon Detector" need a nuke token.
+- `ChooseCrisisSectionEventProcessor` starts the skill check on the top of a skill check crisis, and otherwise asks
+  `followup(card, section)` for the effects of the section.
 - An effect on the current player goes through `onCurrentPlayer`, because a revealed Cylon resolving the card at
-  "Caprica" ignores it (rule 6.1.2.1).
+  "Caprica" ignores it (rule 6.1.2.1). So does "each player", for the humans (`eachHuman`).
+- "Roll a die. On a 4 or lower, ..." queues `rollDie(new ResolveCrisisRollEvent(card, section))`, and `rollResult` holds
+  the number and the effect, so the card text stays in one place.
+- Where a title holder picks a player (`ChooseCrisisTargetEvent`: a miracle token, a Mutiny Card, Interrogation, "The
+  Circle", "Requested Resignation"), `ChooseCrisisTargetEventProcessor.legalTargets` lists the answers, `null` being the
+  card's other instruction. Nobody is asked when there is no legal answer. The answer names its card, which has to be
+  the one being resolved: the last one played into the turn.
+- "Keep this card in play" (`KeepCrisisCardInPlayEvent`) records the skill check in `GameView.crisisCardsInPlay()`, and
+  `EndTurnEvent` leaves that card out of the discard pile. "Detector Sabotage" stops the looks at Loyalty Cards in
+  `LookAtLoyaltyCardEventProcessor`, and "Legendary Discovery" is its distance for phase 12.
+- "Fulfiller of Prophecy" returns to the Crisis step after the Activate Cylon Ships step (see "Turn Loop").
+- The Activate Cylon Ships step activates the icon of the card drawn last. The Cylon ships go through the same events
+  as the skill check crises, e.g. `ActivateRaidersEvent`, in `CrisisCardFollowups.activation`.
 
 ### Followups
 
@@ -240,8 +265,8 @@ ResolveCapricaCrisisEvent(playerNumber)));
 ### Event Constraints
 
 `EventConstraint` is a plain enum of extra rules that can be pinned onto an event (e.g. `DRAW_EXACTLY_2`,
-`DISCARD_EXACTLY_4`, `DISCARD_DOWN_TO_HAND_LIMIT`, `MUST_LAUNCH_IN_VIPER`, `DESTINATION_GALACTICA`), and
-`drawExactly(n)` and `discardExactly(n)` give the counted ones. A processor attaches them to a
+`DRAW_EXACTLY_2_OF_ANY_COLOR`, `DISCARD_EXACTLY_4`, `DISCARD_DOWN_TO_HAND_LIMIT`, `MUST_LAUNCH_IN_VIPER`,
+`DESTINATION_GALACTICA`), and `drawExactly(n)` and `discardExactly(n)` give the counted ones. A processor attaches them to a
 `PlayerDecisionEvent`, e.g. `new PlayerDecisionEvent<>(n, DrawSkillCardsEvent.class, DRAW_EXACTLY_2)`. When the
 decision is answered, the engine copies them onto the submitted event with `ConstrainedEvent.withConstraints`,
 replacing whatever the client sent, so a client can't drop one.
@@ -328,8 +353,12 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
   "Sickbay", see `LocationEvent.canAct`) gets no Action choice.
 - `DiscardStepEvent` asks every player over the hand limit, clockwise from the current player, with
   `DISCARD_DOWN_TO_HAND_LIMIT`: Skill Cards over `handLimit()`, and the President's Quorum Cards.
-- The Crisis Cards of a turn stay with it, in `TurnView.crisisCards()` (`GameOps.playCrisisCard`), for the icons the
-  later steps read. `EndTurnEvent` discards them (rule 8.8).
+- The Crisis step draws a card, keeps it with the turn and queues `ResolveCrisisCardEvent` (see "Crisis Cards"). The
+  Crisis Cards of a turn stay with it, in `TurnView.crisisCards()` (`GameOps.playCrisisCard`), for the icons the later
+  steps read. `EndTurnEvent` discards them (rule 8.8), except the ones kept in play.
+- The Activate Cylon Ships step activates the icon of the card drawn last (rule 8.6). "Fulfiller of Prophecy" sets
+  `TurnView.returnsToCrisisStep()`: the step then also queues `CrisisStepEvent(again = true)`, which draws and resolves a
+  new card and queues the Activate Cylon Ships step of that card. A Crisis step that is skipped queues none.
 - `PrepareForJumpStepEvent` happens only when a Crisis Card of the turn has the "prepare for jump" icon, because with
   the Kobol objective the icon is all the step does. It queues an `IncreaseJumpPreparationEvent` per icon, and the
   Mutineer draws a Mutiny Card (rule 8.7.1). `IncreaseJumpPreparationEvent` queues `JumpingTheFleetEvent` when the
@@ -339,7 +368,6 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
 - `GameOps.endTurnEarly()` (`TurnEndedEarly`) ends a turn before its steps do, e.g. when the current player is
   executed. The Movement, Action, Crisis, Activate Cylon Ships and Prepare for Jump steps that are left then do nothing,
   the Discard step and `EndTurnEvent` still happen. `TurnStarted` clears `TurnView.endedEarly()`.
-- Stubs until phase 11: the Crisis step doesn't resolve its card, and the Activate Cylon Ships step does nothing.
 - A Stranded Karl "Helo" Agathon is off the board until `StartTurnEvent` puts him on the Hangar Deck at his player's
   2nd turn (`PlayerView.turns()`, which an execution starts again for the new character). Until then the Movement and
   Action steps skip him, and `SendToBrigEvent` and `SendToSickbayEvent` leave him alone.
@@ -424,6 +452,9 @@ and its result.
   anyone else an unmanned one. `ProtectTheFleetEvent` takes the same `ViperActivation`, for an unmanned viper, and both
   use `ActivateViperEventProcessor.isValidActivation` and `activate`. The Action step and the "Hangar Deck" offer the
   activation as a decision, and "Command" only when `canActivateUnmanned`.
+- Every effect that places or launches a Cylon ship on the main game board goes through `AbstractOps.takeFromSupply`
+  (rule 11.4.2): a ship from the supply, and when it has none left, one from the lowest-numbered Cylon space area of the
+  Cylon Fleet board. Without one there either, nothing is placed.
 
 ### Journal and Replay
 
@@ -508,10 +539,19 @@ when possible.
   `ScriptEventProcessor` too, because it scans the whole classpath. At every pause, `restore` has to give the same
   `GameSnapshot` and statuses. The test-only `FailingEvent` changes the game and then throws, to test rollback. Engine
   tests use a seeded `Randomness`, not `FakeDeck`, because restore rebuilds the real decks
-- `TurnLoopTest` plays a seeded game from `GameEngine.start` through several full turns, restoring at every pause. Its
-  inputs are relative to the first player the seed picks
+- `TurnLoopTest` plays a seeded game through several full turns, restoring at every pause. Its inputs are relative to
+  the first player the seed picks. The test-only `StackedStartGameEvent` starts the game like `StartGameEvent` and puts
+  simple Crisis Cards on top of the deck (nothing to ask but the section, no die rolls), so the turns don't depend on
+  the cards a seed draws
 - `LocationSkillCheckTest` runs the "Admiral's Quarters", "Brig" and "Airlock" skill checks from the action to
-  `EndSkillCheckEvent` through `submit` and `choose`, restoring at every pause
+  `EndSkillCheckEvent` through `submit` and `choose`, restoring at every pause. The cards that decide a check are dealt,
+  not drawn: `GiveSkillCardEvent` gives each player the cards he plays, and the test-only `StackDestinyDeckEvent` puts
+  known cards on top of the Destiny deck, so each check asserts its total strength and doesn't depend on the seed. Its
+  processor records the fact through `TestOps` (in the tests' `operation` package), because only the ops can record
+  one. `StackCrisisCardEvent` and `SetUpGalacticaEvent` set up the turn that the Airlock check is part of
+- `CrisisStepTest` plays the Crisis step to the end of the Activate Cylon Ships step: the skill check or the alternate
+  instruction of a card, and "Fulfiller of Prophecy" returning to the step. `CrisisCardResolutionTest` runs every section
+  of every card through the real processors with a minimal engine, so a section can't end in an event without a processor
 - `InterruptWindowTest` plays interrupt windows through `submit`, restoring at every pause: the secret status, a pass,
   a tiebreak, an "Evasive Maneuvers" reroll. The test-only `GiveSkillCardEvent` and `PlaceRaiderEvent` set up the
   hands and the board, which a seeded game can't choose

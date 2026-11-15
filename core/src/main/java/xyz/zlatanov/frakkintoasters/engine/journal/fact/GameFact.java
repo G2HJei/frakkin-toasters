@@ -5,6 +5,7 @@ import xyz.zlatanov.frakkintoasters.state.Team;
 import xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
 
 import java.util.List;
 
@@ -39,6 +40,16 @@ public sealed interface GameFact extends Fact {
     }
 
     record CrisisCardPlayed(CrisisCard card) implements GameFact {
+    }
+
+    record CrisisCardKeptInPlay(SkillCheckType type) implements GameFact {
+    }
+
+    // "After the Activate Cylon Ships step, return to the Resolve Crisis step" ("Fulfiller of Prophecy").
+    record ReturnToCrisisStepChanged(boolean returns) implements GameFact {
+    }
+
+    record NukeDiscarded() implements GameFact {
     }
 
     record CrisisCardsCleared(List<CrisisCard> cards) implements GameFact {

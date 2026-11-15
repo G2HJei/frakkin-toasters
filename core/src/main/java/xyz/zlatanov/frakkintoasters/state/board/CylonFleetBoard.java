@@ -21,10 +21,10 @@ public class CylonFleetBoard implements Board, SpaceLocationsBoard, CylonFleetBo
     public static final Map<Location, Location> MOVE_TO_GALACTICA_MAP = Map.of(
             CYLON_FLEET_SPACE_1, GALACTICA_SPACE_2_OCLOCK,
             CYLON_FLEET_SPACE_2, GALACTICA_SPACE_4_OCLOCK,
-            CYLON_FLEET_SPACE_3, GALACTICA_SPACE_6_OCLOCK,
-            CYLON_FLEET_SPACE_4, GALACTICA_SPACE_8_OCLOCK,
+            CYLON_FLEET_SPACE_3, GALACTICA_SPACE_12_OCLOCK,
+            CYLON_FLEET_SPACE_4, GALACTICA_SPACE_6_OCLOCK,
             CYLON_FLEET_SPACE_5_6, GALACTICA_SPACE_10_OCLOCK,
-            CYLON_FLEET_SPACE_7_8, GALACTICA_SPACE_12_OCLOCK);
+            CYLON_FLEET_SPACE_7_8, GALACTICA_SPACE_8_OCLOCK);
 
     private       Pursuit                      pursuitTrack     = START;
     // Declared with their concrete types, so the getters' copies keep the order: new TreeMap<>(TreeMap) keeps the

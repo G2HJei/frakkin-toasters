@@ -3,6 +3,7 @@ package xyz.zlatanov.frakkintoasters.operation;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedOnTop;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.DeckShuffled;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.CardsLost;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.SkillCheckFact.*;
 import xyz.zlatanov.frakkintoasters.state.Game;
@@ -28,6 +29,16 @@ public class SkillCheckOps extends GameOps {
         }
         shuffle(DeckId.DESTINY);
         return this;
+    }
+
+    public void discardFromDestinyDeck(List<SkillCard> cards) {
+        val remaining = new ArrayList<>(game.decks().destiny().cards());
+        cards.forEach(remaining::remove);
+        cards.forEach(this::discardToDeck);
+        record(new DeckShuffled(DeckId.DESTINY, game.randomness().shuffled(remaining)));
+        if (remaining.isEmpty()) {
+            createDestinyDeck();
+        }
     }
 
     public SkillCheckOps start(SkillCheckType type) {

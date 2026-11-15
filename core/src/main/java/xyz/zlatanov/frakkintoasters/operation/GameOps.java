@@ -13,6 +13,7 @@ import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
 
 import java.util.List;
 
@@ -124,10 +125,32 @@ public class GameOps extends AbstractOps {
 
     public void discardCrisisCards() {
         val cards = game.turn().crisisCards();
-        if (!cards.isEmpty()) {
-            record(new CrisisCardsCleared(cards));
-            record(new CardsDiscarded(CRISIS, cards));
+        if (cards.isEmpty()) {
+            return;
         }
+        record(new CrisisCardsCleared(cards));
+        // "Keep this card in play": the cards kept stay out of the discard pile.
+        val discarded = cards.stream()
+                .filter(card -> card.skillCheck() == null || !game.crisisCardsInPlay().contains(card.skillCheck()))
+                .toList();
+        if (!discarded.isEmpty()) {
+            record(new CardsDiscarded(CRISIS, discarded));
+        }
+    }
+
+    public void keepCrisisCardInPlay(SkillCheckType type) {
+        record(new CrisisCardKeptInPlay(type));
+    }
+
+    /**
+     * "After the Activate Cylon Ships step, return to the Resolve Crisis step."
+     */
+    public void returnToCrisisStep(boolean returns) {
+        record(new ReturnToCrisisStepChanged(returns));
+    }
+
+    public void discardNuke() {
+        record(new NukeDiscarded());
     }
 
     /**

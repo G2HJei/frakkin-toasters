@@ -5,6 +5,7 @@ import xyz.zlatanov.frakkintoasters.state.Team;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard;
 import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 
 import java.util.List;
@@ -38,6 +39,11 @@ public interface GameView {
     CylonShipsView cylonShips();
 
     int nukes();
+
+    /**
+     * The skill checks of the Crisis Cards that are kept in play, e.g. "Detector Sabotage" and "Legendary Discovery".
+     */
+    List<SkillCheckType> crisisCardsInPlay();
 
     Character president();
 

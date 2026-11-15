@@ -30,7 +30,8 @@ public interface TurnView {
     int actingPlayerNumber();
 
     /**
-     * The Crisis Cards resolved this turn. They stay with the turn until it ends, when they are discarded (rule 8.8).
+     * The Crisis Cards resolved this turn, in the order they were played. They stay with the turn until it ends, when
+     * they are discarded (rule 8.8).
      */
     List<CrisisCard> crisisCards();
 
@@ -39,6 +40,12 @@ public interface TurnView {
      * happen, except the Discard step: the hand limit applies at the end of every turn.
      */
     boolean endedEarly();
+
+    /**
+     * "After the Activate Cylon Ships step, return to the Resolve Crisis step" ("Fulfiller of Prophecy"): the turn has
+     * another Crisis step and another Activate Cylon Ships step after this one.
+     */
+    boolean returnsToCrisisStep();
 
     /**
      * The latest die roll of the turn, {@code null} before the first. The window before a roll starts it, and its result

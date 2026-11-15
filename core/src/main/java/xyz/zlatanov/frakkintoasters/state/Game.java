@@ -44,6 +44,9 @@ public class Game implements GameView {
     private CylonShips           cylonShips        = CylonShips.builder().build();
     @Builder.Default
     private int                  nukes             = 2;
+    @Builder.Default
+    @Getter(AccessLevel.NONE)
+    private List<SkillCheckType> crisisCardsInPlay = new ArrayList<>();
     @Setter(onMethod_ = @Mutates)
     private Character            president;
     @Builder.Default
@@ -114,6 +117,22 @@ public class Game implements GameView {
     @Override
     public Optional<Team> outcome() {
         return Optional.ofNullable(winner);
+    }
+
+    @Override
+    public List<SkillCheckType> crisisCardsInPlay() {
+        return List.copyOf(crisisCardsInPlay);
+    }
+
+    @Mutates
+    public void keepInPlay(SkillCheckType type) {
+        crisisCardsInPlay.add(type);
+    }
+
+    @Mutates
+    public void discardNuke() {
+        assert nukes > 0;
+        nukes--;
     }
 
     @Mutates

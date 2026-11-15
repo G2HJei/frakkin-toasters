@@ -4,6 +4,7 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.*;
 import xyz.zlatanov.frakkintoasters.state.DieRoll;
 import xyz.zlatanov.frakkintoasters.state.Game;
+import xyz.zlatanov.frakkintoasters.state.card.SeenLoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
@@ -97,6 +98,9 @@ public final class FactApplier {
             case GameFact.ActingPlayerChanged f -> game.turn().actingPlayerNumber(f.playerNumber());
             case GameFact.CrisisCardPlayed f -> game.turn().playCrisisCard(f.card());
             case GameFact.CrisisCardsCleared f -> game.turn().removeCrisisCards(f.cards());
+            case GameFact.CrisisCardKeptInPlay f -> game.keepInPlay(f.type());
+            case GameFact.ReturnToCrisisStepChanged f -> game.turn().returnsToCrisisStep(f.returns());
+            case GameFact.NukeDiscarded ignored -> game.discardNuke();
             case GameFact.GameEnded f -> game.end(f.winner());
         }
     }
@@ -140,6 +144,8 @@ public final class FactApplier {
             case PlayerFact.CivilianShipRevealed f ->
                     game.player(f.playerNumber()).revealedCivilianShipIds().add(f.shipId());
             case PlayerFact.OwnTurnStarted f -> game.player(f.playerNumber()).countTurn();
+            case PlayerFact.LoyaltyCardSeen f -> game.player(f.playerNumber())
+                    .seeLoyaltyCard(new SeenLoyaltyCard(f.targetPlayerNumber(), f.card()));
         }
     }
 

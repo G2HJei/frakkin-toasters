@@ -27,7 +27,7 @@ class PlaceShipOnCylonFleetBoardEventProcessorTest extends EventTestHarness<Plac
 
         assertNoShips(CYLON_FLEET_SPACE_7_8);
         assertShipCount(CYLON_FLEET_SPACE_1, 1);
-        assertShipCount(GALACTICA_SPACE_12_OCLOCK, 2);
+        assertShipCount(GALACTICA_SPACE_8_OCLOCK, 2); // area 7-8 is in front of Galactica (rule 11.4)
     }
 
     private void outOfRaiders() {

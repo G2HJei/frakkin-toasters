@@ -152,6 +152,12 @@ class GameReplayerTest {
         ops.player(2).discard(game.player(2).skillCards().cards().getFirst());
         ops.player(1).discard(game.player(1).mutinyCards().cards().getFirst());
 
+        // what a Crisis Card leaves behind
+        ops.keepCrisisCardInPlay(SkillCheckType.DETECTOR_SABOTAGE);
+        ops.returnToCrisisStep(true);
+        ops.discardNuke();
+        ops.player(2).lookAtLoyaltyCard(1);
+
         // a skill check, in an event scope, then a choice the event queued
         val scope = journal.openScope(null, 1, Journal.ROOT_SCOPE);
         ops.skillCheck().start(SkillCheckType.values()[0], 2);

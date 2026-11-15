@@ -57,4 +57,8 @@ public sealed interface PlayerFact extends Fact {
 
     record OwnTurnStarted(int playerNumber) implements PlayerFact {
     }
+
+    // A random Loyalty Card of the target that the player looked at: only he knows it.
+    record LoyaltyCardSeen(int playerNumber, int targetPlayerNumber, LoyaltyCard card) implements PlayerFact {
+    }
 }

@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.state.view;
 
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 
 public interface DecksHolderView {
@@ -11,4 +12,6 @@ public interface DecksHolderView {
     int skillCardsLeft(SkillCardColor color);
 
     int civilianShipsLeft();
+
+    DeckView<SkillCard> destiny();
 }

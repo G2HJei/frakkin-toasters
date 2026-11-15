@@ -137,6 +137,25 @@ public class GalacticaOps extends BattlestarOps {
         takeFromSupply(Raider.class, location);
     }
 
+    /**
+     * Destroys the civilian ship on top of the civilian ship deck, as when one is drawn to be destroyed (rule 13.6).
+     */
+    public void destroyDrawnCivilianShip() {
+        ship(game.decks().civilianShips().top(1).getFirst().id()).destroyFromDeck();
+    }
+
+    public void placeBasestar(Location location) {
+        takeFromSupply(Basestar.class, location);
+    }
+
+    /**
+     * Places a centurion at the start of the Boarding Party track, if one is left.
+     */
+    public void placeCenturion() {
+        game.cylonShips().nextCenturion()
+                .ifPresent(centurion -> record(new ShipMoved(centurion.id(), CENTURION_SUPPLY, BOARDING_PARTY, null)));
+    }
+
     @Override
     protected GalacticaBoard board() {
         return galacticaBoard();

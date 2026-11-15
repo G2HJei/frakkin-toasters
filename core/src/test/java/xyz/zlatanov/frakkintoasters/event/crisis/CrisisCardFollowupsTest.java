@@ -9,6 +9,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import xyz.zlatanov.frakkintoasters.TestHarness;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
+import xyz.zlatanov.frakkintoasters.event.board.AdvancePursuitTrackEvent;
 import xyz.zlatanov.frakkintoasters.event.board.DecreaseJumpPreparationEvent;
 import xyz.zlatanov.frakkintoasters.event.board.GainResourceEvent;
 import xyz.zlatanov.frakkintoasters.event.board.LoseResourceEvent;
@@ -17,13 +19,20 @@ import xyz.zlatanov.frakkintoasters.event.crisis.ChooseCrisisSectionEvent.Sectio
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.DiscardAllSkillCardsEvent;
 import xyz.zlatanov.frakkintoasters.event.player.DiscardSkillCardsEvent;
+import xyz.zlatanov.frakkintoasters.event.player.DrawMutinyCardEvent;
+import xyz.zlatanov.frakkintoasters.event.player.LaunchViperEvent;
 import xyz.zlatanov.frakkintoasters.event.player.SendToSickbayEvent;
 import xyz.zlatanov.frakkintoasters.event.ship.DamageGalacticaEvent;
 import xyz.zlatanov.frakkintoasters.event.ship.DestroyRaptorEvent;
+import xyz.zlatanov.frakkintoasters.event.ship.DrawAndDestroyCivilianShipsEvent;
+import xyz.zlatanov.frakkintoasters.event.ship.LaunchRaidersEvent;
+import xyz.zlatanov.frakkintoasters.event.ship.PlaceShipsEvent;
+import xyz.zlatanov.frakkintoasters.event.ship.ReturnVipersToReservesEvent;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.board.Resource;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
+import xyz.zlatanov.frakkintoasters.state.crisis.CylonActivation;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 
 import java.util.Arrays;
@@ -32,6 +41,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
+import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.rollDie;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DISCARD_EXACTLY_2;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DISCARD_EXACTLY_3;
 import static xyz.zlatanov.frakkintoasters.event.crisis.ChooseCrisisSectionEvent.Section.BOTTOM;
@@ -69,18 +79,155 @@ class CrisisCardFollowupsTest extends TestHarness {
 
     @ParameterizedTest
     @MethodSource("cardsWithAChooser")
-    void shouldBuildBothSectionsOfEveryCardWithAChooser(CrisisCard card) {
-        assertNotNull(followup(card, TOP));
+    void shouldBuildTheBottomSectionOfEveryCardWithAChooser(CrisisCard card) {
         assertNotNull(followup(card, BOTTOM));
     }
 
-    @Test
-    void shouldNotResolveACardThatIsNotImplemented() {
-        val followups = new CrisisCardFollowups(game);
+    // The top of a skill check crisis is the skill check, which its section's processor starts.
+    @ParameterizedTest
+    @MethodSource("cardsWithAChooser")
+    void shouldBuildTheTopSectionOfEveryEventCrisis(CrisisCard card) {
+        if (card.skillCheck() == null) {
+            assertNotNull(followup(card, TOP));
+        } else {
+            assertThrows(FrakCallTheAdmiralException.class, () -> followup(card, TOP));
+        }
+    }
 
-        assertThrows(FrakCallTheAdmiralException.class, () -> followups.choice(DETENTE));
-        assertThrows(FrakCallTheAdmiralException.class, () -> followups.followup(DETENTE, TOP));
-        assertThrows(FrakCallTheAdmiralException.class, () -> followups.followup(DETENTE, BOTTOM));
+    @Test
+    void shouldNotOfferAChoiceOnASkillCheckCardWithoutAlternative() {
+        assertThrows(FrakCallTheAdmiralException.class, () -> new CrisisCardFollowups(game).choice(WITCH_HUNT));
+    }
+
+    @Test
+    void shouldLetTheCurrentPlayerChooseTheSkillCheckOrTheAlternative() {
+        assertEquals(Followup.one(new ChooseCrisisSectionEvent(CURRENT, WATER_SABOTAGED, TOP),
+                new ChooseCrisisSectionEvent(CURRENT, WATER_SABOTAGED, BOTTOM)), new CrisisCardFollowups(game).choice(WATER_SABOTAGED));
+    }
+
+    // "Discard 1 nuke token. If you do not have any nuke tokens, you cannot choose this option."
+    @ParameterizedTest
+    @EnumSource(value = CrisisCard.class, names = {"ABANDON_GALACTICA", "BUILD_CYLON_DETECTOR"})
+    void shouldOnlyOfferTheTopWithANukeToken(CrisisCard card) {
+        val followups = new CrisisCardFollowups(game);
+        assertEquals(Followup.one(new ChooseCrisisSectionEvent(ADMIRAL, card, TOP),
+                new ChooseCrisisSectionEvent(ADMIRAL, card, BOTTOM)), followups.choice(card));
+
+        game.discardNuke();
+        game.discardNuke();
+        assertEquals(single(new ChooseCrisisSectionEvent(ADMIRAL, card, BOTTOM)), followups.choice(card));
+    }
+
+    @Test
+    void shouldActivateTheShipsOfEachIcon() {
+        assertEquals(new ActivateRaidersEvent(), CrisisCardFollowups.activation(CylonActivation.ACTIVATE_RAIDERS));
+        assertEquals(new LaunchRaidersEvent(), CrisisCardFollowups.activation(CylonActivation.LAUNCH_RAIDERS));
+        assertEquals(new ActivateHeavyRaidersAndCenturionsEvent(),
+                CrisisCardFollowups.activation(CylonActivation.ACTIVATE_HEAVY_RAIDERS));
+        assertEquals(new ActivateCylonBasestarsEvent(), CrisisCardFollowups.activation(CylonActivation.ACTIVATE_BASESTARS));
+    }
+
+    /* the Cylon Fleet crises */
+
+    @Test
+    void shouldResolveDetente() {
+        assertEquals(all(new ReturnVipersToReservesEvent(), new AdvancePursuitTrackEvent()), followup(DETENTE, TOP));
+        assertEquals(all(new ActivateCylonBasestarsEvent(), new ActivateRaidersEvent(),
+                new ActivateHeavyRaidersAndCenturionsEvent()), followup(DETENTE, BOTTOM));
+    }
+
+    @Test
+    void shouldResolveTrackedByRadiation() {
+        assertEquals(single(new PlaceShipsEvent(1, 3, 2)), followup(TRACKED_BY_RADIATION, TOP));
+        assertEquals(single(lose(FUEL, 1)), followup(TRACKED_BY_RADIATION, BOTTOM));
+    }
+
+    // "Any character on Galactica with piloting in his skill set may immediately launch himself in a viper": each pilot
+    // may, then the raiders launch. Himself, so not an unmanned viper.
+    @Test
+    void shouldLetEveryPilotLaunchBeforeTheRaidersLaunch() {
+        setUpPlayers(KARA_STARBUCK_THRACE);
+        moveTo(Location.HANGAR_DECK, KARA_STARBUCK_THRACE);
+        moveTo(Location.COMMAND, LEE_APOLLO_ADAMA);
+
+        assertEquals(all(
+                all(Followup.one(launchHimself(CURRENT), new NoOpEvent(CURRENT)),
+                        Followup.one(launchHimself(CAG), new NoOpEvent(CAG))),
+                single(new LaunchRaidersEvent())), followup(RETURN_TO_DUTY, TOP));
+    }
+
+    private static Event launchHimself(int playerNumber) {
+        return new PlayerDecisionEvent<>(playerNumber, LaunchViperEvent.class, EventConstraint.MUST_LAUNCH_IN_VIPER);
+    }
+
+    /* alternate instructions and die rolls */
+
+    @Test
+    void shouldResolveTheAlternateInstructionsOnTheCurrentPlayer() {
+        assertEquals(all(single(discard(PRESIDENT, DISCARD_EXACTLY_3)),
+                single(new DrawMutinyCardEvent(CURRENT))), followup(A_DESPERATE_PACT, BOTTOM));
+        assertEquals(single(new SendToSickbayEvent(CURRENT)), followup(RAPTOR_MALFUNCTION, BOTTOM));
+        assertEquals(single(discard(CURRENT, EventConstraint.DISCARD_EXACTLY_5)), followup(A_TRAITOR_ACCUSED, BOTTOM));
+    }
+
+    @Test
+    void shouldNotResolveAnAlternateInstructionOnARevealedCylon() {
+        revealCylon();
+        assertEquals(Followup.NONE, followup(RAPTOR_MALFUNCTION, BOTTOM));
+        assertEquals(Followup.NONE, followup(A_TRAITOR_ACCUSED, BOTTOM));
+    }
+
+    @Test
+    void shouldAskEachHumanToDiscardOnCylonScreenings() {
+        assertEquals(all(discard(CURRENT, DISCARD_EXACTLY_2), discard(PRESIDENT, DISCARD_EXACTLY_2),
+                discard(ADMIRAL, DISCARD_EXACTLY_2), discard(CAG, DISCARD_EXACTLY_2)), followup(CYLON_SCREENINGS, BOTTOM));
+        revealCylon();
+        assertEquals(all(discard(PRESIDENT, DISCARD_EXACTLY_2), discard(ADMIRAL, DISCARD_EXACTLY_2),
+                discard(CAG, DISCARD_EXACTLY_2)), followup(CYLON_SCREENINGS, BOTTOM));
+    }
+
+    @Test
+    void shouldCheckTheRollOfTheSection() {
+        val followups = new CrisisCardFollowups(game);
+        assertEquals(single(lose(FOOD, 1)), followups.rollResult(GALACTICA_FALLING_APART, BOTTOM, 6));
+        assertEquals(Followup.NONE, followups.rollResult(GALACTICA_FALLING_APART, BOTTOM, 7));
+        assertEquals(single(lose(FUEL, 1)), followups.rollResult(SEND_SURVEY_TEAM, BOTTOM, 5));
+        assertEquals(Followup.NONE, followups.rollResult(SEND_SURVEY_TEAM, BOTTOM, 6));
+        assertEquals(single(new DrawAndDestroyCivilianShipsEvent(1)), followups.rollResult(FOOD_HOARDING_IN_THE_FLEET, TOP, 3));
+        assertEquals(Followup.NONE, followups.rollResult(FOOD_HOARDING_IN_THE_FLEET, TOP, 4));
+    }
+
+    @Test
+    void shouldRollForTheSectionThatSaysSo() {
+        assertEquals(rollDie(new ResolveCrisisRollEvent(STARVATION_IN_DOGSVILLE, TOP)), followup(STARVATION_IN_DOGSVILLE, TOP));
+        assertEquals(rollDie(new ResolveCrisisRollEvent(STARVATION_IN_DOGSVILLE, BOTTOM)),
+                followup(STARVATION_IN_DOGSVILLE, BOTTOM));
+        assertEquals(all(single(lose(FOOD, 1)), rollDie(new ResolveCrisisRollEvent(REQUISITION_FOR_DEMETRIUS, TOP))),
+                followup(REQUISITION_FOR_DEMETRIUS, TOP));
+    }
+
+    @Test
+    void shouldAskTheChooserForTheTargetOfACard() {
+        assertEquals(single(new PlayerDecisionEvent<>(PRESIDENT, ChooseCrisisTargetEvent.class)), followup(THE_CIRCLE, TOP));
+    }
+
+    // Nobody to choose, so nobody is asked: everybody still has a miracle token.
+    @Test
+    void shouldNotAskForTheMiracleTokenWhenEverybodyHasOne() {
+        assertEquals(single(lose(FUEL, 1)), followup(AN_AMBITIOUS_OPERATION, TOP));
+    }
+
+    @Test
+    void shouldAskForTheMiracleTokenWhenSomebodyLacksOne() {
+        player(CAG).exhaustMiracleToken();
+        assertEquals(all(single(lose(FUEL, 1)), single(new PlayerDecisionEvent<>(ADMIRAL, ChooseCrisisTargetEvent.class))),
+                followup(AN_AMBITIOUS_OPERATION, TOP));
+    }
+
+    @Test
+    void shouldSendTheCurrentPlayerBackToTheCrisisStep() {
+        assertEquals(all(single(discard(CURRENT, EventConstraint.DISCARD_EXACTLY_1)), single(new ReturnToCrisisStepEvent())),
+                followup(FULFILLER_OF_PROPHECY, BOTTOM));
     }
 
     /* resources */

@@ -3,9 +3,12 @@ package xyz.zlatanov.frakkintoasters.state.view;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
 import xyz.zlatanov.frakkintoasters.state.card.MutinyCard;
+import xyz.zlatanov.frakkintoasters.state.card.SeenLoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.crisis.SuperCrisisCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
+
+import java.util.List;
 
 public interface PlayerView {
 
@@ -43,4 +46,9 @@ public interface PlayerView {
      * again for the new character. {@link TurnView#number()} counts everyone's.
      */
     int turns();
+
+    /**
+     * The Loyalty Cards of other players that this player looked at, which only he knows.
+     */
+    List<SeenLoyaltyCard> seenLoyaltyCards();
 }

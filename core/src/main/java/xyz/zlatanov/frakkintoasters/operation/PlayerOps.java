@@ -115,6 +115,24 @@ public class PlayerOps extends GameOps {
         return this;
     }
 
+    /**
+     * Discards random Skill Cards from his hand, as many as he has up to {@code count}.
+     */
+    public void discardRandomSkillCards(int count) {
+        val hand = game.randomness().shuffled(player.skillCards().cards());
+        discard(hand.stream().limit(count).toArray(SkillCard[]::new));
+    }
+
+    /**
+     * Looks at 1 random Loyalty Card of the target that isn't revealed, if he has one.
+     */
+    public void lookAtLoyaltyCard(int targetPlayerNumber) {
+        val cards = game.player(targetPlayerNumber).loyaltyCards().cards();
+        if (!cards.isEmpty()) {
+            record(new LoyaltyCardSeen(player.number(), targetPlayerNumber, game.randomness().shuffled(cards).getFirst()));
+        }
+    }
+
     public void discard(MutinyCard... cards) {
         if (cards.length > 0) {
             record(new CardsLost(player.number(), PlayerPile.MUTINY, List.of(cards)));

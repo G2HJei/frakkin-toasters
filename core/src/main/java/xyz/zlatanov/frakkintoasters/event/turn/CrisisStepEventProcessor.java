@@ -3,10 +3,13 @@ package xyz.zlatanov.frakkintoasters.event.turn;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.crisis.ResolveCrisisCardEvent;
 
 import java.util.Optional;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.NONE;
+import static xyz.zlatanov.frakkintoasters.event.Followup.all;
+import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.GameStep.CRISIS;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.BRIG;
 
@@ -23,9 +26,11 @@ public class CrisisStepEventProcessor extends EventProcessor<CrisisStepEvent> {
             return NONE;
         }
         ops.changeStep(CRISIS);
+        val card = ops.player(current.number()).drawCrisisCard();
         // The card stays with the turn for its icons, until EndTurnEvent discards it (rule 8.8).
-        ops.playCrisisCard(ops.player(current.number()).drawCrisisCard());
-        // todo resolve the card
-        return NONE;
+        ops.playCrisisCard(card);
+        val resolve = single(new ResolveCrisisCardEvent(card));
+        // A card that returned to this step has an Activate Cylon Ships step of its own, which the turn doesn't list.
+        return event.again() ? all(resolve, single(new ActivateCylonShipsStepEvent())) : resolve;
     }
 }

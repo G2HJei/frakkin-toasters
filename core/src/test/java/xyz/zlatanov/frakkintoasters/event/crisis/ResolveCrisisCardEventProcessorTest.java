@@ -3,6 +3,7 @@ package xyz.zlatanov.frakkintoasters.event.crisis;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
@@ -48,6 +49,23 @@ class ResolveCrisisCardEventProcessorTest extends EventTestHarness<ResolveCrisis
         execute(new ResolveCrisisCardEvent(RAIDERS_INBOUND));
 
         assertChoice(CAG, RAIDERS_INBOUND);
+    }
+
+    // "Skill Check Crises ... are resolved according to the rules for skill checks" (rule 8.5.1.1)
+    @Test
+    void shouldStartTheSkillCheckOfACardWithoutAlternative() {
+        execute(new ResolveCrisisCardEvent(WITCH_HUNT));
+
+        assertSkillCheckTriggered(SkillCheckType.WITCH_HUNT);
+    }
+
+    // "Some of these cards give the current player, the President, the Admiral or the CAG the choice to either resolve the
+    // skill check or carry out some alternate instruction."
+    @Test
+    void shouldLetTheCurrentPlayerChooseTheSkillCheckOrTheAlternative() {
+        execute(new ResolveCrisisCardEvent(WATER_SABOTAGED));
+
+        assertChoice(1, WATER_SABOTAGED);
     }
 
     private void assertChoice(int chooser, CrisisCard card) {

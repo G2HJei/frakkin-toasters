@@ -16,8 +16,10 @@ public class CrashLandingFailEventProcessor extends EventProcessor<CrashLandingF
     @Override
     public Followup process() {
         val currentPlayer = game.turn().currentPlayerNumber();
-        return one(
-                single(new LoseResourceEvent(FUEL, 1)),
-                all(new LoseResourceEvent(MORALE, 1), new SendToSickbayEvent(currentPlayer)));
+        // A revealed Cylon resolving the card at "Caprica" ignores being sent to "Sickbay" (rule 6.1.2.1).
+        val doesNotSpendFuel = game.currentPlayer().isHuman()
+                ? all(new LoseResourceEvent(MORALE, 1), new SendToSickbayEvent(currentPlayer))
+                : single(new LoseResourceEvent(MORALE, 1));
+        return one(single(new LoseResourceEvent(FUEL, 1)), doesNotSpendFuel);
     }
 }

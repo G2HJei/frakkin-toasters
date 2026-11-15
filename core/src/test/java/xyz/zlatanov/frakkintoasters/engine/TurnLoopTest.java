@@ -11,16 +11,19 @@ import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
 import xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint;
+import xyz.zlatanov.frakkintoasters.event.crisis.ChooseCrisisSectionEvent;
 import xyz.zlatanov.frakkintoasters.event.location.galactica.ResearchLabEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.DiscardSkillCardsEvent;
 import xyz.zlatanov.frakkintoasters.event.player.DrawSkillCardsEvent;
 import xyz.zlatanov.frakkintoasters.event.player.MoveEvent;
+import xyz.zlatanov.frakkintoasters.event.player.PlaceCivilianShipEvent;
 import xyz.zlatanov.frakkintoasters.event.player.SelectCharacterEvent;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.GameStep;
 import xyz.zlatanov.frakkintoasters.state.Randomness;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
+import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 
 import java.util.LinkedHashSet;
@@ -32,6 +35,10 @@ import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
+import static xyz.zlatanov.frakkintoasters.event.crisis.ChooseCrisisSectionEvent.Section.BOTTOM;
+import static xyz.zlatanov.frakkintoasters.event.crisis.ChooseCrisisSectionEvent.Section.TOP;
+import static xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard.DETENTE;
+import static xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard.RIOTS_NO_JUMP;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.*;
 import static xyz.zlatanov.frakkintoasters.state.GameStep.*;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
@@ -41,13 +48,17 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.*;
 // A seeded game from its start, played through submit and choose alone. Restore has to give the same game at every pause.
 class TurnLoopTest {
 
+    // Simple Crisis Cards, one a turn: nothing to ask but the chooser's section, and no die rolls or interrupt windows. "Riots"
+    // costs 1 food and 1 morale on top, and "Detente" advances the Pursuit track, so the CAG places a civilian ship.
+    private static final List<CrisisCard> CRISIS_CARDS = List.of(RIOTS_NO_JUMP, DETENTE, RIOTS_NO_JUMP, RIOTS_NO_JUMP);
+
     private GameEngine engine;
     // The seats clockwise from the first player, who the seed picks.
     private int        first, second, third;
 
     @BeforeEach
     void start() {
-        engine = GameEngine.start(3, Randomness.seeded(42));
+        engine = new GameEngine(3, Randomness.seeded(42), new StackedStartGameEvent(CRISIS_CARDS));
         first = engine.view().turn().currentPlayerNumber();
         second = first % 3 + 1;
         third = second % 3 + 1;
@@ -85,22 +96,32 @@ class TurnLoopTest {
         play(engine -> engine.choose(first, single(decision(first, ActionEvent.class))));
         play(engine -> engine.submit(first, new ResearchLabEvent(first, ENGINEERING)));
         assertEquals(6, skillCards(first));
-        assertEquals(1, crisisCardsDiscarded()); // the Crisis step stub draws one and discards it
 
-        // turns 2 and 3: the others draw and do nothing
+        // the Admiral chooses the top of "Riots": -1 food and -1 morale
+        assertTurn(1, first, CRISIS);
+        resolveCrisis(RIOTS_NO_JUMP);
+        assertEquals(List.of(7, 9), List.of(food(), morale()));
+        assertEquals(1, crisisCardsDiscarded()); // at the end of the turn (rule 8.8)
+
+        // turns 2 and 3: the others draw and do nothing, and the CAG places the civilian ship that "Detente" brings
         assertTurn(2, second, RECEIVE_SKILLS);
         draw(second, Map.of(POLITICS, 3, LEADERSHIP, 2));
         passMovementAndAction(second);
+        resolveCrisis(DETENTE);
+        placeACivilianShip();
         assertTurn(3, third, RECEIVE_SKILLS);
         draw(third, Map.of(TACTICS, 2, PILOTING, 2, LEADERSHIP, 1));
         passMovementAndAction(third);
+        resolveCrisis(RIOTS_NO_JUMP);
         assertEquals(List.of(6, 8, 8), List.of(skillCards(first), skillCards(second), skillCards(third)));
         assertEquals(3, crisisCardsDiscarded());
+        assertEquals(List.of(6, 8), List.of(food(), morale()));
 
         // turn 4: Adama ends his turn with 11 cards, so he discards 1
         assertTurn(4, first, RECEIVE_SKILLS);
         draw(first, Map.of(LEADERSHIP, 3, TACTICS, 2));
         passMovementAndAction(first);
+        resolveCrisis(RIOTS_NO_JUMP);
         assertTurn(4, first, DISCARD);
         assertWaitingFor(awaiting(first, DiscardSkillCardsEvent.class, DISCARD_DOWN_TO_HAND_LIMIT));
         val discarded = engine.view().player(first).skillCards().cards().getFirst();
@@ -125,18 +146,23 @@ class TurnLoopTest {
 
         draw(first, Map.of(POLITICS, 3, LEADERSHIP, 2));
         passMovementAndAction(first);
+        resolveCrisis(RIOTS_NO_JUMP); // Helo is the Admiral, even off the board
 
         // his 1st turn: he draws, then has no Movement and no Action step to take
         assertTurn(2, second, RECEIVE_SKILLS);
         draw(second, Map.of(LEADERSHIP, 2, TACTICS, 2, PILOTING, 1));
+        resolveCrisis(DETENTE); // but he has a Crisis step
+        placeACivilianShip();
         assertTurn(3, third, RECEIVE_SKILLS);
         assertEquals(Optional.empty(), engine.view().locate(KARL_HELO_AGATHON));
-        assertEquals(2, crisisCardsDiscarded()); // but he has a Crisis step
+        assertEquals(2, crisisCardsDiscarded());
 
         draw(third, Map.of(TACTICS, 2, PILOTING, 2, LEADERSHIP, 1));
         passMovementAndAction(third);
+        resolveCrisis(RIOTS_NO_JUMP);
         draw(first, Map.of(POLITICS, 3, LEADERSHIP, 2));
         passMovementAndAction(first);
+        resolveCrisis(RIOTS_NO_JUMP);
 
         // his 2nd turn
         assertTurn(5, second, RECEIVE_SKILLS);
@@ -158,6 +184,28 @@ class TurnLoopTest {
     private void passMovementAndAction(int player) {
         play(engine -> engine.choose(player, single(new NoOpEvent(player))));
         play(engine -> engine.choose(player, single(new NoOpEvent(player))));
+    }
+
+    // The title holder that the card names chooses its top section.
+    private void resolveCrisis(CrisisCard card) {
+        val game = engine.view();
+        val holder = switch (card.chooser()) {
+            case ADMIRAL -> game.admiral();
+            case CAG -> game.cag();
+            case PRESIDENT -> game.president();
+            case CURRENT_PLAYER -> game.currentPlayer().character();
+        };
+        val chooser = game.playerNumber(holder);
+        assertWaitingFor(new AwaitingChoice(chooser, options(new ChooseCrisisSectionEvent(chooser, card, TOP),
+                new ChooseCrisisSectionEvent(chooser, card, BOTTOM))));
+        play(engine -> engine.choose(chooser, single(new ChooseCrisisSectionEvent(chooser, card, TOP))));
+    }
+
+    // "Detente" moves the Pursuit marker onto a space with a civilian ship: the CAG places it where there is none yet.
+    private void placeACivilianShip() {
+        val cag = engine.view().playerNumber(engine.view().cag());
+        assertWaitingFor(awaiting(cag, PlaceCivilianShipEvent.class));
+        play(engine -> engine.submit(cag, new PlaceCivilianShipEvent(cag, GALACTICA_SPACE_12_OCLOCK)));
     }
 
     private void play(Consumer<GameEngine> input) {
@@ -203,6 +251,14 @@ class TurnLoopTest {
 
     private int skillCards(int player) {
         return engine.view().player(player).skillCards().size();
+    }
+
+    private int food() {
+        return engine.view().boards().galactica().food();
+    }
+
+    private int morale() {
+        return engine.view().boards().galactica().morale();
     }
 
     private int turns(int player) {

@@ -79,6 +79,6 @@ class AdvancePursuitTrackEventProcessorTest extends EventTestHarness<AdvancePurs
         assertNoShips(CYLON_FLEET_SPACE_3);
         assertShipCount(GALACTICA_SPACE_2_OCLOCK, Basestar.class, 1);
         assertShipCount(GALACTICA_SPACE_4_OCLOCK, Raider.class, 1);
-        assertShipCount(GALACTICA_SPACE_6_OCLOCK, HeavyRaider.class, 1);
+        assertShipCount(GALACTICA_SPACE_12_OCLOCK, HeavyRaider.class, 1); // area 3 (rule 11.4)
     }
 }

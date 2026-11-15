@@ -33,6 +33,8 @@ public record GameSnapshot(Map<String, Object> values) {
         s.put("actingPlayer", game.turn().actingPlayerNumber());
         s.put("turnCrisisCards", new ArrayList<>(game.turn().crisisCards()));
         s.put("turnEndedEarly", game.turn().endedEarly());
+        s.put("returnsToCrisisStep", game.turn().returnsToCrisisStep());
+        s.put("crisisCardsInPlay", new ArrayList<>(game.crisisCardsInPlay()));
         s.put("dieRoll", dieRoll(game.turn().dieRoll()));
         s.put("interruptWindow", game.turn().interruptWindow());
         s.put("windowCards", new ArrayList<>(game.turn().windowCards()));
@@ -56,6 +58,7 @@ public record GameSnapshot(Map<String, Object> values) {
             s.put(prefix + "infiltrating", player.isInfiltrating());
             s.put(prefix + "revealedCivilianShips", new ArrayList<>(player.revealedCivilianShipIds()));
             s.put(prefix + "turns", player.turns());
+            s.put(prefix + "seenLoyaltyCards", new ArrayList<>(player.seenLoyaltyCards()));
         }
         galactica(s, game.boards().galactica());
         val pegasus = game.boards().pegasus();

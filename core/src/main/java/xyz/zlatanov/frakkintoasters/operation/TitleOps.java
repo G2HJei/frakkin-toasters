@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.operation;
 
+import lombok.val;
 import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsDiscarded;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.TitleFact.*;
@@ -31,6 +32,16 @@ public class TitleOps extends GameOps {
     public void drawQuorumCard() {
         QuorumCard card = draw(QUORUM);
         record(new PresidentQuorumCardGained(card));
+    }
+
+    /**
+     * The President discards random Quorum Cards, as many as he has up to {@code count}.
+     */
+    public void discardRandomQuorumCards(int count) {
+        val cards = game.randomness().shuffled(game.presidentHand().cards()).stream().limit(count).toList();
+        if (!cards.isEmpty()) {
+            discardQuorumCards(cards);
+        }
     }
 
     public void discardQuorumCards(List<QuorumCard> cards) {

@@ -1,8 +1,11 @@
 package xyz.zlatanov.frakkintoasters.state.crisis;
 
+import lombok.val;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard.*;
@@ -12,8 +15,29 @@ class CrisisCardTest {
 
     @ParameterizedTest
     @EnumSource(CrisisCard.class)
-    void shouldHaveAnActivationIconWhenItHasAChooser(CrisisCard card) {
-        assertEquals(card.chooser() != null, card.activation() != null);
+    void shouldHaveAnActivationIcon(CrisisCard card) {
+        assertNotNull(card.activation());
+    }
+
+    // An event crisis always has a chooser in this deck, and a skill check crisis has one when it has an alternate
+    // instruction.
+    @ParameterizedTest
+    @EnumSource(CrisisCard.class)
+    void shouldBeASkillCheckOrAnEventWithAChooser(CrisisCard card) {
+        assertTrue(card.skillCheck() != null || card.chooser() != null);
+    }
+
+    @Test
+    void shouldAlternateInstructionsBeChosenByTheCurrentPlayer() {
+        assertEquals(CrisisChooser.CURRENT_PLAYER, WATER_SABOTAGED.chooser());
+        assertNull(WITCH_HUNT.chooser());
+        assertEquals(CrisisChooser.CAG, DETENTE.chooser());
+    }
+
+    @Test
+    void shouldHaveEachSkillCheckOnceOnly() {
+        val checks = Arrays.stream(CrisisCard.values()).map(CrisisCard::skillCheck).filter(java.util.Objects::nonNull).toList();
+        assertEquals(checks.size(), checks.stream().distinct().count());
     }
 
     @Test
@@ -39,5 +63,13 @@ class CrisisCardTest {
     void shouldTellTheRescueMissionCardsApart() {
         assertEquals(ACTIVATE_BASESTARS, RESCUE_MISSION_BASESTAR.activation());
         assertEquals(ACTIVATE_RAIDERS, RESCUE_MISSION_RAIDER.activation());
+    }
+
+    // The Cylon Fleet crises have no jump icon: the fleet board replaces the Cylon attack cards.
+    @ParameterizedTest
+    @EnumSource(value = CrisisCard.class, names = {"DETENTE", "RAIDERS_INBOUND", "RETURN_TO_DUTY",
+            "REVIEW_CAMERA_FOOTAGE", "TRACKED_BY_RADIATION", "TRAINING_A_ROOKIE"})
+    void shouldHaveNoJumpIconOnTheCylonFleetCards(CrisisCard card) {
+        assertFalse(card.prepareForJump());
     }
 }

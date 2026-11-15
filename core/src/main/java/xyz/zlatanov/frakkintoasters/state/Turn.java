@@ -30,6 +30,7 @@ public class Turn implements TurnView {
     @Getter(NONE)
     private final List<CrisisCard>          crisisCards            = new ArrayList<>();
     private       boolean                   endedEarly             = false;
+    private       boolean                   returnsToCrisisStep    = false;
     private       DieRoll                   dieRoll;
     @Getter(NONE) //todo review excessive @Getter annotations
     private       InterruptWindow           interruptWindow;
@@ -44,6 +45,7 @@ public class Turn implements TurnView {
     public void start(int number) {
         this.number = number;
         endedEarly = false;
+        returnsToCrisisStep = false;
         dieRoll = null;
         resolvedInterruptCards.clear();
         raidersToMiss.clear();
@@ -52,6 +54,11 @@ public class Turn implements TurnView {
     @Mutates
     public void endEarly() {
         endedEarly = true;
+    }
+
+    @Mutates
+    public void returnsToCrisisStep(boolean returnsToCrisisStep) {
+        this.returnsToCrisisStep = returnsToCrisisStep;
     }
 
     @Override

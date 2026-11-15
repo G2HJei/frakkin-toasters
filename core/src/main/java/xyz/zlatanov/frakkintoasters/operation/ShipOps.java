@@ -12,6 +12,7 @@ import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.board.LocationsArea;
 import xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage;
+import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
 
 import java.util.ArrayList;
@@ -51,6 +52,29 @@ public class ShipOps extends GameOps {
                 .findFirst()
                 .ifPresentOrElse(s -> record(new ShipMoved(shipId, RESERVES, REMOVED, null)),
                         this::destroyInSpace);
+    }
+
+    /**
+     * Destroys a civilian ship that is still in the civilian ship deck, as when one is drawn to be destroyed (rule 13.6).
+     */
+    public void destroyFromDeck() {
+        val civilianShip = game.decks().civilianShips().cards().stream()
+                .filter(ship -> ship.id() == shipId)
+                .findFirst()
+                .orElseThrow(FrakCallTheAdmiralException::new);
+        destroyCivilianShip(civilianShip, CIVILIAN_DECK);
+    }
+
+    /**
+     * Puts a destroyed raptor back in the "Reserves".
+     */
+    public void repair() {
+        val removed = game.removedComponents().items().stream()
+                .anyMatch(item -> item instanceof Raptor raptor && raptor.id() == shipId);
+        if (!removed) {
+            throw new FrakCallTheAdmiralException();
+        }
+        record(new ShipMoved(shipId, REMOVED, RESERVES, null));
     }
 
     public void launchRaiders(int count) {
@@ -138,10 +162,14 @@ public class ShipOps extends GameOps {
     }
 
     private void destroyCivilianShip(CivilianShip civilianShip) {
+        destroyCivilianShip(civilianShip, GALACTICA_SPACE);
+    }
+
+    private void destroyCivilianShip(CivilianShip civilianShip, ShipZone from) {
         decrease(FUEL, civilianShip.fuelCost());
         decrease(MORALE, civilianShip.moraleCost());
         decrease(POPULATION, civilianShip.populationCost());
-        record(new ShipMoved(shipId, GALACTICA_SPACE, REMOVED, null));
+        record(new ShipMoved(shipId, from, REMOVED, null));
     }
 
     private void decrease(xyz.zlatanov.frakkintoasters.state.board.Resource resource, int amount) {

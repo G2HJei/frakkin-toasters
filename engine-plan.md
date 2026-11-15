@@ -500,16 +500,63 @@ differs from the plan above:
 
 ## Phase 11 - Crisis
 
-`ResolveCrisisCardEvent` and `CrisisCardFollowups` resolve 16 choice crises, and their `CrisisCard` constants list the
-chooser and both icons. The other constants are still bare. The remaining 28 event crises need their effects, and the
-skill check crises need their skill check type. Some of those let a title holder pick an alternate instruction instead
-of the skill check (rule 8.5.1.1).
+`ResolveCrisisCardEvent` and `CrisisCardFollowups` resolved 16 choice crises, and only their `CrisisCard` constants listed
+the chooser and both icons. The other constants were bare. The remaining 28 event crises needed their effects, and the
+skill check crises their skill check type. Some of those let a title holder pick an alternate instruction instead of the
+skill check (rule 8.5.1.1).
 
 - The Crisis step and `ResolveCapricaCrisisCardEvent` queue `ResolveCrisisCardEvent`.
 - `Turn` keeps the Crisis Cards of the turn since phase 6, and the Prepare for Jump step and `EndTurnEvent` read them.
-  The Activate Cylon Ships step still has to.
+  The Activate Cylon Ships step reads them too.
 - A card chosen at Caprica counts for Prepare for Jump even on a revealed Cylon's turn (rule 6.1.3.4), so
   `ResolveCapricaCrisisCardEvent` plays it into the turn with `GameOps.playCrisisCard`, like the Crisis step.
+
+**As built.** The card data comes from the images in `materials/images`: all 136 cards of the Crisis deck (the Cylon
+attack cards are out, rule A2.7.2), each with its text, its chooser and both icons. Where it differs from the plan above:
+
+- `CrisisCard` lists the `SkillCheckType` of a skill check crisis, a `CrisisChooser` (a new `CURRENT_PLAYER`, for the
+  skill check crises with an alternate instruction), the `CylonActivation` and the jump icon. Two constants that were typos
+  of other cards (`TRACED_BY_RADIATION`, `GUILTY_CONCIENCE`) are gone. The rulebook counts 141 cards, 5 more than the 136
+  different ones: copies that the images can't tell apart.
+- A card has two sections. On a skill check crisis the top is the skill check, which `ChooseCrisisSectionEventProcessor`
+  starts, and the bottom is the alternate instruction. `ResolveCrisisCardEventProcessor` starts a card with no chooser
+  straight away. `choice` leaves out a section the card forbids: the nuke token sections need a nuke token.
+- A die roll in a section (16 cards) is `rollDie(new ResolveCrisisRollEvent(card, section))`, and
+  `CrisisCardFollowups.rollResult` holds the number and the effect. Where a title holder picks a player there is one
+  event, `ChooseCrisisTargetEvent`, with `legalTargets`, so the card text stays in `event/crisis`.
+- The Activate Cylon Ships step activates the icon of the card drawn last. "Fulfiller of Prophecy" returns to the Crisis
+  step after it: `TurnView.returnsToCrisisStep()` (`ReturnToCrisisStepChanged`), and `CrisisStepEvent(again)` brings the
+  Activate Cylon Ships step of the new card along, so a skipped second Crisis step can't activate the old card again.
+- New facts: `CrisisCardKeptInPlay`, `ReturnToCrisisStepChanged`, `NukeDiscarded` and `LoyaltyCardSeen`. The last one is
+  what a player learned from a Loyalty Card of another (`PlayerView.seenLoyaltyCards()`), which describers have to hide.
+- Processors for the events that Crisis Cards reach: the generic ones (`PlaceShipsEvent`, `ReturnVipersToReservesEvent`,
+  `DamageVipersEvent`, `DestroyCivilianShipsEvent`, `DrawAndDestroyCivilianShipsEvent`, `DestroyCylonShipsEvent`,
+  `PlaceCenturionsEvent`, `DiscardNukeTokenEvent`, `DiscardRandomSkillCardsEvent`, `LookAtLoyaltyCardEvent`,
+  `DrawQuorumCardEvent`, `MoveFromBrigEvent`, `KeepCrisisCardInPlayEvent`) and the results of the skill check crises
+  (`AnalyzeEnemyFighterPassEvent`, `ConsultTheHybridPassEvent`, `MysteriousMessagePassEvent` with
+  `DiscardFromDestinyDeckEvent`, `QuorumInUproarFailEvent`, `SetATrapPassEvent`, `StandoffWithPegasusPassEvent` and
+  `StrangeBeaconPassEvent`). Three result events became generic ones: `CylonTrackingDeviceFailEvent` is a
+  `PlaceShipsEvent`, `ThePassageFailEvent` a `DestroyCivilianShipsEvent` and `LegendaryDiscoveryPassEvent` a
+  `KeepCrisisCardInPlayEvent`.
+- Fixed on the way: `SkillCheckResultFollowups` mapped the icons of "Fleet Mobilization", "Mysterious Message" and
+  "Cylon Genocide" the wrong way round (a basestar icon activated the raiders). `PlayerView.isHuman` decides who ignores
+  what a crisis does (rule 6.1.2.1): `sendTo` gives a `NoOpEvent` for a revealed Cylon.
+- Simplified, with a comment where it happens: the player taking an action doesn't choose which vipers `DamageVipersEvent`
+  damages (it takes unmanned ones first, from the "Reserves"), and the humans choose the centurion that "Set a Trap"
+  destroys by the one closest to the end of the track. A CAG who is piloting doesn't activate an unmanned viper on "Review
+  Camera Footage" and "Training a Rookie", because `ActivateViperEvent` takes his own viper then.
+- Tests: `CrisisStepTest` is the acceptance test through `submit` and `choose`. `CrisisCardResolutionTest` runs every
+  section of every card, with a minimal engine that answers each kind of decision. `TurnLoopTest` and
+  `LocationSkillCheckTest` met real crises: the first stacks the Crisis deck with the test-only `StackedStartGameEvent`.
+  The second deals the hands and the top of the Destiny deck (`StackDestinyDeckEvent`), because the cards its seed drew
+  changed with the size of the Crisis deck.
+
+Fixed after a review: `CylonFleetBoard.MOVE_TO_GALACTICA_MAP` sent areas 3, 4 and 7-8 to the wrong space areas (rule
+11.4). "Mysterious Message" could empty the Destiny deck, and the next skill check failed on the draw. A
+`ChooseCrisisTargetEvent` could name another card the same title holder chooses for. A revealed Cylon at "Caprica" got
+the penalties of a skill check, and its execution on "Defending a Prisoner" stopped the game. "Return to Duty" let a
+pilot launch an unmanned viper instead of himself. A Cylon ship to place when the supply had none left wasn't taken from
+the Cylon Fleet board (rule 11.4.2), for any effect that places or launches one.
 
 ## Phase 12 - Jump and Kobol
 
@@ -519,8 +566,9 @@ of the skill check (rule 8.5.1.1).
 - The execution reaches the Sleeper Agent phase too: Boomer's and Baltar's extra Loyalty Cards, and no hand-off of
   Loyalty Cards after 7 distance (rules 6.1.1, 7.1, A2.1.1.6). `ExecuteEvent`'s processor has the loss when no
   characters are left to select since phase 9 (rule 7.2).
-- 34 event records have no processor after phase 9: the 3 placeholders and 31 real events. Phases 10 to 12 add the
-  ones they reach.
+- 8 event records have no processor after phase 11: the 3 placeholders and 5 real events (`JumpingTheFleetEvent`,
+  `RevealMutineerEvent`, `MoveCivilianShipEvent`, `CapricaPlaySuperCrisisCardEvent` and `HumanPrisonerFailEvent`). This
+  phase adds the ones it reaches.
 
 Acceptance test: seeded games played to a Cylon win and to the Kobol end game, restoring at every pause.
 
