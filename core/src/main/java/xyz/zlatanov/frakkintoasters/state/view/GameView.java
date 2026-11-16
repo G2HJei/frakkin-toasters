@@ -1,8 +1,10 @@
 package xyz.zlatanov.frakkintoasters.state.view;
 
+import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.RemovedComponents;
 import xyz.zlatanov.frakkintoasters.state.Team;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
+import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
 import xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard;
 import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
@@ -59,6 +61,26 @@ public interface GameView {
     Optional<Location> locate(Character character);
 
     Optional<Team> outcome();
+
+    /**
+     * The players who won, empty while the game goes on. A Cylon Leader wins by his Motive Cards, so it can be a player
+     * of either team (rule 16.3.2).
+     */
+    List<Integer> winners();
+
+    /**
+     * The Destination Cards next to the Objective Card, in the order the fleet reached them.
+     */
+    List<DestinationCard> destinations();
+
+    /**
+     * The distance the fleet has traveled (rule 12.3).
+     */
+    default int distanceTraveled() {
+        // "Legendary Discovery" is placed next to the Kobol Objective card and counts as 1 distance
+        val legendaryDiscoveries = crisisCardsInPlay().stream().filter(SkillCheckType.LEGENDARY_DISCOVERY::equals).count();
+        return destinations().stream().mapToInt(DestinationCard::distance).sum() + (int) legendaryDiscoveries;
+    }
 
     /**
      * The components out of the game, e.g. destroyed ships and executed characters.

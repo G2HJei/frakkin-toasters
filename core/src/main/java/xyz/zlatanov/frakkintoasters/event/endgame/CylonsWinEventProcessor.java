@@ -10,7 +10,7 @@ public class CylonsWinEventProcessor extends EventProcessor<CylonsWinEvent> {
 
     @Override
     public Followup process() {
-        ops.endGame(CYLONS); // the engine runs nothing after it
+        EndGame.end(game, ops, CYLONS); // the engine runs nothing after it
         return NONE;
     }
 }

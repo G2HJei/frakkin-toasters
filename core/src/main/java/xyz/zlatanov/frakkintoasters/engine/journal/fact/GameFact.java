@@ -2,6 +2,7 @@ package xyz.zlatanov.frakkintoasters.engine.journal.fact;
 
 import xyz.zlatanov.frakkintoasters.state.GameStep;
 import xyz.zlatanov.frakkintoasters.state.Team;
+import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
 import xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
@@ -58,6 +59,14 @@ public sealed interface GameFact extends Fact {
         }
     }
 
-    record GameEnded(Team winner) implements GameFact {
+    // The Destination Card goes next to the Objective Card, and its distance counts (rule 12.3).
+    record DestinationReached(DestinationCard card) implements GameFact {
+    }
+
+    // @param winnerPlayerNumbers the numbers of the players who win, the Cylon Leaders that qualify included (rule 16.3.2)
+    record GameEnded(Team winner, List<Integer> winnerPlayerNumbers) implements GameFact {
+        public GameEnded {
+            winnerPlayerNumbers = List.copyOf(winnerPlayerNumbers);
+        }
     }
 }

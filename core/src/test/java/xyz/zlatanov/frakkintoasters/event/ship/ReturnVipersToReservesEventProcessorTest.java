@@ -44,6 +44,18 @@ class ReturnVipersToReservesEventProcessorTest extends EventTestHarness<ReturnVi
         assertTrue(galacticaBoard.reserves().contains(raptor));
     }
 
+    // When the fleet jumps the players of assault raptors may choose to remain in their space area (rule 12.1.1).
+    @Test
+    void shouldLeaveAssaultRaptorsToTheirPlayersWhenTheFleetJumps() {
+        val raptor = assaultRaptorAt(GALACTICA_SPACE_4_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_6_OCLOCK);
+
+        execute(new ReturnVipersToReservesEvent(true));
+
+        assertEquals(GALACTICA_SPACE_4_OCLOCK, locate(raptor));
+        assertTrue(galacticaBoard.reserves().contains(viper));
+    }
+
     @Test
     void shouldLeaveOtherShipsAlone() {
         val civilianShip = civilianShipAt(GALACTICA_SPACE_2_OCLOCK);

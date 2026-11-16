@@ -66,11 +66,15 @@ public class ShipOps extends GameOps {
     }
 
     /**
-     * Puts a destroyed raptor back in the "Reserves".
+     * Puts a damaged or destroyed ship back in the "Reserves".
      */
     public void repair() {
+        if (galacticaBoard().damagedShips().stream().anyMatch(ship -> ship.id() == shipId)) {
+            record(new ShipMoved(shipId, DAMAGED, RESERVES, null));
+            return;
+        }
         val removed = game.removedComponents().items().stream()
-                .anyMatch(item -> item instanceof Raptor raptor && raptor.id() == shipId);
+                .anyMatch(item -> item instanceof Ship ship && ship.id() == shipId);
         if (!removed) {
             throw new FrakCallTheAdmiralException();
         }

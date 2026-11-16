@@ -11,8 +11,8 @@ public class PlaceShipsEventProcessor extends EventProcessor<PlaceShipsEvent> {
 
     // In front of Galactica is where the Cylons start the game and where "Dradis Contact" places raiders, behind it is
     // where the civilian ships start and "Bait" places one.
-    private static final Location IN_FRONT = GALACTICA_SPACE_8_OCLOCK;
-    private static final Location BEHIND   = GALACTICA_SPACE_2_OCLOCK;
+    public static final Location IN_FRONT = GALACTICA_SPACE_8_OCLOCK;
+    public static final Location BEHIND   = GALACTICA_SPACE_2_OCLOCK;
 
     @Override
     public Followup process() {

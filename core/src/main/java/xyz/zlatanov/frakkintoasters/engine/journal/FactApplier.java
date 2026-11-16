@@ -56,6 +56,7 @@ public final class FactApplier {
             }
             case BoardFact.JumpPreparationIncreased ignored -> galactica.advanceJumpPreparation();
             case BoardFact.JumpPreparationDecreased ignored -> galactica.decreaseJumpPreparation();
+            case BoardFact.JumpPreparationReset ignored -> galactica.resetJumpPreparation();
             case BoardFact.LocationDamaged f -> {
                 val board = Stream.of(galactica, game.boards().pegasus())
                         .filter(b -> b.locations().contains(f.location()))
@@ -101,7 +102,8 @@ public final class FactApplier {
             case GameFact.CrisisCardKeptInPlay f -> game.keepInPlay(f.type());
             case GameFact.ReturnToCrisisStepChanged f -> game.turn().returnsToCrisisStep(f.returns());
             case GameFact.NukeDiscarded ignored -> game.discardNuke();
-            case GameFact.GameEnded f -> game.end(f.winner());
+            case GameFact.GameEnded f -> game.end(f.winner(), f.winnerPlayerNumbers());
+            case GameFact.DestinationReached f -> game.reachDestination(f.card());
         }
     }
 
@@ -139,6 +141,7 @@ public final class FactApplier {
             case PlayerFact.MiracleTokenGained f -> game.player(f.playerNumber()).gainMiracleToken();
             case PlayerFact.MiracleTokenLost f -> game.player(f.playerNumber()).exhaustMiracleToken();
             case PlayerFact.LoyaltyCardRevealed f -> game.player(f.playerNumber()).loyaltyCards().reveal(f.card());
+            case PlayerFact.MotiveCardRevealed f -> game.player(f.playerNumber()).motiveCards().reveal(f.card());
             case PlayerFact.InfiltrationStarted f -> game.player(f.playerNumber()).infiltrateGalactica();
             case PlayerFact.InfiltrationEnded f -> game.player(f.playerNumber()).endInfiltration();
             case PlayerFact.CivilianShipRevealed f ->

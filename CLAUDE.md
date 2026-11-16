@@ -48,7 +48,7 @@ Next steps, in order:
    for "Executive Order".
 3. ~~Create the journal and tie it to the ops classes in `operation/`.~~ Done, see "Journal and Replay". Still open:
    describers and per-viewer hiding, and JSON serialization. The pending followups are the engine's `Agenda`.
-4. Create the game engine to drive the events and turns. `engine-plan.md` has the plan in phases. Phases 1 to 11 are
+4. Create the game engine to drive the events and turns. `engine-plan.md` has the plan in phases. Phases 1 to 12 are
    done: the journal moved out of `Game` into `engine/journal/`, the turn state is grouped in `state/Turn`, the journal
    and processors are ready for the engine, `GameEngine` runs events through `submit` and `choose`, it restores a
    game from its journal and rolls back a failed input (see "Engine"), `GameEngine.start` sets up a game and plays
@@ -56,7 +56,8 @@ Next steps, in order:
    "End of Game and Mutiny"), a skill check runs from the action that starts it to its end, with every location
    action in scope (see "Skill Check Sequence" and "Execution"), and the six interrupt Skill Cards are played in
    secret windows around die rolls and attacks (see "Interrupt Cards" and "Combat"), and the Crisis step resolves every
-   Crisis Card and activates the Cylon ships by its icon (see "Crisis Cards"). Next is phase 12: Jump and Kobol.
+   Crisis Card and activates the Cylon ships by its icon (see "Crisis Cards"), and the fleet jumps through the Sleeper Agent
+   phase to the Kobol end game (see "Jump and Kobol"). Next is phase 13: the docs.
 5. Create a working frontend with the events that exist by then.
 
 ## Project Structure
@@ -67,7 +68,7 @@ Multi-module Gradle project with a single `core` module. Package root: `xyz.zlat
 
 - root - `EventProcessor` (base class for all processors)
 - `event/` - event records and their processors, grouped by area (`action`, `board`, `crisis`, `deck`, `endgame`,
-  `interrupt`, `location/{galactica,pegasus,colonialone,cylon}`, `loyalty`, `officials`, `player`, `ship`,
+  `interrupt`, `jump`, `location/{galactica,pegasus,colonialone,cylon}`, `loyalty`, `officials`, `player`, `ship`,
   `skillcheck`, `skillcheck/ability`, `skillcheck/result`, `turn`). The attacks and the viper activation are in the root
   package. Also `placeholder/` (events that need player input) and
   `constraint/` (`EventConstraint`, `ConstrainedEvent`). `location/` holds `LocationActionProcessor`, the base of the
@@ -233,7 +234,7 @@ instruction.
   the one being resolved: the last one played into the turn.
 - "Keep this card in play" (`KeepCrisisCardInPlayEvent`) records the skill check in `GameView.crisisCardsInPlay()`, and
   `EndTurnEvent` leaves that card out of the discard pile. "Detector Sabotage" stops the looks at Loyalty Cards in
-  `LookAtLoyaltyCardEventProcessor`, and "Legendary Discovery" is its distance for phase 12.
+  `LookAtLoyaltyCardEventProcessor`, and "Legendary Discovery" counts as 1 distance (see "Jump and Kobol").
 - "Fulfiller of Prophecy" returns to the Crisis step after the Activate Cylon Ships step (see "Turn Loop").
 - The Activate Cylon Ships step activates the icon of the card drawn last. The Cylon ships go through the same events
   as the skill check crises, e.g. `ActivateRaidersEvent`, in `CrisisCardFollowups.activation`.
@@ -377,8 +378,8 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
 - `WinChecks` (`event/endgame/`) holds the Cylon wins that happen at once (rule 16.1): a centurion at the end of the
   Boarding Party track, and 6 damaged Galactica locations. The engine asks after every event, and `ScopeClosed` records
   the result with the event's followup, so restore never runs the checks. The resource check stays in `EndTurnEvent`.
-- `CylonsWinEvent` records `GameEnded(winner)` (`GameOps.endGame`), and `GameView.outcome()` gives the winning `Team`,
-  which `Finished(winner)` reports. A test script that plays to the end has to end the game, e.g. with a
+- `CylonsWinEvent` ends the game for the Cylons through `EndGame.end` (the `GameEnded` fact), and `GameView.outcome()` gives the winning `Team`,
+  which `Finished(winner)` reports, and `GameView.winners()` the players who won. A test script that plays to the end has to end the game, e.g. with a
   `CylonsWinEvent`.
 - To draw a Mutiny Card, queue a `DrawMutinyCardEvent`. Its processor sends the player to the "Brig" on the second card
   (the Mutineer on the third, `PlayerView.isMutineer()`), and asks for a `Discard1MutinyCardEvent` per card over the
@@ -395,11 +396,44 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
   Loyalty Cards are discarded but the Mutineer card stays, and the player chooses a new character. Once the game is
   under way, `SelectCharacterEventProcessor.canBeSelected` allows any type but a Cylon Leader, and never an executed
   character or its other version. `FinishExecutionEvent` then adds a "You Are Not a Cylon" card to the Loyalty deck and
-  deals one, and hands on the titles the executed character held. No character left to choose: `CylonsWinEvent`.
+  deals one (`DealLoyaltyCardsEvent`, with extra cards for Boomer and Baltar before the Sleeper Agent phase), and hands on
+  the titles the executed character held. No character left to choose: `CylonsWinEvent`.
 - A hidden Cylon reveals a "You Are a Cylon" card (`LoyaltyCardRevealed`), gives his other Loyalty Cards to a human
   (`GiveLoyaltyCardsEvent`) and the Mutineer card too (`PassMutineerCardEvent`), moves to the "Resurrection Ship" and
-  loses his titles. An Infiltrating Cylon Leader only goes back to the "Resurrection Ship" (`InfiltrationEnded`).
+  loses his titles. From 7 distance on he keeps his other Loyalty Cards. An Infiltrating Cylon Leader only goes back to the "Resurrection Ship" (`InfiltrationEnded`).
 - The executed current player's turn ends early (see "Turn Loop").
+
+### Jump and Kobol
+
+The jump is a chain of events, one per step of rule 12.1.1. `JumpingTheFleetEvent` comes from the "FTL Control" action
+and from `IncreaseJumpPreparationEvent` (the track has no "Auto Jump" space, the token goes back to `START`).
+
+- `JumpingTheFleetEventProcessor` queues a decision per assault raptor in space (`one(ReturnAssaultRaptorEvent,
+  NoOpEvent)`: its pilot, or the current player when unmanned, may keep it there), `ReturnVipersToReservesEvent(true)`,
+  `MoveCylonShipsToFleetBoardEvent` and `DrawDestinationCardsEvent`. After 8 distance it queues `EndGameEvent` instead.
+- The Admiral's `ChooseDestinationEvent` names both cards, the other goes to the bottom. `ResolveDestinationCardEvent`
+  records `DestinationReached` (`GameView.destinations()` and `distanceTraveled()`), queues the card's effects
+  (`DestinationCardFollowups`, the card text in its comments), `ObjectiveInstructionsEvent(distanceBefore)` and
+  `ResetJumpPreparationEvent`. "Lion's Head Nebula" advances the track after the reset, "Misjump" draws its new card at
+  once. `DestinationCard` has the printed distance, and "Mining Asteroid" is left out because the Crisis deck has no
+  "Scar". "Legendary Discovery" counts as 1 distance too, through `crisisCardsInPlay()`.
+- The cards that ask the Admiral: `RiskShipsEvent` (with `RiskResultEvent` after the roll, only when enough ships are in
+  the "Reserves"), `GasGiantEvent`, the "Civilian Convoy" trade and `GasCloudPlaceEvent`. "Ragnar Anchorage" repairs as
+  many ships as possible without asking.
+- `ObjectiveInstructionsEvent` queues `SleeperAgentPhaseEvent` when the distance reaches 4 for the first time.
+  It deals a card per player with `DealLoyaltyCardsEvent` (two to Boomer and Baltar unless revealed Cylons, Motive Cards to
+  a Cylon Leader), then `FinishSleeperAgentPhaseEvent` has the revealed Cylons pass on the Mutineer card and hand their
+  cards to a human, and the current player choose who draws an extra card when nobody got the Mutineer card. From 7
+  distance on no Loyalty Cards are handed off (`FinishSleeperAgentPhaseEventProcessor.canHandOffLoyaltyCards`).
+- `RevealMutineerEvent(playerNumber, drawsLoyaltyCard)`: the card stays among the Loyalty Cards and everybody knows it
+  (describers show it faceup). The player loses the titles, draws a Mutiny Card and, when dealt it facedown, another
+  Loyalty Card.
+- `EndGameEvent` follows rules 16.1 and 16.2: each unrevealed Personal Goal of a human reduces its resource by 1
+  (`LoyaltyCard.personalGoalResource`), and the Cylons win if a resource is 0. Every ending goes through
+  `EndGame.end(game, ops, team)`: the Cylon Leaders reveal the Motive Cards they can (`MotiveCards`, the requirements as
+  printed, `MotiveCard.allegiance`), and `GameEnded` carries the winning players (`GameView.winners()`), the Leaders with
+  at least two revealed cards of the winning allegiance and at most one unrevealed included (rule 16.3.2).
+- Not built yet: revealing a Motive Card or a Personal Goal in the middle of a game, and the Final Five cards.
 
 ### Interrupt Cards
 
@@ -555,5 +589,8 @@ when possible.
 - `InterruptWindowTest` plays interrupt windows through `submit`, restoring at every pause: the secret status, a pass,
   a tiebreak, an "Evasive Maneuvers" reroll. The test-only `GiveSkillCardEvent` and `PlaceRaiderEvent` set up the
   hands and the board, which a seeded game can't choose
+- `JumpAndKobolTest` plays four jumps and the Kobol end game through `submit` and `choose`, restoring at every pause: the
+  Sleeper Agent phase, a human win, and a Personal Goal that turns it into a Cylon win. The test-only `StackDeckEvent`
+  stacks the Destination and Loyalty decks, which a seeded game can't choose
 - Tests follow the pattern: set up game state, execute the event, assert state changes and followups. Use real game ops
   in processor tests, not mocks, since processors may read their own changes

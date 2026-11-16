@@ -2,10 +2,12 @@ package xyz.zlatanov.frakkintoasters.event.loyalty;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
+import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.officials.GiveTitlesToNextInLineEvent;
 import xyz.zlatanov.frakkintoasters.event.player.DrawMutinyCardEvent;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
@@ -28,6 +30,12 @@ public class PassMutineerCardEventProcessor extends EventProcessor<PassMutineerC
         ops.player(player.number()).giveLoyaltyCards(recipient, List.of(MUTINEER));
         // "That player must then draw one Mutiny Card and gives each Title Card he has to the player whose character is
         // highest in the order of succession for that title (excluding himself)."
-        return all(new DrawMutinyCardEvent(recipient), new GiveTitlesToNextInLineEvent(recipient));
+        val followups = new ArrayList<Event>();
+        if (event.recipientDrawsLoyaltyCard()) {
+            followups.add(new DealLoyaltyCardsEvent(recipient, 1, true));
+        }
+        followups.add(new DrawMutinyCardEvent(recipient));
+        followups.add(new GiveTitlesToNextInLineEvent(recipient));
+        return all(followups.toArray(Event[]::new));
     }
 }

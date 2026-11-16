@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.experimental.Accessors;
 import xyz.zlatanov.frakkintoasters.state.board.BoardsHolder;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
+import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
 import xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard;
 import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
@@ -58,7 +59,13 @@ public class Game implements GameView {
     @Builder.Default
     private RemovedComponents    removedComponents = new RemovedComponents();
     @Getter(AccessLevel.NONE)
+    @Builder.Default
+    private List<DestinationCard> destinations     = new ArrayList<>(); // the cards next to the Objective Card
+    @Getter(AccessLevel.NONE)
     private Team                 winner; // null while the game goes on
+    @Getter(AccessLevel.NONE)
+    @Builder.Default
+    private List<Integer>        winners           = List.of();
 
 
     public static GameBuilder builder() {
@@ -135,10 +142,26 @@ public class Game implements GameView {
         nukes--;
     }
 
+    @Override
+    public List<DestinationCard> destinations() {
+        return List.copyOf(destinations);
+    }
+
+    @Override
+    public List<Integer> winners() {
+        return List.copyOf(winners);
+    }
+
     @Mutates
-    public void end(Team winner) {
+    public void reachDestination(DestinationCard card) {
+        destinations.add(card);
+    }
+
+    @Mutates
+    public void end(Team winner, List<Integer> winners) {
         assert this.winner == null; // a game ends once
         this.winner = winner;
+        this.winners = List.copyOf(winners);
     }
 
     @Mutates

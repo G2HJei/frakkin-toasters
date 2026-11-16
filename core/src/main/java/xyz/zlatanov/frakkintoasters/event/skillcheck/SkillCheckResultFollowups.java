@@ -27,6 +27,8 @@ import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
 
 import java.util.Arrays;
 import java.util.List;
+import xyz.zlatanov.frakkintoasters.event.jump.ObjectiveInstructionsEvent;
+
 import java.util.Optional;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
@@ -106,7 +108,9 @@ public class SkillCheckResultFollowups {
             case FLEET_MOBILIZATION -> all(new ActivateCylonBasestarsEvent(), new LaunchRaidersEvent());
             // unique to one skill check
             case ANALYZE_ENEMY_FIGHTER -> single(new AnalyzeEnemyFighterPassEvent());
-            case LEGENDARY_DISCOVERY -> single(new KeepCrisisCardInPlayEvent(type)); // it counts as 1 distance
+            // "Place this card next to the Kobol Objective card. It counts as 1 distance.", which can reach a distance of the
+            // Objective Card (rule 12.4)
+            case LEGENDARY_DISCOVERY -> all(new KeepCrisisCardInPlayEvent(type), new ObjectiveInstructionsEvent(game.distanceTraveled()));
             case STANDOFF_WITH_PEGASUS -> single(new StandoffWithPegasusPassEvent());
             case CYLON_GENOCIDE -> single(new CylonGenocidePassEvent());
             case MYSTERIOUS_MESSAGE -> single(new MysteriousMessagePassEvent());

@@ -5,6 +5,7 @@ import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.endgame.CylonsWinEvent;
+import xyz.zlatanov.frakkintoasters.event.loyalty.FinishSleeperAgentPhaseEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.loyalty.GiveLoyaltyCardsEvent;
 import xyz.zlatanov.frakkintoasters.event.loyalty.PassMutineerCardEvent;
 import xyz.zlatanov.frakkintoasters.event.officials.GiveTitlesToNextInLineEvent;
@@ -82,7 +83,9 @@ public class ExecuteEventProcessor extends EventProcessor<ExecuteEvent> {
     private Followup cylon(LoyaltyCard cylonCard) {
         val playerNumber = player.number();
         ops.player(playerNumber).revealLoyaltyCard(cylonCard);
-        val remainingCards = player.loyaltyCards().cards().stream().anyMatch(card -> card != MUTINEER);
+        // From 7 distance on, he keeps them (rule 6.1.1).
+        val remainingCards = player.loyaltyCards().cards().stream().anyMatch(card -> card != MUTINEER)
+                && FinishSleeperAgentPhaseEventProcessor.canHandOffLoyaltyCards(game);
         val giveCards = remainingCards ? toAHuman(human -> new GiveLoyaltyCardsEvent(playerNumber, human)) : NONE;
         val passMutineer = player.isMutineer() ? toAHuman(human -> new PassMutineerCardEvent(playerNumber, human)) : NONE;
         ops.player(playerNumber).sendTo(RESURRECTION_SHIP);

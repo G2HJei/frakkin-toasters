@@ -26,6 +26,10 @@ public class CylonFleetBoard implements Board, SpaceLocationsBoard, CylonFleetBo
             CYLON_FLEET_SPACE_5_6, GALACTICA_SPACE_10_OCLOCK,
             CYLON_FLEET_SPACE_7_8, GALACTICA_SPACE_8_OCLOCK);
 
+    // the space area of the Cylon Fleet board that a space area of the main game board corresponds to (rule 11.4)
+    public static final Map<Location, Location> MOVE_TO_FLEET_MAP = MOVE_TO_GALACTICA_MAP.entrySet().stream()
+            .collect(java.util.stream.Collectors.toUnmodifiableMap(Map.Entry::getValue, Map.Entry::getKey));
+
     private       Pursuit                      pursuitTrack     = START;
     // Declared with their concrete types, so the getters' copies keep the order: new TreeMap<>(TreeMap) keeps the
     // comparator, and EnumSet.copyOf(EnumSet) works on an empty set too.

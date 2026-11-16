@@ -39,9 +39,13 @@ public class PlayerOps extends GameOps {
         record(new CharacterSelected(player.number(), selectedCharacter));
     }
 
-    public void drawLoyaltyCards(int cardsToDraw) {
-        val loyaltyCards = draw(DeckId.LOYALTY, cardsToDraw);
+    /**
+     *  the cards drawn
+     */
+    public List<LoyaltyCard> drawLoyaltyCards(int cardsToDraw) {
+        List<LoyaltyCard> loyaltyCards = draw(DeckId.LOYALTY, cardsToDraw);
         gain(PlayerPile.LOYALTY, loyaltyCards);
+        return loyaltyCards;
     }
 
     public void moveTo(Location location) { //todo move to brig makes Admiral lose its title
@@ -172,6 +176,10 @@ public class PlayerOps extends GameOps {
 
     public void revealLoyaltyCard(LoyaltyCard card) {
         record(new LoyaltyCardRevealed(player.number(), card));
+    }
+
+    public void revealMotiveCard(MotiveCard card) {
+        record(new MotiveCardRevealed(player.number(), card));
     }
 
     public void discardLoyaltyCards(List<LoyaltyCard> cards) {

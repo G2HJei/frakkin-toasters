@@ -3,6 +3,7 @@ package xyz.zlatanov.frakkintoasters.event.player;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
+import xyz.zlatanov.frakkintoasters.event.loyalty.DealLoyaltyCardsEvent;
 import xyz.zlatanov.frakkintoasters.event.officials.DetermineNextAdmiralEvent;
 import xyz.zlatanov.frakkintoasters.event.officials.DetermineNextPresidentEvent;
 
@@ -36,8 +37,7 @@ class FinishExecutionEventProcessorTest extends EventTestHarness<FinishExecution
         execute(new FinishExecutionEvent(2, LAURA_ROSLIN));
 
         assertTrue(loyaltyDeck.wasShuffled());
-        assertEquals(List.of(NOT_CYLON), player(2).loyaltyCards().cards());
-        assertFollowup(new DetermineNextPresidentEvent());
+        assertFollowup(all(new DealLoyaltyCardsEvent(2, 1, false), new DetermineNextPresidentEvent()));
     }
 
     // "If the Admiral, President or CAG is executed, the title will change hands after the new character is selected."
@@ -48,7 +48,8 @@ class FinishExecutionEventProcessorTest extends EventTestHarness<FinishExecution
 
         execute(new FinishExecutionEvent(2, LAURA_ROSLIN));
 
-        assertFollowup(all(new DetermineNextPresidentEvent(), new DetermineNextAdmiralEvent()));
+        assertFollowup(all(new DealLoyaltyCardsEvent(2, 1, false), new DetermineNextPresidentEvent(),
+                new DetermineNextAdmiralEvent()));
     }
 
     @Test

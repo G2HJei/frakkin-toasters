@@ -3,6 +3,7 @@ package xyz.zlatanov.frakkintoasters.event.loyalty;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
+import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
 
 import java.util.List;
 

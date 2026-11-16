@@ -49,7 +49,7 @@ class WinChecksTest extends TestHarness {
     @Test
     void aGameThatEndedWinsNoMore() {
         SIX_LOCATIONS.forEach(galacticaBoard::damage);
-        game.end(CYLONS);
+        game.end(CYLONS, List.of());
 
         assertEquals(NONE, WinChecks.check(game));
     }

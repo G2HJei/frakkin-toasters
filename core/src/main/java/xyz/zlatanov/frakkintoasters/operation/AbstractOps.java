@@ -21,11 +21,13 @@ import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.CylonShip;
+import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 import xyz.zlatanov.frakkintoasters.state.ship.ShipZone;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipZone.CYLON_SUPPLY;
@@ -104,17 +106,18 @@ public abstract class AbstractOps {
      * Places a Cylon ship of the type in a space area of the main game board, as every effect that places one does
      * (rule 11.4.2). Nothing is placed when there is none of the type left.
      */
-    protected void takeFromSupply(Class<? extends CylonShip> type, Location location) {
+    protected Optional<Integer> takeFromSupply(Class<? extends CylonShip> type, Location location) {
         val fromSupply = game.cylonShips().next(type);
         if (fromSupply.isPresent()) {
             record(new ShipMoved(fromSupply.get().id(), CYLON_SUPPLY, GALACTICA_SPACE, location));
-            return;
+            return Optional.of(fromSupply.get().id());
         }
         // Out of ships in the supply: one from the Cylon Fleet board, the lowest-numbered space area first.
-        LocationsArea.CYLON_FLEET_SPACE.locations().stream()
+        val fromFleetBoard = LocationsArea.CYLON_FLEET_SPACE.locations().stream()
                 .flatMap(area -> cylonFleetBoard().shipsIn(area, type).stream())
-                .findFirst()
-                .ifPresent(ship -> record(new ShipMoved(ship.id(), ShipZone.CYLON_FLEET_SPACE, GALACTICA_SPACE, location)));
+                .findFirst();
+        fromFleetBoard.ifPresent(ship -> record(new ShipMoved(ship.id(), ShipZone.CYLON_FLEET_SPACE, GALACTICA_SPACE, location)));
+        return fromFleetBoard.map(Ship::id);
     }
 
     protected GalacticaBoard galacticaBoard() {

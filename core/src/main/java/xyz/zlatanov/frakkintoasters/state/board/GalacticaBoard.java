@@ -245,6 +245,12 @@ public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard, Gal
     }
 
     @Mutates
+    public GalacticaBoard resetJumpPreparation() {
+        jumpPreparation = JumpPreparation.START;
+        return this;
+    }
+
+    @Mutates
     public GalacticaBoard decreaseJumpPreparation() {
         jumpPreparation = JumpPreparation.values()[Math.max(0, jumpPreparation.ordinal() - 1)];
         return this;

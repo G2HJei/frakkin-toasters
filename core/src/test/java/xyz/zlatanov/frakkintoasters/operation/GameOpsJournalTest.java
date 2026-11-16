@@ -94,9 +94,9 @@ class GameOpsJournalTest extends TestHarness {
 
     @Test
     void theEndOfTheGameIsRecorded() {
-        ops.endGame(Team.CYLONS);
+        ops.endGame(Team.CYLONS, List.of());
 
-        assertEquals(List.of(new GameEnded(Team.CYLONS)), journal.facts());
+        assertEquals(List.of(new GameEnded(Team.CYLONS, List.of())), journal.facts());
         assertEquals(Optional.of(Team.CYLONS), game.outcome());
     }
 

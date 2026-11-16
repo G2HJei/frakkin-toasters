@@ -2,6 +2,7 @@ package xyz.zlatanov.frakkintoasters.operation;
 
 import lombok.NoArgsConstructor;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedOnTop;
+import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import java.util.List;
@@ -19,5 +20,10 @@ public class TestOps {
     // The cards don't come out of their decks, as GiveSkillCardEvent's don't.
     public static void stackDestinyDeck(GameOps ops, List<SkillCard> topFirst) {
         ops.record(new CardsAddedOnTop(DESTINY, topFirst));
+    }
+
+    // Cards of a deck that the game builds later or from the whole enum, so a test knows what a draw gives.
+    public static void stackDeck(GameOps ops, DeckId deck, List<?> topFirst) {
+        ops.record(new CardsAddedOnTop(deck, topFirst));
     }
 }

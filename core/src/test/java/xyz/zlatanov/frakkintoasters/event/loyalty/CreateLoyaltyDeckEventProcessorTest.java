@@ -100,7 +100,7 @@ class CreateLoyaltyDeckEventProcessorTest extends EventTestHarness<CreateLoyalty
 
         execute(event);
 
-        assertFollowup(new RevealMutineerEvent());
+        assertFollowup(new RevealMutineerEvent(1, true));
     }
 
     void pickCharacters(boolean pickCylonLeader) {
@@ -148,7 +148,8 @@ class CreateLoyaltyDeckEventProcessorTest extends EventTestHarness<CreateLoyalty
                         .filter(LoyaltyCard::isCylon)
                         .count());
         if (hasMutineer) {
-            assertFollowup(new RevealMutineerEvent());
+            val mutineer = game.players().stream().filter(p -> p.loyaltyCards().cards().contains(MUTINEER)).findFirst().orElseThrow();
+            assertFollowup(new RevealMutineerEvent(mutineer.number(), true));
         }
     }
 }

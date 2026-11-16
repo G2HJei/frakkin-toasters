@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.engine;
 
+import java.util.List;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.engine.Agenda.Frame;
@@ -37,7 +38,7 @@ class AgendaReplayerTest {
         assertEquals(Optional.of(new Frame(decision, first)), AgendaReplayer.replay(journal).top());
 
         journal.openScope(new NoOpEvent(1), 1, first); // the answer to the decision, which ends the game
-        journal.record(new GameEnded(CYLONS));
+        journal.record(new GameEnded(CYLONS, List.of()));
         journal.closeScope(NONE);
         assertTrue(AgendaReplayer.replay(journal).isEmpty());
     }
@@ -131,7 +132,7 @@ class AgendaReplayerTest {
         val first = journal.openScope(new NoOpEvent(1), 1, ROOT_SCOPE);
         journal.closeScope(all(event(2), event(3)));
         journal.openScope(new NoOpEvent(2), 1, first);
-        journal.record(new GameEnded(CYLONS));
+        journal.record(new GameEnded(CYLONS, List.of()));
         journal.closeScope(NONE);
     }
 

@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.engine.journal;
 
+import java.util.List;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.Fact;
@@ -9,8 +10,8 @@ import xyz.zlatanov.frakkintoasters.state.Die;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Randomness;
 import xyz.zlatanov.frakkintoasters.state.Team;
-import xyz.zlatanov.frakkintoasters.state.board.Resource;
 import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
+import xyz.zlatanov.frakkintoasters.state.board.Resource;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow.BeforeRaidersActivate;
 import xyz.zlatanov.frakkintoasters.state.interrupt.PlayedInterruptCard;
@@ -271,9 +272,14 @@ class GameReplayerTest {
         ops.player(3).endInfiltration();
         ops.player(1).loseMiracleToken();
         ops.player(1).revealLoyaltyCard(game.player(1).loyaltyCards().cards().getFirst());
+        ops.player(3).revealMotiveCard(game.player(3).motiveCards().cards().getFirst());
         ops.player(2).removeCharacter();
         ops.endTurnEarly();
-        ops.endGame(Team.CYLONS);
+
+        // a jump: the fleet reaches a destination and the Jump Preparation track is reset
+        ops.galactica().reachDestination(DestinationCard.DEEP_SPACE);
+        ops.galactica().resetJumpPreparation();
+        ops.endGame(Team.CYLONS, List.of());
 
         return game;
     }

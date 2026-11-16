@@ -4,6 +4,10 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.*;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedOnTop;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedToBottom;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsDiscarded;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.GameFact.DestinationReached;
+import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.ShipFact.ShipMoved;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.GalacticaBoard;
@@ -14,11 +18,13 @@ import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
 
 import java.util.List;
+import java.util.Optional;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.board.Resource.MORALE;
 import static xyz.zlatanov.frakkintoasters.state.board.Resource.POPULATION;
 import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.GALACTICA_DAMAGE;
+import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.DESTINATION;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipZone.*;
 
 public class GalacticaOps extends BattlestarOps {
@@ -101,6 +107,32 @@ public class GalacticaOps extends BattlestarOps {
         record(new JumpPreparationDecreased());
     }
 
+    public void resetJumpPreparation() {
+        record(new JumpPreparationReset());
+    }
+
+    /**
+     * @return the drawn Destination Cards, which are in no pile until placed or returned
+     */
+    public List<DestinationCard> drawDestinationCards(int count) {
+        return draw(DESTINATION, count);
+    }
+
+    public void returnDestinationCardToBottom(DestinationCard card) {
+        record(new CardsAddedToBottom(DESTINATION, List.of(card)));
+    }
+
+    public void discardDestinationCard(DestinationCard card) {
+        record(new CardsDiscarded(DESTINATION, List.of(card)));
+    }
+
+    /**
+     * Places the card next to the Objective Card, where its distance counts.
+     */
+    public void reachDestination(DestinationCard card) {
+        record(new DestinationReached(card));
+    }
+
     public void advanceBoardingParty() {
         record(new BoardingPartyAdvanced());
     }
@@ -144,8 +176,8 @@ public class GalacticaOps extends BattlestarOps {
         ship(game.decks().civilianShips().top(1).getFirst().id()).destroyFromDeck();
     }
 
-    public void placeBasestar(Location location) {
-        takeFromSupply(Basestar.class, location);
+    public Optional<Integer> placeBasestar(Location location) {
+        return takeFromSupply(Basestar.class, location);
     }
 
     /**

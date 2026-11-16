@@ -1,5 +1,9 @@
 package xyz.zlatanov.frakkintoasters.state.card;
 
+import xyz.zlatanov.frakkintoasters.state.board.Resource;
+
+import static xyz.zlatanov.frakkintoasters.state.board.Resource.*;
+
 public enum LoyaltyCard {
     NOT_CYLON,
     NOT_CYLON_USE_CAUTION,
@@ -28,6 +32,20 @@ public enum LoyaltyCard {
 
     public boolean isCylon() {
         return ordinal() > MUTINEER.ordinal();
+    }
+
+    /**
+     * @return the resource an unrevealed Personal Goal card reduces by 1 at the end of the game (rule 16.2), or
+     * {@code null} for any other card
+     */
+    public Resource personalGoalResource() {
+        return switch (this) {
+            case NOT_CYLON_ACQUIRE_POWER, NOT_CYLON_POLITICAL_INTRIGUE -> FOOD;
+            case NOT_CYLON_SACRIFICE, NOT_CYLON_SELFISH -> FUEL;
+            case NOT_CYLON_DEVASTATION, NOT_CYLON_SELF_DESTRUCTION -> MORALE;
+            case NOT_CYLON_STAND_AND_FIGHT, NOT_CYLON_USE_CAUTION -> POPULATION;
+            default -> null;
+        };
     }
 
 }

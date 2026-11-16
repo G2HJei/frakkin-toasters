@@ -572,6 +572,46 @@ the Cylon Fleet board (rule 11.4.2), for any effect that places or launches one.
 
 Acceptance test: seeded games played to a Cylon win and to the Kobol end game, restoring at every pause.
 
+**As built.** The jump is a chain of events, each step of rule 12.1.1 one of them, and the Kobol end game is one more event
+that every ending goes through.
+
+- `JumpingTheFleetEventProcessor` queues step 1 (a decision per assault raptor in space, `one(ReturnAssaultRaptorEvent,
+  NoOpEvent)`, then `ReturnVipersToReservesEvent(exceptAssaultRaptors = true)`), step 2 (`MoveCylonShipsToFleetBoardEvent`,
+  the reverse of `CylonFleetBoard.MOVE_TO_GALACTICA_MAP`, with the basestar damage back in the pile) and step 4
+  (`DrawDestinationCardsEvent`). The Admiral's `ChooseDestinationEvent` puts the other card on the bottom and queues
+  `ResolveDestinationCardEvent`, which places the card (`DestinationReached`, `GameView.distanceTraveled()`), follows it
+  (`DestinationCardFollowups`), then runs `ObjectiveInstructionsEvent` (step 6) and `ResetJumpPreparationEvent` (step 7).
+  Step 3 is Earth only. After 8 distance the processor queues `EndGameEvent` instead (rule 12.4.2).
+- `DestinationCard` has the distance of each of the 21 cards, and the deck is the real one. "Mining Asteroid" is left out
+  because it searches for the "Scar" Crisis Card, which the deck doesn't have. "Misjump" draws its new card at once.
+  "Legendary Discovery" counts as 1 distance through `crisisCardsInPlay()` and checks the Objective Card.
+- The cards that ask the Admiral: the risks (`RiskShipsEvent`, then `RiskResultEvent` after the roll, offered only when
+  the ships are in the "Reserves": I read "risk 2 vipers" as needing 2), "Gas Giant", the "Civilian Convoy" trade, and
+  "Gas Cloud" (`GasCloudPlaceEvent`, one card at a time to either end). "Ragnar Anchorage" is simplified: the Admiral
+  repairs as many ships as possible (Mark VIIs first), because it never costs anything. "Gas Giant" destroys a viper in
+  the "Reserves" only.
+- `SleeperAgentPhaseEvent` (distance 4 for the first time) deals one card per player with `DealLoyaltyCardsEvent`, two
+  to Boomer and Baltar unless they are revealed Cylons, and two Motive Cards to a Cylon Leader.
+  `FinishSleeperAgentPhaseEvent` then has each revealed Cylon pass the Mutineer card on (the recipient reveals it as if
+  dealt) and hand the other cards to a human, and lets the current player choose who draws an extra card when the
+  Mutineer card is still in the deck (rule 5.5.2.3). No hand-off from 7 distance, also in an execution (rule 6.1.1).
+- `RevealMutineerEvent(playerNumber, drawsLoyaltyCard)` has its processor: the card stays among the Loyalty Cards and is
+  known to everybody, the player loses the titles, draws a Mutiny Card and, when dealt it facedown, another Loyalty Card.
+  `FinishExecutionEventProcessor` deals the cards through `DealLoyaltyCardsEvent`, with the extra cards of Boomer and
+  Baltar before the Sleeper Agent phase, and sends a new Boomer to the "Brig" after it.
+- `EndGameEvent` reduces the resource of each unrevealed Personal Goal of a human by 1 and ends the game for the humans
+  unless a resource is 0. `EndGame` is the one way to end a game: the Cylon Leaders reveal the Motive Cards that they can
+  (`MotiveCards`, as printed), and the winners are the players of the winning team plus the Leaders with at least two
+  revealed cards of its allegiance and at most one unrevealed (rule 16.3.2). `GameEnded` carries them, in
+  `GameView.winners()`. `CylonsWinEvent` goes through it too.
+- New facts: `JumpPreparationReset`, `DestinationReached`, `MotiveCardRevealed`, and `GameEnded` got the winners.
+- Still without a processor: the 3 placeholders and `MoveCivilianShipEvent`, `CapricaPlaySuperCrisisCardEvent` and
+  `HumanPrisonerFailEvent`, which no jump, Sleeper Agent phase or end game reaches.
+- Not built: revealing a Motive Card or a Personal Goal in the middle of the game, Final Five cards, "Mining Asteroid".
+- Tests: `JumpAndKobolTest` plays four jumps and the end game through `submit` and `choose`, restoring at every pause:
+  the Sleeper Agent phase at 5 distance, a human win, and a Personal Goal that turns it into a Cylon one.
+  `StackDeckEvent` is its test-only way to stack the Destination and Loyalty decks. The Cylon wins are in `GameEngineTest`.
+
 ## Phase 13 - Docs
 
 - Update `CLAUDE.md`: packages, architecture, roadmap. `Turn` moves from the root package description to `state/`.

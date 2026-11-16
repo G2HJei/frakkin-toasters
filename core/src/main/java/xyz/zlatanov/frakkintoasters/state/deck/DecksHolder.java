@@ -23,7 +23,6 @@ import xyz.zlatanov.frakkintoasters.state.view.DecksHolderView;
 
 import java.util.List;
 
-import static xyz.zlatanov.frakkintoasters.state.card.DestinationCard.*;
 import static xyz.zlatanov.frakkintoasters.state.util.AllCardsProvider.*;
 
 @Builder
@@ -39,7 +38,7 @@ public class DecksHolder implements DecksHolderView {
     @Builder.Default
     private final Deck<BasestarDamage>  basestarDamage  = genericDeck(BasestarDamage.class, false);
     @Builder.Default
-    private final Deck<DestinationCard> destination     = genericDeck(DestinationCard.class, REMOTE_PLANET, ICY_MOON, BARREN_PLANET, TYLIUM_PLANET, TYLIUM_PLANET, TYLIUM_PLANET);
+    private final Deck<DestinationCard> destination     = genericDeck(DestinationCard.class);
     @Builder.Default
     private final Deck<SkillCard>       politics        = politicsCards();
     @Builder.Default
@@ -120,6 +119,16 @@ public class DecksHolder implements DecksHolderView {
     @Override
     public int civilianShipsLeft() {
         return civilianShips.size();
+    }
+
+    @Override
+    public int loyaltyCardsLeft() {
+        return loyalty.size();
+    }
+
+    @Override
+    public int crisisCardsLeft() {
+        return crisis.size() + crisis.discardSize();
     }
 
     public <T> Deck<T> deck(DeckId id) {

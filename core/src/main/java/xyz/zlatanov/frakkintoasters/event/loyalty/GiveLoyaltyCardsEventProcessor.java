@@ -17,10 +17,10 @@ public class GiveLoyaltyCardsEventProcessor extends EventProcessor<GiveLoyaltyCa
         return isPlayer(recipient)
                 && recipient != player.number()
                 && game.player(recipient).isHuman()
-                && !cardsToGive().isEmpty();
+                && !cardsToGive().isEmpty()
+                && FinishSleeperAgentPhaseEventProcessor.canHandOffLoyaltyCards(game); // rule 6.1.1
     }
 
-    // todo no excess Loyalty Cards may be handed off once Galactica has traveled 7 or more distance (rule 6.1.1)
     @Override
     public Followup process() {
         ops.player(player.number()).giveLoyaltyCards(event.recipientPlayerNumber(), cardsToGive());

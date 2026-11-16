@@ -2,6 +2,7 @@ package xyz.zlatanov.frakkintoasters.event.loyalty;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
+import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
@@ -19,7 +20,8 @@ import static xyz.zlatanov.frakkintoasters.state.character.CharacterType.CYLON_L
 
 public class CreateLoyaltyDeckEventProcessor extends EventProcessor<CreateLoyaltyDeckEvent> {
 
-    private static final List<Character> CHARACTERS_WITH_EXTRA_CARDS = List.of(SHARON_BOOMER_VALERII, GAIUS_BALTAR);
+    // The characters whose player is dealt an additional Loyalty Card, at the start of the game and in the Sleeper Agent phase
+    public static final List<Character> CHARACTERS_WITH_EXTRA_CARDS = List.of(SHARON_BOOMER_VALERII, GAIUS_BALTAR);
 
     @Override
     public Followup process() {
@@ -60,16 +62,12 @@ public class CreateLoyaltyDeckEventProcessor extends EventProcessor<CreateLoyalt
         ops.player(cylonPlayerNumber).drawMotiveCards();
     }
 
+    // "When a human player receives the Mutineer card facedown at the start of the game, he must immediately reveal it."
     private Followup followup() {
-        val hasMutineer = game.players()
-                .stream()
-                .map(PlayerView::loyaltyCards)
-                .map(DeckView::cards)
-                .flatMap(Collection::stream)
-                .anyMatch(MUTINEER::equals);
-        return hasMutineer
-                ? single(new RevealMutineerEvent())
-                : Followup.NONE;
+        return Followup.all(game.players().stream()
+                .filter(player -> player.loyaltyCards().cards().contains(MUTINEER))
+                .map(player -> new RevealMutineerEvent(player.number(), true))
+                .toArray(Event[]::new));
     }
 
     private boolean withCylonLeader() {

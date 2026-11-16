@@ -3,6 +3,7 @@ package xyz.zlatanov.frakkintoasters.engine.journal.fact;
 import xyz.zlatanov.frakkintoasters.state.PlayerPile;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
+import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 
 import java.util.List;
@@ -44,6 +45,9 @@ public sealed interface PlayerFact extends Fact {
     }
 
     record LoyaltyCardRevealed(int playerNumber, LoyaltyCard card) implements PlayerFact {
+    }
+
+    record MotiveCardRevealed(int playerNumber, MotiveCard card) implements PlayerFact {
     }
 
     record InfiltrationStarted(int playerNumber) implements PlayerFact {

@@ -324,7 +324,7 @@ class FactApplierTest {
     void gameEndedSetsTheOutcome() {
         assertEquals(Optional.empty(), game.outcome());
 
-        apply(new GameEnded(CYLONS));
+        apply(new GameEnded(CYLONS, List.of()));
 
         assertEquals(Optional.of(CYLONS), game.outcome());
     }

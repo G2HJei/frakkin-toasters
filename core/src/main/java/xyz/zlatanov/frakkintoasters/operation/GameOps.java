@@ -163,8 +163,8 @@ public class GameOps extends AbstractOps {
         return first;
     }
 
-    public void endGame(Team winner) {
-        record(new GameEnded(winner));
+    public void endGame(Team winner, List<Integer> winners) {
+        record(new GameEnded(winner, winners));
     }
 
     /**

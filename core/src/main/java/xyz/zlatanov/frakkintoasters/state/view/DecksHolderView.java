@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.state.view;
 
+import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 
@@ -12,6 +13,18 @@ public interface DecksHolderView {
     int skillCardsLeft(SkillCardColor color);
 
     int civilianShipsLeft();
+
+    /**
+     * @return the Loyalty Cards that nobody has been dealt
+     */
+    int loyaltyCardsLeft();
+
+    DeckView<LoyaltyCard> loyalty();
+
+    /**
+     * @return the Crisis Cards in the draw pile and the discard pile, which is shuffled in when the draw pile runs out
+     */
+    int crisisCardsLeft();
 
     DeckView<SkillCard> destiny();
 }

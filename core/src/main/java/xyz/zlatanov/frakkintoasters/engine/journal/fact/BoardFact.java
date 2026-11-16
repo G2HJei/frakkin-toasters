@@ -20,6 +20,10 @@ public sealed interface BoardFact extends Fact {
     record JumpPreparationDecreased() implements BoardFact {
     }
 
+    // The fleet token goes back to the start space when the fleet jumps (rule 12.1.1).
+    record JumpPreparationReset() implements BoardFact {
+    }
+
     record LocationDamaged(Location location) implements BoardFact {
     }
 
