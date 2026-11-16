@@ -147,7 +147,7 @@ public class GameEngine {
         return journal;
     }
 
-    // All or nothing (decision 6 in engine-plan.md). Facts apply as they are recorded, so a failure rebuilds the game
+    // All or nothing. Facts apply as they are recorded, so a failure rebuilds the game
     // from the journal as it stood before the input. Only a failure pays for the replay.
     private void advance(Runnable acceptedInput) {
         val entriesBefore = journal.size();
@@ -241,7 +241,7 @@ public class GameEngine {
         });
     }
 
-    // A PlayerEvent names the acting player, so the options name the chooser, if anyone. Decision 7 in engine-plan.md.
+    // A PlayerEvent names the acting player, so the options name the chooser, if anyone.
     private int chooser(OneOf oneOf) {
         val players = playersIn(oneOf).distinct().toList();
         if (players.size() > 1) {

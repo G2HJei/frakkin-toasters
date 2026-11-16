@@ -35,29 +35,28 @@ code. That includes:
 
 - `skill-check.drawio` - the full skill check sequence: before-check cards, playing cards in, abilities, result,
   consequences, and the optional followup events.
-- `architecture.md` - the target design for the `GameView` + game ops + journal + describers + engine and the journal.
 
 ## Roadmap
 
 Next steps, in order:
 
-1. ~~Complete the skill check sequence according to `skill-check.drawio`.~~ Done in phase 9 of `engine-plan.md`, see
-   "Skill Check Sequence".
+1. ~~Complete the skill check sequence according to `skill-check.drawio`.~~ Done, see "Skill Check Sequence".
 2. ~~Reanalyze existing events: `PlayerEvent` or current player.~~ Done. The engine still has to call
    `GameOps.actingPlayer`
    for "Executive Order".
 3. ~~Create the journal and tie it to the ops classes in `operation/`.~~ Done, see "Journal and Replay". Still open:
    describers and per-viewer hiding, and JSON serialization. The pending followups are the engine's `Agenda`.
-4. Create the game engine to drive the events and turns. `engine-plan.md` has the plan in phases. Phases 1 to 12 are
-   done: the journal moved out of `Game` into `engine/journal/`, the turn state is grouped in `state/Turn`, the journal
-   and processors are ready for the engine, `GameEngine` runs events through `submit` and `choose`, it restores a
+4. ~~Create the game engine to drive the events and turns.~~ Done: the journal lives in `engine/journal/`, the turn state is grouped in `state/Turn`, `GameEngine` runs events through `submit` and `choose`, it restores a
    game from its journal and rolls back a failed input (see "Engine"), `GameEngine.start` sets up a game and plays
    its turns (see "Turn Loop"), processors check what players submit (see "Validation"), the Cylons can win (see
    "End of Game and Mutiny"), a skill check runs from the action that starts it to its end, with every location
    action in scope (see "Skill Check Sequence" and "Execution"), and the six interrupt Skill Cards are played in
    secret windows around die rolls and attacks (see "Interrupt Cards" and "Combat"), and the Crisis step resolves every
    Crisis Card and activates the Cylon ships by its icon (see "Crisis Cards"), and the fleet jumps through the Sleeper Agent
-   phase to the Kobol end game (see "Jump and Kobol"). Next is phase 13: the docs.
+   phase to the Kobol end game (see "Jump and Kobol"). Still open, as new events that plug in: Executive
+   Order and the other `Action:` and `Movement:` skill cards, Cylon reveal, Quorum and Super Crisis cards, and the
+   interrupts that aren't skill cards (character abilities such as Helo's reroll, and revealing a Motive Card in the
+   middle of resolving something, rule 6.2.2.1), which can reuse the interrupt windows.
 5. Create a working frontend with the events that exist by then.
 
 ## Project Structure
@@ -111,6 +110,7 @@ Multi-module Gradle project with a single `core` module. Package root: `xyz.zlat
 - `state/damage/` - damage card enums: `GalacticaDamage`, `PegasusDamage`, `BasestarDamage`
 - `state/track/` - `BoardingParty`, `JumpPreparation`, `Pursuit`
 - `state/character/` - `Character` enum (33 BSG characters), `CharacterType` enum
+- `state/util/` - `AllCardsProvider` (builds the full decks in canonical order)
 - `state/exception/` - `InvalidActionException` (an event failed validation) and `FrakCallTheAdmiralException` (should
   never happen, i.e. a programming error)
 
@@ -219,7 +219,7 @@ sections, `TOP` and `BOTTOM`. On a skill check crisis the top is the skill check
 instruction.
 
 - `choice(card)` gives a `OneOf` of two `ChooseCrisisSectionEvent`s, one per section. They are `PlayerEvent`s that name
-  the chooser, because the engine derives who answers a `OneOf` from its options (decision 7 in `engine-plan.md`) and
+  the chooser, because the engine derives who answers a `OneOf` from its options (see "Engine") and
   most sections name no player. Don't put the effects of a section directly into the `one(...)`. A section a card
   forbids isn't offered: the "nuke token" sections of "Abandon Galactica" and "Build Cylon Detector" need a nuke token.
 - `ChooseCrisisSectionEventProcessor` starts the skill check on the top of a skill check crisis, and otherwise asks
@@ -317,8 +317,9 @@ constructor takes any first event, and `GameEngineTest` uses the test-only `Scri
   runs it, puts the result of `WinChecks` before the followup, closes the scope with both and pushes them. It stops at a
   `PlayerDecisionEvent` or a `OneOf`, and clears the agenda once the game has an outcome. Only that empties the
   agenda: running out of events before the game ends throws `FrakCallTheAdmiralException`.
-- The chooser of a `OneOf` is the player of the `PlayerEvent`s in its options, otherwise the current player (decision 7
-  in `engine-plan.md`). Options that name different players are a bug.
+- The chooser of a `OneOf` is the player of the `PlayerEvent`s in its options, otherwise the current player. That
+  works because `PlayerEvent.playerNumber()` is always the acting player: an event that names a target, such as
+  `SendToBrigEvent`, is a plain `Event`. Options that name different players are a bug.
 - Input check: the right player, `decision.action().isInstance(event)` (so `ActionEvent` takes any location action),
   and a submitted `PlayerEvent` names the submitter.
 - Rejected input throws `InvalidActionException` and changes nothing. A queued event that fails validation and a
@@ -492,9 +493,7 @@ and its result.
 
 ### Journal and Replay
 
-The journal records exactly what the game ops did, so a game can be rebuilt from the journal alone (`journal-plan.md`
-has
-the design). It is fact-sourced: replay applies recorded facts, and never re-runs processors or needs randomness.
+The journal records exactly what the game ops did, so a game can be rebuilt from the journal alone. It is fact-sourced: replay applies recorded facts, and never re-runs processors or needs randomness.
 
 - `Fact` (`engine/journal/fact/`) is a sealed interface, grouped by area: `BoardFact`, `DeckFact`, `GameFact`,
   `InterruptFact`, `PlayerFact`, `ShipFact`, `SkillCheckFact`, `TitleFact`. The records are nested in the area interfaces, because a
