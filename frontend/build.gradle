@@ -14,12 +14,17 @@ node {
 
 def sources = [file('src'), file('index.html'), file('package.json'), file('package-lock.json'), file('vite.config.ts'),
                file('tsconfig.json')]
+// the images the app shows (src/art), without the rulebooks
+def materials = fileTree(rootProject.file('materials-sorted')) {
+    include '**/*.png', '**/*.jpg', '**/*.gif'
+}
 
 tasks.register('npmBuild', NpmTask) {
     description = 'Type checks and builds the app into dist/'
     dependsOn tasks.named('npmInstall')
     args = ['run', 'build']
     inputs.files(sources)
+    inputs.files(materials)
     outputs.dir('dist')
 }
 
@@ -28,6 +33,7 @@ tasks.register('npmTest', NpmTask) {
     dependsOn tasks.named('npmInstall')
     args = ['test']
     inputs.files(sources)
+    inputs.files(materials)
     inputs.dir('scripts')
     outputs.upToDateWhen { false }
 }

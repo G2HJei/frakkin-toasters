@@ -1,0 +1,226 @@
+// The images of materials-sorted at the repository's root: a folder per enum of the core, a file per constant, named
+// like it. Vite copies them into the build and gives each its URL. A component that has no image falls back to its name.
+import { constantLabel, skillCardLabel, type SkillCardLike } from '../labels/describe';
+
+const FILES = import.meta.glob<string>('./**/*.{png,jpg,gif}', {
+  base: '../../../materials-sorted',
+  eager: true,
+  query: '?url',
+  import: 'default',
+});
+
+// "./CrisisCard/WATER_SABOTAGED.png" -> "CrisisCard/WATER_SABOTAGED"
+const URLS = new Map<string, string>(Object.entries(FILES).map(([path, url]) => [path.replace(/^\.\//, '').replace(/\.\w+$/, ''), url]));
+
+/** Every image by its path without the extension, e.g. `Character/player-token/LAURA_ROSLIN`. */
+export function artPaths(): string[] {
+  return [...URLS.keys()];
+}
+
+export type ArtShape = 'card' | 'token' | 'pilot' | 'location' | 'ship' | 'damage' | 'dial' | 'track' | 'back';
+
+/** An image of a component: its file, its name as alt text, and what the preview shows large. */
+export interface ArtRef {
+  key: string;
+  url: string;
+  label: string;
+  shape: ArtShape;
+  preview: string[];
+}
+
+function art(path: string, label: string, shape: ArtShape, previewPaths: string[] = [path]): ArtRef | null {
+  const url = URLS.get(path);
+  if (!url) {
+    return null;
+  }
+  const preview = previewPaths.map((previewPath) => URLS.get(previewPath)).filter((found): found is string => found !== undefined);
+  return { key: path, url, label, shape, preview };
+}
+
+export const CARD_ENUMS = [
+  'CrisisCard',
+  'SuperCrisisCard',
+  'DestinationCard',
+  'LoyaltyCard',
+  'MotiveCard',
+  'MutinyCard',
+  'QuorumCard',
+  'ObjectiveCard',
+] as const;
+
+export type CardEnum = (typeof CARD_ENUMS)[number];
+
+export type DamageEnum = 'GalacticaDamage' | 'PegasusDamage' | 'BasestarDamage';
+
+type Constant = string | null | undefined;
+
+export function cardArt(enumName: CardEnum, card: Constant): ArtRef | null {
+  return card ? art(`${enumName}/${card}`, constantLabel(enumName, card), 'card') : null;
+}
+
+// A Skill Card's image is named by its type and value, e.g. SkillCardType/CALCULATIONS_3.
+export function skillCardArt(card: SkillCardLike | null | undefined): ArtRef | null {
+  return card?.type ? art(`SkillCardType/${card.type}_${card.value}`, skillCardLabel(card), 'card') : null;
+}
+
+/** A Skill Card known only by its type, e.g. a card played on a die roll: the image of its lowest value. */
+export function skillTypeArt(type: Constant): ArtRef | null {
+  if (!type) {
+    return null;
+  }
+  const path = artPaths()
+    .filter((candidate) => new RegExp(`^SkillCardType/${type}_\\d+$`).test(candidate))
+    .sort()[0];
+  return path ? art(path, constantLabel('SkillCardType', type), 'card') : null;
+}
+
+/** A character's standee, with the character sheet as its preview. */
+export function characterArt(character: Constant): ArtRef | null {
+  return character
+    ? art(`Character/player-token/${character}`, constantLabel('Character', character), 'token', [`Character/card/${character}`])
+    : null;
+}
+
+export function characterSheetArt(character: Constant): ArtRef | null {
+  return character ? art(`Character/card/${character}`, constantLabel('Character', character), 'card') : null;
+}
+
+/** A pilot's round token, for his ship. Only the pilots have one. */
+export function pilotArt(character: Constant): ArtRef | null {
+  return character
+    ? art(`Character/piloting-token/${character}`, constantLabel('Character', character), 'pilot', [`Character/card/${character}`])
+    : null;
+}
+
+// The Basestar Bridge card comes in three parts, its name and its six abilities.
+const LOCATION_PARTS: Partial<Record<string, string[]>> = {
+  BASESTAR_BRIDGE: ['BASESTAR_BRIDGE_1', 'BASESTAR_BRIDGE_2', 'BASESTAR_BRIDGE_3'],
+};
+
+/** A location's card. The space areas have none. */
+export function locationArt(location: Constant): ArtRef | null {
+  if (!location) {
+    return null;
+  }
+  const parts = (LOCATION_PARTS[location] ?? [location]).map((part) => `Location/${part}`);
+  return art(parts[0], constantLabel('Location', location), 'location', parts);
+}
+
+export function shipArt(type: Constant): ArtRef | null {
+  return type ? art(`ShipType/${type}`, constantLabel('ShipType', type), 'ship') : null;
+}
+
+export function damageArt(enumName: DamageEnum, damage: Constant): ArtRef | null {
+  return damage ? art(`${enumName}/${damage}`, constantLabel(enumName, damage), 'damage') : null;
+}
+
+/** The back of a deck's cards. The Skill Card decks have none: their color shows instead. */
+export function deckBackArt(deck: Constant): ArtRef | null {
+  // the "You Are Not a Cylon" cards are Loyalty Cards, with their back
+  const back = deck === 'LOYALTY_NOT_CYLON' ? 'LOYALTY' : deck;
+  return back ? art(`DeckId/${back}`, constantLabel('DeckId', deck), 'back') : null;
+}
+
+/** A resource dial set to a value, 0 to 15. */
+export function resourceArt(resource: Constant, value: number): ArtRef | null {
+  return resource ? art(`Resource/${resource}_${value}`, `${constantLabel('Resource', resource)} ${value}`, 'dial', []) : null;
+}
+
+/** A track with its token at a position. */
+export function trackArt(enumName: 'JumpPreparation' | 'Pursuit', position: Constant): ArtRef | null {
+  return position ? art(`${enumName}/${position}`, constantLabel(enumName, position), 'track') : null;
+}
+
+/** The card a skill check comes from: a Crisis Card, a Super Crisis Card, or the location of a location's check. */
+export function skillCheckArt(type: Constant): ArtRef | null {
+  return cardArt('CrisisCard', type) ?? cardArt('SuperCrisisCard', type) ?? locationArt(type);
+}
+
+/** The image of a constant of an enum, for the enums that have images. */
+export function enumArt(enumName: string, constant: Constant): ArtRef | null {
+  if ((CARD_ENUMS as readonly string[]).includes(enumName)) {
+    return cardArt(enumName as CardEnum, constant);
+  }
+  switch (enumName) {
+    case 'Character':
+      return characterArt(constant);
+    case 'Location':
+      return locationArt(constant);
+    case 'ShipType':
+      return shipArt(constant);
+    case 'GalacticaDamage':
+    case 'PegasusDamage':
+    case 'BasestarDamage':
+      return damageArt(enumName, constant);
+    case 'SkillCheckType':
+      return skillCheckArt(constant);
+    case 'SkillCardType':
+      return skillTypeArt(constant);
+    default:
+      return null;
+  }
+}
+
+/** The kind of card a deck holds: a card enum, a Skill Card, or a civilian ship. */
+export function deckCards(deck: Constant): string | null {
+  switch (deck) {
+    case 'CRISIS':
+      return 'CrisisCard';
+    case 'SUPER_CRISIS':
+      return 'SuperCrisisCard';
+    case 'QUORUM':
+      return 'QuorumCard';
+    case 'LOYALTY':
+    case 'LOYALTY_NOT_CYLON':
+      return 'LoyaltyCard';
+    case 'MUTINY':
+      return 'MutinyCard';
+    case 'MOTIVE':
+      return 'MotiveCard';
+    case 'DESTINATION':
+      return 'DestinationCard';
+    case 'GALACTICA_DAMAGE':
+      return 'GalacticaDamage';
+    case 'PEGASUS_DAMAGE':
+      return 'PegasusDamage';
+    case 'BASESTAR_DAMAGE':
+      return 'BasestarDamage';
+    case 'CIVILIAN_SHIPS':
+      return 'CivilianShip';
+    case null:
+    case undefined:
+      return null;
+    default:
+      return 'SkillCard';
+  }
+}
+
+/** The deck a player's pile comes from, for the back of its hidden cards. */
+export function pileDeck(pile: Constant): string | null {
+  switch (pile) {
+    case 'SKILL':
+      return null;
+    case 'LOYALTY':
+      return 'LOYALTY';
+    case 'MOTIVE':
+      return 'MOTIVE';
+    case 'MUTINY':
+      return 'MUTINY';
+    case 'SUPER_CRISIS':
+      return 'SUPER_CRISIS';
+    default:
+      return null;
+  }
+}
+
+/** A card of a deck or a pile, whatever its kind: an enum's constant, a Skill Card, or a civilian ship. */
+export function deckCardArt(card: unknown, kind: string | null): ArtRef | null {
+  if (card && typeof card === 'object' && 'type' in card && 'value' in card) {
+    return skillCardArt(card as SkillCardLike);
+  }
+  if (card && typeof card === 'object' && 'id' in card) {
+    const ship = shipArt('CIVILIAN');
+    return ship ? { ...ship, key: `${ship.key}#${(card as { id: number }).id}`, label: `Civilian ship #${(card as { id: number }).id}` } : null;
+  }
+  return typeof card === 'string' && kind ? enumArt(kind, card) : null;
+}

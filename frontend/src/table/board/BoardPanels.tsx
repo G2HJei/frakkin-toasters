@@ -1,8 +1,10 @@
+import { characterArt, deckBackArt, deckCardArt, deckCards, shipArt } from '../../art/images';
+import { ArtImg, CardBack } from '../../art/Art';
 import { cardLabel, constantLabel } from '../../labels/describe';
-import type { ShipProjection } from '../../wire/types';
+import type { DeckProjection, ShipProjection } from '../../wire/types';
 import { useTable } from '../tableContext';
 
-/** What the board's schematic leaves out: the reserves, the damaged vipers, the Cylon supply and what is out of the game. */
+/** What the board leaves out: the reserves, the damaged vipers, the Cylon supply and what is out of the game. */
 export function BoardExtras() {
   const table = useTable();
   const game = table.game;
@@ -10,18 +12,28 @@ export function BoardExtras() {
     return null;
   }
   const galactica = game.galactica;
+  const supply = game.cylonSupply;
   return (
     <section className="panel board-extras" aria-label="board extras">
       <ShipRow title="Reserves" ships={galactica?.reserves ?? []} />
       <ShipRow title="Damaged vipers" ships={galactica?.damagedVipers ?? []} />
-      <p className="muted small">
-        Cylon supply: {game.cylonSupply?.basestars} basestars, {game.cylonSupply?.raiders} raiders, {game.cylonSupply?.heavyRaiders} heavy raiders,{' '}
-        {game.cylonSupply?.centurions} centurions
+      <p className="row">
+        <span className="row-name">Cylon supply</span>
+        <Supply type="BASESTAR" count={supply?.basestars} />
+        <Supply type="RAIDER" count={supply?.raiders} />
+        <Supply type="HEAVY_RAIDER" count={supply?.heavyRaiders} />
+        <span className="ship-chip">{supply?.centurions ?? 0} centurions</span>
       </p>
       {((game.removedCharacters ?? []).length > 0 || (game.destroyedShips ?? []).length > 0) && (
-        <p className="muted small">
-          Out of the game: {(game.removedCharacters ?? []).map((character) => constantLabel('Character', character)).join(', ')}{' '}
-          {(game.destroyedShips ?? []).map(shipLabel).join(', ')}
+        <p className="row out-of-game">
+          <span className="row-name">Out of the game</span>
+          {(game.removedCharacters ?? []).map((character) => {
+            const art = characterArt(character);
+            return art ? <ArtImg key={character} art={art} className="removed" /> : <span key={character}>{constantLabel('Character', character)}</span>;
+          })}
+          {(game.destroyedShips ?? []).map((ship) => (
+            <ShipChip key={ship.id} ship={ship} />
+          ))}
         </p>
       )}
     </section>
@@ -36,11 +48,29 @@ function ShipRow({ title, ships }: { title: string; ships: ShipProjection[] }) {
     <p className="row">
       <span className="row-name">{title}</span>
       {ships.map((ship) => (
-        <span key={ship.id} className="tile">
-          {shipLabel(ship)}
-        </span>
+        <ShipChip key={ship.id} ship={ship} />
       ))}
     </p>
+  );
+}
+
+function ShipChip({ ship }: { ship: ShipProjection }) {
+  const art = shipArt(ship.type);
+  return (
+    <span className="ship-chip" data-ship={ship.id} title={shipLabel(ship)}>
+      {art && <ArtImg art={{ ...art, label: shipLabel(ship) }} />}
+      <span>#{ship.id}</span>
+    </span>
+  );
+}
+
+function Supply({ type, count }: { type: string; count: number | undefined }) {
+  const art = shipArt(type);
+  return (
+    <span className="ship-chip" title={`${count ?? 0} ${constantLabel('ShipType', type)}`}>
+      {art ? <ArtImg art={art} /> : constantLabel('ShipType', type)}
+      <span>×{count ?? 0}</span>
+    </span>
   );
 }
 
@@ -58,7 +88,7 @@ export function shipLabel(ship: ShipProjection): string {
   return parts.join(' · ');
 }
 
-/** The decks: their counts, the discard piles that lie face up, and the draw piles in order for the sandbox. */
+/** The decks: their backs and counts, the top of each discard pile face up, and the draw piles in order for the sandbox. */
 export function DecksPanel() {
   const table = useTable();
   return (
@@ -75,31 +105,19 @@ export function DecksPanel() {
         <tbody>
           {(table.game?.decks ?? []).map((deck) => (
             <tr key={deck.deck} data-deck={deck.deck}>
-              <td>{constantLabel('DeckId', deck.deck)}</td>
               <td>
-                {deck.drawPile ? (
-                  <details>
-                    <summary>{deck.size}</summary>
-                    <ol className="pile">
-                      {deck.drawPile.map((card, index) => (
-                        <li key={index}>{cardLabel(card)}</li>
-                      ))}
-                    </ol>
-                  </details>
-                ) : (
-                  deck.size
-                )}
+                <span className="deck-name">
+                  <DeckBack deck={deck} />
+                  {constantLabel('DeckId', deck.deck)}
+                </span>
               </td>
+              <td>{deck.drawPile ? <Pile cards={deck.drawPile} deck={deck} count={deck.size} /> : deck.size}</td>
               <td>
                 {deck.discarded && deck.discarded.length > 0 ? (
-                  <details>
-                    <summary>{deck.discardSize}</summary>
-                    <ol className="pile">
-                      {deck.discarded.map((card, index) => (
-                        <li key={index}>{cardLabel(card)}</li>
-                      ))}
-                    </ol>
-                  </details>
+                  <span className="discard">
+                    <TopCard deck={deck} />
+                    <Pile cards={deck.discarded} deck={deck} count={deck.discardSize} />
+                  </span>
                 ) : (
                   deck.discardSize
                 )}
@@ -109,5 +127,46 @@ export function DecksPanel() {
         </tbody>
       </table>
     </section>
+  );
+}
+
+const SKILL_COLORS = ['POLITICS', 'LEADERSHIP', 'TACTICS', 'PILOTING', 'ENGINEERING', 'TREACHERY'];
+
+// The back of a deck, or a Skill Card deck's color.
+function DeckBack({ deck }: { deck: DeckProjection }) {
+  const back = deckBackArt(deck.deck);
+  if (back) {
+    return <ArtImg art={back} className="deck-back" />;
+  }
+  if (SKILL_COLORS.includes(deck.deck ?? '') || deck.deck === 'DESTINY') {
+    return <CardBack color={deck.deck} count={deck.size} size="xs" label={constantLabel('DeckId', deck.deck)} />;
+  }
+  return null;
+}
+
+// The last card discarded lies on top, face up.
+function TopCard({ deck }: { deck: DeckProjection }) {
+  const top = deck.discarded?.[deck.discarded.length - 1];
+  const art = deckCardArt(top, deckCards(deck.deck));
+  return art ? <ArtImg art={art} className="top-card" /> : null;
+}
+
+function Pile({ cards, deck, count }: { cards: unknown[]; deck: DeckProjection; count: number }) {
+  const kind = deckCards(deck.deck);
+  return (
+    <details>
+      <summary>{count}</summary>
+      <ol className="pile">
+        {cards.map((card, index) => {
+          const art = deckCardArt(card, kind);
+          return (
+            <li key={index}>
+              {art && <ArtImg art={art} className="pile-card" />}
+              {cardLabel(card)}
+            </li>
+          );
+        })}
+      </ol>
+    </details>
   );
 }

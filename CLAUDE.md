@@ -11,7 +11,7 @@ games to browsers (see `backend-plan.md`), and the React `frontend` module is th
 
 ## Scope
 
-The rules and card images are in `materials/` (`bsg-rules/Battlestar_Galactica_CR2-0.pdf` and its Appendix are the
+The rules and card images are in `materials-sorted/` (`bsg-rules/Battlestar_Galactica_CR2-0.pdf` and its Appendix are the
 combined rulebook v2). The first version covers the full game with the Kobol objective.
 
 Out of scope: everything that only applies with the New Caprica, Ionian Nebula or Earth Objective Cards. The rulebook
@@ -226,7 +226,7 @@ Daybreak.
 
 A `CrisisCard` constant lists what is printed on the card: its `SkillCheckType` (`null` for an event crisis), its
 `CrisisChooser`, its `CylonActivation` icon and whether it has the "prepare for jump" icon. The images in
-`materials/images` are the source. An event crisis always has a chooser, and a skill check crisis has one
+`materials-sorted/CrisisCard` are the source. An event crisis always has a chooser, and a skill check crisis has one
 (`CURRENT_PLAYER`, `PRESIDENT`, `ADMIRAL` or `CAG`) when it gives an alternate instruction to carry out instead of the
 skill check (rule 8.5.1.1). A skill check crisis without a chooser starts its check straight away.
 
@@ -658,8 +658,17 @@ REST (the lobby lists poll), Zustand for the game. See `frontend-plan.md`.
   leaves the player and the constraints to the server), `src/table/` (the state panels, the log), `src/sandbox/`
   (undo, export, restart with the seed, setup by injecting a `SandboxEvent`, the inspector), `src/pages/`.
 - The browser holds no game rules: a picker only narrows to plausible answers, the engine judges them.
-- The board (`src/table/board/`): `BoardSvg` draws our own schematic (never the publisher's art), laid out in
-  `layout.ts`, which has a place for every `Location` (a test checks it). Inputs on the board are in
+- `src/art/`: the images of `materials-sorted/` (a folder per enum, a file per constant, a Skill Card as
+  `TYPE_value`, a dial as `RESOURCE_value`). `images.ts` loads them with `import.meta.glob`, so Vite copies them into
+  the build, and gives an `ArtRef` per component (`cardArt`, `skillCardArt`, `characterArt` (the standee, with the
+  character sheet as the preview), `locationArt`, `shipArt`, `deckBackArt`, ...) or `null` where there is none: the
+  UI then shows the name. `refs.ts` finds what an event, a fact or an option names through the schema, for the log and
+  the input. `Art.tsx`: `CardTile` (a face-up card is a `tile`, a face-down one a `tile back`, which the lobby e2e
+  checks), `CardBack`, `ArtStrip`, `SvgArt`, and the hover preview (`ArtPreview`). `images.test.ts` checks that every
+  constant has its image and every image names a constant.
+- The board (`src/table/board/`): `BoardSvg` puts the location cards, standees, damage tokens, ships with their pilot
+  tokens, dials and tracks on our own layout, `layout.ts`, which has a place for every `Location` (a test checks it).
+  The space areas and the boarding party track have no image and stay schematic. Inputs on the board are in
   `src/input/boardMoves.ts`: a move by clicking a location (asking for a discard when it leaves its ship) and the "Act"
   button on the asked player's location. Each builds the same event, or picks the same option, as the builder; a test
   checks it. The builder stays for everything else.

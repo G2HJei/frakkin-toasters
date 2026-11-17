@@ -9,6 +9,8 @@ import { SandboxToolbar } from '../sandbox/SandboxToolbar';
 import { BoardExtras, DecksPanel } from '../table/board/BoardPanels';
 import { BoardSvg } from '../table/board/BoardSvg';
 import { actLocation, actOption, leavesArea, moveEvent, moveTargets } from '../input/boardMoves';
+import { skillCardArt } from '../art/images';
+import { ArtImg, ArtPreview } from '../art/Art';
 import { constantLabel, skillCardLabel } from '../labels/describe';
 import { LogPanel } from '../table/log/LogPanel';
 import { PlayersPanel } from '../table/players/PlayersPanel';
@@ -115,8 +117,9 @@ function LiveTable({ gameId, name, seed }: { gameId: string; name: string; seed:
                     <h2>Moving to {constantLabel('Location', pendingMove)}: discard a Skill Card</h2>
                     <div className="picker">
                       {context.hand(asked).map((card, index) => (
-                        <button key={index} type="button" className="tile" onClick={() => { send(submitMessage(token, moveEvent(asked, pendingMove, card))); setPendingMove(null); }}>
-                          {skillCardLabel(card)}
+                        <button key={index} type="button" className="tile card-pick" onClick={() => { send(submitMessage(token, moveEvent(asked, pendingMove, card))); setPendingMove(null); }}>
+                          {skillCardArt(card) && <ArtImg art={skillCardArt(card)!} />}
+                          <span>{skillCardLabel(card)}</span>
                         </button>
                       ))}
                       <button type="button" onClick={() => { send(submitMessage(token, moveEvent(asked, pendingMove, null))); setPendingMove(null); }}>No discard</button>
@@ -133,6 +136,7 @@ function LiveTable({ gameId, name, seed }: { gameId: string; name: string; seed:
             </div>
           </>
         )}
+        <ArtPreview />
       </main>
     </Table.Provider>
   );

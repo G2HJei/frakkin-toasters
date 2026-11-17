@@ -68,9 +68,10 @@ Every phase ends with the tests green. The plan is done when:
    builder stays as "Advanced".
 5. **The frontend owns the wording**, as backend decision 7 says. `labels/` gives a name for every enum constant and
    a template for every event, fact and option. A missing name falls back to the humanized constant.
-6. **The look is our own.** The boards are schematic SVG and the cards are text tiles. The scans in
-   `materials/images` are the publisher's art: reference for the layout, not assets to ship. The UI shows card and
-   character names, not their printed text.
+6. **The table shows the scans.** The images in `materials-sorted/` (a file per enum constant) are the cards,
+   tokens, dials and tracks, on our own board layout (`src/art`). A component without an image shows its name, and
+   the space areas stay schematic. The UI's own wording is names only, never a card's printed text: a card is read
+   from its image, enlarged on hover. (This replaced "the look is our own: schematic SVG and text tiles".)
 7. **The sandbox is a game mode, not a separate app.** It uses the same table and socket, with a `Sandbox` viewer
    that sees everything and answers for whoever is asked. It is stored like any game, so it survives a restart, shows
    in the lobby and can be exported.
@@ -392,7 +393,7 @@ builder's for the same answer.
 
 - Legal-move hints: a list in `core` of the legal answers to a decision. The UI tries and shows the engine's message.
   It would be its own plan, and phase 8 would use it.
-- The printed text of cards and characters, and art from the scans (decision 6).
+- The printed text of cards and characters as text (decision 6): it shows only in the images.
 - The events still open in the engine (Executive Order, Quorum and Super Crisis cards, Cylon reveal). Their decisions
   show in the builder once they exist. Until then, picking an option whose event has no processor (e.g.
   `MoveCivilianShipEvent`) comes back as a server failure, which is what the sandbox is there to find.

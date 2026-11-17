@@ -1,4 +1,6 @@
 import { useMemo } from 'react';
+import { ArtStrip } from '../../art/Art';
+import { factArt, optionArt, recordArt, unique } from '../../art/refs';
 import { eventLabel, factLabel, optionLabel, typeLabel } from '../../labels/describe';
 import { useGameStore } from '../../live/gameStore';
 import type { LogEntry } from '../../wire/types';
@@ -24,7 +26,10 @@ export function groupByTurn(entries: LogEntry[]): TurnGroup[] {
   return groups.filter((group) => group.entries.length > 0);
 }
 
-/** Every scope with its actor, its event and its facts, grouped by turn, the latest turn open. */
+/**
+ * Every scope with its actor, its event and its facts, grouped by turn, the latest turn open. The cards, characters,
+ * locations and ships an entry names show beside it, and the back of the cards a hidden fact counts.
+ */
 export function LogPanel() {
   const table = useTable();
   const log = useGameStore((state) => state.log);
@@ -41,6 +46,7 @@ export function LogPanel() {
                 {entry.kind === 'ChoiceLog' ? (
                   <span>
                     {table.playerName(entry.chooser)} picks {entry.option ? optionLabel(entry.option, table) : 'an option'}
+                    <ArtStrip refs={optionArt(entry.option)} />
                   </span>
                 ) : (
                   <>
@@ -48,6 +54,7 @@ export function LogPanel() {
                     <span className="event">
                       {entry.details ? eventLabel(entry.details as unknown as Record<string, unknown>, table) : typeLabel(entry.event ?? '')}
                     </span>
+                    <ArtStrip refs={unique([...recordArt(entry.details as unknown as Record<string, unknown> | null), ...(entry.facts ?? []).flatMap(factArt)])} />
                     {(entry.facts ?? []).length > 0 && (
                       <ul className="facts">
                         {(entry.facts ?? []).map((fact, factIndex) => (

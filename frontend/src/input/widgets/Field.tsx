@@ -1,6 +1,9 @@
 // One widget per component type: a player, a ship, a number, a checkbox, a constant, cards of a hand or a deck, counts
-// per color, a nested form. "None" for a nullable field. A shape the builder doesn't know falls back to raw JSON.
+// per color, a nested form. "None" for a nullable field. A shape the builder doesn't know falls back to raw JSON. A
+// constant or a card with an image shows it, and a character is picked from the standees too.
 import { useState } from 'react';
+import { characterArt, enumArt, skillCardArt, type ArtRef } from '../../art/images';
+import { ArtImg } from '../../art/Art';
 import { constantLabel, skillCardLabel, typeLabel } from '../../labels/describe';
 import { humanizeType } from '../../labels/humanize';
 import { enumValues, recordNamed, schema, type Component, type TypeRef } from '../../wire/schema';
@@ -125,15 +128,43 @@ function NumberInput(props: WidgetProps) {
 function EnumSelect(props: WidgetProps) {
   const { type, value, onChange } = props;
   const values = enumValues(type.name ?? '');
+  const art = value === null ? null : enumArt(type.name ?? '', value as string);
   return (
-    <select aria-label={props.name} value={value === null ? '' : String(value)} onChange={(event) => onChange(event.target.value === '' ? null : event.target.value)}>
-      {type.nullable && <option value="">none</option>}
-      {values.map((constant) => (
-        <option key={constant} value={constant}>
-          {constantLabel(type.name ?? '', constant)}
-        </option>
-      ))}
-    </select>
+    <>
+      <select aria-label={props.name} value={value === null ? '' : String(value)} onChange={(event) => onChange(event.target.value === '' ? null : event.target.value)}>
+        {type.nullable && <option value="">none</option>}
+        {values.map((constant) => (
+          <option key={constant} value={constant}>
+            {constantLabel(type.name ?? '', constant)}
+          </option>
+        ))}
+      </select>
+      {art && <ArtImg art={art} className="field-art" />}
+      {type.name === 'Character' && <CharacterGallery value={value as string | null} onChange={onChange} />}
+    </>
+  );
+}
+
+// Every character's standee, to pick one by its face. The engine judges whether he can be chosen.
+function CharacterGallery({ value, onChange }: { value: string | null; onChange(value: Value): void }) {
+  return (
+    <span className="gallery" role="group" aria-label="characters">
+      {enumValues('Character').map((character) => {
+        const art = characterArt(character);
+        return art ? (
+          <button
+            type="button"
+            key={character}
+            className={character === value ? 'gallery-item picked' : 'gallery-item'}
+            aria-pressed={character === value}
+            title={art.label}
+            onClick={() => onChange(character)}
+          >
+            <ArtImg art={art} />
+          </button>
+        ) : null;
+      })}
+    </span>
   );
 }
 
@@ -161,15 +192,19 @@ function SkillCardPicker(props: WidgetProps) {
   const { value, onChange, owner } = props;
   const cards = skillCardsFor(owner, table);
   const selected = value === null ? -1 : cards.findIndex((card) => sameCard(card, value as SkillCard));
+  const art = value === null ? null : skillCardArt(value as SkillCard);
   return (
-    <select aria-label={props.name} value={selected} onChange={(event) => onChange(Number(event.target.value) < 0 ? null : cards[Number(event.target.value)])}>
-      <option value={-1}>none</option>
-      {cards.map((card, index) => (
-        <option key={index} value={index}>
-          {skillCardLabel(card)}
-        </option>
-      ))}
-    </select>
+    <>
+      <select aria-label={props.name} value={selected} onChange={(event) => onChange(Number(event.target.value) < 0 ? null : cards[Number(event.target.value)])}>
+        <option value={-1}>none</option>
+        {cards.map((card, index) => (
+          <option key={index} value={index}>
+            {skillCardLabel(card)}
+          </option>
+        ))}
+      </select>
+      {art && <ArtImg art={art} className="field-art" />}
+    </>
   );
 }
 
@@ -196,6 +231,7 @@ function CardsMultiPicker(props: WidgetProps) {
   return (
     <PositionsPicker
       labels={cards.map(skillCardLabel)}
+      arts={cards.map(skillCardArt)}
       onChange={(positions) => props.onChange(positions.map((position) => cards[position]))}
     />
   );
@@ -211,12 +247,13 @@ function PlayedCardsPicker(props: WidgetProps) {
   return (
     <PositionsPicker
       labels={candidates.map(label)}
+      arts={candidates.map((played) => skillCardArt('skillCard' in played ? played.skillCard : played.card))}
       onChange={(positions) => props.onChange(positions.map((position) => candidates[position]))}
     />
   );
 }
 
-function PositionsPicker({ labels, onChange }: { labels: string[]; onChange(positions: number[]): void }) {
+function PositionsPicker({ labels, arts = [], onChange }: { labels: string[]; arts?: (ArtRef | null)[]; onChange(positions: number[]): void }) {
   const [picked, setPicked] = useState<number[]>([]);
   const toggle = (position: number) => {
     const next = picked.includes(position) ? picked.filter((candidate) => candidate !== position) : [...picked, position];
@@ -232,11 +269,12 @@ function PositionsPicker({ labels, onChange }: { labels: string[]; onChange(posi
         <button
           type="button"
           key={position}
-          className={picked.includes(position) ? 'tile picked' : 'tile'}
+          className={['tile', arts[position] ? 'card-pick' : '', picked.includes(position) ? 'picked' : ''].join(' ').trim()}
           aria-pressed={picked.includes(position)}
           onClick={() => toggle(position)}
         >
-          {text}
+          {arts[position] ? <ArtImg art={arts[position] as ArtRef} /> : null}
+          <span>{text}</span>
         </button>
       ))}
     </span>
