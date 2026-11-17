@@ -67,7 +67,7 @@ function LiveTable({ gameId, name, seed }: { gameId: string; name: string; seed:
     // the tab's icon marks an input for you too
     const icon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
     if (icon) {
-      icon.href = yourMove ? '/favicon-move.svg' : '/favicon.svg';
+      icon.href = yourMove ? '/favicon-move.svg' : '/favicon.ico';
     }
   }, [game, name]);
 

@@ -36,6 +36,7 @@ function LoggedIn() {
     <>
       <nav className="top">
         <Link to="/" className="brand">
+          <img src="/logo.png" alt="" />
           Frakkin Toasters
         </Link>
         <span className="spacer" />
