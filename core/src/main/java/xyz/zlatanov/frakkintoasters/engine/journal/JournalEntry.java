@@ -38,6 +38,17 @@ public sealed interface JournalEntry {
      * @param scopeId the scope of the event that queued the {@code OneOf}
      * @param option  the picked option
      */
+    /**
+     * A sandbox setup event ran at once, ahead of the pending input. Its scope follows, with the root as its parent.
+     */
+    record EventInjected(Event event) implements JournalEntry {
+
+        @Override
+        public int scopeId() {
+            return Journal.ROOT_SCOPE;
+        }
+    }
+
     record ChoiceMade(int scopeId, int chooser, Followup option) implements JournalEntry {
     }
 }

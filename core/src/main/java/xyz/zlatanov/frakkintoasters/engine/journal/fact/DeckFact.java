@@ -37,6 +37,13 @@ public sealed interface DeckFact extends Fact {
         }
     }
 
+    // A sandbox setup takes the cards out of the draw pile, to stack them or give them to a player, so no copy appears.
+    record CardsPulled(DeckId deck, List<?> cards) implements DeckFact {
+        public CardsPulled {
+            cards = List.copyOf(cards);
+        }
+    }
+
     record CardsDiscarded(DeckId deck, List<?> cards) implements DeckFact {
         public CardsDiscarded {
             cards = List.copyOf(cards);

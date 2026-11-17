@@ -1,0 +1,650 @@
+/* Our own look: a schematic console. Cards are text tiles, colored by their Skill Card color. */
+:root {
+  --bg: #0d1117;
+  --panel: #161b22;
+  --panel-raised: #1f2630;
+  --line: #2d3540;
+  --text: #e3e8ef;
+  --muted: #8b96a5;
+  --accent: #e0a73a;
+  --accent-text: #1a1206;
+  --danger: #e5534b;
+  --ok: #57ab5a;
+  --cylon: #c96262;
+  --politics: #c9a227;
+  --leadership: #5f9e4f;
+  --tactics: #8a63c9;
+  --piloting: #c0503f;
+  --engineering: #3f7fc0;
+  --treachery: #6d4a3a;
+  --radius: 6px;
+  color-scheme: dark;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--text);
+  background: var(--bg);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+}
+
+a {
+  color: var(--accent);
+}
+
+h1 {
+  font-size: 1.4rem;
+  margin: 0.2rem 0 0.8rem;
+}
+
+h2 {
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin: 0.6rem 0 0.4rem;
+}
+
+button,
+.button {
+  display: inline-block;
+  background: var(--panel-raised);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.35rem 0.75rem;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+button:hover,
+.button:hover {
+  border-color: var(--accent);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+button.primary,
+.button.primary {
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+button.link {
+  background: none;
+  border: none;
+  color: var(--accent);
+  padding: 0 0.25rem;
+}
+
+input,
+select,
+textarea {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.3rem 0.45rem;
+  font: inherit;
+  max-width: 100%;
+}
+
+input[type='number'] {
+  width: 5rem;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.small {
+  font-size: 0.85rem;
+}
+
+.error,
+.rejected {
+  color: var(--danger);
+}
+
+nav.top {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+
+nav.top .brand {
+  font-weight: 700;
+  color: var(--text);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+  margin: 0.6rem 0;
+}
+
+.page-actions form {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.card,
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 0.8rem;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  align-items: flex-start;
+}
+
+.field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.25rem 0;
+}
+
+.field-name {
+  min-width: 8rem;
+  color: var(--muted);
+}
+
+.games {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.games li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  background: var(--panel-raised);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  margin-right: 0.25rem;
+}
+
+.seats {
+  padding-left: 1.4rem;
+}
+
+/* the table */
+
+.table-page {
+  padding: 0.6rem 1rem 2rem;
+}
+
+.table-header {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.connection {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.connection.open {
+  color: var(--ok);
+}
+
+.connection.reconnecting {
+  color: var(--danger);
+}
+
+.table-grid {
+  display: grid;
+  grid-template-columns: minmax(320px, 1.1fr) minmax(320px, 1.2fr) minmax(300px, 1fr);
+  gap: 0.8rem;
+  align-items: start;
+}
+
+@media (max-width: 1100px) {
+  .table-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.input-panel {
+  border-color: var(--accent);
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  align-items: stretch;
+}
+
+.option {
+  text-align: left;
+}
+
+.constraint {
+  color: var(--accent);
+}
+
+.actions {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.nested {
+  display: block;
+  border-left: 2px solid var(--line);
+  padding-left: 0.6rem;
+  margin-left: 0.2rem;
+}
+
+.picker,
+.counts {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.count {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.count input {
+  width: 3.5rem;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  align-items: center;
+  margin: 0.25rem 0;
+}
+
+.row-name {
+  color: var(--muted);
+  min-width: 6.5rem;
+}
+
+.tile {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  background: var(--panel-raised);
+  font-size: 0.85rem;
+}
+
+.tile.picked {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.tile.back {
+  font-style: italic;
+}
+
+.tile.revealed,
+.tile.cylon {
+  border-color: var(--cylon);
+}
+
+.tile.crisis {
+  border-color: var(--accent);
+}
+
+.skill-politics {
+  border-left: 4px solid var(--politics);
+}
+
+.skill-leadership {
+  border-left: 4px solid var(--leadership);
+}
+
+.skill-tactics {
+  border-left: 4px solid var(--tactics);
+}
+
+.skill-piloting {
+  border-left: 4px solid var(--piloting);
+}
+
+.skill-engineering {
+  border-left: 4px solid var(--engineering);
+}
+
+.skill-treachery {
+  border-left: 4px solid var(--treachery);
+}
+
+.player {
+  border-top: 1px solid var(--line);
+  padding: 0.4rem 0;
+}
+
+.player:first-child {
+  border-top: none;
+}
+
+.resources {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  gap: 0.3rem 0.8rem;
+  margin: 0;
+}
+
+.resource dt {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.resource dd {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.locations {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  gap: 0.35rem;
+  margin: 0.4rem 0;
+}
+
+.location {
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.3rem 0.4rem;
+  min-height: 2.4rem;
+}
+
+.location.damaged {
+  border-color: var(--danger);
+}
+
+.location-name {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.token {
+  display: inline-block;
+  font-size: 0.8rem;
+  margin: 0.1rem 0.2rem 0 0;
+  padding: 0 0.3rem;
+  border-radius: 3px;
+  background: var(--panel-raised);
+}
+
+.token.ship-raider,
+.token.ship-heavy_raider,
+.token.ship-basestar {
+  color: var(--cylon);
+}
+
+.decks table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.decks td,
+.decks th {
+  text-align: left;
+  padding: 0.15rem 0.3rem;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+.pile {
+  margin: 0.2rem 0;
+  padding-left: 1.2rem;
+  max-height: 14rem;
+  overflow: auto;
+}
+
+.log .entries {
+  list-style: none;
+  margin: 0.2rem 0;
+  padding: 0;
+  max-height: 32rem;
+  overflow: auto;
+}
+
+.log .entries > li {
+  padding: 0.2rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.log .actor {
+  color: var(--accent);
+}
+
+.log .facts {
+  margin: 0.1rem 0 0;
+  padding-left: 1.2rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.inspector {
+  max-height: 24rem;
+  overflow: auto;
+  font-size: 0.75rem;
+  background: var(--bg);
+  padding: 0.5rem;
+}
+
+details > summary {
+  cursor: pointer;
+  color: var(--muted);
+}
+
+.outcome {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+/* the board: a schematic of our own, not the printed board */
+
+.board-svg {
+  width: 100%;
+  height: auto;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  margin-bottom: 0.8rem;
+  font-family: inherit;
+}
+
+.board-svg text {
+  fill: var(--text);
+  font-size: 11px;
+}
+
+.board-svg .dial circle {
+  fill: var(--bg);
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.board-svg .dial-value {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.board-svg .dial-name,
+.board-svg .track-title,
+.board-svg .note,
+.board-svg .area-title {
+  fill: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.board-svg .step rect {
+  fill: var(--bg);
+  stroke: var(--line);
+}
+
+.board-svg .step.current rect {
+  fill: var(--accent);
+  stroke: var(--accent);
+}
+
+.board-svg .step.current text {
+  fill: var(--accent-text);
+  font-weight: 600;
+}
+
+.board-svg .hull {
+  fill: #1a2129;
+  stroke: var(--line);
+  stroke-width: 2;
+}
+
+.board-svg .location rect {
+  fill: var(--panel-raised);
+  stroke: var(--line);
+}
+
+.board-svg .location.galacticaSpace > rect,
+.board-svg .location.cylonFleetSpace > rect {
+  fill: transparent;
+  stroke-dasharray: 5 4;
+}
+
+.board-svg .location.cylon > rect,
+.board-svg .location.cylonFleet > rect {
+  stroke: var(--cylon);
+}
+
+.board-svg .location.damaged > rect {
+  stroke: var(--danger);
+  stroke-width: 2;
+}
+
+.board-svg .location.target > rect {
+  stroke: var(--accent);
+  stroke-width: 2;
+  cursor: pointer;
+}
+
+.board-svg .location.target:hover > rect {
+  fill: #2b2416;
+}
+
+.board-svg .location-name {
+  fill: var(--muted);
+  font-size: 10px;
+}
+
+.board-svg .damage {
+  fill: var(--danger);
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+.board-svg .character rect {
+  fill: var(--accent);
+  stroke: none;
+}
+
+.board-svg .character text {
+  fill: var(--accent-text);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.board-svg .ship {
+  font-size: 10px;
+}
+
+.board-svg .ship-raider,
+.board-svg .ship-heavy_raider,
+.board-svg .ship-basestar {
+  fill: var(--cylon);
+}
+
+.board-svg .act {
+  cursor: pointer;
+}
+
+.board-svg .act rect {
+  fill: var(--accent);
+}
+
+.board-svg .act text {
+  fill: var(--accent-text);
+  font-weight: 700;
+}
+
+.count-ok {
+  color: var(--ok);
+}
+
+.count-off {
+  color: var(--muted);
+}

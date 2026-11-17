@@ -73,6 +73,10 @@ public class GameOps extends AbstractOps {
         return new InterruptOps(game, recorder);
     }
 
+    public SandboxOps sandbox() {
+        return new SandboxOps(game, recorder);
+    }
+
     /**
      * Lets a player other than the current one act (e.g. the target of an "Executive Order" card).
      */

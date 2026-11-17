@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event.jump;
 
+import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
@@ -25,6 +26,7 @@ public class GasCloudEventProcessor extends EventProcessor<GasCloudEvent> {
         for (int i = 0; i < CARDS && game.decks().crisisCardsLeft() > 0; i++) {
             cards.add(ops.player(event.playerNumber()).drawCrisisCard());
         }
+        ops.player(event.playerNumber()).see(DeckId.CRISIS, cards);
         return single(new GasCloudPlaceEvent(event.playerNumber(), cards));
     }
 }

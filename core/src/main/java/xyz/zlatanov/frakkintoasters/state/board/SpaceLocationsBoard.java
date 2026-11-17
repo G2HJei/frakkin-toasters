@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 public interface SpaceLocationsBoard extends SpaceLocationsBoardView {
-    Map<Ship, Location> shipsInSpace();
 
     @Mutates
     SpaceLocationsBoard place(Location in, Ship ship);

@@ -1,0 +1,41 @@
+import com.github.gradle.node.npm.task.NpmTask
+
+plugins {
+    id 'base'
+    id 'com.github.node-gradle.node' version '7.1.0'
+}
+
+// Gradle downloads its own Node, so the build doesn't depend on the machine's.
+node {
+    download = true
+    version = '24.19.0'
+    npmInstallCommand = 'ci'
+}
+
+def sources = [file('src'), file('index.html'), file('package.json'), file('package-lock.json'), file('vite.config.ts'),
+               file('tsconfig.json')]
+
+tasks.register('npmBuild', NpmTask) {
+    description = 'Type checks and builds the app into dist/'
+    dependsOn tasks.named('npmInstall')
+    args = ['run', 'build']
+    inputs.files(sources)
+    outputs.dir('dist')
+}
+
+tasks.register('npmTest', NpmTask) {
+    description = 'Runs the Vitest tests'
+    dependsOn tasks.named('npmInstall')
+    args = ['test']
+    inputs.files(sources)
+    inputs.dir('scripts')
+    outputs.upToDateWhen { false }
+}
+
+tasks.named('assemble') {
+    dependsOn tasks.named('npmBuild')
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('npmTest')
+}

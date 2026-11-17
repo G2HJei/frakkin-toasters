@@ -153,6 +153,11 @@ public class PlayerOps extends GameOps {
         record(new CivilianShipRevealed(player.number(), civId));
     }
 
+    // The player looks at cards of the deck that he doesn't take, so only he knows them.
+    public void see(DeckId deck, List<?> cards) {
+        record(new CardsSeen(player.number(), deck, cards));
+    }
+
     public void pilot(int humanFighterId) {
         val character = player.character();
         galacticaBoard().shipInSpace(humanFighterId, HumanFighter.class); // fails when there is no such fighter

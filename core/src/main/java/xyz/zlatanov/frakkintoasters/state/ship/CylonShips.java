@@ -79,6 +79,11 @@ public class CylonShips implements CylonShipsView {
     }
 
     @Override
+    public int availableCenturions() {
+        return centurions.size();
+    }
+
+    @Override
     public int available(ShipType shipType) {
         return switch (shipType) {
             case BASESTAR -> basestars.size();

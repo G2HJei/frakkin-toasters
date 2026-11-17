@@ -194,6 +194,20 @@ class FactApplierTest {
         assertEquals(List.of(card, other), game.decks().<SkillCard>deck(DeckId.POLITICS).discardedCards());
     }
 
+    @Test
+    void cardsPulledLeaveTheDrawPileWithoutGoingAnywhere() {
+        val deck = game.decks().<SkillCard>deck(DeckId.POLITICS);
+        val pulled = deck.cards().get(2);
+        val size = deck.size();
+        val copies = deck.cards().stream().filter(pulled::equals).count();
+
+        apply(new DeckFact.CardsPulled(DeckId.POLITICS, List.of(pulled)));
+
+        assertEquals(size - 1, deck.size());
+        assertEquals(copies - 1, deck.cards().stream().filter(pulled::equals).count());
+        assertEquals(List.of(), deck.discardedCards());
+    }
+
     /* GameFact */
 
     @Test
@@ -450,6 +464,17 @@ class FactApplierTest {
         apply(new CivilianShipRevealed(2, 2005));
 
         assertEquals(java.util.Set.of(2005), game.player(2).revealedCivilianShipIds());
+    }
+
+    @Test
+    void civilianShipForgottenForgetsTheShipForThePlayerOnly() {
+        apply(new CivilianShipRevealed(2, 2005));
+        apply(new CivilianShipRevealed(3, 2005));
+
+        apply(new PlayerFact.CivilianShipForgotten(2, 2005));
+
+        assertEquals(java.util.Set.of(), game.player(2).revealedCivilianShipIds());
+        assertEquals(java.util.Set.of(2005), game.player(3).revealedCivilianShipIds());
     }
 
     @Test

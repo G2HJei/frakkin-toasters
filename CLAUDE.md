@@ -5,7 +5,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 Web version of the Battlestar Galactica board game. Java implementation modeling the game's state, events, and
-mechanics. So far only the game-logic `core` module exists. There is no engine driving turns yet and no frontend.
+mechanics. The game-logic `core` module holds the rules and the engine, and the Spring Boot `backend` module serves
+games to browsers (see `backend-plan.md`), and the React `frontend` module is the website and the table (see
+`frontend-plan.md`).
 
 ## Scope
 
@@ -29,12 +31,16 @@ code. That includes:
 ./gradlew test           # Run all tests
 ./gradlew :core:test     # Run tests in the core module
 ./gradlew :core:test --tests "xyz.zlatanov.frakkintoasters.event.player.MoveEventProcessorTest"  # Run a single test class
+./gradlew :backend:test  # Run tests in the backend module (Testcontainers: Docker has to run)
+docker compose up -d     # Postgres for local runs, on port 5433
+./gradlew :backend:bootRun --args='--spring.profiles.active=dev'  # builds the frontend and serves the whole app on 8080
 ```
 
 ## Design Documents
 
 - `skill-check.drawio` - the full skill check sequence: before-check cards, playing cards in, abilities, result,
   consequences, and the optional followup events.
+- `backend.drawio` - the backend: logins, lobby, the live connections, `GameSessions` and the tables.
 
 ## Roadmap
 
@@ -45,7 +51,8 @@ Next steps, in order:
    `GameOps.actingPlayer`
    for "Executive Order".
 3. ~~Create the journal and tie it to the ops classes in `operation/`.~~ Done, see "Journal and Replay". Still open:
-   describers and per-viewer hiding, and JSON serialization. The pending followups are the engine's `Agenda`.
+   Done since: per-viewer hiding (`projection/`, see "Projections") and JSON (the backend's `JournalCodec`). The pending
+   followups are the engine's `Agenda`.
 4. ~~Create the game engine to drive the events and turns.~~ Done: the journal lives in `engine/journal/`, the turn state is grouped in `state/Turn`, `GameEngine` runs events through `submit` and `choose`, it restores a
    game from its journal and rolls back a failed input (see "Engine"), `GameEngine.start` sets up a game and plays
    its turns (see "Turn Loop"), processors check what players submit (see "Validation"), the Cylons can win (see
@@ -57,11 +64,16 @@ Next steps, in order:
    Order and the other `Action:` and `Movement:` skill cards, Cylon reveal, Quorum and Super Crisis cards, and the
    interrupts that aren't skill cards (character abilities such as Helo's reroll, and revealing a Motive Card in the
    middle of resolving something, rule 6.2.2.1), which can reuse the interrupt windows.
-5. Create a working frontend with the events that exist by then.
+5. ~~Create a working frontend with the events that exist by then.~~ Done (`backend-plan.md`, `frontend-plan.md`):
+   the backend, the sandbox, the wire schema, the table with the board, the lobby and rooms (see "Backend" and
+   "Frontend"). Still open: legal-move hints (a list in `core` of the legal answers to a decision), more inputs on the
+   board (viper activation, targets of a choice lighting up), and the events still open in the engine.
 
 ## Project Structure
 
-Multi-module Gradle project with a single `core` module. Package root: `xyz.zlatanov.frakkintoasters`.
+Multi-module Gradle project on Java 21: `core` (no libraries but Lombok), `backend` (Spring Boot 4, package
+`xyz.zlatanov.frakkintoasters.backend`) and `frontend` (React, built through node-gradle). Package root: `xyz.zlatanov.frakkintoasters`. The processor registry scans the
+whole root package, so nothing in `backend` may be named `XxxEventProcessor`.
 
 ### Key Packages
 
@@ -78,11 +90,15 @@ Multi-module Gradle project with a single `core` module. Package root: `xyz.zlat
   `AbstractOps`, which holds the `Game` and a `FactRecorder`, and offers `record`, `draw`, `shuffle`. Ops record facts,
   they never write to components
 - `engine/` - `GameEngine` (runs a game, see "Engine"), `Agenda` (stack of pending followups), `AgendaReplayer`
-  (rebuilds the agenda from a journal), `ProcessorRegistry` (maps each event class to its processor, scanned once from
-  the classpath), `PendingInput` and `EngineStatus` (what the game waits for), `ScopeActor` (who a journal scope is
+  (rebuilds the agenda from a journal), `ProcessorRegistry` (maps each event class to its processor) and
+  `EventCatalog` (every event type, records and interfaces), both scanned once from the classpath by
+  `ClasspathScanner`, `PendingInput` and `EngineStatus` (what the game waits for), `ScopeActor` (who a journal scope is
   logged under)
 - `engine/journal/` - `Journal`, `JournalEntry`, `FactRecorder`, `FactApplier`, `ShipZones`, `GameReplayer`, and `fact/`
   with the `Fact` records
+- `projection/` - what a `Viewer` (a player or an observer) may see: `GameProjection.of(view, pendingInput, viewer)`
+  (the game, built by `GameProjector`). Plain records that `backend` turns into JSON. It reads through the views and
+  never depends on `..operation..`, and nothing else in `core` depends on it (`ArchitectureTest`). See "Projections"
 - `state/` - game state model: `Game` (top level), `Turn` (turn number, `GameStep`, current and acting player, the
   Crisis Cards of the turn and whether it returns to the Crisis step, the `DieRoll`, the open interrupt window and its
   cards, read through `GameView.turn()`; `number` counts player turns, not rounds), `Player` (`turns()` counts the player's own turns), `Team` (the winner in
@@ -335,6 +351,22 @@ constructor takes any first event, and `GameEngineTest` uses the test-only `Scri
   event, `ScopeClosed` pushes its followup, `ChoiceMade` selects the option, and the scope with a `GameEnded` fact
   clears the agenda when it closes). The first event's `ScopeOpened` finds an empty agenda. A journal that doesn't match
   those moves, or ends neither at a pause nor with the end of the game, throws `IllegalArgumentException`.
+- Seeds: `GameEngine.start(playerCount, seed)` and `restore(journal, seed)` make a seeded engine, which reseeds its
+  `Randomness` (`reseed`) before each input from the seed mixed with the journal's size. So the same seed and inputs
+  give the same game, also after a restore. A game started with a `Randomness`, or restored without a seed, gets fresh
+  randomness after a restore. `pendingInput()` is the pending input in full, a secret one included.
+- Sandbox: `inject(SandboxEvent)` runs a setup event at once, ahead of the pending input, through the same run loop
+  (win checks included). `JournalEntry.EventInjected(event)` before its scope tells `AgendaReplayer` to push it, with
+  the root as its parent. `submit` never takes a `SandboxEvent`. `undo()` goes back to the pause before the last input:
+  the engine knows where each input began (live from `advance`, after a restore from
+  `AgendaReplayer.replayWithInputs`: the scope that answered a decision, each `ChoiceMade`, each `EventInjected`), and
+  rebuilds from that prefix. A choice that led to a decision is undone on its own; before the first pause there is
+  nothing to undo.
+- `event/sandbox/` holds the `SandboxEvent` marker and the setup events, plain `Event`s with typed fields (one per kind
+  of card): put a Crisis, Destination, Skill or Destiny card on top, give a Skill Card, move a character, place a ship,
+  change a resource, set the jump preparation track, damage a location, assign a title. Their processors use the
+  rules' ops where one fits, and `SandboxOps` (`GameOps.sandbox()`) for the rest. `DeckFact.CardsPulled` takes a
+  stacked or given card out of its draw pile, so no copy appears.
 
 ### Turn Loop
 
@@ -543,6 +575,103 @@ Rules for facts and ops:
 7. Ships and centurions are named by their fixed ids. Decks are built in canonical order and shuffled by
    `GameOps.startGame()`.
 
+### Projections
+
+`projection/` holds what each `Viewer` (`PlayerViewer(n)` or `Observer`) may know. Projections are data, not text:
+the frontend owns the wording.
+
+- `GameProjection.of(view, pendingInput, viewer)` is the game. What lies open on the table is public. A hidden card is a
+  count, with the colors of Skill Cards (their backs show them), and a field holding cards is `null` for a viewer who
+  may not see them (`SkillHand`, `HiddenCards<T>`). `GameProjector`'s javadoc lists the rules: hands, Loyalty and other
+  player cards, the President's Quorum hand, looked-at Loyalty Cards and civilian ship cargo, face down discard piles
+  (`Disclosure.FACEDOWN_DISCARDS`), cards played before a skill check, an open interrupt window's cards (the others
+  count them in the hand), the pending input (backend decision 6), and everything once the game has ended. The Mutineer
+  card is faceup once held ("immediately reveal this card").
+- `LiveUpdateProjection.of(journal, from, viewer)` is what happened: the scopes (`ScopeLog`: actor, event type, its
+  fields when public, the facts) and the choices (`ChoiceLog`). `LiveUpdateProjector` has an exhaustive switch over every
+  fact, so a new fact doesn't compile until it has a rule. A fact the viewer may not see becomes `Hidden` (count,
+  colors). A shuffle never shows its order, a draw only a count. The scope of a `SecretEvent` shows only to its actor.
+  Followups never show. It reads the whole journal, e.g. for who was President when a Quorum Card was drawn.
+- What a player learns is a fact (backend decision 8): a player who looks at cards he doesn't take records
+  `PlayerFact.CardsSeen` (`PlayerOps.see`), which applies nothing, like `LoyaltyCardSeen` and `CivilianShipRevealed`.
+- `Disclosure.CARD_COMPONENTS` marks every event component that holds a card public or private, and a test fails until
+  a new one is marked. An event shows its fields only when all its cards are public.
+- A civilian ship's id says nothing about its cargo: every shuffle of the civilian ship deck deals the ids anew
+  (`AbstractOps.shuffle`), and a ship that goes back into the deck is forgotten by whoever looked at it
+  (`CivilianShipForgotten`).
+
+### Backend
+
+`backend` (Spring Boot 4, Java 21, package `xyz.zlatanov.frakkintoasters.backend`) runs one `GameEngine` per game,
+stores its journal in Postgres and pushes to every viewer what he may see (`backend-plan.md`). It adds no game rules.
+
+- `journal/` - `JournalCodec` (a `JournalEntry` to JSON and back, `FORMAT_VERSION`), `ValueCodec` (records by their
+  components; a value of an interface type carries its `kind`, from the closed `TypeRegistry`; a `List<?>` of cards
+  takes its type from the `DeckId` or `PlayerPile` beside it, `cardType()`), `WireCodec` (the projections), and
+  `TypeWalker` (every type and its components, for the format lock). `FormatLockTest` checks the format against
+  `src/test/resources/journal-format.txt`: a change needs a new `FORMAT_VERSION`, then run it with
+  `-DupdateFormatLock=true`. An event is named by its simple name, a fact with its area (`DeckFact.CardsDrawn`).
+- `game/` - `GameSessions` runs the commands of a game one at a time (a lock per game): session from the Caffeine
+  cache or restored from the rows, the state token (`StateTokens`, the sequence hashed with `frakkin.token-secret`),
+  the engine, the new entries and the `game_bundle` summary in one transaction (a failed write evicts the session),
+  then the projections to the `ProjectionSink`, under the lock. A viewer for whom nothing visible changed gets nothing.
+  `JournalStore`, `GameBundles` (with `mode` and `seed`: a seeded game restores with its seed).
+- `user/` - logins through Google and Discord (`LoginProviders`, only those with a client id), the `dev` profile's
+  login by name (`POST /api/dev/login`, refused together with a real provider), `AppUserAuthentication` in the HTTP
+  session, which Spring Session keeps in Postgres so a login survives a restart, `GET`/`PUT /api/me`. CSRF through the
+  `XSRF-TOKEN` cookie and the `X-XSRF-TOKEN` header.
+- `lobby/` - `/api/games`: host, list (open lobbies, mine, running ones to watch), join as a player (next free seat, 7
+  at most) or an observer, leave, and start by the host with 3 to 7 players (the seats close up to 1..n).
+- `live/` - `/ws/games/{id}`: the handshake needs a participant and an allowed `Origin`, and gives the connection its
+  `Viewer`. `ConnectionPool` is the `ProjectionSink`; each `LiveConnection` sends from its own queue. Client messages:
+  `status`, `history`, `submit` (token, event), `choose` (token, option index). Server messages: `game` (token,
+  projection), `update`, `log`, `rejected`. A new connection gets `game`, then `log`.
+- `sandbox/` - `POST /api/sandbox {playerCount, seed?}` starts a sandbox (`game_bundle.mode = SANDBOX`, a seeded
+  engine, the caller its only participant, with the `Sandbox` viewer, who answers for whoever is asked). The socket
+  takes `undo` (deletes the rows after the new sequence; every connection gets `game` and `log` again) and `inject` (a
+  `SandboxEvent`) only in a sandbox. `GET /api/games/{id}/journal` exports a sandbox (`formatVersion`, `seed`,
+  `playerCount`, `entries`) and `POST /api/sandbox/import` stores one as a new sandbox once the engine restores it.
+- Regression journals: `src/test/resources/journals/*.json` are sandbox exports, and `RegressionJournalsTest` checks
+  that each restores. A bug found in the sandbox becomes a test: export the journal, drop it there, load it with
+  `RegressionJournals.engine(name)` and assert.
+- Flyway migrations in `src/main/resources/db/migration`. The tests (`BackendTest`) run against a Testcontainers
+  Postgres with the `dev` profile; `LiveGameTest` drives real web socket clients and restarts the server mid-game, and
+  `SandboxLiveTest` plays, undoes, exports and imports a sandbox.
+
+### Frontend
+
+`frontend/` is a React 19 + TypeScript (strict) + Vite app, built by Gradle through node-gradle (its own Node 24, `npm
+ci`): `./gradlew build` type checks, builds and tests it, and the backend's `bootJar` packs `frontend/dist` under
+`static/`, with `AppRoutesController` forwarding the app's routes to `index.html`. React Router, TanStack Query for
+REST (the lobby lists poll), Zustand for the game. See `frontend-plan.md`.
+
+- The wire schema: `./gradlew :backend:exportSchema` writes `frontend/src/wire/schema.json` (`backend/wire/WireSchema`:
+  every record with its components and type references, unions, enums, the socket messages, the `location` of a
+  location's action, and a `role` for each int: `player`, `ship`, `scope` or `count`). `npm run gen` turns it into
+  `src/wire/types.ts`. `WireSchemaTest` fails when the checked-in schema is stale, and `tsc` when the UI uses a field
+  that went away. `GET /api/schema` serves the same JSON.
+- `src/api/` (`http.ts` sends the `XSRF-TOKEN` cookie as `X-XSRF-TOKEN`, `queries.ts` the hooks), `src/live/`
+  (`GameSocket` reconnects with backoff, `gameStore` holds the game, its token, the log and the last rejection),
+  `src/labels/` (all wording: a humanized fallback, `overrides.ts` for names, templates for events, facts and options;
+  only names, never a card's printed text), `src/input/` (the input panel: a choice is a button per option, answered
+  by index; a decision is the `EventBuilder`, a form made from the schema, which builds exactly the codec's JSON and
+  leaves the player and the constraints to the server), `src/table/` (the state panels, the log), `src/sandbox/`
+  (undo, export, restart with the seed, setup by injecting a `SandboxEvent`, the inspector), `src/pages/`.
+- The browser holds no game rules: a picker only narrows to plausible answers, the engine judges them.
+- The board (`src/table/board/`): `BoardSvg` draws our own schematic (never the publisher's art), laid out in
+  `layout.ts`, which has a place for every `Location` (a test checks it). Inputs on the board are in
+  `src/input/boardMoves.ts`: a move by clicking a location (asking for a discard when it leaves its ship) and the "Act"
+  button on the asked player's location. Each builds the same event, or picks the same option, as the builder; a test
+  checks it. The builder stays for everything else.
+- The website: `GamesPage` (the lobby: my sandboxes and games, open lobbies, games to watch, hosting), `RoomPage`
+  (seats and observers, join, leave, start), `SettingsPage`. A 401 goes to the login page.
+- e2e (`frontend/e2e/`): `sandbox.spec.ts` plays a seeded sandbox through a turn, undoes, exports and imports;
+  `lobby.spec.ts` has five users host, join, observe, leave and start a game, checks that nobody sees another
+  player's cards and that an observer gets no input, and races two users for the last seat.
+- Commands: `npm run dev` (Vite on 5173, proxying `/api`, `/ws`, `/oauth2` to 8080; the `dev` profile allows its
+  origin), `npm test` (Vitest), `npm run gen`, `npm run e2e` (Playwright, against the running app with the `dev`
+  profile, `E2E_BASE_URL` to point elsewhere).
+
 ### Lombok Usage
 
 Uses Lombok extensively: `@Builder`, `@Getter`, `@Accessors(fluent = true)`, `@RequiredArgsConstructor`, `val`.
@@ -564,8 +693,14 @@ when possible.
   `rolled(int)` first, which starts and rolls a `DieRoll` the way the window and `RollDieEvent` do
 - `FakeDeck<T>` - test double for `Deck<T>` with `nextCard(T...)` to control draws, and `clear()` to empty the draw
   pile
+- `core` has test fixtures (`src/testFixtures`, plugin `java-test-fixtures`) for what `backend` tests use too: the
+  test-only events with their processors and `TestOps`, `GameSnapshot`, `ScriptedScenario`, `ScriptedTurns` and
+  `TestEngines` (starts an engine with any first event). `ArchitectureTest` leaves them out, like the tests
 - `GameSnapshot` (`engine/journal/`) - turns a `Game` into comparable plain values. Replay tests compare a live game
-  with its replayed twin. `GameReplayerTest` has the scripted scenario that has to record every kind of fact
+  with its replayed twin. `ScriptedScenario.play(journal)` records every kind of fact, which `GameReplayerTest`
+  checks. One of its scopes has no event, so only `GameReplayer` rebuilds it, not `GameEngine.restore`
+- `ScriptedTurns` is `TurnLoopTest`'s seeded game as a list of inputs, each computed from the game when it's its turn,
+  for tests that drive a game from outside (the codec, the sessions, the web socket)
 - Op tests also assert the logged facts (`journal.facts()`), and `FactApplierTest` covers each fact
 - `GameEngineTest` plays a script of real events through `submit` and `choose`, started by the test-only `ScriptEvent`
   (it calls `ops.startGame()` and queues the script). The registry finds test processors such as
@@ -580,7 +715,7 @@ when possible.
   `EndSkillCheckEvent` through `submit` and `choose`, restoring at every pause. The cards that decide a check are dealt,
   not drawn: `GiveSkillCardEvent` gives each player the cards he plays, and the test-only `StackDestinyDeckEvent` puts
   known cards on top of the Destiny deck, so each check asserts its total strength and doesn't depend on the seed. Its
-  processor records the fact through `TestOps` (in the tests' `operation` package), because only the ops can record
+  processor records the fact through `TestOps` (in the fixtures' `operation` package), because only the ops can record
   one. `StackCrisisCardEvent` and `SetUpGalacticaEvent` set up the turn that the Airlock check is part of
 - `CrisisStepTest` plays the Crisis step to the end of the Activate Cylon Ships step: the skill check or the alternate
   instruction of a card, and "Fulfiller of Prophecy" returning to the step. `CrisisCardResolutionTest` runs every section

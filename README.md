@@ -62,7 +62,85 @@ the journal, so a game can be restored from its journal alone.
 +------------------------------------------+
 ```
 
-Not built yet: describers (the journal facts as text, per viewer) and a frontend.
+## Backend
+
+The `backend` module serves the engine to browsers (`backend.drawio`, `backend-plan.md`). Users log in through Google
+or Discord, host and join games in the lobby, and play or observe them over a web socket. Each game runs one
+`GameEngine`, its journal is stored in Postgres, and every viewer gets only what he may see: the `projection/` package
+of `core` builds the game and the log per viewer.
+
+```text
+                                  user browser
+            |                          |                              ^
+            | REST                     | web socket                   | web socket
+            | log in, me,              | status / submit / choose     | game / update / log / rejected
+            | host, join, start        |                              |
+            v                          v                              |
++-----------+-----------+   +----------+-----------+      +-----------+-----------+
+| Lobby and users       |   | LiveConnection       |<-----+ ConnectionPool        |
+| Google / Discord auth |   | user, viewer, game   |      | game -> connections   |
++-----------+-----------+   +----------+-----------+      +-----------^-----------+
+            |                          | command                      | push in order
+            |                          v                              |
+            |          +---------------+------------------------------+-----------+
+            |  start   | GameSessions                                             |
+            +--------->| lock the game, get the session, check the token,         |
+            |          | run the engine, store the entries and the summary,       |
+            |          | build and queue each viewer's projections, unlock        |
+            |          +-------+-------------------------------+------------------+
+            |                  | cache-aside                   | JournalCodec (JSON)
+            |                  v                               v
+            |          +-------+-------------+   +-------------+------------------+
+            |          | GameSession (cached)|   | Postgres                       |
+            |          | GameEngine          |   | journal_entry, game_bundle,    |
+            |          | start / restore     |   | participant, app_user,         |
+            +--------->|                     |   | user_identity, sessions        |
+                       +---------------------+   +--------------------------------+
+```
+
+## Frontend
+
+The `frontend` module is a React app (`frontend-plan.md`): the website (login, the lobby with its games, game rooms,
+settings) and the table, where a game is played over the web socket. The table shows exactly what the server's
+projection holds: the board as our own schematic, the players, the turn, the skill check, the decks and the log. A
+choice is a button per option; a decision is answered on the board where it can be (a move by clicking a location,
+an action by the "Act" button on your location) and otherwise by the event builder, a form made from the wire schema
+that the backend exports. The browser holds no game rules: the engine judges every answer.
+
+A **sandbox** is a game one user plays for every seat: he sees everything, the draw piles too, and can undo, restart
+with the same seed, set up scenarios (stack a card, give a card, move a character, place a ship, change a resource,
+...) and export the journal, or import one.
+
+### Running it locally
+
+Docker has to run, for Postgres and for the backend's tests (Testcontainers).
+
+```bash
+docker compose up -d                                              # Postgres on port 5433
+./gradlew :backend:bootRun --args='--spring.profiles.active=dev'  # the app on http://localhost:8080
+```
+
+`./gradlew build` builds and tests everything, and packs the built frontend into the backend's jar, so
+`java -jar backend/build/libs/backend-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev` serves the whole app too. To work
+on the frontend with hot reload, run `npm run dev` in `frontend/` and open http://localhost:5173 (it proxies the API
+and the socket to 8080). Log in by name, start a sandbox with a seed, and play.
+
+The `dev` profile has a login by name (`POST /api/dev/login`), so no client secrets are needed. Without it, set
+`FRAKKIN_LOGIN_GOOGLE_CLIENTID` / `..._CLIENTSECRET` and `FRAKKIN_LOGIN_DISCORD_CLIENTID` / `..._CLIENTSECRET`. The
+`Dockerfile` builds one image; its header lists the settings a deployment gives (the database, the logins and
+`TOKEN_SECRET`).
+
+- `npm test` in `frontend/` runs the unit tests, and `npm run e2e` the Playwright specs against the running app
+  (`npx playwright install chromium` once).
+- After a change to an event, a fact or a projection: `./gradlew :backend:exportSchema`, then `npm run gen`.
+
+### A sandbox bug becomes a test
+
+1. Export the sandbox's journal ("Export" on the table).
+2. Drop the file into `backend/src/test/resources/journals/`. `RegressionJournalsTest` checks that every file there
+   restores.
+3. Write a test that loads it with `RegressionJournals.engine("the-file.json")`: the game as it stood, seeded, so the
+   next input gives what the sandbox gave. Assert what should have happened.
 
 ## Turn cycle
 

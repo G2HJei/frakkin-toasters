@@ -27,6 +27,13 @@ public class Randomness {
     }
 
     /**
+     * Starts the sequence of random results again from the seed, as {@link #seeded(long)} would.
+     */
+    public void reseed(long seed) {
+        random.setSeed(seed);
+    }
+
+    /**
      * @return a random int in [origin, bound)
      */
     public int nextInt(int origin, int bound) {

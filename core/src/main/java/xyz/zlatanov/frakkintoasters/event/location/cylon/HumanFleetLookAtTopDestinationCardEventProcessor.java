@@ -1,5 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event.location.cylon;
 
+import java.util.List;
+import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.location.LocationActionProcessor;
@@ -16,6 +18,7 @@ public class HumanFleetLookAtTopDestinationCardEventProcessor extends LocationAc
     public Followup process() {
         val playerNumber = event.playerNumber();
         val card = ops.player(playerNumber).drawDestinationCard();
+        ops.player(playerNumber).see(DeckId.DESTINATION, List.of(card));
         return all(
                 one(
                         new PlaceDestinationCardOnTopEvent(playerNumber, card),

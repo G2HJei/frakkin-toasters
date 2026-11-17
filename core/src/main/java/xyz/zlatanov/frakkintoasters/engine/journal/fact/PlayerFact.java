@@ -5,6 +5,7 @@ import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
+import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 
 import java.util.List;
 
@@ -59,10 +60,22 @@ public sealed interface PlayerFact extends Fact {
     record CivilianShipRevealed(int playerNumber, int shipId) implements PlayerFact {
     }
 
+    // The ship went back into the deck, where it gets a new id.
+    record CivilianShipForgotten(int playerNumber, int shipId) implements PlayerFact {
+    }
+
     record OwnTurnStarted(int playerNumber) implements PlayerFact {
     }
 
     // A random Loyalty Card of the target that the player looked at: only he knows it.
     record LoyaltyCardSeen(int playerNumber, int targetPlayerNumber, LoyaltyCard card) implements PlayerFact {
+    }
+
+    // Cards the player looked at without taking them, e.g. the Admiral's two Destination Cards: only he knows them.
+    // It changes nothing, it tells who learned what.
+    record CardsSeen(int playerNumber, DeckId deck, List<?> cards) implements PlayerFact {
+        public CardsSeen {
+            cards = List.copyOf(cards);
+        }
     }
 }

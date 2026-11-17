@@ -1,0 +1,79 @@
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
+
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '4.1.2'
+}
+
+dependencies {
+    implementation project(':core')
+    implementation platform(SpringBootPlugin.BOM_COORDINATES)
+    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-flyway'
+    implementation 'org.springframework.boot:spring-boot-starter-session-jdbc'
+    implementation 'org.flywaydb:flyway-database-postgresql'
+    implementation 'com.github.ben-manes.caffeine:caffeine'
+    runtimeOnly 'org.postgresql:postgresql'
+
+    compileOnly 'org.projectlombok:lombok:1.18.44'
+    annotationProcessor 'org.projectlombok:lombok:1.18.44'
+    testCompileOnly 'org.projectlombok:lombok:1.18.44'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.44'
+
+    testImplementation testFixtures(project(':core'))
+    testImplementation platform('org.junit:junit-bom:6.0.3')
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
+    testImplementation 'org.testcontainers:testcontainers-postgresql'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+    // The jar check starts the packaged application.
+    dependsOn bootJar
+    systemProperty 'bootJar', bootJar.archiveFile.get().asFile.absolutePath
+    systemProperty 'projectDir', projectDir.absolutePath
+    if (System.getProperty('writeExampleJournal') != null) {
+        systemProperty 'writeExampleJournal', System.getProperty('writeExampleJournal')
+    }
+    if (System.getProperty('updateFormatLock') != null) {
+        systemProperty 'updateFormatLock', System.getProperty('updateFormatLock')
+    }
+}
+
+// One jar, the executable one.
+jar {
+    enabled = false
+}
+
+// Writes the wire schema for the frontend, which generates its types from it (npm run gen).
+tasks.register('exportSchema', JavaExec) {
+    group = 'build'
+    description = 'Writes frontend/src/wire/schema.json'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'xyz.zlatanov.frakkintoasters.backend.wire.WireSchemaExport'
+    args = [rootProject.file('frontend/src/wire/schema.json').absolutePath]
+}
+
+// The jar serves the built frontend from static/, so the application is one deployable.
+bootJar {
+    dependsOn ':frontend:npmBuild'
+    from(rootProject.file('frontend/dist')) {
+        into 'BOOT-INF/classes/static'
+    }
+}
+
+// bootRun runs from the class folders, which don't hold the frontend: it builds the app and serves frontend/dist.
+bootRun {
+    dependsOn ':frontend:npmBuild'
+    def dist = rootProject.file('frontend/dist').toURI().toString()
+    systemProperty 'spring.web.resources.static-locations', "${dist.endsWith('/') ? dist : dist + '/'},classpath:/static/"
+}

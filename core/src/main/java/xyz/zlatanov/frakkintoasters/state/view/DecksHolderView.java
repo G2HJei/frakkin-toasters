@@ -1,5 +1,7 @@
 package xyz.zlatanov.frakkintoasters.state.view;
 
+import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
+
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
@@ -27,4 +29,6 @@ public interface DecksHolderView {
     int crisisCardsLeft();
 
     DeckView<SkillCard> destiny();
+
+    <T> DeckView<T> deck(DeckId id);
 }

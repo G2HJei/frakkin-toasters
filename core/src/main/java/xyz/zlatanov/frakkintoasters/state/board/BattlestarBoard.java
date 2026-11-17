@@ -7,8 +7,6 @@ import java.util.Set;
 
 public interface BattlestarBoard extends Board, BattlestarBoardView {
 
-    Set<Location> damagedLocations();
-
     @Mutates
     BattlestarBoard damage(Location location);
 

@@ -1,0 +1,11 @@
+**/build/
+**/node_modules/
+.gradle/
+.idea/
+.claude/
+.git/
+materials/
+frontend/dist/
+frontend/test-results/
+frontend/playwright-report/
+.playwright-mcp/

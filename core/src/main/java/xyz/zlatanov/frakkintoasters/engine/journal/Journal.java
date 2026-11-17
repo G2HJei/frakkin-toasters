@@ -3,6 +3,7 @@ package xyz.zlatanov.frakkintoasters.engine.journal;
 import lombok.NoArgsConstructor;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ChoiceMade;
+import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.EventInjected;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.FactRecorded;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ScopeClosed;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ScopeOpened;
@@ -82,6 +83,17 @@ public class Journal {
             throw new FrakCallTheAdmiralException();
         }
         entries.add(new ChoiceMade(scopeId, chooser, option));
+    }
+
+    /**
+     * Records a sandbox setup event that runs ahead of the pending input. It is injected between events, so no scope may
+     * be open.
+     */
+    public void recordInjection(Event event) {
+        if (openScope != ROOT_SCOPE) {
+            throw new FrakCallTheAdmiralException();
+        }
+        entries.add(new EventInjected(event));
     }
 
     /**

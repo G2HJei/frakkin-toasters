@@ -2,6 +2,7 @@ package xyz.zlatanov.frakkintoasters.operation;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.CivilianShipForgotten;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.ResourceDecreased;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedOnTop;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.ShipFact.BasestarDamageAttached;
@@ -199,6 +200,9 @@ public class ShipOps extends GameOps {
     public void escort() {
         galacticaBoard().shipInSpace(shipId, CivilianShip.class); // fails when it is not a civilian ship in space
         record(new ShipMoved(shipId, GALACTICA_SPACE, CIVILIAN_DECK, null));
+        game.players().stream()
+                .filter(player -> player.revealedCivilianShipIds().contains(shipId))
+                .forEach(player -> record(new CivilianShipForgotten(player.number(), shipId)));
         shuffle(CIVILIAN_SHIPS);
     }
 }

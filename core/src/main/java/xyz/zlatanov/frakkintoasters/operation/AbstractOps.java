@@ -20,6 +20,7 @@ import xyz.zlatanov.frakkintoasters.state.damage.PegasusDamage;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
+import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
 import xyz.zlatanov.frakkintoasters.state.ship.CylonShip;
 import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 import xyz.zlatanov.frakkintoasters.state.ship.ShipZone;
@@ -58,7 +59,23 @@ public abstract class AbstractOps {
         Deck<Object> deck = game.decks().deck(id);
         List<Object> all = new ArrayList<>(deck.cards());
         all.addAll(deck.discardedCards());
-        record(new DeckShuffled(id, game.randomness().shuffled(all)));
+        List<Object> order = game.randomness().shuffled(all);
+        if (id == CIVILIAN_SHIPS) {
+            order = dealCivilianShipIds(order);
+        }
+        record(new DeckShuffled(id, order));
+    }
+
+    // A ship keeps its id on the board, so the id of a ship that comes out of the deck must say nothing about its
+    // cargo: every shuffle deals the ids of the ships in the deck to their cargo anew.
+    private List<Object> dealCivilianShipIds(List<Object> ships) {
+        val ids = game.randomness().shuffled(ships.stream().map(ship -> ((CivilianShip) ship).id()).toList());
+        val dealt = new ArrayList<Object>();
+        for (int i = 0; i < ships.size(); i++) {
+            val cargo = (CivilianShip) ships.get(i);
+            dealt.add(new CivilianShip(ids.get(i), cargo.fuelCost(), cargo.moraleCost(), cargo.populationCost()));
+        }
+        return dealt;
     }
 
     /**

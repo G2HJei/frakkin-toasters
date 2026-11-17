@@ -19,3 +19,10 @@ gradlew.bat
 /gradlew
 /bsg-rules/
 /*.drawio.bkp
+
+# Frontend
+node_modules/
+/frontend/dist/
+/frontend/test-results/
+/frontend/playwright-report/
+/.playwright-mcp/

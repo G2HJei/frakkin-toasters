@@ -1,0 +1,3 @@
+# Local play without client secrets: the login by name, and the Vite dev server's origin for the game socket.
+frakkin:
+  allowed-origins: http://localhost:5173

@@ -9,6 +9,7 @@ import xyz.zlatanov.frakkintoasters.state.crisis.SuperCrisisCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import java.util.List;
+import java.util.Set;
 
 public interface PlayerView {
 
@@ -46,6 +47,11 @@ public interface PlayerView {
      * again for the new character. {@link TurnView#number()} counts everyone's.
      */
     int turns();
+
+    /**
+     * The civilian ships this player looked at, which only he knows. A ship that goes back into the deck is forgotten.
+     */
+    Set<Integer> revealedCivilianShipIds();
 
     /**
      * The Loyalty Cards of other players that this player looked at, which only he knows.

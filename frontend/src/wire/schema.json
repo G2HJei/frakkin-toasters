@@ -1,0 +1,6501 @@
+{
+  "formatVersion" : 2,
+  "types" : {
+    "ABetterMachineEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "ASecondChanceEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "ActionEvent" : {
+      "kind" : "union",
+      "discriminator" : "kind",
+      "members" : [ "AdministrationEvent", "AdmiralsQuartersEvent", "AirlockEvent", "ArmoryEvent", "BasestarBridgeEvent", "BrigEvent", "CapricaDrawAndResolveCrisisCardsEvent", "CapricaPlaySuperCrisisCardEvent", "CommandEvent", "CommunicationsEvent", "CylonFleetEvent", "EngineRoomEvent", "FTLControlEvent", "HangarDeckEvent", "HumanFleetInfiltrateEvent", "HumanFleetLookAtTopCrisisCardEvent", "HumanFleetLookAtTopDestinationCardEvent", "MainBatteriesEvent", "PegasusCicEvent", "PresidentsOfficeEvent", "PressRoomEvent", "QuorumChamberEvent", "ResearchLabEvent", "ResurrectionShipEvent", "WeaponsControlEvent" ]
+    },
+    "ActionStepEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "ActivateCylonBasestarEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "basestarShipId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      } ]
+    },
+    "ActivateCylonBasestarsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "ActivateCylonShipsStepEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "ActivateHeavyRaidersAndCenturionsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "ActivateRaiderEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "raiderShipId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      } ]
+    },
+    "ActivateRaidersEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "ActivateViperEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "activation",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "ViperActivation"
+        }
+      } ]
+    },
+    "AdministrationEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "LocationEvent", "PlayerEvent" ],
+      "location" : "ADMINISTRATION",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "AdmiralsQuartersEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "LocationEvent", "PlayerEvent" ],
+      "location" : "ADMIRALS_QUARTERS",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "targetPlayer",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "AdvancePursuitTrackEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "AfterBasestarOrCenturionDestroyed" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "InterruptWindow" ],
+      "components" : [ ]
+    },
+    "AfterDieRoll" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "InterruptWindow" ],
+      "components" : [ ]
+    },
+    "AfterViperAttacked" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "InterruptWindow" ],
+      "components" : [ {
+        "name" : "humanFighterId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      } ]
+    },
+    "AirlockEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "LocationEvent", "PlayerEvent" ],
+      "location" : "AIRLOCK",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "targetPlayer",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "AllOf" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Followup" ],
+      "components" : [ {
+        "name" : "followups",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "Followup"
+          }
+        }
+      } ]
+    },
+    "AnalyzeEnemyFighterPassEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "Area" : {
+      "kind" : "enum",
+      "values" : [ "SPACE", "RESERVES", "SPACE_OR_RESERVES" ]
+    },
+    "ArmoryEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "LocationEvent", "PlayerEvent" ],
+      "location" : "ARMORY",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "centurionId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      } ]
+    },
+    "ArmoryResultEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "centurionId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      } ]
+    },
+    "AssignTitleEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "SandboxEvent" ],
+      "components" : [ {
+        "name" : "title",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Title"
+        }
+      }, {
+        "name" : "character",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Character"
+        }
+      } ]
+    },
+    "AttackCylonShipEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "humanFighterId",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "ship"
+        }
+      }, {
+        "name" : "cylonShipId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      } ]
+    },
+    "AttackCylonShipResultEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "humanFighterId",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "ship"
+        }
+      }, {
+        "name" : "cylonShipId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      } ]
+    },
+    "AttackGalacticaEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "cylonShipId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      } ]
+    },
+    "AttackGalacticaResultEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "cylonShipId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      } ]
+    },
+    "AttackViperEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "raiderId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      }, {
+        "name" : "humanFighterId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      } ]
+    },
+    "AttackViperResultEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "humanFighterId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      } ]
+    },
+    "BaitEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "BasestarBridgeAbility" : {
+      "kind" : "enum",
+      "values" : [ "CAG_PLACES_CIVILIAN_SHIP", "JUMP_OR_PURSUIT", "BASESTAR_OR_RAIDERS", "GALACTICA_DAMAGE" ]
+    },
+    "BasestarBridgeAbilityEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "ability",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "BasestarBridgeAbility"
+        }
+      } ]
+    },
+    "BasestarBridgeAbilityResultEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "ability",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "BasestarBridgeAbility"
+        }
+      } ]
+    },
+    "BasestarBridgeEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "LocationEvent", "PlayerEvent" ],
+      "location" : "BASESTAR_BRIDGE",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "firstAbility",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "BasestarBridgeAbility"
+        }
+      } ]
+    },
+    "BasestarBridgeShipsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "shipType",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "ShipType"
+        }
+      }, {
+        "name" : "location",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      } ]
+    },
+    "BasestarDamage" : {
+      "kind" : "enum",
+      "values" : [ "STRUCTURAL_DAMAGE", "DISABLED_WEAPONS", "DISABLED_HANGAR_BAY", "CRITICAL_HIT" ]
+    },
+    "BeforeDieRoll" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "InterruptWindow" ],
+      "components" : [ ]
+    },
+    "BeforePilotedViperAttack" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "InterruptWindow" ],
+      "components" : [ ]
+    },
+    "BeforeRaidersActivate" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "InterruptWindow" ],
+      "components" : [ ]
+    },
+    "BoardFact" : {
+      "kind" : "union",
+      "discriminator" : "kind",
+      "members" : [ "BoardFact.BoardingPartyAdvanced", "BoardFact.EngineRoomActivated", "BoardFact.JumpPreparationDecreased", "BoardFact.JumpPreparationIncreased", "BoardFact.JumpPreparationReset", "BoardFact.LocationDamaged", "BoardFact.PursuitAdvanced", "BoardFact.PursuitReset", "BoardFact.ResourceDecreased", "BoardFact.ResourceIncreased" ]
+    },
+    "BoardFact.BoardingPartyAdvanced" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "BoardFact", "Fact" ],
+      "components" : [ ]
+    },
+    "BoardFact.EngineRoomActivated" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "BoardFact", "Fact" ],
+      "components" : [ ]
+    },
+    "BoardFact.JumpPreparationDecreased" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "BoardFact", "Fact" ],
+      "components" : [ ]
+    },
+    "BoardFact.JumpPreparationIncreased" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "BoardFact", "Fact" ],
+      "components" : [ ]
+    },
+    "BoardFact.JumpPreparationReset" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "BoardFact", "Fact" ],
+      "components" : [ ]
+    },
+    "BoardFact.LocationDamaged" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "BoardFact", "Fact" ],
+      "components" : [ {
+        "name" : "location",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      } ]
+    },
+    "BoardFact.PursuitAdvanced" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "BoardFact", "Fact" ],
+      "components" : [ ]
+    },
+    "BoardFact.PursuitReset" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "BoardFact", "Fact" ],
+      "components" : [ ]
+    },
+    "BoardFact.ResourceDecreased" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "BoardFact", "Fact" ],
+      "components" : [ {
+        "name" : "resource",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Resource"
+        }
+      }, {
+        "name" : "amount",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      } ]
+    },
+    "BoardFact.ResourceIncreased" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "BoardFact", "Fact" ],
+      "components" : [ {
+        "name" : "resource",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Resource"
+        }
+      }, {
+        "name" : "amount",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      } ]
+    },
+    "BoardingParty" : {
+      "kind" : "enum",
+      "values" : [ "START", "POSITION_1", "POSITION_2", "POSITION_3", "HUMANS_LOSE" ]
+    },
+    "BrigEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "LocationEvent", "PlayerEvent" ],
+      "location" : "BRIG",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "CapricaDrawAndResolveCrisisCardsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "LocationEvent", "PlayerEvent" ],
+      "location" : "CAPRICA",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "CapricaPlaySuperCrisisCardEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "LocationEvent", "PlayerEvent" ],
+      "location" : "CAPRICA",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "superCrisisCard",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "SuperCrisisCard"
+        }
+      } ]
+    },
+    "Cargo" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "fuel",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "morale",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "population",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      } ]
+    },
+    "CenturionProjection" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "id",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      }, {
+        "name" : "position",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "BoardingParty"
+        }
+      } ]
+    },
+    "ChangeOfPlansEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "changeOfPlansCard",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "SkillCard"
+        }
+      } ]
+    },
+    "ChangeResourceEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "SandboxEvent" ],
+      "components" : [ {
+        "name" : "resource",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Resource"
+        }
+      }, {
+        "name" : "amount",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      } ]
+    },
+    "Character" : {
+      "kind" : "enum",
+      "values" : [ "AARON_DORAL", "ANASTASIA_DEE_DUALLA", "BRENDAN_HOTDOG_COSTANZA", "CALLANDRA_CALLY_TYROL", "CAPRICA_SIX", "CAVIL", "CHIEF_GALEN_TYROL", "DANNA_BIERS", "ELLEN_TIGH", "FELIX_GAETA", "GAIUS_BALTAR", "GAIUS_BALTAR_ALT", "HELENA_CAIN", "KARL_HELO_AGATHON", "KARL_HELO_AGATHON_ALT", "KARA_STARBUCK_THRACE", "LAURA_ROSLIN", "LEE_ADAMA", "LEE_APOLLO_ADAMA", "LEOBEN_CONOY", "LOUANNE_KAT_KATRAINE", "LOUIS_HOSHI", "ROMO_LAMPKIN", "SAMUEL_T_ANDERS", "SAUL_TIGH", "SHARON_ATHENA_AGATHON", "SHARON_BOOMER_VALERII", "SHERMAN_DOC_COTTLE", "SIMON_ONEIL", "TOM_ZAREK", "TOM_ZAREK_ALT", "TORY_FOSTER", "WILLIAM_ADAMA" ]
+    },
+    "ChoiceLog" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "LogEntry" ],
+      "components" : [ {
+        "name" : "scopeId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "scope"
+        }
+      }, {
+        "name" : "chooser",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "option",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "Followup"
+        }
+      } ]
+    },
+    "ChoiceMade" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "JournalEntry" ],
+      "components" : [ {
+        "name" : "scopeId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "scope"
+        }
+      }, {
+        "name" : "chooser",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "option",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "Followup"
+        }
+      } ]
+    },
+    "Choose" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "InputProjection" ],
+      "components" : [ {
+        "name" : "player",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "options",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "Followup"
+          }
+        }
+      } ]
+    },
+    "ChooseCrisisSectionEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "CrisisCard"
+        }
+      }, {
+        "name" : "section",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Section"
+        }
+      } ]
+    },
+    "ChooseCrisisTargetEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "CrisisCard"
+        }
+      }, {
+        "name" : "targetPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "player"
+        }
+      } ]
+    },
+    "ChooseDestinationEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "chosen",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "DestinationCard"
+        }
+      }, {
+        "name" : "other",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "DestinationCard"
+        }
+      } ]
+    },
+    "ChooseExtraLoyaltyCardEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "targetPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "ChooseGalacticaDamageEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "resolved",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "GalacticaDamage"
+        }
+      }, {
+        "name" : "returned",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "GalacticaDamage"
+        }
+      } ]
+    },
+    "ChooseMessage" : {
+      "kind" : "record",
+      "type" : "choose",
+      "interfaces" : [ "ClientMessage" ],
+      "components" : [ {
+        "name" : "token",
+        "type" : {
+          "t" : "string",
+          "nullable" : true
+        }
+      }, {
+        "name" : "option",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      } ]
+    },
+    "CivilianShip" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "id",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      }, {
+        "name" : "fuelCost",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "moraleCost",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "populationCost",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      } ]
+    },
+    "ClientMessage" : {
+      "kind" : "union",
+      "discriminator" : "type",
+      "members" : [ "ChooseMessage", "HistoryMessage", "InjectMessage", "StatusMessage", "SubmitMessage", "UndoMessage" ]
+    },
+    "CloseInterruptWindowEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "CommandEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "LocationEvent", "PlayerEvent" ],
+      "location" : "COMMAND",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "CommunicationsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "LocationEvent", "PlayerEvent" ],
+      "location" : "COMMUNICATIONS",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "civilianShipId1",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "ship"
+        }
+      }, {
+        "name" : "civilianShipId2",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "ship"
+        }
+      } ]
+    },
+    "ConstrainedEvent" : {
+      "kind" : "union",
+      "discriminator" : "kind",
+      "members" : [ "DiscardQuorumCardsEvent", "DiscardSkillCardsEvent", "DrawSkillCardsEvent", "LaunchViperEvent", "LeaveBrigEvent" ]
+    },
+    "ConsultTheHybridPassEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "CrashLandingFailEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "CreateDestinyDeckEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "CreateLoyaltyDeckEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "CrisisCard" : {
+      "kind" : "enum",
+      "values" : [ "DETENTE", "RAIDERS_INBOUND", "RETURN_TO_DUTY", "REVIEW_CAMERA_FOOTAGE", "TRACKED_BY_RADIATION", "TRAINING_A_ROOKIE", "ABANDON_GALACTICA", "AN_AMBITIOUS_OPERATION", "A_DESPERATE_PACT", "CONSULT_THE_HYBRID", "DANGEROUS_PLOTS", "DISHONEST_TACTICS", "DOMESTIC_DISPUTE", "EARTH_IN_RUINS", "ENEMY_OF_MY_ENEMY", "GALACTICA_FALLING_APART", "GIVE_IN_TO_DESPAIR", "HYBRID_IN_PANIC", "INCITEMENT_TO_MUTINY", "INSUBORDINATE_CREW", "ONE_LAST_COCKTAIL", "QUESTION_PROCEDURE", "QUORUM_IN_UPROAR", "RALLYING_SUPPORT", "REACTOR_CRITICAL", "REBUILD_TRUST", "RELIGIOUS_TURMOIL", "REQUISITION_FOR_DEMETRIUS", "SECRET_MEETINGS", "STARVATION_IN_DOGSVILLE", "AIRLOCK_LEAK", "AMBUSHED_BY_THE_PRESS", "APPOINT_HEAD_OF_SECURITY", "CENTURION_ASSAULT", "CONSULT_THE_PRISONER", "CONTROVERSIAL_MANUSCRIPT", "CYLON_GENOCIDE", "DIVISIVE_BEHAVIOR", "FAMILIAR_FACE", "GUILTY_CONSCIENCE", "HAUNTED_BY_THE_PAST", "HERA_RESCUED", "HIDDEN_EXPLOSIVES", "HIDDEN_IDENTITY", "INTERROGATION", "IN_THE_RING", "JOES_BAR", "LABOR_DISPUTE", "MEDAL_OF_DISTINCTION", "MYSTERIOUS_GUIDE", "MYSTERIOUS_MESSAGE", "POWER_FAILURE", "RAPTOR_MALFUNCTION", "SET_A_TRAP", "STRANGE_BEACON", "TEMPLE_OF_THE_FIVE", "THE_CIRCLE", "THE_PASSAGE", "THREAT_OF_SUPER_NOVA", "TRUTH_AND_RECONCILIATION", "UNEXPLAINED_DEATHS", "UNFAIR_BIAS", "UNWELCOME_FACES", "WIDESPREAD_STARVATION", "ADMIRAL_GRILLED", "ANALYZE_ENEMY_FIGHTER", "A_TRAITOR_ACCUSED", "BOMB_THREAT", "BUILD_CYLON_DETECTOR", "COLONIAL_DAY", "CRASH_LANDING", "CRIPPLED_RAIDER", "CYLON_ACCUSATION", "CYLON_SCREENINGS", "CYLON_TRACKING_DEVICE", "CYLON_VIRUS", "DECLARE_MARTIAL_LAW", "DETECTOR_SABOTAGE", "ELECTIONS_LOOM", "FOOD_SHORTAGE", "FORCED_WATER_MINING", "FULFILLER_OF_PROPHECY", "GUILT_BY_COLLUSION", "HANGAR_ACCIDENT", "INFORMING_THE_PUBLIC", "JUMP_COMPUTER_FAILURE", "KEEP_TABS_ON_VISITOR", "LEGENDARY_DISCOVERY", "LOSS_OF_A_FRIEND", "LOW_SUPPLIES", "MANDATORY_TESTING", "MISSING_G4_EXPLOSIVES", "NETWORK_COMPUTERS", "PRISONER_REVOLT", "PRISON_LABOR", "REQUESTED_RESIGNATION", "RESCUE_CAPRICA_SURVIVORS", "RESCUE_MISSION_BASESTAR", "RESCUE_MISSION_RAIDER", "RESCUE_THE_FLEET", "RESISTANCE", "RIOTS_JUMP", "RIOTS_NO_JUMP", "SCOUTING_FOR_FUEL", "SCOUTING_FOR_WATER", "SECURITY_BREACH", "SEND_SURVEY_TEAM", "SLEEP_DEPRIVATION", "TERRORIST_BOMBER", "TERRORIST_INVESTIGATIONS", "THE_OLYMPIC_CARRIER", "UNEXPECTED_REUNION", "UNIDENTIFIED_SHIP", "WATER_SABOTAGED", "WATER_SHORTAGE_BASESTAR_AND_JUMP", "WATER_SHORTAGE_BASESTAR_NO_JUMP", "WATER_SHORTAGE_RAIDERS", "WEAPONS_MALFUNCTION", "WITCH_HUNT", "AN_OFFER_OF_PEACE", "ASSASSINATION_PLOT", "A_GUILTY_VERDICT", "CIVILIAN_SHIP_NUKED", "CODE_BLUE", "DEFENDING_A_PRISONER", "FOOD_HOARDING_IN_THE_FLEET", "MEDICAL_BREAKTHROUGH", "PRESSURE_SUPPLY_SHIPS", "REUNITE_THE_FLEET", "REVIEW_GALACTICAS_LOGS", "SABOTAGE_INVESTIGATED", "STANDOFF_WITH_PEGASUS", "SUSPICIOUS_ELECTION_RESULTS", "THE_BLACK_MARKET", "TRAINING_SNAFU", "UNSETTLING_STORIES" ]
+    },
+    "CrisisStepEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "again",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      } ]
+    },
+    "CylonFleetEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "LocationEvent", "PlayerEvent" ],
+      "location" : "CYLON_FLEET",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "typeToActivate",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "ShipType"
+        }
+      } ]
+    },
+    "CylonFleetProjection" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "pursuit",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Pursuit"
+        }
+      }, {
+        "name" : "locations",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "LocationProjection"
+          }
+        }
+      }, {
+        "name" : "ships",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "ShipProjection"
+          }
+        }
+      } ]
+    },
+    "CylonGenocidePassEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "CylonSupply" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "basestars",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "raiders",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "heavyRaiders",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "centurions",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      } ]
+    },
+    "CylonsWinEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "DamageBasestarEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "basestarId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      } ]
+    },
+    "DamageGalacticaEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "DamageHumanFighterEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "shipId",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "ship"
+        }
+      } ]
+    },
+    "DamageLocationEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "SandboxEvent" ],
+      "components" : [ {
+        "name" : "location",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      } ]
+    },
+    "DamagePegasusEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "DamageVipersEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "count",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "area",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Area"
+        }
+      } ]
+    },
+    "DealLoyaltyCardsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "count",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "extra",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      } ]
+    },
+    "Decide" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "InputProjection" ],
+      "components" : [ {
+        "name" : "player",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "action",
+        "type" : {
+          "nullable" : true,
+          "t" : "class",
+          "of" : "Event"
+        }
+      }, {
+        "name" : "constraints",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "EventConstraint"
+          }
+        }
+      } ]
+    },
+    "DeckFact" : {
+      "kind" : "union",
+      "discriminator" : "kind",
+      "members" : [ "DeckFact.CardsAddedOnTop", "DeckFact.CardsAddedToBottom", "DeckFact.CardsDiscarded", "DeckFact.CardsDrawn", "DeckFact.CardsPulled", "DeckFact.DeckShuffled" ]
+    },
+    "DeckFact.CardsAddedOnTop" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "DeckFact", "Fact" ],
+      "components" : [ {
+        "name" : "deck",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "DeckId"
+        }
+      }, {
+        "name" : "cards",
+        "type" : {
+          "t" : "cards",
+          "nullable" : true
+        }
+      } ]
+    },
+    "DeckFact.CardsAddedToBottom" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "DeckFact", "Fact" ],
+      "components" : [ {
+        "name" : "deck",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "DeckId"
+        }
+      }, {
+        "name" : "cards",
+        "type" : {
+          "t" : "cards",
+          "nullable" : true
+        }
+      } ]
+    },
+    "DeckFact.CardsDiscarded" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "DeckFact", "Fact" ],
+      "components" : [ {
+        "name" : "deck",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "DeckId"
+        }
+      }, {
+        "name" : "cards",
+        "type" : {
+          "t" : "cards",
+          "nullable" : true
+        }
+      } ]
+    },
+    "DeckFact.CardsDrawn" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "DeckFact", "Fact" ],
+      "components" : [ {
+        "name" : "deck",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "DeckId"
+        }
+      }, {
+        "name" : "cards",
+        "type" : {
+          "t" : "cards",
+          "nullable" : true
+        }
+      } ]
+    },
+    "DeckFact.CardsPulled" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "DeckFact", "Fact" ],
+      "components" : [ {
+        "name" : "deck",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "DeckId"
+        }
+      }, {
+        "name" : "cards",
+        "type" : {
+          "t" : "cards",
+          "nullable" : true
+        }
+      } ]
+    },
+    "DeckFact.DeckShuffled" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "DeckFact", "Fact" ],
+      "components" : [ {
+        "name" : "deck",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "DeckId"
+        }
+      }, {
+        "name" : "drawOrder",
+        "type" : {
+          "t" : "cards",
+          "nullable" : true
+        }
+      } ]
+    },
+    "DeckId" : {
+      "kind" : "enum",
+      "values" : [ "CIVILIAN_SHIPS", "GALACTICA_DAMAGE", "PEGASUS_DAMAGE", "BASESTAR_DAMAGE", "DESTINATION", "POLITICS", "LEADERSHIP", "TACTICS", "PILOTING", "ENGINEERING", "TREACHERY", "DESTINY", "QUORUM", "CRISIS", "SUPER_CRISIS", "LOYALTY", "LOYALTY_NOT_CYLON", "MUTINY", "MOTIVE" ]
+    },
+    "DeckProjection" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "deck",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "DeckId"
+        }
+      }, {
+        "name" : "size",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "discardSize",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "discarded",
+        "type" : {
+          "t" : "cards",
+          "nullable" : true
+        }
+      }, {
+        "name" : "drawPile",
+        "type" : {
+          "t" : "cards",
+          "nullable" : true
+        }
+      } ]
+    },
+    "DeclareEmergencyEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "declareEmergencyCard",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "SkillCard"
+        }
+      } ]
+    },
+    "DecreaseJumpPreparationEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "DefendingAPrisonerFailEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "DefendingAPrisonerFailResultEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "DerelictBasestarEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "DestinationCard" : {
+      "kind" : "enum",
+      "values" : [ "ASTEROID_FIELD", "BARREN_PLANET", "CYLON_AMBUSH", "CYLON_REFINERY", "DEEP_SPACE", "DESOLATE_MOON", "ICY_MOON", "RAGNAR_ANCHORAGE", "REMOTE_PLANET", "TYLIUM_PLANET", "ALGAE_PLANET", "CYLON_RAIDERS", "DERELICT_BASESTAR", "DYING_STAR", "GAS_GIANT", "LIONS_HEAD_NEBULA", "RADIOACTIVE_CLOUD", "A_CIVILIAN_CONVOY", "BINARY_STAR", "GAS_CLOUD", "MISJUMP" ]
+    },
+    "DestroyCivilianShipEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "shipId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      } ]
+    },
+    "DestroyCivilianShipsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "count",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      } ]
+    },
+    "DestroyCylonShipsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "area",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      } ]
+    },
+    "DestroyRaidersEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "shipIds",
+        "type" : {
+          "nullable" : true,
+          "t" : "set",
+          "of" : {
+            "t" : "int",
+            "nullable" : false,
+            "role" : "ship"
+          }
+        }
+      } ]
+    },
+    "DestroyRaptorEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "DetermineNextAdmiralEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "excludedPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "player"
+        }
+      } ]
+    },
+    "DetermineNextCagEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "excludedPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "player"
+        }
+      } ]
+    },
+    "DetermineNextPresidentEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "excludedPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "player"
+        }
+      } ]
+    },
+    "DetermineSkillCheckAbilitiesOrderEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "cardsWithAbilities",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "SkillCard"
+          }
+        }
+      } ]
+    },
+    "DetermineSkillCheckResultEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "DieRollProjection" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "value",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "count"
+        }
+      }, {
+        "name" : "cards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "SkillCardType"
+          }
+        }
+      }, {
+        "name" : "modifier",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "result",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "count"
+        }
+      } ]
+    },
+    "Discard1MutinyCardEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "cardToDiscard",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "MutinyCard"
+        }
+      } ]
+    },
+    "DiscardAllSkillCardsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "DiscardDownTo1MutinyCardEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "cardToKeep",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "MutinyCard"
+        }
+      } ]
+    },
+    "DiscardFromDestinyDeckEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "cards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "SkillCard"
+          }
+        }
+      } ]
+    },
+    "DiscardNukeTokenEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "DiscardQuorumCardsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ConstrainedEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "cards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "QuorumCard"
+          }
+        }
+      }, {
+        "name" : "discardLimit",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "EventConstraint"
+        }
+      } ]
+    },
+    "DiscardRandomSkillCardsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "count",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      } ]
+    },
+    "DiscardSkillCardsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ConstrainedEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "cards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "SkillCard"
+          }
+        }
+      }, {
+        "name" : "discardLimit",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "EventConstraint"
+        }
+      } ]
+    },
+    "DiscardStepEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "DogfightEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "viperId",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "ship"
+        }
+      }, {
+        "name" : "removedCard",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "SkillCard"
+        }
+      } ]
+    },
+    "DradisContactEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "DrawAndDestroyCivilianShipsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "count",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      } ]
+    },
+    "DrawAndResolveRecklessCardsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "DrawDestinationCardsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "DrawMutinyCardEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "DrawQuorumCardEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "DrawSkillCardsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ConstrainedEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "selection",
+        "type" : {
+          "nullable" : true,
+          "t" : "map",
+          "key" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "SkillCardColor"
+          },
+          "value" : {
+            "t" : "int",
+            "nullable" : false,
+            "role" : "count"
+          }
+        }
+      }, {
+        "name" : "drawLimit",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "EventConstraint"
+        }
+      } ]
+    },
+    "DrawSkillCardsOfColorEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "color",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "SkillCardColor"
+        }
+      }, {
+        "name" : "count",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      } ]
+    },
+    "EndGameEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "EndSkillCheckEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "EndTurnEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "EngineRoomEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "LocationEvent", "PlayerEvent" ],
+      "location" : "ENGINE_ROOM",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "discardCard1",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "SkillCard"
+        }
+      }, {
+        "name" : "discardCard2",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "SkillCard"
+        }
+      } ]
+    },
+    "Event" : {
+      "kind" : "union",
+      "discriminator" : "kind",
+      "members" : [ "ABetterMachineEvent", "ASecondChanceEvent", "ActionStepEvent", "ActivateCylonBasestarEvent", "ActivateCylonBasestarsEvent", "ActivateCylonShipsStepEvent", "ActivateHeavyRaidersAndCenturionsEvent", "ActivateRaiderEvent", "ActivateRaidersEvent", "ActivateViperEvent", "AdministrationEvent", "AdmiralsQuartersEvent", "AdvancePursuitTrackEvent", "AirlockEvent", "AnalyzeEnemyFighterPassEvent", "ArmoryEvent", "ArmoryResultEvent", "AssignTitleEvent", "AttackCylonShipEvent", "AttackCylonShipResultEvent", "AttackGalacticaEvent", "AttackGalacticaResultEvent", "AttackViperEvent", "AttackViperResultEvent", "BaitEvent", "BasestarBridgeAbilityEvent", "BasestarBridgeAbilityResultEvent", "BasestarBridgeEvent", "BasestarBridgeShipsEvent", "BrigEvent", "CapricaDrawAndResolveCrisisCardsEvent", "CapricaPlaySuperCrisisCardEvent", "ChangeOfPlansEvent", "ChangeResourceEvent", "ChooseCrisisSectionEvent", "ChooseCrisisTargetEvent", "ChooseDestinationEvent", "ChooseExtraLoyaltyCardEvent", "ChooseGalacticaDamageEvent", "CloseInterruptWindowEvent", "CommandEvent", "CommunicationsEvent", "ConsultTheHybridPassEvent", "CrashLandingFailEvent", "CreateDestinyDeckEvent", "CreateLoyaltyDeckEvent", "CrisisStepEvent", "CylonFleetEvent", "CylonGenocidePassEvent", "CylonsWinEvent", "DamageBasestarEvent", "DamageGalacticaEvent", "DamageHumanFighterEvent", "DamageLocationEvent", "DamagePegasusEvent", "DamageVipersEvent", "DealLoyaltyCardsEvent", "DeclareEmergencyEvent", "DecreaseJumpPreparationEvent", "DefendingAPrisonerFailEvent", "DefendingAPrisonerFailResultEvent", "DerelictBasestarEvent", "DestroyCivilianShipEvent", "DestroyCivilianShipsEvent", "DestroyCylonShipsEvent", "DestroyRaidersEvent", "DestroyRaptorEvent", "DetermineNextAdmiralEvent", "DetermineNextCagEvent", "DetermineNextPresidentEvent", "DetermineSkillCheckAbilitiesOrderEvent", "DetermineSkillCheckResultEvent", "Discard1MutinyCardEvent", "DiscardAllSkillCardsEvent", "DiscardDownTo1MutinyCardEvent", "DiscardFromDestinyDeckEvent", "DiscardNukeTokenEvent", "DiscardQuorumCardsEvent", "DiscardRandomSkillCardsEvent", "DiscardSkillCardsEvent", "DiscardStepEvent", "DogfightEvent", "DradisContactEvent", "DrawAndDestroyCivilianShipsEvent", "DrawAndResolveRecklessCardsEvent", "DrawDestinationCardsEvent", "DrawMutinyCardEvent", "DrawQuorumCardEvent", "DrawSkillCardsEvent", "DrawSkillCardsOfColorEvent", "EndGameEvent", "EndSkillCheckEvent", "EndTurnEvent", "EngineRoomEvent", "ExecuteEvent", "ExploitAWeaknessEvent", "FTLControlEvent", "FTLControlResultEvent", "FinishExecutionEvent", "FinishSleeperAgentPhaseEvent", "FootageTransmittedFailEvent", "ForceTheirHandEvent", "GainResourceEvent", "GasCloudEvent", "GasCloudPlaceEvent", "GasGiantEvent", "GiveLoyaltyCardsEvent", "GiveSkillCardToPlayerEvent", "GiveTitlesToNextInLineEvent", "HangarDeckEvent", "HumanFleetInfiltrateEvent", "HumanFleetLookAtTopCrisisCardEvent", "HumanFleetLookAtTopDestinationCardEvent", "HumanPrisonerFailEvent", "IncreaseJumpPreparationEvent", "InstallUpgradesEvent", "IronWillEvent", "JumpingTheFleetEvent", "KeepCrisisCardInPlayEvent", "KeepTabsOnVisitorFailEvent", "KeepTabsOnVisitorFailResultEvent", "LaunchRaidersEvent", "LaunchViperEvent", "LeaveBrigEvent", "LookAtLoyaltyCardEvent", "LoseResourceEvent", "MainBatteriesEvent", "MainBatteriesResultEvent", "MajorVictoryResultEvent", "MakeAdmiralEvent", "MakePresidentEvent", "MakeSkillCheckEvent", "MoveCharacterEvent", "MoveCivilianShipEvent", "MoveCylonShipsToFleetBoardEvent", "MoveEvent", "MoveFromBrigEvent", "MovementStepEvent", "MysteriousMessagePassEvent", "NoOpEvent", "ObjectiveInstructionsEvent", "OpenInterruptWindowEvent", "PassMutineerCardEvent", "PegasusCicEvent", "PegasusCicResultEvent", "PersonalVicesEvent", "PlaceCenturionsEvent", "PlaceCivilianShipEvent", "PlaceCivilianShipsInFrontEvent", "PlaceCrisisCardOnBottomEvent", "PlaceCrisisCardOnTopEvent", "PlaceDestinationCardAtBottomEvent", "PlaceDestinationCardOnTopEvent", "PlaceInSetupLocationEvent", "PlaceRaidersBehindEvent", "PlaceShipEvent", "PlaceShipOnCylonFleetBoardEvent", "PlaceShipOnCylonFleetBoardResultEvent", "PlaceShipsEvent", "PlayCardsBeforeSkillCheckEvent", "PlayCardsIntoSkillCheckEvent", "PlayFromDestinyDeckEvent", "PlayInterruptCardEvent", "PlayQuorumCardEvent", "PlaySuperCrisisCardEvent", "PlayerDecisionEvent", "PoliticalProwessEvent", "PrepareForJumpStepEvent", "PresidentsOfficeEvent", "PressRoomEvent", "ProtectTheFleetEvent", "PutCrisisCardOnTopEvent", "PutDestinationCardOnTopEvent", "PutDestinyCardOnTopEvent", "PutSkillCardOnTopEvent", "QuickThinkingEvent", "QuorumChamberEvent", "QuorumInUproarFailEvent", "RagnarAnchorageEvent", "ReceiveSkillsStepEvent", "ReceiveStartingSkillsEvent", "RedTapeEvent", "ReplaceMutinousPresidentEvent", "ResearchLabEvent", "ResetJumpPreparationEvent", "ResolveCapricaCrisisCardEvent", "ResolveCardsBeforeSkillCheckEvent", "ResolveConsequencesEvent", "ResolveCrisisCardEvent", "ResolveCrisisRollEvent", "ResolveDestinationCardEvent", "ResolveSkillCheckAbilityEvent", "ResolveSkillCheckResultEvent", "ResurrectionShipEvent", "ReturnAssaultRaptorEvent", "ReturnToCrisisStepEvent", "ReturnVipersToReservesEvent", "RevealCardsBeforeSkillCheckEvent", "RevealMutineerEvent", "RiskResultEvent", "RiskShipsEvent", "RollDieEvent", "SelectCharacterEvent", "SendToBrigEvent", "SendToSickbayEvent", "SetATrapPassEvent", "SetJumpPreparationEvent", "ShuffleAndDivideCardsEvent", "ShuffleTreacheryIntoDestinyDeckEvent", "SleeperAgentPhaseEvent", "StandoffWithPegasusPassEvent", "StartGameEvent", "StartTurnEvent", "StrangeBeaconPassEvent", "TiebreakCardsBeforeSkillCheckEvent", "TiebreakInterruptCardsEvent", "TotalSkillCheckStrengthEvent", "TrustInstinctsEvent", "ViolentOutburstsEvent", "WeaponsControlEvent" ]
+    },
+    "EventConstraint" : {
+      "kind" : "enum",
+      "values" : [ "DRAW_EXACTLY_1", "DRAW_EXACTLY_2", "DRAW_EXACTLY_3", "DRAW_EXACTLY_4", "DRAW_EXACTLY_5", "DRAW_EXACTLY_2_OF_ANY_COLOR", "DISCARD_EXACTLY_1", "DISCARD_EXACTLY_2", "DISCARD_EXACTLY_3", "DISCARD_EXACTLY_4", "DISCARD_EXACTLY_5", "DISCARD_DOWN_TO_HAND_LIMIT", "MUST_LAUNCH_IN_VIPER", "DESTINATION_GALACTICA" ]
+    },
+    "EventInjected" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "JournalEntry" ],
+      "components" : [ {
+        "name" : "event",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "Event"
+        }
+      } ]
+    },
+    "ExecuteEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "ExploitAWeaknessEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "targetHumanPlayer",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "FTLControlEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "LocationEvent", "PlayerEvent" ],
+      "location" : "FTL_CONTROL",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "FTLControlResultEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "Fact" : {
+      "kind" : "union",
+      "discriminator" : "kind",
+      "members" : [ "BoardFact.BoardingPartyAdvanced", "BoardFact.EngineRoomActivated", "BoardFact.JumpPreparationDecreased", "BoardFact.JumpPreparationIncreased", "BoardFact.JumpPreparationReset", "BoardFact.LocationDamaged", "BoardFact.PursuitAdvanced", "BoardFact.PursuitReset", "BoardFact.ResourceDecreased", "BoardFact.ResourceIncreased", "DeckFact.CardsAddedOnTop", "DeckFact.CardsAddedToBottom", "DeckFact.CardsDiscarded", "DeckFact.CardsDrawn", "DeckFact.CardsPulled", "DeckFact.DeckShuffled", "GameFact.ActingPlayerChanged", "GameFact.CrisisCardKeptInPlay", "GameFact.CrisisCardPlayed", "GameFact.CrisisCardsCleared", "GameFact.CurrentPlayerChanged", "GameFact.DestinationReached", "GameFact.DieRollCardPlayed", "GameFact.DieRollStarted", "GameFact.DieRolled", "GameFact.GameEnded", "GameFact.GameStarted", "GameFact.NukeDiscarded", "GameFact.ReturnToCrisisStepChanged", "GameFact.StepChanged", "GameFact.TurnEndedEarly", "GameFact.TurnStarted", "InterruptFact.InterruptCardPlayed", "InterruptFact.InterruptCardResolved", "InterruptFact.InterruptCardReturned", "InterruptFact.InterruptWindowClosed", "InterruptFact.InterruptWindowOpened", "InterruptFact.RaiderMissed", "InterruptFact.RaidersWillMiss", "PlayerFact.CardsGained", "PlayerFact.CardsLost", "PlayerFact.CardsSeen", "PlayerFact.CharacterMoved", "PlayerFact.CharacterRemoved", "PlayerFact.CharacterRemovedFromBoards", "PlayerFact.CharacterSelected", "PlayerFact.CivilianShipForgotten", "PlayerFact.CivilianShipRevealed", "PlayerFact.InfiltrationEnded", "PlayerFact.InfiltrationStarted", "PlayerFact.LoyaltyCardRevealed", "PlayerFact.LoyaltyCardSeen", "PlayerFact.MiracleTokenGained", "PlayerFact.MiracleTokenLost", "PlayerFact.MotiveCardRevealed", "PlayerFact.OwnTurnStarted", "ShipFact.BasestarDamageAttached", "ShipFact.BasestarDamageCleared", "ShipFact.PilotChanged", "ShipFact.ShipMoved", "SkillCheckFact.AbilityResolved", "SkillCheckFact.CardRemoved", "SkillCheckFact.CardsDrawn", "SkillCheckFact.CardsPlaced", "SkillCheckFact.CardsPlayedBefore", "SkillCheckFact.EmergencyDeclared", "SkillCheckFact.FailResultPrevented", "SkillCheckFact.PassResultReplaced", "SkillCheckFact.PlayedBeforeRevealed", "SkillCheckFact.ResultDetermined", "SkillCheckFact.SkillCheckEnded", "SkillCheckFact.SkillCheckStarted", "SkillCheckFact.TargetChosen", "SkillCheckFact.TotalStrengthDetermined", "TitleFact.AdmiralAssigned", "TitleFact.CagAssigned", "TitleFact.PresidentAssigned", "TitleFact.PresidentQuorumCardGained", "TitleFact.PresidentQuorumCardsLost" ]
+    },
+    "FactProjection" : {
+      "kind" : "union",
+      "discriminator" : "kind",
+      "members" : [ "Hidden", "Shown" ]
+    },
+    "FactRecorded" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "JournalEntry" ],
+      "components" : [ {
+        "name" : "scopeId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "scope"
+        }
+      }, {
+        "name" : "fact",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "Fact"
+        }
+      } ]
+    },
+    "FinishExecutionEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "executedCharacter",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Character"
+        }
+      } ]
+    },
+    "FinishSleeperAgentPhaseEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "Followup" : {
+      "kind" : "union",
+      "discriminator" : "kind",
+      "members" : [ "AllOf", "None", "OneOf", "Single" ]
+    },
+    "FootageTransmittedFailEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "ForceTheirHandEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "skillCard",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "SkillCard"
+        }
+      } ]
+    },
+    "GainResourceEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "resource",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Resource"
+        }
+      }, {
+        "name" : "amount",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      } ]
+    },
+    "GalacticaDamage" : {
+      "kind" : "enum",
+      "values" : [ "FUEL", "FOOD", "WEAPONS_CONTROL", "HANGAR_DECK", "FTL_CONTROL", "COMMAND", "ARMORY", "ADMIRALS_QUARTERS" ]
+    },
+    "GalacticaProjection" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "fuel",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "food",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "morale",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "population",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "jumpPreparation",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "JumpPreparation"
+        }
+      }, {
+        "name" : "colonialOneDestroyed",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      }, {
+        "name" : "locations",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "LocationProjection"
+          }
+        }
+      }, {
+        "name" : "ships",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "ShipProjection"
+          }
+        }
+      }, {
+        "name" : "reserves",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "ShipProjection"
+          }
+        }
+      }, {
+        "name" : "damagedVipers",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "ShipProjection"
+          }
+        }
+      }, {
+        "name" : "boardingParty",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "CenturionProjection"
+          }
+        }
+      } ]
+    },
+    "GameFact" : {
+      "kind" : "union",
+      "discriminator" : "kind",
+      "members" : [ "GameFact.ActingPlayerChanged", "GameFact.CrisisCardKeptInPlay", "GameFact.CrisisCardPlayed", "GameFact.CrisisCardsCleared", "GameFact.CurrentPlayerChanged", "GameFact.DestinationReached", "GameFact.DieRollCardPlayed", "GameFact.DieRollStarted", "GameFact.DieRolled", "GameFact.GameEnded", "GameFact.GameStarted", "GameFact.NukeDiscarded", "GameFact.ReturnToCrisisStepChanged", "GameFact.StepChanged", "GameFact.TurnEndedEarly", "GameFact.TurnStarted" ]
+    },
+    "GameFact.ActingPlayerChanged" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "GameFact" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "player"
+        }
+      } ]
+    },
+    "GameFact.CrisisCardKeptInPlay" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "GameFact" ],
+      "components" : [ {
+        "name" : "type",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "SkillCheckType"
+        }
+      } ]
+    },
+    "GameFact.CrisisCardPlayed" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "GameFact" ],
+      "components" : [ {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "CrisisCard"
+        }
+      } ]
+    },
+    "GameFact.CrisisCardsCleared" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "GameFact" ],
+      "components" : [ {
+        "name" : "cards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "CrisisCard"
+          }
+        }
+      } ]
+    },
+    "GameFact.CurrentPlayerChanged" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "GameFact" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "GameFact.DestinationReached" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "GameFact" ],
+      "components" : [ {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "DestinationCard"
+        }
+      } ]
+    },
+    "GameFact.DieRollCardPlayed" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "GameFact" ],
+      "components" : [ {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "SkillCardType"
+        }
+      }, {
+        "name" : "modifier",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      } ]
+    },
+    "GameFact.DieRollStarted" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "GameFact" ],
+      "components" : [ ]
+    },
+    "GameFact.DieRolled" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "GameFact" ],
+      "components" : [ {
+        "name" : "value",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      } ]
+    },
+    "GameFact.GameEnded" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "GameFact" ],
+      "components" : [ {
+        "name" : "winner",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Team"
+        }
+      }, {
+        "name" : "winnerPlayerNumbers",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "t" : "int",
+            "nullable" : false,
+            "role" : "player"
+          }
+        }
+      } ]
+    },
+    "GameFact.GameStarted" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "GameFact" ],
+      "components" : [ {
+        "name" : "playerCount",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "objective",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "ObjectiveCard"
+        }
+      } ]
+    },
+    "GameFact.NukeDiscarded" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "GameFact" ],
+      "components" : [ ]
+    },
+    "GameFact.ReturnToCrisisStepChanged" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "GameFact" ],
+      "components" : [ {
+        "name" : "returns",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      } ]
+    },
+    "GameFact.StepChanged" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "GameFact" ],
+      "components" : [ {
+        "name" : "step",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "GameStep"
+        }
+      } ]
+    },
+    "GameFact.TurnEndedEarly" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "GameFact" ],
+      "components" : [ ]
+    },
+    "GameFact.TurnStarted" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "GameFact" ],
+      "components" : [ {
+        "name" : "turn",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      } ]
+    },
+    "GameMessage" : {
+      "kind" : "record",
+      "type" : "game",
+      "interfaces" : [ "ServerMessage" ],
+      "components" : [ {
+        "name" : "token",
+        "type" : {
+          "t" : "string",
+          "nullable" : true
+        }
+      }, {
+        "name" : "game",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "GameProjection"
+        }
+      } ]
+    },
+    "GameProjection" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "viewer",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "Viewer"
+        }
+      }, {
+        "name" : "objective",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "ObjectiveCard"
+        }
+      }, {
+        "name" : "turn",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "TurnProjection"
+        }
+      }, {
+        "name" : "players",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "PlayerProjection"
+          }
+        }
+      }, {
+        "name" : "titles",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "Titles"
+        }
+      }, {
+        "name" : "galactica",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "GalacticaProjection"
+        }
+      }, {
+        "name" : "pegasus",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "PegasusProjection"
+        }
+      }, {
+        "name" : "cylonFleet",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "CylonFleetProjection"
+        }
+      }, {
+        "name" : "cylonSupply",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "CylonSupply"
+        }
+      }, {
+        "name" : "decks",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "DeckProjection"
+          }
+        }
+      }, {
+        "name" : "presidentHand",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "HiddenCards",
+          "args" : [ {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "QuorumCard"
+          } ]
+        }
+      }, {
+        "name" : "skillCheck",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "SkillCheckProjection"
+        }
+      }, {
+        "name" : "nukes",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "crisisCardsInPlay",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "SkillCheckType"
+          }
+        }
+      }, {
+        "name" : "destinations",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "DestinationCard"
+          }
+        }
+      }, {
+        "name" : "distanceTraveled",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "removedCharacters",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "Character"
+          }
+        }
+      }, {
+        "name" : "destroyedShips",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "ShipProjection"
+          }
+        }
+      }, {
+        "name" : "input",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "InputProjection"
+        }
+      }, {
+        "name" : "outcome",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "Outcome"
+        }
+      } ]
+    },
+    "GameStep" : {
+      "kind" : "enum",
+      "values" : [ "SETUP", "RECEIVE_SKILLS", "MOVEMENT", "ACTION", "CRISIS", "ACTIVATE_CYLON_SHIPS", "PREPARE_FOR_JUMP", "DISCARD" ]
+    },
+    "GasCloudEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "GasCloudPlaceEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "cards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "CrisisCard"
+          }
+        }
+      } ]
+    },
+    "GasGiantEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "GiveLoyaltyCardsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "recipientPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "GiveSkillCardToPlayerEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "SandboxEvent" ],
+      "components" : [ {
+        "name" : "targetPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "SkillCard"
+        }
+      } ]
+    },
+    "GiveTitlesToNextInLineEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "HangarDeckEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "LocationEvent", "PlayerEvent" ],
+      "location" : "HANGAR_DECK",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "Hidden" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "FactProjection" ],
+      "components" : [ {
+        "name" : "fact",
+        "type" : {
+          "nullable" : true,
+          "t" : "class",
+          "of" : "Fact"
+        }
+      }, {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "player"
+        }
+      }, {
+        "name" : "otherPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "player"
+        }
+      }, {
+        "name" : "deck",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "DeckId"
+        }
+      }, {
+        "name" : "pile",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "PlayerPile"
+        }
+      }, {
+        "name" : "skillCheckPile",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "SkillCheckPile"
+        }
+      }, {
+        "name" : "count",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "colors",
+        "type" : {
+          "nullable" : true,
+          "t" : "map",
+          "key" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "SkillCardColor"
+          },
+          "value" : {
+            "t" : "int",
+            "nullable" : false,
+            "role" : "count"
+          }
+        }
+      } ]
+    },
+    "HiddenCards" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "typeParams" : [ "T" ],
+      "components" : [ {
+        "name" : "count",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "revealed",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "t" : "var",
+            "name" : "T",
+            "nullable" : false
+          }
+        }
+      }, {
+        "name" : "cards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "t" : "var",
+            "name" : "T",
+            "nullable" : false
+          }
+        }
+      } ]
+    },
+    "HistoryMessage" : {
+      "kind" : "record",
+      "type" : "history",
+      "interfaces" : [ "ClientMessage" ],
+      "components" : [ ]
+    },
+    "HumanFleetInfiltrateEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "LocationEvent", "PlayerEvent" ],
+      "location" : "HUMAN_FLEET",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "galacticaLocation",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      } ]
+    },
+    "HumanFleetLookAtTopCrisisCardEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "LocationEvent", "PlayerEvent" ],
+      "location" : "HUMAN_FLEET",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "HumanFleetLookAtTopDestinationCardEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "LocationEvent", "PlayerEvent" ],
+      "location" : "HUMAN_FLEET",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "HumanPrisonerFailEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "IncreaseJumpPreparationEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "InjectMessage" : {
+      "kind" : "record",
+      "type" : "inject",
+      "interfaces" : [ "ClientMessage" ],
+      "components" : [ {
+        "name" : "token",
+        "type" : {
+          "t" : "string",
+          "nullable" : true
+        }
+      }, {
+        "name" : "event",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "Event"
+        }
+      } ]
+    },
+    "InputProjection" : {
+      "kind" : "union",
+      "discriminator" : "kind",
+      "members" : [ "Choose", "Decide", "Waiting", "WaitingFor" ]
+    },
+    "InstallUpgradesEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "skillCheckPassed",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      } ]
+    },
+    "InterruptFact" : {
+      "kind" : "union",
+      "discriminator" : "kind",
+      "members" : [ "InterruptFact.InterruptCardPlayed", "InterruptFact.InterruptCardResolved", "InterruptFact.InterruptCardReturned", "InterruptFact.InterruptWindowClosed", "InterruptFact.InterruptWindowOpened", "InterruptFact.RaiderMissed", "InterruptFact.RaidersWillMiss" ]
+    },
+    "InterruptFact.InterruptCardPlayed" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "InterruptFact" ],
+      "components" : [ {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "PlayedInterruptCard"
+        }
+      } ]
+    },
+    "InterruptFact.InterruptCardResolved" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "InterruptFact" ],
+      "components" : [ {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "PlayedInterruptCard"
+        }
+      } ]
+    },
+    "InterruptFact.InterruptCardReturned" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "InterruptFact" ],
+      "components" : [ {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "PlayedInterruptCard"
+        }
+      } ]
+    },
+    "InterruptFact.InterruptWindowClosed" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "InterruptFact" ],
+      "components" : [ ]
+    },
+    "InterruptFact.InterruptWindowOpened" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "InterruptFact" ],
+      "components" : [ {
+        "name" : "window",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "InterruptWindow"
+        }
+      } ]
+    },
+    "InterruptFact.RaiderMissed" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "InterruptFact" ],
+      "components" : [ {
+        "name" : "area",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      } ]
+    },
+    "InterruptFact.RaidersWillMiss" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "InterruptFact" ],
+      "components" : [ {
+        "name" : "area",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      }, {
+        "name" : "count",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      } ]
+    },
+    "InterruptWindow" : {
+      "kind" : "union",
+      "discriminator" : "kind",
+      "members" : [ "AfterBasestarOrCenturionDestroyed", "AfterDieRoll", "AfterViperAttacked", "BeforeDieRoll", "BeforePilotedViperAttack", "BeforeRaidersActivate" ]
+    },
+    "IronWillEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "JournalEntry" : {
+      "kind" : "union",
+      "discriminator" : "kind",
+      "members" : [ "ChoiceMade", "EventInjected", "FactRecorded", "ScopeClosed", "ScopeOpened" ]
+    },
+    "JumpPreparation" : {
+      "kind" : "enum",
+      "values" : [ "START", "POSITION_1", "POSITION_2", "MINUS_3", "MINUS_1" ]
+    },
+    "JumpingTheFleetEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "KeepCrisisCardInPlayEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "skillCheckType",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "SkillCheckType"
+        }
+      } ]
+    },
+    "KeepTabsOnVisitorFailEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "KeepTabsOnVisitorFailResultEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "LaunchRaidersEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "LaunchViperEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ConstrainedEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "shipType",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "ShipType"
+        }
+      }, {
+        "name" : "location",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      }, {
+        "name" : "pilot",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Character"
+        }
+      }, {
+        "name" : "unmannedViperId",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "ship"
+        }
+      }, {
+        "name" : "mustLaunchInViper",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      } ]
+    },
+    "LeaveBrigEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ConstrainedEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "destination",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      }, {
+        "name" : "destinationLimit",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "EventConstraint"
+        }
+      } ]
+    },
+    "LiveUpdateProjection" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "entries",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "LogEntry"
+          }
+        }
+      } ]
+    },
+    "Location" : {
+      "kind" : "enum",
+      "values" : [ "FTL_CONTROL", "WEAPONS_CONTROL", "COMMUNICATIONS", "RESEARCH_LAB", "ARMORY", "COMMAND", "ADMIRALS_QUARTERS", "HANGAR_DECK", "SICKBAY", "BRIG", "QUORUM_CHAMBER", "PRESS_ROOM", "PRESIDENTS_OFFICE", "ADMINISTRATION", "GALACTICA_SPACE_12_OCLOCK", "GALACTICA_SPACE_2_OCLOCK", "GALACTICA_SPACE_4_OCLOCK", "GALACTICA_SPACE_6_OCLOCK", "GALACTICA_SPACE_8_OCLOCK", "GALACTICA_SPACE_10_OCLOCK", "PEGASUS_CIC", "AIRLOCK", "MAIN_BATTERIES", "ENGINE_ROOM", "CAPRICA", "CYLON_FLEET", "HUMAN_FLEET", "RESURRECTION_SHIP", "BASESTAR_BRIDGE", "CYLON_FLEET_SPACE_1", "CYLON_FLEET_SPACE_2", "CYLON_FLEET_SPACE_3", "CYLON_FLEET_SPACE_4", "CYLON_FLEET_SPACE_5_6", "CYLON_FLEET_SPACE_7_8" ]
+    },
+    "LocationEvent" : {
+      "kind" : "union",
+      "discriminator" : "kind",
+      "members" : [ "AdministrationEvent", "AdmiralsQuartersEvent", "AirlockEvent", "ArmoryEvent", "BasestarBridgeEvent", "BrigEvent", "CapricaDrawAndResolveCrisisCardsEvent", "CapricaPlaySuperCrisisCardEvent", "CommandEvent", "CommunicationsEvent", "CylonFleetEvent", "EngineRoomEvent", "FTLControlEvent", "HangarDeckEvent", "HumanFleetInfiltrateEvent", "HumanFleetLookAtTopCrisisCardEvent", "HumanFleetLookAtTopDestinationCardEvent", "MainBatteriesEvent", "PegasusCicEvent", "PresidentsOfficeEvent", "PressRoomEvent", "QuorumChamberEvent", "ResearchLabEvent", "ResurrectionShipEvent", "WeaponsControlEvent" ]
+    },
+    "LocationProjection" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "location",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      }, {
+        "name" : "damaged",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      }, {
+        "name" : "characters",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "Character"
+          }
+        }
+      } ]
+    },
+    "LogEntry" : {
+      "kind" : "union",
+      "discriminator" : "kind",
+      "members" : [ "ChoiceLog", "ScopeLog" ]
+    },
+    "LogMessage" : {
+      "kind" : "record",
+      "type" : "log",
+      "interfaces" : [ "ServerMessage" ],
+      "components" : [ {
+        "name" : "log",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "LiveUpdateProjection"
+        }
+      } ]
+    },
+    "LookAtLoyaltyCardEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "targetPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "LoseResourceEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "resource",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Resource"
+        }
+      }, {
+        "name" : "amount",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      } ]
+    },
+    "LoyaltyCard" : {
+      "kind" : "enum",
+      "values" : [ "NOT_CYLON", "NOT_CYLON_USE_CAUTION", "NOT_CYLON_STAND_AND_FIGHT", "NOT_CYLON_SELFISH", "NOT_CYLON_SELF_DESTRUCTION", "NOT_CYLON_SACRIFICE", "NOT_CYLON_POLITICAL_INTRIGUE", "NOT_CYLON_DEVASTATION", "NOT_CYLON_ACQUIRE_POWER", "FINAL_FIVE_YOU_ARE_SENT_TO_BRIG", "FINAL_FIVE_YOU_ARE_EXECUTED", "FINAL_FIVE_THEY_ARE_EXECUTED", "FINAL_FIVE_DAMAGE_GALACTICA_TWICE", "FINAL_FIVE_CYLON_SHIPS_ACTIVATE", "MUTINEER", "CYLON_CAN_PLACE_CENTURION", "CYLON_DECREASE_JUMP_TRACK", "CYLON_DRAW_TREACHERY_CARDS", "CYLON_SEND_TO_BRIG", "CYLON_DAMAGE_GALACTICA", "CYLON_REDUCE_MORALE", "CYLON_SEND_TO_SICKBAY" ]
+    },
+    "MainBatteriesEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "LocationEvent", "PlayerEvent" ],
+      "location" : "MAIN_BATTERIES",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "spaceLocation",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      } ]
+    },
+    "MainBatteriesResultEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "spaceLocation",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      } ]
+    },
+    "MajorVictoryResultEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "MakeAdmiralEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "character",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Character"
+        }
+      } ]
+    },
+    "MakePresidentEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "character",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Character"
+        }
+      } ]
+    },
+    "MakeSkillCheckEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "MotiveCard" : {
+      "kind" : "enum",
+      "values" : [ "SUBJECTS_TO_STUDY", "SAVOR_THEIR_DEMISE", "NO_UNNECESSARY_FORCE", "HARVEST_THEIR_RESOURCES", "FIGHT_WITH_HONOR", "A_JUSTIFIED_RESPONSE", "A_FALSE_SENSE_OF_SECURITY", "PRESSURE_THEIR_LEADERS", "MAKE_AN_ALLY", "LEARN_TO_CHERISH", "KEEP_THEM_DOCILE", "IMPROVE_EFFICIENCY", "END_THE_CHASE" ]
+    },
+    "MoveCharacterEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "SandboxEvent" ],
+      "components" : [ {
+        "name" : "character",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Character"
+        }
+      }, {
+        "name" : "destination",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      } ]
+    },
+    "MoveCivilianShipEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "civilianShipIt",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      }, {
+        "name" : "location",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      } ]
+    },
+    "MoveCylonShipsToFleetBoardEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "MoveEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "destination",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      }, {
+        "name" : "discardCard",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "SkillCard"
+        }
+      } ]
+    },
+    "MoveFromBrigEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "targetPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "destination",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      } ]
+    },
+    "MovementStepEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "MutinyCard" : {
+      "kind" : "enum",
+      "values" : [ "WEAPONS_ARMED", "VIOLENT_PROTEST", "UNAUTHORIZED_USAGE", "THE_STRONG_SURVIVE", "SET_THE_AGENDA", "SEND_A_MESSAGE", "SELFISH_ACT", "SCAVENGING_FOR_PARTS", "RUINED_REPUTATION", "PEACEFUL_RESISTANCE", "PANIC", "NECESSARY_RISK", "MAKE_A_DEAL", "IMPEACHMENT", "FEED_THE_PEOPLE", "CONTROVERSIAL_SPEECH", "CLIPPED_WINGS", "BLACKMAIL", "BETRAYAL_OF_TRUST", "BAIT_AND_SWITCH", "ASSUME_COMMAND", "ARMED_RESISTANCE" ]
+    },
+    "MysteriousMessagePassEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "NoOpEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "None" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Followup" ],
+      "components" : [ ]
+    },
+    "ObjectiveCard" : {
+      "kind" : "enum",
+      "values" : [ "KOBOL" ]
+    },
+    "ObjectiveInstructionsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "distanceBefore",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      } ]
+    },
+    "Observer" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Viewer" ],
+      "components" : [ ]
+    },
+    "OneOf" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Followup" ],
+      "components" : [ {
+        "name" : "options",
+        "type" : {
+          "nullable" : true,
+          "t" : "set",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "Followup"
+          }
+        }
+      } ]
+    },
+    "OpenInterruptWindowEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "window",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "InterruptWindow"
+        }
+      } ]
+    },
+    "Outcome" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "winner",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Team"
+        }
+      }, {
+        "name" : "winners",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "t" : "int",
+            "nullable" : false,
+            "role" : "player"
+          }
+        }
+      } ]
+    },
+    "PassMutineerCardEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "recipientPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "recipientDrawsLoyaltyCard",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      } ]
+    },
+    "PegasusCicEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "LocationEvent", "PlayerEvent" ],
+      "location" : "PEGASUS_CIC",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "basestarId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      } ]
+    },
+    "PegasusCicResultEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "basestarId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      } ]
+    },
+    "PegasusDamage" : {
+      "kind" : "enum",
+      "values" : [ "PEGASUS_CIC", "MAIN_BATTERIES", "ENGINE_ROOM", "AIRLOCK" ]
+    },
+    "PegasusProjection" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "engineRoomActivated",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      }, {
+        "name" : "locations",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "LocationProjection"
+          }
+        }
+      } ]
+    },
+    "PersonalVicesEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "PlaceCenturionsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "count",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      } ]
+    },
+    "PlaceCivilianShipEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "location",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      } ]
+    },
+    "PlaceCivilianShipsInFrontEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "count",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      } ]
+    },
+    "PlaceCrisisCardOnBottomEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "CrisisCard"
+        }
+      } ]
+    },
+    "PlaceCrisisCardOnTopEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "CrisisCard"
+        }
+      } ]
+    },
+    "PlaceDestinationCardAtBottomEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "DestinationCard"
+        }
+      } ]
+    },
+    "PlaceDestinationCardOnTopEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "DestinationCard"
+        }
+      } ]
+    },
+    "PlaceInSetupLocationEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "location",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      } ]
+    },
+    "PlaceRaidersBehindEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "count",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      } ]
+    },
+    "PlaceShipEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "SandboxEvent" ],
+      "components" : [ {
+        "name" : "shipType",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "ShipType"
+        }
+      }, {
+        "name" : "location",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      } ]
+    },
+    "PlaceShipOnCylonFleetBoardEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "cylonShipType",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "ShipType"
+        }
+      } ]
+    },
+    "PlaceShipOnCylonFleetBoardResultEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "cylonShipType",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "ShipType"
+        }
+      } ]
+    },
+    "PlaceShipsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "basestars",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "raiders",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "civilianShips",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      } ]
+    },
+    "PlayCardsBeforeSkillCheckEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "skillCards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "SkillCard"
+          }
+        }
+      } ]
+    },
+    "PlayCardsIntoSkillCheckEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "skillCards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "SkillCard"
+          }
+        }
+      } ]
+    },
+    "PlayFromDestinyDeckEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "PlayInterruptCardEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent", "SecretEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "SkillCard"
+        }
+      }, {
+        "name" : "calculationsModifier",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "count"
+        }
+      } ]
+    },
+    "PlayQuorumCardEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "PlaySuperCrisisCardEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "superCrisisCard",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "SuperCrisisCard"
+        }
+      } ]
+    },
+    "PlayedBefore" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "player",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "cards",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "SkillHand"
+        }
+      } ]
+    },
+    "PlayedCard" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "skillCard",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "SkillCard"
+        }
+      } ]
+    },
+    "PlayedInterruptCard" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "SkillCard"
+        }
+      }, {
+        "name" : "calculationsModifier",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "count"
+        }
+      } ]
+    },
+    "PlayerDecisionEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "typeParams" : [ "T" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "action",
+        "type" : {
+          "nullable" : true,
+          "t" : "class",
+          "of" : "Event"
+        }
+      }, {
+        "name" : "eventConstraints",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "EventConstraint"
+          }
+        }
+      } ]
+    },
+    "PlayerEvent" : {
+      "kind" : "union",
+      "discriminator" : "kind",
+      "members" : [ "ActivateViperEvent", "AdministrationEvent", "AdmiralsQuartersEvent", "AirlockEvent", "ArmoryEvent", "BasestarBridgeAbilityEvent", "BasestarBridgeAbilityResultEvent", "BasestarBridgeEvent", "BasestarBridgeShipsEvent", "BrigEvent", "CapricaDrawAndResolveCrisisCardsEvent", "CapricaPlaySuperCrisisCardEvent", "ChangeOfPlansEvent", "ChooseCrisisSectionEvent", "ChooseCrisisTargetEvent", "ChooseDestinationEvent", "ChooseExtraLoyaltyCardEvent", "ChooseGalacticaDamageEvent", "CommandEvent", "CommunicationsEvent", "CylonFleetEvent", "DealLoyaltyCardsEvent", "DeclareEmergencyEvent", "DetermineSkillCheckAbilitiesOrderEvent", "Discard1MutinyCardEvent", "DiscardAllSkillCardsEvent", "DiscardDownTo1MutinyCardEvent", "DiscardFromDestinyDeckEvent", "DiscardQuorumCardsEvent", "DiscardRandomSkillCardsEvent", "DiscardSkillCardsEvent", "DogfightEvent", "DrawMutinyCardEvent", "DrawSkillCardsEvent", "DrawSkillCardsOfColorEvent", "EngineRoomEvent", "ExecuteEvent", "ExploitAWeaknessEvent", "FTLControlEvent", "FinishExecutionEvent", "ForceTheirHandEvent", "GasCloudEvent", "GasCloudPlaceEvent", "GasGiantEvent", "GiveLoyaltyCardsEvent", "GiveTitlesToNextInLineEvent", "HangarDeckEvent", "HumanFleetInfiltrateEvent", "HumanFleetLookAtTopCrisisCardEvent", "HumanFleetLookAtTopDestinationCardEvent", "LaunchViperEvent", "LeaveBrigEvent", "LookAtLoyaltyCardEvent", "MainBatteriesEvent", "MoveEvent", "NoOpEvent", "PassMutineerCardEvent", "PegasusCicEvent", "PlaceCivilianShipEvent", "PlaceCrisisCardOnBottomEvent", "PlaceCrisisCardOnTopEvent", "PlaceDestinationCardAtBottomEvent", "PlaceDestinationCardOnTopEvent", "PlaceInSetupLocationEvent", "PlayCardsBeforeSkillCheckEvent", "PlayCardsIntoSkillCheckEvent", "PlayInterruptCardEvent", "PlaySuperCrisisCardEvent", "PlayerDecisionEvent", "PoliticalProwessEvent", "PresidentsOfficeEvent", "PressRoomEvent", "ProtectTheFleetEvent", "QuorumChamberEvent", "ReplaceMutinousPresidentEvent", "ResearchLabEvent", "ResolveCapricaCrisisCardEvent", "ResurrectionShipEvent", "ReturnAssaultRaptorEvent", "RevealMutineerEvent", "RiskShipsEvent", "SelectCharacterEvent", "WeaponsControlEvent" ]
+    },
+    "PlayerFact" : {
+      "kind" : "union",
+      "discriminator" : "kind",
+      "members" : [ "PlayerFact.CardsGained", "PlayerFact.CardsLost", "PlayerFact.CardsSeen", "PlayerFact.CharacterMoved", "PlayerFact.CharacterRemoved", "PlayerFact.CharacterRemovedFromBoards", "PlayerFact.CharacterSelected", "PlayerFact.CivilianShipForgotten", "PlayerFact.CivilianShipRevealed", "PlayerFact.InfiltrationEnded", "PlayerFact.InfiltrationStarted", "PlayerFact.LoyaltyCardRevealed", "PlayerFact.LoyaltyCardSeen", "PlayerFact.MiracleTokenGained", "PlayerFact.MiracleTokenLost", "PlayerFact.MotiveCardRevealed", "PlayerFact.OwnTurnStarted" ]
+    },
+    "PlayerFact.CardsGained" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "PlayerFact" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "pile",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "PlayerPile"
+        }
+      }, {
+        "name" : "cards",
+        "type" : {
+          "t" : "cards",
+          "nullable" : true
+        }
+      } ]
+    },
+    "PlayerFact.CardsLost" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "PlayerFact" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "pile",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "PlayerPile"
+        }
+      }, {
+        "name" : "cards",
+        "type" : {
+          "t" : "cards",
+          "nullable" : true
+        }
+      } ]
+    },
+    "PlayerFact.CardsSeen" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "PlayerFact" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "deck",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "DeckId"
+        }
+      }, {
+        "name" : "cards",
+        "type" : {
+          "t" : "cards",
+          "nullable" : true
+        }
+      } ]
+    },
+    "PlayerFact.CharacterMoved" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "PlayerFact" ],
+      "components" : [ {
+        "name" : "character",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Character"
+        }
+      }, {
+        "name" : "to",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      } ]
+    },
+    "PlayerFact.CharacterRemoved" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "PlayerFact" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "character",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Character"
+        }
+      } ]
+    },
+    "PlayerFact.CharacterRemovedFromBoards" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "PlayerFact" ],
+      "components" : [ {
+        "name" : "character",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Character"
+        }
+      } ]
+    },
+    "PlayerFact.CharacterSelected" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "PlayerFact" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "character",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Character"
+        }
+      } ]
+    },
+    "PlayerFact.CivilianShipForgotten" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "PlayerFact" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "shipId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      } ]
+    },
+    "PlayerFact.CivilianShipRevealed" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "PlayerFact" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "shipId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      } ]
+    },
+    "PlayerFact.InfiltrationEnded" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "PlayerFact" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "PlayerFact.InfiltrationStarted" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "PlayerFact" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "PlayerFact.LoyaltyCardRevealed" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "PlayerFact" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "LoyaltyCard"
+        }
+      } ]
+    },
+    "PlayerFact.LoyaltyCardSeen" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "PlayerFact" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "targetPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "LoyaltyCard"
+        }
+      } ]
+    },
+    "PlayerFact.MiracleTokenGained" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "PlayerFact" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "PlayerFact.MiracleTokenLost" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "PlayerFact" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "PlayerFact.MotiveCardRevealed" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "PlayerFact" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "MotiveCard"
+        }
+      } ]
+    },
+    "PlayerFact.OwnTurnStarted" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "PlayerFact" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "PlayerPile" : {
+      "kind" : "enum",
+      "values" : [ "SKILL", "MOTIVE", "LOYALTY", "MUTINY", "SUPER_CRISIS" ]
+    },
+    "PlayerProjection" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "number",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "character",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Character"
+        }
+      }, {
+        "name" : "location",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      }, {
+        "name" : "skillCards",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "SkillHand"
+        }
+      }, {
+        "name" : "loyaltyCards",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "HiddenCards",
+          "args" : [ {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "LoyaltyCard"
+          } ]
+        }
+      }, {
+        "name" : "motiveCards",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "HiddenCards",
+          "args" : [ {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "MotiveCard"
+          } ]
+        }
+      }, {
+        "name" : "mutinyCards",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "HiddenCards",
+          "args" : [ {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "MutinyCard"
+          } ]
+        }
+      }, {
+        "name" : "superCrisisCards",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "HiddenCards",
+          "args" : [ {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "SuperCrisisCard"
+          } ]
+        }
+      }, {
+        "name" : "miracleToken",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      }, {
+        "name" : "infiltrating",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      }, {
+        "name" : "human",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : true
+        }
+      }, {
+        "name" : "revealedCylon",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      }, {
+        "name" : "mutineer",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      }, {
+        "name" : "turns",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "handLimit",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "seenLoyaltyCards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "SeenLoyaltyCard"
+          }
+        }
+      }, {
+        "name" : "knownCivilianShips",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "t" : "int",
+            "nullable" : false,
+            "role" : "ship"
+          }
+        }
+      } ]
+    },
+    "PlayerViewer" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Viewer" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "PoliticalProwessEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "politicalProwessCard",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "SkillCard"
+        }
+      }, {
+        "name" : "pass",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      } ]
+    },
+    "PrepareForJumpStepEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "PresidentsOfficeEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "LocationEvent", "PlayerEvent" ],
+      "location" : "PRESIDENTS_OFFICE",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "PressRoomEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "LocationEvent", "PlayerEvent" ],
+      "location" : "PRESS_ROOM",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "targetPlayer",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "ProtectTheFleetEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "activation",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "ViperActivation"
+        }
+      } ]
+    },
+    "Pursuit" : {
+      "kind" : "enum",
+      "values" : [ "START", "ONE_CIVILIAN_SHIP", "POSITION_2", "TWO_CIVILIAN_SHIPS", "AUTO_ATTACK" ]
+    },
+    "PutCrisisCardOnTopEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "SandboxEvent" ],
+      "components" : [ {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "CrisisCard"
+        }
+      } ]
+    },
+    "PutDestinationCardOnTopEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "SandboxEvent" ],
+      "components" : [ {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "DestinationCard"
+        }
+      } ]
+    },
+    "PutDestinyCardOnTopEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "SandboxEvent" ],
+      "components" : [ {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "SkillCard"
+        }
+      } ]
+    },
+    "PutSkillCardOnTopEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "SandboxEvent" ],
+      "components" : [ {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "SkillCard"
+        }
+      } ]
+    },
+    "QuickThinkingEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "cardToRemove",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "SkillCard"
+        }
+      } ]
+    },
+    "QuorumCard" : {
+      "kind" : "enum",
+      "values" : [ "ESTABLISH_DOGSVILLE", "PRESIDENTIAL_ORDER", "RESIGNATION", "ACCEPT_PROPHECY", "ARREST_ORDER", "ASSIGN_ARBITRATOR", "ASSIGN_MISSION_SPECIALIST", "ASSIGN_VICE_PRESIDENT", "AUTHORIZATION_OF_BRUTAL_FORCE", "ENCOURAGE_MUTINY", "FOOD_RATIONING", "INSPIRATIONAL_SPEECH", "PRESIDENTIAL_PARDON", "RELEASE_CYLON_MUGSHOTS", "ASSIGN_CHIEF_OF_STAFF", "CIVILIAN_SELF_DEFENSE", "CONSULT_THE_ORACLE", "ENACT_PRODUCTION_QUOTAS", "EULOGY", "EXECUTE_PRISONER", "PROBATION", "RESOURCES_FOR_GALACTICA", "UNSAVORY_CONNECTIONS" ]
+    },
+    "QuorumChamberEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "LocationEvent", "PlayerEvent" ],
+      "location" : "QUORUM_CHAMBER",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "QuorumInUproarFailEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "RagnarAnchorageEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "ReceiveSkillsStepEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "ReceiveStartingSkillsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "RedTapeEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "RejectedMessage" : {
+      "kind" : "record",
+      "type" : "rejected",
+      "interfaces" : [ "ServerMessage" ],
+      "components" : [ {
+        "name" : "reason",
+        "type" : {
+          "t" : "string",
+          "nullable" : true
+        }
+      }, {
+        "name" : "message",
+        "type" : {
+          "t" : "string",
+          "nullable" : true
+        }
+      } ]
+    },
+    "ReplaceMutinousPresidentEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "ResearchLabEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "LocationEvent", "PlayerEvent" ],
+      "location" : "RESEARCH_LAB",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "skillCardColor",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "SkillCardColor"
+        }
+      } ]
+    },
+    "ResetJumpPreparationEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "ResolveCapricaCrisisCardEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "crisisCardToPlay",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "CrisisCard"
+        }
+      }, {
+        "name" : "crisisCardToPutAtBottom",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "CrisisCard"
+        }
+      } ]
+    },
+    "ResolveCardsBeforeSkillCheckEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "ResolveConsequencesEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "ResolveCrisisCardEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "CrisisCard"
+        }
+      } ]
+    },
+    "ResolveCrisisRollEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "CrisisCard"
+        }
+      }, {
+        "name" : "section",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Section"
+        }
+      } ]
+    },
+    "ResolveDestinationCardEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "DestinationCard"
+        }
+      } ]
+    },
+    "ResolveSkillCheckAbilityEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "type",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "SkillCardType"
+        }
+      } ]
+    },
+    "ResolveSkillCheckResultEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "Resource" : {
+      "kind" : "enum",
+      "values" : [ "FUEL", "FOOD", "MORALE", "POPULATION" ]
+    },
+    "ResurrectionShipEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "LocationEvent", "PlayerEvent" ],
+      "location" : "RESURRECTION_SHIP",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "ReturnAssaultRaptorEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "shipId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      } ]
+    },
+    "ReturnToCrisisStepEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "ReturnVipersToReservesEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "exceptAssaultRaptors",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      } ]
+    },
+    "RevealCardsBeforeSkillCheckEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "RevealMutineerEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "drawsLoyaltyCard",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      } ]
+    },
+    "Risk" : {
+      "kind" : "enum",
+      "values" : [ "CYLON_REFINERY", "ICY_MOON", "TYLIUM_PLANET" ]
+    },
+    "RiskResultEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "risk",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Risk"
+        }
+      } ]
+    },
+    "RiskShipsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "risk",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Risk"
+        }
+      } ]
+    },
+    "RollDieEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "Sandbox" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Viewer" ],
+      "components" : [ ]
+    },
+    "SandboxEvent" : {
+      "kind" : "union",
+      "discriminator" : "kind",
+      "members" : [ "AssignTitleEvent", "ChangeResourceEvent", "DamageLocationEvent", "GiveSkillCardToPlayerEvent", "MoveCharacterEvent", "PlaceShipEvent", "PutCrisisCardOnTopEvent", "PutDestinationCardOnTopEvent", "PutDestinyCardOnTopEvent", "PutSkillCardOnTopEvent", "SetJumpPreparationEvent" ]
+    },
+    "ScopeClosed" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "JournalEntry" ],
+      "components" : [ {
+        "name" : "scopeId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "scope"
+        }
+      }, {
+        "name" : "followup",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "Followup"
+        }
+      } ]
+    },
+    "ScopeLog" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "LogEntry" ],
+      "components" : [ {
+        "name" : "scopeId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "scope"
+        }
+      }, {
+        "name" : "parentId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "scope"
+        }
+      }, {
+        "name" : "actor",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "event",
+        "type" : {
+          "nullable" : true,
+          "t" : "class",
+          "of" : "Event"
+        }
+      }, {
+        "name" : "details",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "Event"
+        }
+      }, {
+        "name" : "facts",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "FactProjection"
+          }
+        }
+      } ]
+    },
+    "ScopeOpened" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "JournalEntry" ],
+      "components" : [ {
+        "name" : "scopeId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "scope"
+        }
+      }, {
+        "name" : "parentId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "scope"
+        }
+      }, {
+        "name" : "event",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "Event"
+        }
+      }, {
+        "name" : "actor",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "SecretEvent" : {
+      "kind" : "union",
+      "discriminator" : "kind",
+      "members" : [ "PlayInterruptCardEvent" ]
+    },
+    "Section" : {
+      "kind" : "enum",
+      "values" : [ "TOP", "BOTTOM" ]
+    },
+    "SeenLoyaltyCard" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "ownerPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "LoyaltyCard"
+        }
+      } ]
+    },
+    "SelectCharacterEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "selectedCharacter",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Character"
+        }
+      } ]
+    },
+    "SendToBrigEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "targetPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "SendToSickbayEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "targetPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "ServerMessage" : {
+      "kind" : "union",
+      "discriminator" : "type",
+      "members" : [ "GameMessage", "LogMessage", "RejectedMessage", "UpdateMessage" ]
+    },
+    "SetATrapPassEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "SetJumpPreparationEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "SandboxEvent" ],
+      "components" : [ {
+        "name" : "position",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "JumpPreparation"
+        }
+      } ]
+    },
+    "ShipFact" : {
+      "kind" : "union",
+      "discriminator" : "kind",
+      "members" : [ "ShipFact.BasestarDamageAttached", "ShipFact.BasestarDamageCleared", "ShipFact.PilotChanged", "ShipFact.ShipMoved" ]
+    },
+    "ShipFact.BasestarDamageAttached" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "ShipFact" ],
+      "components" : [ {
+        "name" : "shipId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "BasestarDamage"
+        }
+      } ]
+    },
+    "ShipFact.BasestarDamageCleared" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "ShipFact" ],
+      "components" : [ {
+        "name" : "shipId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      } ]
+    },
+    "ShipFact.PilotChanged" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "ShipFact" ],
+      "components" : [ {
+        "name" : "shipId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      }, {
+        "name" : "pilot",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Character"
+        }
+      } ]
+    },
+    "ShipFact.ShipMoved" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "ShipFact" ],
+      "components" : [ {
+        "name" : "shipId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      }, {
+        "name" : "from",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "ShipZone"
+        }
+      }, {
+        "name" : "to",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "ShipZone"
+        }
+      }, {
+        "name" : "location",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      } ]
+    },
+    "ShipProjection" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "id",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      }, {
+        "name" : "type",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "ShipType"
+        }
+      }, {
+        "name" : "location",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      }, {
+        "name" : "pilot",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Character"
+        }
+      }, {
+        "name" : "damage",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "BasestarDamage"
+          }
+        }
+      }, {
+        "name" : "cargo",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "Cargo"
+        }
+      } ]
+    },
+    "ShipType" : {
+      "kind" : "enum",
+      "values" : [ "ASSAULT_RAPTOR", "BASESTAR", "HEAVY_RAIDER", "RAIDER", "RAPTOR", "VIPER", "VIPER_MARK_VII", "CIVILIAN" ]
+    },
+    "ShipZone" : {
+      "kind" : "enum",
+      "values" : [ "CYLON_SUPPLY", "CENTURION_SUPPLY", "CIVILIAN_DECK", "RESERVES", "DAMAGED", "GALACTICA_SPACE", "CYLON_FLEET_SPACE", "BOARDING_PARTY", "REMOVED" ]
+    },
+    "Shown" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "FactProjection" ],
+      "components" : [ {
+        "name" : "fact",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "Fact"
+        }
+      } ]
+    },
+    "ShuffleAndDivideCardsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "ShuffleTreacheryIntoDestinyDeckEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "count",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      } ]
+    },
+    "Single" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Followup" ],
+      "components" : [ {
+        "name" : "event",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "Event"
+        }
+      } ]
+    },
+    "SkillCard" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "value",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "type",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "SkillCardType"
+        }
+      } ]
+    },
+    "SkillCardColor" : {
+      "kind" : "enum",
+      "values" : [ "POLITICS", "LEADERSHIP", "TACTICS", "PILOTING", "ENGINEERING", "TREACHERY" ]
+    },
+    "SkillCardType" : {
+      "kind" : "enum",
+      "values" : [ "CONSOLIDATE_POWER", "INVESTIGATIVE_COMMITTEE", "SUPPORT_THE_PEOPLE", "PREVENTIVE_POLICY", "RED_TAPE", "POLITICAL_PROWESS", "FORCE_THEIR_HAND", "POPULAR_INFLUENCE", "NEGOTIATION", "EXECUTIVE_ORDER", "DECLARE_EMERGENCY", "MAJOR_VICTORY", "AT_ANY_COST", "IRON_WILL", "STATE_OF_EMERGENCY", "ALL_HANDS_ON_DECK", "RESTORE_ORDER", "CHANGE_OF_PLANS", "LAUNCH_SCOUT", "STRATEGIC_PLANNING", "GUTS_AND_INITIATIVE", "CRITICAL_SITUATION", "TRUST_INSTINCTS", "SCOUTING_FOR_FUEL", "QUICK_THINKING", "UNORTHODOX_PLAN", "A_SECOND_CHANCE", "EVASIVE_MANOEUVRES", "MAXIMUM_FIREPOWER", "FULL_THROTTLE", "RUN_INTERFERENCE", "PROTECT_THE_FLEET", "BEST_OF_THE_BEST", "DOGFIGHT", "COMBAT_VETERAN", "LAUNCH_RESERVES", "REPAIR", "SCIENTIFIC_RESEARCH", "JURY_RIGGED", "CALCULATIONS", "ESTABLISH_NETWORK", "BUILD_NUKE", "INSTALL_UPGRADES", "RAPTOR_SPECIALIST", "TEST_THE_LIMITS", "DRADIS_CONTACT", "BAIT", "A_BETTER_MACHINE", "PERSONAL_VICES", "VIOLENT_OUTBURSTS", "EXPLOIT_A_WEAKNESS" ]
+    },
+    "SkillCheckFact" : {
+      "kind" : "union",
+      "discriminator" : "kind",
+      "members" : [ "SkillCheckFact.AbilityResolved", "SkillCheckFact.CardRemoved", "SkillCheckFact.CardsDrawn", "SkillCheckFact.CardsPlaced", "SkillCheckFact.CardsPlayedBefore", "SkillCheckFact.EmergencyDeclared", "SkillCheckFact.FailResultPrevented", "SkillCheckFact.PassResultReplaced", "SkillCheckFact.PlayedBeforeRevealed", "SkillCheckFact.ResultDetermined", "SkillCheckFact.SkillCheckEnded", "SkillCheckFact.SkillCheckStarted", "SkillCheckFact.TargetChosen", "SkillCheckFact.TotalStrengthDetermined" ]
+    },
+    "SkillCheckFact.AbilityResolved" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "SkillCheckFact" ],
+      "components" : [ {
+        "name" : "type",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "SkillCardType"
+        }
+      } ]
+    },
+    "SkillCheckFact.CardRemoved" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "SkillCheckFact" ],
+      "components" : [ {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "SkillCard"
+        }
+      }, {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "player"
+        }
+      } ]
+    },
+    "SkillCheckFact.CardsDrawn" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "SkillCheckFact" ],
+      "components" : [ {
+        "name" : "pile",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "SkillCheckPile"
+        }
+      }, {
+        "name" : "cards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "SkillCard"
+          }
+        }
+      } ]
+    },
+    "SkillCheckFact.CardsPlaced" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "SkillCheckFact" ],
+      "components" : [ {
+        "name" : "pile",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "SkillCheckPile"
+        }
+      }, {
+        "name" : "cards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "SkillCard"
+          }
+        }
+      }, {
+        "name" : "onTop",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      } ]
+    },
+    "SkillCheckFact.CardsPlayedBefore" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "SkillCheckFact" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "cards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "SkillCard"
+          }
+        }
+      } ]
+    },
+    "SkillCheckFact.EmergencyDeclared" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "SkillCheckFact" ],
+      "components" : [ ]
+    },
+    "SkillCheckFact.FailResultPrevented" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "SkillCheckFact" ],
+      "components" : [ ]
+    },
+    "SkillCheckFact.PassResultReplaced" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "SkillCheckFact" ],
+      "components" : [ ]
+    },
+    "SkillCheckFact.PlayedBeforeRevealed" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "SkillCheckFact" ],
+      "components" : [ ]
+    },
+    "SkillCheckFact.ResultDetermined" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "SkillCheckFact" ],
+      "components" : [ {
+        "name" : "result",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "SkillCheckResult"
+        }
+      } ]
+    },
+    "SkillCheckFact.SkillCheckEnded" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "SkillCheckFact" ],
+      "components" : [ ]
+    },
+    "SkillCheckFact.SkillCheckStarted" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "SkillCheckFact" ],
+      "components" : [ {
+        "name" : "type",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "SkillCheckType"
+        }
+      } ]
+    },
+    "SkillCheckFact.TargetChosen" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "SkillCheckFact" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "SkillCheckFact.TotalStrengthDetermined" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "SkillCheckFact" ],
+      "components" : [ {
+        "name" : "totalStrength",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      } ]
+    },
+    "SkillCheckPile" : {
+      "kind" : "enum",
+      "values" : [ "CARDS", "MATCHING", "NON_MATCHING" ]
+    },
+    "SkillCheckProjection" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "type",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "SkillCheckType"
+        }
+      }, {
+        "name" : "targetPlayer",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "player"
+        }
+      }, {
+        "name" : "difficulty",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "playedBefore",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "PlayedBefore"
+          }
+        }
+      }, {
+        "name" : "playedBeforeRevealed",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      }, {
+        "name" : "cards",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "SkillHand"
+        }
+      }, {
+        "name" : "matchingPile",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "SkillCard"
+          }
+        }
+      }, {
+        "name" : "nonMatchingPile",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "SkillCard"
+          }
+        }
+      }, {
+        "name" : "resolvedAbilities",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "SkillCardType"
+          }
+        }
+      }, {
+        "name" : "emergencyDeclared",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      }, {
+        "name" : "totalStrength",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "count"
+        }
+      }, {
+        "name" : "result",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "SkillCheckResult"
+        }
+      }, {
+        "name" : "passResultReplaced",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      }, {
+        "name" : "failResultPrevented",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      } ]
+    },
+    "SkillCheckResult" : {
+      "kind" : "enum",
+      "values" : [ "PASS", "PARTIAL_PASS", "FAIL" ]
+    },
+    "SkillCheckType" : {
+      "kind" : "enum",
+      "values" : [ "ADMIRALS_QUARTERS", "AIRLOCK", "BRIG", "ADMIRAL_GRILLED", "ANALYZE_ENEMY_FIGHTER", "A_TRAITOR_ACCUSED", "BOMB_THREAT", "COLONIAL_DAY", "CRASH_LANDING", "CRIPPLED_RAIDER", "CYLON_ACCUSATION", "CYLON_SCREENINGS", "CYLON_TRACKING_DEVICE", "CYLON_VIRUS", "DETECTOR_SABOTAGE", "ELECTIONS_LOOM", "FORCED_WATER_MINING", "FULFILLER_OF_PROPHECY", "GUILT_BY_COLLUSION", "HANGAR_ACCIDENT", "INFORMING_THE_PUBLIC", "JUMP_COMPUTER_FAILURE", "KEEP_TABS_ON_VISITOR", "LEGENDARY_DISCOVERY", "LOSS_OF_A_FRIEND", "LOW_SUPPLIES", "MANDATORY_TESTING", "MISSING_G4_EXPLOSIVES", "NETWORK_COMPUTERS", "PRISONER_REVOLT", "PRISON_LABOR", "RESISTANCE", "SCOUTING_FOR_FUEL", "SCOUTING_FOR_WATER", "SECURITY_BREACH", "SEND_SURVEY_TEAM", "TERRORIST_BOMBER", "TERRORIST_INVESTIGATIONS", "THE_OLYMPIC_CARRIER", "UNEXPECTED_REUNION", "UNIDENTIFIED_SHIP", "WATER_SABOTAGED", "WEAPONS_MALFUNCTION", "WITCH_HUNT", "AN_OFFER_OF_PEACE", "CODE_BLUE", "DEFENDING_A_PRISONER", "MEDICAL_BREAKTHROUGH", "REUNITE_THE_FLEET", "REVIEW_GALACTICAS_LOGS", "SABOTAGE_INVESTIGATED", "STANDOFF_WITH_PEGASUS", "THE_BLACK_MARKET", "TRAINING_SNAFU", "UNSETTLING_STORIES", "AIRLOCK_LEAK", "CENTURION_ASSAULT", "CONSULT_THE_PRISONER", "CYLON_GENOCIDE", "DIVISIVE_BEHAVIOR", "FAMILIAR_FACE", "GUILTY_CONSCIENCE", "HAUNTED_BY_THE_PAST", "HERA_RESCUED", "HIDDEN_IDENTITY", "IN_THE_RING", "JOES_BAR", "MYSTERIOUS_GUIDE", "MYSTERIOUS_MESSAGE", "POWER_FAILURE", "RAPTOR_MALFUNCTION", "SET_A_TRAP", "STRANGE_BEACON", "TEMPLE_OF_THE_FIVE", "THE_PASSAGE", "THREAT_OF_SUPER_NOVA", "UNEXPLAINED_DEATHS", "UNFAIR_BIAS", "A_DESPERATE_PACT", "CONSULT_THE_HYBRID", "DOMESTIC_DISPUTE", "EARTH_IN_RUINS", "ENEMY_OF_MY_ENEMY", "GALACTICA_FALLING_APART", "GIVE_IN_TO_DESPAIR", "HYBRID_IN_PANIC", "INCITEMENT_TO_MUTINY", "INSUBORDINATE_CREW", "ONE_LAST_COCKTAIL", "QUORUM_IN_UPROAR", "RALLYING_SUPPORT", "REACTOR_CRITICAL", "REBUILD_TRUST", "RELIGIOUS_TURMOIL", "SECRET_MEETINGS", "BOMB_ON_COLONIAL_1", "CYLON_INTRUDERS", "FIRE_ALL_MISSILES", "FLEET_MOBILIZATION", "FOOTAGE_TRANSMITTED", "HUMAN_PRISONER", "INBOUND_NUKES", "THE_FARM" ]
+    },
+    "SkillHand" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "count",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "colors",
+        "type" : {
+          "nullable" : true,
+          "t" : "map",
+          "key" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "SkillCardColor"
+          },
+          "value" : {
+            "t" : "int",
+            "nullable" : false,
+            "role" : "count"
+          }
+        }
+      }, {
+        "name" : "cards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "SkillCard"
+          }
+        }
+      } ]
+    },
+    "SleeperAgentPhaseEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "StandoffWithPegasusPassEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "StartGameEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "StartTurnEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "StatusMessage" : {
+      "kind" : "record",
+      "type" : "status",
+      "interfaces" : [ "ClientMessage" ],
+      "components" : [ ]
+    },
+    "StrangeBeaconPassEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "SubmitMessage" : {
+      "kind" : "record",
+      "type" : "submit",
+      "interfaces" : [ "ClientMessage" ],
+      "components" : [ {
+        "name" : "token",
+        "type" : {
+          "t" : "string",
+          "nullable" : true
+        }
+      }, {
+        "name" : "event",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "Event"
+        }
+      } ]
+    },
+    "SuperCrisisCard" : {
+      "kind" : "enum",
+      "values" : [ "FIGHTING_BLIND", "HUMAN_PRISONER", "FIRE_ALL_MISSILES", "THE_FARM", "PSYCHOLOGICAL_WARFARE", "FOOTAGE_TRANSMITTED", "DEMAND_PEACE_MANIFESTO", "INBOUND_NUKES", "FLEET_MOBILIZATION", "CYLON_INTRUDERS", "BOMB_ON_COLONIAL_1" ]
+    },
+    "Team" : {
+      "kind" : "enum",
+      "values" : [ "HUMANS", "CYLONS" ]
+    },
+    "TiebreakCardsBeforeSkillCheckEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "keptCards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "PlayedCard"
+          }
+        }
+      } ]
+    },
+    "TiebreakInterruptCardsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "keptCards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "PlayedInterruptCard"
+          }
+        }
+      } ]
+    },
+    "Title" : {
+      "kind" : "enum",
+      "values" : [ "PRESIDENT", "ADMIRAL", "CAG" ]
+    },
+    "TitleFact" : {
+      "kind" : "union",
+      "discriminator" : "kind",
+      "members" : [ "TitleFact.AdmiralAssigned", "TitleFact.CagAssigned", "TitleFact.PresidentAssigned", "TitleFact.PresidentQuorumCardGained", "TitleFact.PresidentQuorumCardsLost" ]
+    },
+    "TitleFact.AdmiralAssigned" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "TitleFact" ],
+      "components" : [ {
+        "name" : "character",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Character"
+        }
+      } ]
+    },
+    "TitleFact.CagAssigned" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "TitleFact" ],
+      "components" : [ {
+        "name" : "character",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Character"
+        }
+      } ]
+    },
+    "TitleFact.PresidentAssigned" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "TitleFact" ],
+      "components" : [ {
+        "name" : "character",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Character"
+        }
+      } ]
+    },
+    "TitleFact.PresidentQuorumCardGained" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "TitleFact" ],
+      "components" : [ {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "QuorumCard"
+        }
+      } ]
+    },
+    "TitleFact.PresidentQuorumCardsLost" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "TitleFact" ],
+      "components" : [ {
+        "name" : "cards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "QuorumCard"
+          }
+        }
+      } ]
+    },
+    "Titles" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "president",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Character"
+        }
+      }, {
+        "name" : "admiral",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Character"
+        }
+      }, {
+        "name" : "cag",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Character"
+        }
+      } ]
+    },
+    "TotalSkillCheckStrengthEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "TrustInstinctsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "TurnProjection" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "number",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "step",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "GameStep"
+        }
+      }, {
+        "name" : "currentPlayer",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "actingPlayer",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "crisisCards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "CrisisCard"
+          }
+        }
+      }, {
+        "name" : "endedEarly",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      }, {
+        "name" : "returnsToCrisisStep",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      }, {
+        "name" : "dieRoll",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "DieRollProjection"
+        }
+      }, {
+        "name" : "interruptWindow",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "InterruptWindow"
+        }
+      }, {
+        "name" : "windowCards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "PlayedInterruptCard"
+          }
+        }
+      }, {
+        "name" : "resolvedInterruptCards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "SkillCardType"
+          }
+        }
+      }, {
+        "name" : "raidersToMiss",
+        "type" : {
+          "nullable" : true,
+          "t" : "map",
+          "key" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "Location"
+          },
+          "value" : {
+            "t" : "int",
+            "nullable" : false,
+            "role" : "count"
+          }
+        }
+      } ]
+    },
+    "UndoMessage" : {
+      "kind" : "record",
+      "type" : "undo",
+      "interfaces" : [ "ClientMessage" ],
+      "components" : [ {
+        "name" : "token",
+        "type" : {
+          "t" : "string",
+          "nullable" : true
+        }
+      } ]
+    },
+    "UpdateMessage" : {
+      "kind" : "record",
+      "type" : "update",
+      "interfaces" : [ "ServerMessage" ],
+      "components" : [ {
+        "name" : "update",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "LiveUpdateProjection"
+        }
+      } ]
+    },
+    "Viewer" : {
+      "kind" : "union",
+      "discriminator" : "kind",
+      "members" : [ "Observer", "PlayerViewer", "Sandbox" ]
+    },
+    "ViolentOutburstsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "ViperActivation" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "launchShipType",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "ShipType"
+        }
+      }, {
+        "name" : "launchLocation",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      }, {
+        "name" : "humanFighterId",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "ship"
+        }
+      }, {
+        "name" : "moveLocation",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      }, {
+        "name" : "attackCylonShipId",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "ship"
+        }
+      }, {
+        "name" : "escortCivilianShipId",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "ship"
+        }
+      } ]
+    },
+    "Waiting" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "InputProjection" ],
+      "components" : [ ]
+    },
+    "WaitingFor" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "InputProjection" ],
+      "components" : [ {
+        "name" : "player",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "WeaponsControlEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "LocationEvent", "PlayerEvent" ],
+      "location" : "WEAPONS_CONTROL",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "cylonShipId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      } ]
+    }
+  },
+  "lists" : {
+    "events" : [ "ABetterMachineEvent", "ASecondChanceEvent", "ActionStepEvent", "ActivateCylonBasestarEvent", "ActivateCylonBasestarsEvent", "ActivateCylonShipsStepEvent", "ActivateHeavyRaidersAndCenturionsEvent", "ActivateRaiderEvent", "ActivateRaidersEvent", "ActivateViperEvent", "AdministrationEvent", "AdmiralsQuartersEvent", "AdvancePursuitTrackEvent", "AirlockEvent", "AnalyzeEnemyFighterPassEvent", "ArmoryEvent", "ArmoryResultEvent", "AttackCylonShipEvent", "AttackCylonShipResultEvent", "AttackGalacticaEvent", "AttackGalacticaResultEvent", "AttackViperEvent", "AttackViperResultEvent", "BaitEvent", "BasestarBridgeAbilityEvent", "BasestarBridgeAbilityResultEvent", "BasestarBridgeEvent", "BasestarBridgeShipsEvent", "BrigEvent", "CapricaDrawAndResolveCrisisCardsEvent", "CapricaPlaySuperCrisisCardEvent", "ChangeOfPlansEvent", "ChooseCrisisSectionEvent", "ChooseCrisisTargetEvent", "ChooseDestinationEvent", "ChooseExtraLoyaltyCardEvent", "ChooseGalacticaDamageEvent", "CloseInterruptWindowEvent", "CommandEvent", "CommunicationsEvent", "ConsultTheHybridPassEvent", "CrashLandingFailEvent", "CreateDestinyDeckEvent", "CreateLoyaltyDeckEvent", "CrisisStepEvent", "CylonFleetEvent", "CylonGenocidePassEvent", "CylonsWinEvent", "DamageBasestarEvent", "DamageGalacticaEvent", "DamageHumanFighterEvent", "DamagePegasusEvent", "DamageVipersEvent", "DealLoyaltyCardsEvent", "DeclareEmergencyEvent", "DecreaseJumpPreparationEvent", "DefendingAPrisonerFailEvent", "DefendingAPrisonerFailResultEvent", "DerelictBasestarEvent", "DestroyCivilianShipEvent", "DestroyCivilianShipsEvent", "DestroyCylonShipsEvent", "DestroyRaidersEvent", "DestroyRaptorEvent", "DetermineNextAdmiralEvent", "DetermineNextCagEvent", "DetermineNextPresidentEvent", "DetermineSkillCheckAbilitiesOrderEvent", "DetermineSkillCheckResultEvent", "Discard1MutinyCardEvent", "DiscardAllSkillCardsEvent", "DiscardDownTo1MutinyCardEvent", "DiscardFromDestinyDeckEvent", "DiscardNukeTokenEvent", "DiscardQuorumCardsEvent", "DiscardRandomSkillCardsEvent", "DiscardSkillCardsEvent", "DiscardStepEvent", "DogfightEvent", "DradisContactEvent", "DrawAndDestroyCivilianShipsEvent", "DrawAndResolveRecklessCardsEvent", "DrawDestinationCardsEvent", "DrawMutinyCardEvent", "DrawQuorumCardEvent", "DrawSkillCardsEvent", "DrawSkillCardsOfColorEvent", "EndGameEvent", "EndSkillCheckEvent", "EndTurnEvent", "EngineRoomEvent", "ExecuteEvent", "ExploitAWeaknessEvent", "FTLControlEvent", "FTLControlResultEvent", "FinishExecutionEvent", "FinishSleeperAgentPhaseEvent", "FootageTransmittedFailEvent", "ForceTheirHandEvent", "GainResourceEvent", "GasCloudEvent", "GasCloudPlaceEvent", "GasGiantEvent", "GiveLoyaltyCardsEvent", "GiveTitlesToNextInLineEvent", "HangarDeckEvent", "HumanFleetInfiltrateEvent", "HumanFleetLookAtTopCrisisCardEvent", "HumanFleetLookAtTopDestinationCardEvent", "HumanPrisonerFailEvent", "IncreaseJumpPreparationEvent", "InstallUpgradesEvent", "IronWillEvent", "JumpingTheFleetEvent", "KeepCrisisCardInPlayEvent", "KeepTabsOnVisitorFailEvent", "KeepTabsOnVisitorFailResultEvent", "LaunchRaidersEvent", "LaunchViperEvent", "LeaveBrigEvent", "LookAtLoyaltyCardEvent", "LoseResourceEvent", "MainBatteriesEvent", "MainBatteriesResultEvent", "MajorVictoryResultEvent", "MakeAdmiralEvent", "MakePresidentEvent", "MakeSkillCheckEvent", "MoveCivilianShipEvent", "MoveCylonShipsToFleetBoardEvent", "MoveEvent", "MoveFromBrigEvent", "MovementStepEvent", "MysteriousMessagePassEvent", "NoOpEvent", "ObjectiveInstructionsEvent", "OpenInterruptWindowEvent", "PassMutineerCardEvent", "PegasusCicEvent", "PegasusCicResultEvent", "PersonalVicesEvent", "PlaceCenturionsEvent", "PlaceCivilianShipEvent", "PlaceCivilianShipsInFrontEvent", "PlaceCrisisCardOnBottomEvent", "PlaceCrisisCardOnTopEvent", "PlaceDestinationCardAtBottomEvent", "PlaceDestinationCardOnTopEvent", "PlaceInSetupLocationEvent", "PlaceRaidersBehindEvent", "PlaceShipOnCylonFleetBoardEvent", "PlaceShipOnCylonFleetBoardResultEvent", "PlaceShipsEvent", "PlayCardsBeforeSkillCheckEvent", "PlayCardsIntoSkillCheckEvent", "PlayFromDestinyDeckEvent", "PlayInterruptCardEvent", "PlayQuorumCardEvent", "PlaySuperCrisisCardEvent", "PlayerDecisionEvent", "PoliticalProwessEvent", "PrepareForJumpStepEvent", "PresidentsOfficeEvent", "PressRoomEvent", "ProtectTheFleetEvent", "QuickThinkingEvent", "QuorumChamberEvent", "QuorumInUproarFailEvent", "RagnarAnchorageEvent", "ReceiveSkillsStepEvent", "ReceiveStartingSkillsEvent", "RedTapeEvent", "ReplaceMutinousPresidentEvent", "ResearchLabEvent", "ResetJumpPreparationEvent", "ResolveCapricaCrisisCardEvent", "ResolveCardsBeforeSkillCheckEvent", "ResolveConsequencesEvent", "ResolveCrisisCardEvent", "ResolveCrisisRollEvent", "ResolveDestinationCardEvent", "ResolveSkillCheckAbilityEvent", "ResolveSkillCheckResultEvent", "ResurrectionShipEvent", "ReturnAssaultRaptorEvent", "ReturnToCrisisStepEvent", "ReturnVipersToReservesEvent", "RevealCardsBeforeSkillCheckEvent", "RevealMutineerEvent", "RiskResultEvent", "RiskShipsEvent", "RollDieEvent", "SelectCharacterEvent", "SendToBrigEvent", "SendToSickbayEvent", "SetATrapPassEvent", "ShuffleAndDivideCardsEvent", "ShuffleTreacheryIntoDestinyDeckEvent", "SleeperAgentPhaseEvent", "StandoffWithPegasusPassEvent", "StartGameEvent", "StartTurnEvent", "StrangeBeaconPassEvent", "TiebreakCardsBeforeSkillCheckEvent", "TiebreakInterruptCardsEvent", "TotalSkillCheckStrengthEvent", "TrustInstinctsEvent", "ViolentOutburstsEvent", "WeaponsControlEvent" ],
+    "sandboxEvents" : [ "AssignTitleEvent", "ChangeResourceEvent", "DamageLocationEvent", "GiveSkillCardToPlayerEvent", "MoveCharacterEvent", "PlaceShipEvent", "PutCrisisCardOnTopEvent", "PutDestinationCardOnTopEvent", "PutDestinyCardOnTopEvent", "PutSkillCardOnTopEvent", "SetJumpPreparationEvent" ],
+    "facts" : [ "BoardFact.BoardingPartyAdvanced", "BoardFact.EngineRoomActivated", "BoardFact.JumpPreparationDecreased", "BoardFact.JumpPreparationIncreased", "BoardFact.JumpPreparationReset", "BoardFact.LocationDamaged", "BoardFact.PursuitAdvanced", "BoardFact.PursuitReset", "BoardFact.ResourceDecreased", "BoardFact.ResourceIncreased", "DeckFact.CardsAddedOnTop", "DeckFact.CardsAddedToBottom", "DeckFact.CardsDiscarded", "DeckFact.CardsDrawn", "DeckFact.CardsPulled", "DeckFact.DeckShuffled", "GameFact.ActingPlayerChanged", "GameFact.CrisisCardKeptInPlay", "GameFact.CrisisCardPlayed", "GameFact.CrisisCardsCleared", "GameFact.CurrentPlayerChanged", "GameFact.DestinationReached", "GameFact.DieRollCardPlayed", "GameFact.DieRollStarted", "GameFact.DieRolled", "GameFact.GameEnded", "GameFact.GameStarted", "GameFact.NukeDiscarded", "GameFact.ReturnToCrisisStepChanged", "GameFact.StepChanged", "GameFact.TurnEndedEarly", "GameFact.TurnStarted", "InterruptFact.InterruptCardPlayed", "InterruptFact.InterruptCardResolved", "InterruptFact.InterruptCardReturned", "InterruptFact.InterruptWindowClosed", "InterruptFact.InterruptWindowOpened", "InterruptFact.RaiderMissed", "InterruptFact.RaidersWillMiss", "PlayerFact.CardsGained", "PlayerFact.CardsLost", "PlayerFact.CardsSeen", "PlayerFact.CharacterMoved", "PlayerFact.CharacterRemoved", "PlayerFact.CharacterRemovedFromBoards", "PlayerFact.CharacterSelected", "PlayerFact.CivilianShipForgotten", "PlayerFact.CivilianShipRevealed", "PlayerFact.InfiltrationEnded", "PlayerFact.InfiltrationStarted", "PlayerFact.LoyaltyCardRevealed", "PlayerFact.LoyaltyCardSeen", "PlayerFact.MiracleTokenGained", "PlayerFact.MiracleTokenLost", "PlayerFact.MotiveCardRevealed", "PlayerFact.OwnTurnStarted", "ShipFact.BasestarDamageAttached", "ShipFact.BasestarDamageCleared", "ShipFact.PilotChanged", "ShipFact.ShipMoved", "SkillCheckFact.AbilityResolved", "SkillCheckFact.CardRemoved", "SkillCheckFact.CardsDrawn", "SkillCheckFact.CardsPlaced", "SkillCheckFact.CardsPlayedBefore", "SkillCheckFact.EmergencyDeclared", "SkillCheckFact.FailResultPrevented", "SkillCheckFact.PassResultReplaced", "SkillCheckFact.PlayedBeforeRevealed", "SkillCheckFact.ResultDetermined", "SkillCheckFact.SkillCheckEnded", "SkillCheckFact.SkillCheckStarted", "SkillCheckFact.TargetChosen", "SkillCheckFact.TotalStrengthDetermined", "TitleFact.AdmiralAssigned", "TitleFact.CagAssigned", "TitleFact.PresidentAssigned", "TitleFact.PresidentQuorumCardGained", "TitleFact.PresidentQuorumCardsLost" ]
+  },
+  "messages" : {
+    "choose" : "ChooseMessage",
+    "game" : "GameMessage",
+    "history" : "HistoryMessage",
+    "inject" : "InjectMessage",
+    "log" : "LogMessage",
+    "rejected" : "RejectedMessage",
+    "status" : "StatusMessage",
+    "submit" : "SubmitMessage",
+    "undo" : "UndoMessage",
+    "update" : "UpdateMessage"
+  }
+}

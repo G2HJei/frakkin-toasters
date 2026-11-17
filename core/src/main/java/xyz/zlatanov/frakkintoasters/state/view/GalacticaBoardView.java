@@ -20,6 +20,8 @@ public interface GalacticaBoardView extends BattlestarBoardView, SpaceLocationsB
 
     List<Location> VIPER_LAUNCH_SPACES = List.of(GALACTICA_SPACE_4_OCLOCK, GALACTICA_SPACE_6_OCLOCK);
 
+    boolean colonialOneDestroyed();
+
     int fuel();
 
     int food();

@@ -16,6 +16,7 @@ import xyz.zlatanov.frakkintoasters.event.Followup.Single;
 import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
 import xyz.zlatanov.frakkintoasters.event.constraint.ConstrainedEvent;
 import xyz.zlatanov.frakkintoasters.event.endgame.WinChecks;
+import xyz.zlatanov.frakkintoasters.event.sandbox.SandboxEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.turn.StartGameEvent;
 import xyz.zlatanov.frakkintoasters.operation.GameOps;
@@ -26,6 +27,8 @@ import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
 import xyz.zlatanov.frakkintoasters.state.view.GameView;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -35,14 +38,32 @@ import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.allOf;
 
 public class GameEngine {
 
+    // A seeded engine reseeds its randomness before each input, from the seed and the size of the journal, so the same
+    // inputs give the same game, also after a restore. Without a seed, a restored game gets fresh randomness.
+    private final Long       seed;
+    private final Randomness randomness;
+
     // A rollback replaces these, see advance().
     private Journal journal;
     private Game    game;
     private GameOps ops;
     private Agenda  agenda;
+    // where each input began in the journal, so undo goes back to the pause before the last one
+    private Deque<Integer> inputStarts = new ArrayDeque<>();
 
     GameEngine(int playerCount, Randomness randomness, Event first) {
+        this(playerCount, null, randomness, first);
+    }
+
+    GameEngine(int playerCount, long seed, Event first) {
+        this(playerCount, seed, Randomness.seeded(seed), first);
+    }
+
+    private GameEngine(int playerCount, Long seed, Randomness randomness, Event first) {
+        this.seed = seed;
+        this.randomness = randomness;
         journal = new Journal();
+        reseed();
         game = Game.builder(playerCount)
                 .randomness(randomness)
                 .die(new Die(randomness))
@@ -53,12 +74,22 @@ public class GameEngine {
         runToNextInput();
     }
 
-    private GameEngine(Journal journal) {
+    private GameEngine(Journal journal, Long seed) {
+        this.seed = seed;
+        this.randomness = seed == null ? null : Randomness.seeded(seed);
         rebuild(journal);
     }
 
     public static GameEngine start(int playerCount, Randomness randomness) {
         return new GameEngine(playerCount, randomness, new StartGameEvent());
+    }
+
+    /**
+     * Starts a game whose randomness comes from the seed alone: the same seed and the same inputs give the same game,
+     * also across {@link #restore(Journal, long)} and {@link #undo()}.
+     */
+    public static GameEngine start(int playerCount, long seed) {
+        return new GameEngine(playerCount, seed, new StartGameEvent());
     }
 
     /**
@@ -69,11 +100,25 @@ public class GameEngine {
      *                                  the run loop or ends neither at a pause nor with the end of the game
      */
     public static GameEngine restore(Journal journal) {
-        return new GameEngine(new Journal(journal.entries()));
+        return new GameEngine(new Journal(journal.entries()), null);
+    }
+
+    /**
+     * Rebuilds a seeded game from its journal. It goes on as the original would with the same inputs.
+     */
+    public static GameEngine restore(Journal journal, long seed) {
+        return new GameEngine(new Journal(journal.entries()), seed);
+    }
+
+    /**
+     * @return the seed of a seeded game
+     */
+    public Optional<Long> seed() {
+        return Optional.ofNullable(seed);
     }
 
     public EngineStatus status(int player) {
-        val pendingInput = pending();
+        val pendingInput = pendingInput();
         if (pendingInput.isEmpty()) {
             // runToNextInput leaves nothing pending only once the game has ended
             return EngineStatus.finished(game.outcome().orElseThrow(FrakCallTheAdmiralException::new));
@@ -134,6 +179,38 @@ public class GameEngine {
     }
 
     /**
+     * Runs a sandbox setup event at once, ahead of the pending input, then runs the game to the next input, with the
+     * win checks of the run loop. A pending choice keeps the options it was built with, even when the setup makes them
+     * stale.
+     *
+     * @throws InvalidActionException      if the game is over or the event isn't valid. Nothing changes
+     * @throws FrakCallTheAdmiralException if anything fails after the event was accepted. The game rolls back
+     */
+    public void inject(SandboxEvent event) {
+        if (agenda.isEmpty()) {
+            throw new InvalidActionException("The game is over");
+        }
+        ProcessorRegistry.create(event).prepare(game, event);
+        advance(() -> {
+            journal.recordInjection(event);
+            agenda.push(single(event), ROOT_SCOPE);
+        });
+    }
+
+    /**
+     * Goes back to the pause before the last input: a decision answered, an option picked or an event injected. A
+     * choice that led to a decision is undone on its own, and a finished game can be undone too.
+     *
+     * @throws InvalidActionException if there was no input yet
+     */
+    public void undo() {
+        if (inputStarts.isEmpty()) {
+            throw new InvalidActionException("Nothing to undo");
+        }
+        rebuild(new Journal(journal.entries().subList(0, inputStarts.peekLast())));
+    }
+
+    /**
      * @return the game. A rollback replaces it, so ask again after a {@link FrakCallTheAdmiralException}
      */
     public GameView view() {
@@ -151,9 +228,11 @@ public class GameEngine {
     // from the journal as it stood before the input. Only a failure pays for the replay.
     private void advance(Runnable acceptedInput) {
         val entriesBefore = journal.size();
+        reseed();
         try {
             acceptedInput.run();
             runToNextInput();
+            inputStarts.addLast(entriesBefore);
         } catch (RuntimeException e) {
             rebuild(new Journal(journal.entries().subList(0, entriesBefore)));
             throw e instanceof FrakCallTheAdmiralException bug
@@ -162,18 +241,33 @@ public class GameEngine {
         }
     }
 
+    // The same seed and journal size give the same random results, however the engine got there.
+    private void reseed() {
+        if (seed == null) {
+            return;
+        }
+        var mixed = seed + journal.size() * 0x9E3779B97F4A7C15L;
+        mixed = (mixed ^ (mixed >>> 30)) * 0xBF58476D1CE4E5B9L;
+        mixed = (mixed ^ (mixed >>> 27)) * 0x94D049BB133111EBL;
+        randomness.reseed(mixed ^ (mixed >>> 31));
+    }
+
     private void rebuild(Journal journal) {
-        val rebuiltGame = GameReplayer.replay(journal);
-        val rebuiltAgenda = AgendaReplayer.replay(journal);
+        val rebuiltGame = seed == null ? GameReplayer.replay(journal) : GameReplayer.replay(journal, randomness);
+        val replay = AgendaReplayer.replayWithInputs(journal);
         this.journal = journal;
         game = rebuiltGame;
         ops = new GameOps(game, new FactRecorder(game, journal));
-        agenda = rebuiltAgenda;
+        agenda = replay.agenda();
+        inputStarts = new ArrayDeque<>(replay.inputStarts());
     }
 
     private PlayerDecisionEvent<?> getDecision(int player, Event event, Agenda.Frame frame) {
         if (!(frame.followup() instanceof Single(PlayerDecisionEvent<?> decision))) {
             throw new InvalidActionException("No decision is pending");
+        }
+        if (event instanceof SandboxEvent) {
+            throw new InvalidActionException("A setup event is injected, not submitted");
         }
         if (player != decision.playerNumber()) {
             throw new InvalidActionException("Player " + decision.playerNumber() + " has to decide");
@@ -233,7 +327,10 @@ public class GameEngine {
         }
     }
 
-    private Optional<PendingInput> pending() {
+    /**
+     * @return what the game waits for, a secret input included. Empty once the game has ended
+     */
+    public Optional<PendingInput> pendingInput() {
         return agenda.top().map(frame -> switch (frame.followup()) {
             case Single(PlayerDecisionEvent<?> decision) -> new AwaitingDecision(decision);
             case OneOf oneOf -> new AwaitingChoice(chooser(oneOf), oneOf.options());

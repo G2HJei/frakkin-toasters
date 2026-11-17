@@ -4,8 +4,11 @@ import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 
 import java.util.List;
+import java.util.Map;
 
 public interface SpaceLocationsBoardView {
+
+    Map<Ship, Location> shipsInSpace();
 
     Location locate(Ship ship);
 

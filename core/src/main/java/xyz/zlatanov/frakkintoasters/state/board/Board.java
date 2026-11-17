@@ -12,10 +12,6 @@ import java.util.stream.Collectors;
 
 public interface Board extends BoardView {
 
-    Set<Location> locations();
-
-    Map<Character, Location> characters();
-
     @Mutates
     void place(Location to, Character character);
 

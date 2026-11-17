@@ -81,6 +81,7 @@ public final class FactApplier {
             case DeckFact.CardsAddedOnTop f -> addOnTop(game.decks().deck(f.deck()), f.cards());
             case DeckFact.CardsAddedToBottom f -> addToBottom(game.decks().deck(f.deck()), f.cards());
             case DeckFact.CardsDiscarded f -> discard(game.decks().deck(f.deck()), f.cards());
+            case DeckFact.CardsPulled f -> remove(game.decks().deck(f.deck()), f.cards());
         }
     }
 
@@ -146,7 +147,12 @@ public final class FactApplier {
             case PlayerFact.InfiltrationEnded f -> game.player(f.playerNumber()).endInfiltration();
             case PlayerFact.CivilianShipRevealed f ->
                     game.player(f.playerNumber()).revealedCivilianShipIds().add(f.shipId());
+            case PlayerFact.CivilianShipForgotten f ->
+                    game.player(f.playerNumber()).revealedCivilianShipIds().remove(f.shipId());
             case PlayerFact.OwnTurnStarted f -> game.player(f.playerNumber()).countTurn();
+            case PlayerFact.CardsSeen ignored -> {
+                // only who knows the cards changes
+            }
             case PlayerFact.LoyaltyCardSeen f -> game.player(f.playerNumber())
                     .seeLoyaltyCard(new SeenLoyaltyCard(f.targetPlayerNumber(), f.card()));
         }

@@ -19,8 +19,17 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
  * Keeps the journal complete: replay only works if every state change is a recorded fact. Ops record facts, and only
  * the fact applier changes components. Tests are not analyzed, they set up state directly.
  */
-@AnalyzeClasses(packages = "xyz.zlatanov.frakkintoasters", importOptions = ImportOption.DoNotIncludeTests.class)
+@AnalyzeClasses(packages = "xyz.zlatanov.frakkintoasters",
+        importOptions = {ImportOption.DoNotIncludeTests.class, ArchitectureTest.DoNotIncludeTestFixtures.class})
 class ArchitectureTest {
+
+    // The test fixtures set up state for tests, like the tests themselves.
+    static class DoNotIncludeTestFixtures implements ImportOption {
+        @Override
+        public boolean includes(com.tngtech.archunit.core.importer.Location location) {
+            return !location.contains("/testFixtures/") && !location.contains("-test-fixtures");
+        }
+    }
 
     @ArchTest
     static final ArchRule onlyTheFactApplierAndTheStateItselfCallMutators =
@@ -51,6 +60,18 @@ class ArchitectureTest {
             noClasses().that().doNotHaveFullyQualifiedName(RollDieEventProcessor.class.getName())
                     .should().callMethodWhere(target(name("rollDie")).and(target(owner(assignableTo(GameOps.class)))))
                     .because("a die roll goes through FollowupUtils.rollDie, so the interrupt windows around it open");
+
+    @ArchTest
+    static final ArchRule projectionsDoNotDependOnTheOps =
+            noClasses().that().resideInAPackage("..projection..")
+                    .should().dependOnClassesThat().resideInAPackage("..operation..")
+                    .because("a projection reads the game through the views and the journal, it never changes it");
+
+    @ArchTest
+    static final ArchRule nothingInCoreDependsOnTheProjections =
+            noClasses().that().resideOutsideOfPackage("..projection..")
+                    .should().dependOnClassesThat().resideInAPackage("..projection..")
+                    .because("the projections are what the game shows to its viewers, the game doesn't need them");
 
     @ArchTest
     static final ArchRule eventsDoNotDependOnTheEngine =
