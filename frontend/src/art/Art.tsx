@@ -126,8 +126,8 @@ export function ArtStrip({ refs, className = '' }: { refs: ArtRef[]; className?:
   );
 }
 
-/** An image inside the board's SVG, with the same preview. */
-export function SvgArt({ art, x, y, width, height, className, title }: {
+/** An image inside the board's SVG, with the same preview unless what it is part of shows more on hover. */
+export function SvgArt({ art, x, y, width, height, className, title, preview = true, transform }: {
   art: ArtRef;
   x: number;
   y: number;
@@ -135,6 +135,8 @@ export function SvgArt({ art, x, y, width, height, className, title }: {
   height: number;
   className?: string;
   title?: string;
+  preview?: boolean;
+  transform?: string;
 }) {
   return (
     <image
@@ -145,8 +147,9 @@ export function SvgArt({ art, x, y, width, height, className, title }: {
       height={height}
       preserveAspectRatio="xMidYMid meet"
       className={className}
+      transform={transform}
       data-art={art.key}
-      {...previewHandlers(art)}
+      {...(preview ? previewHandlers(art) : {})}
     >
       <title>{title ?? art.label}</title>
     </image>

@@ -655,26 +655,41 @@ REST (the lobby lists poll), Zustand for the game. See `frontend-plan.md`.
   `src/labels/` (all wording: a humanized fallback, `overrides.ts` for names, templates for events, facts and options;
   only names, never a card's printed text), `src/input/` (the input panel: a choice is a button per option, answered
   by index; a decision is the `EventBuilder`, a form made from the schema, which builds exactly the codec's JSON and
-  leaves the player and the constraints to the server), `src/table/` (the state panels, the log), `src/sandbox/`
-  (undo, export, restart with the seed, setup by injecting a `SandboxEvent`, the inspector), `src/pages/`.
+  leaves the player and the constraints to the server), `src/table/` (the board and the panels around it, see "The
+  table"), `src/sandbox/` (undo, export, restart with the seed, setup by injecting a `SandboxEvent`, the inspector),
+  `src/pages/`.
 - The browser holds no game rules: a picker only narrows to plausible answers, the engine judges them.
 - `src/art/`: the images of `materials-sorted/` (a folder per enum, a file per constant, a Skill Card as
-  `TYPE_value`, a dial as `RESOURCE_value`). `images.ts` loads them with `import.meta.glob`, so Vite copies them into
-  the build, and gives an `ArtRef` per component (`cardArt`, `skillCardArt`, `characterArt` (the standee, with the
-  character sheet as the preview), `locationArt`, `shipArt`, `deckBackArt`, ...) or `null` where there is none: the
-  UI then shows the name. `refs.ts` finds what an event, a fact or an option names through the schema, for the log and
-  the input. `Art.tsx`: `CardTile` (a face-up card is a `tile`, a face-down one a `tile back`, which the lobby e2e
-  checks), `CardBack`, `ArtStrip`, `SvgArt`, and the hover preview (`ArtPreview`). `images.test.ts` checks that every
-  constant has its image and every image names a constant.
-- The board (`src/table/board/`): `BoardSvg` puts the location cards, standees, damage tokens, ships with their pilot
-  tokens, dials and tracks on our own layout, `layout.ts`, which has a place for every `Location` (a test checks it).
-  The space areas and the boarding party track have no image and stay schematic. Inputs on the board are in
+  `TYPE_value`, a dial as `RESOURCE_value`; and for what no enum names, `Title/`, `Token/`, `Die/` and `Back/SKILL`).
+  `images.ts` loads the folders with `import.meta.glob` (not the full board scan at the root), so Vite copies them
+  into the build, and gives an `ArtRef` per component (`cardArt`, `skillCardArt`, `characterArt` (the standee, with
+  the character sheet as the preview), `locationArt`, `shipArt`, `deckBackArt`, `titleArt`, `tokenArt`, `dieArt`, ...)
+  or `null` where there is none: the UI then shows the name. `refs.ts` finds what an event, a fact or an option names
+  through the schema, for the log and the input. `Art.tsx`: `CardTile` (a face-up card is a `tile`, a face-down one a
+  `tile back`, which the lobby e2e checks), `CardBack`, `ArtStrip`, `SvgArt`, and the hover preview (`ArtPreview`).
+  `images.test.ts` checks that every constant has its image and every image names a constant.
+- The table (`TablePage`, the "Wardroom" layout): the board across the width, and under it three columns: the turn and
+  the game (`TurnPanel`) over the log, the players' mats (`PlayersPanel`), the decision (`InputPanel`) over the skill
+  check (`SkillCheckPanel`). The styles are the "table" section of `styles.css`: the board's palette, cut corners
+  (`.cf`, `--chamfer`) and printed-label tabs. A player is named by his character everywhere (`playerName`), "Player n"
+  before he has one; the user in the seat shows only on his mat (`userName`, from the room's seats).
+- The board (`src/table/board/`): `board.jpg` is the surface, and `BoardSvg` lays the components on its printed slots,
+  in the image's pixels (`layout.ts`: a place for every `Location`, which a test checks, the track positions, the
+  dials and the `SLOTS`). The standees stand on the location cards, the ships fly in the space areas (the bow's wedge is
+  8 o'clock, the stern's 2 o'clock), the printed dials turn to the resources, markers sit on the tracks, and the decks
+  lie in the deck row with their counts and their top discards. What has no slot (the turn's Crisis Cards, the die, the
+  Quorum and Motive decks, the objective, the nukes) lies on free space. Inputs on the board are in
   `src/input/boardMoves.ts`: a move by clicking a location (asking for a discard when it leaves its ship) and the "Act"
   button on the asked player's location. Each builds the same event, or picks the same option, as the builder; a test
   checks it. The builder stays for everything else.
+- Hover (`src/table/reveal.tsx`): a pile shows what it holds in one fixed popover (`RevealLayer`). A face-up discard
+  pile shows to everyone. A sandbox looks like a live table, every hand and deck face down, and shows on hover what the
+  players can't see (`hidden` sections: hands, Loyalty and other player cards, draw piles, face-down discards, a skill
+  check's cards).
 - The website: `GamesPage` (the lobby: my sandboxes and games, open lobbies, games to watch, hosting), `RoomPage`
   (seats and observers, join, leave, start), `SettingsPage`. A 401 goes to the login page.
-- e2e (`frontend/e2e/`): `sandbox.spec.ts` plays a seeded sandbox through a turn, undoes, exports and imports;
+- e2e (`frontend/e2e/`): `sandbox.spec.ts` plays a seeded sandbox through a turn (reading the stacked Crisis Card
+  from the Crisis deck's hover), undoes, exports and imports;
   `lobby.spec.ts` has five users host, join, observe, leave and start a game, checks that nobody sees another
   player's cards and that an observer gets no input, and races two users for the last seat.
 - Commands: `npm run dev` (Vite on 5173, proxying `/api`, `/ws`, `/oauth2` to 8080; the `dev` profile allows its

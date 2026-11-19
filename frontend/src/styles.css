@@ -259,19 +259,6 @@ nav.top .brand img {
   color: var(--danger);
 }
 
-.table-grid {
-  display: grid;
-  grid-template-columns: minmax(300px, 380px) minmax(0, 1fr) minmax(280px, 360px);
-  gap: 0.8rem;
-  align-items: start;
-}
-
-@media (max-width: 1100px) {
-  .table-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 .toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -396,93 +383,6 @@ nav.top .brand img {
   border-left: 4px solid var(--treachery);
 }
 
-.player {
-  border-top: 1px solid var(--line);
-  padding: 0.4rem 0;
-}
-
-.player:first-child {
-  border-top: none;
-}
-
-.resources {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
-  gap: 0.3rem 0.8rem;
-  margin: 0;
-}
-
-.resource dt {
-  color: var(--muted);
-  font-size: 0.8rem;
-}
-
-.resource dd {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.locations {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
-  gap: 0.35rem;
-  margin: 0.4rem 0;
-}
-
-.location {
-  border: 1px solid var(--line);
-  border-radius: 4px;
-  padding: 0.3rem 0.4rem;
-  min-height: 2.4rem;
-}
-
-.location.damaged {
-  border-color: var(--danger);
-}
-
-.location-name {
-  display: block;
-  font-size: 0.8rem;
-  color: var(--muted);
-}
-
-.token {
-  display: inline-block;
-  font-size: 0.8rem;
-  margin: 0.1rem 0.2rem 0 0;
-  padding: 0 0.3rem;
-  border-radius: 3px;
-  background: var(--panel-raised);
-}
-
-.token.ship-raider,
-.token.ship-heavy_raider,
-.token.ship-basestar {
-  color: var(--cylon);
-}
-
-.decks table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.85rem;
-}
-
-.decks td,
-.decks th {
-  text-align: left;
-  padding: 0.15rem 0.3rem;
-  border-bottom: 1px solid var(--line);
-  vertical-align: top;
-}
-
-.pile {
-  margin: 0.2rem 0;
-  padding-left: 1.2rem;
-  max-height: 14rem;
-  overflow: auto;
-}
-
 .log .entries {
   list-style: none;
   margin: 0.2rem 0;
@@ -524,207 +424,6 @@ details > summary {
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--accent);
-}
-
-/* the board: the location cards, tokens, dials and tracks on our own layout */
-
-.board-svg {
-  width: 100%;
-  height: auto;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  margin-bottom: 0.8rem;
-  font-family: inherit;
-}
-
-.board-svg text {
-  fill: var(--text);
-  font-size: 11px;
-}
-
-.board-svg .dial circle {
-  fill: var(--bg);
-  stroke: var(--accent);
-  stroke-width: 2;
-}
-
-.board-svg .dial-name,
-.board-svg .track-title,
-.board-svg .note,
-.board-svg .area-title {
-  fill: var(--muted);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.board-svg .step rect {
-  fill: var(--bg);
-  stroke: var(--line);
-}
-
-.board-svg .step.current rect {
-  fill: var(--accent);
-  stroke: var(--accent);
-}
-
-.board-svg .step.current text {
-  fill: var(--accent-text);
-  font-weight: 600;
-}
-
-.board-svg .hull {
-  fill: #1a2129;
-  stroke: var(--line);
-  stroke-width: 2;
-}
-
-.board-svg .location .plain {
-  fill: var(--panel-raised);
-  stroke: var(--line);
-}
-
-.board-svg .location .frame {
-  fill: none;
-  stroke: var(--line);
-  pointer-events: none;
-}
-
-.board-svg .location .space {
-  fill: rgba(9, 14, 24, 0.75);
-  stroke: var(--line);
-  stroke-dasharray: 5 4;
-}
-
-.board-svg .location.cylonFleetSpace .space {
-  fill: rgba(40, 10, 12, 0.45);
-  stroke: var(--cylon);
-}
-
-.board-svg .space-name,
-.board-svg .to-miss {
-  fill: var(--muted);
-  font-size: 10px;
-}
-
-.board-svg .to-miss {
-  fill: var(--cylon);
-}
-
-.board-svg .location.cylon .frame,
-.board-svg .location.cylonFleet .frame {
-  stroke: var(--cylon);
-}
-
-.board-svg .location.damaged .frame {
-  stroke: var(--danger);
-  stroke-width: 3;
-}
-
-.board-svg .location.damaged .location-art,
-.board-svg .location.destroyed .location-art {
-  filter: grayscale(0.7) brightness(0.6);
-}
-
-.board-svg .location.target .frame,
-.board-svg .location.target .space {
-  stroke: var(--accent);
-  stroke-width: 3;
-  stroke-dasharray: none;
-}
-
-.board-svg .location.target {
-  cursor: pointer;
-}
-
-.board-svg .location.target:hover .frame,
-.board-svg .location.target:hover .space {
-  fill: rgba(224, 167, 58, 0.18);
-}
-
-.board-svg .damage-token,
-.board-svg .pilot-token {
-  filter: drop-shadow(0 0 2px #000);
-}
-
-.board-svg .character .token-ring {
-  fill: none;
-  stroke: #000;
-  stroke-width: 1;
-}
-
-.board-svg .character.current .token-ring {
-  stroke: var(--accent);
-  stroke-width: 2.5;
-}
-
-.board-svg .ship-count {
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.board-svg .ship-group.ship-raider .ship-count,
-.board-svg .ship-group.ship-heavy_raider .ship-count,
-.board-svg .ship-group.ship-basestar .ship-count {
-  fill: var(--cylon);
-}
-
-.board-svg .dial-caption {
-  fill: var(--muted);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.board-svg .dial-caption .dial-value {
-  fill: var(--text);
-  font-weight: 700;
-}
-
-.board-svg .location-name {
-  fill: var(--muted);
-  font-size: 10px;
-}
-
-.board-svg .damage {
-  fill: var(--danger);
-  font-size: 9px;
-  text-transform: uppercase;
-}
-
-.board-svg .character rect:not(.token-ring) {
-  fill: var(--accent);
-  stroke: none;
-}
-
-.board-svg .character text {
-  fill: var(--accent-text);
-  font-size: 10px;
-  font-weight: 600;
-}
-
-.board-svg .ship {
-  font-size: 10px;
-}
-
-.board-svg .ship-raider,
-.board-svg .ship-heavy_raider,
-.board-svg .ship-basestar {
-  fill: var(--cylon);
-}
-
-.board-svg .act {
-  cursor: pointer;
-}
-
-.board-svg .act rect {
-  fill: var(--accent);
-}
-
-.board-svg .act text {
-  fill: var(--accent-text);
-  font-weight: 700;
 }
 
 .count-ok {
@@ -943,37 +642,6 @@ details > summary {
   box-shadow: 0 0 0 2px var(--accent);
 }
 
-.player-head {
-  display: flex;
-  gap: 0.6rem;
-  align-items: flex-start;
-}
-
-.avatar {
-  height: 56px;
-  border-radius: 4px;
-  border: 1px solid var(--line);
-}
-
-.avatar.small {
-  height: 36px;
-}
-
-.player.current .avatar {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent);
-}
-
-.player.cylon .avatar {
-  border-color: var(--cylon);
-}
-
-.who {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
 .check-head {
   display: flex;
   gap: 0.8rem;
@@ -1040,40 +708,6 @@ details > summary {
   opacity: 0.7;
 }
 
-.deck-name {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.deck-back {
-  height: 32px;
-  border-radius: 2px;
-}
-
-.discard {
-  display: inline-flex;
-  align-items: flex-start;
-  gap: 0.4rem;
-}
-
-.top-card {
-  height: 40px;
-  border-radius: 2px;
-}
-
-.pile li {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  margin: 1px 0;
-}
-
-.pile-card {
-  height: 22px;
-  border-radius: 2px;
-}
-
 .art-preview {
   position: fixed;
   bottom: 1rem;
@@ -1112,4 +746,800 @@ details > summary {
 .art-preview-label {
   color: var(--muted);
   font-size: 0.85rem;
+}
+
+/* the table: board.jpg with the components on it, and the Wardroom around it ------------------------------------ */
+
+/* the palette, sampled from the board's artwork */
+.table-page {
+  --space-950: #070f1c;
+  --space-800: #11203a;
+  --dradis: #4fa3e0;
+  --dradis-glow: #8fd0ff;
+  --steel-100: #e2e6eb;
+  --steel-300: #aeb6c0;
+  --steel-500: #6d7783;
+  --alert: #c8322b;
+  --alert-dim: #6e1a16;
+  --amber: #f2b441;
+  --display: Bahnschrift, 'DIN Alternate', 'Roboto Condensed', 'Arial Narrow', sans-serif;
+  --c: 14px;
+  padding: 0 0 2rem;
+  background: var(--space-950);
+  color: var(--steel-100);
+}
+
+/* cut corners like the cards: resolved on each element, so each uses its own --c */
+.table-page *,
+.table-page *::before {
+  --chamfer: polygon(var(--c) 0, calc(100% - var(--c)) 0, 100% var(--c), 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%, var(--c) 100%, 0 calc(100% - var(--c)), 0 var(--c));
+}
+
+.table-page .cf {
+  --edge: #5d6773;
+  --fill: linear-gradient(180deg, #2c333c, #1c2128 55%, #171b21);
+  --bw: 1.5px;
+  position: relative;
+  isolation: isolate;
+  background: var(--edge);
+  clip-path: var(--chamfer);
+}
+
+.table-page .cf::before {
+  content: '';
+  position: absolute;
+  inset: var(--bw);
+  z-index: -1;
+  background: var(--fill);
+  clip-path: var(--chamfer);
+}
+
+.table-page .tab {
+  display: flex;
+  margin: -4px 0 12px;
+}
+
+/* like the board's printed labels */
+.table-page .tab span {
+  display: inline-block;
+  font: 600 12px/1 var(--display);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #151b25;
+  background: linear-gradient(#eef1f4, #b8c0c9);
+  padding: 6px 18px;
+  clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0 50%);
+}
+
+.table-page .tab.red span {
+  background: linear-gradient(#e2554d, #a8231d);
+  color: #fff;
+}
+
+.table-page .tab.blue span {
+  background: linear-gradient(#7cc0f0, #2f78b5);
+  color: #06121f;
+}
+
+.table-page .table-header {
+  align-items: center;
+  height: 46px;
+  padding: 0 18px;
+  background: linear-gradient(#1f252d, #12161c);
+  border-bottom: 3px solid var(--alert);
+}
+
+.table-page .table-header h1 {
+  font: 600 16px var(--display);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.table-page .table-header a {
+  color: var(--dradis-glow);
+  text-decoration: none;
+}
+
+.table-page .table-header .connection {
+  margin-left: auto;
+}
+
+.table-page .connecting {
+  padding: 1rem 18px;
+}
+
+.table-page > .panel.sandbox {
+  margin: 10px 14px;
+}
+
+/* the board */
+
+.table-page > .board {
+  position: relative;
+  line-height: 0;
+}
+
+.board-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.board-svg text {
+  font-family: var(--display);
+  fill: #fff;
+}
+
+.board-svg .card {
+  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.7));
+}
+
+.board-svg .card.in-play {
+  filter: drop-shadow(0 0 4px #ffd25a) drop-shadow(0 0 16px rgba(255, 190, 60, 0.6));
+}
+
+.board-svg .piece,
+.board-svg .character image {
+  filter: drop-shadow(0 6px 5px rgba(0, 0, 0, 0.8));
+}
+
+.board-svg .pilot-token {
+  filter: drop-shadow(0 0 3px #fff) drop-shadow(0 4px 6px rgba(0, 0, 0, 0.8));
+}
+
+.board-svg .count polygon {
+  fill: rgba(6, 12, 24, 0.9);
+  stroke: rgba(143, 208, 255, 0.65);
+  stroke-width: 2;
+}
+
+.board-svg .count text {
+  font-weight: 700;
+}
+
+.board-svg .count.accent polygon {
+  stroke: var(--amber);
+}
+
+.board-svg .count.accent text {
+  fill: var(--amber);
+}
+
+.board-svg .count.result.pass polygon {
+  stroke: #57ab5a;
+}
+
+.board-svg .count.result.fail polygon {
+  stroke: var(--alert);
+}
+
+/* the dial's value, for a screen reader and the tests; its chip shows it */
+.board-svg .dial-caption {
+  font-size: 1px;
+  fill: transparent;
+}
+
+.board-svg .marker rect {
+  fill: none;
+  stroke: var(--dradis-glow);
+  stroke-width: 7;
+  filter: drop-shadow(0 0 12px rgba(143, 208, 255, 0.95));
+}
+
+.board-svg .marker-pursuit rect {
+  stroke: #ffb199;
+  filter: drop-shadow(0 0 12px rgba(255, 90, 60, 0.95));
+}
+
+.board-svg .hotspot {
+  fill: transparent;
+}
+
+.board-svg [data-reveal]:hover .hotspot {
+  fill: rgba(143, 208, 255, 0.08);
+  stroke: rgba(143, 208, 255, 0.55);
+  stroke-width: 3;
+}
+
+.board-svg .location .frame,
+.board-svg .location .space-frame {
+  fill: none;
+}
+
+.board-svg .location.target {
+  cursor: pointer;
+}
+
+.board-svg .location.target .frame,
+.board-svg .location.target .space-frame {
+  fill: rgba(242, 180, 65, 0.12);
+  stroke: var(--amber);
+  stroke-width: 8;
+  filter: drop-shadow(0 0 14px rgba(242, 180, 65, 0.9));
+}
+
+.board-svg .location.target:hover .frame,
+.board-svg .location.target:hover .space-frame {
+  fill: rgba(242, 180, 65, 0.3);
+}
+
+.board-svg .destroyed-veil {
+  fill: rgba(0, 0, 0, 0.6);
+}
+
+.board-svg .damage {
+  font-size: 30px;
+  font-weight: 700;
+  fill: #ff8a80;
+}
+
+.board-svg .character .token-ring {
+  fill: none;
+}
+
+.board-svg .character.current .token-ring {
+  stroke: #ffd24d;
+  stroke-width: 6;
+  filter: drop-shadow(0 0 12px rgba(255, 200, 70, 0.9));
+}
+
+.board-svg .character.cylon .token-ring {
+  stroke: #e0352b;
+  stroke-width: 6;
+  filter: drop-shadow(0 0 10px rgba(224, 53, 43, 0.8));
+}
+
+.board-svg .character rect:not(.token-ring) {
+  fill: rgba(6, 12, 24, 0.85);
+}
+
+.board-svg .character text {
+  font-size: 22px;
+}
+
+.board-svg .act {
+  cursor: pointer;
+}
+
+.board-svg .act rect {
+  fill: var(--alert);
+  stroke: #fff;
+  stroke-width: 3;
+}
+
+.board-svg .act text {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+/* the Wardroom: the turn and the log, the players, the decision and the skill check */
+
+.wardroom {
+  display: grid;
+  grid-template-columns: minmax(320px, 440px) minmax(0, 1fr) minmax(340px, 480px);
+  gap: 14px;
+  padding: 14px;
+  align-items: start;
+}
+
+.wardroom .stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+@media (max-width: 1200px) {
+  .wardroom {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .wardroom > .players {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 800px) {
+  .wardroom {
+    grid-template-columns: 1fr;
+  }
+}
+
+.table-page .panel {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  padding: 16px 18px 18px;
+}
+
+.table-page .panel.cf {
+  background: var(--edge);
+}
+
+.table-page .your-move {
+  --edge: var(--alert);
+  --bw: 2px;
+}
+
+.table-page h2 {
+  font: 600 20px var(--display);
+  text-transform: none;
+  letter-spacing: 0.01em;
+  color: var(--steel-100);
+  margin: 0 0 8px;
+}
+
+.table-page .row-name,
+.table-page .muted {
+  color: var(--steel-300);
+}
+
+.table-page .badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding: 0 9px 0 3px;
+  font: 600 11px/1 var(--display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: #0e1626;
+  border: 1px solid var(--steel-500);
+  border-radius: 0;
+  color: var(--steel-100);
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+
+.table-page .badge .art {
+  width: 18px;
+  height: 18px;
+  object-fit: cover;
+  object-position: 50% 30%;
+}
+
+.table-page .badge .art.round {
+  border-radius: 50%;
+  object-position: center;
+}
+
+.table-page .badge.title {
+  border-color: #d9a640;
+  color: #f3d38a;
+}
+
+.table-page .badge.mutineer {
+  border-color: #c0503f;
+  color: #f0a090;
+}
+
+.table-page .badge.cylon {
+  border-color: var(--alert);
+  background: var(--alert-dim);
+  color: #fff;
+  padding-left: 9px;
+}
+
+.table-page .badge.token {
+  border-color: var(--dradis);
+  color: var(--dradis-glow);
+}
+
+/* turn and game */
+
+.turn .turn-line {
+  font: 700 22px var(--display);
+}
+
+.turn .step-name {
+  color: var(--amber);
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.table-page .steps {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: flex;
+  gap: 2px;
+}
+
+.table-page .steps li {
+  flex: 1;
+  font: 600 9px/1.1 var(--display);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 7px 4px 7px 9px;
+  background: #141c29;
+  color: var(--steel-500);
+  text-align: center;
+  clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 50%, calc(100% - 7px) 100%, 0 100%, 7px 50%);
+}
+
+.table-page .steps li.done {
+  background: #22344d;
+  color: var(--steel-300);
+}
+
+.table-page .steps li.now {
+  background: var(--amber);
+  color: #1b1305;
+}
+
+.table-page .people {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.table-page .person {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex: 1;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 5px 8px 5px 5px;
+}
+
+.table-page .person .art {
+  width: 34px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 3px;
+}
+
+.table-page .person small,
+.table-page .block > small {
+  display: block;
+  font: 600 10px var(--display);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--steel-500);
+}
+
+.table-page .person b {
+  display: block;
+  font: 600 14px var(--display);
+}
+
+.table-page .block {
+  margin-bottom: 10px;
+}
+
+.table-page .block-body,
+.table-page .block .cards {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.table-page .block-text b {
+  display: block;
+  font: 600 15px var(--display);
+}
+
+.table-page .block-text span {
+  display: block;
+  font-size: 12px;
+  color: var(--steel-300);
+}
+
+.table-page .note {
+  color: var(--amber);
+  font-size: 12px;
+}
+
+.table-page .die-roll {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.table-page .die-face {
+  width: 40px;
+}
+
+/* the log */
+
+.table-page .log summary {
+  font: 600 11px var(--display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--steel-300);
+}
+
+.table-page .log .entries {
+  max-height: 34rem;
+}
+
+.table-page .log .entries > li {
+  border-bottom-color: rgba(255, 255, 255, 0.07);
+}
+
+.table-page .log .actor {
+  color: var(--amber);
+  font-weight: 600;
+}
+
+/* the players' mats */
+
+.players .mats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 12px;
+}
+
+.table-page .mat {
+  --c: 10px;
+  display: flex;
+  gap: 12px;
+  min-width: 0;
+  padding: 12px 12px 12px 14px;
+  background: rgba(0, 0, 0, 0.28);
+  border-left: 5px solid #4b5561;
+  clip-path: var(--chamfer);
+}
+
+.table-page .mat.current {
+  border-left-color: var(--alert);
+  background: linear-gradient(90deg, rgba(200, 50, 43, 0.22), rgba(0, 0, 0, 0.28) 45%);
+}
+
+.table-page .mat.cylon {
+  border-left-color: var(--alert-dim);
+}
+
+.table-page .mat .avatar {
+  width: 88px;
+  height: 130px;
+  object-fit: cover;
+  border: 0;
+  border-radius: 5px;
+  flex: none;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.6);
+}
+
+.table-page .mat .avatar.empty {
+  display: block;
+  background: #141c29;
+}
+
+.table-page .mat.current .avatar {
+  box-shadow: 0 0 0 2px #ffd24d, 0 0 14px 3px rgba(255, 200, 70, 0.6);
+}
+
+.table-page .mat.cylon .avatar {
+  box-shadow: 0 0 0 2px #e0352b;
+}
+
+.table-page .mat-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.table-page .mat .who {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.table-page .mat .who strong {
+  font: 600 17px var(--display);
+}
+
+.table-page .mat .who .user {
+  color: var(--steel-300);
+  font-size: 13px;
+}
+
+.table-page .mat .you {
+  font: 600 10px var(--display);
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  background: var(--dradis);
+  color: #04101e;
+  padding: 2px 6px;
+}
+
+.table-page .mat .where {
+  font-size: 12px;
+  color: var(--steel-300);
+  margin: 2px 0 6px;
+}
+
+.table-page .mat .where::before {
+  content: '◆ ';
+  color: var(--dradis);
+}
+
+.table-page .mat .badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 4px 0 8px;
+}
+
+.table-page .mat .hand {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 2px 0 8px;
+}
+
+.table-page .mat .piles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.table-page .mat .pile {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.table-page .mat .pile-cards {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.table-page .mat .pile-name {
+  font: 600 9px var(--display);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--steel-300);
+}
+
+.table-page .learned-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.table-page .learned {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--steel-300);
+}
+
+.table-page .learned .art {
+  width: 22px;
+  height: 22px;
+  object-fit: cover;
+  border-radius: 3px;
+}
+
+/* what a sandbox shows on hover: a hint that there is more */
+.table-page .hidden-cards[data-reveal] {
+  display: inline-flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  cursor: help;
+  outline: 1px dashed rgba(143, 208, 255, 0.4);
+  outline-offset: 2px;
+}
+
+/* the skill check */
+
+.table-page .check-numbers {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.table-page .check-numbers b {
+  font: 600 16px var(--display);
+}
+
+.table-page .meter-row strong {
+  font: 700 20px var(--display);
+  color: var(--amber);
+}
+
+.table-page .meter-bar {
+  display: flex;
+  gap: 3px;
+  margin: 10px 0;
+}
+
+.table-page .meter-bar i {
+  flex: 1;
+  height: 14px;
+  background: #13243b;
+  position: relative;
+}
+
+.table-page .meter-bar i.in {
+  background: var(--dradis);
+  box-shadow: 0 0 8px rgba(79, 163, 224, 0.8);
+}
+
+.table-page .meter-bar i.line::after {
+  content: '';
+  position: absolute;
+  right: -3px;
+  top: -5px;
+  bottom: -5px;
+  width: 2px;
+  background: var(--amber);
+}
+
+/* the popover of a pile: what a deck or a hand holds */
+
+.reveal-pop {
+  position: fixed;
+  z-index: 50;
+  max-height: 60vh;
+  overflow: auto;
+  padding: 12px 14px;
+  background: rgba(9, 18, 34, 0.97);
+  border: 1px solid rgba(143, 208, 255, 0.55);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+  clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.reveal-title {
+  font: 600 13px var(--display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--dradis-glow);
+  margin-bottom: 8px;
+}
+
+.reveal-section + .reveal-section {
+  margin-top: 10px;
+}
+
+.reveal-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--steel-300);
+  margin-bottom: 4px;
+}
+
+.sandbox-only {
+  font: 600 9px var(--display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #04101e;
+  background: var(--amber);
+  padding: 1px 5px;
+}
+
+.reveal-pop .pile {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 6px;
+}
+
+.reveal-pop .pile li {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--steel-300);
+}
+
+.reveal-pop .pile .art {
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
 }

@@ -1,98 +1,204 @@
-import { cardArt, characterArt, skillCardArt, skillCheckArt, skillTypeArt } from '../../art/images';
+import type { ReactNode } from 'react';
+import { cardArt, characterArt, dieArt, shipArt, skillBackArt, skillCardArt, skillCheckArt, skillTypeArt } from '../../art/images';
 import { ArtImg, CardBack, CardTile } from '../../art/Art';
 import { constantLabel, skillCardLabel } from '../../labels/describe';
 import type { SkillCard, SkillHand } from '../../wire/types';
+import { useRevealHandlers, type RevealSection } from '../reveal';
 import { useTable } from '../tableContext';
 
-/** The turn: its number, current and acting player, step, Crisis Cards, the die roll and an open interrupt window. */
+// the steps of a player's turn, in order
+const STEPS = ['RECEIVE_SKILLS', 'MOVEMENT', 'ACTION', 'CRISIS', 'ACTIVATE_CYLON_SHIPS', 'PREPARE_FOR_JUMP', 'DISCARD'];
+
+/**
+ * The turn and the game: the turn's number and step, the current and the acting character, the turn's Crisis Cards,
+ * the die, an open interrupt window, the objective with the distance and the nukes, and what left the game.
+ */
 export function TurnPanel() {
   const table = useTable();
-  const turn = table.game?.turn;
-  if (!turn) {
+  const game = table.game;
+  const turn = game?.turn;
+  if (!game || !turn) {
     return null;
   }
-  const characterOf = (playerNumber: number) => table.game?.players?.find((player) => player.number === playerNumber)?.character ?? null;
-  const current = characterArt(characterOf(turn.currentPlayer));
-  const acting = turn.actingPlayer !== turn.currentPlayer ? characterArt(characterOf(turn.actingPlayer)) : null;
+  const step = STEPS.indexOf(turn.step ?? '');
+  const objective = cardArt('ObjectiveCard', game.objective);
+  const die = dieArt(turn.dieRoll?.value);
   return (
-    <section className="panel turn" aria-label="turn">
-      <h2>
-        Turn {turn.number} · {constantLabel('GameStep', turn.step)}
+    <section className="panel cf turn" aria-label="turn">
+      <div className="tab">
+        <span>Turn &amp; game</span>
+      </div>
+      <h2 className="turn-line">
+        <span className="turn-no">Turn {turn.number}</span> · <span className="step-name">{constantLabel('GameStep', turn.step)}</span>
       </h2>
-      <p className="who">
-        {current && <ArtImg art={current} className="avatar small" />}
-        <span>
-          Current: {table.playerName(turn.currentPlayer)}
-          {turn.actingPlayer !== turn.currentPlayer ? ` · acting: ${table.playerName(turn.actingPlayer)}` : ''}
-          {turn.endedEarly ? ' · ended early' : ''}
-          {turn.returnsToCrisisStep ? ' · returns to the Crisis step' : ''}
-        </span>
-        {acting && <ArtImg art={acting} className="avatar small" />}
-      </p>
-      {(turn.crisisCards ?? []).length > 0 && (
-        <div className="row">
-          <span className="row-name">Crisis Cards</span>
-          {(turn.crisisCards ?? []).map((card, index) => (
-            <CardTile key={index} art={cardArt('CrisisCard', card)} label={constantLabel('CrisisCard', card)} size="lg" className="crisis" />
-          ))}
-        </div>
+      <ol className="steps">
+        {STEPS.map((name, index) => (
+          <li key={name} className={index < step ? 'done' : index === step ? 'now' : ''}>
+            {constantLabel('GameStep', name)}
+          </li>
+        ))}
+      </ol>
+      <div className="people">
+        <Person playerNumber={turn.currentPlayer} role="Current" />
+        <Person playerNumber={turn.actingPlayer} role="Acting" />
+      </div>
+      {(turn.endedEarly || turn.returnsToCrisisStep) && (
+        <p className="note">
+          {turn.endedEarly ? 'The turn ended early. ' : ''}
+          {turn.returnsToCrisisStep ? 'The turn returns to the Crisis step.' : ''}
+        </p>
       )}
-      {(table.game?.crisisCardsInPlay ?? []).length > 0 && (
-        <div className="row">
-          <span className="row-name">In play</span>
-          {(table.game?.crisisCardsInPlay ?? []).map((type, index) => (
-            <CardTile key={index} art={skillCheckArt(type)} label={constantLabel('SkillCheckType', type)} className="crisis" />
-          ))}
-        </div>
+      {(turn.crisisCards ?? []).length > 0 && (
+        <Block label="Crisis">
+          <span className="cards">
+            {(turn.crisisCards ?? []).map((card, index) => (
+              <CardTile key={index} art={cardArt('CrisisCard', card)} label={constantLabel('CrisisCard', card)} size="md" className="crisis" />
+            ))}
+          </span>
+          <span className="block-text">
+            <b>{(turn.crisisCards ?? []).map((card) => constantLabel('CrisisCard', card)).join(', ')}</b>
+            {game.skillCheck && (
+              <span>
+                Skill check · difficulty {game.skillCheck.difficulty} · {game.skillCheck.cards?.count ?? 0} cards in
+              </span>
+            )}
+          </span>
+        </Block>
+      )}
+      {(game.crisisCardsInPlay ?? []).length > 0 && (
+        <Block label="In play">
+          <span className="cards">
+            {(game.crisisCardsInPlay ?? []).map((type, index) => (
+              <CardTile key={index} art={skillCheckArt(type)} label={constantLabel('SkillCheckType', type)} size="xs" className="crisis" />
+            ))}
+          </span>
+        </Block>
       )}
       {turn.dieRoll && (
-        <div className="row die-roll">
-          <span className="row-name">Die roll</span>
-          {turn.dieRoll.value === null ? (
-            <span className="muted">not rolled yet</span>
-          ) : (
-            <>
-              <span className="die" title="the die">
-                {turn.dieRoll.value}
-              </span>
-              {turn.dieRoll.modifier !== 0 && (
-                <span className="modifier">
-                  {turn.dieRoll.modifier > 0 ? '+' : '−'}
-                  {Math.abs(turn.dieRoll.modifier)}
+        <Block label="Die roll">
+          <span className="die-roll">
+            {turn.dieRoll.value === null ? (
+              <span className="muted">not rolled yet</span>
+            ) : (
+              <>
+                {die ? <ArtImg art={die} className="die-face" /> : <span className="die">{turn.dieRoll.value}</span>}
+                {turn.dieRoll.modifier !== 0 && (
+                  <span className="modifier">
+                    {turn.dieRoll.modifier > 0 ? '+' : '−'}
+                    {Math.abs(turn.dieRoll.modifier)}
+                  </span>
+                )}
+                <span className="arrow">→</span>
+                <span className="die result" title="the result">
+                  {turn.dieRoll.result}
                 </span>
-              )}
-              <span className="arrow">→</span>
-              <span className="die result" title="the result">
-                {turn.dieRoll.result}
-              </span>
-            </>
-          )}
-          {(turn.dieRoll.cards ?? []).map((type, index) => (
-            <CardTile key={index} art={skillTypeArt(type)} label={constantLabel('SkillCardType', type)} size="xs" />
-          ))}
-        </div>
+              </>
+            )}
+            {(turn.dieRoll.cards ?? []).map((type, index) => (
+              <CardTile key={index} art={skillTypeArt(type)} label={constantLabel('SkillCardType', type)} size="xs" />
+            ))}
+          </span>
+        </Block>
       )}
-      {turn.interruptWindow && (
-        <div className="row interrupt">
-          <span className="row-name">Interrupt: {constantLabel('InterruptWindow', turn.interruptWindow.kind)}</span>
-          {(turn.windowCards ?? []).map((card, index) => (
-            <CardTile key={index} art={skillCardArt(card.card)} label={skillCardLabel(card.card)} caption={table.playerName(card.playerNumber)} />
-          ))}
-        </div>
-      )}
+      {turn.interruptWindow && <InterruptWindow />}
       {(turn.resolvedInterruptCards ?? []).length > 0 && (
-        <div className="row">
-          <span className="row-name">Resolved this turn</span>
-          {(turn.resolvedInterruptCards ?? []).map((type, index) => (
-            <CardTile key={index} art={skillTypeArt(type)} label={constantLabel('SkillCardType', type)} size="xs" />
-          ))}
-        </div>
+        <Block label="Resolved this turn">
+          <span className="cards">
+            {(turn.resolvedInterruptCards ?? []).map((type, index) => (
+              <CardTile key={index} art={skillTypeArt(type)} label={constantLabel('SkillCardType', type)} size="xs" />
+            ))}
+          </span>
+        </Block>
       )}
+      <Block label="Objective">
+        {objective && <CardTile art={objective} label={objective.label} size="xs" />}
+        <span className="block-text">
+          <b>{constantLabel('ObjectiveCard', game.objective)}</b>
+          <span>
+            distance {game.distanceTraveled} · {game.nukes} nuke{game.nukes === 1 ? '' : 's'}
+          </span>
+        </span>
+      </Block>
+      <OutOfTheGame />
     </section>
   );
 }
 
-/** The skill check: its card, target, difficulty, the cards played before it, the piles, the strength and the result. */
+function Person({ playerNumber, role }: { playerNumber: number; role: string }) {
+  const table = useTable();
+  const character = table.game?.players?.find((player) => player.number === playerNumber)?.character ?? null;
+  const art = characterArt(character);
+  return (
+    <div className="person">
+      {art ? <ArtImg art={art} /> : <span className="avatar empty" />}
+      <span>
+        <small>{role}</small>
+        <b>{table.playerName(playerNumber)}</b>
+      </span>
+    </div>
+  );
+}
+
+function Block({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="block">
+      <small>{label}</small>
+      <div className="block-body">{children}</div>
+    </div>
+  );
+}
+
+// The cards played into an interrupt window lie face down until it closes: the others count them.
+function InterruptWindow() {
+  const table = useTable();
+  const turn = table.game?.turn;
+  const cards = turn?.windowCards ?? [];
+  const sections: RevealSection[] = [
+    { title: 'Played', cards: cards.map((card) => ({ art: skillCardArt(card.card), label: `${table.playerName(card.playerNumber)}: ${skillCardLabel(card.card)}` })), hidden: true },
+  ];
+  const handlers = useRevealHandlers('interrupt-window', 'Interrupt window', sections);
+  return (
+    <Block label={`Interrupt: ${constantLabel('InterruptWindow', turn?.interruptWindow?.kind)}`}>
+      <span className="cards" {...handlers}>
+        {cards.length === 0 ? <span className="muted">no cards yet</span> : table.sandbox ? <CardBack count={cards.length} size="xs" /> : cards.map((card, index) => (
+          <CardTile key={index} art={skillCardArt(card.card)} label={skillCardLabel(card.card)} caption={table.playerName(card.playerNumber)} size="xs" />
+        ))}
+      </span>
+    </Block>
+  );
+}
+
+function OutOfTheGame() {
+  const game = useTable().game;
+  const characters = game?.removedCharacters ?? [];
+  const ships = game?.destroyedShips ?? [];
+  if (characters.length === 0 && ships.length === 0) {
+    return null;
+  }
+  return (
+    <Block label="Out of the game">
+      <span className="cards">
+        {characters.map((character) => {
+          const art = characterArt(character);
+          return art ? <ArtImg key={character} art={art} className="removed" /> : <span key={character}>{constantLabel('Character', character)}</span>;
+        })}
+        {ships.map((ship) => {
+          const art = shipArt(ship.type);
+          return (
+            <span key={ship.id} className="ship-chip" title={`${constantLabel('ShipType', ship.type)} #${ship.id}`}>
+              {art && <ArtImg art={art} />}#{ship.id}
+            </span>
+          );
+        })}
+      </span>
+    </Block>
+  );
+}
+
+/**
+ * The skill check: its card, difficulty against the cards in, who played before it, the face-down pile (counted; a
+ * sandbox shows it on hover), the piles once revealed, the strength and the result.
+ */
 export function SkillCheckPanel() {
   const table = useTable();
   const check = table.game?.skillCheck;
@@ -100,86 +206,108 @@ export function SkillCheckPanel() {
     return null;
   }
   const subject = skillCheckArt(check.type);
+  const inCount = check.cards?.count ?? 0;
+  const cells = Math.max(check.difficulty, inCount, 1) + 2;
   return (
-    <section className="panel skill-check" aria-label="skill check">
-      <h2>Skill check: {constantLabel('SkillCheckType', check.type)}</h2>
+    <section className="panel cf skill-check" aria-label="skill check">
+      <div className="tab">
+        <span>Skill check</span>
+      </div>
       <div className="check-head">
         {subject && <CardTile art={subject} label={constantLabel('SkillCheckType', check.type)} size="md" />}
         <div className="check-numbers">
-          <p>
+          <b>{constantLabel('SkillCheckType', check.type)}</b>
+          {check.targetPlayer !== null && <span>about {table.playerName(check.targetPlayer)}</span>}
+          {check.emergencyDeclared && <span>emergency declared</span>}
+          <span className="meter-row">
             Difficulty <strong>{check.difficulty}</strong>
-            {check.targetPlayer !== null ? ` · about ${table.playerName(check.targetPlayer)}` : ''}
-            {check.emergencyDeclared ? ' · emergency declared' : ''}
-          </p>
+          </span>
           {check.totalStrength !== null && (
-            <p className={`check-result ${(check.result ?? '').toLowerCase()}`}>
+            <span className={`meter-row check-result ${(check.result ?? '').toLowerCase()}`}>
               Strength <strong>{check.totalStrength}</strong>
               {check.result ? ` · ${constantLabel('SkillCheckResult', check.result)}` : ''}
               {check.passResultReplaced ? ' · pass replaced' : ''}
               {check.failResultPrevented ? ' · fail prevented' : ''}
-            </p>
+            </span>
           )}
         </div>
       </div>
+      <div className="meter-bar" aria-hidden="true">
+        {Array.from({ length: cells }, (_, index) => (
+          <i key={index} className={[index < inCount ? 'in' : '', index === check.difficulty - 1 ? 'line' : ''].join(' ').trim()} />
+        ))}
+      </div>
       {(check.playedBefore ?? []).map((played) => (
-        <div key={played.player} className="row">
-          <span className="row-name">Before, {table.playerName(played.player)}</span>
-          <Cards hand={played.cards} />
-        </div>
+        <Row key={played.player} label={`Before the check: ${table.playerName(played.player)}`}>
+          <Cards id={`before-${played.player}`} title={`Played before the check by ${table.playerName(played.player)}`} hand={played.cards} />
+        </Row>
       ))}
-      <div className="row">
-        <span className="row-name">Face down</span>
-        <Cards hand={check.cards} />
-      </div>
-      <div className="row">
-        <span className="row-name">Matching</span>
-        <CardList cards={check.matchingPile ?? []} />
-      </div>
-      <div className="row">
-        <span className="row-name">Not matching</span>
-        <CardList cards={check.nonMatchingPile ?? []} />
-      </div>
+      <Row label="Face down">
+        <Cards id="check-face-down" title="The skill check's face-down cards" hand={check.cards} />
+      </Row>
+      {(check.matchingPile ?? []).length > 0 && (
+        <Row label="Matching">
+          <CardList cards={check.matchingPile ?? []} />
+        </Row>
+      )}
+      {(check.nonMatchingPile ?? []).length > 0 && (
+        <Row label="Not matching">
+          <CardList cards={check.nonMatchingPile ?? []} />
+        </Row>
+      )}
       {(check.resolvedAbilities ?? []).length > 0 && (
-        <div className="row">
-          <span className="row-name">Abilities resolved</span>
+        <Row label="Abilities resolved">
           {(check.resolvedAbilities ?? []).map((type, index) => (
             <CardTile key={index} art={skillTypeArt(type)} label={constantLabel('SkillCardType', type)} size="xs" />
           ))}
-        </div>
+        </Row>
       )}
     </section>
   );
 }
 
-// Cards face up for who may see them, otherwise their backs by color.
-function Cards({ hand }: { hand: SkillHand | null }) {
+function Row({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="row">
+      <span className="row-name">{label}</span>
+      <span className="hand">{children}</span>
+    </div>
+  );
+}
+
+// Cards face up for who may see them in a live game, otherwise their backs, which a sandbox opens on hover.
+function Cards({ id, title, hand }: { id: string; title: string; hand: SkillHand | null }) {
+  const table = useTable();
+  const sections: RevealSection[] = [{ title: 'Cards', cards: (hand?.cards ?? []).map((card) => ({ art: skillCardArt(card), label: skillCardLabel(card) })), hidden: true }];
+  const handlers = useRevealHandlers(id, title, sections);
   if (!hand || hand.count === 0) {
     return <span className="muted">—</span>;
   }
-  if (hand.cards) {
+  if (hand.cards && !table.sandbox) {
     return <CardList cards={hand.cards} />;
   }
   const colors = Object.entries(hand.colors ?? {});
-  return colors.length > 0 ? (
-    <span className="hand">
-      {colors.map(([color, count]) => (
-        <CardBack key={color} color={color} count={count ?? 0} />
-      ))}
+  const back = skillBackArt();
+  return (
+    <span className="hidden-cards" {...handlers}>
+      {colors.length > 0 ? (
+        colors.map(([color, count]) => <CardBack key={color} color={color} count={count ?? 0} size="xs" />)
+      ) : (
+        <span className="tile back card-back size-xs" title={`${hand.count} face down`}>
+          {back && <ArtImg art={back} />}
+          <span className="back-count">×{hand.count}</span>
+        </span>
+      )}
     </span>
-  ) : (
-    <CardBack count={hand.count} />
   );
 }
 
 function CardList({ cards }: { cards: SkillCard[] }) {
-  if (cards.length === 0) {
-    return <span className="muted">—</span>;
-  }
   return (
-    <span className="hand">
+    <>
       {cards.map((card, index) => (
-        <CardTile key={index} art={skillCardArt(card)} label={skillCardLabel(card)} />
+        <CardTile key={index} art={skillCardArt(card)} label={skillCardLabel(card)} size="xs" />
       ))}
-    </span>
+    </>
   );
 }

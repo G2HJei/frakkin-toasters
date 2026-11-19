@@ -15,6 +15,8 @@ export interface TableContext extends LabelContext {
   game: GameProjection | null;
   sandbox: boolean;
   askedPlayer: number | null;
+  // the name of the user in a seat, which only the players panel shows: everywhere else a player is his character
+  userName(playerNumber: number): string | null;
   players(): { number: number; label: string }[];
   ships(): ShipChoice[];
   hand(playerNumber: number | null): SkillCard[];
@@ -23,17 +25,24 @@ export interface TableContext extends LabelContext {
   windowCards(): PlayedInterruptCard[];
 }
 
-export function tableContext(game: GameProjection | null, sandbox: boolean, askedPlayer: number | null): TableContext {
+export function tableContext(
+  game: GameProjection | null,
+  sandbox: boolean,
+  askedPlayer: number | null,
+  userNames: Partial<Record<number, string>> = {},
+): TableContext {
   const players = game?.players ?? [];
+  // a player is his character, and his seat until he has one
   const playerName = (playerNumber: number) => {
     const player = players.find((candidate) => candidate.number === playerNumber);
-    return player?.character ? `P${playerNumber} ${constantLabel('Character', player.character)}` : `Player ${playerNumber}`;
+    return player?.character ? constantLabel('Character', player.character) : `Player ${playerNumber}`;
   };
   return {
     game,
     sandbox,
     askedPlayer,
     playerName,
+    userName: (playerNumber) => userNames[playerNumber] ?? null,
     players: () => players.map((player) => ({ number: player.number, label: playerName(player.number) })),
     ships: () => {
       if (!game) {
@@ -72,6 +81,7 @@ export const Table = createContext<TableContext>({
   game: null,
   sandbox: false,
   askedPlayer: null,
+  userName: () => null,
   players: () => [],
   ships: () => [],
   hand: () => [],

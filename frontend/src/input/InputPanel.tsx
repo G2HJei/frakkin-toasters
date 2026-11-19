@@ -25,8 +25,13 @@ export function InputPanel({ onChoose, onSubmit }: InputPanelProps) {
   const outcome = table.game?.outcome ?? null;
   const art = input?.kind === 'Choose' ? choiceArt(input.options ?? []) : null;
 
+  // the viewer is asked: a Choose or a Decide only reaches the one who answers
+  const yourMove = input?.kind === 'Choose' || input?.kind === 'Decide';
   return (
-    <section className="panel input-panel" aria-label="input">
+    <section className={`panel cf input-panel ${yourMove ? 'your-move' : ''}`.trim()} aria-label="input">
+      <div className={yourMove ? 'tab red' : 'tab'}>
+        <span>{yourMove ? 'Decision · your move' : 'Decision'}</span>
+      </div>
       <h2>{heading(input, table.playerName)}</h2>
       {outcome && (
         <p className="outcome">

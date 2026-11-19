@@ -2,7 +2,8 @@
 // like it. Vite copies them into the build and gives each its URL. A component that has no image falls back to its name.
 import { constantLabel, skillCardLabel, type SkillCardLike } from '../labels/describe';
 
-const FILES = import.meta.glob<string>('./**/*.{png,jpg,gif}', {
+// only the folders: the full-size board scan at the root isn't for the browser (the table's board is board.jpg)
+const FILES = import.meta.glob<string>('./*/**/*.{png,jpg,gif}', {
   base: '../../../materials-sorted',
   eager: true,
   query: '?url',
@@ -112,6 +113,33 @@ export function shipArt(type: Constant): ArtRef | null {
 
 export function damageArt(enumName: DamageEnum, damage: Constant): ArtRef | null {
   return damage ? art(`${enumName}/${damage}`, constantLabel(enumName, damage), 'damage') : null;
+}
+
+export type TitleName = 'PRESIDENT' | 'ADMIRAL' | 'CAG' | 'INFILTRATING';
+
+const TITLE_LABELS: Record<TitleName, string> = { PRESIDENT: 'President', ADMIRAL: 'Admiral', CAG: 'CAG', INFILTRATING: 'Infiltrating' };
+
+/** A title card, which lies in front of the player who holds it. */
+export function titleArt(title: TitleName): ArtRef | null {
+  return art(`Title/${title}`, TITLE_LABELS[title], 'card');
+}
+
+export type TokenName = 'CURRENT_PLAYER' | 'MIRACLE' | 'NUKE' | 'CENTURION';
+
+const TOKEN_LABELS: Record<TokenName, string> = { CURRENT_PLAYER: 'Current player', MIRACLE: 'Miracle token', NUKE: 'Nuke', CENTURION: 'Centurion' };
+
+export function tokenArt(token: TokenName): ArtRef | null {
+  return art(`Token/${token}`, TOKEN_LABELS[token], 'token', []);
+}
+
+/** The die showing a value, 1 to 8. */
+export function dieArt(value: number | null | undefined): ArtRef | null {
+  return value ? art(`Die/${value}`, `Die: ${value}`, 'token', []) : null;
+}
+
+/** The back of every Skill Card, whatever its color. */
+export function skillBackArt(): ArtRef | null {
+  return art('Back/SKILL', 'Skill Card', 'back', []);
 }
 
 /** The back of a deck's cards. The Skill Card decks have none: their color shows instead. */

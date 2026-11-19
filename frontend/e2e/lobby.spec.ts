@@ -59,7 +59,8 @@ test('players host, join, observe, leave and start a game, and nobody sees anoth
     }
     await asked.page.getByRole('region', { name: 'input' }).getByLabel('selected character').selectOption(character);
     await asked.page.getByRole('region', { name: 'input' }).getByRole('button', { name: 'Send' }).click();
-    await expect(asked.page.getByRole('region', { name: 'players' })).toContainText(characterName(character));
+    // a mat names its character first: the user names, e.g. "Starbuck …", show under it
+    await expect(asked.page.getByRole('region', { name: 'players' }).locator('.who strong', { hasText: characterName(character) })).toHaveCount(1);
   }
 
   // after the starting Skill Cards, each player sees his own cards and only the colors of the others'

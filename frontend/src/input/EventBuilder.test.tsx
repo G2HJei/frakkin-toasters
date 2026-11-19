@@ -65,7 +65,8 @@ describe('the event builder', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Send' }));
 
     expect(onSubmit).toHaveBeenCalledWith({ kind: 'GiveSkillCardToPlayerEvent', targetPlayerNumber: 2, card: null });
-    expect(screen.getByRole('option', { name: 'P2 Laura Roslin' })).toBeInTheDocument();
+    // a player is his character
+    expect(screen.getByRole('option', { name: 'Laura Roslin' })).toBeInTheDocument();
   });
 
   it('fills a nested record, a viper activation', () => {

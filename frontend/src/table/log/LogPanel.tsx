@@ -35,8 +35,10 @@ export function LogPanel() {
   const log = useGameStore((state) => state.log);
   const groups = useMemo(() => groupByTurn(log), [log]);
   return (
-    <section className="panel log" aria-label="log">
-      <h2>Log</h2>
+    <section className="panel cf log" aria-label="log">
+      <div className="tab">
+        <span>Log</span>
+      </div>
       {groups.map((group, index) => (
         <details key={`${group.turn}-${index}`} open={index === groups.length - 1}>
           <summary>{group.turn === 0 ? 'Setup' : `Turn ${group.turn}`}</summary>

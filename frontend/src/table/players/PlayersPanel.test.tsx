@@ -1,6 +1,7 @@
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { PlayersPanel } from './PlayersPanel';
+import { RevealLayer, useReveal } from '../reveal';
 import { Table, tableContext } from '../tableContext';
 import type { GameProjection } from '../../wire/types';
 
@@ -51,6 +52,39 @@ describe('the players', () => {
       'Not Cylon',
     ]);
     expect(own?.querySelector('img.avatar')?.getAttribute('alt')).toBe('William Adama');
+  });
+
+  it('names a player by his character first, and the user in the seat under it', () => {
+    const panel = render(
+      <Table.Provider value={tableContext(game, false, null, { 1: 'atlas', 2: 'kestrel' })}>
+        <PlayersPanel />
+      </Table.Provider>,
+    ).container;
+
+    expect(panel.querySelector('[data-player="2"] .who strong')?.textContent).toBe('Laura Roslin');
+    expect(panel.querySelector('[data-player="2"] .who .user')?.textContent).toBe('kestrel');
+    expect(panel.querySelector('[data-player="2"] .badges')?.textContent).toContain('President');
+  });
+
+  it('lays out a sandbox like a live table, every hand face down, and shows a hand on hover', () => {
+    const sandbox = {
+      ...game,
+      viewer: { kind: 'Sandbox' },
+      players: game.players!.map((player) =>
+        player.number === 2 ? { ...player, skillCards: { ...player.skillCards!, cards: [{ type: 'RED_TAPE', value: 0 }, { type: 'RED_TAPE', value: 0 }, { type: 'EXECUTIVE_ORDER', value: 1 }] } } : player,
+      ),
+    } as unknown as GameProjection;
+    const panel = render(
+      <Table.Provider value={tableContext(sandbox, true, null)}>
+        <PlayersPanel />
+        <RevealLayer />
+      </Table.Provider>,
+    ).container;
+
+    expect(panel.querySelectorAll('.tile:not(.back)')).toHaveLength(0);
+    fireEvent.mouseEnter(panel.querySelector('[data-reveal="hand-2"]')!);
+    expect([...document.querySelectorAll('.reveal-pop ol.pile li')].map((card) => card.textContent)).toEqual(['Red Tape 0', 'Red Tape 0', 'Executive Order 1']);
+    useReveal.getState().hide();
   });
 
   it('shows only the backs of another player\'s cards: a back per Skill Card color, and the backs of his piles', () => {

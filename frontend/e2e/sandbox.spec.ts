@@ -34,7 +34,9 @@ test('a seeded sandbox is played through a turn, undone, exported and imported',
   await page.getByLabel('setup').selectOption('PutCrisisCardOnTopEvent');
   await page.getByRole('region', { name: 'sandbox' }).getByLabel('card').selectOption('RIOTS_NO_JUMP');
   await page.getByRole('button', { name: 'Inject' }).click();
-  await expect(page.locator('tr[data-deck="CRISIS"] ol.pile li').first()).toHaveText('Riots No Jump');
+  // the sandbox shows the Crisis deck's draw pile on hover, top first
+  await page.locator('[data-reveal="deck-CRISIS"]').hover();
+  await expect(page.locator('.reveal-pop ol.pile li').first()).toHaveText('Riots No Jump');
   await input(page).getByRole('button', { name: 'Take an action' }).click();
   await input(page).getByLabel('skill card color').selectOption('ENGINEERING');
   await send(page);
@@ -61,7 +63,7 @@ test('a seeded sandbox is played through a turn, undone, exported and imported',
   await expect(page).not.toHaveURL(/sandbox\/new/);
   await expect(page.getByRole('region', { name: 'turn' }).getByRole('heading')).toHaveText('Turn 2 · Receive Skills');
   await expect(resource(page, 'Food')).toHaveText('7');
-  await expect(input(page).getByRole('heading')).toHaveText('P2 Laura Roslin decides');
+  await expect(input(page).getByRole('heading')).toHaveText('Laura Roslin decides');
 });
 
 function input(page: Page) {

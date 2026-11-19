@@ -4,12 +4,16 @@ import {
   CARD_ENUMS,
   characterArt,
   deckBackArt,
+  dieArt,
   enumArt,
   locationArt,
   resourceArt,
   skillCardArt,
+  skillBackArt,
   skillCheckArt,
   skillTypeArt,
+  titleArt,
+  tokenArt,
   trackArt,
 } from './images';
 import { isSpace } from '../table/board/layout';
@@ -63,6 +67,15 @@ describe('the images', () => {
           return enumValues('Location').includes(name.replace(/_\d$/, ''));
         case 'DeckId':
           return enumValues('DeckId').includes(name);
+        // the components no enum names: the titles, the tokens, the die and the Skill Card back
+        case 'Title':
+          return ['PRESIDENT', 'ADMIRAL', 'CAG', 'INFILTRATING'].includes(name);
+        case 'Token':
+          return ['CURRENT_PLAYER', 'MIRACLE', 'NUKE', 'CENTURION'].includes(name);
+        case 'Die':
+          return /^[1-8]$/.test(name);
+        case 'Back':
+          return name === 'SKILL';
         default:
           return false;
       }
@@ -103,6 +116,15 @@ describe('the images', () => {
     expect(resourceArt('MORALE', 15)?.key).toBe('Resource/MORALE_15');
     expect(resourceArt('MORALE', 16)).toBeNull();
     expect(trackArt('JumpPreparation', 'MINUS_3')?.key).toBe('JumpPreparation/MINUS_3');
+  });
+
+  it('has the titles, the tokens, every face of the die and the Skill Card back, and leaves the full board scan out', () => {
+    expect((['PRESIDENT', 'ADMIRAL', 'CAG', 'INFILTRATING'] as const).filter((title) => titleArt(title) === null)).toEqual([]);
+    expect((['CURRENT_PLAYER', 'MIRACLE', 'NUKE', 'CENTURION'] as const).filter((token) => tokenArt(token) === null)).toEqual([]);
+    expect([1, 2, 3, 4, 5, 6, 7, 8].filter((value) => dieArt(value) === null)).toEqual([]);
+    expect(dieArt(null)).toBeNull();
+    expect(skillBackArt()?.key).toBe('Back/SKILL');
+    expect(artPaths()).not.toContain('BOARD');
   });
 
   it('shows the back of a deck, the Loyalty back for the "You Are Not a Cylon" cards, and none for a Skill Card deck', () => {
