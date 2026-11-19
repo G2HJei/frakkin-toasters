@@ -1,0 +1,688 @@
+{
+ "image": "board-classic.jpg",
+ "note": "pixels of the image; boxes are [x, y, width, height]; location boxes end with their BoardArea; locationTitles are the panels the names are printed in; distanceTraveled is where destinations tuck under the objective (nothing is printed there); launch.* are the printed launch strips; cylonSectors is the centre and slope of the Cylon fleet board's sector lines; dials have no printed pointer: \"printed\" is the value at the top of the wheel",
+ "width": 2003,
+ "height": 2317,
+ "locations": {
+  "CAPRICA": [
+   196,
+   413,
+   168,
+   237,
+   "cylon"
+  ],
+  "CYLON_FLEET": [
+   383,
+   413,
+   171,
+   237,
+   "cylon"
+  ],
+  "HUMAN_FLEET": [
+   572,
+   416,
+   171,
+   237,
+   "cylon"
+  ],
+  "RESURRECTION_SHIP": [
+   776,
+   411,
+   168,
+   237,
+   "cylon"
+  ],
+  "BASESTAR_BRIDGE": [
+   979,
+   413,
+   168,
+   237,
+   "cylonFleet"
+  ],
+  "QUORUM_CHAMBER": [
+   110,
+   866,
+   171,
+   234,
+   "colonialOne"
+  ],
+  "PRESS_ROOM": [
+   313,
+   866,
+   172,
+   234,
+   "colonialOne"
+  ],
+  "PRESIDENTS_OFFICE": [
+   518,
+   866,
+   177,
+   234,
+   "colonialOne"
+  ],
+  "ADMINISTRATION": [
+   722,
+   866,
+   169,
+   234,
+   "colonialOne"
+  ],
+  "PEGASUS_CIC": [
+   1074,
+   884,
+   172,
+   243,
+   "pegasus"
+  ],
+  "AIRLOCK": [
+   1278,
+   956,
+   172,
+   237,
+   "pegasus"
+  ],
+  "MAIN_BATTERIES": [
+   1510,
+   956,
+   171,
+   237,
+   "pegasus"
+  ],
+  "ENGINE_ROOM": [
+   1713,
+   890,
+   172,
+   237,
+   "pegasus"
+  ],
+  "FTL_CONTROL": [
+   267,
+   1728,
+   177,
+   237,
+   "galactica"
+  ],
+  "WEAPONS_CONTROL": [
+   480,
+   1587,
+   172,
+   238,
+   "galactica"
+  ],
+  "COMMUNICATIONS": [
+   748,
+   1587,
+   177,
+   238,
+   "galactica"
+  ],
+  "RESEARCH_LAB": [
+   1025,
+   1587,
+   171,
+   238,
+   "galactica"
+  ],
+  "ARMORY": [
+   1247,
+   1728,
+   177,
+   237,
+   "galactica"
+  ],
+  "COMMAND": [
+   480,
+   1872,
+   172,
+   237,
+   "galactica"
+  ],
+  "ADMIRALS_QUARTERS": [
+   753,
+   1872,
+   180,
+   237,
+   "galactica"
+  ],
+  "HANGAR_DECK": [
+   1019,
+   1872,
+   183,
+   237,
+   "galactica"
+  ],
+  "SICKBAY": [
+   1525,
+   1580,
+   177,
+   237,
+   "galactica"
+  ],
+  "BRIG": [
+   1525,
+   1877,
+   171,
+   248,
+   "galactica"
+  ]
+ },
+ "spaceAreas": {
+  "CYLON_FLEET_SPACE_5_6": [
+   1241,
+   168,
+   330,
+   60,
+   "cylonFleetSpace"
+  ],
+  "CYLON_FLEET_SPACE_3": [
+   1587,
+   168,
+   330,
+   60,
+   "cylonFleetSpace"
+  ],
+  "CYLON_FLEET_SPACE_7_8": [
+   1233,
+   282,
+   116,
+   178,
+   "cylonFleetSpace"
+  ],
+  "CYLON_FLEET_SPACE_1": [
+   1809,
+   282,
+   116,
+   178,
+   "cylonFleetSpace"
+  ],
+  "CYLON_FLEET_SPACE_4": [
+   1241,
+   513,
+   330,
+   60,
+   "cylonFleetSpace"
+  ],
+  "CYLON_FLEET_SPACE_2": [
+   1587,
+   513,
+   330,
+   60,
+   "cylonFleetSpace"
+  ],
+  "GALACTICA_SPACE_10_OCLOCK": [
+   178,
+   1439,
+   810,
+   82,
+   "galacticaSpace"
+  ],
+  "GALACTICA_SPACE_12_OCLOCK": [
+   1016,
+   1386,
+   810,
+   135,
+   "galacticaSpace"
+  ],
+  "GALACTICA_SPACE_8_OCLOCK": [
+   14,
+   1507,
+   156,
+   677,
+   "galacticaSpace"
+  ],
+  "GALACTICA_SPACE_2_OCLOCK": [
+   1833,
+   1507,
+   156,
+   677,
+   "galacticaSpace"
+  ],
+  "GALACTICA_SPACE_6_OCLOCK": [
+   178,
+   2170,
+   810,
+   133,
+   "galacticaSpace"
+  ],
+  "GALACTICA_SPACE_4_OCLOCK": [
+   1016,
+   2170,
+   810,
+   133,
+   "galacticaSpace"
+  ]
+ },
+ "tracks": {
+  "pursuit": {
+   "START": {
+    "x": 1400,
+    "y": 94
+   },
+   "ONE_CIVILIAN_SHIP": {
+    "x": 1482,
+    "y": 94
+   },
+   "POSITION_2": {
+    "x": 1564,
+    "y": 94
+   },
+   "TWO_CIVILIAN_SHIPS": {
+    "x": 1646,
+    "y": 94
+   },
+   "AUTO_ATTACK": {
+    "x": 1743,
+    "y": 94
+   }
+  },
+  "jump": {
+   "START": {
+    "x": 288,
+    "y": 1336
+   },
+   "POSITION_1": {
+    "x": 382,
+    "y": 1336
+   },
+   "POSITION_2": {
+    "x": 474,
+    "y": 1336
+   },
+   "MINUS_3": {
+    "x": 568,
+    "y": 1336
+   },
+   "MINUS_1": {
+    "x": 660,
+    "y": 1336
+   }
+  },
+  "boarding": {
+   "START": {
+    "x": 1242,
+    "y": 2058
+   },
+   "POSITION_1": {
+    "x": 1302,
+    "y": 2058
+   },
+   "POSITION_2": {
+    "x": 1362,
+    "y": 2058
+   },
+   "POSITION_3": {
+    "x": 1422,
+    "y": 2058
+   },
+   "HUMANS_LOSE": {
+    "x": 1482,
+    "y": 2058
+   }
+  }
+ },
+ "dials": {
+  "fuel": {
+   "x": 1217.0,
+   "y": 1278.3,
+   "r": 64,
+   "printed": 8
+  },
+  "food": {
+   "x": 1377.0,
+   "y": 1278.3,
+   "r": 64,
+   "printed": 8
+  },
+  "morale": {
+   "x": 1537.0,
+   "y": 1278.3,
+   "r": 64,
+   "printed": 10
+  },
+  "population": {
+   "x": 1697.0,
+   "y": 1278.3,
+   "r": 64,
+   "printed": 12
+  }
+ },
+ "slots": {
+  "objective": [
+   24,
+   58,
+   140,
+   217
+  ],
+  "distanceTraveled": {
+   "x": 24,
+   "y": 275,
+   "width": 140,
+   "strip": 36,
+   "count": 8
+  },
+  "deck.destination": [
+   208,
+   61,
+   84,
+   130
+  ],
+  "deck.crisis": [
+   349,
+   61,
+   84,
+   130
+  ],
+  "deck.superCrisis": [
+   490,
+   61,
+   84,
+   130
+  ],
+  "deck.quorum": [
+   630,
+   61,
+   84,
+   130
+  ],
+  "deck.mutiny": [
+   771,
+   61,
+   84,
+   130
+  ],
+  "deck.loyalty": [
+   912,
+   61,
+   84,
+   130
+  ],
+  "deck.motive": [
+   1053,
+   61,
+   84,
+   130
+  ],
+  "deck.destiny": [
+   208,
+   230,
+   84,
+   130
+  ],
+  "deck.POLITICS": [
+   349,
+   230,
+   84,
+   130
+  ],
+  "deck.LEADERSHIP": [
+   490,
+   230,
+   84,
+   130
+  ],
+  "deck.TACTICS": [
+   630,
+   230,
+   84,
+   130
+  ],
+  "deck.PILOTING": [
+   771,
+   230,
+   84,
+   130
+  ],
+  "deck.ENGINEERING": [
+   912,
+   230,
+   84,
+   130
+  ],
+  "deck.TREACHERY": [
+   1053,
+   230,
+   84,
+   130
+  ],
+  "cylonReserves": [
+   1344,
+   613,
+   471,
+   103
+  ],
+  "damagedVipers": [
+   92,
+   1145,
+   253,
+   103
+  ],
+  "shipReserves": [
+   367,
+   1145,
+   556,
+   103
+  ],
+  "launch.GALACTICA_SPACE_6_OCLOCK": [
+   909,
+   2162,
+   34,
+   130
+  ],
+  "launch.GALACTICA_SPACE_4_OCLOCK": [
+   1121,
+   2162,
+   34,
+   130
+  ],
+  "boardingParty": [
+   1206,
+   1973,
+   312,
+   147
+  ]
+ },
+ "cells": {},
+ "locationTitles": {
+  "FTL_CONTROL": [
+   273,
+   1852,
+   165,
+   110
+  ],
+  "WEAPONS_CONTROL": [
+   486,
+   1710,
+   160,
+   111
+  ],
+  "COMMUNICATIONS": [
+   754,
+   1710,
+   165,
+   111
+  ],
+  "RESEARCH_LAB": [
+   1031,
+   1710,
+   159,
+   111
+  ],
+  "ARMORY": [
+   1253,
+   1852,
+   165,
+   110
+  ],
+  "COMMAND": [
+   486,
+   1993,
+   160,
+   111
+  ],
+  "ADMIRALS_QUARTERS": [
+   759,
+   1994,
+   168,
+   110
+  ],
+  "HANGAR_DECK": [
+   1025,
+   1994,
+   171,
+   110
+  ],
+  "SICKBAY": [
+   1531,
+   1702,
+   165,
+   112
+  ],
+  "BRIG": [
+   1531,
+   2000,
+   159,
+   112
+  ],
+  "QUORUM_CHAMBER": [
+   116,
+   981,
+   159,
+   112
+  ],
+  "PRESS_ROOM": [
+   319,
+   981,
+   160,
+   112
+  ],
+  "PRESIDENTS_OFFICE": [
+   524,
+   981,
+   165,
+   112
+  ],
+  "ADMINISTRATION": [
+   728,
+   981,
+   157,
+   112
+  ],
+  "PEGASUS_CIC": [
+   1080,
+   1011,
+   160,
+   110
+  ],
+  "AIRLOCK": [
+   1284,
+   1076,
+   160,
+   109
+  ],
+  "MAIN_BATTERIES": [
+   1516,
+   1076,
+   159,
+   109
+  ],
+  "ENGINE_ROOM": [
+   1719,
+   1012,
+   160,
+   110
+  ],
+  "CAPRICA": [
+   202,
+   531,
+   156,
+   116
+  ],
+  "CYLON_FLEET": [
+   389,
+   531,
+   159,
+   116
+  ],
+  "HUMAN_FLEET": [
+   578,
+   532,
+   159,
+   113
+  ],
+  "RESURRECTION_SHIP": [
+   782,
+   532,
+   156,
+   116
+  ],
+  "BASESTAR_BRIDGE": [
+   985,
+   531,
+   156,
+   116
+  ]
+ },
+ "areaNumbers": {
+  "CYLON_FLEET_SPACE_5_6": [
+   1210,
+   186
+  ],
+  "CYLON_FLEET_SPACE_3": [
+   1948,
+   186
+  ],
+  "CYLON_FLEET_SPACE_7_8": [
+   1206,
+   371
+  ],
+  "CYLON_FLEET_SPACE_1": [
+   1952,
+   371
+  ],
+  "CYLON_FLEET_SPACE_4": [
+   1210,
+   555
+  ],
+  "CYLON_FLEET_SPACE_2": [
+   1948,
+   555
+  ]
+ },
+ "cylonSectors": {
+  "centre": [
+   1579,
+   371
+  ],
+  "slope": 0.4043
+ },
+ "titleFont": {
+  "family": "Copperplate Gothic Bold",
+  "size": 15
+ },
+ "quadrants": {
+  "topLeft": [
+   24,
+   24,
+   1151,
+   732
+  ],
+  "cylonFleet": [
+   1179,
+   24,
+   1979,
+   726
+  ],
+  "ships": [
+   0,
+   742,
+   2003,
+   1431
+  ],
+  "galactica": [
+   0,
+   1378,
+   2003,
+   2317
+  ]
+ }
+}
