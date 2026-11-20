@@ -325,6 +325,9 @@ describe('the board', () => {
 
     fireEvent.mouseEnter(board.querySelector('[data-reveal="discard-CRISIS"]')!);
     expect([...document.querySelectorAll('.reveal-pop ol.pile li')].map((card) => card.textContent)).toEqual(['Water Sabotaged', 'Riots Jump']);
+    // the cards are large enough to read, so they have no preview of their own
+    fireEvent.mouseEnter(document.querySelector('.reveal-pop ol.pile.cards li .art')!);
+    expect(usePreview.getState().art).toBeNull();
 
     // the deck shows its discard pile too, and nothing of the draw pile
     fireEvent.mouseEnter(board.querySelector('[data-reveal="deck-CRISIS"]')!);

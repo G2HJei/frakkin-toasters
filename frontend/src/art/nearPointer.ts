@@ -20,6 +20,11 @@ function along(pointer: number, size: number, room: number): number {
   return Math.max(MARGIN, Math.min(pointer + GAP, room - MARGIN - size));
 }
 
+/** The widest a popover can be and still go beside the point, after or before it, without covering it. */
+export function roomBeside(point: Point): number {
+  return Math.max(window.innerWidth - point.x, point.x) - GAP - MARGIN;
+}
+
 export function placeNear(element: HTMLElement, point: Point) {
   // measured at the window's corner, where nothing squeezes it
   element.style.left = '0px';

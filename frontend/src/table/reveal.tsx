@@ -1,11 +1,12 @@
 // What a pile holds, shown on hover: a deck's discard pile for everyone, and in a sandbox what the players at the table
 // can't see (a hand, a draw pile, the face-down cards of a skill check). The table looks the same in a sandbox and in a
-// live game; only hovering shows more. The popover lives in one fixed layer, so no panel clips it.
+// live game; only hovering shows more. The popover lives in one fixed layer, so no panel clips it, and shows the cards
+// as large as their images.
 import { useRef, type ReactNode } from 'react';
 import { create } from 'zustand';
 import { ArtImg } from '../art/Art';
 import type { ArtRef } from '../art/images';
-import { usePlaceNear, type Point } from '../art/nearPointer';
+import { roomBeside, usePlaceNear, type Point } from '../art/nearPointer';
 import { useTable } from './tableContext';
 
 export interface RevealCard {
@@ -50,7 +51,7 @@ export const useReveal = create<RevealState>((set, get) => ({
     }
     set({ open, closing: null });
   },
-  // a moment to move the pointer onto the popover, to hover its cards
+  // a moment to move the pointer onto the popover, to scroll it
   hideSoon: (id) => {
     if (get().open?.id !== id) {
       return;
@@ -94,9 +95,21 @@ export function useRevealHandlers(id: string, title: string, sections: RevealSec
   };
 }
 
-const WIDTH = 460;
+// a Crisis Card with the popover's padding, border and scrollbar
+const ONE_CARD = 330;
 
-/** The one popover of the table, next to the pointer that opened it. */
+// cards in rows, icons or names in a list
+function pileClass(section: RevealSection): string {
+  if (section.cards.some((card) => card.icon)) {
+    return 'pile icons';
+  }
+  return section.cards.some((card) => card.art) ? 'pile cards' : 'pile list';
+}
+
+/**
+ * The one popover of the table, next to the pointer that opened it. The cards are as large as their images, to read
+ * them without a preview of their own, and the popover scrolls when they don't fit in the window.
+ */
 export function RevealLayer() {
   const open = useReveal((state) => state.open);
   const ref = useRef<HTMLDivElement>(null);
@@ -104,36 +117,39 @@ export function RevealLayer() {
   if (!open) {
     return null;
   }
-  // a list of icons is as wide as its names, cards take the full width
-  const width = open.sections.every((section) => section.cards.every((card) => card.icon)) ? undefined : WIDTH;
+  // beside the pointer, with fewer cards in a row, so it doesn't cover the pile; a window too narrow for even one card
+  // there leaves it the window's width
+  const room = roomBeside(open.pointer);
   return (
     <div
       ref={ref}
       className="reveal-pop"
       role="tooltip"
-      style={{ width }}
+      style={{ maxWidth: room >= ONE_CARD ? room : undefined }}
       onMouseEnter={() => useReveal.getState().keep()}
       onMouseLeave={() => useReveal.getState().hide()}
     >
       <div className="reveal-title">{open.title}</div>
-      {open.sections.map((section) => (
-        <div key={section.title} className={section.hidden ? 'reveal-section hidden-info' : 'reveal-section'}>
-          {section.title && (
-            <div className="reveal-section-title">
-              {section.title} · {section.cards.length}
-              {section.hidden && <span className="sandbox-only">hidden at the table</span>}
-            </div>
-          )}
-          <ol className={section.cards.some((card) => card.icon) ? 'pile icons' : 'pile'}>
-            {section.cards.map((card, index) => (
-              <li key={index}>
-                {card.icon ?? (card.art && <ArtImg art={card.art} />)}
-                <span>{card.label}</span>
-              </li>
-            ))}
-          </ol>
-        </div>
-      ))}
+      <div className="reveal-body">
+        {open.sections.map((section) => (
+          <div key={section.title} className={section.hidden ? 'reveal-section hidden-info' : 'reveal-section'}>
+            {section.title && (
+              <div className="reveal-section-title">
+                {section.title} · {section.cards.length}
+                {section.hidden && <span className="sandbox-only">hidden at the table</span>}
+              </div>
+            )}
+            <ol className={pileClass(section)}>
+              {section.cards.map((card, index) => (
+                <li key={index}>
+                  {card.icon ?? (card.art && <ArtImg art={card.art} preview={false} />)}
+                  <span>{card.label}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

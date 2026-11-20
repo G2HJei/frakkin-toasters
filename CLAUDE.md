@@ -696,7 +696,9 @@ REST (the lobby lists poll), Zustand for the game. See `frontend-plan.md`.
   are in `src/input/boardMoves.ts`: a move by clicking a location (asking for a discard when it leaves its ship) and the
   "Act" button on the asked player's location. Each builds the same event, or picks the same option, as the builder; a
   test checks it. The builder stays for everything else.
-- Hover (`src/table/reveal.tsx`): a pile shows what it holds in one fixed popover (`RevealLayer`). A face-up discard
+- Hover (`src/table/reveal.tsx`): a pile shows what it holds in one fixed popover (`RevealLayer`), its cards as large as
+  their images (no preview of their own) in rows of up to 860px, and scrolls when they don't fit the window. The
+  preview of a single image (`ArtPreview`) shows it as large as it is too, scaled down only by a smaller window. A face-up discard
   pile shows to everyone. A sandbox looks like a live table, every hand and deck face down, and shows on hover what the
   players can't see (`hidden` sections: hands, Loyalty and other player cards, draw piles, face-down discards, a skill
   check's cards).

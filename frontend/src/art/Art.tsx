@@ -57,9 +57,11 @@ export function ArtPreview() {
   return (
     <div ref={ref} className={`art-preview preview-${art.shape}${extra ? ' with-extra' : ''}`} aria-hidden="true">
       <div className="art-preview-art">
-        {art.preview.map((url) => (
-          <img key={url} src={url} alt="" />
-        ))}
+        <div className="art-preview-images">
+          {art.preview.map((url) => (
+            <img key={url} src={url} alt="" />
+          ))}
+        </div>
         <span className="art-preview-label">{art.label}</span>
       </div>
       {extra && <div className="art-preview-extra">{extra}</div>}

@@ -677,7 +677,7 @@ details > summary {
   opacity: 0.7;
 }
 
-/* next to the pointer (nearPointer.ts), over the pile popover whose cards it shows large */
+/* next to the pointer (nearPointer.ts), over the pile popover */
 .art-preview {
   position: fixed;
   left: 0;
@@ -701,27 +701,24 @@ details > summary {
   gap: 0.3rem;
 }
 
-.art-preview-art img {
-  display: block;
-  max-height: 62vh;
-  max-width: min(36rem, 45vw);
-  border-radius: 8px;
-}
-
-.art-preview.preview-location .art-preview-art img {
-  max-height: 30vh;
-}
-
-/* a character sheet (the preview of a standee, a portrait or a pilot's token) at its full height, so its text reads:
-   only a window too small for it scales it down */
-.art-preview.preview-token .art-preview-art img,
-.art-preview.preview-pilot .art-preview-art img {
-  max-height: calc(100vh - 4rem);
+/* the images as large as they are, so their text reads (the parts of the Basestar Bridge side by side): it follows the
+   pointer and can't scroll, so only a window too small for them scales them down */
+.art-preview-images {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
   max-width: calc(100vw - 2rem);
 }
 
+.art-preview-images img {
+  display: block;
+  min-width: 0;
+  max-height: calc(100vh - 4rem);
+  border-radius: 8px;
+}
+
 /* with a player's mat beside it */
-.art-preview.with-extra .art-preview-art img {
+.art-preview.with-extra .art-preview-images {
   max-width: calc(100vw - 2rem - 360px);
 }
 
@@ -1594,15 +1591,18 @@ details > summary {
   color: var(--danger);
 }
 
-/* the popover of a pile: what a deck or a hand holds */
+/* the popover of a pile: what a deck or a hand holds, the cards as large as their images. As large as the window allows
+   (nearPointer.ts keeps 8px from its edges), and the cards scroll under the title */
 
 .reveal-pop {
   position: fixed;
   left: 0;
   top: 0;
   z-index: 50;
-  max-height: 60vh;
-  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 16px);
+  max-width: calc(100vw - 16px);
   padding: 12px 14px;
   background: rgba(9, 18, 34, 0.97);
   border: 1px solid rgba(143, 208, 255, 0.55);
@@ -1618,6 +1618,12 @@ details > summary {
   text-transform: uppercase;
   color: var(--dradis-glow);
   margin-bottom: 8px;
+}
+
+.reveal-body {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
 }
 
 .reveal-section + .reveal-section {
@@ -1647,7 +1653,6 @@ details > summary {
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
   gap: 6px;
 }
 
@@ -1659,15 +1664,28 @@ details > summary {
   color: var(--steel-300);
 }
 
+/* rows of at most 860px: 3 Crisis Cards, 4 Skill Cards. A card's name wraps under its image */
+.reveal-pop .pile.cards {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 10px;
+  max-width: 860px;
+}
+
+.reveal-pop .pile.cards li {
+  width: min-content;
+  font-size: 12px;
+}
+
 .reveal-pop .pile .art {
-  width: 100%;
+  width: auto;
   height: auto;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
 /* a list of icons with their names, e.g. the steps of a turn */
 .reveal-pop .pile.icons {
-  grid-template-columns: none;
   gap: 7px;
 }
 
