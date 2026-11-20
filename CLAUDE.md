@@ -671,8 +671,8 @@ REST (the lobby lists poll), Zustand for the game. See `frontend-plan.md`.
 - The table (`TablePage`): no bar over it, the board in the middle, as high as the screen (`.table-main` is a size
   container, the board's width follows its height), and a column on each side that scrolls on its own. On the left the
   game and the turn (`TurnPanel`, its tab names the game, with the connection beside it while it isn't open, and the
-  skill check under the turn's Crisis Card), the decision (`InputPanel`) and its prompts and the sandbox's tools, and under them the log, which takes the height they leave (at least 260px) and scrolls inside its body. On the
-  right the players' mats (`PlayersPanel`, the nukes beside the Admiral). Under 1100px the board goes across the width
+  skill check under the turn's Crisis Card), the decision (`InputPanel`) and its prompts, and under them the log, which takes the height they leave (at least 260px) and scrolls inside its body. On the
+  right the sandbox's tools in a sandbox, above the players' mats (`PlayersPanel`, the nukes beside the Admiral). Under 1100px the board goes across the width
   and the panels under it. The styles are the "table" section of `styles.css`: the board's palette, cut corners
   (`.cf`, `--chamfer`) and printed-label tabs. A player is named by his character everywhere (`playerName`), "Player n"
   before he has one; the user in the seat shows only on his mat (`userName`, from the room's seats).

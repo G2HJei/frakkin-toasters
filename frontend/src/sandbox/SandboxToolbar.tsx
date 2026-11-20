@@ -23,7 +23,7 @@ export function SandboxToolbar({ gameId, seed, onUndo, onInject }: SandboxToolba
   const [setup, setSetup] = useState<string>(schema.lists.sandboxEvents[0] ?? '');
 
   return (
-    <section className="panel sandbox" aria-label="sandbox">
+    <section className="panel cf sandbox" aria-label="sandbox">
       <div className="toolbar">
         <button type="button" onClick={onUndo}>
           Undo

@@ -22,8 +22,9 @@ import { TopNav } from './TopNav';
 
 /**
  * The table of a game, in a tab of its own and with no bar over it: its socket, the board as high as the screen, and
- * the panels on its sides: on the left the game and the turn with its skill check, the input, and the sandbox's tools in
- * a sandbox, with the log under them, and the players on the right. The room before the game starts keeps the top bar.
+ * the panels on its sides: on the left the game and the turn with its skill check and the input, with the log under
+ * them, and on the right the sandbox's tools in a sandbox, above the players. The room before the game starts keeps the
+ * top bar.
  */
 export function TablePage() {
   const { id = '' } = useParams();
@@ -115,14 +116,6 @@ function LiveTable({ gameId, name, seed, userNames }: { gameId: string; name: st
                   </div>
                 </section>
               )}
-              {sandbox && (
-                <SandboxToolbar
-                  gameId={gameId}
-                  seed={seed}
-                  onUndo={() => send(undoMessage(token))}
-                  onInject={(event: EventValue) => send(injectMessage(token, event))}
-                />
-              )}
               {/* the log takes what the panels above leave */}
               <LogPanel />
             </div>
@@ -142,6 +135,14 @@ function LiveTable({ gameId, name, seed, userNames }: { gameId: string; name: st
               />
             </div>
             <div className="table-side right">
+              {sandbox && (
+                <SandboxToolbar
+                  gameId={gameId}
+                  seed={seed}
+                  onUndo={() => send(undoMessage(token))}
+                  onInject={(event: EventValue) => send(injectMessage(token, event))}
+                />
+              )}
               <PlayersPanel />
             </div>
           </div>
