@@ -136,5 +136,8 @@ describe('the players', () => {
     ]);
     // the President's Quorum hand lies with her, face down
     expect(other?.querySelector('.tile.back [data-art="DeckId/QUORUM"]')).not.toBeNull();
+    // a back has no preview, which would cover the pile's popover
+    fireEvent.mouseEnter(other!.querySelector('[data-art="DeckId/QUORUM"]')!);
+    expect(usePreview.getState().art).toBeNull();
   });
 });

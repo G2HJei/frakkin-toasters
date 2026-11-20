@@ -131,5 +131,8 @@ describe('the images', () => {
     expect(deckBackArt('CRISIS')?.key).toBe('DeckId/CRISIS');
     expect(deckBackArt('LOYALTY_NOT_CYLON')?.key).toBe('DeckId/LOYALTY');
     expect(deckBackArt('POLITICS')).toBeNull();
+    // nothing to read on a back, so no preview
+    expect(deckBackArt('MUTINY')?.preview).toEqual([]);
+    expect(skillBackArt()?.preview).toEqual([]);
   });
 });

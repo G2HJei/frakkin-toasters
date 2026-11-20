@@ -142,11 +142,14 @@ export function skillBackArt(): ArtRef | null {
   return art('Back/SKILL', 'Skill Card', 'back', []);
 }
 
-/** The back of a deck's cards. The Skill Card decks have none: their color shows instead. */
+/**
+ * The back of a deck's cards. The Skill Card decks have none: their color shows instead. A back has nothing to read, so
+ * it has no preview, which would only cover the pile's popover.
+ */
 export function deckBackArt(deck: Constant): ArtRef | null {
   // the "You Are Not a Cylon" cards are Loyalty Cards, with their back
   const back = deck === 'LOYALTY_NOT_CYLON' ? 'LOYALTY' : deck;
-  return back ? art(`DeckId/${back}`, constantLabel('DeckId', deck), 'back') : null;
+  return back ? art(`DeckId/${back}`, constantLabel('DeckId', deck), 'back', []) : null;
 }
 
 /** A resource dial set to a value, 0 to 15. */
