@@ -748,7 +748,7 @@ details > summary {
   font-size: 0.85rem;
 }
 
-/* the table: board.jpg with the components on it, and the Wardroom around it ------------------------------------ */
+/* the table: board-classic.jpg with the components on it, as high as the screen, and the panels on its sides ----- */
 
 /* the palette, sampled from the board's artwork */
 .table-page {
@@ -764,7 +764,7 @@ details > summary {
   --amber: #f2b441;
   --display: Bahnschrift, 'DIN Alternate', 'Roboto Condensed', 'Arial Narrow', sans-serif;
   --c: 14px;
-  padding: 0 0 2rem;
+  padding: 0;
   background: var(--space-950);
   color: var(--steel-100);
 }
@@ -849,15 +849,83 @@ details > summary {
   padding: 1rem 18px;
 }
 
-.table-page > .panel.sandbox {
-  margin: 10px 14px;
+/* the screen under the top bars: the panels on the left, the board, the panels on the right, each side scrolling on
+   its own */
+
+#root:has(> .table-page) {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+
+.table-page {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.table-main {
+  flex: 1;
+  min-height: 0;
+  container-type: size;
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) auto minmax(0, 2fr);
+  grid-template-rows: minmax(0, 1fr);
+  gap: 12px;
+  padding: 0 12px;
+}
+
+.table-side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 12px 0 16px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--steel-500) transparent;
 }
 
 /* the board */
 
-.table-page > .board {
+.table-main > .board {
   position: relative;
   line-height: 0;
+  align-self: center;
+  /* as high as the screen, as long as the sides keep 340px and 300px */
+  width: min(calc(100cqh * 2003 / 2317), calc(100cqw - 676px));
+}
+
+/* a narrow screen: the board across the width, the panels under it */
+@media (max-width: 1100px) {
+  #root:has(> .table-page) {
+    display: block;
+    height: auto;
+  }
+
+  .table-page {
+    display: block;
+  }
+
+  .table-main {
+    container-type: normal;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 12px;
+  }
+
+  .table-main > .board {
+    order: -1;
+    width: min(100%, 900px);
+    align-self: center;
+  }
+
+  .table-side {
+    overflow: visible;
+    padding: 12px 0 0;
+  }
 }
 
 .board-svg {
@@ -930,6 +998,14 @@ details > summary {
 .board-svg .marker-pursuit rect {
   stroke: #ffb199;
   filter: drop-shadow(0 0 12px rgba(255, 90, 60, 0.95));
+}
+
+/* the printed wheels have no pointer: the value at the top is the one that counts */
+.board-svg .dial-pointer {
+  fill: var(--alert);
+  stroke: #fff;
+  stroke-width: 2;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.8));
 }
 
 .board-svg .hotspot {
@@ -1014,38 +1090,7 @@ details > summary {
   letter-spacing: 0.1em;
 }
 
-/* the Wardroom: the turn and the log, the players, the decision and the skill check */
-
-.wardroom {
-  display: grid;
-  grid-template-columns: minmax(320px, 440px) minmax(0, 1fr) minmax(340px, 480px);
-  gap: 14px;
-  padding: 14px;
-  align-items: start;
-}
-
-.wardroom .stack {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  min-width: 0;
-}
-
-@media (max-width: 1200px) {
-  .wardroom {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .wardroom > .players {
-    grid-column: 1 / -1;
-  }
-}
-
-@media (max-width: 800px) {
-  .wardroom {
-    grid-template-columns: 1fr;
-  }
-}
+/* the panels */
 
 .table-page .panel {
   margin: 0;
@@ -1253,8 +1298,38 @@ details > summary {
   color: var(--steel-300);
 }
 
+/* the log takes what the panels above it leave in the left column, at least 260px, and scrolls inside its body */
+.table-page .log {
+  display: flex;
+  flex-direction: column;
+}
+
+.table-side.left > .log {
+  flex: 1 0 260px;
+  min-height: 260px;
+}
+
+.table-page .log-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--steel-500) transparent;
+}
+
 .table-page .log .entries {
-  max-height: 34rem;
+  max-height: none;
+  overflow: visible;
+}
+
+@media (max-width: 1100px) {
+  .table-side.left > .log {
+    flex: none;
+  }
+
+  .table-page .log-body {
+    max-height: 34rem;
+  }
 }
 
 .table-page .log .entries > li {
@@ -1270,7 +1345,7 @@ details > summary {
 
 .players .mats {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
   gap: 12px;
 }
 

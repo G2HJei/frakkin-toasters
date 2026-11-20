@@ -19,7 +19,10 @@ import { SkillCheckPanel, TurnPanel } from '../table/turn/TurnPanel';
 import type { ClientMessage } from '../wire/types';
 import { RoomPage } from './RoomPage';
 
-/** The table of a game: its socket, the board, the panels around it, the input, and the sandbox's tools in a sandbox. */
+/**
+ * The table of a game: its socket, the board as high as the screen, and the panels on its sides: on the left the turn,
+ * the input, the skill check and the sandbox's tools in a sandbox, with the log under them, and the players on the right.
+ */
 export function TablePage() {
   const { id = '' } = useParams();
   const room = useRoom(id);
@@ -88,15 +91,37 @@ function LiveTable({ gameId, name, seed, userNames }: { gameId: string; name: st
         {!game ? (
           <p className="muted connecting">Connecting…</p>
         ) : (
-          <>
-            {sandbox && (
-              <SandboxToolbar
-                gameId={gameId}
-                seed={seed}
-                onUndo={() => send(undoMessage(token))}
-                onInject={(event: EventValue) => send(injectMessage(token, event))}
-              />
-            )}
+          <div className="table-main">
+            <div className="table-side left">
+              <TurnPanel />
+              <InputPanel onChoose={(option) => send(chooseMessage(token, option))} onSubmit={(event) => send(submitMessage(token, event))} />
+              {pendingMove && asked !== null && (
+                <section className="panel cf move-prompt" aria-label="discard to move">
+                  <h2>Moving to {constantLabel('Location', pendingMove)}: discard a Skill Card</h2>
+                  <div className="picker">
+                    {context.hand(asked).map((card, index) => (
+                      <button key={index} type="button" className="tile card-pick" onClick={() => { send(submitMessage(token, moveEvent(asked, pendingMove, card))); setPendingMove(null); }}>
+                        {skillCardArt(card) && <ArtImg art={skillCardArt(card)!} />}
+                        <span>{skillCardLabel(card)}</span>
+                      </button>
+                    ))}
+                    <button type="button" onClick={() => { send(submitMessage(token, moveEvent(asked, pendingMove, null))); setPendingMove(null); }}>No discard</button>
+                    <button type="button" className="link" onClick={() => setPendingMove(null)}>Cancel</button>
+                  </div>
+                </section>
+              )}
+              <SkillCheckPanel />
+              {sandbox && (
+                <SandboxToolbar
+                  gameId={gameId}
+                  seed={seed}
+                  onUndo={() => send(undoMessage(token))}
+                  onInject={(event: EventValue) => send(injectMessage(token, event))}
+                />
+              )}
+              {/* the log takes what the panels above leave */}
+              <LogPanel />
+            </div>
             <div className="board">
               <BoardSvg
                 targets={targets}
@@ -112,33 +137,10 @@ function LiveTable({ gameId, name, seed, userNames }: { gameId: string; name: st
                 onAct={() => send(chooseMessage(token, actOption(game) ?? 0))}
               />
             </div>
-            <div className="wardroom">
-              <div className="stack">
-                <TurnPanel />
-                <LogPanel />
-              </div>
+            <div className="table-side right">
               <PlayersPanel />
-              <div className="stack">
-                <InputPanel onChoose={(option) => send(chooseMessage(token, option))} onSubmit={(event) => send(submitMessage(token, event))} />
-                {pendingMove && asked !== null && (
-                  <section className="panel cf move-prompt" aria-label="discard to move">
-                    <h2>Moving to {constantLabel('Location', pendingMove)}: discard a Skill Card</h2>
-                    <div className="picker">
-                      {context.hand(asked).map((card, index) => (
-                        <button key={index} type="button" className="tile card-pick" onClick={() => { send(submitMessage(token, moveEvent(asked, pendingMove, card))); setPendingMove(null); }}>
-                          {skillCardArt(card) && <ArtImg art={skillCardArt(card)!} />}
-                          <span>{skillCardLabel(card)}</span>
-                        </button>
-                      ))}
-                      <button type="button" onClick={() => { send(submitMessage(token, moveEvent(asked, pendingMove, null))); setPendingMove(null); }}>No discard</button>
-                      <button type="button" className="link" onClick={() => setPendingMove(null)}>Cancel</button>
-                    </div>
-                  </section>
-                )}
-                <SkillCheckPanel />
-              </div>
             </div>
-          </>
+          </div>
         )}
         <ArtPreview />
         <RevealLayer />

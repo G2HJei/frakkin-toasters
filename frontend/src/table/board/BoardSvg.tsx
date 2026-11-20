@@ -10,17 +10,33 @@ import {
   pilotArt,
   shipArt,
   skillBackArt,
-  skillCardArt,
   skillCheckArt,
   tokenArt,
+  type ArtRef,
 } from '../../art/images';
 import { SvgArt } from '../../art/Art';
-import { cardLabel, constantLabel, skillCardLabel } from '../../labels/describe';
+import { cardLabel, constantLabel } from '../../labels/describe';
 import type { Character, DeckProjection, GameProjection, Location, LocationProjection, ShipProjection } from '../../wire/types';
 import { useRevealHandlers, type RevealCard, type RevealSection } from '../reveal';
 import { useTable } from '../tableContext';
-import boardUrl from './board.jpg';
-import { BOARD_HEIGHT, BOARD_WIDTH, BOARDING_TRACK, DIALS, JUMP_TRACK, LAYOUT, PURSUIT_TRACK, SKILL_SLOTS, SLOTS, type Box, type Place } from './layout';
+import boardUrl from './board-classic.jpg';
+import {
+  BOARD_HEIGHT,
+  BOARD_WIDTH,
+  BOARDING_TRACK,
+  DECK_SLOTS,
+  DIALS,
+  DISTANCE,
+  JUMP_TRACK,
+  LAUNCH_TUBES,
+  LAYOUT,
+  PURSUIT_TRACK,
+  SLOTS,
+  TITLES,
+  type Box,
+  type Place,
+  type Point,
+} from './layout';
 
 export interface BoardSvgProps {
   // the locations a pending input can be answered with, which light up and take a click
@@ -35,11 +51,12 @@ export interface BoardSvgProps {
 const FACEDOWN_DISCARDS = new Set(['CIVILIAN_SHIPS', 'GALACTICA_DAMAGE', 'PEGASUS_DAMAGE', 'BASESTAR_DAMAGE', 'DESTINATION', 'DESTINY', 'LOYALTY', 'LOYALTY_NOT_CYLON', 'MOTIVE']);
 
 /**
- * The board as it lies on the table: board.jpg, with every component on its printed slot. The characters stand on their
- * locations, the ships fly in the space areas, the dials turn to the resources, the markers sit on the tracks and the
- * decks lie in the deck row with their counts and the top of their discard piles. What has no printed slot (the turn's
- * Crisis Cards, the die, the Quorum and Motive decks, the objective, the nukes) lies on free space. Hovering a deck shows
- * its discard pile, and in a sandbox what the players can't see.
+ * The board as it lies on the table: board-classic.jpg, with every component on its printed slot. The characters stand
+ * on the pictures of their locations, the ships fly in the space areas, the dials turn to the resources, the markers sit
+ * on the tracks, the decks lie in the rack with their counts and the top of their discard piles, the civilian ships lie
+ * with the ship reserves, and the destinations tuck under the objective. The cards kept in play and the die lie on the
+ * free starfield. The card being resolved and its skill check are the turn panel's, and the nukes the Admiral's mat's.
+ * Hovering a deck shows its discard pile, and in a sandbox what the players can't see.
  */
 export function BoardSvg({ targets, onLocation, actAt, onAct }: BoardSvgProps) {
   const table = useTable();
@@ -59,9 +76,8 @@ export function BoardSvg({ targets, onLocation, actAt, onAct }: BoardSvgProps) {
       <Dials game={game} />
       <Tracks game={game} />
       <Reserves game={game} />
-      <DeckRow game={game} />
-      <TopDecks game={game} />
-      <SkillCheckSlot game={game} />
+      <DeckRack game={game} />
+      <Objective game={game} />
       <FreeSpace game={game} />
 
       {locations.map((location) => {
@@ -84,11 +100,11 @@ export function BoardSvg({ targets, onLocation, actAt, onAct }: BoardSvgProps) {
           >
             <rect className={space ? 'space-frame' : 'frame'} x={place.x - 6} y={place.y - 6} width={place.width + 12} height={place.height + 12} rx={14} />
             {space ? (
-              <Ships place={place} ships={ships.filter((ship) => ship.location === name)} toMiss={game.turn?.raidersToMiss?.[name] ?? 0} />
+              <Ships place={place} ships={ships.filter((ship) => ship.location === name)} toMiss={game.turn?.raidersToMiss?.[name] ?? 0} avoid={LAUNCH_TUBES[name]} />
             ) : (
               <LocationMarks place={place} location={location} destroyed={destroyed} engineRoom={name === 'ENGINE_ROOM' && (game.pegasus?.engineRoomActivated ?? false)} />
             )}
-            <Standees place={place} characters={(location.characters ?? []) as Character[]} current={currentCharacter} cylons={cylons} nameOf={table.playerName} game={game} />
+            <Standees place={place} title={TITLES[name]} characters={(location.characters ?? []) as Character[]} current={currentCharacter} cylons={cylons} nameOf={table.playerName} game={game} />
             {actAt === name && onAct && (
               <g className="act" role="button" aria-label="Act" onClick={onAct}>
                 <rect x={place.x + place.width - 96} y={place.y - 22} width={110} height={52} rx={6} />
@@ -106,7 +122,8 @@ export function BoardSvg({ targets, onLocation, actAt, onAct }: BoardSvgProps) {
 
 // ---------------------------------------------------------------- the dials and the tracks
 
-// Each dial is the printed wheel, turned until the value sits under the pointer: 16 values, 22.5° apart.
+// Each dial is the printed wheel, turned until the value sits at the top under the pointer: 16 values, 22.5° apart.
+// The value shows on the hub too.
 function Dials({ game }: { game: GameProjection }) {
   const galactica = game.galactica;
   return (
@@ -115,6 +132,7 @@ function Dials({ game }: { game: GameProjection }) {
         const dial = DIALS[resource];
         const value = galactica?.[resource] ?? null;
         const angle = value === null ? 0 : (dial.printed - value) * 22.5;
+        const top = dial.y - dial.r;
         return (
           <g key={resource} className="dial" data-resource={resource}>
             <clipPath id={`dial-${resource}`}>
@@ -123,8 +141,9 @@ function Dials({ game }: { game: GameProjection }) {
             <g clipPath={`url(#dial-${resource})`}>
               <image href={boardUrl} x={0} y={0} width={BOARD_WIDTH} height={BOARD_HEIGHT} transform={`rotate(${angle} ${dial.x} ${dial.y})`} />
             </g>
-            <Count x={dial.x + 66} y={dial.y + 102} value={value ?? '—'} className="dial-chip" />
-            <text className="dial-caption" x={dial.x + 66} y={dial.y + 102}>
+            <polygon className="dial-pointer" points={`${dial.x - 11},${top - 12} ${dial.x + 11},${top - 12} ${dial.x},${top + 6}`} />
+            <Count x={dial.x} y={dial.y - 15} value={value ?? '—'} size={28} align="middle" className="dial-chip" />
+            <text className="dial-caption" x={dial.x} y={dial.y}>
               <tspan className="dial-value">{value ?? '—'}</tspan>
               <tspan className="dial-name"> {resource}</tspan>
             </text>
@@ -148,8 +167,8 @@ function Tracks({ game }: { game: GameProjection }) {
   const centurion = tokenArt('CENTURION');
   return (
     <g className="tracks">
-      {jump && JUMP_TRACK[jump] && <Marker track="JumpPreparation" position={jump} at={JUMP_TRACK[jump]} label={constantLabel('JumpPreparation', jump)} />}
-      {pursuit && PURSUIT_TRACK[pursuit] && <Marker track="Pursuit" position={pursuit} at={PURSUIT_TRACK[pursuit]} label={constantLabel('Pursuit', pursuit)} />}
+      {jump && JUMP_TRACK[jump] && <Marker track="JumpPreparation" position={jump} at={JUMP_TRACK[jump]} size={88} label={constantLabel('JumpPreparation', jump)} />}
+      {pursuit && PURSUIT_TRACK[pursuit] && <Marker track="Pursuit" position={pursuit} at={PURSUIT_TRACK[pursuit]} size={78} label={constantLabel('Pursuit', pursuit)} />}
       <g className="boarding" data-track="BoardingParty">
         {[...boarding.entries()].map(([position, count]) => {
           const at = BOARDING_TRACK[position];
@@ -157,12 +176,12 @@ function Tracks({ game }: { game: GameProjection }) {
             <g key={position} className="centurions" data-position={position} aria-label={`${count} centurion${count > 1 ? 's' : ''} at ${constantLabel('BoardingParty', position)}`}>
               {centurion ? (
                 Array.from({ length: Math.min(count, 3) }, (_, index) => (
-                  <SvgArt key={index} art={centurion} x={at.x - 22 + index * 10} y={at.y - 40 - index * 6} width={44} height={68} preview={false} className="piece" />
+                  <SvgArt key={index} art={centurion} x={at.x - 22 + index * 6} y={at.y - 34 - index * 8} width={44} height={68} preview={false} className="piece" />
                 ))
               ) : (
                 <circle cx={at.x} cy={at.y} r={22} />
               )}
-              {count > 1 && <Count x={at.x + 22} y={at.y - 50} value={`×${count}`} small />}
+              {count > 1 && <Count x={at.x + 26} y={at.y - 62} value={`×${count}`} size={24} align="end" />}
             </g>
           ) : null;
         })}
@@ -171,85 +190,104 @@ function Tracks({ game }: { game: GameProjection }) {
   );
 }
 
-function Marker({ track, position, at, label }: { track: string; position: string; at: { x: number; y: number }; label: string }) {
+function Marker({ track, position, at, size, label }: { track: string; position: string; at: Point; size: number; label: string }) {
   return (
     <g className={`marker marker-${track.toLowerCase()}`} data-track={track} data-position={position}>
       <title>{label}</title>
-      <rect x={at.x - 36} y={at.y - 36} width={72} height={72} rx={12} />
+      <rect x={at.x - size / 2} y={at.y - size / 2} width={size} height={size} rx={12} />
     </g>
   );
 }
 
-// ---------------------------------------------------------------- reserves, supply, the decks on the top half
+// ---------------------------------------------------------------- the reserves and the Cylon supply
+
+// The supply in the Cylon reserves, a pile per kind side by side: where the pile lies and the size of its pieces.
+const SUPPLY: { type: string; x: number; size: [number, number] }[] = [
+  { type: 'BASESTAR', x: 1356, size: [110, 58] },
+  { type: 'RAIDER', x: 1492, size: [64, 42] },
+  { type: 'HEAVY_RAIDER', x: 1602, size: [86, 27] },
+  { type: 'CENTURION', x: 1730, size: [32, 50] },
+];
 
 function Reserves({ game }: { game: GameProjection }) {
   const supply = game.cylonSupply;
-  const reserves = SLOTS.shipReserves;
-  const damaged = SLOTS.damagedVipers;
+  const counts: Record<string, number> = {
+    BASESTAR: supply?.basestars ?? 0,
+    RAIDER: supply?.raiders ?? 0,
+    HEAVY_RAIDER: supply?.heavyRaiders ?? 0,
+    CENTURION: supply?.centurions ?? 0,
+  };
   const cylon = SLOTS.cylonReserves;
+  const reserves = inset(SLOTS.shipReserves, 14, 24);
+  // the civilian ships lie face down at the right end of the ship reserves
+  const civilians = { ...reserves, x: reserves.x + reserves.width - CIVILIAN_PILE, width: CIVILIAN_PILE };
   return (
     <g className="reserves">
       <g data-slot="reserves">
-        <ShipPiles box={reserves} ships={game.galactica?.reserves ?? []} />
+        <ShipPiles box={{ ...reserves, width: reserves.width - CIVILIAN_PILE - 18 }} ships={game.galactica?.reserves ?? []} />
+        <DeckPile deck={game.decks?.find((deck) => deck.deck === 'CIVILIAN_SHIPS')} slot={civilians} back={shipArt('CIVILIAN')} ships />
       </g>
       <g data-slot="damaged-vipers">
-        <ShipPiles box={damaged} ships={game.galactica?.damagedVipers ?? []} />
+        <ShipPiles box={inset(SLOTS.damagedVipers, 14, 24)} ships={game.galactica?.damagedVipers ?? []} />
       </g>
       <g data-slot="cylon-supply">
-        <CountedPile type="BASESTAR" count={supply?.basestars ?? 0} x={cylon.x + 20} y={cylon.y + 20} />
-        <CountedPile type="RAIDER" count={supply?.raiders ?? 0} x={cylon.x + 20} y={cylon.y + 160} />
-        <CountedPile type="HEAVY_RAIDER" count={supply?.heavyRaiders ?? 0} x={cylon.x + 20} y={cylon.y + 250} />
-        <CountedPile type="CENTURION" count={supply?.centurions ?? 0} x={cylon.x + 20} y={cylon.y + 320} />
+        {SUPPLY.map(({ type, x, size }) => (
+          <CountedPile key={type} type={type} count={counts[type]} x={x} y={cylon.y + (cylon.height - size[1]) / 2 + 6} size={size} />
+        ))}
       </g>
     </g>
   );
 }
 
-function TopDecks({ game }: { game: GameProjection }) {
+function inset(box: Box, dx: number, dy: number): Box {
+  return { x: box.x + dx, y: box.y + dy, width: box.width - 2 * dx, height: box.height - dy };
+}
+
+// ---------------------------------------------------------------- the deck rack, the objective, the tokens
+
+function DeckRack({ game }: { game: GameProjection }) {
   const deck = (id: string) => game.decks?.find((candidate) => candidate.deck === id);
-  const destinations = game.destinations ?? [];
-  const distance = SLOTS.distanceTraveled;
+  const rack = Object.entries(DECK_SLOTS).filter(([id]) => id !== 'MOTIVE' || (deck(id)?.size ?? 0) > 0);
   return (
-    <g className="top-decks">
-      <DeckPile deck={deck('DESTINATION')} slot={SLOTS.destinationDeck} back />
-      <DeckPile deck={deck('CIVILIAN_SHIPS')} slot={SLOTS.civilianShips} ship="CIVILIAN" />
-      <RevealGroup id="distance" title="Destinations reached" sections={[{ title: 'Reached, first first', cards: destinations.map((card) => ({ art: cardArt('DestinationCard', card), label: constantLabel('DestinationCard', card) })) }]}>
-        <g data-slot="distance">
-          <rect className="hotspot" x={distance.x} y={distance.y} width={distance.width} height={distance.height} />
-          {destinations.map((card, index) => {
-            const art = cardArt('DestinationCard', card);
-            return art ? <SvgArt key={index} art={art} x={distance.x + 10 + index * 8} y={distance.y + 10 + index * 10} width={140} height={200} className="card" preview={false} /> : null;
-          })}
-          <Count x={distance.x + 112} y={distance.y + 172} value={game.distanceTraveled} accent />
-        </g>
-      </RevealGroup>
-      <DeckPile deck={deck('GALACTICA_DAMAGE')} slot={SLOTS.galacticaDamage} back token />
-      <DeckPile deck={deck('PEGASUS_DAMAGE')} slot={SLOTS.pegasusDamage} back token />
-      <DeckPile deck={deck('BASESTAR_DAMAGE')} slot={SLOTS.basestarDamage} back token />
-      <DeckPile deck={deck('QUORUM')} slot={SLOTS.quorum} back />
-      {(deck('MOTIVE')?.size ?? 0) > 0 && <DeckPile deck={deck('MOTIVE')} slot={SLOTS.motive} back />}
+    <g className="deck-rack">
+      {rack.map(([id, slot]) => (
+        <DeckPile key={id} deck={deck(id)} slot={slot} back={deckBackArt(id) ?? skillBackArt()} extra={id === 'LOYALTY' ? deck('LOYALTY_NOT_CYLON') : undefined} />
+      ))}
+      {/* each face-up discard pile lies over the right half of its deck */}
+      {rack
+        .filter(([id]) => !FACEDOWN_DISCARDS.has(id))
+        .map(([id, slot]) => (
+          <Discard key={id} deck={deck(id)} slot={{ ...slot, x: slot.x + slot.width / 2, y: slot.y + 6 }} />
+        ))}
     </g>
   );
 }
 
-// ---------------------------------------------------------------- the deck row
-
-function DeckRow({ game }: { game: GameProjection }) {
-  const deck = (id: string) => game.decks?.find((candidate) => candidate.deck === id);
+/** The objective, and the destinations reached tucked under it with their distance showing, first first. */
+function Objective({ game }: { game: GameProjection }) {
+  const slot = SLOTS.objective;
+  const objective = cardArt('ObjectiveCard', game.objective);
+  const destinations = game.destinations ?? [];
+  // the strips close up when more cards are reached than the printed space holds
+  const strip = destinations.length > DISTANCE.count ? (DISTANCE.strip * DISTANCE.count) / destinations.length : DISTANCE.strip;
   return (
-    <g className="deck-row">
-      <DeckPile deck={deck('CRISIS')} slot={SLOTS.crisisDeck} />
-      <Discard deck={deck('CRISIS')} slot={SLOTS.crisisDiscard} />
-      <DeckPile deck={deck('SUPER_CRISIS')} slot={SLOTS.superCrisis} />
-      <DeckPile deck={deck('MUTINY')} slot={SLOTS.mutiny} />
-      <DeckPile deck={deck('LOYALTY')} slot={SLOTS.loyalty} extra={deck('LOYALTY_NOT_CYLON')} />
-      <DeckPile deck={deck('DESTINY')} slot={SLOTS.destiny} />
-      {Object.entries(SKILL_SLOTS).map(([color, slots]) => (
-        <g key={color}>
-          <DeckPile deck={deck(color)} slot={slots.deck} skillBack />
-          <Discard deck={deck(color)} slot={slots.discard} />
+    <g className="objective">
+      <RevealGroup id="distance" title="Destinations reached" sections={[{ title: 'Reached, first first', cards: destinations.map((card) => ({ art: cardArt('DestinationCard', card), label: constantLabel('DestinationCard', card) })) }]}>
+        <g data-slot="distance">
+          <rect className="hotspot" x={DISTANCE.x} y={DISTANCE.y} width={DISTANCE.width} height={Math.max(strip * destinations.length, DISTANCE.strip)} />
+          {/* the later cards lie under the earlier ones, so each shows its own strip */}
+          {destinations
+            .map((card, index) => ({ card, index, art: cardArt('DestinationCard', card) }))
+            .reverse()
+            .map(({ card, index, art }) =>
+              art ? (
+                <SvgArt key={`${card}-${index}`} art={art} x={DISTANCE.x} y={DISTANCE.y + (index + 1) * strip - slot.height} width={DISTANCE.width} height={slot.height} className="card" preview={false} />
+              ) : null,
+            )}
+          {objective && <SvgArt art={objective} x={slot.x} y={slot.y} width={slot.width} height={slot.height} className="card" />}
+          <Count x={DISTANCE.x + DISTANCE.width + 8} y={DISTANCE.y + strip * destinations.length + 6} value={game.distanceTraveled} size={30} align="end" accent />
         </g>
-      ))}
+      </RevealGroup>
     </g>
   );
 }
@@ -271,39 +309,42 @@ export function deckSections(deck: DeckProjection | undefined): RevealSection[] 
   ];
 }
 
-/** A deck in its slot: the printed back (or a back, or a pile of ships), its count, and its piles on hover. */
-function DeckPile({ deck, slot, back = false, skillBack = false, token = false, ship, extra }: {
+/** A deck in its slot: its back (a card, or a pile of ships like the reserves'), its count, and its piles on hover. */
+function DeckPile({ deck, slot, back, ships = false, extra }: {
   deck: DeckProjection | undefined;
   slot: Box;
-  back?: boolean;
-  skillBack?: boolean;
-  token?: boolean;
-  ship?: string;
+  back: ArtRef | null;
+  ships?: boolean;
   extra?: DeckProjection | undefined;
 }) {
   if (!deck) {
     return null;
   }
-  const backArt = back ? deckBackArt(deck.deck) : skillBack ? skillBackArt() : null;
-  const shipImage = ship ? shipArt(ship) : null;
   const sections = [...deckSections(deck), ...deckSections(extra)];
   const count = deck.size + (extra?.size ?? 0);
+  if (ships) {
+    const [width, height] = SHIP_SIZE.CIVILIAN.map((side) => side * RESERVE_SCALE);
+    const shown = Math.min(count, CIVILIAN_SHOWN);
+    const step = PILE_STEP * RESERVE_SCALE;
+    return (
+      <RevealGroup id={`deck-${deck.deck}`} title={constantLabel('DeckId', deck.deck)} sections={sections}>
+        <g className="deck-slot" data-deck={deck.deck} data-pile="draw">
+          <rect className="hotspot" x={slot.x} y={slot.y - 10} width={slot.width} height={slot.height} />
+          {back &&
+            Array.from({ length: shown }, (_, index) => (
+              <SvgArt key={index} art={back} x={slot.x + index * step} y={slot.y + (shown - 1 - index) * 6} width={width} height={height} className="piece" preview={false} />
+            ))}
+          <Count x={slot.x + width + Math.max(shown - 1, 0) * step + 8} y={slot.y - 18} value={count} size={24} align="end" />
+        </g>
+      </RevealGroup>
+    );
+  }
   return (
     <RevealGroup id={`deck-${deck.deck}`} title={constantLabel('DeckId', deck.deck)} sections={sections}>
       <g className="deck-slot" data-deck={deck.deck} data-pile="draw">
         <rect className="hotspot" x={slot.x} y={slot.y} width={slot.width} height={slot.height} />
-        {backArt && deck.size > 0 && (
-          token ? (
-            <SvgArt art={backArt} x={slot.x + 4} y={slot.y + 4} width={slot.width - 8} height={slot.height - 8} className="piece" preview={false} />
-          ) : (
-            <SvgArt art={backArt} x={slot.x + 8} y={slot.y + 8} width={slot.width - 16} height={slot.height - 16} className="card" preview={false} />
-          )
-        )}
-        {shipImage &&
-          Array.from({ length: Math.min(deck.size, 4) }, (_, index) => (
-            <SvgArt key={index} art={shipImage} x={slot.x + 70 + index * 10} y={slot.y + 70 - index * 6} width={118} height={58} className="piece" preview={false} />
-          ))}
-        <Count x={slot.x + (token ? slot.width - 20 : 22)} y={slot.y + slot.height - (token ? 18 : 62)} value={count} small={token} />
+        {back && count > 0 && <SvgArt art={back} x={slot.x + 3} y={slot.y + 3} width={slot.width - 6} height={slot.height - 6} className="card" preview={false} />}
+        <Count x={slot.x - 8} y={slot.y + slot.height - 34} value={count} size={26} />
       </g>
     </RevealGroup>
   );
@@ -316,100 +357,51 @@ function Discard({ deck, slot }: { deck: DeckProjection | undefined; slot: Box }
   }
   const top = deck.discarded?.[deck.discarded.length - 1];
   const art = top !== undefined ? deckCardArt(top, deckCards(deck.deck)) : null;
+  if (!art) {
+    return null;
+  }
   return (
     <RevealGroup id={`discard-${deck.deck}`} title={`${constantLabel('DeckId', deck.deck)}: discard pile`} sections={deckSections(deck).slice(1)}>
       <g className="deck-slot" data-deck={deck.deck} data-pile="discard">
-        <rect className="hotspot" x={slot.x} y={slot.y} width={slot.width} height={slot.height} />
-        {art && <SvgArt art={art} x={slot.x + 6} y={slot.y + 6} width={slot.width - 12} height={slot.height - 12} className="card" preview={false} />}
-        {deck.discardSize > 1 && <Count x={slot.x + 22} y={slot.y + slot.height - 62} value={deck.discardSize} small />}
+        <SvgArt art={art} x={slot.x} y={slot.y} width={slot.width} height={slot.height} className="card" preview={false} />
+        {/* its count at the top, clear of the next deck's count at the bottom */}
+        {deck.discardSize > 1 && <Count x={slot.x + slot.width + 6} y={slot.y - 10} value={deck.discardSize} size={22} align="end" />}
       </g>
     </RevealGroup>
   );
 }
 
-// ---------------------------------------------------------------- the skill check and the free space
+// ---------------------------------------------------------------- the free starfield
 
-/** The skill check in progress, in its printed area: its card, the face-down pile, the difficulty and the result. */
-function SkillCheckSlot({ game }: { game: GameProjection }) {
-  const check = game.skillCheck;
-  if (!check) {
-    return null;
-  }
-  const slot = SLOTS.skillCheck;
-  const subject = skillCheckArt(check.type);
-  const back = skillBackArt();
-  const faceDown = check.cards?.count ?? 0;
-  const before = (check.playedBefore ?? []).flatMap((played) => played.cards?.cards ?? []);
-  const sections: RevealSection[] = [
-    { title: 'Face down', cards: (check.cards?.cards ?? []).map((card) => ({ art: skillCardArt(card), label: skillCardLabel(card) })), hidden: true },
-    { title: 'Played before the check', cards: before.map((card) => ({ art: skillCardArt(card), label: skillCardLabel(card) })), hidden: !check.playedBeforeRevealed },
-  ];
+/** The Crisis Cards kept in play, by the jump track, the later ones on top, and the die. */
+function FreeSpace({ game }: { game: GameProjection }) {
+  const slot = SLOTS.inPlay;
   return (
-    <g className="skill-check-slot" data-slot="skill-check">
-      {subject && <SvgArt art={subject} x={slot.x + 12} y={slot.y + 10} width={150} height={212} className="card in-play" />}
-      <RevealGroup id="skill-check-cards" title={`Skill check: ${constantLabel('SkillCheckType', check.type)}`} sections={sections}>
-        <g className="face-down" data-pile="skill-check">
-          <rect className="hotspot" x={slot.x + 180} y={slot.y + 20} width={220} height={200} />
-          {back &&
-            Array.from({ length: Math.min(faceDown, 10) }, (_, index) => (
-              <SvgArt
-                key={index}
-                art={back}
-                x={slot.x + 190 + index * 20}
-                y={slot.y + 48 + (index % 2) * 6}
-                width={100}
-                height={146}
-                className="card"
-                preview={false}
-                transform={`rotate(${(index - Math.min(faceDown, 10) / 2) * 3} ${slot.x + 240 + index * 20} ${slot.y + 120})`}
-              />
-            ))}
-        </g>
-      </RevealGroup>
-      <Count x={slot.x + 380} y={slot.y + 150} value={`diff ${check.difficulty}`} accent />
-      {check.totalStrength !== null && (
-        <Count x={slot.x + 380} y={slot.y + 200} value={`${check.totalStrength}${check.result ? ` ${constantLabel('SkillCheckResult', check.result)}` : ''}`} className={`result ${(check.result ?? '').toLowerCase()}`} />
-      )}
+    <g className="free-space">
+      <g className="in-play" data-slot="in-play">
+        {(game.crisisCardsInPlay ?? []).map((type, index) => {
+          const art = skillCheckArt(type);
+          return art ? <SvgArt key={`${type}-${index}`} art={art} x={slot.x + index * 30} y={slot.y} width={slot.width} height={slot.height} className="card kept" /> : null;
+        })}
+      </g>
+      <Die game={game} />
     </g>
   );
 }
 
-/** What has no printed slot: the turn's Crisis Cards, the ones kept in play, the die, the objective and the nukes. */
-function FreeSpace({ game }: { game: GameProjection }) {
-  const turn = game.turn;
-  const checkCard = game.skillCheck?.type ?? null;
-  // the Crisis Card a skill check comes from lies in the skill check area
-  const crisis = (turn?.crisisCards ?? []).filter((card) => card !== checkCard);
-  const inPlay = game.crisisCardsInPlay ?? [];
-  const roll = turn?.dieRoll?.value ?? null;
-  const die = dieArt(roll);
-  const objective = cardArt('ObjectiveCard', game.objective);
-  const nuke = tokenArt('NUKE');
+function Die({ game }: { game: GameProjection }) {
+  const roll = game.turn?.dieRoll ?? null;
+  const art = dieArt(roll?.value ?? null);
+  if (!roll || !art) {
+    return null;
+  }
+  const slot = SLOTS.die;
   return (
-    <g className="free-space">
-      {crisis.map((card, index) => {
-        const art = cardArt('CrisisCard', card);
-        return art ? <SvgArt key={`${card}-${index}`} art={art} x={SLOTS.turnCrisis.x + index * 165} y={SLOTS.turnCrisis.y} width={150} height={212} className="card in-play" /> : null;
-      })}
-      {inPlay.map((type, index) => {
-        const art = skillCheckArt(type);
-        return art ? <SvgArt key={`${type}-${index}`} art={art} x={SLOTS.inPlay.x + index * 40} y={SLOTS.inPlay.y + index * 12} width={150} height={212} className="card kept" /> : null;
-      })}
-      {die && (
-        <g className="die" data-die={roll}>
-          <SvgArt art={die} x={SLOTS.die.x} y={SLOTS.die.y} width={SLOTS.die.width} height={SLOTS.die.height} className="piece" />
-          {turn?.dieRoll?.result !== null && turn?.dieRoll?.result !== undefined && turn.dieRoll.result !== roll && (
-            <Count x={SLOTS.die.x + 100} y={SLOTS.die.y + 70} value={`→ ${turn.dieRoll.result}`} small accent />
-          )}
-        </g>
+    <g className="die" data-die={roll.value}>
+      <SvgArt art={art} x={slot.x} y={slot.y} width={slot.width} height={slot.height} className="piece" />
+      {roll.result !== null && roll.result !== undefined && roll.result !== roll.value && (
+        <Count x={slot.x + slot.width / 2} y={slot.y + slot.height + 4} value={`→ ${roll.result}`} size={26} align="middle" accent />
       )}
-      {objective && <SvgArt art={objective} x={SLOTS.objective.x} y={SLOTS.objective.y} width={SLOTS.objective.width} height={SLOTS.objective.height} className="card" />}
-      <g className="nukes" data-nukes={game.nukes}>
-        {nuke &&
-          Array.from({ length: game.nukes }, (_, index) => (
-            <SvgArt key={index} art={nuke} x={SLOTS.nukes.x} y={SLOTS.nukes.y + index * 70} width={100} height={88} className="piece" title={`${game.nukes} nuke${game.nukes > 1 ? 's' : ''}`} />
-          ))}
-      </g>
     </g>
   );
 }
@@ -424,20 +416,22 @@ function LocationMarks({ place, location, destroyed, engineRoom }: { place: Plac
       {destroyed && <rect className="destroyed-veil" x={place.x} y={place.y} width={place.width} height={place.height} rx={10} />}
       {location.damaged &&
         (damage ? (
-          <SvgArt art={damage} x={place.x + (place.width - 96) / 2} y={place.y + 14} width={96} height={96} className="damage-token piece" />
+          <SvgArt art={damage} x={place.x + (place.width - 96) / 2} y={place.y + 12} width={96} height={96} className="damage-token piece" />
         ) : (
           <text className="damage" x={place.x + place.width / 2} y={place.y + 60} textAnchor="middle">
             damaged
           </text>
         ))}
-      {engineRoom && <Count x={place.x + 10} y={place.y + 20} value="activated" small accent />}
+      {engineRoom && <Count x={place.x + 10} y={place.y + 20} value="activated" size={26} accent />}
     </>
   );
 }
 
-// The standees stand at the bottom of the location, side by side while they fit, overlapping when they don't.
-function Standees({ place, characters, current, cylons, nameOf, game }: {
+// The standees stand on the picture of their location, above its printed name, side by side while they fit and
+// overlapping when they don't. In a space area, where nothing is printed, they stand at the bottom.
+function Standees({ place, title, characters, current, cylons, nameOf, game }: {
   place: Place;
+  title: Box | undefined;
   characters: Character[];
   current: Character | null;
   cylons: Set<Character | null>;
@@ -447,11 +441,12 @@ function Standees({ place, characters, current, cylons, nameOf, game }: {
   if (characters.length === 0) {
     return null;
   }
-  const width = 74;
-  const height = 109;
-  const step = characters.length <= 1 ? 0 : Math.min(width + 4, (place.width - width) / (characters.length - 1));
+  const picture = title ? title.y - place.y : place.height;
+  const height = title ? Math.min(109, picture - 12) : 109;
+  const width = (height * 74) / 109;
+  const step = characters.length <= 1 ? 0 : Math.min(width + 4, (place.width - 12 - width) / (characters.length - 1));
   const left = place.x + (place.width - (width + step * (characters.length - 1))) / 2;
-  const top = place.y + place.height - height - 8;
+  const top = title ? place.y + (picture - height) / 2 : place.y + place.height - height - 8;
   return (
     <>
       {characters.map((character, index) => {
@@ -469,8 +464,8 @@ function Standees({ place, characters, current, cylons, nameOf, game }: {
               </>
             ) : (
               <>
-                <rect x={place.x + 6} y={place.y + 60 + index * 40} width={place.width - 12} height={34} rx={14} />
-                <text x={place.x + place.width / 2} y={place.y + 84 + index * 40} textAnchor="middle">
+                <rect x={place.x + 6} y={place.y + 20 + index * 40} width={place.width - 12} height={34} rx={14} />
+                <text x={place.x + place.width / 2} y={place.y + 44 + index * 40} textAnchor="middle">
                   {shortName(constantLabel('Character', character))}
                 </text>
               </>
@@ -499,6 +494,11 @@ const SHIP_SIZE: Record<string, [number, number]> = {
 const SHIP_ORDER = Object.keys(SHIP_SIZE);
 const PILE_STEP = 12;
 const PILE_MAX = 4;
+// the reserves are a narrow strip: smaller ships, and the count on the pile instead of beside it
+const RESERVE_SCALE = 0.7;
+// the civilian ships' pile at the end of the reserves: as many as it shows, and its width
+const CIVILIAN_SHOWN = 3;
+const CIVILIAN_PILE = (104 + (CIVILIAN_SHOWN - 1) * PILE_STEP) * RESERVE_SCALE;
 
 interface ShipGroup {
   type: string;
@@ -527,49 +527,89 @@ export function groupShips(ships: ShipProjection[]): ShipGroup[] {
   return groups;
 }
 
-// the piles laid out left to right, wrapping inside the box
-function layOut(box: Box, groups: ShipGroup[]) {
-  const placed: { group: ShipGroup; x: number; y: number; width: number; height: number }[] = [];
+interface PlacedGroup {
+  group: ShipGroup;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  step: number;
+}
+
+// The piles laid out left to right, wrapping inside the box and stepping over what it has to leave free. A compact
+// layout puts each count on its pile.
+function layOut(box: Box, groups: ShipGroup[], { scale = 1, compact = false, avoid }: { scale?: number; compact?: boolean; avoid?: Box } = {}): PlacedGroup[] {
+  const placed: PlacedGroup[] = [];
+  const step = PILE_STEP * scale;
+  const gap = 18 * scale;
   let x = box.x;
   let y = box.y;
   let rowHeight = 0;
   for (const group of groups) {
-    const [width, height] = SHIP_SIZE[group.type] ?? [90, 50];
+    const [width, height] = (SHIP_SIZE[group.type] ?? [90, 50]).map((side) => side * scale);
     const shown = Math.min(group.ships.length, PILE_MAX);
     const pilot = group.ships[0].pilot ? 30 : 0;
     const damage = (group.ships[0].damage ?? []).length > 0 ? 44 : 0;
-    const groupWidth = width + (shown - 1) * PILE_STEP + (group.ships.length > 1 ? 60 : 0);
+    const groupWidth = width + (shown - 1) * step + (group.ships.length > 1 && !compact ? 60 : 0);
     const groupHeight = height + (shown - 1) * 6 + pilot + damage;
-    if (x + groupWidth > box.x + box.width && x > box.x) {
-      x = box.x;
-      y += rowHeight + 14;
-      rowHeight = 0;
+    for (let tries = 0; tries < 3; tries++) {
+      if (x + groupWidth > box.x + box.width && x > box.x) {
+        x = box.x;
+        y += rowHeight + 14;
+        rowHeight = 0;
+      } else if (avoid && x < avoid.x + avoid.width && x + groupWidth > avoid.x && y < avoid.y + avoid.height && y + groupHeight > avoid.y) {
+        x = avoid.x + avoid.width + gap;
+      } else {
+        break;
+      }
     }
-    placed.push({ group, x, y: y + pilot, width, height });
-    x += groupWidth + 18;
+    placed.push({ group, x, y: y + pilot, width, height, step });
+    x += groupWidth + gap;
     rowHeight = Math.max(rowHeight, groupHeight);
   }
   return placed;
 }
 
-function Ships({ place, ships, toMiss }: { place: Place; ships: ShipProjection[]; toMiss: number }) {
-  const placed = layOut(place, groupShips(ships));
+// a space area narrower than a basestar (the strips at the bow and the stern) takes smaller ships, counted on the pile
+const BASESTAR_WIDTH = 214;
+
+function Ships({ place, ships, toMiss, avoid }: { place: Place; ships: ShipProjection[]; toMiss: number; avoid?: Box }) {
+  const narrow = place.width < BASESTAR_WIDTH + 60;
+  const scale = narrow ? Math.min(1, place.width / BASESTAR_WIDTH) : 1;
   return (
     <g className="ships">
-      {toMiss > 0 && <Count x={place.x + place.width - 10} y={place.y} value={`${toMiss} will miss`} small accent />}
-      {placed.map(({ group, x, y, width, height }) => {
+      {toMiss > 0 && <Count x={place.x + place.width - 10} y={place.y} value={`${toMiss} will miss`} size={26} align="end" accent />}
+      <Piles placed={layOut(place, groupShips(ships), { scale, compact: narrow, avoid })} compact={narrow} />
+    </g>
+  );
+}
+
+function ShipPiles({ box, ships }: { box: Box; ships: ShipProjection[] }) {
+  return <Piles placed={layOut(box, groupShips(ships), { scale: RESERVE_SCALE, compact: true })} compact />;
+}
+
+function Piles({ placed, compact = false }: { placed: PlacedGroup[]; compact?: boolean }) {
+  return (
+    <>
+      {placed.map(({ group, x, y, width, height, step }) => {
         const shown = Math.min(group.ships.length, PILE_MAX);
+        const right = x + width + (shown - 1) * step;
         return (
           <g key={group.ships[0].id} className={`ship-group ship-${group.type.toLowerCase()}`}>
             {group.ships.map((ship, index) => {
               const at = Math.min(index, PILE_MAX - 1);
-              return <Ship key={ship.id} ship={ship} x={x + at * PILE_STEP} y={y + (shown - 1 - at) * 6} width={width} height={height} />;
+              return <Ship key={ship.id} ship={ship} x={x + at * step} y={y + (shown - 1 - at) * 6} width={width} height={height} />;
             })}
-            {group.ships.length > 1 && <Count x={x + width + (shown - 1) * PILE_STEP + 8} y={y + height / 2 - 22} value={`×${group.ships.length}`} small />}
+            {group.ships.length > 1 &&
+              (compact ? (
+                <Count x={right + 8} y={y - 18} value={`×${group.ships.length}`} size={24} align="end" />
+              ) : (
+                <Count x={right + 8} y={y + height / 2 - 22} value={`×${group.ships.length}`} size={30} />
+              ))}
           </g>
         );
       })}
-    </g>
+    </>
   );
 }
 
@@ -596,37 +636,19 @@ function Ship({ ship, x, y, width, height }: { ship: ShipProjection; x: number; 
 }
 
 /** Ships counted in a pile: the supply, where only the numbers are known. */
-function CountedPile({ type, count, x, y }: { type: string; count: number; x: number; y: number }) {
+function CountedPile({ type, count, x, y, size }: { type: string; count: number; x: number; y: number; size: [number, number] }) {
   const art = type === 'CENTURION' ? tokenArt('CENTURION') : shipArt(type);
-  const [width, height] = SHIP_SIZE[type] ?? [90, 50];
+  const [width, height] = size;
   const shown = Math.min(count, PILE_MAX);
+  const step = 8;
   return (
     <g className={`supply supply-${type.toLowerCase()}`} data-supply={type} aria-label={`${count} ${constantLabel('ShipType', type)}`}>
       {art &&
         Array.from({ length: shown }, (_, index) => (
-          <SvgArt key={index} art={art} x={x + index * PILE_STEP} y={y + (shown - 1 - index) * 6} width={width} height={height} className="piece" preview={false} />
+          <SvgArt key={index} art={art} x={x + index * step} y={y + (shown - 1 - index) * 5} width={width} height={height} className="piece" preview={false} />
         ))}
-      <Count x={x + width + (shown - 1) * PILE_STEP + 12} y={y + height / 2 - 22} value={`×${count}`} small />
+      <Count x={x + width + Math.max(shown - 1, 0) * step + 8} y={y - 18} value={`×${count}`} size={24} align="end" />
     </g>
-  );
-}
-
-function ShipPiles({ box, ships }: { box: Box; ships: ShipProjection[] }) {
-  return (
-    <>
-      {layOut(box, groupShips(ships)).map(({ group, x, y, width, height }) => {
-        const shown = Math.min(group.ships.length, PILE_MAX);
-        return (
-          <g key={group.ships[0].id} className={`ship-group ship-${group.type.toLowerCase()}`}>
-            {group.ships.map((ship, index) => {
-              const at = Math.min(index, PILE_MAX - 1);
-              return <Ship key={ship.id} ship={ship} x={x + at * PILE_STEP} y={y + (shown - 1 - at) * 6} width={width} height={height} />;
-            })}
-            {group.ships.length > 1 && <Count x={x + width + (shown - 1) * PILE_STEP + 8} y={y + height / 2 - 22} value={`×${group.ships.length}`} small />}
-          </g>
-        );
-      })}
-    </>
   );
 }
 
@@ -642,34 +664,38 @@ export function boardShipLabel(ship: ShipProjection): string {
 
 // ---------------------------------------------------------------- small parts
 
-/** A number on the board in a chip with cut corners: a count, a difficulty, a value. */
-function Count({ x, y, value, small = false, accent = false, className = '' }: {
+/**
+ * A number on the board in a chip with cut corners: a count, a difficulty, a value. `y` is its top, and `x` its left
+ * edge, its middle or its right edge.
+ */
+function Count({ x, y, value, size = 36, align = 'start', accent = false, className = '' }: {
   x: number;
   y: number;
   value: number | string;
-  small?: boolean;
+  size?: number;
+  align?: 'start' | 'middle' | 'end';
   accent?: boolean;
   className?: string;
 }) {
   const text = String(value);
-  const size = small ? 30 : 36;
-  const width = 26 + text.length * size * 0.56;
-  const height = size + 16;
-  const cut = 10;
+  const width = size * (0.72 + text.length * 0.56);
+  const height = size * 1.44;
+  const cut = size * 0.28;
+  const left = align === 'start' ? x : align === 'middle' ? x - width / 2 : x - width;
   const points = [
-    [x + cut, y],
-    [x + width, y],
-    [x + width, y + height - cut],
-    [x + width - cut, y + height],
-    [x, y + height],
-    [x, y + cut],
+    [left + cut, y],
+    [left + width, y],
+    [left + width, y + height - cut],
+    [left + width - cut, y + height],
+    [left, y + height],
+    [left, y + cut],
   ]
     .map((point) => point.join(','))
     .join(' ');
   return (
     <g className={['count', accent ? 'accent' : '', className].join(' ').trim()}>
       <polygon points={points} />
-      <text x={x + width / 2} y={y + height / 2 + size * 0.36} textAnchor="middle" fontSize={size}>
+      <text x={left + width / 2} y={y + height / 2 + size * 0.36} textAnchor="middle" fontSize={size}>
         {text}
       </text>
     </g>
@@ -691,4 +717,3 @@ export function shortName(label: string): string {
   const words = label.replace(/\(.*\)/, '').trim().split(' ');
   return words[words.length - 1];
 }
-

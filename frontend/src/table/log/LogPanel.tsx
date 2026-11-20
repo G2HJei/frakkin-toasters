@@ -39,38 +39,41 @@ export function LogPanel() {
       <div className="tab">
         <span>Log</span>
       </div>
-      {groups.map((group, index) => (
-        <details key={`${group.turn}-${index}`} open={index === groups.length - 1}>
-          <summary>{group.turn === 0 ? 'Setup' : `Turn ${group.turn}`}</summary>
-          <ol className="entries">
-            {group.entries.map((entry, at) => (
-              <li key={at} className={entry.kind === 'ChoiceLog' ? 'choice' : 'scope'}>
-                {entry.kind === 'ChoiceLog' ? (
-                  <span>
-                    {table.playerName(entry.chooser)} picks {entry.option ? optionLabel(entry.option, table) : 'an option'}
-                    <ArtStrip refs={optionArt(entry.option)} />
-                  </span>
-                ) : (
-                  <>
-                    <span className="actor">{entry.actor > 0 ? table.playerName(entry.actor) : 'Game'}</span>{' '}
-                    <span className="event">
-                      {entry.details ? eventLabel(entry.details as unknown as Record<string, unknown>, table) : typeLabel(entry.event ?? '')}
+      {/* the body scrolls, so the log can take whatever height its column leaves it */}
+      <div className="log-body">
+        {groups.map((group, index) => (
+          <details key={`${group.turn}-${index}`} open={index === groups.length - 1}>
+            <summary>{group.turn === 0 ? 'Setup' : `Turn ${group.turn}`}</summary>
+            <ol className="entries">
+              {group.entries.map((entry, at) => (
+                <li key={at} className={entry.kind === 'ChoiceLog' ? 'choice' : 'scope'}>
+                  {entry.kind === 'ChoiceLog' ? (
+                    <span>
+                      {table.playerName(entry.chooser)} picks {entry.option ? optionLabel(entry.option, table) : 'an option'}
+                      <ArtStrip refs={optionArt(entry.option)} />
                     </span>
-                    <ArtStrip refs={unique([...recordArt(entry.details as unknown as Record<string, unknown> | null), ...(entry.facts ?? []).flatMap(factArt)])} />
-                    {(entry.facts ?? []).length > 0 && (
-                      <ul className="facts">
-                        {(entry.facts ?? []).map((fact, factIndex) => (
-                          <li key={factIndex}>{factLabel(fact, table)}</li>
-                        ))}
-                      </ul>
-                    )}
-                  </>
-                )}
-              </li>
-            ))}
-          </ol>
-        </details>
-      ))}
+                  ) : (
+                    <>
+                      <span className="actor">{entry.actor > 0 ? table.playerName(entry.actor) : 'Game'}</span>{' '}
+                      <span className="event">
+                        {entry.details ? eventLabel(entry.details as unknown as Record<string, unknown>, table) : typeLabel(entry.event ?? '')}
+                      </span>
+                      <ArtStrip refs={unique([...recordArt(entry.details as unknown as Record<string, unknown> | null), ...(entry.facts ?? []).flatMap(factArt)])} />
+                      {(entry.facts ?? []).length > 0 && (
+                        <ul className="facts">
+                          {(entry.facts ?? []).map((fact, factIndex) => (
+                            <li key={factIndex}>{factLabel(fact, table)}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </details>
+        ))}
+      </div>
     </section>
   );
 }

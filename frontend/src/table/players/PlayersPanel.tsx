@@ -8,8 +8,8 @@ import { useTable } from '../tableContext';
 
 /**
  * Every player's mat: his character first and the user in the seat under it, where he is, the titles and tokens in
- * front of him, and his cards: face up for the viewer they belong to, otherwise their backs. A sandbox shows the backs
- * too, like a live game, and what they hide on hover.
+ * front of him (the nukes with the Admiral), and his cards: face up for the viewer they belong to, otherwise their
+ * backs. A sandbox shows the backs too, like a live game, and what they hide on hover.
  */
 export function PlayersPanel() {
   const table = useTable();
@@ -52,6 +52,8 @@ function PlayerMat({ player }: { player: PlayerProjection }) {
         <p className="badges">
           {president && <TitleBadge title="PRESIDENT" />}
           {holds(titles?.admiral) && <TitleBadge title="ADMIRAL" />}
+          {/* the nukes lie in front of the Admiral */}
+          {holds(titles?.admiral) && (game?.nukes ?? 0) > 0 && <Badge className="token nukes" art={tokenArt('NUKE')} label={`${game?.nukes} nuke${game?.nukes === 1 ? '' : 's'}`} />}
           {holds(titles?.cag) && <TitleBadge title="CAG" />}
           {player.infiltrating && <TitleBadge title="INFILTRATING" />}
           {player.mutineer && <Badge className="mutineer" art={cardArt('LoyaltyCard', 'MUTINEER')} label="Mutineer" />}

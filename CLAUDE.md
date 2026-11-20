@@ -668,20 +668,28 @@ REST (the lobby lists poll), Zustand for the game. See `frontend-plan.md`.
   through the schema, for the log and the input. `Art.tsx`: `CardTile` (a face-up card is a `tile`, a face-down one a
   `tile back`, which the lobby e2e checks), `CardBack`, `ArtStrip`, `SvgArt`, and the hover preview (`ArtPreview`).
   `images.test.ts` checks that every constant has its image and every image names a constant.
-- The table (`TablePage`, the "Wardroom" layout): the board across the width, and under it three columns: the turn and
-  the game (`TurnPanel`) over the log, the players' mats (`PlayersPanel`), the decision (`InputPanel`) over the skill
-  check (`SkillCheckPanel`). The styles are the "table" section of `styles.css`: the board's palette, cut corners
+- The table (`TablePage`): the board in the middle, as high as the screen (`.table-main` is a size container, the
+  board's width follows its height), and a column on each side that scrolls on its own. On the left the turn and the
+  game (`TurnPanel`), the decision (`InputPanel`) and its prompts, the skill check (`SkillCheckPanel`) and the sandbox's
+  tools, and under them the log, which takes the height they leave (at least 260px) and scrolls inside its body. On the
+  right the players' mats (`PlayersPanel`, the nukes beside the Admiral). Under 1100px the board goes across the width
+  and the panels under it. The styles are the "table" section of `styles.css`: the board's palette, cut corners
   (`.cf`, `--chamfer`) and printed-label tabs. A player is named by his character everywhere (`playerName`), "Player n"
   before he has one; the user in the seat shows only on his mat (`userName`, from the room's seats).
-- The board (`src/table/board/`): `board.jpg` is the surface, and `BoardSvg` lays the components on its printed slots,
-  in the image's pixels (`layout.ts`: a place for every `Location`, which a test checks, the track positions, the
-  dials and the `SLOTS`). The standees stand on the location cards, the ships fly in the space areas (the bow's wedge is
-  8 o'clock, the stern's 2 o'clock), the printed dials turn to the resources, markers sit on the tracks, and the decks
-  lie in the deck row with their counts and their top discards. What has no slot (the turn's Crisis Cards, the die, the
-  Quorum and Motive decks, the objective, the nukes) lies on free space. Inputs on the board are in
-  `src/input/boardMoves.ts`: a move by clicking a location (asking for a discard when it leaves its ship) and the "Act"
-  button on the asked player's location. Each builds the same event, or picks the same option, as the builder; a test
-  checks it. The builder stays for everything else.
+- The board (`src/table/board/`): `board-classic.jpg` is the surface, and `BoardSvg` lays the components on its printed
+  slots, in the image's pixels. `board-classic.layout.json`, measured with the image, holds what is printed, and
+  `layout.ts` reads it (a place for every `Location`, which a test checks, the title panels, the tracks, the dials, the
+  deck rack, the launch tubes) and adds the free starfield (`SLOTS`). The standees stand on the location pictures above
+  the printed names, the ships fly in the space areas (the bow's strip is 8 o'clock, the stern's 2 o'clock; narrow
+  strips take smaller ships, and the ships leave the launch tubes free), the printed dials turn to the resources with
+  the value on the hub, markers sit on the tracks, the decks lie in the rack with their counts and their top discard
+  fanned over them, the civilian ships lie at the end of the ship reserves, and the destinations tuck under the
+  objective, each showing its distance. The Crisis Cards kept in play lie by the jump track and the die on the free
+  starfield. The board leaves out the card being resolved and its skill check (the turn and skill check panels show
+  them), the damage token piles (only the tokens in play show) and the nukes (the Admiral's mat). Inputs on the board
+  are in `src/input/boardMoves.ts`: a move by clicking a location (asking for a discard when it leaves its ship) and the
+  "Act" button on the asked player's location. Each builds the same event, or picks the same option, as the builder; a
+  test checks it. The builder stays for everything else.
 - Hover (`src/table/reveal.tsx`): a pile shows what it holds in one fixed popover (`RevealLayer`). A face-up discard
   pile shows to everyone. A sandbox looks like a live table, every hand and deck face down, and shows on hover what the
   players can't see (`hidden` sections: hands, Loyalty and other player cards, draw piles, face-down discards, a skill

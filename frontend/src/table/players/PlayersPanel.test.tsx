@@ -87,6 +87,27 @@ describe('the players', () => {
     useReveal.getState().hide();
   });
 
+  it('lays the nukes beside the Admiral, and nowhere once they are used', () => {
+    const panel = render(
+      <Table.Provider value={tableContext({ ...game, nukes: 2 } as GameProjection, false, null)}>
+        <PlayersPanel />
+      </Table.Provider>,
+    ).container;
+
+    const nukes = panel.querySelector('[data-player="1"] .badges .nukes');
+    expect(nukes?.textContent).toBe('2 nukes');
+    expect(nukes?.previousElementSibling?.textContent).toContain('Admiral');
+    expect(nukes?.querySelector('img')).not.toBeNull();
+    expect(panel.querySelector('[data-player="2"] .nukes')).toBeNull();
+
+    const used = render(
+      <Table.Provider value={tableContext({ ...game, nukes: 0 } as GameProjection, false, null)}>
+        <PlayersPanel />
+      </Table.Provider>,
+    ).container;
+    expect(used.querySelector('.nukes')).toBeNull();
+  });
+
   it('shows only the backs of another player\'s cards: a back per Skill Card color, and the backs of his piles', () => {
     const panel = renderPanel();
     const other = panel.querySelector('[data-player="2"]');

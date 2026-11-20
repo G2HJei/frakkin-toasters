@@ -2,7 +2,7 @@
 // like it. Vite copies them into the build and gives each its URL. A component that has no image falls back to its name.
 import { constantLabel, skillCardLabel, type SkillCardLike } from '../labels/describe';
 
-// only the folders: the full-size board scan at the root isn't for the browser (the table's board is board.jpg)
+// only the folders: the full-size board scan at the root isn't for the browser (the table's board is board-classic.jpg)
 const FILES = import.meta.glob<string>('./*/**/*.{png,jpg,gif}', {
   base: '../../../materials-sorted',
   eager: true,

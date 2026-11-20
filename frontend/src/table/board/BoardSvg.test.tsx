@@ -4,6 +4,7 @@ import { BoardSvg, groupShips, shortName } from './BoardSvg';
 import { RevealLayer, useReveal } from '../reveal';
 import { Table, tableContext } from '../tableContext';
 import type { GameProjection, ShipProjection } from '../../wire/types';
+import { DECK_SLOTS, DIALS, DISTANCE, JUMP_TRACK, LAUNCH_TUBES, LAYOUT, SLOTS, TITLES } from './layout';
 
 const location = (name: string, characters: string[] = [], damaged = false) => ({ location: name, damaged, characters });
 
@@ -113,23 +114,86 @@ describe('the board', () => {
     const board = renderBoard();
 
     expect([...board.querySelectorAll('.dial-value')].map((dial) => dial.textContent)).toEqual(['8', '7', '9', '12']);
-    // food: the wheel shows 8, one step of 22.5° back gives 7
-    expect(board.querySelector('[data-resource="food"] image')?.getAttribute('transform')).toBe('rotate(22.5 3378 210)');
-    expect(board.querySelector('[data-resource="fuel"] image')?.getAttribute('transform')).toBe('rotate(0 3158 210)');
+    // food: the wheel shows 8 at the top, one step of 22.5° back gives 7
+    expect(board.querySelector('[data-resource="food"] image')?.getAttribute('transform')).toBe(`rotate(22.5 ${DIALS.food.x} ${DIALS.food.y})`);
+    expect(board.querySelector('[data-resource="fuel"] image')?.getAttribute('transform')).toBe(`rotate(0 ${DIALS.fuel.x} ${DIALS.fuel.y})`);
   });
 
-  it("lays the decks in their slots with their counts and the top of the discard pile, the skill check in its area", () => {
+  it("stands each character on the picture of his location, above its printed name", () => {
+    const board = renderBoard();
+
+    const standee = board.querySelector('[data-location="RESEARCH_LAB"] [data-character="WILLIAM_ADAMA"] image')!;
+    const bottom = Number(standee.getAttribute('y')) + Number(standee.getAttribute('height'));
+    expect(Number(standee.getAttribute('y'))).toBeGreaterThanOrEqual(LAYOUT.RESEARCH_LAB.y);
+    expect(bottom).toBeLessThanOrEqual(TITLES.RESEARCH_LAB!.y);
+  });
+
+  it('tucks the destinations under the objective, the later ones under the earlier, each showing a strip', () => {
+    const board = renderBoard(undefined, { ...game, destinations: ['ALGAE_PLANET', 'ASTEROID_FIELD'], distanceTraveled: 3 } as GameProjection);
+
+    const cards = [...board.querySelectorAll('[data-slot="distance"] image')].map((card) => card.getAttribute('data-art'));
+    // drawn first is lowest: the second destination, then the first, then the objective on top
+    expect(cards).toEqual(['DestinationCard/ASTEROID_FIELD', 'DestinationCard/ALGAE_PLANET', 'ObjectiveCard/KOBOL']);
+    const bottoms = [...board.querySelectorAll('[data-slot="distance"] image')].map((card) => Number(card.getAttribute('y')) + Number(card.getAttribute('height')));
+    expect(bottoms).toEqual([DISTANCE.y + 2 * DISTANCE.strip, DISTANCE.y + DISTANCE.strip, SLOTS.objective.y + SLOTS.objective.height]);
+    expect(board.querySelector('[data-slot="distance"]')?.textContent).toContain('3');
+  });
+
+  it('lays every deck of the rack in its printed slot with its back, a Skill Card back where the deck has none', () => {
+    const decks = ['DESTINATION', 'CRISIS', 'DESTINY', 'TACTICS'].map((deck) => ({ deck, size: 5, discardSize: 0, discarded: [], drawPile: null }));
+    const board = renderBoard(undefined, { ...game, decks } as unknown as GameProjection);
+
+    expect(board.querySelector('[data-deck="CRISIS"][data-pile="draw"] [data-art="DeckId/CRISIS"]')).not.toBeNull();
+    expect(board.querySelector('[data-deck="DESTINY"][data-pile="draw"] [data-art="Back/SKILL"]')).not.toBeNull();
+    const tactics = board.querySelector('[data-deck="TACTICS"][data-pile="draw"] .hotspot')!;
+    expect([tactics.getAttribute('x'), tactics.getAttribute('y')]).toEqual([String(DECK_SLOTS.TACTICS.x), String(DECK_SLOTS.TACTICS.y)]);
+  });
+
+  it('keeps the ships of a space area off its printed launch tube', () => {
+    const vipers = Array.from({ length: 3 }, (_, index) => ({ id: 10 + index, type: 'VIPER', location: 'GALACTICA_SPACE_4_OCLOCK', pilot: ['LEE_ADAMA', 'KARA_STARBUCK_THRACE', 'KARL_HELO_AGATHON'][index], damage: [], cargo: null }));
+    const board = renderBoard(undefined, { ...game, galactica: { ...game.galactica!, ships: vipers } } as unknown as GameProjection);
+
+    const tube = LAUNCH_TUBES.GALACTICA_SPACE_4_OCLOCK!;
+    for (const viper of board.querySelectorAll('[data-location="GALACTICA_SPACE_4_OCLOCK"] [data-art="ShipType/VIPER"]')) {
+      const left = Number(viper.getAttribute('x'));
+      const right = left + Number(viper.getAttribute('width'));
+      expect(right <= tube.x || left >= tube.x + tube.width).toBe(true);
+    }
+  });
+
+  it('lays the decks in the rack with their counts and the top of the discard pile, and the die on the starfield', () => {
     const board = renderBoard();
 
     expect(board.querySelector('[data-deck="CRISIS"][data-pile="draw"]')?.textContent).toContain('70');
     expect(board.querySelector('[data-deck="CRISIS"][data-pile="discard"] [data-art="CrisisCard/WATER_SABOTAGED"]')).not.toBeNull();
     expect(board.querySelector('[data-deck="POLITICS"][data-pile="discard"] [data-art="SkillCardType/RED_TAPE_0"]')).not.toBeNull();
-    expect(board.querySelector('[data-slot="skill-check"] [data-art="CrisisCard/CYLON_SCREENINGS"]')).not.toBeNull();
-    expect(board.querySelectorAll('[data-pile="skill-check"] [data-art="Back/SKILL"]')).toHaveLength(3);
-    expect(board.querySelector('[data-slot="skill-check"]')?.textContent).toContain('diff 9');
     expect(board.querySelector('[data-slot="distance"] [data-art="DestinationCard/ALGAE_PLANET"]')).not.toBeNull();
     expect(board.querySelector('.die')?.getAttribute('data-die')).toBe('5');
-    expect(board.querySelectorAll('.nukes [data-art="Token/NUKE"]')).toHaveLength(2);
+  });
+
+  it("leaves the card being resolved and its skill check to the turn panel, and the nukes to the Admiral's mat", () => {
+    const board = renderBoard();
+
+    // the turn's Crisis Card lies only in its discard pile, the skill check's card nowhere
+    expect(board.querySelectorAll('[data-art="CrisisCard/WATER_SABOTAGED"]')).toHaveLength(1);
+    expect(board.querySelector('[data-art="CrisisCard/CYLON_SCREENINGS"]')).toBeNull();
+    expect(board.querySelector('[data-pile="skill-check"]')).toBeNull();
+    expect(board.querySelector('[data-art="Token/NUKE"]')).toBeNull();
+  });
+
+  it('lays the Crisis Cards kept in play by the jump track, the civilian ships in the ship reserves, and no damage decks', () => {
+    const decks = ['CIVILIAN_SHIPS', 'GALACTICA_DAMAGE', 'PEGASUS_DAMAGE', 'BASESTAR_DAMAGE'].map((deck) => ({ deck, size: 10, discardSize: 0, discarded: [], drawPile: null }));
+    const board = renderBoard(undefined, { ...game, decks, crisisCardsInPlay: ['LEGENDARY_DISCOVERY'] } as unknown as GameProjection);
+
+    const kept = board.querySelector('[data-slot="in-play"] image')!;
+    expect(kept.getAttribute('data-art')).toBe('CrisisCard/LEGENDARY_DISCOVERY');
+    expect(Number(kept.getAttribute('x'))).toBeGreaterThan(JUMP_TRACK.MINUS_1.x);
+    const civilians = board.querySelector('[data-slot="reserves"] [data-deck="CIVILIAN_SHIPS"]')!;
+    expect(civilians.querySelectorAll('[data-art="ShipType/CIVILIAN"]')).toHaveLength(3);
+    expect(civilians.textContent).toContain('10');
+    const ships = [...civilians.querySelectorAll('image')].map((ship) => Number(ship.getAttribute('x')) + Number(ship.getAttribute('width')));
+    expect(Math.max(...ships)).toBeLessThanOrEqual(SLOTS.shipReserves.x + SLOTS.shipReserves.width);
+    expect(board.querySelector('[data-deck$="_DAMAGE"]')).toBeNull();
   });
 
   it('shows a face-up discard pile on hover, top first, but never a draw pile at a live table', () => {
@@ -144,21 +208,17 @@ describe('the board', () => {
     expect(document.querySelector('.reveal-pop .sandbox-only')).toBeNull();
   });
 
-  it('shows in a sandbox what the table hides, on hover: the draw pile top first, the face-down cards of a skill check', () => {
+  it('shows in a sandbox what the table hides, on hover: the draw pile top first', () => {
     const sandbox = {
       ...game,
       viewer: { kind: 'Sandbox' },
       decks: [{ deck: 'CRISIS', size: 2, discardSize: 0, discarded: [], drawPile: ['RIOTS_NO_JUMP', 'FOOD_SHORTAGE'] }],
-      skillCheck: { ...game.skillCheck!, cards: { count: 1, colors: {}, cards: [{ type: 'RED_TAPE', value: 0 }] } },
     } as unknown as GameProjection;
     const board = renderBoard(undefined, sandbox, true);
 
     fireEvent.mouseEnter(board.querySelector('[data-reveal="deck-CRISIS"]')!);
     expect(document.querySelector('.reveal-pop ol.pile li')?.textContent).toBe('Riots No Jump');
     expect(document.querySelector('.reveal-pop .sandbox-only')).not.toBeNull();
-
-    fireEvent.mouseEnter(board.querySelector('[data-reveal="skill-check-cards"]')!);
-    expect(document.querySelector('.reveal-pop ol.pile li')?.textContent).toBe('Red Tape 0');
   });
 
   it('lights up the locations an input can be answered with', () => {
