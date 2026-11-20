@@ -1,17 +1,20 @@
 import { expect, test, type Page } from '@playwright/test';
+import { openGame } from './tabs';
 
-// A seeded sandbox from the start: the characters for every seat, a full turn with a stacked Crisis Card, undo, export
-// and import.
-test('a seeded sandbox is played through a turn, undone, exported and imported', async ({ page }) => {
-  await page.goto('/login');
-  await page.getByLabel('name').fill(`E2E ${Date.now()}`);
-  await page.getByRole('button', { name: 'Log in (dev)' }).click();
-  await expect(page.getByRole('link', { name: 'New sandbox' })).toBeVisible();
+// A seeded sandbox from the start, in a tab of its own: the characters for every seat, a full turn with a stacked
+// Crisis Card, undo, export and import.
+test('a seeded sandbox is played through a turn, undone, exported and imported', async ({ page: lobby }) => {
+  await lobby.goto('/login');
+  await lobby.getByLabel('name').fill(`E2E ${Date.now()}`);
+  await lobby.getByRole('button', { name: 'Log in (dev)' }).click();
+  await expect(lobby.getByRole('link', { name: 'New sandbox' })).toBeVisible();
 
-  await page.getByRole('link', { name: 'New sandbox' }).click();
-  await page.getByLabel('players').selectOption('4');
-  await page.getByLabel('seed').fill('42');
-  await page.getByRole('button', { name: 'Start the sandbox' }).click();
+  await lobby.getByRole('link', { name: 'New sandbox' }).click();
+  await lobby.getByLabel('players').selectOption('4');
+  await lobby.getByLabel('seed').fill('42');
+  let page = await openGame(lobby, (from) => from.getByRole('button', { name: 'Start the sandbox' }).click());
+  // the first tab goes back to the lobby
+  await expect(lobby.getByRole('link', { name: 'New sandbox' })).toBeVisible();
   await expect(input(page).getByRole('heading')).toHaveText('Player 1 decides');
 
   // the characters, one per seat, answered by the sandbox's one user
@@ -58,9 +61,9 @@ test('a seeded sandbox is played through a turn, undone, exported and imported',
   const id = page.url().split('/').pop();
   const exported = await page.request.get(`/api/games/${id}/journal`);
   expect(exported.ok()).toBeTruthy();
-  await page.goto('/sandbox/new');
-  await page.getByLabel('journal file').setInputFiles({ name: 'sandbox.json', mimeType: 'application/json', buffer: await exported.body() });
-  await expect(page).not.toHaveURL(/sandbox\/new/);
+  await lobby.goto('/sandbox/new');
+  const file = { name: 'sandbox.json', mimeType: 'application/json', buffer: await exported.body() };
+  page = await openGame(lobby, (from) => from.getByLabel('journal file').setInputFiles(file));
   await expect(page.getByRole('region', { name: 'turn' }).getByRole('heading')).toHaveText('Turn 2 · Receive Skills');
   await expect(resource(page, 'Food')).toHaveText('7');
   await expect(input(page).getByRole('heading')).toHaveText('Laura Roslin decides');

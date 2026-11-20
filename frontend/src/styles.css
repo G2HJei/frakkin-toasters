@@ -240,12 +240,6 @@ nav.top .brand img {
   padding: 0.6rem 1rem 2rem;
 }
 
-.table-header {
-  display: flex;
-  align-items: baseline;
-  gap: 1rem;
-}
-
 .connection {
   font-size: 0.8rem;
   color: var(--muted);
@@ -255,7 +249,8 @@ nav.top .brand img {
   color: var(--ok);
 }
 
-.connection.reconnecting {
+.connection.reconnecting,
+.connection.closed {
   color: var(--danger);
 }
 
@@ -821,36 +816,47 @@ details > summary {
   color: #06121f;
 }
 
-.table-page .table-header {
+/* the game's name on the turn panel, after the logo: a heading rather than a printed label, and the connection beside
+   it while it isn't open */
+.table-page .turn .tab {
   align-items: center;
-  height: 46px;
-  padding: 0 18px;
-  background: linear-gradient(#1f252d, #12161c);
-  border-bottom: 3px solid var(--alert);
+  gap: 10px;
+  margin: 0 0 6px;
 }
 
-.table-page .table-header h1 {
-  font: 600 16px var(--display);
-  letter-spacing: 0.16em;
+.table-page .turn .tab .logo {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+}
+
+.table-page .turn .tab span {
+  font: 700 22px/1.2 var(--display);
+  letter-spacing: 0.01em;
+  text-transform: none;
+  color: var(--steel-100);
+  background: none;
+  padding: 0;
+  clip-path: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table-page .turn .tab .connection {
+  flex: none;
+  font: 600 11px/1 var(--display);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  margin: 0;
-}
-
-.table-page .table-header a {
-  color: var(--dradis-glow);
-  text-decoration: none;
-}
-
-.table-page .table-header .connection {
-  margin-left: auto;
 }
 
 .table-page .connecting {
   padding: 1rem 18px;
 }
 
-/* the screen under the top bars: the panels on the left, the board, the panels on the right, each side scrolling on
-   its own */
+/* the whole screen, with no bar over it: the panels on the left, the board, the panels on the right, each side
+   scrolling on its own */
 
 #root:has(> .table-page) {
   display: flex;
@@ -1174,12 +1180,12 @@ details > summary {
 /* turn and game */
 
 .turn .turn-line {
-  font: 700 22px var(--display);
+  font: 700 18px var(--display);
 }
 
 .turn .step-name {
   color: var(--amber);
-  font-size: 16px;
+  font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }

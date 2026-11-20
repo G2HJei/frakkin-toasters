@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useCreateSandbox, useImportSandbox } from '../api/queries';
+import { openGameTab } from './gameTab';
 
-/** A new sandbox: 3 to 7 players and an optional seed, or an exported journal to import. */
+/** A new sandbox: 3 to 7 players and an optional seed, or an exported journal to import. It opens in a tab of its own, and this one goes back to the lobby. */
 export function NewSandboxPage() {
   const navigate = useNavigate();
   const create = useCreateSandbox();
@@ -18,9 +19,16 @@ export function NewSandboxPage() {
         className="card"
         onSubmit={(event) => {
           event.preventDefault();
+          const tab = openGameTab(navigate);
           create.mutate(
             { playerCount: players, seed: seed.trim() === '' ? null : Number(seed) },
-            { onSuccess: ({ id }) => navigate(`/games/${id}`) },
+            {
+              onSuccess: ({ id }) => {
+                navigate('/');
+                tab.go(id);
+              },
+              onError: tab.close,
+            },
           );
         }}
       >
@@ -53,7 +61,15 @@ export function NewSandboxPage() {
             onChange={async (event) => {
               const file = event.target.files?.[0];
               if (file) {
-                importJournal.mutate(await file.text(), { onSuccess: ({ id }) => navigate(`/games/${id}`) });
+                // the tab opens before the file is read, while the browser still allows it
+                const tab = openGameTab(navigate);
+                importJournal.mutate(await file.text(), {
+                  onSuccess: ({ id }) => {
+                    navigate('/');
+                    tab.go(id);
+                  },
+                  onError: tab.close,
+                });
               }
             }}
           />

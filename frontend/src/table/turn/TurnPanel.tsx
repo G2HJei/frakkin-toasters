@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { cardArt, characterArt, dieArt, shipArt, skillBackArt, skillCardArt, skillCheckArt, skillTypeArt } from '../../art/images';
 import { ArtImg, CardBack, CardTile } from '../../art/Art';
 import { constantLabel, skillCardLabel } from '../../labels/describe';
+import type { ConnectionState } from '../../live/GameSocket';
 import type { SkillCard, SkillHand } from '../../wire/types';
 import { useRevealHandlers, type RevealSection } from '../reveal';
 import { useTable } from '../tableContext';
@@ -10,45 +11,52 @@ import { useTable } from '../tableContext';
 const STEPS = ['RECEIVE_SKILLS', 'MOVEMENT', 'ACTION', 'CRISIS', 'ACTIVATE_CYLON_SHIPS', 'PREPARE_FOR_JUMP', 'DISCARD'];
 
 /**
- * The turn and the game: the turn's number and step, the current and the acting character, the turn's Crisis Cards,
- * the die, an open interrupt window, the objective with the distance and the nukes, and what left the game.
+ * The game, named after the logo on the panel's tab, with the connection beside it while it isn't open, and the turn
+ * once one has started: the turn's number and step, the current and the acting character, the turn's Crisis Cards, the
+ * die, an open interrupt window, the objective with the distance and the nukes, and what left the game.
  */
-export function TurnPanel() {
+export function TurnPanel({ name, connection }: { name: string; connection: ConnectionState }) {
   const table = useTable();
   const game = table.game;
-  const turn = game?.turn;
-  if (!game || !turn) {
+  if (!game) {
     return null;
   }
-  const step = STEPS.indexOf(turn.step ?? '');
+  const turn = game.turn;
+  const step = STEPS.indexOf(turn?.step ?? '');
   const objective = cardArt('ObjectiveCard', game.objective);
-  const die = dieArt(turn.dieRoll?.value);
+  const die = dieArt(turn?.dieRoll?.value);
   return (
     <section className="panel cf turn" aria-label="turn">
       <div className="tab">
-        <span>Turn &amp; game</span>
+        <img src="/logo.png" alt="" className="logo" />
+        <span title={name}>{name || 'Game'}</span>
+        {connection !== 'open' && <small className={`connection ${connection}`}>{connection}</small>}
       </div>
-      <h2 className="turn-line">
-        <span className="turn-no">Turn {turn.number}</span> · <span className="step-name">{constantLabel('GameStep', turn.step)}</span>
-      </h2>
-      <ol className="steps">
-        {STEPS.map((name, index) => (
-          <li key={name} className={index < step ? 'done' : index === step ? 'now' : ''}>
-            {constantLabel('GameStep', name)}
-          </li>
-        ))}
-      </ol>
-      <div className="people">
-        <Person playerNumber={turn.currentPlayer} role="Current" />
-        <Person playerNumber={turn.actingPlayer} role="Acting" />
-      </div>
-      {(turn.endedEarly || turn.returnsToCrisisStep) && (
+      {turn && (
+        <>
+          <h2 className="turn-line">
+            <span className="turn-no">Turn {turn.number}</span> · <span className="step-name">{constantLabel('GameStep', turn.step)}</span>
+          </h2>
+          <ol className="steps">
+            {STEPS.map((stepName, index) => (
+              <li key={stepName} className={index < step ? 'done' : index === step ? 'now' : ''}>
+                {constantLabel('GameStep', stepName)}
+              </li>
+            ))}
+          </ol>
+          <div className="people">
+            <Person playerNumber={turn.currentPlayer} role="Current" />
+            <Person playerNumber={turn.actingPlayer} role="Acting" />
+          </div>
+        </>
+      )}
+      {turn && (turn.endedEarly || turn.returnsToCrisisStep) && (
         <p className="note">
           {turn.endedEarly ? 'The turn ended early. ' : ''}
           {turn.returnsToCrisisStep ? 'The turn returns to the Crisis step.' : ''}
         </p>
       )}
-      {(turn.crisisCards ?? []).length > 0 && (
+      {turn && (turn.crisisCards ?? []).length > 0 && (
         <Block label="Crisis">
           <span className="cards">
             {(turn.crisisCards ?? []).map((card, index) => (
@@ -74,7 +82,7 @@ export function TurnPanel() {
           </span>
         </Block>
       )}
-      {turn.dieRoll && (
+      {turn?.dieRoll && (
         <Block label="Die roll">
           <span className="die-roll">
             {turn.dieRoll.value === null ? (
@@ -100,8 +108,8 @@ export function TurnPanel() {
           </span>
         </Block>
       )}
-      {turn.interruptWindow && <InterruptWindow />}
-      {(turn.resolvedInterruptCards ?? []).length > 0 && (
+      {turn?.interruptWindow && <InterruptWindow />}
+      {turn && (turn.resolvedInterruptCards ?? []).length > 0 && (
         <Block label="Resolved this turn">
           <span className="cards">
             {(turn.resolvedInterruptCards ?? []).map((type, index) => (

@@ -668,9 +668,9 @@ REST (the lobby lists poll), Zustand for the game. See `frontend-plan.md`.
   through the schema, for the log and the input. `Art.tsx`: `CardTile` (a face-up card is a `tile`, a face-down one a
   `tile back`, which the lobby e2e checks), `CardBack`, `ArtStrip`, `SvgArt`, and the hover preview (`ArtPreview`).
   `images.test.ts` checks that every constant has its image and every image names a constant.
-- The table (`TablePage`): the board in the middle, as high as the screen (`.table-main` is a size container, the
-  board's width follows its height), and a column on each side that scrolls on its own. On the left the turn and the
-  game (`TurnPanel`), the decision (`InputPanel`) and its prompts, the skill check (`SkillCheckPanel`) and the sandbox's
+- The table (`TablePage`): no bar over it, the board in the middle, as high as the screen (`.table-main` is a size
+  container, the board's width follows its height), and a column on each side that scrolls on its own. On the left the
+  game and the turn (`TurnPanel`, its tab names the game, with the connection beside it while it isn't open), the decision (`InputPanel`) and its prompts, the skill check (`SkillCheckPanel`) and the sandbox's
   tools, and under them the log, which takes the height they leave (at least 260px) and scrolls inside its body. On the
   right the players' mats (`PlayersPanel`, the nukes beside the Admiral). Under 1100px the board goes across the width
   and the panels under it. The styles are the "table" section of `styles.css`: the board's palette, cut corners
@@ -695,8 +695,12 @@ REST (the lobby lists poll), Zustand for the game. See `frontend-plan.md`.
   players can't see (`hidden` sections: hands, Loyalty and other player cards, draw piles, face-down discards, a skill
   check's cards).
 - The website: `GamesPage` (the lobby: my sandboxes and games, open lobbies, games to watch, hosting), `RoomPage`
-  (seats and observers, join, leave, start), `SettingsPage`. A 401 goes to the login page.
-- e2e (`frontend/e2e/`): `sandbox.spec.ts` plays a seeded sandbox through a turn (reading the stacked Crisis Card
+  (seats and observers, join, leave, start), `SettingsPage`. A 401 goes to the login page. The lobby's pages and a
+  game's room have the top bar (`TopNav`), the table doesn't. A game opens in a tab of its own: the links to it, and
+  hosting, joining, a new or imported sandbox through `openGameTab` (`src/pages/gameTab.ts`), which opens the tab on the
+  click, while the browser allows it, and points it at the game when the request answers. A sandbox's "Restart with
+  this seed" stays in its tab.
+- e2e (`frontend/e2e/`): each spec follows a game into its tab (`tabs.ts`). `sandbox.spec.ts` plays a seeded sandbox through a turn (reading the stacked Crisis Card
   from the Crisis deck's hover), undoes, exports and imports;
   `lobby.spec.ts` has five users host, join, observe, leave and start a game, checks that nobody sees another
   player's cards and that an observer gets no input, and races two users for the last seat.

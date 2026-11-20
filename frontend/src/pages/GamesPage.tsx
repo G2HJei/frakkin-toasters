@@ -1,14 +1,19 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useGames, useLobbyAction, type GameSummary } from '../api/queries';
+import { openGameTab } from './gameTab';
 
-/** The lobby: open lobbies to join, my games and sandboxes, running games to watch, and hosting a game. */
+/** The lobby: open lobbies to join, my games and sandboxes, running games to watch, and hosting a game. Each game opens in a tab of its own. */
 export function GamesPage() {
   const games = useGames();
   const action = useLobbyAction();
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const mine = games.data?.mine ?? [];
+  const join = (game: GameSummary, as: 'PLAYER' | 'OBSERVER') => {
+    const tab = openGameTab(navigate);
+    action.mutate({ path: `/api/games/${game.id}/join`, body: { as } }, { onSuccess: () => tab.go(game.id), onError: tab.close });
+  };
 
   return (
     <main className="page">
@@ -19,7 +24,17 @@ export function GamesPage() {
         <form
           onSubmit={(event) => {
             event.preventDefault();
-            action.mutate({ path: '/api/games', body: { name } }, { onSuccess: (room) => navigate(`/games/${room.id}`) });
+            const tab = openGameTab(navigate);
+            action.mutate(
+              { path: '/api/games', body: { name } },
+              {
+                onSuccess: (room) => {
+                  tab.go(room.id);
+                  setName('');
+                },
+                onError: tab.close,
+              },
+            );
           }}
         >
           <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Game name" aria-label="game name" />
@@ -34,10 +49,10 @@ export function GamesPage() {
         games={games.data?.open ?? []}
         action={(game) => (
           <>
-            <button type="button" onClick={() => action.mutate({ path: `/api/games/${game.id}/join`, body: { as: 'PLAYER' } }, { onSuccess: () => navigate(`/games/${game.id}`) })}>
+            <button type="button" onClick={() => join(game, 'PLAYER')}>
               Join
             </button>
-            <button type="button" onClick={() => action.mutate({ path: `/api/games/${game.id}/join`, body: { as: 'OBSERVER' } }, { onSuccess: () => navigate(`/games/${game.id}`) })}>
+            <button type="button" onClick={() => join(game, 'OBSERVER')}>
               Observe
             </button>
           </>
@@ -47,7 +62,7 @@ export function GamesPage() {
         title="Watch"
         games={games.data?.running ?? []}
         action={(game) => (
-          <button type="button" onClick={() => action.mutate({ path: `/api/games/${game.id}/join`, body: { as: 'OBSERVER' } }, { onSuccess: () => navigate(`/games/${game.id}`) })}>
+          <button type="button" onClick={() => join(game, 'OBSERVER')}>
             Watch
           </button>
         )}
@@ -66,7 +81,7 @@ function GameList({ title, games, action }: { title: string; games: GameSummary[
         <ul className="games">
           {games.map((game) => (
             <li key={game.id}>
-              {game.participant ? <Link to={`/games/${game.id}`}>{game.name}</Link> : <span>{game.name}</span>}
+              {game.participant ? <Link to={`/games/${game.id}`} target="_blank">{game.name}</Link> : <span>{game.name}</span>}
               <span className="muted">
                 {' '}
                 · {game.status.toLowerCase()} · {game.players} players · host {game.hostName}

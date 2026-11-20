@@ -18,10 +18,12 @@ import { Table, tableContext } from '../table/tableContext';
 import { SkillCheckPanel, TurnPanel } from '../table/turn/TurnPanel';
 import type { ClientMessage } from '../wire/types';
 import { RoomPage } from './RoomPage';
+import { TopNav } from './TopNav';
 
 /**
- * The table of a game: its socket, the board as high as the screen, and the panels on its sides: on the left the turn,
- * the input, the skill check and the sandbox's tools in a sandbox, with the log under them, and the players on the right.
+ * The table of a game, in a tab of its own and with no bar over it: its socket, the board as high as the screen, and
+ * the panels on its sides: on the left the game and the turn, the input, the skill check and the sandbox's tools in a
+ * sandbox, with the log under them, and the players on the right. The room before the game starts keeps the top bar.
  */
 export function TablePage() {
   const { id = '' } = useParams();
@@ -33,14 +35,22 @@ export function TablePage() {
     [seats],
   );
   if (room.data && room.data.status === 'LOBBY') {
-    return <RoomPage room={room.data} />;
+    return (
+      <>
+        <TopNav />
+        <RoomPage room={room.data} />
+      </>
+    );
   }
   if (room.error) {
     return (
-      <main className="page">
-        <p className="error">{room.error.message}</p>
-        <Link to="/">Back</Link>
-      </main>
+      <>
+        <TopNav />
+        <main className="page">
+          <p className="error">{room.error.message}</p>
+          <Link to="/">Back</Link>
+        </main>
+      </>
     );
   }
   return <LiveTable gameId={id} name={room.data?.name ?? ''} seed={room.data?.seed ?? null} userNames={userNames} />;
@@ -83,17 +93,12 @@ function LiveTable({ gameId, name, seed, userNames }: { gameId: string; name: st
   return (
     <Table.Provider value={context}>
       <main className="table-page">
-        <header className="table-header">
-          <Link to="/">← Games</Link>
-          <h1>{name}</h1>
-          <span className={`connection ${connection}`}>{connection}</span>
-        </header>
         {!game ? (
           <p className="muted connecting">Connecting…</p>
         ) : (
           <div className="table-main">
             <div className="table-side left">
-              <TurnPanel />
+              <TurnPanel name={name} connection={connection} />
               <InputPanel onChoose={(option) => send(chooseMessage(token, option))} onSubmit={(event) => send(submitMessage(token, event))} />
               {pendingMove && asked !== null && (
                 <section className="panel cf move-prompt" aria-label="discard to move">

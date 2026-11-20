@@ -1,6 +1,8 @@
 import { expect, test, type Browser, type BrowserContext, type Page } from '@playwright/test';
+import { openGame } from './tabs';
 
-// Logs a new browser in through the dev login, as the login page does, and opens the games.
+// Logs a new browser in through the dev login, as the login page does, and opens the games. Its page becomes the game's
+// tab once it opens one.
 async function user(browser: Browser, name: string): Promise<{ context: BrowserContext; page: Page }> {
   const context = await browser.newContext();
   const page = await context.newPage();
@@ -25,20 +27,20 @@ test('players host, join, observe, leave and start a game, and nobody sees anoth
   const watcher = await user(browser, `Gaeta ${suffix}`);
 
   await host.page.getByLabel('game name').fill(game);
-  await host.page.getByRole('button', { name: 'Host a game' }).click();
+  host.page = await openGame(host.page, (lobby) => lobby.getByRole('button', { name: 'Host a game' }).click());
   await expect(host.page.getByRole('heading', { name: game })).toBeVisible();
 
   // the others find it among the open lobbies, which poll
   for (const joiner of [second, third]) {
     await joiner.page.goto('/');
-    await lobbyEntry(joiner.page, 'Open lobbies', game).getByRole('button', { name: 'Join' }).click();
+    joiner.page = await openGame(joiner.page, (lobby) => lobbyEntry(lobby, 'Open lobbies', game).getByRole('button', { name: 'Join' }).click());
     await expect(joiner.page.getByRole('heading', { name: game })).toBeVisible();
   }
   await third.page.getByRole('button', { name: 'Leave' }).click();
   await expect(host.page.getByRole('region', { name: 'seats' })).not.toContainText(`Starbuck ${suffix}`);
   await third.page.getByRole('button', { name: 'Take a seat' }).click();
   await observer.page.goto('/');
-  await lobbyEntry(observer.page, 'Open lobbies', game).getByRole('button', { name: 'Observe' }).click();
+  observer.page = await openGame(observer.page, (lobby) => lobbyEntry(lobby, 'Open lobbies', game).getByRole('button', { name: 'Observe' }).click());
   await expect(host.page.getByRole('region', { name: 'seats' })).toContainText(`Dualla ${suffix}`);
 
   await host.page.getByRole('button', { name: 'Start with 3 players' }).click();
@@ -84,7 +86,7 @@ test('two users race for the last seat, and one of them gets it', async ({ brows
   const game = `Race ${suffix}`;
   const host = await user(browser, `Host ${suffix}`);
   await host.page.getByLabel('game name').fill(game);
-  await host.page.getByRole('button', { name: 'Host a game' }).click();
+  host.page = await openGame(host.page, (lobby) => lobby.getByRole('button', { name: 'Host a game' }).click());
   await expect(host.page.getByRole('heading', { name: game })).toBeVisible();
   const gameUrl = host.page.url();
   for (let seat = 2; seat <= 6; seat++) {
