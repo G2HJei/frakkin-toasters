@@ -29,9 +29,6 @@ export function InputPanel({ onChoose, onSubmit }: InputPanelProps) {
   const yourMove = input?.kind === 'Choose' || input?.kind === 'Decide';
   return (
     <section className={`panel cf input-panel ${yourMove ? 'your-move' : ''}`.trim()} aria-label="input">
-      <div className={yourMove ? 'tab red' : 'tab'}>
-        <span>{yourMove ? 'Decision · your move' : 'Decision'}</span>
-      </div>
       <h2>{heading(input, table.playerName)}</h2>
       {outcome && (
         <p className="outcome">

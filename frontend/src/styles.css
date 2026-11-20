@@ -780,16 +780,6 @@ details > summary {
   clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0 50%);
 }
 
-.table-page .tab.red span {
-  background: linear-gradient(#e2554d, #a8231d);
-  color: #fff;
-}
-
-.table-page .tab.blue span {
-  background: linear-gradient(#7cc0f0, #2f78b5);
-  color: #06121f;
-}
-
 /* the game's name on the turn panel, after the logo: a heading rather than a printed label, and the connection beside
    it while it isn't open */
 .table-page .turn .tab {
@@ -1281,7 +1271,7 @@ details > summary {
 /* the log */
 
 .table-page .log summary {
-  font: 600 11px var(--display);
+  font: 600 12px var(--display);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--steel-300);
@@ -1291,6 +1281,33 @@ details > summary {
 .table-page .log {
   display: flex;
   flex-direction: column;
+  font-size: 15px;
+}
+
+.table-page .log .facts {
+  font-size: 0.9em;
+}
+
+/* over the bottom of the log while the user reads further up */
+.table-page .log-to-bottom {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  font: 600 11px/1 var(--display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #151b25;
+  background: linear-gradient(#eef1f4, #b8c0c9);
+  border: 0;
+  border-radius: 0;
+  padding: 7px 18px;
+  clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0 50%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.table-page .log-to-bottom:hover {
+  background: linear-gradient(#ffffff, #cfd6dd);
 }
 
 .table-side.left > .log {

@@ -671,10 +671,10 @@ REST (the lobby lists poll), Zustand for the game. See `frontend-plan.md`.
 - The table (`TablePage`): no bar over it, the board in the middle, as high as the screen (`.table-main` is a size
   container, the board's width follows its height), and a column on each side that scrolls on its own. On the left the
   game and the turn (`TurnPanel`, its tab names the game, with the connection beside it while it isn't open, and the
-  skill check under the turn's Crisis Card), the decision (`InputPanel`) and its prompts, and under them the log, which takes the height they leave (at least 260px) and scrolls inside its body. On the
+  skill check under the turn's Crisis Card), the decision (`InputPanel`) and its prompts, and under them the log, which takes the height they leave (at least 260px) and scrolls inside its body. Neither has a title. The log keeps every turn open and follows the newest entry until the user scrolls up (`useFollowBottom`), and "Go to bottom" follows again. On the
   right the sandbox's tools in a sandbox, above the players' mats (`PlayersPanel`, the nukes beside the Admiral). Under 1100px the board goes across the width
   and the panels under it. The styles are the "table" section of `styles.css`: the board's palette, cut corners
-  (`.cf`, `--chamfer`) and printed-label tabs. A player is named by his character everywhere (`playerName`), "Player n"
+  (`.cf`, `--chamfer`) and the printed-label look. A player is named by his character everywhere (`playerName`), "Player n"
   before he has one; the user in the seat shows only on his mat (`userName`, from the room's seats).
 - The board (`src/table/board/`): `board-classic.jpg` is the surface, and `BoardSvg` lays the components on its printed
   slots, in the image's pixels. `board-classic.layout.json`, measured with the image, holds what is printed, and
