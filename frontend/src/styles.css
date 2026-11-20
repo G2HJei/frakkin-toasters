@@ -712,10 +712,17 @@ details > summary {
   max-height: 30vh;
 }
 
-/* a player's mat beside his character sheet */
+/* a character sheet (the preview of a standee, a portrait or a pilot's token) at its full height, so its text reads:
+   only a window too small for it scales it down */
+.art-preview.preview-token .art-preview-art img,
+.art-preview.preview-pilot .art-preview-art img {
+  max-height: calc(100vh - 4rem);
+  max-width: calc(100vw - 2rem);
+}
+
+/* with a player's mat beside it */
 .art-preview.with-extra .art-preview-art img {
-  max-height: 40vh;
-  max-width: min(30rem, 35vw);
+  max-width: calc(100vw - 2rem - 360px);
 }
 
 .art-preview-extra .mat {

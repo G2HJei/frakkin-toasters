@@ -681,10 +681,10 @@ REST (the lobby lists poll), Zustand for the game. See `frontend-plan.md`.
   reads it (a place for every `Location`, which a test checks, the title panels, the tracks, the resources, the deck
   rack, the launch tubes) and adds the free starfield (`SLOTS`). The standees stand on the printed names of their
   locations, reaching a little into the pictures, and a damaged location gets a red "damaged" chip, like the Engine
-  Room's "activated", on its bottom edge, clear of its name. The ships fly in the middle of their space areas, the
-  Cylon ships first, a ship as large in every area of its board, alone or piled (the bow's strip is 8 o'clock, the
-  stern's 2 o'clock; the ships leave the launch tubes free). The resources are printed in a row, each amount after its
-  icon and label ("FUEL:"), red in the red zone (`resources.tsx`, the icons in `icons/`),
+  Room's "activated", at the bottom of the panel its name is printed in, under the name. The ships fly in the middle
+  of their space areas, the Cylon ships first, a ship as large in every area of its board, alone or piled (the bow's
+  strip is 8 o'clock, the stern's 2 o'clock; the ships leave the launch tubes free). The resources are printed in a
+  row, each amount after its icon and label ("FUEL:"), red in the red zone (`resources.tsx`, the icons in `icons/`),
   markers sit on the tracks, the decks lie in the rack, which prints no names but rings each Skill Card deck in its
   color, with their counts and their top discard over them, the civilian ships lie at the end of the ship reserves, and
   the destinations tuck under the objective, each showing its distance. The Crisis Cards kept in play lie by the jump

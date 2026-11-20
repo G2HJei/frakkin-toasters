@@ -122,18 +122,17 @@ describe('the board', () => {
     expect(groups.map((group) => group.ships.map((one) => one.id))).toEqual([[9], [2, 5], [1], [3]]);
   });
 
-  it('labels a damaged location at its bottom, clear of its printed name, and puts the markers on the tracks', () => {
+  it('labels a damaged location inside it, under its printed name, and puts the markers on the tracks', () => {
     const board = renderBoard();
 
     expect(board.querySelector('[data-location="ARMORY"]')?.classList).toContain('damaged');
-    // a chip like the Engine Room's "activated", on the location's bottom edge
+    // a chip like the Engine Room's "activated", at the bottom of the panel the name is printed in
     const label = board.querySelector('[data-location="ARMORY"] .count.damaged-label')!;
     expect(label.textContent).toBe('damaged');
-    const top = Math.min(...label.querySelector('polygon')!.getAttribute('points')!.split(' ').map((point) => Number(point.split(',')[1])));
-    const armory = LAYOUT.ARMORY;
+    const ys = label.querySelector('polygon')!.getAttribute('points')!.split(' ').map((point) => Number(point.split(',')[1]));
     const title = TITLES.ARMORY!;
-    expect(top).toBeGreaterThan(title.y + title.height / 2 + 20);
-    expect(top).toBeLessThan(armory.y + armory.height);
+    expect(Math.min(...ys)).toBeGreaterThan(title.y + title.height / 2 + 15);
+    expect(Math.max(...ys)).toBeLessThanOrEqual(title.y + title.height);
     expect(board.querySelector('[data-location="RESEARCH_LAB"] .damaged-label')).toBeNull();
     expect(board.querySelector('[data-track="JumpPreparation"]')?.getAttribute('data-position')).toBe('POSITION_2');
     expect(board.querySelector('[data-track="Pursuit"]')?.getAttribute('data-position')).toBe('START');

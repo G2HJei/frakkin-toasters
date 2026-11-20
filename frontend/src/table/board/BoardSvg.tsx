@@ -112,8 +112,7 @@ export function BoardSvg({ targets, onLocation, actAt, onAct }: BoardSvgProps) {
             {/* under the standees, which show their own cards */}
             {card && <rect className="location-hotspot" x={place.x} y={place.y} width={place.width} height={place.height} {...previewHandlers(card)} />}
             <Standees place={place} title={TITLES[name]} characters={(location.characters ?? []) as Character[]} current={currentCharacter} cylons={cylons} nameOf={table.playerName} game={game} />
-            {/* on the bottom edge, under the printed name and over the standees' feet */}
-            {!space && location.damaged && <Count x={place.x + place.width / 2} y={place.y + place.height - 16} value="damaged" size={26} align="middle" className="damaged-label" />}
+            {!space && location.damaged && <DamagedLabel place={place} title={TITLES[name]} />}
             {actAt === name && onAct && (
               <g className="act" role="button" aria-label="Act" onClick={onAct}>
                 <rect x={place.x + place.width - 96} y={place.y - 22} width={110} height={52} rx={6} />
@@ -403,6 +402,15 @@ function LocationMarks({ place, destroyed, engineRoom }: { place: Place; destroy
       {engineRoom && <Count x={place.x + 10} y={place.y + 20} value="activated" size={26} accent />}
     </>
   );
+}
+
+// A damaged location's label, like the Engine Room's "activated": at the bottom of the panel its name is printed in,
+// under the name (two lines of it leave room for no more than this size) and over the standees' feet.
+const DAMAGED_SIZE = 24;
+
+function DamagedLabel({ place, title }: { place: Place; title: Box | undefined }) {
+  const bottom = title ? title.y + title.height - 2 : place.y + place.height - 10;
+  return <Count x={place.x + place.width / 2} y={bottom - DAMAGED_SIZE * 1.44} value="damaged" size={DAMAGED_SIZE} align="middle" className="damaged-label" />;
 }
 
 // The standees stand on the printed name of their location, a little taller than its panel, so they reach up into the
