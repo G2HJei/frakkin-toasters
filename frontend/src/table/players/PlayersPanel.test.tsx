@@ -2,6 +2,7 @@ import { fireEvent, render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { PlayersPanel } from './PlayersPanel';
 import { RevealLayer, useReveal } from '../reveal';
+import { usePreview } from '../../art/Art';
 import { Table, tableContext } from '../tableContext';
 import type { GameProjection } from '../../wire/types';
 
@@ -85,6 +86,20 @@ describe('the players', () => {
     fireEvent.mouseEnter(panel.querySelector('[data-reveal="hand-2"]')!);
     expect([...document.querySelectorAll('.reveal-pop ol.pile li')].map((card) => card.textContent)).toEqual(['Red Tape 0', 'Red Tape 0', 'Executive Order 1']);
     useReveal.getState().hide();
+  });
+
+  it('lays the titles and tokens under the portrait, and previews one from anywhere on its badge', () => {
+    const panel = renderPanel();
+    const side = panel.querySelector('[data-player="1"] .mat-side');
+
+    expect(side?.firstElementChild?.matches('img.avatar')).toBe(true);
+    expect(side?.querySelector('.badges')?.textContent).toBe('AdmiralCurrent');
+    const admiral = side!.querySelector('.badge.title')!;
+    expect(admiral.querySelector('img')?.getAttribute('alt')).toBe('Admiral');
+    fireEvent.mouseEnter(admiral);
+    expect(usePreview.getState().art?.label).toBe('Admiral');
+    fireEvent.mouseLeave(admiral);
+    expect(usePreview.getState().art).toBeNull();
   });
 
   it('lays the nukes beside the Admiral, and nowhere once they are used', () => {

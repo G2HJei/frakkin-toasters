@@ -1,24 +1,21 @@
 import type { ReactNode } from 'react';
 import { cardArt, characterArt, skillCardArt, titleArt, tokenArt, type ArtRef, type CardEnum, type TitleName, type TokenName } from '../../art/images';
-import { ArtImg, CardBack, CardTile } from '../../art/Art';
+import { ArtImg, CardBack, CardTile, previewHandlers } from '../../art/Art';
 import { constantLabel, skillCardLabel } from '../../labels/describe';
 import type { HiddenCards, PlayerProjection, SkillHand } from '../../wire/types';
 import { faceDown, useRevealHandlers, type RevealSection } from '../reveal';
 import { useTable } from '../tableContext';
 
 /**
- * Every player's mat: his character first and the user in the seat under it, where he is, the titles and tokens in
- * front of him (the nukes with the Admiral), and his cards: face up for the viewer they belong to, otherwise their
- * backs. A sandbox shows the backs too, like a live game, and what they hide on hover.
+ * Every player's mat: his portrait with the titles and tokens in front of him under it (the nukes with the Admiral),
+ * his character and the user in the seat, where he is, and his cards: face up for the viewer they belong to,
+ * otherwise their backs. A sandbox shows the backs too, like a live game, and what they hide on hover.
  */
 export function PlayersPanel() {
   const table = useTable();
   const players = table.game?.players ?? [];
   return (
-    <section className="panel cf players" aria-label="players">
-      <div className="tab blue">
-        <span>Players</span>
-      </div>
+    <section className="players" aria-label="players">
       <div className="mats">
         {players.map((player) => (
           <PlayerMat key={player.number} player={player} />
@@ -38,17 +35,11 @@ function PlayerMat({ player }: { player: PlayerProjection }) {
   const portrait = characterArt(player.character);
   const user = table.userName(player.number);
   const current = turn?.currentPlayer === player.number;
-  const classes = ['player', 'mat', current ? 'current' : '', player.revealedCylon ? 'cylon' : ''].join(' ').trim();
+  const classes = ['player', 'mat', 'cf', current ? 'current' : '', player.revealedCylon ? 'cylon' : ''].join(' ').trim();
   return (
     <article className={classes} data-player={player.number}>
-      {portrait ? <ArtImg art={portrait} className="avatar" /> : <span className="avatar empty" />}
-      <div className="mat-body">
-        <header className="who">
-          <strong>{player.character ? constantLabel('Character', player.character) : `Player ${player.number}`}</strong>
-          {user && <span className="user">{user}</span>}
-          {viewerIs(table.game, player.number) && <em className="you">you</em>}
-        </header>
-        <p className="where">{player.location ? constantLabel('Location', player.location) : player.character ? 'off the board' : 'no character yet'}</p>
+      <div className="mat-side">
+        {portrait ? <ArtImg art={portrait} className="avatar" /> : <span className="avatar empty" />}
         <p className="badges">
           {president && <TitleBadge title="PRESIDENT" />}
           {holds(titles?.admiral) && <TitleBadge title="ADMIRAL" />}
@@ -58,10 +49,20 @@ function PlayerMat({ player }: { player: PlayerProjection }) {
           {player.infiltrating && <TitleBadge title="INFILTRATING" />}
           {player.mutineer && <Badge className="mutineer" art={cardArt('LoyaltyCard', 'MUTINEER')} label="Mutineer" />}
           {player.revealedCylon && <Badge className="cylon" art={null} label="Cylon" />}
+          {/* a Cylon Leader who isn't infiltrating */}
+          {player.human === false && !player.revealedCylon && <Badge className="cylon" art={null} label="Not human" />}
           {current && <TokenBadge token="CURRENT_PLAYER" label="Current" />}
           {turn?.actingPlayer === player.number && turn.actingPlayer !== turn.currentPlayer && <Badge className="token" art={null} label="Acting" />}
           {player.miracleToken && <TokenBadge token="MIRACLE" label="Miracle" />}
         </p>
+      </div>
+      <div className="mat-body">
+        <header className="who">
+          <strong>{player.character ? constantLabel('Character', player.character) : `Player ${player.number}`}</strong>
+          {user && <span className="user">{user}</span>}
+          {viewerIs(table.game, player.number) && <em className="you">you</em>}
+        </header>
+        <p className="where">{player.location ? constantLabel('Location', player.location) : player.character ? 'off the board' : 'no character yet'}</p>
         <Hand hand={player.skillCards} owner={player.number} />
         <div className="piles">
           <Pile label="Loyalty" cards={player.loyaltyCards} enumName="LoyaltyCard" deck="LOYALTY" owner={player.number} />
@@ -71,10 +72,6 @@ function PlayerMat({ player }: { player: PlayerProjection }) {
           {president && <Pile label="Quorum" cards={game?.presidentHand ?? null} enumName="QuorumCard" deck="QUORUM" owner={player.number} />}
         </div>
         <Learned player={player} />
-        <p className="small muted">
-          {player.turns} turns · hand limit {player.handLimit}
-          {player.human === false ? ' · not human' : ''}
-        </p>
       </div>
     </article>
   );
@@ -93,10 +90,11 @@ function TokenBadge({ token, label }: { token: TokenName; label: string }) {
   return <Badge className="token" art={tokenArt(token)} label={label} round />;
 }
 
+// The whole badge shows the preview, not just its icon.
 function Badge({ className, art, label, round = false }: { className: string; art: ArtRef | null; label: string; round?: boolean }) {
   return (
-    <span className={`badge ${className}`}>
-      {art && <ArtImg art={art} className={round ? 'round' : ''} />}
+    <span className={`badge ${className}`} {...(art ? previewHandlers(art) : {})}>
+      {art && <ArtImg art={art} className={round ? 'round' : ''} preview={false} />}
       {label}
     </span>
   );

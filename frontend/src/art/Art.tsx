@@ -23,7 +23,7 @@ export const usePreview = create<PreviewState>((set, get) => ({
   },
 }));
 
-function previewHandlers(art: ArtRef) {
+export function previewHandlers(art: ArtRef) {
   if (art.preview.length === 0) {
     return {};
   }
@@ -49,7 +49,8 @@ export function ArtPreview() {
   );
 }
 
-export function ArtImg({ art, className = '' }: { art: ArtRef; className?: string }) {
+/** An image with the preview on hover, unless what it is part of shows it (`preview={false}`). */
+export function ArtImg({ art, className = '', preview = true }: { art: ArtRef; className?: string; preview?: boolean }) {
   return (
     <img
       src={art.url}
@@ -58,7 +59,7 @@ export function ArtImg({ art, className = '' }: { art: ArtRef; className?: strin
       draggable={false}
       className={`art art-${art.shape} ${className}`.trim()}
       data-art={art.key}
-      {...previewHandlers(art)}
+      {...(preview ? previewHandlers(art) : {})}
     />
   );
 }
