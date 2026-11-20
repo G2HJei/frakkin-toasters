@@ -96,5 +96,5 @@ async function expectTurn(page: Page, line: string, step: string) {
 }
 
 function resource(page: Page, name: string) {
-  return page.locator('svg.board-svg .dial', { hasText: name.toLowerCase() }).locator('.dial-value');
+  return page.locator(`svg.board-svg .resource[data-resource="${name.toLowerCase()}"]`);
 }

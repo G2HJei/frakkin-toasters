@@ -1,6 +1,6 @@
 {
- "image": "board-classic.jpg",
- "note": "pixels of the image; boxes are [x, y, width, height]; location boxes end with their BoardArea; locationTitles are the panels the names are printed in; distanceTraveled is where destinations tuck under the objective (nothing is printed there); launch.* are the printed launch strips; cylonSectors is the centre and slope of the Cylon fleet board's sector lines; dials have no printed pointer: \"printed\" is the value at the top of the wheel",
+ "image": "board.jpg",
+ "note": "pixels of the image; boxes are [x, y, width, height]; location boxes end with their BoardArea; locationTitles are the panels the names are printed in; distanceTraveled is where destinations tuck under the objective (nothing is printed there); launch.* are the printed launch strips; cylonSectors is the centre and slope of the Cylon fleet board's sector lines; resources are where each amount goes after its printed icon and label, in a row: the left end of the text and its baseline",
  "width": 2003,
  "height": 2317,
  "locations": {
@@ -320,30 +320,22 @@
    }
   }
  },
- "dials": {
+ "resources": {
   "fuel": {
-   "x": 1217.0,
-   "y": 1278.3,
-   "r": 64,
-   "printed": 8
+   "x": 1120,
+   "y": 1290
   },
   "food": {
-   "x": 1377.0,
-   "y": 1278.3,
-   "r": 64,
-   "printed": 8
+   "x": 1334,
+   "y": 1290
   },
   "morale": {
-   "x": 1537.0,
-   "y": 1278.3,
-   "r": 64,
-   "printed": 10
+   "x": 1572,
+   "y": 1290
   },
   "population": {
-   "x": 1697.0,
-   "y": 1278.3,
-   "r": 64,
-   "printed": 12
+   "x": 1873,
+   "y": 1290
   }
  },
  "slots": {
@@ -361,88 +353,88 @@
    "count": 8
   },
   "deck.destination": [
-   208,
-   61,
-   84,
-   130
+   230,
+   41,
+   96,
+   148
   ],
   "deck.crisis": [
-   349,
-   61,
-   84,
-   130
+   362,
+   41,
+   96,
+   148
   ],
   "deck.superCrisis": [
-   490,
-   61,
-   84,
-   130
+   494,
+   41,
+   96,
+   148
   ],
   "deck.quorum": [
-   630,
-   61,
-   84,
-   130
+   626,
+   41,
+   96,
+   148
   ],
   "deck.mutiny": [
-   771,
-   61,
-   84,
-   130
+   758,
+   41,
+   96,
+   148
   ],
   "deck.loyalty": [
-   912,
-   61,
-   84,
-   130
+   890,
+   41,
+   96,
+   148
   ],
   "deck.motive": [
-   1053,
-   61,
-   84,
-   130
+   1022,
+   41,
+   96,
+   148
   ],
   "deck.destiny": [
-   208,
    230,
-   84,
-   130
+   206,
+   96,
+   148
   ],
   "deck.POLITICS": [
-   349,
-   230,
-   84,
-   130
+   362,
+   206,
+   96,
+   148
   ],
   "deck.LEADERSHIP": [
-   490,
-   230,
-   84,
-   130
+   494,
+   206,
+   96,
+   148
   ],
   "deck.TACTICS": [
-   630,
-   230,
-   84,
-   130
+   626,
+   206,
+   96,
+   148
   ],
   "deck.PILOTING": [
-   771,
-   230,
-   84,
-   130
+   758,
+   206,
+   96,
+   148
   ],
   "deck.ENGINEERING": [
-   912,
-   230,
-   84,
-   130
+   890,
+   206,
+   96,
+   148
   ],
   "deck.TREACHERY": [
-   1053,
-   230,
-   84,
-   130
+   1022,
+   206,
+   96,
+   148
   ],
   "cylonReserves": [
    1344,

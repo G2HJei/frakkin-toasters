@@ -1,13 +1,14 @@
-// Where everything lies on board-classic.jpg, in the image's own pixels (2003×2317). board-classic.layout.json, measured
-// with the image, has what is printed: the location cards and the panels their names are printed in, the space areas,
-// the tracks, the dials, the deck rack and the reserves. The free starfield for the little that has no printed slot is
+// Where everything lies on board.jpg, in the image's own pixels (2003×2317). board.layout.json, measured with the
+// image, has what is printed: the location cards and the panels their names are printed in, the space areas, the
+// tracks, the resources, the deck rack and the reserves. The free starfield for the little that has no printed slot is
 // below. A test checks that every Location of the schema has a place here.
 //
 // Galactica's bow points left: the area in front of it (8 o'clock, where Cylon ships appear) is the strip at the bow,
 // the one behind it (2 o'clock, where civilian ships appear) the strip at the stern, the others clockwise. The Cylon
 // Fleet board's areas sit around the basestar at the clock positions of the Galactica areas they lead to.
 import type { Location } from '../../wire/types';
-import printed from './board-classic.layout.json';
+import printed from './board.layout.json';
+import type { ResourceName } from './resources';
 
 export const BOARD_WIDTH = printed.width;
 export const BOARD_HEIGHT = printed.height;
@@ -59,8 +60,14 @@ export const JUMP_TRACK: Record<string, Point> = printed.tracks.jump;
 export const PURSUIT_TRACK: Record<string, Point> = printed.tracks.pursuit;
 export const BOARDING_TRACK: Record<string, Point> = printed.tracks.boarding;
 
-// the printed dials: their centre, their radius, and the value at the top of the printed wheel
-export const DIALS: Record<'fuel' | 'food' | 'morale' | 'population', { x: number; y: number; r: number; printed: number }> = printed.dials;
+// the resources, printed in a row, each an icon and a label ("FUEL:"), and where the amount goes after the label: the
+// left end of the text and its baseline
+export const RESOURCES: Record<ResourceName, Point> = {
+  fuel: printed.resources.fuel,
+  food: printed.resources.food,
+  morale: printed.resources.morale,
+  population: printed.resources.population,
+};
 
 // the deck rack: a printed slot per deck, by DeckId ("deck.superCrisis" is SUPER_CRISIS)
 export const DECK_SLOTS: Record<string, Box> = Object.fromEntries(
@@ -87,7 +94,6 @@ export const SLOTS = {
   shipReserves: printedBox(printed.slots.shipReserves),
   // no printed slot: the free starfield
   inPlay: box(785, 1262, 110, 155),
-  die: box(150, 1290, 84, 90),
 };
 
 export function isSpace(location: string | null | undefined): boolean {

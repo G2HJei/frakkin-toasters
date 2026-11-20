@@ -1,6 +1,6 @@
 // The images on the table. A thumbnail is too small to read, so hovering one shows it large in the preview, which
 // follows the pointer.
-import { useRef } from 'react';
+import { useRef, type ReactNode } from 'react';
 import { create } from 'zustand';
 import { deckBackArt, type ArtRef } from './images';
 import { usePlaceNear, type Point } from './nearPointer';
@@ -9,7 +9,9 @@ import { constantLabel } from '../labels/describe';
 interface PreviewState {
   art: ArtRef | null;
   pointer: Point | null;
-  show(art: ArtRef, pointer: Point): void;
+  // shown beside the images, e.g. a player's mat by his character sheet
+  extra: ReactNode;
+  show(art: ArtRef, pointer: Point, extra?: ReactNode): void;
   move(art: ArtRef, pointer: Point): void;
   hide(art: ArtRef): void;
 }
@@ -17,7 +19,8 @@ interface PreviewState {
 export const usePreview = create<PreviewState>((set, get) => ({
   art: null,
   pointer: null,
-  show: (art, pointer) => set({ art, pointer }),
+  extra: null,
+  show: (art, pointer, extra = null) => set({ art, pointer, extra }),
   move: (art, pointer) => {
     if (get().art?.key === art.key) {
       set({ pointer });
@@ -26,17 +29,17 @@ export const usePreview = create<PreviewState>((set, get) => ({
   // only the image that showed the preview hides it
   hide: (art) => {
     if (get().art?.key === art.key) {
-      set({ art: null, pointer: null });
+      set({ art: null, pointer: null, extra: null });
     }
   },
 }));
 
-export function previewHandlers(art: ArtRef) {
+export function previewHandlers(art: ArtRef, extra?: ReactNode) {
   if (art.preview.length === 0) {
     return {};
   }
   return {
-    onMouseEnter: (event: React.MouseEvent) => usePreview.getState().show(art, { x: event.clientX, y: event.clientY }),
+    onMouseEnter: (event: React.MouseEvent) => usePreview.getState().show(art, { x: event.clientX, y: event.clientY }, extra),
     onMouseMove: (event: React.MouseEvent) => usePreview.getState().move(art, { x: event.clientX, y: event.clientY }),
     onMouseLeave: () => usePreview.getState().hide(art),
   };
@@ -45,17 +48,21 @@ export function previewHandlers(art: ArtRef) {
 export function ArtPreview() {
   const art = usePreview((state) => state.art);
   const pointer = usePreview((state) => state.pointer);
+  const extra = usePreview((state) => state.extra);
   const ref = useRef<HTMLDivElement>(null);
   usePlaceNear(ref, pointer);
   if (!art) {
     return null;
   }
   return (
-    <div ref={ref} className={`art-preview preview-${art.shape}`} aria-hidden="true">
-      {art.preview.map((url) => (
-        <img key={url} src={url} alt="" />
-      ))}
-      <span className="art-preview-label">{art.label}</span>
+    <div ref={ref} className={`art-preview preview-${art.shape}${extra ? ' with-extra' : ''}`} aria-hidden="true">
+      <div className="art-preview-art">
+        {art.preview.map((url) => (
+          <img key={url} src={url} alt="" />
+        ))}
+        <span className="art-preview-label">{art.label}</span>
+      </div>
+      {extra && <div className="art-preview-extra">{extra}</div>}
     </div>
   );
 }
@@ -138,8 +145,11 @@ export function ArtStrip({ refs, className = '' }: { refs: ArtRef[]; className?:
   );
 }
 
-/** An image inside the board's SVG, with the same preview unless what it is part of shows more on hover. */
-export function SvgArt({ art, x, y, width, height, className, title, preview = true, transform }: {
+/**
+ * An image inside the board's SVG, with the same preview unless what it is part of shows more on hover, and what the
+ * preview shows beside it.
+ */
+export function SvgArt({ art, x, y, width, height, className, title, preview = true, previewExtra, transform }: {
   art: ArtRef;
   x: number;
   y: number;
@@ -148,6 +158,7 @@ export function SvgArt({ art, x, y, width, height, className, title, preview = t
   className?: string;
   title?: string;
   preview?: boolean;
+  previewExtra?: ReactNode;
   transform?: string;
 }) {
   return (
@@ -161,7 +172,7 @@ export function SvgArt({ art, x, y, width, height, className, title, preview = t
       className={className}
       transform={transform}
       data-art={art.key}
-      {...(preview ? previewHandlers(art) : {})}
+      {...(preview ? previewHandlers(art, previewExtra) : {})}
     >
       <title>{title ?? art.label}</title>
     </image>

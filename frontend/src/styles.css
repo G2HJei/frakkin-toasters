@@ -684,9 +684,8 @@ details > summary {
   top: 0;
   z-index: 60;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.3rem;
+  align-items: flex-start;
+  gap: 0.6rem;
   padding: 0.5rem;
   background: rgba(13, 17, 23, 0.92);
   border: 1px solid var(--line);
@@ -695,15 +694,32 @@ details > summary {
   pointer-events: none;
 }
 
-.art-preview img {
+.art-preview-art {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.art-preview-art img {
   display: block;
   max-height: 62vh;
   max-width: min(36rem, 45vw);
   border-radius: 8px;
 }
 
-.art-preview.preview-location img {
+.art-preview.preview-location .art-preview-art img {
   max-height: 30vh;
+}
+
+/* a player's mat beside his character sheet */
+.art-preview.with-extra .art-preview-art img {
+  max-height: 40vh;
+  max-width: min(30rem, 35vw);
+}
+
+.art-preview-extra .mat {
+  width: 340px;
 }
 
 .art-preview-label {
@@ -711,7 +727,7 @@ details > summary {
   font-size: 0.85rem;
 }
 
-/* the table: board-classic.jpg with the components on it, as high as the screen, and the panels on its sides ----- */
+/* the table: board.jpg with the components on it, as high as the screen, and the panels on its sides ------------ */
 
 /* the palette, sampled from the board's artwork */
 .table-page {
@@ -965,10 +981,16 @@ details > summary {
   stroke: var(--alert);
 }
 
-/* the dial's value, for a screen reader and the tests; its chip shows it */
-.board-svg .dial-caption {
-  font-size: 1px;
-  fill: transparent;
+/* each resource's amount after its printed label, red in the red zone */
+.board-svg .resource {
+  font-size: 38px;
+  font-weight: 700;
+  fill: var(--steel-100);
+}
+
+.board-svg .resource.red-zone {
+  fill: #ff4f43;
+  filter: drop-shadow(0 0 8px rgba(255, 70, 50, 0.75));
 }
 
 .board-svg .marker rect {
@@ -983,15 +1005,8 @@ details > summary {
   filter: drop-shadow(0 0 12px rgba(255, 90, 60, 0.95));
 }
 
-/* the printed wheels have no pointer: the value at the top is the one that counts */
-.board-svg .dial-pointer {
-  fill: var(--alert);
-  stroke: #fff;
-  stroke-width: 2;
-  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.8));
-}
-
-.board-svg .hotspot {
+.board-svg .hotspot,
+.board-svg .location-hotspot {
   fill: transparent;
 }
 
@@ -1027,9 +1042,12 @@ details > summary {
   fill: rgba(0, 0, 0, 0.6);
 }
 
-.board-svg .damage {
-  font-size: 30px;
-  font-weight: 700;
+/* a damaged location's label, like the Engine Room's "activated" but red */
+.board-svg .count.damaged-label polygon {
+  stroke: #ff6b60;
+}
+
+.board-svg .count.damaged-label text {
   fill: #ff8a80;
 }
 
@@ -1662,4 +1680,30 @@ details > summary {
   width: 18px;
   height: 18px;
   color: var(--dradis-glow);
+}
+
+/* what a civilian ship costs when destroyed: the resources' icons with the amounts */
+.cargo {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 96px;
+}
+
+.cargo-amount {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font: 700 15px var(--display);
+  color: var(--steel-100);
+}
+
+.cargo .resource-icon {
+  height: 20px;
+  width: auto;
+}
+
+.cargo-none {
+  color: var(--steel-500);
 }

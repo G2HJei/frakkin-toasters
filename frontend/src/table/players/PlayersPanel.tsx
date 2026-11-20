@@ -25,6 +25,12 @@ export function PlayersPanel() {
   );
 }
 
+/** A player's mat as the game stands, e.g. beside his character sheet when the pointer is on his standee. */
+export function PlayerMatOf({ playerNumber }: { playerNumber: number }) {
+  const player = useTable().game?.players?.find((candidate) => candidate.number === playerNumber);
+  return player ? <PlayerMat player={player} /> : null;
+}
+
 function PlayerMat({ player }: { player: PlayerProjection }) {
   const table = useTable();
   const game = table.game;

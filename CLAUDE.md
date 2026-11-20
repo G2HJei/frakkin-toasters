@@ -676,17 +676,23 @@ REST (the lobby lists poll), Zustand for the game. See `frontend-plan.md`.
   and the panels under it. The styles are the "table" section of `styles.css`: the board's palette, cut corners
   (`.cf`, `--chamfer`) and the printed-label look. A player is named by his character everywhere (`playerName`), "Player n"
   before he has one; the user in the seat shows only on his mat (`userName`, from the room's seats).
-- The board (`src/table/board/`): `board-classic.jpg` is the surface, and `BoardSvg` lays the components on its printed
-  slots, in the image's pixels. `board-classic.layout.json`, measured with the image, holds what is printed, and
-  `layout.ts` reads it (a place for every `Location`, which a test checks, the title panels, the tracks, the dials, the
-  deck rack, the launch tubes) and adds the free starfield (`SLOTS`). The standees stand on the location pictures above
-  the printed names, the ships fly in the space areas (the bow's strip is 8 o'clock, the stern's 2 o'clock; narrow
-  strips take smaller ships, and the ships leave the launch tubes free), the printed dials turn to the resources with
-  the value on the hub, markers sit on the tracks, the decks lie in the rack with their counts and their top discard
-  fanned over them, the civilian ships lie at the end of the ship reserves, and the destinations tuck under the
-  objective, each showing its distance. The Crisis Cards kept in play lie by the jump track and the die on the free
-  starfield. The board leaves out the card being resolved and its skill check (the turn panel shows
-  them), the damage token piles (only the tokens in play show) and the nukes (the Admiral's mat). Inputs on the board
+- The board (`src/table/board/`): `board.jpg` is the surface, and `BoardSvg` lays the components on its printed
+  slots, in the image's pixels. `board.layout.json`, measured with the image, holds what is printed, and `layout.ts`
+  reads it (a place for every `Location`, which a test checks, the title panels, the tracks, the resources, the deck
+  rack, the launch tubes) and adds the free starfield (`SLOTS`). The standees stand on the printed names of their
+  locations, reaching a little into the pictures, and a damaged location gets a red "damaged" chip, like the Engine
+  Room's "activated", on its bottom edge, clear of its name. The ships fly in the middle of their space areas, the
+  Cylon ships first, a ship as large in every area of its board, alone or piled (the bow's strip is 8 o'clock, the
+  stern's 2 o'clock; the ships leave the launch tubes free). The resources are printed in a row, each amount after its
+  icon and label ("FUEL:"), red in the red zone (`resources.tsx`, the icons in `icons/`),
+  markers sit on the tracks, the decks lie in the rack, which prints no names but rings each Skill Card deck in its
+  color, with their counts and their top discard over them, the civilian ships lie at the end of the ship reserves, and
+  the destinations tuck under the objective, each showing its distance. The Crisis Cards kept in play lie by the jump
+  track. The board leaves out the card being resolved, its skill check and the die (the turn panel shows them), the
+  damage token piles (only the tokens in play show) and the nukes (the Admiral's mat). Hovering a location shows its
+  card, a standee its character sheet with its player's mat beside it (`PlayerMatOf`, the preview's `extra`), and a
+  pile of civilian ships shows what each costs
+  when destroyed to whoever knows it (a sandbox, the players who looked at it). Inputs on the board
   are in `src/input/boardMoves.ts`: a move by clicking a location (asking for a discard when it leaves its ship) and the
   "Act" button on the asked player's location. Each builds the same event, or picks the same option, as the builder; a
   test checks it. The builder stays for everything else.

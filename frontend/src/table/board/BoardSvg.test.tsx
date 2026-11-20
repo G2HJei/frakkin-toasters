@@ -1,10 +1,11 @@
 import { fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { BoardSvg, groupShips, shortName } from './BoardSvg';
+import { ArtPreview, usePreview } from '../../art/Art';
 import { RevealLayer, useReveal } from '../reveal';
 import { Table, tableContext } from '../tableContext';
 import type { GameProjection, ShipProjection } from '../../wire/types';
-import { DECK_SLOTS, DIALS, DISTANCE, JUMP_TRACK, LAUNCH_TUBES, LAYOUT, SLOTS, TITLES } from './layout';
+import { DECK_SLOTS, DISTANCE, JUMP_TRACK, LAUNCH_TUBES, LAYOUT, RESOURCES, SLOTS, TITLES } from './layout';
 
 const location = (name: string, characters: string[] = [], damaged = false) => ({ location: name, damaged, characters });
 
@@ -21,7 +22,11 @@ const game = {
     morale: 9,
     population: 12,
     jumpPreparation: 'POSITION_2',
-    locations: [location('RESEARCH_LAB', ['WILLIAM_ADAMA']), location('ARMORY', [], true), location('GALACTICA_SPACE_4_OCLOCK')],
+    locations: [
+      location('RESEARCH_LAB', ['WILLIAM_ADAMA']),
+      location('ARMORY', [], true),
+      ...['2', '4', '8', '10', '12'].map((hour) => location(`GALACTICA_SPACE_${hour}_OCLOCK`)),
+    ],
     ships: [{ id: 3, type: 'VIPER', location: 'GALACTICA_SPACE_4_OCLOCK', pilot: 'KARA_STARBUCK_THRACE', damage: [], cargo: null }],
     reserves: [{ id: 4, type: 'VIPER', location: null, pilot: null, damage: [], cargo: null }],
     damagedVipers: [],
@@ -62,11 +67,28 @@ function renderBoard(targets?: Set<string>, projection: GameProjection = game, s
     <Table.Provider value={tableContext(projection, sandbox, null)}>
       <BoardSvg targets={targets} />
       <RevealLayer />
+      <ArtPreview />
     </Table.Provider>,
   ).container;
 }
 
-afterEach(() => useReveal.getState().hide());
+afterEach(() => {
+  useReveal.getState().hide();
+  usePreview.setState({ art: null, pointer: null, extra: null });
+});
+
+// where the images of a space area's ships lie
+function shipBoxes(board: HTMLElement, location: string) {
+  return [...board.querySelectorAll(`[data-location="${location}"] .ship > image`)].map((image) => ({
+    art: image.getAttribute('data-art'),
+    x: Number(image.getAttribute('x')),
+    y: Number(image.getAttribute('y')),
+    width: Number(image.getAttribute('width')),
+    height: Number(image.getAttribute('height')),
+  }));
+}
+
+const inSpace = (id: number, type: string, location: string, extra: object = {}) => ({ id, type, location, pilot: null, damage: [], cargo: null, ...extra });
 
 describe('the board', () => {
   it("lies on the board's image, each character's standee on the printed card of the location the projection puts him", () => {
@@ -100,32 +122,133 @@ describe('the board', () => {
     expect(groups.map((group) => group.ships.map((one) => one.id))).toEqual([[9], [2, 5], [1], [3]]);
   });
 
-  it('marks a damaged location with its damage token, and puts the markers on the tracks', () => {
+  it('labels a damaged location at its bottom, clear of its printed name, and puts the markers on the tracks', () => {
     const board = renderBoard();
 
     expect(board.querySelector('[data-location="ARMORY"]')?.classList).toContain('damaged');
-    expect(board.querySelector('[data-location="ARMORY"] [data-art="GalacticaDamage/ARMORY"]')).not.toBeNull();
+    // a chip like the Engine Room's "activated", on the location's bottom edge
+    const label = board.querySelector('[data-location="ARMORY"] .count.damaged-label')!;
+    expect(label.textContent).toBe('damaged');
+    const top = Math.min(...label.querySelector('polygon')!.getAttribute('points')!.split(' ').map((point) => Number(point.split(',')[1])));
+    const armory = LAYOUT.ARMORY;
+    const title = TITLES.ARMORY!;
+    expect(top).toBeGreaterThan(title.y + title.height / 2 + 20);
+    expect(top).toBeLessThan(armory.y + armory.height);
+    expect(board.querySelector('[data-location="RESEARCH_LAB"] .damaged-label')).toBeNull();
     expect(board.querySelector('[data-track="JumpPreparation"]')?.getAttribute('data-position')).toBe('POSITION_2');
     expect(board.querySelector('[data-track="Pursuit"]')?.getAttribute('data-position')).toBe('START');
     expect(board.querySelector('[data-track="BoardingParty"] [data-position="POSITION_1"]')?.getAttribute('aria-label')).toBe('1 centurion at Position 1');
   });
 
-  it("turns each dial's printed wheel until its value sits under the pointer", () => {
+  it('puts each amount after its printed resource, red in the red zone', () => {
     const board = renderBoard();
 
-    expect([...board.querySelectorAll('.dial-value')].map((dial) => dial.textContent)).toEqual(['8', '7', '9', '12']);
-    // food: the wheel shows 8 at the top, one step of 22.5° back gives 7
-    expect(board.querySelector('[data-resource="food"] image')?.getAttribute('transform')).toBe(`rotate(22.5 ${DIALS.food.x} ${DIALS.food.y})`);
-    expect(board.querySelector('[data-resource="fuel"] image')?.getAttribute('transform')).toBe(`rotate(0 ${DIALS.fuel.x} ${DIALS.fuel.y})`);
+    const amount = (resource: string) => board.querySelector(`.resource[data-resource="${resource}"]`)!;
+    expect(['fuel', 'food', 'morale', 'population'].map((resource) => amount(resource).textContent)).toEqual(['8', '7', '9', '12']);
+    expect([amount('fuel').getAttribute('x'), amount('fuel').getAttribute('y')]).toEqual([String(RESOURCES.fuel.x), String(RESOURCES.fuel.y)]);
+    expect(amount('food').getAttribute('aria-label')).toBe('Food: 7');
+    expect(board.querySelectorAll('.resource.red-zone')).toHaveLength(0);
+
+    // the red zones: fuel and food under 5, morale under 6, population under 7
+    const low = renderBoard(undefined, { ...game, galactica: { ...game.galactica!, fuel: 4, food: 5, morale: 5, population: 7 } } as GameProjection);
+    expect([...low.querySelectorAll('.resource.red-zone')].map((red) => red.getAttribute('data-resource'))).toEqual(['fuel', 'morale']);
   });
 
-  it("stands each character on the picture of his location, above its printed name", () => {
+  it('stands each character on the printed name of his location, reaching a little into its picture', () => {
     const board = renderBoard();
 
     const standee = board.querySelector('[data-location="RESEARCH_LAB"] [data-character="WILLIAM_ADAMA"] image')!;
-    const bottom = Number(standee.getAttribute('y')) + Number(standee.getAttribute('height'));
-    expect(Number(standee.getAttribute('y'))).toBeGreaterThanOrEqual(LAYOUT.RESEARCH_LAB.y);
-    expect(bottom).toBeLessThanOrEqual(TITLES.RESEARCH_LAB!.y);
+    const top = Number(standee.getAttribute('y'));
+    const bottom = top + Number(standee.getAttribute('height'));
+    const title = TITLES.RESEARCH_LAB!;
+    expect(bottom).toBeLessThanOrEqual(title.y + title.height);
+    expect(bottom).toBeGreaterThan(title.y + title.height - 10);
+    expect(top).toBeLessThan(title.y);
+    expect(top).toBeGreaterThan(title.y - 30);
+  });
+
+  it("shows the player's mat beside the character sheet while the pointer is on his standee", () => {
+    const board = renderBoard();
+
+    const standee = board.querySelector('[data-character="WILLIAM_ADAMA"] image')!;
+    fireEvent.mouseEnter(standee);
+    expect(document.querySelector('.art-preview .art-preview-art img')?.getAttribute('src')).toContain('WILLIAM_ADAMA');
+    expect(document.querySelector('.art-preview .art-preview-extra .mat')?.getAttribute('data-player')).toBe('1');
+    fireEvent.mouseLeave(standee);
+    expect(document.querySelector('.art-preview')).toBeNull();
+  });
+
+  it("shows a location's card on hover, and a standee's character sheet over it", () => {
+    const board = renderBoard();
+
+    fireEvent.mouseEnter(board.querySelector('[data-location="RESEARCH_LAB"] .location-hotspot')!);
+    expect(usePreview.getState().art?.key).toBe('Location/RESEARCH_LAB');
+    fireEvent.mouseEnter(board.querySelector('[data-character="WILLIAM_ADAMA"] image')!);
+    expect(usePreview.getState().art?.key).toBe('Character/player-token/WILLIAM_ADAMA');
+    // a space area has no card
+    expect(board.querySelector('[data-location="GALACTICA_SPACE_4_OCLOCK"] .location-hotspot')).toBeNull();
+  });
+
+  it('lays the ships of a space area in its middle, the Cylon ships first, each as large as anywhere on its board', () => {
+    const ships = [
+      inSpace(20, 'VIPER', 'GALACTICA_SPACE_8_OCLOCK'),
+      inSpace(21, 'RAIDER', 'GALACTICA_SPACE_8_OCLOCK'),
+      inSpace(22, 'RAIDER', 'GALACTICA_SPACE_8_OCLOCK'),
+      inSpace(23, 'BASESTAR', 'GALACTICA_SPACE_8_OCLOCK'),
+      inSpace(24, 'VIPER', 'GALACTICA_SPACE_12_OCLOCK'),
+      inSpace(25, 'VIPER', 'GALACTICA_SPACE_10_OCLOCK'),
+      inSpace(26, 'VIPER', 'GALACTICA_SPACE_10_OCLOCK'),
+    ];
+    const board = renderBoard(undefined, { ...game, galactica: { ...game.galactica!, ships } } as unknown as GameProjection);
+
+    // a lone ship in the middle of its area
+    const [lone] = shipBoxes(board, 'GALACTICA_SPACE_12_OCLOCK');
+    const area = LAYOUT.GALACTICA_SPACE_12_OCLOCK;
+    expect(lone.x + lone.width / 2).toBeCloseTo(area.x + area.width / 2);
+    expect(lone.y + lone.height / 2).toBeCloseTo(area.y + area.height / 2);
+
+    // the basestar first, then the raiders, then the viper, the whole lot in the middle of the strip
+    const strip = shipBoxes(board, 'GALACTICA_SPACE_8_OCLOCK');
+    expect(strip.map((ship) => ship.art)).toEqual(['ShipType/BASESTAR', 'ShipType/RAIDER', 'ShipType/RAIDER', 'ShipType/VIPER']);
+    const narrow = LAYOUT.GALACTICA_SPACE_8_OCLOCK;
+    const top = Math.min(...strip.map((ship) => ship.y));
+    const bottom = Math.max(...strip.map((ship) => ship.y + ship.height));
+    expect(Math.abs(top - narrow.y - (narrow.y + narrow.height - bottom))).toBeLessThan(10);
+
+    // a viper is as large alone, piled and in the narrow strip
+    const vipers = [lone, ...shipBoxes(board, 'GALACTICA_SPACE_10_OCLOCK'), strip[3]];
+    expect(new Set(vipers.map((viper) => `${viper.width}×${viper.height}`)).size).toBe(1);
+  });
+
+  it("shows what a civilian ship costs when destroyed on hover, in a sandbox, and to no one who doesn't know it", () => {
+    const civilians = [
+      inSpace(30, 'CIVILIAN', 'GALACTICA_SPACE_2_OCLOCK', { cargo: { fuel: 1, morale: 0, population: 1 } }),
+      inSpace(31, 'CIVILIAN', 'GALACTICA_SPACE_2_OCLOCK', { cargo: { fuel: 0, morale: 0, population: 0 } }),
+    ];
+    const sandbox = { ...game, viewer: { kind: 'Sandbox' }, galactica: { ...game.galactica!, ships: civilians } } as unknown as GameProjection;
+    const board = renderBoard(undefined, sandbox, true);
+
+    fireEvent.mouseEnter(board.querySelector('[data-reveal="cargo-30"]')!);
+    const lines = [...document.querySelectorAll('.reveal-pop ol.pile li')];
+    expect(lines.map((line) => line.textContent)).toEqual(['11Civilian ship #30', 'nothingCivilian ship #31']);
+    expect(lines[0].querySelector('.cargo')?.getAttribute('aria-label')).toBe('1 population, 1 fuel');
+    expect([...lines[0].querySelectorAll('.cargo-amount')].map((amount) => amount.getAttribute('data-resource'))).toEqual(['population', 'fuel']);
+    expect(document.querySelector('.reveal-pop .sandbox-only')).not.toBeNull();
+    // the ship's own preview would cover the costs
+    fireEvent.mouseEnter(board.querySelector('[data-ship="30"] image')!);
+    expect(usePreview.getState().art).toBeNull();
+
+    const unknown = { ...game, galactica: { ...game.galactica!, ships: civilians.map((ship) => ({ ...ship, cargo: null })) } } as unknown as GameProjection;
+    const table = renderBoard(undefined, unknown);
+    expect(table.querySelector('[data-reveal^="cargo-"]')).toBeNull();
+  });
+
+  it("names what each civilian ship of the deck costs, in a sandbox's draw pile", () => {
+    const decks = [{ deck: 'CIVILIAN_SHIPS', size: 1, discardSize: 0, discarded: [], drawPile: [{ id: 40, fuelCost: 0, moraleCost: 1, populationCost: 1 }] }];
+    const board = renderBoard(undefined, { ...game, viewer: { kind: 'Sandbox' }, decks } as unknown as GameProjection, true);
+
+    fireEvent.mouseEnter(board.querySelector('[data-reveal="deck-CIVILIAN_SHIPS"]')!);
+    expect(document.querySelector('.reveal-pop ol.pile li')?.textContent).toBe('civilian ship #40: 1 population, 1 morale');
   });
 
   it('tucks the destinations under the objective, the later ones under the earlier, each showing a strip', () => {
@@ -161,23 +284,25 @@ describe('the board', () => {
     }
   });
 
-  it('lays the decks in the rack with their counts and the top of the discard pile, and the die on the starfield', () => {
+  it('lays the decks in the rack with their counts and the top of the discard pile over the deck, clear of the next', () => {
     const board = renderBoard();
 
     expect(board.querySelector('[data-deck="CRISIS"][data-pile="draw"]')?.textContent).toContain('70');
-    expect(board.querySelector('[data-deck="CRISIS"][data-pile="discard"] [data-art="CrisisCard/WATER_SABOTAGED"]')).not.toBeNull();
+    const discard = board.querySelector('[data-deck="CRISIS"][data-pile="discard"] [data-art="CrisisCard/WATER_SABOTAGED"]')!;
+    const right = Number(discard.getAttribute('x')) + Number(discard.getAttribute('width'));
+    expect(right).toBeLessThan(DECK_SLOTS.SUPER_CRISIS.x);
     expect(board.querySelector('[data-deck="POLITICS"][data-pile="discard"] [data-art="SkillCardType/RED_TAPE_0"]')).not.toBeNull();
     expect(board.querySelector('[data-slot="distance"] [data-art="DestinationCard/ALGAE_PLANET"]')).not.toBeNull();
-    expect(board.querySelector('.die')?.getAttribute('data-die')).toBe('5');
   });
 
-  it("leaves the card being resolved and its skill check to the turn panel, and the nukes to the Admiral's mat", () => {
+  it("leaves the card being resolved, its skill check and the die to the turn panel, and the nukes to the Admiral's mat", () => {
     const board = renderBoard();
 
     // the turn's Crisis Card lies only in its discard pile, the skill check's card nowhere
     expect(board.querySelectorAll('[data-art="CrisisCard/WATER_SABOTAGED"]')).toHaveLength(1);
     expect(board.querySelector('[data-art="CrisisCard/CYLON_SCREENINGS"]')).toBeNull();
     expect(board.querySelector('[data-pile="skill-check"]')).toBeNull();
+    expect(board.querySelector('[data-art^="Die/"]')).toBeNull();
     expect(board.querySelector('[data-art="Token/NUKE"]')).toBeNull();
   });
 
