@@ -637,32 +637,6 @@ details > summary {
   box-shadow: 0 0 0 2px var(--accent);
 }
 
-.check-head {
-  display: flex;
-  gap: 0.8rem;
-  align-items: flex-start;
-}
-
-.check-numbers p {
-  margin: 0.2rem 0;
-}
-
-.check-numbers strong {
-  font-size: 1.2rem;
-}
-
-.check-result.pass strong {
-  color: var(--ok);
-}
-
-.check-result.fail strong {
-  color: var(--danger);
-}
-
-.check-result.partial_pass strong {
-  color: var(--accent);
-}
-
 .die {
   display: inline-grid;
   place-items: center;
@@ -1183,31 +1157,45 @@ details > summary {
   font: 700 18px var(--display);
 }
 
-.turn .step-name {
+/* the acting character, when it isn't the current one */
+.turn .turn-line .acting {
   color: var(--amber);
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
 }
 
+.turn .turn-line .acting small {
+  font: 600 10px var(--display);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* the steps as chevrons with an icon each, all named in the popover on hover; the step the turn is at takes the room
+   for its name */
 .table-page .steps {
   list-style: none;
   margin: 0 0 12px;
   padding: 0;
   display: flex;
   gap: 2px;
+  cursor: help;
 }
 
 .table-page .steps li {
-  flex: 1;
-  font: 600 9px/1.1 var(--display);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 7px 4px 7px 9px;
+  flex: 1 1 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 0 6px 0 12px;
   background: #141c29;
   color: var(--steel-500);
-  text-align: center;
   clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 50%, calc(100% - 7px) 100%, 0 100%, 7px 50%);
+}
+
+.table-page .steps li:first-child {
+  padding-left: 6px;
+  clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 50%, calc(100% - 7px) 100%, 0 100%);
 }
 
 .table-page .steps li.done {
@@ -1216,44 +1204,39 @@ details > summary {
 }
 
 .table-page .steps li.now {
+  flex: 0 1 auto;
+  padding-right: 13px;
   background: var(--amber);
   color: #1b1305;
 }
 
-.table-page .people {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 10px;
+.table-page .steps .step-icon {
+  flex: none;
+  width: 16px;
+  height: 16px;
 }
 
-.table-page .person {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex: 1;
-  background: rgba(255, 255, 255, 0.04);
-  padding: 5px 8px 5px 5px;
+.table-page .steps .step-label {
+  font: 600 10px/1.05 var(--display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
-.table-page .person .art {
-  width: 34px;
-  height: 50px;
-  object-fit: cover;
-  border-radius: 3px;
+.table-page .steps li:not(.now) .step-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
-.table-page .person small,
 .table-page .block > small {
   display: block;
   font: 600 10px var(--display);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--steel-500);
-}
-
-.table-page .person b {
-  display: block;
-  font: 600 14px var(--display);
 }
 
 .table-page .block {
@@ -1541,49 +1524,19 @@ details > summary {
   outline-offset: 2px;
 }
 
-/* the skill check */
+/* the skill check, in the turn panel */
 
-.table-page .check-numbers {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.table-page .check-numbers b {
-  font: 600 16px var(--display);
-}
-
-.table-page .meter-row strong {
+.table-page .check-figure strong {
   font: 700 20px var(--display);
   color: var(--amber);
 }
 
-.table-page .meter-bar {
-  display: flex;
-  gap: 3px;
-  margin: 10px 0;
+.table-page .check-result.pass strong {
+  color: var(--ok);
 }
 
-.table-page .meter-bar i {
-  flex: 1;
-  height: 14px;
-  background: #13243b;
-  position: relative;
-}
-
-.table-page .meter-bar i.in {
-  background: var(--dradis);
-  box-shadow: 0 0 8px rgba(79, 163, 224, 0.8);
-}
-
-.table-page .meter-bar i.line::after {
-  content: '';
-  position: absolute;
-  right: -3px;
-  top: -5px;
-  bottom: -5px;
-  width: 2px;
-  background: var(--amber);
+.table-page .check-result.fail strong {
+  color: var(--danger);
 }
 
 /* the popover of a pile: what a deck or a hand holds */
@@ -1653,4 +1606,28 @@ details > summary {
   width: 100%;
   height: auto;
   border-radius: 4px;
+}
+
+/* a list of icons with their names, e.g. the steps of a turn */
+.reveal-pop .pile.icons {
+  grid-template-columns: none;
+  gap: 7px;
+}
+
+.reveal-pop .pile.icons li {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  font: 600 12px var(--display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--steel-100);
+}
+
+.reveal-pop .pile.icons svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--dradis-glow);
 }

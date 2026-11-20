@@ -15,15 +15,15 @@ import { LogPanel } from '../table/log/LogPanel';
 import { PlayersPanel } from '../table/players/PlayersPanel';
 import { RevealLayer } from '../table/reveal';
 import { Table, tableContext } from '../table/tableContext';
-import { SkillCheckPanel, TurnPanel } from '../table/turn/TurnPanel';
+import { TurnPanel } from '../table/turn/TurnPanel';
 import type { ClientMessage } from '../wire/types';
 import { RoomPage } from './RoomPage';
 import { TopNav } from './TopNav';
 
 /**
  * The table of a game, in a tab of its own and with no bar over it: its socket, the board as high as the screen, and
- * the panels on its sides: on the left the game and the turn, the input, the skill check and the sandbox's tools in a
- * sandbox, with the log under them, and the players on the right. The room before the game starts keeps the top bar.
+ * the panels on its sides: on the left the game and the turn with its skill check, the input, and the sandbox's tools in
+ * a sandbox, with the log under them, and the players on the right. The room before the game starts keeps the top bar.
  */
 export function TablePage() {
   const { id = '' } = useParams();
@@ -115,7 +115,6 @@ function LiveTable({ gameId, name, seed, userNames }: { gameId: string; name: st
                   </div>
                 </section>
               )}
-              <SkillCheckPanel />
               {sandbox && (
                 <SandboxToolbar
                   gameId={gameId}

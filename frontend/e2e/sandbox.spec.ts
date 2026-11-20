@@ -28,7 +28,7 @@ test('a seeded sandbox is played through a turn, undone, exported and imported',
   await draw(page, { LEADERSHIP: 2, TACTICS: 1 });
 
   // turn 1: Adama draws, moves to the Research Lab, stacks a Crisis Card, draws there, and resolves the stacked card
-  await expect(page.getByRole('region', { name: 'turn' }).getByRole('heading')).toHaveText('Turn 1 · Receive Skills');
+  await expectTurn(page, 'Turn 1 · William Adama', 'Receive Skills');
   await draw(page, { LEADERSHIP: 3, TACTICS: 2 });
   await input(page).getByRole('button', { name: 'Move' }).click();
   await input(page).getByLabel('destination').selectOption('RESEARCH_LAB');
@@ -45,16 +45,16 @@ test('a seeded sandbox is played through a turn, undone, exported and imported',
   await send(page);
   await input(page).getByRole('button', { name: /Top of Riots No Jump/ }).click();
 
-  await expect(page.getByRole('region', { name: 'turn' }).getByRole('heading')).toHaveText('Turn 2 · Receive Skills');
+  await expectTurn(page, 'Turn 2 · Laura Roslin', 'Receive Skills');
   await expect(resource(page, 'Food')).toHaveText('7');
   await expect(resource(page, 'Morale')).toHaveText('9');
 
   // undo goes back to the section, and the same answer gives the same game
   await page.getByRole('button', { name: 'Undo' }).click();
-  await expect(page.getByRole('region', { name: 'turn' }).getByRole('heading')).toHaveText('Turn 1 · Crisis');
+  await expectTurn(page, 'Turn 1 · William Adama', 'Crisis');
   await expect(resource(page, 'Food')).toHaveText('8');
   await input(page).getByRole('button', { name: /Top of Riots No Jump/ }).click();
-  await expect(page.getByRole('region', { name: 'turn' }).getByRole('heading')).toHaveText('Turn 2 · Receive Skills');
+  await expectTurn(page, 'Turn 2 · Laura Roslin', 'Receive Skills');
   await expect(resource(page, 'Food')).toHaveText('7');
 
   // export, then import as a new sandbox: the same game
@@ -64,7 +64,7 @@ test('a seeded sandbox is played through a turn, undone, exported and imported',
   await lobby.goto('/sandbox/new');
   const file = { name: 'sandbox.json', mimeType: 'application/json', buffer: await exported.body() };
   page = await openGame(lobby, (from) => from.getByLabel('journal file').setInputFiles(file));
-  await expect(page.getByRole('region', { name: 'turn' }).getByRole('heading')).toHaveText('Turn 2 · Receive Skills');
+  await expectTurn(page, 'Turn 2 · Laura Roslin', 'Receive Skills');
   await expect(resource(page, 'Food')).toHaveText('7');
   await expect(input(page).getByRole('heading')).toHaveText('Laura Roslin decides');
 });
@@ -86,6 +86,13 @@ async function draw(page: Page, counts: Record<string, number>) {
     await input(page).getByLabel(color, { exact: true }).fill(String(count));
   }
   await send(page);
+}
+
+// the turn's line (its number, the current character and the acting one when it's another) and the step it is at
+async function expectTurn(page: Page, line: string, step: string) {
+  const turn = page.getByRole('region', { name: 'turn' });
+  await expect(turn.getByRole('heading')).toHaveText(line);
+  await expect(turn.locator('.steps [aria-current="step"]')).toHaveText(step);
 }
 
 function resource(page: Page, name: string) {

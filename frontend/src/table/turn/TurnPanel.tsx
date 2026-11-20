@@ -6,14 +6,16 @@ import type { ConnectionState } from '../../live/GameSocket';
 import type { SkillCard, SkillHand } from '../../wire/types';
 import { useRevealHandlers, type RevealSection } from '../reveal';
 import { useTable } from '../tableContext';
+import { StepIcon, type TurnStep } from './StepIcon';
 
 // the steps of a player's turn, in order
-const STEPS = ['RECEIVE_SKILLS', 'MOVEMENT', 'ACTION', 'CRISIS', 'ACTIVATE_CYLON_SHIPS', 'PREPARE_FOR_JUMP', 'DISCARD'];
+const STEPS: TurnStep[] = ['RECEIVE_SKILLS', 'MOVEMENT', 'ACTION', 'CRISIS', 'ACTIVATE_CYLON_SHIPS', 'PREPARE_FOR_JUMP', 'DISCARD'];
 
 /**
  * The game, named after the logo on the panel's tab, with the connection beside it while it isn't open, and the turn
- * once one has started: the turn's number and step, the current and the acting character, the turn's Crisis Cards, the
- * die, an open interrupt window, the objective with the distance and the nukes, and what left the game.
+ * once one has started: the turn's number with the current character and the acting one when it's another, the steps
+ * as icons (the step the turn is at named beside its icon), the turn's Crisis Cards, the skill check, the die, an open
+ * interrupt window, and what left the game.
  */
 export function TurnPanel({ name, connection }: { name: string; connection: ConnectionState }) {
   const table = useTable();
@@ -22,8 +24,6 @@ export function TurnPanel({ name, connection }: { name: string; connection: Conn
     return null;
   }
   const turn = game.turn;
-  const step = STEPS.indexOf(turn?.step ?? '');
-  const objective = cardArt('ObjectiveCard', game.objective);
   const die = dieArt(turn?.dieRoll?.value);
   return (
     <section className="panel cf turn" aria-label="turn">
@@ -35,19 +35,15 @@ export function TurnPanel({ name, connection }: { name: string; connection: Conn
       {turn && (
         <>
           <h2 className="turn-line">
-            <span className="turn-no">Turn {turn.number}</span> · <span className="step-name">{constantLabel('GameStep', turn.step)}</span>
+            <span className="turn-no">Turn {turn.number}</span> · <span title="current player">{table.playerName(turn.currentPlayer)}</span>
+            {turn.actingPlayer !== turn.currentPlayer && (
+              <span className="acting" title="acting player">
+                {' · '}
+                <small>acting</small> {table.playerName(turn.actingPlayer)}
+              </span>
+            )}
           </h2>
-          <ol className="steps">
-            {STEPS.map((stepName, index) => (
-              <li key={stepName} className={index < step ? 'done' : index === step ? 'now' : ''}>
-                {constantLabel('GameStep', stepName)}
-              </li>
-            ))}
-          </ol>
-          <div className="people">
-            <Person playerNumber={turn.currentPlayer} role="Current" />
-            <Person playerNumber={turn.actingPlayer} role="Acting" />
-          </div>
+          <Steps step={turn.step} />
         </>
       )}
       {turn && (turn.endedEarly || turn.returnsToCrisisStep) && (
@@ -65,14 +61,10 @@ export function TurnPanel({ name, connection }: { name: string; connection: Conn
           </span>
           <span className="block-text">
             <b>{(turn.crisisCards ?? []).map((card) => constantLabel('CrisisCard', card)).join(', ')}</b>
-            {game.skillCheck && (
-              <span>
-                Skill check · difficulty {game.skillCheck.difficulty} · {game.skillCheck.cards?.count ?? 0} cards in
-              </span>
-            )}
           </span>
         </Block>
       )}
+      <SkillCheck />
       {(game.crisisCardsInPlay ?? []).length > 0 && (
         <Block label="In play">
           <span className="cards">
@@ -118,32 +110,28 @@ export function TurnPanel({ name, connection }: { name: string; connection: Conn
           </span>
         </Block>
       )}
-      <Block label="Objective">
-        {objective && <CardTile art={objective} label={objective.label} size="xs" />}
-        <span className="block-text">
-          <b>{constantLabel('ObjectiveCard', game.objective)}</b>
-          <span>
-            distance {game.distanceTraveled} · {game.nukes} nuke{game.nukes === 1 ? '' : 's'}
-          </span>
-        </span>
-      </Block>
       <OutOfTheGame />
     </section>
   );
 }
 
-function Person({ playerNumber, role }: { playerNumber: number; role: string }) {
-  const table = useTable();
-  const character = table.game?.players?.find((player) => player.number === playerNumber)?.character ?? null;
-  const art = characterArt(character);
+// The steps as icons, the step the turn is at named beside its icon. Hovering lists every step with its name.
+function Steps({ step }: { step: string | null }) {
+  const at = STEPS.findIndex((stepName) => stepName === step);
+  const sections: RevealSection[] = [
+    { title: '', cards: STEPS.map((stepName) => ({ art: null, label: constantLabel('GameStep', stepName), icon: <StepIcon step={stepName} /> })) },
+  ];
+  const handlers = useRevealHandlers('turn-steps', 'Steps of a turn', sections);
   return (
-    <div className="person">
-      {art ? <ArtImg art={art} /> : <span className="avatar empty" />}
-      <span>
-        <small>{role}</small>
-        <b>{table.playerName(playerNumber)}</b>
-      </span>
-    </div>
+    <ol className="steps" {...handlers}>
+      {STEPS.map((stepName, index) => (
+        <li key={stepName} className={index < at ? 'done' : index === at ? 'now' : ''} aria-current={index === at ? 'step' : undefined}>
+          <StepIcon step={stepName} />
+          {/* only the step the turn is at shows its name, the others keep it for screen readers */}
+          <span className="step-label">{constantLabel('GameStep', stepName)}</span>
+        </li>
+      ))}
+    </ol>
   );
 }
 
@@ -204,46 +192,40 @@ function OutOfTheGame() {
 }
 
 /**
- * The skill check: its card, difficulty against the cards in, who played before it, the face-down pile (counted; a
- * sandbox shows it on hover), the piles once revealed, the strength and the result.
+ * The skill check: its card, the difficulty, who played before it, the face-down pile (counted; a sandbox shows it on
+ * hover), the piles once revealed, the strength and the result.
  */
-export function SkillCheckPanel() {
+function SkillCheck() {
   const table = useTable();
   const check = table.game?.skillCheck;
   if (!check) {
     return null;
   }
-  const subject = skillCheckArt(check.type);
-  const inCount = check.cards?.count ?? 0;
-  const cells = Math.max(check.difficulty, inCount, 1) + 2;
+  const name = constantLabel('SkillCheckType', check.type);
+  // a Crisis Card's check is about the card the Crisis block shows just above, a location's check shows its location
+  const fromCrisis = (table.game?.turn?.crisisCards ?? []).some((card) => card === check.type);
+  const subject = fromCrisis ? null : skillCheckArt(check.type);
   return (
-    <section className="panel cf skill-check" aria-label="skill check">
-      <div className="tab">
-        <span>Skill check</span>
-      </div>
-      <div className="check-head">
-        {subject && <CardTile art={subject} label={constantLabel('SkillCheckType', check.type)} size="md" />}
-        <div className="check-numbers">
-          <b>{constantLabel('SkillCheckType', check.type)}</b>
+    <div className="block skill-check" role="group" aria-label="skill check">
+      <small>Skill check</small>
+      <div className="block-body">
+        {subject && <CardTile art={subject} label={name} size="md" />}
+        <span className="block-text">
+          {!fromCrisis && <b>{name}</b>}
           {check.targetPlayer !== null && <span>about {table.playerName(check.targetPlayer)}</span>}
           {check.emergencyDeclared && <span>emergency declared</span>}
-          <span className="meter-row">
+          <span className="check-figure">
             Difficulty <strong>{check.difficulty}</strong>
           </span>
           {check.totalStrength !== null && (
-            <span className={`meter-row check-result ${(check.result ?? '').toLowerCase()}`}>
+            <span className={`check-figure check-result ${(check.result ?? '').toLowerCase()}`}>
               Strength <strong>{check.totalStrength}</strong>
               {check.result ? ` · ${constantLabel('SkillCheckResult', check.result)}` : ''}
               {check.passResultReplaced ? ' · pass replaced' : ''}
               {check.failResultPrevented ? ' · fail prevented' : ''}
             </span>
           )}
-        </div>
-      </div>
-      <div className="meter-bar" aria-hidden="true">
-        {Array.from({ length: cells }, (_, index) => (
-          <i key={index} className={[index < inCount ? 'in' : '', index === check.difficulty - 1 ? 'line' : ''].join(' ').trim()} />
-        ))}
+        </span>
       </div>
       {(check.playedBefore ?? []).map((played) => (
         <Row key={played.player} label={`Before the check: ${table.playerName(played.player)}`}>
@@ -270,7 +252,7 @@ export function SkillCheckPanel() {
           ))}
         </Row>
       )}
-    </section>
+    </div>
   );
 }
 

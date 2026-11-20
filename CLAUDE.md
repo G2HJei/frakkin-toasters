@@ -670,8 +670,8 @@ REST (the lobby lists poll), Zustand for the game. See `frontend-plan.md`.
   `images.test.ts` checks that every constant has its image and every image names a constant.
 - The table (`TablePage`): no bar over it, the board in the middle, as high as the screen (`.table-main` is a size
   container, the board's width follows its height), and a column on each side that scrolls on its own. On the left the
-  game and the turn (`TurnPanel`, its tab names the game, with the connection beside it while it isn't open), the decision (`InputPanel`) and its prompts, the skill check (`SkillCheckPanel`) and the sandbox's
-  tools, and under them the log, which takes the height they leave (at least 260px) and scrolls inside its body. On the
+  game and the turn (`TurnPanel`, its tab names the game, with the connection beside it while it isn't open, and the
+  skill check under the turn's Crisis Card), the decision (`InputPanel`) and its prompts and the sandbox's tools, and under them the log, which takes the height they leave (at least 260px) and scrolls inside its body. On the
   right the players' mats (`PlayersPanel`, the nukes beside the Admiral). Under 1100px the board goes across the width
   and the panels under it. The styles are the "table" section of `styles.css`: the board's palette, cut corners
   (`.cf`, `--chamfer`) and printed-label tabs. A player is named by his character everywhere (`playerName`), "Player n"
@@ -685,7 +685,7 @@ REST (the lobby lists poll), Zustand for the game. See `frontend-plan.md`.
   the value on the hub, markers sit on the tracks, the decks lie in the rack with their counts and their top discard
   fanned over them, the civilian ships lie at the end of the ship reserves, and the destinations tuck under the
   objective, each showing its distance. The Crisis Cards kept in play lie by the jump track and the die on the free
-  starfield. The board leaves out the card being resolved and its skill check (the turn and skill check panels show
+  starfield. The board leaves out the card being resolved and its skill check (the turn panel shows
   them), the damage token piles (only the tokens in play show) and the nukes (the Admiral's mat). Inputs on the board
   are in `src/input/boardMoves.ts`: a move by clicking a location (asking for a discard when it leaves its ship) and the
   "Act" button on the asked player's location. Each builds the same event, or picks the same option, as the builder; a

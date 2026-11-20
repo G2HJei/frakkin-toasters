@@ -1,6 +1,7 @@
 // What a pile holds, shown on hover: a deck's discard pile for everyone, and in a sandbox what the players at the table
 // can't see (a hand, a draw pile, the face-down cards of a skill check). The table looks the same in a sandbox and in a
 // live game; only hovering shows more. The popover lives in one fixed layer, so no panel clips it.
+import type { ReactNode } from 'react';
 import { create } from 'zustand';
 import { ArtImg } from '../art/Art';
 import type { ArtRef } from '../art/images';
@@ -9,9 +10,12 @@ import { useTable } from './tableContext';
 export interface RevealCard {
   art: ArtRef | null;
   label: string;
+  // drawn in place of an image, e.g. a step's icon
+  icon?: ReactNode;
 }
 
 export interface RevealSection {
+  // empty for a list with nothing to count, which then has no heading
   title: string;
   cards: RevealCard[];
   // what the players at the table can't see, which only a sandbox shows
@@ -102,9 +106,11 @@ export function RevealLayer() {
   const below = open.rect.bottom + 8;
   const fitsBelow = below + 320 < window.innerHeight;
   const left = Math.max(8, Math.min(open.rect.left, window.innerWidth - WIDTH - 8));
+  // a list of icons is as wide as its names, cards take the full width
+  const width = open.sections.every((section) => section.cards.every((card) => card.icon)) ? undefined : WIDTH;
   const style: React.CSSProperties = fitsBelow
-    ? { left, top: below, width: WIDTH }
-    : { left, bottom: window.innerHeight - open.rect.top + 8, width: WIDTH };
+    ? { left, top: below, width }
+    : { left, bottom: window.innerHeight - open.rect.top + 8, width };
   return (
     <div
       className="reveal-pop"
@@ -116,14 +122,16 @@ export function RevealLayer() {
       <div className="reveal-title">{open.title}</div>
       {open.sections.map((section) => (
         <div key={section.title} className={section.hidden ? 'reveal-section hidden-info' : 'reveal-section'}>
-          <div className="reveal-section-title">
-            {section.title} · {section.cards.length}
-            {section.hidden && <span className="sandbox-only">hidden at the table</span>}
-          </div>
-          <ol className="pile">
+          {section.title && (
+            <div className="reveal-section-title">
+              {section.title} · {section.cards.length}
+              {section.hidden && <span className="sandbox-only">hidden at the table</span>}
+            </div>
+          )}
+          <ol className={section.cards.some((card) => card.icon) ? 'pile icons' : 'pile'}>
             {section.cards.map((card, index) => (
               <li key={index}>
-                {card.art && <ArtImg art={card.art} />}
+                {card.icon ?? (card.art && <ArtImg art={card.art} />)}
                 <span>{card.label}</span>
               </li>
             ))}
