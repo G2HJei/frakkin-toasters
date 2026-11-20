@@ -1,24 +1,32 @@
-// The images on the table. A thumbnail is too small to read, so hovering one shows it large in the preview, on the
-// half of the window away from the pointer.
+// The images on the table. A thumbnail is too small to read, so hovering one shows it large in the preview, which
+// follows the pointer.
+import { useRef } from 'react';
 import { create } from 'zustand';
 import { deckBackArt, type ArtRef } from './images';
+import { usePlaceNear, type Point } from './nearPointer';
 import { constantLabel } from '../labels/describe';
 
 interface PreviewState {
   art: ArtRef | null;
-  side: 'left' | 'right';
-  show(art: ArtRef, pointerX: number): void;
+  pointer: Point | null;
+  show(art: ArtRef, pointer: Point): void;
+  move(art: ArtRef, pointer: Point): void;
   hide(art: ArtRef): void;
 }
 
 export const usePreview = create<PreviewState>((set, get) => ({
   art: null,
-  side: 'right',
-  show: (art, pointerX) => set({ art, side: pointerX > window.innerWidth / 2 ? 'left' : 'right' }),
+  pointer: null,
+  show: (art, pointer) => set({ art, pointer }),
+  move: (art, pointer) => {
+    if (get().art?.key === art.key) {
+      set({ pointer });
+    }
+  },
   // only the image that showed the preview hides it
   hide: (art) => {
     if (get().art?.key === art.key) {
-      set({ art: null });
+      set({ art: null, pointer: null });
     }
   },
 }));
@@ -28,19 +36,22 @@ export function previewHandlers(art: ArtRef) {
     return {};
   }
   return {
-    onMouseEnter: (event: React.MouseEvent) => usePreview.getState().show(art, event.clientX),
+    onMouseEnter: (event: React.MouseEvent) => usePreview.getState().show(art, { x: event.clientX, y: event.clientY }),
+    onMouseMove: (event: React.MouseEvent) => usePreview.getState().move(art, { x: event.clientX, y: event.clientY }),
     onMouseLeave: () => usePreview.getState().hide(art),
   };
 }
 
 export function ArtPreview() {
   const art = usePreview((state) => state.art);
-  const side = usePreview((state) => state.side);
+  const pointer = usePreview((state) => state.pointer);
+  const ref = useRef<HTMLDivElement>(null);
+  usePlaceNear(ref, pointer);
   if (!art) {
     return null;
   }
   return (
-    <div className={`art-preview ${side} preview-${art.shape}`} aria-hidden="true">
+    <div ref={ref} className={`art-preview preview-${art.shape}`} aria-hidden="true">
       {art.preview.map((url) => (
         <img key={url} src={url} alt="" />
       ))}

@@ -677,10 +677,12 @@ details > summary {
   opacity: 0.7;
 }
 
+/* next to the pointer (nearPointer.ts), over the pile popover whose cards it shows large */
 .art-preview {
   position: fixed;
-  bottom: 1rem;
-  z-index: 50;
+  left: 0;
+  top: 0;
+  z-index: 60;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -691,14 +693,6 @@ details > summary {
   border-radius: var(--radius);
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.7);
   pointer-events: none;
-}
-
-.art-preview.right {
-  right: 1rem;
-}
-
-.art-preview.left {
-  left: 1rem;
 }
 
 .art-preview img {
@@ -721,8 +715,9 @@ details > summary {
 
 /* the palette, sampled from the board's artwork */
 .table-page {
-  --space-950: #070f1c;
+  --space-950: #07080d;
   --space-800: #11203a;
+  --gunmetal: #252c32;
   --dradis: #4fa3e0;
   --dradis-glow: #8fd0ff;
   --steel-100: #e2e6eb;
@@ -734,7 +729,19 @@ details > summary {
   --display: Bahnschrift, 'DIN Alternate', 'Roboto Condensed', 'Arial Narrow', sans-serif;
   --c: 14px;
   padding: 0;
-  background: var(--space-950);
+  /* the board's space goes on under the panels: the colours of its left and right edges (sampled from the picture)
+     down each side, fading out toward the screen's edges, and stars like its own */
+  background:
+    url('./table/starfield.svg') 0 0 / 480px,
+    url('./table/starfield.svg') 211px 137px / 317px,
+    linear-gradient(90deg, var(--space-950), transparent 28% 80%, var(--space-950)),
+    linear-gradient(#080b12, #0d1019 5%, #0d111b 10%, #0b101c 12.5%, #0f182a 17.5%, #0f172a 20%, #0d1321 25% 27.5%,
+      #0d1423 30%, #0c1221 32.5%, #080b13 37.5%, #080910 42.5%, #08090e 60%, #070a11 67.5%, #07080d 75%, #07090f 77.5%,
+      #080b14 80%, #080c14 82.5%, #06080d 85%, #06070c 92.5%, #06080d 95%, #05060b) left / 55% 100% no-repeat,
+    linear-gradient(#07080d, #06070c 47.5%, #06080e 50%, #0a0f1c 52.5%, #0c1323 55%, #080c16 60%, #070a13 65%,
+      #070b14 67.5%, #080c17 70%, #090f1c 72.5%, #0b111f 75%, #0a101d 77.5%, #05080f 85%, #06070c 87.5%, #05080e 90%,
+      #080d18 92.5%, #0c1425 95%, #0e1629 97.5%, #0d1528) right / 45% 100% no-repeat,
+    var(--space-950);
   color: var(--steel-100);
 }
 
@@ -746,7 +753,7 @@ details > summary {
 
 .table-page .cf {
   --edge: #5d6773;
-  --fill: linear-gradient(180deg, #2c333c, #1c2128 55%, #171b21);
+  --fill: var(--gunmetal);
   --bw: 1.5px;
   position: relative;
   isolation: isolate;
@@ -902,6 +909,12 @@ details > summary {
   display: block;
   width: 100%;
   height: auto;
+}
+
+/* the picture fades out at its edges into the page's space, so no seam shows; the components on it don't fade */
+.board-svg .board-image {
+  mask-image: linear-gradient(90deg, transparent, #000 1.5% 98.5%, transparent), linear-gradient(transparent, #000 1% 99%, transparent);
+  mask-composite: intersect;
 }
 
 .board-svg text {
@@ -1366,7 +1379,7 @@ details > summary {
 .table-page .mat.current {
   --edge: var(--alert);
   --bw: 2px;
-  --fill: linear-gradient(90deg, rgba(200, 50, 43, 0.22), transparent 45%), linear-gradient(180deg, #2c333c, #1c2128 55%, #171b21);
+  --fill: linear-gradient(90deg, rgba(200, 50, 43, 0.22), transparent 45%), var(--gunmetal);
 }
 
 .table-page .mat.cylon {
@@ -1560,6 +1573,8 @@ details > summary {
 
 .reveal-pop {
   position: fixed;
+  left: 0;
+  top: 0;
   z-index: 50;
   max-height: 60vh;
   overflow: auto;

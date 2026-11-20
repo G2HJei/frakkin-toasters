@@ -1,10 +1,11 @@
 // What a pile holds, shown on hover: a deck's discard pile for everyone, and in a sandbox what the players at the table
 // can't see (a hand, a draw pile, the face-down cards of a skill check). The table looks the same in a sandbox and in a
 // live game; only hovering shows more. The popover lives in one fixed layer, so no panel clips it.
-import type { ReactNode } from 'react';
+import { useRef, type ReactNode } from 'react';
 import { create } from 'zustand';
 import { ArtImg } from '../art/Art';
 import type { ArtRef } from '../art/images';
+import { usePlaceNear, type Point } from '../art/nearPointer';
 import { useTable } from './tableContext';
 
 export interface RevealCard {
@@ -26,7 +27,8 @@ interface Open {
   id: string;
   title: string;
   sections: RevealSection[];
-  rect: { left: number; top: number; right: number; bottom: number };
+  // where the pointer entered the element; the popover stays there, so the pointer can move onto it
+  pointer: Point;
 }
 
 interface RevealState {
@@ -85,10 +87,8 @@ export function useRevealHandlers(id: string, title: string, sections: RevealSec
     return {};
   }
   return {
-    onMouseEnter: (event: React.MouseEvent<Element>) => {
-      const box = event.currentTarget.getBoundingClientRect();
-      useReveal.getState().show({ id, title, sections: shown, rect: { left: box.left, top: box.top, right: box.right, bottom: box.bottom } });
-    },
+    onMouseEnter: (event: React.MouseEvent<Element>) =>
+      useReveal.getState().show({ id, title, sections: shown, pointer: { x: event.clientX, y: event.clientY } }),
     onMouseLeave: () => useReveal.getState().hideSoon(id),
     'data-reveal': id,
   };
@@ -96,26 +96,22 @@ export function useRevealHandlers(id: string, title: string, sections: RevealSec
 
 const WIDTH = 460;
 
-/** The one popover of the table, beside the element that opened it. */
+/** The one popover of the table, next to the pointer that opened it. */
 export function RevealLayer() {
   const open = useReveal((state) => state.open);
+  const ref = useRef<HTMLDivElement>(null);
+  usePlaceNear(ref, open?.pointer ?? null);
   if (!open) {
     return null;
   }
-  // below the element when it fits, otherwise above it; never off the window's sides
-  const below = open.rect.bottom + 8;
-  const fitsBelow = below + 320 < window.innerHeight;
-  const left = Math.max(8, Math.min(open.rect.left, window.innerWidth - WIDTH - 8));
   // a list of icons is as wide as its names, cards take the full width
   const width = open.sections.every((section) => section.cards.every((card) => card.icon)) ? undefined : WIDTH;
-  const style: React.CSSProperties = fitsBelow
-    ? { left, top: below, width }
-    : { left, bottom: window.innerHeight - open.rect.top + 8, width };
   return (
     <div
+      ref={ref}
       className="reveal-pop"
       role="tooltip"
-      style={style}
+      style={{ width }}
       onMouseEnter={() => useReveal.getState().keep()}
       onMouseLeave={() => useReveal.getState().hide()}
     >
