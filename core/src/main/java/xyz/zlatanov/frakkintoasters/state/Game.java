@@ -45,6 +45,7 @@ public class Game implements GameView {
     private CylonShips           cylonShips        = CylonShips.builder().build();
     @Builder.Default
     private int                  nukes             = 2;
+    private boolean              moraleLostToExecution;
     @Builder.Default
     @Getter(AccessLevel.NONE)
     private List<SkillCheckType> crisisCardsInPlay = new ArrayList<>();
@@ -145,6 +146,11 @@ public class Game implements GameView {
     @Mutates
     public void gainNuke() {
         nukes++;
+    }
+
+    @Mutates
+    public void loseMoraleToExecution() {
+        moraleLostToExecution = true;
     }
 
     @Override

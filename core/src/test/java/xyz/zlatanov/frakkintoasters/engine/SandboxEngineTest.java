@@ -7,7 +7,7 @@ import org.junit.jupiter.api.TestFactory;
 import xyz.zlatanov.frakkintoasters.engine.journal.GameSnapshot;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.EventInjected;
 import xyz.zlatanov.frakkintoasters.event.sandbox.*;
-import xyz.zlatanov.frakkintoasters.event.sandbox.AssignTitleEvent.Title;
+import xyz.zlatanov.frakkintoasters.state.Title;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.Resource;
 import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;

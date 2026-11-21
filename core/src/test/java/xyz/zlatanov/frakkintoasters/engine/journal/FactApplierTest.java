@@ -355,6 +355,13 @@ class FactApplierTest {
     }
 
     @Test
+    void moraleLostToExecutionIsRemembered() {
+        apply(new MoraleLostToExecution());
+
+        assertTrue(game.moraleLostToExecution());
+    }
+
+    @Test
     void nukeGainedAddsOneToken() {
         apply(new NukeGained());
 

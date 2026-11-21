@@ -1,6 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event.action;
 
 import lombok.NoArgsConstructor;
+import xyz.zlatanov.frakkintoasters.event.action.quorum.*;
 import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
 import xyz.zlatanov.frakkintoasters.state.view.GameView;
 import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
@@ -24,12 +25,17 @@ public final class QuorumCardPlays {
         }
         return switch (card) {
             case ENACT_PRODUCTION_QUOTAS, ESTABLISH_DOGSVILLE, FOOD_RATIONING, INSPIRATIONAL_SPEECH -> true;
+            case ARREST_ORDER -> ArrestOrderEventProcessor.canPlay(game);
+            case EXECUTE_PRISONER -> ExecutePrisonerEventProcessor.canPlay(game);
+            case PRESIDENTIAL_PARDON -> PresidentialPardonEventProcessor.canPlay(game, player);
+            case RELEASE_CYLON_MUGSHOTS -> ReleaseCylonMugshotsEventProcessor.canPlay(game, player);
+            case ENCOURAGE_MUTINY -> EncourageMutinyEventProcessor.canPlay(game, player);
+            case PRESIDENTIAL_ORDER -> PresidentialOrderEventProcessor.canPlay(game);
+            case EULOGY -> EulogyEventProcessor.canPlay(game);
             // the cards that later phases of quorum-cards-plan.md build
-            case PRESIDENTIAL_ORDER, RESIGNATION, ACCEPT_PROPHECY, ARREST_ORDER, ASSIGN_ARBITRATOR,
-                 ASSIGN_MISSION_SPECIALIST, ASSIGN_VICE_PRESIDENT, AUTHORIZATION_OF_BRUTAL_FORCE, ENCOURAGE_MUTINY,
-                 PRESIDENTIAL_PARDON, RELEASE_CYLON_MUGSHOTS, ASSIGN_CHIEF_OF_STAFF, CIVILIAN_SELF_DEFENSE,
-                 CONSULT_THE_ORACLE, EULOGY, EXECUTE_PRISONER, PROBATION, RESOURCES_FOR_GALACTICA,
-                 UNSAVORY_CONNECTIONS -> false;
+            case RESIGNATION, ACCEPT_PROPHECY, ASSIGN_ARBITRATOR, ASSIGN_MISSION_SPECIALIST, ASSIGN_VICE_PRESIDENT,
+                 AUTHORIZATION_OF_BRUTAL_FORCE, ASSIGN_CHIEF_OF_STAFF, CIVILIAN_SELF_DEFENSE, CONSULT_THE_ORACLE,
+                 PROBATION, RESOURCES_FOR_GALACTICA, UNSAVORY_CONNECTIONS -> false;
         };
     }
 

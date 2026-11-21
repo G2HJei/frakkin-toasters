@@ -143,8 +143,10 @@ public abstract class AbstractOps {
     /**
      * Loses the resource, as every loss does (rule 13.2). "Preventative Policy" makes the next loss of a resource this
      * turn 1 smaller.
+     *
+     * @return how much was lost
      */
-    protected void loseResource(Resource resource, int amount) {
+    protected int loseResource(Resource resource, int amount) {
         if (amount > 0 && game.turn().lossReductions().contains(resource)) {
             record(new LossReduced(resource));
             amount--;
@@ -152,6 +154,7 @@ public abstract class AbstractOps {
         if (amount > 0) {
             record(new ResourceDecreased(resource, amount));
         }
+        return Math.max(amount, 0);
     }
 
     protected GalacticaBoard galacticaBoard() {

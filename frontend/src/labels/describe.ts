@@ -219,6 +219,7 @@ const FACT_TEMPLATES: Record<string, string> = {
   'GameFact.CurrentPlayerChanged': '{playerNumber} is the current player',
   'GameFact.DestinationReached': 'The fleet reaches {card}',
   'GameFact.GameEnded': 'The {winner} win',
+  'GameFact.MoraleLostToExecution': 'The execution cost the fleet morale',
   'TitleFact.PresidentAssigned': '{character} is the President',
   'TitleFact.AdmiralAssigned': '{character} is the Admiral',
   'TitleFact.CagAssigned': '{character} is the CAG',

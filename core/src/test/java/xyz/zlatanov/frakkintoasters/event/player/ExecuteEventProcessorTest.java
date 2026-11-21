@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static xyz.zlatanov.frakkintoasters.state.board.Resource.MORALE;
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.*;
@@ -70,6 +71,28 @@ class ExecuteEventProcessorTest extends EventTestHarness<ExecuteEvent> {
         assertTrue(player(2).loyaltyCards().isEmpty());
         assertEquals(List.of(NOT_CYLON), loyaltyDeck.discardedCards());
         assertFalse(game.turn().endedEarly());
+        assertFollowupSelection();
+    }
+
+    // "Eulogy" asks whether an execution cost the fleet morale.
+    @Test
+    void shouldRememberThatAnExecutionCostMorale() {
+        player(2).loyaltyCards().addOnTop(NOT_CYLON);
+
+        execute(new ExecuteEvent(2));
+
+        assertTrue(game.moraleLostToExecution());
+        assertFollowupSelection();
+    }
+
+    @Test
+    void notWhenAPreventativePolicyTookTheLoss() {
+        player(2).loyaltyCards().addOnTop(NOT_CYLON);
+        ops.reduceNextLoss(MORALE);
+
+        execute(new ExecuteEvent(2));
+
+        assertFalse(game.moraleLostToExecution());
         assertFollowupSelection();
     }
 

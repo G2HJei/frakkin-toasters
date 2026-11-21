@@ -8,10 +8,15 @@ import xyz.zlatanov.frakkintoasters.engine.PendingInput.AwaitingDecision;
 import xyz.zlatanov.frakkintoasters.engine.journal.GameSnapshot;
 import xyz.zlatanov.frakkintoasters.event.ActionEvent;
 import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
+import xyz.zlatanov.frakkintoasters.event.action.GrantEvent;
+import xyz.zlatanov.frakkintoasters.event.action.GrantEvent.GrantedBy;
 import xyz.zlatanov.frakkintoasters.event.action.QuorumCardEvent;
+import xyz.zlatanov.frakkintoasters.event.action.quorum.ArrestOrderEvent;
 import xyz.zlatanov.frakkintoasters.event.action.quorum.EnactProductionQuotasEvent;
 import xyz.zlatanov.frakkintoasters.event.action.quorum.EstablishDogsvilleEvent;
 import xyz.zlatanov.frakkintoasters.event.action.quorum.FoodRationingEvent;
+import xyz.zlatanov.frakkintoasters.event.action.skillcard.ExecutiveOrderEvent;
 import xyz.zlatanov.frakkintoasters.event.action.title.PresidentTitleActionEvent;
 import xyz.zlatanov.frakkintoasters.event.endgame.CylonsWinEvent;
 import xyz.zlatanov.frakkintoasters.event.location.colonialone.QuorumChamberEvent;
@@ -25,18 +30,23 @@ import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Randomness;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
+import static xyz.zlatanov.frakkintoasters.event.action.GrantEvent.Grant.ACTION;
 import static xyz.zlatanov.frakkintoasters.state.Team.CYLONS;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.BRIG;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.QUORUM_CHAMBER;
 import static xyz.zlatanov.frakkintoasters.state.card.QuorumCard.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.EXECUTIVE_ORDER;
 
 /**
  * Quorum Cards played through {@code submit} and {@code choose} alone, restoring the game at every pause. The President
@@ -46,6 +56,8 @@ class QuorumCardActionsTest {
 
     // Only the end of the game empties the agenda, so the script ends it.
     private static final Followup CYLONS_WIN = single(new CylonsWinEvent());
+
+    private static final SkillCard EXECUTIVE_ORDER_1 = new SkillCard(1, EXECUTIVE_ORDER);
 
     private GameEngine engine;
 
@@ -128,6 +140,26 @@ class QuorumCardActionsTest {
         assertThrows(InvalidActionException.class, () -> engine.submit(1, new EnactProductionQuotasEvent(1)));
     }
 
+    // The President plays a Quorum Card as one of the actions an "Executive Order" gives him.
+    @Test
+    void thePresidentPlaysACardOnAGrantedAction() {
+        start(all(setUp(WILLIAM_ADAMA), single(new MakePresidentEvent(LAURA_ROSLIN)),
+                single(new GiveSkillCardEvent(1, EXECUTIVE_ORDER_1)), single(new GiveQuorumCardToPresidentEvent(ARREST_ORDER)),
+                single(new ActionStepEvent()), CYLONS_WIN));
+
+        act(1);
+        play(engine -> engine.submit(1, new ExecutiveOrderEvent(1, EXECUTIVE_ORDER_1, 2)));
+        choose(2, all(new GrantEvent(2, ACTION, GrantedBy.EXECUTIVE_ORDER),
+                new GrantEvent(2, ACTION, GrantedBy.EXECUTIVE_ORDER)));
+        act(2);
+        play(engine -> engine.submit(2, new ArrestOrderEvent(2, 3)));
+        pass(2);
+
+        assertEquals(Optional.of(BRIG), engine.view().locate(KARA_STARBUCK_THRACE));
+        assertEquals(List.of(ARREST_ORDER), game().decks().quorum().discardedCards());
+        assertEquals(new Finished(CYLONS), engine.status(1));
+    }
+
     // The first player's character becomes President.
     private static Followup setUp(Character first) {
         return all(
@@ -150,6 +182,10 @@ class QuorumCardActionsTest {
     // The player chooses to take an action.
     private void act(int player) {
         choose(player, single(new PlayerDecisionEvent<>(player, ActionEvent.class)));
+    }
+
+    private void pass(int player) {
+        choose(player, single(new NoOpEvent(player)));
     }
 
     private void choose(int player, Followup option) {

@@ -43,6 +43,11 @@ public interface GameView {
     int nukes();
 
     /**
+     * @return whether an execution has cost the fleet morale in this game, for "Eulogy"
+     */
+    boolean moraleLostToExecution();
+
+    /**
      * The skill checks of the Crisis Cards that are kept in play, e.g. "Detector Sabotage" and "Legendary Discovery".
      */
     List<SkillCheckType> crisisCardsInPlay();

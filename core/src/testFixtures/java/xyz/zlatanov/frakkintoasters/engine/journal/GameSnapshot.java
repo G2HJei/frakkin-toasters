@@ -49,6 +49,7 @@ public record GameSnapshot(Map<String, Object> values) {
         s.put("admiral", game.admiral());
         s.put("cag", game.cag());
         s.put("nukes", game.nukes());
+        s.put("moraleLostToExecution", game.moraleLostToExecution());
         s.put("presidentHand", deck(game.presidentHand()));
         for (val id : DeckId.values()) {
             s.put("deck." + id, deck(game.decks().deck(id)));

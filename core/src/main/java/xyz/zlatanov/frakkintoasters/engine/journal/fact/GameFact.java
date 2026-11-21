@@ -55,6 +55,10 @@ public sealed interface GameFact extends Fact {
     record NukeDiscarded() implements GameFact {
     }
 
+    // An execution cost the fleet morale (rule 7.1), which "Eulogy" asks for.
+    record MoraleLostToExecution() implements GameFact {
+    }
+
     record NukeGained() implements GameFact {
     }
 

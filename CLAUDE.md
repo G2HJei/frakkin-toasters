@@ -318,7 +318,8 @@ instead, e.g. `FollowupUtils.chooseCharacterForSickbay` (rule 9.3.2).
   it's mapped. A damaged location has no action (rule 11.7.2.2), and a location with preconditions asks the static
   `canAct` of its processor, e.g. FTL Control out of the red zone.
 - A rule that another processor or a followup needs too is a public static check on its processor, e.g.
-  `SendToBrigEventProcessor.canBeSentToBrig` or `MakePresidentEventProcessor.canBecomePresident`.
+  `SendToBrigEventProcessor.canBeSentToBrig`, `MakePresidentEventProcessor.canBecomePresident` or
+  `MakeAdmiralEventProcessor.canBecomeAdmiral` (and `MakeCagEventProcessor.canBecomeCag`: not in the "Brig").
 - `EventProcessor.isPlayer(n)` checks a player number from the client, and `holdsSkillCards(cards)` the hand. It counts
   copies, because the decks hold equal cards.
 - A decision must always have a legal answer, or the game waits forever. A processor queues one only when an answer
@@ -510,7 +511,8 @@ Quorum Cards: `SkillCardPlays.canPlay` keeps it `false` and `SkillCardEventsTest
 `ExecuteEventProcessor.canBeExecuted` allows humans only: a revealed Cylon ignores it (rule 6.1.2.1).
 
 - The player discards his Skill and Mutiny Cards and his miracle token.
-- A human: lose 1 morale, the character leaves the game (`CharacterRemoved`, into `GameView.removedComponents()`), the
+- A human: lose 1 morale (`MoraleLostToExecution` when the loss happens, `GameView.moraleLostToExecution()`, which
+  "Eulogy" asks for), the character leaves the game (`CharacterRemoved`, into `GameView.removedComponents()`), the
   Loyalty Cards are discarded but the Mutineer card stays, and the player chooses a new character. Once the game is
   under way, `SelectCharacterEventProcessor.canBeSelected` allows any type but a Cylon Leader, and never an executed
   character or its other version. `FinishExecutionEvent` then adds a "You Are Not a Cylon" card to the Loyalty deck and

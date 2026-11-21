@@ -110,6 +110,7 @@ public final class FactApplier {
             case GameFact.ReturnToCrisisStepChanged f -> game.turn().returnsToCrisisStep(f.returns());
             case GameFact.NukeDiscarded ignored -> game.discardNuke();
             case GameFact.NukeGained ignored -> game.gainNuke();
+            case GameFact.MoraleLostToExecution ignored -> game.loseMoraleToExecution();
             case GameFact.SkillCardPlayed f -> game.turn().playSkillCard(f.card().type());
             case GameFact.LossReductionAdded f -> game.turn().addLossReduction(f.resource());
             case GameFact.LossReduced f -> game.turn().useLossReduction(f.resource());

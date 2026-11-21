@@ -169,6 +169,10 @@ public class GameOps extends AbstractOps {
         record(new CylonShipsHeld());
     }
 
+    public void moraleLostToExecution() {
+        record(new MoraleLostToExecution());
+    }
+
     /**
      * "Preventative Policy": the next loss of the resource this turn is 1 smaller.
      */

@@ -98,7 +98,9 @@ public class ExecuteEventProcessor extends EventProcessor<ExecuteEvent> {
     private Followup human() {
         val playerNumber = player.number();
         val character = player.character();
-        ops.galactica().decreaseMorale(1);
+        if (ops.galactica().decreaseMorale(1) > 0) {
+            ops.moraleLostToExecution(); // unless a "Preventative Policy" took the loss
+        }
         ops.player(playerNumber).removeCharacter();
         ops.player(playerNumber).discardLoyaltyCards(player.loyaltyCards().cards().stream()
                 .filter(card -> card != MUTINEER)

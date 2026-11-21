@@ -87,8 +87,11 @@ public class GalacticaOps extends BattlestarOps {
         loseResource(POPULATION, populationLost);
     }
 
-    public void decreaseMorale(int moraleLost) {
-        loseResource(MORALE, moraleLost);
+    /**
+     * @return how much morale was lost
+     */
+    public int decreaseMorale(int moraleLost) {
+        return loseResource(MORALE, moraleLost);
     }
 
     public void decreaseResource(Resource resource, int amount) {
