@@ -14,6 +14,7 @@ import xyz.zlatanov.frakkintoasters.state.view.GameView;
 import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static lombok.AccessLevel.PRIVATE;
 import static xyz.zlatanov.frakkintoasters.event.Followup.NONE;
@@ -46,23 +47,24 @@ public final class Actions {
      * @return the player's choice of an action or a pass, {@link Followup#NONE} when he has nothing to choose
      */
     public static Followup offerAction(GameView game, int playerNumber) {
-        val player = game.player(playerNumber);
-        if (game.locate(player.character()).isEmpty()) {
-            return NONE; // a character off the board (a "Stranded" Karl "Helo" Agathon) takes no actions
-        }
-        if (isPilot(game, player)) {
-            // A pilot activates his viper, or takes another action, e.g. plays a Skill Card (rule 11.2.1). He is in
-            // space, so a location action is never his.
-            return SkillCardPlays.canPlayAction(game, player)
-                    ? one(new PlayerDecisionEvent<>(playerNumber, ActivateViperEvent.class),
-                    new PlayerDecisionEvent<>(playerNumber, ActionEvent.class),
-                    new NoOpEvent(playerNumber))
-                    : one(new PlayerDecisionEvent<>(playerNumber, ActivateViperEvent.class), new NoOpEvent(playerNumber));
-        }
-        // Once he chose to act, he must have a legal answer: none e.g. in "Sickbay" without a card to play.
-        return canTakeAction(game, player)
-                ? one(new PlayerDecisionEvent<>(playerNumber, ActionEvent.class), new NoOpEvent(playerNumber))
-                : NONE;
+        return choice(playerNumber, actionDecisions(game, playerNumber));
+    }
+
+    /**
+     * @return the player's choice of a move or a pass, e.g. for an "Executive Order". A "Movement:" ability can't be used
+     * then (rule 8.3.5)
+     */
+    public static Followup offerMove(GameView game, int playerNumber) {
+        return choice(playerNumber, moveDecisions(game, playerNumber));
+    }
+
+    /**
+     * @return the player's choice of a move, an action or a pass, e.g. for a "State of Emergency"
+     */
+    public static Followup offerMoveOrAction(GameView game, int playerNumber) {
+        val decisions = new ArrayList<Event>(moveDecisions(game, playerNumber));
+        decisions.addAll(actionDecisions(game, playerNumber));
+        return choice(playerNumber, decisions);
     }
 
     /**
@@ -80,16 +82,42 @@ public final class Actions {
      */
     public static Followup offerMovement(GameView game, int playerNumber) {
         val player = game.player(playerNumber);
-        val options = new ArrayList<Event>();
-        if (canMove(game, player)) {
-            options.add(new PlayerDecisionEvent<>(playerNumber, MoveEvent.class));
-        }
+        val decisions = new ArrayList<Event>(moveDecisions(game, playerNumber));
         if (game.locate(player.character()).isPresent() && SkillCardPlays.canPlayMovementAbility(game, player)) {
-            options.add(new PlayerDecisionEvent<>(playerNumber, MovementAbilityEvent.class));
+            decisions.add(new PlayerDecisionEvent<>(playerNumber, MovementAbilityEvent.class));
         }
-        if (options.isEmpty()) {
+        return choice(playerNumber, decisions);
+    }
+
+    private static List<Event> actionDecisions(GameView game, int playerNumber) {
+        val player = game.player(playerNumber);
+        if (game.locate(player.character()).isEmpty()) {
+            return List.of(); // a character off the board (a "Stranded" Karl "Helo" Agathon) takes no actions
+        }
+        if (isPilot(game, player)) {
+            // A pilot activates his viper, or takes another action, e.g. plays a Skill Card (rule 11.2.1). He is in
+            // space, so a location action is never his.
+            return SkillCardPlays.canPlayAction(game, player)
+                    ? List.of(new PlayerDecisionEvent<>(playerNumber, ActivateViperEvent.class),
+                    new PlayerDecisionEvent<>(playerNumber, ActionEvent.class))
+                    : List.of(new PlayerDecisionEvent<>(playerNumber, ActivateViperEvent.class));
+        }
+        // Once he chose to act, he must have a legal answer: none e.g. in "Sickbay" without a card to play.
+        return canTakeAction(game, player) ? List.of(new PlayerDecisionEvent<>(playerNumber, ActionEvent.class)) : List.of();
+    }
+
+    private static List<Event> moveDecisions(GameView game, int playerNumber) {
+        return canMove(game, game.player(playerNumber))
+                ? List.of(new PlayerDecisionEvent<>(playerNumber, MoveEvent.class))
+                : List.of();
+    }
+
+    // The decisions, or doing nothing instead.
+    private static Followup choice(int playerNumber, List<Event> decisions) {
+        if (decisions.isEmpty()) {
             return NONE;
         }
+        val options = new ArrayList<>(decisions);
         options.add(new NoOpEvent(playerNumber));
         return one(options.toArray(Event[]::new));
     }

@@ -79,6 +79,7 @@ public final class Disclosure {
             entry("DogfightEvent.removedCard", true),
             entry("EngineRoomEvent.discardCard1", true),
             entry("EngineRoomEvent.discardCard2", true),
+            entry("ExecutiveOrderEvent.card", true),
             entry("ForceTheirHandEvent.skillCard", true),
             entry("GasCloudPlaceEvent.cards", false),
             entry("MoveEvent.discardCard", true),
@@ -98,6 +99,7 @@ public final class Disclosure {
             entry("ResolveCrisisCardEvent.card", true),
             entry("ResolveCrisisRollEvent.card", true),
             entry("ResolveDestinationCardEvent.card", true),
+            entry("StateOfEmergencyEvent.card", true),
             entry("TiebreakCardsBeforeSkillCheckEvent.keptCards", true), // the cards were revealed
             entry("TiebreakInterruptCardsEvent.keptCards", true), // the window's cards show when it closes
             // the setups of a sandbox, whose one viewer sees everything

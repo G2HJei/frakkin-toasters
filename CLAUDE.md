@@ -47,9 +47,8 @@ docker compose up -d     # Postgres for local runs, on port 5433
 Next steps, in order:
 
 1. ~~Complete the skill check sequence according to `skill-check.drawio`.~~ Done, see "Skill Check Sequence".
-2. ~~Reanalyze existing events: `PlayerEvent` or current player.~~ Done. The engine still has to call
-   `GameOps.actingPlayer`
-   for "Executive Order".
+2. ~~Reanalyze existing events: `PlayerEvent` or current player.~~ Done. `GrantEvent` calls `GameOps.actingPlayer`
+   for "Executive Order" and "State of Emergency" (see "Actions and Skill Cards").
 3. ~~Create the journal and tie it to the ops classes in `operation/`.~~ Done, see "Journal and Replay". Still open:
    Done since: per-viewer hiding (`projection/`, see "Projections") and JSON (the backend's `JournalCodec`). The pending
    followups are the engine's `Agenda`.
@@ -438,9 +437,15 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
   `GalacticaOps` losses, the FUEL and FOOD damage tokens, destroyed civilian ships), which uses the reduction up on the
   next loss of that resource (`LossReduced`). The sandbox's `ChangeResourceEvent` uses `SandboxOps.decreaseResource`,
   which isn't a loss.
-- `GrantEvent(playerNumber, grant, grantedBy)` gives a player an action later, e.g. the "Hangar Deck"'s "1 more
-  action" once the pilot is in space. It is queued, never submitted, makes the player the acting player when it runs,
-  and offers through `Actions`.
+- `GrantEvent(playerNumber, grant, grantedBy)` lets a player act later: `ACTION`, `MOVE` (a plain `MoveEvent`, no
+  Movement abilities outside your own Movement step, rule 8.3.5) or `MOVE_OR_ACTION`. It is queued, never submitted,
+  makes the player the acting player when it runs (so grants nest), and offers through `Actions`. `grantedBy` brings
+  its card's rules: an "Executive Order" grant does nothing for a Cylon player or once the turn ended early (A2.3.8.4,
+  A2.3.8.6), a "State of Emergency" one always resolves. `ResetActingPlayerEvent` ends the card.
+- "Executive Order" targets another human who can move or act, and queues `one(all(MOVE, ACTION), all(ACTION,
+  ACTION))` (the first only when he can move), which he chooses because the grants name him. "State of Emergency"
+  loses 1 food, then grants `MOVE_OR_ACTION` to every player clockwise from its player, Cylons included.
+- The "Hangar Deck"'s "1 more action" is an `ACTION` grant, offered once the pilot is in space.
 
 ### End of Game and Mutiny
 

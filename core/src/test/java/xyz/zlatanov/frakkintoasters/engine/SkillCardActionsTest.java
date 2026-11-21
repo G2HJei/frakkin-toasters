@@ -11,10 +11,14 @@ import xyz.zlatanov.frakkintoasters.event.ActivateViperEvent;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.BuildNukeEvent;
+import xyz.zlatanov.frakkintoasters.event.action.GrantEvent;
+import xyz.zlatanov.frakkintoasters.event.action.GrantEvent.GrantedBy;
 import xyz.zlatanov.frakkintoasters.event.action.MovementAbilityEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.ConsolidatePowerEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.CriticalSituationEvent;
+import xyz.zlatanov.frakkintoasters.event.action.skillcard.ExecutiveOrderEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.PreventivePolicyEvent;
+import xyz.zlatanov.frakkintoasters.event.action.skillcard.StateOfEmergencyEvent;
 import xyz.zlatanov.frakkintoasters.event.board.LoseResourceEvent;
 import xyz.zlatanov.frakkintoasters.event.endgame.CylonsWinEvent;
 import xyz.zlatanov.frakkintoasters.event.location.galactica.HangarDeckEvent;
@@ -43,7 +47,10 @@ import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
+import static xyz.zlatanov.frakkintoasters.event.action.GrantEvent.Grant.ACTION;
+import static xyz.zlatanov.frakkintoasters.event.action.GrantEvent.Grant.MOVE;
 import static xyz.zlatanov.frakkintoasters.state.Team.CYLONS;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.ADMINISTRATION;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_4_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.SICKBAY;
 import static xyz.zlatanov.frakkintoasters.state.board.Resource.FOOD;
@@ -66,6 +73,14 @@ class SkillCardActionsTest {
     private static final SkillCard BUILD_NUKE_6        = new SkillCard(6, BUILD_NUKE);
     private static final SkillCard CRITICAL_SITUATION_3 = new SkillCard(3, CRITICAL_SITUATION);
     private static final SkillCard PREVENTIVE_POLICY_3  = new SkillCard(3, PREVENTIVE_POLICY);
+    private static final SkillCard EXECUTIVE_ORDER_1    = new SkillCard(1, EXECUTIVE_ORDER);
+    private static final SkillCard STATE_OF_EMERGENCY_6 = new SkillCard(6, STATE_OF_EMERGENCY);
+
+    // The choices of the target of an "Executive Order", player 2.
+    private static final Followup MOVE_THEN_ACT = all(new GrantEvent(2, MOVE, GrantedBy.EXECUTIVE_ORDER),
+            new GrantEvent(2, ACTION, GrantedBy.EXECUTIVE_ORDER));
+    private static final Followup ACT_TWICE     = all(new GrantEvent(2, ACTION, GrantedBy.EXECUTIVE_ORDER),
+            new GrantEvent(2, ACTION, GrantedBy.EXECUTIVE_ORDER));
 
     private GameEngine engine;
 
@@ -157,6 +172,76 @@ class SkillCardActionsTest {
         assertEquals(7, engine.view().boards().galactica().food());
     }
 
+    // The target acts twice: the grants make him the acting player, and the current player acts again at the end.
+    @Test
+    void executiveOrderLetsTheTargetActTwice() {
+        start(all(setUp(WILLIAM_ADAMA),
+                all(new GiveSkillCardEvent(1, EXECUTIVE_ORDER_1), new GiveSkillCardEvent(2, BUILD_NUKE_6),
+                        new GiveSkillCardEvent(2, CONSOLIDATE_POWER_1)),
+                single(new ActionStepEvent()), CYLONS_WIN));
+
+        act(1);
+        play(engine -> engine.submit(1, new ExecutiveOrderEvent(1, EXECUTIVE_ORDER_1, 2)));
+        assertWaitingFor(new AwaitingChoice(2, Set.of(MOVE_THEN_ACT, ACT_TWICE)));
+
+        choose(2, ACT_TWICE);
+        assertEquals(2, engine.view().turn().actingPlayerNumber());
+        act(2);
+        play(engine -> engine.submit(2, new BuildNukeEvent(2, BUILD_NUKE_6)));
+        act(2);
+        play(engine -> engine.submit(2, new ConsolidatePowerEvent(2, CONSOLIDATE_POWER_1)));
+        play(engine -> engine.submit(2, new DrawSkillCardsEvent(2, Map.of(PILOTING, 2))));
+
+        assertEquals(new Finished(CYLONS), engine.status(1));
+        assertEquals(1, engine.view().turn().actingPlayerNumber());
+        assertEquals(3, engine.view().nukes());
+        assertEquals(List.of(EXECUTIVE_ORDER, BUILD_NUKE, CONSOLIDATE_POWER), engine.view().turn().playedSkillCards());
+    }
+
+    @Test
+    void executiveOrderLetsTheTargetMoveThenAct() {
+        start(all(setUp(WILLIAM_ADAMA),
+                all(new GiveSkillCardEvent(1, EXECUTIVE_ORDER_1), new GiveSkillCardEvent(2, BUILD_NUKE_6)),
+                single(new ActionStepEvent()), CYLONS_WIN));
+
+        act(1);
+        play(engine -> engine.submit(1, new ExecutiveOrderEvent(1, EXECUTIVE_ORDER_1, 2)));
+        choose(2, MOVE_THEN_ACT);
+        choose(2, single(new PlayerDecisionEvent<>(2, MoveEvent.class)));
+        play(engine -> engine.submit(2, new MoveEvent(2, ADMINISTRATION, null)));
+        act(2);
+        play(engine -> engine.submit(2, new BuildNukeEvent(2, BUILD_NUKE_6)));
+
+        assertEquals(new Finished(CYLONS), engine.status(1));
+        assertEquals(ADMINISTRATION, engine.view().locate(LAURA_ROSLIN).orElseThrow());
+        assertEquals(3, engine.view().nukes());
+    }
+
+    // The target of an "Executive Order" plays a "State of Emergency": each grant makes its player the acting player,
+    // so the target acts again afterwards, and the current player once both are over.
+    @Test
+    void grantsNest() {
+        start(all(setUp(WILLIAM_ADAMA),
+                all(new GiveSkillCardEvent(1, EXECUTIVE_ORDER_1), new GiveSkillCardEvent(2, STATE_OF_EMERGENCY_6)),
+                single(new ActionStepEvent()), CYLONS_WIN));
+
+        act(1);
+        play(engine -> engine.submit(1, new ExecutiveOrderEvent(1, EXECUTIVE_ORDER_1, 2)));
+        choose(2, ACT_TWICE);
+        act(2);
+        play(engine -> engine.submit(2, new StateOfEmergencyEvent(2, STATE_OF_EMERGENCY_6)));
+        for (val player : List.of(2, 3, 1)) { // clockwise from the player of the card
+            assertEquals(player, engine.view().turn().actingPlayerNumber());
+            pass(player);
+        }
+        assertEquals(2, engine.view().turn().actingPlayerNumber()); // his second action
+        pass(2);
+
+        assertEquals(new Finished(CYLONS), engine.status(1));
+        assertEquals(1, engine.view().turn().actingPlayerNumber());
+        assertEquals(7, engine.view().boards().galactica().food());
+    }
+
     // The engine accepts a card only where a decision of its timing is asked.
     @Test
     void aCardAnswersOnlyADecisionOfItsTiming() {
@@ -193,6 +278,10 @@ class SkillCardActionsTest {
     // The player chooses to take an action.
     private void act(int player) {
         choose(player, single(new PlayerDecisionEvent<>(player, ActionEvent.class)));
+    }
+
+    private void pass(int player) {
+        choose(player, single(new NoOpEvent(player)));
     }
 
     private void choose(int player, Followup option) {

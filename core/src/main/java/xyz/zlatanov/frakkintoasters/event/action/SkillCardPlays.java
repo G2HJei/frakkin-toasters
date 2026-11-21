@@ -4,6 +4,7 @@ import lombok.NoArgsConstructor;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.BuildNukeEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.ConsolidatePowerEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.CriticalSituationEventProcessor;
+import xyz.zlatanov.frakkintoasters.event.action.skillcard.ExecutiveOrderEventProcessor;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 import xyz.zlatanov.frakkintoasters.state.view.GameView;
@@ -33,9 +34,10 @@ public final class SkillCardPlays {
             case CONSOLIDATE_POWER -> ConsolidatePowerEventProcessor.canPlay(game);
             case BUILD_NUKE -> BuildNukeEventProcessor.canPlay(game);
             case CRITICAL_SITUATION -> CriticalSituationEventProcessor.canPlay(game, player);
-            case PREVENTIVE_POLICY -> true;
+            case PREVENTIVE_POLICY, STATE_OF_EMERGENCY -> true;
+            case EXECUTIVE_ORDER -> ExecutiveOrderEventProcessor.canPlay(game, player);
             // not built yet
-            case POPULAR_INFLUENCE, NEGOTIATION, EXECUTIVE_ORDER, STATE_OF_EMERGENCY, LAUNCH_SCOUT,
+            case POPULAR_INFLUENCE, NEGOTIATION, LAUNCH_SCOUT,
                  SCOUTING_FOR_FUEL, UNORTHODOX_PLAN, MAXIMUM_FIREPOWER, FULL_THROTTLE, COMBAT_VETERAN,
                  LAUNCH_RESERVES, REPAIR, RAPTOR_SPECIALIST, TEST_THE_LIMITS -> false;
             // played in a skill check, before it, or in an interrupt window, never as an action or a movement
