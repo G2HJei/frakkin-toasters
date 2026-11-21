@@ -24,8 +24,7 @@ class QuorumCardEventsTest {
     // the cards that later phases of quorum-cards-plan.md build
     private static final Set<QuorumCard> NOT_BUILT_YET = EnumSet.of(
             RESIGNATION, ACCEPT_PROPHECY, ASSIGN_ARBITRATOR, ASSIGN_MISSION_SPECIALIST, ASSIGN_VICE_PRESIDENT,
-            AUTHORIZATION_OF_BRUTAL_FORCE, ASSIGN_CHIEF_OF_STAFF, CIVILIAN_SELF_DEFENSE, CONSULT_THE_ORACLE, PROBATION,
-            RESOURCES_FOR_GALACTICA, UNSAVORY_CONNECTIONS);
+            ASSIGN_CHIEF_OF_STAFF, CONSULT_THE_ORACLE, PROBATION, UNSAVORY_CONNECTIONS);
 
     @Test
     void eachCardHasOneEvent() {

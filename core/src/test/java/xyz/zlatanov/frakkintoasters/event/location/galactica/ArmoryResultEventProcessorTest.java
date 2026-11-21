@@ -4,13 +4,11 @@ import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
-import xyz.zlatanov.frakkintoasters.event.interrupt.OpenInterruptWindowEvent;
-import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow.AfterBasestarOrCenturionDestroyed;
+import xyz.zlatanov.frakkintoasters.event.ship.DestroyCenturionEvent;
 import xyz.zlatanov.frakkintoasters.state.ship.Centurion;
 import xyz.zlatanov.frakkintoasters.state.track.BoardingParty;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.STRATEGIC_PLANNING;
 
 class ArmoryResultEventProcessorTest extends EventTestHarness<ArmoryResultEvent> {
@@ -39,9 +37,7 @@ class ArmoryResultEventProcessorTest extends EventTestHarness<ArmoryResultEvent>
 
         execute(new ArmoryResultEvent(centurion.id()));
 
-        assertNull(galacticaBoard.boardingPartyTrack().get(centurion));
-        assertEquals(4, cylonShips.centurions().size());
-        assertFollowup(new OpenInterruptWindowEvent(new AfterBasestarOrCenturionDestroyed()));
+        assertFollowup(new DestroyCenturionEvent(centurion.id()));
     }
 
     @Test
@@ -52,9 +48,7 @@ class ArmoryResultEventProcessorTest extends EventTestHarness<ArmoryResultEvent>
 
         execute(new ArmoryResultEvent(other.id()));
 
-        assertEquals(BoardingParty.START, galacticaBoard.boardingPartyTrack().get(centurion));
-        assertNull(galacticaBoard.boardingPartyTrack().get(other));
-        assertFollowup(new OpenInterruptWindowEvent(new AfterBasestarOrCenturionDestroyed()));
+        assertFollowup(new DestroyCenturionEvent(other.id()));
     }
 
     @Test
@@ -66,7 +60,6 @@ class ArmoryResultEventProcessorTest extends EventTestHarness<ArmoryResultEvent>
 
         execute(new ArmoryResultEvent(centurion.id()));
 
-        assertNull(galacticaBoard.boardingPartyTrack().get(centurion));
-        assertFollowup(new OpenInterruptWindowEvent(new AfterBasestarOrCenturionDestroyed()));
+        assertFollowup(new DestroyCenturionEvent(centurion.id()));
     }
 }

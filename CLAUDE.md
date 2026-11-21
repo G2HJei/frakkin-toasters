@@ -480,6 +480,7 @@ Quorum Cards: `SkillCardPlays.canPlay` keeps it `false` and `SkillCardEventsTest
   the "Reserves"). `BattlestarOps.repairLocation` records `LocationRepaired` and puts the location's damage token back
   on its pile, shuffled (rule 11.7.2.2). Not every location has a token (`DamageTokens.of`), and the sandbox's
   `DamageLocationEvent` pulls the token out of its pile (`CardsPulled`), as a draw would, so a repair returns one copy.
+  `RepairEventProcessor.isDamaged`, `areDamagedVipers` and `repairLocation` are shared with "Resources for Galactica".
 - "Unorthodox Plan" takes the action of "Command", "Armory", "Weapons Control" or "Communications" from anywhere, even
   damaged. It queues the location's decision with `ANYWHERE_EVEN_IF_DAMAGED`. Those four events are
   `AnywhereLocationEvent`s with an `anywhere` component, which only that constraint sets: the engine replaces a
@@ -608,6 +609,8 @@ and its result.
   fighter in space. A pilot's action (`Actions.offerAction`, also
   for the "Hangar Deck"'s extra action) offers the activation as a decision, and "Command" only when
   `canActivateUnmanned`.
+- `DestroyCenturionEvent` destroys a centurion on the Boarding Party track and opens the "Major Victory" window (the
+  "Armory" result, "Authorization of Brutal Force"). `DestroyHeavyRaiderEvent` destroys a heavy raider in space.
 - Every effect that places or launches a Cylon ship on the main game board goes through `AbstractOps.takeFromSupply`
   (rule 11.4.2): a ship from the supply, and when it has none left, one from the lowest-numbered Cylon space area of the
   Cylon Fleet board. Without one there either, nothing is placed.
