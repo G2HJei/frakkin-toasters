@@ -64,6 +64,11 @@ public final class FactApplier {
                         .orElseThrow(FrakCallTheAdmiralException::new);
                 board.damage(f.location());
             }
+            case BoardFact.LocationRepaired f -> Stream.of(galactica, game.boards().pegasus())
+                    .filter(b -> b.locations().contains(f.location()))
+                    .findFirst()
+                    .orElseThrow(FrakCallTheAdmiralException::new)
+                    .repair(f.location());
             case BoardFact.BoardingPartyAdvanced ignored -> galactica.advanceBoardingParty();
             case BoardFact.PursuitAdvanced ignored -> game.boards().cylonFleet().advancePursuit();
             case BoardFact.PursuitReset ignored -> game.boards().cylonFleet().resetPursuit();

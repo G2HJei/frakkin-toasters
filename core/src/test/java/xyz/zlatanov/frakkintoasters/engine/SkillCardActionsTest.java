@@ -26,6 +26,9 @@ import xyz.zlatanov.frakkintoasters.event.action.skillcard.ExecutiveOrderEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.LaunchScoutEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.MaximumFirepowerEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.RaptorSpecialistEvent;
+import xyz.zlatanov.frakkintoasters.event.action.skillcard.RepairEvent;
+import xyz.zlatanov.frakkintoasters.event.sandbox.DamageLocationEvent;
+import xyz.zlatanov.frakkintoasters.event.sandbox.MoveCharacterEvent;
 import xyz.zlatanov.frakkintoasters.event.deck.LookAtTopCardEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.PreventivePolicyEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.StateOfEmergencyEvent;
@@ -98,6 +101,7 @@ class SkillCardActionsTest {
     private static final SkillCard MAXIMUM_FIREPOWER_3  = new SkillCard(3, MAXIMUM_FIREPOWER);
     private static final SkillCard RAPTOR_SPECIALIST_3  = new SkillCard(3, RAPTOR_SPECIALIST);
     private static final SkillCard LAUNCH_SCOUT_1       = new SkillCard(1, LAUNCH_SCOUT);
+    private static final SkillCard REPAIR_1             = new SkillCard(1, REPAIR);
 
     // The choices of the target of an "Executive Order", player 2.
     private static final Followup MOVE_THEN_ACT = all(new GrantEvent(2, MOVE, GrantedBy.EXECUTIVE_ORDER),
@@ -348,6 +352,20 @@ class SkillCardActionsTest {
             assertEquals(3, engine.view().boards().galactica().reserves().stream().filter(Raptor.class::isInstance).count());
         }
         assertEquals(new Finished(CYLONS), engine.status(1));
+    }
+
+    // A damaged location has no action (rule 11.7.2.2), but its character may repair it.
+    @Test
+    void repairALocationFromInside() {
+        start(all(setUp(WILLIAM_ADAMA),
+                all(new GiveSkillCardEvent(1, REPAIR_1), new DamageLocationEvent(COMMAND), new MoveCharacterEvent(WILLIAM_ADAMA, COMMAND)),
+                single(new ActionStepEvent()), CYLONS_WIN));
+
+        act(1);
+        play(engine -> engine.submit(1, new RepairEvent(1, REPAIR_1, List.of())));
+
+        assertEquals(new Finished(CYLONS), engine.status(1));
+        assertFalse(engine.view().boards().galactica().isDamaged(COMMAND));
     }
 
     // The engine accepts a card only where a decision of its timing is asked.

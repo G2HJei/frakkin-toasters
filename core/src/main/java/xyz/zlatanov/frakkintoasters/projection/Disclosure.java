@@ -100,6 +100,7 @@ public final class Disclosure {
             entry("PreventivePolicyEvent.card", true),
             entry("QuickThinkingEvent.cardToRemove", true),
             entry("RaptorSpecialistEvent.card", true),
+            entry("RepairEvent.card", true),
             entry("ResolveCapricaCrisisCardEvent.crisisCardToPlay", true),
             entry("ResolveCapricaCrisisCardEvent.crisisCardToPutAtBottom", false),
             entry("ResolveCrisisCardEvent.card", true),

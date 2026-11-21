@@ -148,6 +148,15 @@ public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard, Gal
 
     @Mutates
     @Override
+    public GalacticaBoard repair(Location location) {
+        if (!damagedLocations.remove(location)) {
+            throw new FrakCallTheAdmiralException("Not damaged: " + location);
+        }
+        return this;
+    }
+
+    @Mutates
+    @Override
     public GalacticaBoard place(Location in, Ship ship) {
         assert in.isSpaceLocation();
         shipsInSpace.put(ship, in);

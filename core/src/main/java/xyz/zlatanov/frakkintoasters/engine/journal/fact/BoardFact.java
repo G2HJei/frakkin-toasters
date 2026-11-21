@@ -27,6 +27,10 @@ public sealed interface BoardFact extends Fact {
     record LocationDamaged(Location location) implements BoardFact {
     }
 
+    // The damage token goes back to its pile with other facts (rule 11.7.2.2).
+    record LocationRepaired(Location location) implements BoardFact {
+    }
+
     record BoardingPartyAdvanced() implements BoardFact {
     }
 

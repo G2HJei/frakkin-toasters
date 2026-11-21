@@ -460,6 +460,10 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
   `FollowupUtils.damageGalactica()`, the choice of rule 11.7.2 that a Galactica attack offers too.
 - "Raptor Specialist" builds an assault raptor from `GalacticaBoardView.supply()` (ship zone `HUMAN_SUPPLY`: ids 22 to
   24, 4 assault raptors in all, A2.4.4) for a raptor from the "Reserves", or returns a destroyed raptor.
+- "Repair" repairs the player's damaged location, or at the "Hangar Deck" up to 2 damaged vipers (`ShipOps.repair`, to
+  the "Reserves"). `BattlestarOps.repairLocation` records `LocationRepaired` and puts the location's damage token back
+  on its pile, shuffled (rule 11.7.2.2). Not every location has a token (`DamageTokens.of`), and the sandbox's
+  `DamageLocationEvent` pulls the token out of its pile (`CardsPulled`), as a draw would, so a repair returns one copy.
 
 ### End of Game and Mutiny
 

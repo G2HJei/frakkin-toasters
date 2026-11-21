@@ -90,6 +90,7 @@ class LiveUpdateProjectionTest {
             new Sample(new BoardFact.JumpPreparationDecreased(), Rule.PUBLIC),
             new Sample(new BoardFact.JumpPreparationReset(), Rule.PUBLIC),
             new Sample(new BoardFact.LocationDamaged(ARMORY), Rule.PUBLIC),
+            new Sample(new BoardFact.LocationRepaired(ARMORY), Rule.PUBLIC),
             new Sample(new BoardFact.BoardingPartyAdvanced(), Rule.PUBLIC),
             new Sample(new BoardFact.PursuitAdvanced(), Rule.PUBLIC),
             new Sample(new BoardFact.PursuitReset(), Rule.PUBLIC),

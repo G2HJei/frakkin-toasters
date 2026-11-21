@@ -15,5 +15,6 @@ public interface BattlestarBoard extends Board, BattlestarBoardView {
         return damagedLocations().contains(location);
     }
 
-    //todo add repair to be used by the corresponding engineering(?) card
+    @Mutates
+    BattlestarBoard repair(Location location);
 }

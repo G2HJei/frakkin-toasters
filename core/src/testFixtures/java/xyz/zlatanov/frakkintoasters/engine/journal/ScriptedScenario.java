@@ -157,6 +157,8 @@ public final class ScriptedScenario {
             ops.galactica().damage();
         }
         ops.pegasus().damage();
+        ops.pegasus().damage();
+        ops.pegasus().repairLocation(game.boards().pegasus().damagedLocations().iterator().next());
         ops.pegasus().activateEngineRoom();
         ops.galactica().decreasePopulation(2);
         ops.galactica().decreaseMorale(1);

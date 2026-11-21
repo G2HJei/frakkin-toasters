@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.state.board;
 
+import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.Mutates;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.view.PegasusBoardView;
@@ -64,6 +65,15 @@ public class PegasusBoard implements BattlestarBoard, PegasusBoardView {
     public PegasusBoard damage(Location location) {
         assert locations.contains(location);
         damagedLocations.add(location);
+        return this;
+    }
+
+    @Mutates
+    @Override
+    public PegasusBoard repair(Location location) {
+        if (!damagedLocations.remove(location)) {
+            throw new FrakCallTheAdmiralException("Not damaged: " + location);
+        }
         return this;
     }
 }

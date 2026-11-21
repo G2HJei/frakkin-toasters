@@ -1,4 +1,4 @@
-format version 7
+format version 8
 enum Area = SPACE, RESERVES, SPACE_OR_RESERVES
 enum BasestarBridgeAbility = CAG_PLACES_CIVILIAN_SHIP, JUMP_OR_PURSUIT, BASESTAR_OR_RAIDERS, GALACTICA_DAMAGE
 enum BasestarDamage = STRUCTURAL_DAMAGE, DISABLED_WEAPONS, DISABLED_HANGAR_BAY, CRITICAL_HIT
@@ -97,6 +97,7 @@ record BoardFact.JumpPreparationDecreased()
 record BoardFact.JumpPreparationIncreased()
 record BoardFact.JumpPreparationReset()
 record BoardFact.LocationDamaged(location: Location)
+record BoardFact.LocationRepaired(location: Location)
 record BoardFact.PursuitAdvanced()
 record BoardFact.PursuitReset()
 record BoardFact.ResourceDecreased(resource: Resource, amount: int)
@@ -327,6 +328,7 @@ record RaptorSpecialistEvent(playerNumber: int, card: SkillCard, choice: Choice)
 record ReceiveSkillsStepEvent()
 record ReceiveStartingSkillsEvent()
 record RedTapeEvent()
+record RepairEvent(playerNumber: int, card: SkillCard, viperIds: List<int?>)
 record ReplaceMutinousPresidentEvent(playerNumber: int)
 record ResearchLabEvent(playerNumber: int, skillCardColor: SkillCardColor)
 record ResetActingPlayerEvent()

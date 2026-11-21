@@ -40,8 +40,9 @@ public final class SkillCardPlays {
             case LAUNCH_SCOUT, SCOUTING_FOR_FUEL -> LaunchScoutEventProcessor.canRiskARaptor(game);
             case RAPTOR_SPECIALIST -> RaptorSpecialistEventProcessor.canPlay(game);
             case TEST_THE_LIMITS -> TestTheLimitsEventProcessor.canPlay(game);
+            case REPAIR -> RepairEventProcessor.canPlay(game, player);
             // not built yet
-            case POPULAR_INFLUENCE, NEGOTIATION, UNORTHODOX_PLAN, REPAIR -> false;
+            case POPULAR_INFLUENCE, NEGOTIATION, UNORTHODOX_PLAN -> false;
             // played in a skill check, before it, or in an interrupt window, never as an action or a movement
             case INVESTIGATIVE_COMMITTEE, SUPPORT_THE_PEOPLE, RED_TAPE, POLITICAL_PROWESS, FORCE_THEIR_HAND,
                  DECLARE_EMERGENCY, MAJOR_VICTORY, AT_ANY_COST, IRON_WILL, ALL_HANDS_ON_DECK, RESTORE_ORDER,

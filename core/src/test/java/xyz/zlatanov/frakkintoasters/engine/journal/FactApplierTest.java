@@ -117,6 +117,18 @@ class FactApplierTest {
     }
 
     @Test
+    void locationRepairedClearsTheDamage() {
+        apply(new LocationDamaged(ARMORY));
+        apply(new LocationDamaged(PEGASUS_CIC));
+
+        apply(new LocationRepaired(ARMORY));
+        apply(new LocationRepaired(PEGASUS_CIC));
+
+        assertEquals(Set.of(), game.boards().galactica().damagedLocations());
+        assertEquals(Set.of(), game.boards().pegasus().damagedLocations());
+    }
+
+    @Test
     void boardingPartyAdvancedMovesEveryCenturionOneStep() {
         game.boards().galactica().boardGalactica(new Centurion(1));
 

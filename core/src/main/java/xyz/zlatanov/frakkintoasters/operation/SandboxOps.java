@@ -71,7 +71,11 @@ public class SandboxOps extends AbstractOps {
         takeFromSupply(type, location);
     }
 
+    // The location's damage token is in play, out of its pile, as if it had been drawn, so a repair returns it once.
     public void damage(Location location) {
+        DamageTokens.of(location)
+                .filter(token -> game.decks().deck(DamageTokens.deckOf(token)).cards().contains(token))
+                .ifPresent(token -> record(new CardsPulled(DamageTokens.deckOf(token), List.of(token))));
         record(new LocationDamaged(location));
     }
 
