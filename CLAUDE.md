@@ -707,7 +707,10 @@ stores its journal in Postgres and pushes to every viewer what he may see (`back
 - `live/` - `/ws/games/{id}`: the handshake needs a participant and an allowed `Origin`, and gives the connection its
   `Viewer`. `ConnectionPool` is the `ProjectionSink`; each `LiveConnection` sends from its own queue. Client messages:
   `status`, `history`, `submit` (token, event), `choose` (token, option index). Server messages: `game` (token,
-  projection), `update`, `log`, `rejected`. A new connection gets `game`, then `log`.
+  projection), `update`, `log`, `rejected`. A new connection gets `game`, then `log`. A game that can't be opened
+  (e.g. saved by another `FORMAT_VERSION`) gets `rejected` (`UNAVAILABLE`, with the reason) and then the close 1008
+  (`LiveConnection.closeAfterSending`), after which `GameSocket` doesn't reconnect; the table shows the reason, and the
+  room's `unavailableReason` before any socket.
 - `sandbox/` - `POST /api/sandbox {playerCount, seed?}` starts a sandbox (`game_bundle.mode = SANDBOX`, a seeded
   engine, the caller its only participant, with the `Sandbox` viewer, who answers for whoever is asked). The socket
   takes `undo` (deletes the rows after the new sequence; every connection gets `game` and `log` again) and `inject` (a

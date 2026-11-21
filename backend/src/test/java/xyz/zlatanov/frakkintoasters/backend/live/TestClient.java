@@ -17,6 +17,7 @@ import java.net.http.WebSocket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -38,6 +39,7 @@ final class TestClient implements AutoCloseable {
     private       WebSocket                    socket;
     private       String                       token; // of the last game message read
     private       JsonNode                     game;
+    private       CompletableFuture<Integer>   closeCode = new CompletableFuture<>(); // of the current connection
 
     TestClient(int port) {
         this.port = port;
@@ -70,6 +72,7 @@ final class TestClient implements AutoCloseable {
     @SneakyThrows
     void connect(UUID game, int serverPort) {
         inbox.clear(); // what the old connection had left
+        closeCode = new CompletableFuture<>();
         port = serverPort;
         val cookieHeader = cookies.getCookieStore().getCookies().stream()
                 .map(cookie -> cookie.getName() + "=" + cookie.getValue())
@@ -184,6 +187,14 @@ final class TestClient implements AutoCloseable {
         return game;
     }
 
+    /**
+     * @return the status code the server closed the connection with
+     */
+    @SneakyThrows
+    int awaitClose() {
+        return closeCode.get(10, TimeUnit.SECONDS);
+    }
+
     boolean loggedIn() {
         return cookies.getCookieStore().getCookies().stream().anyMatch(cookie -> cookie.getName().equals("SESSION"));
     }
@@ -240,6 +251,12 @@ final class TestClient implements AutoCloseable {
                 inbox.add(message);
             }
             webSocket.request(1);
+            return null;
+        }
+
+        @Override
+        public CompletionStage<?> onClose(WebSocket webSocket, int statusCode, String reason) {
+            closeCode.complete(statusCode);
             return null;
         }
     }

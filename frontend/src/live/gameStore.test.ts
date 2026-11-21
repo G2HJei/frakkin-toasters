@@ -30,9 +30,9 @@ class FakeSocket implements SocketLike {
     this.onmessage?.(new MessageEvent('message', { data: JSON.stringify(message) }));
   }
 
-  drop() {
+  drop(code?: number) {
     this.readyState = 3;
-    this.onclose?.(new CloseEvent('close'));
+    this.onclose?.(new CloseEvent('close', { code }));
   }
 }
 
@@ -120,6 +120,15 @@ describe('the game store, fed by a socket', () => {
     expect(useGameStore.getState().connection).toBe('open');
     expect(useGameStore.getState().token).toBe('t3');
     expect(useGameStore.getState().log).toHaveLength(1);
+  });
+
+  it('keeps the reason and stops when the server refuses the game, e.g. one saved by another version', () => {
+    sockets[0].receive({ type: 'rejected', reason: 'UNAVAILABLE', message: 'The game was saved by another version (format 2)' });
+    sockets[0].drop(1008);
+
+    expect(timers).toHaveLength(0);
+    expect(useGameStore.getState().connection).toBe('closed');
+    expect(useGameStore.getState().rejected?.message).toContain('format 2');
   });
 
   it('stops reconnecting once closed', () => {

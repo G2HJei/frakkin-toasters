@@ -8,6 +8,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import tools.jackson.databind.JsonNode;
@@ -53,6 +54,8 @@ class LiveGameTest {
     JournalCodec        codec;
     @Autowired
     PostgreSQLContainer postgres;
+    @Autowired
+    JdbcClient          jdbc;
 
     private final List<TestClient> clients = new ArrayList<>();
 
@@ -190,6 +193,26 @@ class LiveGameTest {
             }
             assertEquals(5, clients.getFirst().game().get("turn").get("number").intValue());
         }
+    }
+
+    @Test
+    void aGameSavedByAnotherVersionIsRefusedWithTheReasonBeforeTheClose() {
+        val game = scriptedGame();
+        val client = clients.getFirst();
+        client.close();
+        val older = JournalCodec.FORMAT_VERSION - 1;
+        jdbc.sql("UPDATE game_bundle SET format_version = :older WHERE id = :id")
+                .param("older", older)
+                .param("id", game)
+                .update();
+        sessions.evict(game);
+
+        client.connect(game);
+
+        val rejected = client.next("rejected");
+        assertEquals("UNAVAILABLE", rejected.get("reason").stringValue());
+        assertTrue(rejected.get("message").stringValue().contains("format " + older), rejected.toString());
+        assertEquals(1008, client.awaitClose()); // the client doesn't reconnect after it
     }
 
     /* setup */

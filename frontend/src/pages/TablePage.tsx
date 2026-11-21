@@ -43,12 +43,14 @@ export function TablePage() {
       </>
     );
   }
-  if (room.error) {
+  // a game saved by another version can't be opened, so no socket is tried
+  const unavailable = room.error?.message ?? room.data?.unavailableReason;
+  if (unavailable) {
     return (
       <>
         <TopNav />
         <main className="page">
-          <p className="error">{room.error.message}</p>
+          <p className="error">{unavailable}</p>
           <Link to="/">Back</Link>
         </main>
       </>
@@ -61,6 +63,7 @@ function LiveTable({ gameId, name, seed, userNames }: { gameId: string; name: st
   const game = useGameStore((state) => state.game);
   const token = useGameStore((state) => state.token);
   const connection = useGameStore((state) => state.connection);
+  const rejected = useGameStore((state) => state.rejected);
   const socket = useRef<GameSocket | null>(null);
 
   useEffect(() => {
@@ -95,7 +98,15 @@ function LiveTable({ gameId, name, seed, userNames }: { gameId: string; name: st
     <Table.Provider value={context}>
       <main className="table-page">
         {!game ? (
-          <p className="muted connecting">Connecting…</p>
+          // before a game, only a refusal is rejected: the server says why it can't open the game
+          rejected ? (
+            <div className="connecting">
+              <p className="error">{rejected.message}</p>
+              <Link to="/">Back</Link>
+            </div>
+          ) : (
+            <p className="muted connecting">Connecting…</p>
+          )
         ) : (
           <div className="table-main">
             <div className="table-side left">

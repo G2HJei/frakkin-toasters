@@ -20,11 +20,13 @@ export interface GameSocketOptions {
 }
 
 const OPEN = 1;
+// the server can't open the game (e.g. saved by another version), and said why in a rejection before closing
+const REFUSED = 1008;
 
 /**
  * The web socket of one open table. It reconnects with backoff when the connection drops; on a new connection the
  * server sends the game and then the whole log, so nothing is lost. Messages sent while it is down are dropped: the
- * caller sends again with the token of the latest game.
+ * caller sends again with the token of the latest game. A game the server refuses isn't tried again.
  */
 export class GameSocket {
   private socket: SocketLike | null = null;
@@ -88,8 +90,14 @@ export class GameSocket {
     socket.onmessage = (event) => {
       this.onMessage(JSON.parse(String(event.data)) as ServerMessage);
     };
-    socket.onclose = () => {
+    socket.onclose = (event) => {
       if (this.closed || this.socket !== socket) {
+        return;
+      }
+      if (event.code === REFUSED) {
+        this.closed = true;
+        this.socket = null;
+        this.onState('closed', this.attempt);
         return;
       }
       const delay = this.backoff[Math.min(this.attempt, this.backoff.length - 1)];

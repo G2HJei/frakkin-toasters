@@ -25,8 +25,18 @@ public final class LiveConnection {
     private final UUID                  gameBundleId;
     private final UUID                  userId;
     private final Viewer                viewer;
-    private final BlockingQueue<String> queue = new LinkedBlockingQueue<>(MAX_QUEUED);
-    private final Thread                writer;
+    private final BlockingQueue<Outgoing> queue = new LinkedBlockingQueue<>(MAX_QUEUED);
+    private final Thread                  writer;
+
+    // what the writer takes from the queue: a message, or the close that follows the messages queued before it
+    private sealed interface Outgoing {
+    }
+
+    private record Text(String json) implements Outgoing {
+    }
+
+    private record Close(CloseStatus status) implements Outgoing {
+    }
 
     LiveConnection(WebSocketSession session, UUID gameBundleId, UUID userId, Viewer viewer) {
         this.session = session;
@@ -52,14 +62,30 @@ public final class LiveConnection {
      * Queues a message. Never blocks: a connection whose queue is full is closed.
      */
     public void send(String json) {
-        if (!queue.offer(json)) {
+        if (!queue.offer(new Text(json))) {
             log.warn("Connection {} fell behind, closing it", session.getId());
             close(CloseStatus.SESSION_NOT_RELIABLE.withReason("Fell behind"));
         }
     }
 
+    /**
+     * Closes at once, dropping what is still queued.
+     */
     public void close(CloseStatus status) {
         writer.interrupt();
+        closeSession(status);
+    }
+
+    /**
+     * Closes once the messages queued before have gone out, e.g. the rejection that says why.
+     */
+    public void closeAfterSending(CloseStatus status) {
+        if (!queue.offer(new Close(status))) {
+            close(status);
+        }
+    }
+
+    private void closeSession(CloseStatus status) {
         try {
             if (session.isOpen()) {
                 session.close(status);
@@ -73,8 +99,14 @@ public final class LiveConnection {
     private void write() {
         try {
             while (session.isOpen()) {
-                var message = queue.take();
-                session.sendMessage(new TextMessage(message));
+                switch (queue.take()) {
+                    case Text(var json) -> session.sendMessage(new TextMessage(json));
+                    case Close(var status) -> {
+                        // the writer itself closes, so it isn't interrupted in the middle of the close frame
+                        closeSession(status);
+                        return;
+                    }
+                }
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

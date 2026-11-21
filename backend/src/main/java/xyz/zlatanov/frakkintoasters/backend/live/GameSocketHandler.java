@@ -59,7 +59,8 @@ public class GameSocketHandler extends TextWebSocketHandler {
             });
         } catch (GameNotAvailableException e) {
             connection.send(messages.rejected("UNAVAILABLE", e.getMessage()));
-            connection.close(CloseStatus.POLICY_VIOLATION.withReason("The game can't be opened"));
+            // the client doesn't reconnect after this close, so the rejection has to reach it first
+            connection.closeAfterSending(CloseStatus.POLICY_VIOLATION.withReason("The game can't be opened"));
         }
     }
 
