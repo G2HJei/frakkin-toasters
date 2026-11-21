@@ -67,6 +67,7 @@ public final class Disclosure {
             entry("ChooseDestinationEvent.other", false), // it goes to the bottom of the deck, only the Admiral saw it
             entry("ChooseGalacticaDamageEvent.resolved", true),
             entry("ChooseGalacticaDamageEvent.returned", false),
+            entry("CombatVeteranEvent.card", true),
             entry("ConsolidatePowerEvent.card", true),
             entry("CriticalSituationEvent.card", true),
             entry("DeclareEmergencyEvent.declareEmergencyCard", true),
@@ -81,7 +82,10 @@ public final class Disclosure {
             entry("EngineRoomEvent.discardCard2", true),
             entry("ExecutiveOrderEvent.card", true),
             entry("ForceTheirHandEvent.skillCard", true),
+            entry("FullThrottleEvent.card", true),
             entry("GasCloudPlaceEvent.cards", false),
+            entry("LaunchReservesEvent.card", true),
+            entry("MaximumFirepowerEvent.card", true),
             entry("MoveEvent.discardCard", true),
             entry("PlaceCrisisCardOnBottomEvent.card", false),
             entry("PlaceCrisisCardOnTopEvent.card", false),

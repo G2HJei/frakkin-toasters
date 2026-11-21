@@ -11,12 +11,18 @@ import xyz.zlatanov.frakkintoasters.event.ActivateViperEvent;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.BuildNukeEvent;
+import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ScopeOpened;
+import xyz.zlatanov.frakkintoasters.event.AttackCylonShipEvent;
 import xyz.zlatanov.frakkintoasters.event.action.GrantEvent;
+import xyz.zlatanov.frakkintoasters.event.action.GrantedViperActivationEvent;
+import xyz.zlatanov.frakkintoasters.event.action.ViperActivationRoundEvent;
 import xyz.zlatanov.frakkintoasters.event.action.GrantEvent.GrantedBy;
 import xyz.zlatanov.frakkintoasters.event.action.MovementAbilityEvent;
+import xyz.zlatanov.frakkintoasters.event.action.skillcard.CombatVeteranEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.ConsolidatePowerEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.CriticalSituationEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.ExecutiveOrderEvent;
+import xyz.zlatanov.frakkintoasters.event.action.skillcard.MaximumFirepowerEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.PreventivePolicyEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.StateOfEmergencyEvent;
 import xyz.zlatanov.frakkintoasters.event.board.LoseResourceEvent;
@@ -34,6 +40,8 @@ import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Randomness;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
+import xyz.zlatanov.frakkintoasters.state.ship.Raider;
+import xyz.zlatanov.frakkintoasters.state.ship.Viper;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 
@@ -47,12 +55,13 @@ import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
+import static xyz.zlatanov.frakkintoasters.event.ViperActivation.attack;
+import static xyz.zlatanov.frakkintoasters.event.ViperActivation.launch;
+import static xyz.zlatanov.frakkintoasters.event.ViperActivation.move;
 import static xyz.zlatanov.frakkintoasters.event.action.GrantEvent.Grant.ACTION;
 import static xyz.zlatanov.frakkintoasters.event.action.GrantEvent.Grant.MOVE;
 import static xyz.zlatanov.frakkintoasters.state.Team.CYLONS;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.ADMINISTRATION;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_4_OCLOCK;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.SICKBAY;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.board.Resource.FOOD;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.VIPER;
@@ -75,6 +84,8 @@ class SkillCardActionsTest {
     private static final SkillCard PREVENTIVE_POLICY_3  = new SkillCard(3, PREVENTIVE_POLICY);
     private static final SkillCard EXECUTIVE_ORDER_1    = new SkillCard(1, EXECUTIVE_ORDER);
     private static final SkillCard STATE_OF_EMERGENCY_6 = new SkillCard(6, STATE_OF_EMERGENCY);
+    private static final SkillCard COMBAT_VETERAN_3     = new SkillCard(3, COMBAT_VETERAN);
+    private static final SkillCard MAXIMUM_FIREPOWER_3  = new SkillCard(3, MAXIMUM_FIREPOWER);
 
     // The choices of the target of an "Executive Order", player 2.
     private static final Followup MOVE_THEN_ACT = all(new GrantEvent(2, MOVE, GrantedBy.EXECUTIVE_ORDER),
@@ -240,6 +251,57 @@ class SkillCardActionsTest {
         assertEquals(new Finished(CYLONS), engine.status(1));
         assertEquals(1, engine.view().turn().actingPlayerNumber());
         assertEquals(7, engine.view().boards().galactica().food());
+    }
+
+    // The rounds follow the viper the launch took, and offer its legal activations as options.
+    @Test
+    void combatVeteranLaunchesAViperAndMovesIt() {
+        start(all(setUp(WILLIAM_ADAMA), single(new GiveSkillCardEvent(1, COMBAT_VETERAN_3)), single(new ActionStepEvent()),
+                CYLONS_WIN));
+        int launched = engine.view().boards().galactica().reserves().stream()
+                .filter(Viper.class::isInstance).findFirst().orElseThrow().id();
+
+        act(1);
+        play(engine -> engine.submit(1, new CombatVeteranEvent(1, COMBAT_VETERAN_3, launch(VIPER, GALACTICA_SPACE_4_OCLOCK))));
+        assertWaitingFor(new AwaitingChoice(1, Set.of(
+                all(new GrantedViperActivationEvent(1, move(launched, GALACTICA_SPACE_2_OCLOCK)),
+                        new ViperActivationRoundEvent(1, launched, 1, false)),
+                all(new GrantedViperActivationEvent(1, move(launched, GALACTICA_SPACE_6_OCLOCK)),
+                        new ViperActivationRoundEvent(1, launched, 1, false)),
+                single(new NoOpEvent(1)))));
+        choose(1, all(new GrantedViperActivationEvent(1, move(launched, GALACTICA_SPACE_6_OCLOCK)),
+                new ViperActivationRoundEvent(1, launched, 1, false)));
+        choose(1, single(new GrantedViperActivationEvent(1, move(launched, GALACTICA_SPACE_8_OCLOCK))));
+
+        assertEquals(new Finished(CYLONS), engine.status(1));
+        assertEquals(GALACTICA_SPACE_8_OCLOCK, engine.view().boards().galactica().shipsInSpace().entrySet().stream()
+                .filter(entry -> entry.getKey().id() == launched).findFirst().orElseThrow().getValue());
+    }
+
+    // The launched pilot attacks with his action, and may stop after any attack.
+    @Test
+    void maximumFirepowerAttacksUntilThePlayerStops() {
+        start(all(setUp(KARA_STARBUCK_THRACE),
+                all(new GiveSkillCardEvent(1, MAXIMUM_FIREPOWER_3), new PlaceRaiderEvent(GALACTICA_SPACE_4_OCLOCK),
+                        new PlaceRaiderEvent(GALACTICA_SPACE_4_OCLOCK)),
+                single(new ActionStepEvent()), CYLONS_WIN));
+
+        act(1);
+        play(engine -> engine.submit(1, new HangarDeckEvent(1)));
+        play(engine -> engine.submit(1, new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_4_OCLOCK, KARA_STARBUCK_THRACE, null)));
+        act(1);
+        play(engine -> engine.submit(1, new MaximumFirepowerEvent(1, MAXIMUM_FIREPOWER_3)));
+        val viper = engine.view().boards().galactica().pilotedFighter(KARA_STARBUCK_THRACE).orElseThrow().id();
+        val raider = engine.view().boards().galactica().shipsIn(GALACTICA_SPACE_4_OCLOCK, Raider.class).getFirst().id();
+        choose(1, all(new GrantedViperActivationEvent(1, attack(viper, raider)), new ViperActivationRoundEvent(1, viper, 3, true)));
+        if (engine.pendingInput().isPresent()) {
+            pass(1); // a raider is left to attack: the player stops
+        }
+
+        assertEquals(new Finished(CYLONS), engine.status(1));
+        assertEquals(1, engine.journal().entries().stream()
+                .filter(entry -> entry instanceof ScopeOpened opened && opened.event() instanceof AttackCylonShipEvent)
+                .count());
     }
 
     // The engine accepts a card only where a decision of its timing is asked.

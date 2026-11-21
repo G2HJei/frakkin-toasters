@@ -1,5 +1,5 @@
 {
-  "formatVersion" : 5,
+  "formatVersion" : 6,
   "types" : {
     "ABetterMachineEvent" : {
       "kind" : "record",
@@ -16,7 +16,7 @@
     "ActionEvent" : {
       "kind" : "union",
       "discriminator" : "kind",
-      "members" : [ "AdministrationEvent", "AdmiralsQuartersEvent", "AirlockEvent", "ArmoryEvent", "BasestarBridgeEvent", "BrigEvent", "BuildNukeEvent", "CapricaDrawAndResolveCrisisCardsEvent", "CapricaPlaySuperCrisisCardEvent", "CommandEvent", "CommunicationsEvent", "ConsolidatePowerEvent", "CylonFleetEvent", "EngineRoomEvent", "ExecutiveOrderEvent", "FTLControlEvent", "HangarDeckEvent", "HumanFleetInfiltrateEvent", "HumanFleetLookAtTopCrisisCardEvent", "HumanFleetLookAtTopDestinationCardEvent", "MainBatteriesEvent", "PegasusCicEvent", "PresidentsOfficeEvent", "PressRoomEvent", "QuorumChamberEvent", "ResearchLabEvent", "ResurrectionShipEvent", "StateOfEmergencyEvent", "WeaponsControlEvent" ]
+      "members" : [ "AdministrationEvent", "AdmiralsQuartersEvent", "AirlockEvent", "ArmoryEvent", "BasestarBridgeEvent", "BrigEvent", "BuildNukeEvent", "CapricaDrawAndResolveCrisisCardsEvent", "CapricaPlaySuperCrisisCardEvent", "CombatVeteranEvent", "CommandEvent", "CommunicationsEvent", "ConsolidatePowerEvent", "CylonFleetEvent", "EngineRoomEvent", "ExecutiveOrderEvent", "FTLControlEvent", "FullThrottleEvent", "HangarDeckEvent", "HumanFleetInfiltrateEvent", "HumanFleetLookAtTopCrisisCardEvent", "HumanFleetLookAtTopDestinationCardEvent", "LaunchReservesEvent", "MainBatteriesEvent", "MaximumFirepowerEvent", "PegasusCicEvent", "PresidentsOfficeEvent", "PressRoomEvent", "QuorumChamberEvent", "ResearchLabEvent", "ResurrectionShipEvent", "StateOfEmergencyEvent", "WeaponsControlEvent" ]
     },
     "ActionStepEvent" : {
       "kind" : "record",
@@ -1014,6 +1014,33 @@
       "tagged" : true,
       "interfaces" : [ "Event" ],
       "components" : [ ]
+    },
+    "CombatVeteranEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "PlayerEvent", "SkillCardEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "SkillCard"
+        }
+      }, {
+        "name" : "first",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "ViperActivation"
+        }
+      } ]
     },
     "CommandEvent" : {
       "kind" : "record",
@@ -2111,7 +2138,7 @@
     "Event" : {
       "kind" : "union",
       "discriminator" : "kind",
-      "members" : [ "ABetterMachineEvent", "ASecondChanceEvent", "ActionStepEvent", "ActivateCylonBasestarEvent", "ActivateCylonBasestarsEvent", "ActivateCylonShipsStepEvent", "ActivateHeavyRaidersAndCenturionsEvent", "ActivateRaiderEvent", "ActivateRaidersEvent", "ActivateViperEvent", "AdministrationEvent", "AdmiralsQuartersEvent", "AdvancePursuitTrackEvent", "AirlockEvent", "AnalyzeEnemyFighterPassEvent", "ArmoryEvent", "ArmoryResultEvent", "AssignTitleEvent", "AttackCylonShipEvent", "AttackCylonShipResultEvent", "AttackGalacticaEvent", "AttackGalacticaResultEvent", "AttackViperEvent", "AttackViperResultEvent", "BaitEvent", "BasestarBridgeAbilityEvent", "BasestarBridgeAbilityResultEvent", "BasestarBridgeEvent", "BasestarBridgeShipsEvent", "BrigEvent", "BuildNukeEvent", "CapricaDrawAndResolveCrisisCardsEvent", "CapricaPlaySuperCrisisCardEvent", "ChangeOfPlansEvent", "ChangeResourceEvent", "ChooseCrisisSectionEvent", "ChooseCrisisTargetEvent", "ChooseDestinationEvent", "ChooseExtraLoyaltyCardEvent", "ChooseGalacticaDamageEvent", "CloseInterruptWindowEvent", "CommandEvent", "CommunicationsEvent", "ConsolidatePowerEvent", "ConsultTheHybridPassEvent", "CrashLandingFailEvent", "CreateDestinyDeckEvent", "CreateLoyaltyDeckEvent", "CrisisStepEvent", "CriticalSituationEvent", "CylonFleetEvent", "CylonGenocidePassEvent", "CylonsWinEvent", "DamageBasestarEvent", "DamageGalacticaEvent", "DamageHumanFighterEvent", "DamageLocationEvent", "DamagePegasusEvent", "DamageVipersEvent", "DealLoyaltyCardsEvent", "DeclareEmergencyEvent", "DecreaseJumpPreparationEvent", "DefendingAPrisonerFailEvent", "DefendingAPrisonerFailResultEvent", "DerelictBasestarEvent", "DestroyCivilianShipEvent", "DestroyCivilianShipsEvent", "DestroyCylonShipsEvent", "DestroyRaidersEvent", "DestroyRaptorEvent", "DetermineNextAdmiralEvent", "DetermineNextCagEvent", "DetermineNextPresidentEvent", "DetermineSkillCheckAbilitiesOrderEvent", "DetermineSkillCheckResultEvent", "Discard1MutinyCardEvent", "DiscardAllSkillCardsEvent", "DiscardDownTo1MutinyCardEvent", "DiscardFromDestinyDeckEvent", "DiscardNukeTokenEvent", "DiscardQuorumCardsEvent", "DiscardRandomSkillCardsEvent", "DiscardSkillCardsEvent", "DiscardStepEvent", "DogfightEvent", "DradisContactEvent", "DrawAndDestroyCivilianShipsEvent", "DrawAndResolveRecklessCardsEvent", "DrawDestinationCardsEvent", "DrawMutinyCardEvent", "DrawQuorumCardEvent", "DrawSkillCardsEvent", "DrawSkillCardsOfColorEvent", "EndGameEvent", "EndSkillCheckEvent", "EndTurnEvent", "EngineRoomEvent", "ExecuteEvent", "ExecutiveOrderEvent", "ExploitAWeaknessEvent", "FTLControlEvent", "FTLControlResultEvent", "FinishExecutionEvent", "FinishSleeperAgentPhaseEvent", "FootageTransmittedFailEvent", "ForceTheirHandEvent", "GainResourceEvent", "GasCloudEvent", "GasCloudPlaceEvent", "GasGiantEvent", "GiveLoyaltyCardsEvent", "GiveSkillCardToPlayerEvent", "GiveTitlesToNextInLineEvent", "GrantEvent", "HangarDeckEvent", "HumanFleetInfiltrateEvent", "HumanFleetLookAtTopCrisisCardEvent", "HumanFleetLookAtTopDestinationCardEvent", "HumanPrisonerFailEvent", "IncreaseJumpPreparationEvent", "InstallUpgradesEvent", "IronWillEvent", "JumpingTheFleetEvent", "KeepCrisisCardInPlayEvent", "KeepTabsOnVisitorFailEvent", "KeepTabsOnVisitorFailResultEvent", "LaunchRaidersEvent", "LaunchViperEvent", "LeaveBrigEvent", "LookAtLoyaltyCardEvent", "LoseResourceEvent", "MainBatteriesEvent", "MainBatteriesResultEvent", "MajorVictoryResultEvent", "MakeAdmiralEvent", "MakePresidentEvent", "MakeSkillCheckEvent", "MoveCharacterEvent", "MoveCivilianShipEvent", "MoveCylonShipsToFleetBoardEvent", "MoveEvent", "MoveFromBrigEvent", "MovementStepEvent", "MysteriousMessagePassEvent", "NoOpEvent", "ObjectiveInstructionsEvent", "OpenInterruptWindowEvent", "PassMutineerCardEvent", "PegasusCicEvent", "PegasusCicResultEvent", "PersonalVicesEvent", "PlaceCenturionsEvent", "PlaceCivilianShipEvent", "PlaceCivilianShipsInFrontEvent", "PlaceCrisisCardOnBottomEvent", "PlaceCrisisCardOnTopEvent", "PlaceDestinationCardAtBottomEvent", "PlaceDestinationCardOnTopEvent", "PlaceInSetupLocationEvent", "PlaceRaidersBehindEvent", "PlaceShipEvent", "PlaceShipOnCylonFleetBoardEvent", "PlaceShipOnCylonFleetBoardResultEvent", "PlaceShipsEvent", "PlayCardsBeforeSkillCheckEvent", "PlayCardsIntoSkillCheckEvent", "PlayFromDestinyDeckEvent", "PlayInterruptCardEvent", "PlayQuorumCardEvent", "PlaySuperCrisisCardEvent", "PlayerDecisionEvent", "PoliticalProwessEvent", "PrepareForJumpStepEvent", "PresidentsOfficeEvent", "PressRoomEvent", "PreventivePolicyEvent", "ProtectTheFleetEvent", "PutCrisisCardOnTopEvent", "PutDestinationCardOnTopEvent", "PutDestinyCardOnTopEvent", "PutSkillCardOnTopEvent", "QuickThinkingEvent", "QuorumChamberEvent", "QuorumInUproarFailEvent", "RagnarAnchorageEvent", "ReceiveSkillsStepEvent", "ReceiveStartingSkillsEvent", "RedTapeEvent", "ReplaceMutinousPresidentEvent", "ResearchLabEvent", "ResetActingPlayerEvent", "ResetJumpPreparationEvent", "ResolveCapricaCrisisCardEvent", "ResolveCardsBeforeSkillCheckEvent", "ResolveConsequencesEvent", "ResolveCrisisCardEvent", "ResolveCrisisRollEvent", "ResolveDestinationCardEvent", "ResolveSkillCheckAbilityEvent", "ResolveSkillCheckResultEvent", "ResurrectionShipEvent", "ReturnAssaultRaptorEvent", "ReturnToCrisisStepEvent", "ReturnVipersToReservesEvent", "RevealCardsBeforeSkillCheckEvent", "RevealMutineerEvent", "RiskResultEvent", "RiskShipsEvent", "RollDieEvent", "SelectCharacterEvent", "SendToBrigEvent", "SendToSickbayEvent", "SetATrapPassEvent", "SetJumpPreparationEvent", "ShuffleAndDivideCardsEvent", "ShuffleTreacheryIntoDestinyDeckEvent", "SleeperAgentPhaseEvent", "StandoffWithPegasusPassEvent", "StartGameEvent", "StartTurnEvent", "StateOfEmergencyEvent", "StrangeBeaconPassEvent", "TiebreakCardsBeforeSkillCheckEvent", "TiebreakInterruptCardsEvent", "TotalSkillCheckStrengthEvent", "TrustInstinctsEvent", "ViolentOutburstsEvent", "WeaponsControlEvent" ]
+      "members" : [ "ABetterMachineEvent", "ASecondChanceEvent", "ActionStepEvent", "ActivateCylonBasestarEvent", "ActivateCylonBasestarsEvent", "ActivateCylonShipsStepEvent", "ActivateHeavyRaidersAndCenturionsEvent", "ActivateRaiderEvent", "ActivateRaidersEvent", "ActivateViperEvent", "AdministrationEvent", "AdmiralsQuartersEvent", "AdvancePursuitTrackEvent", "AirlockEvent", "AnalyzeEnemyFighterPassEvent", "ArmoryEvent", "ArmoryResultEvent", "AssignTitleEvent", "AttackCylonShipEvent", "AttackCylonShipResultEvent", "AttackGalacticaEvent", "AttackGalacticaResultEvent", "AttackViperEvent", "AttackViperResultEvent", "BaitEvent", "BasestarBridgeAbilityEvent", "BasestarBridgeAbilityResultEvent", "BasestarBridgeEvent", "BasestarBridgeShipsEvent", "BrigEvent", "BuildNukeEvent", "CapricaDrawAndResolveCrisisCardsEvent", "CapricaPlaySuperCrisisCardEvent", "ChangeOfPlansEvent", "ChangeResourceEvent", "ChooseCrisisSectionEvent", "ChooseCrisisTargetEvent", "ChooseDestinationEvent", "ChooseExtraLoyaltyCardEvent", "ChooseGalacticaDamageEvent", "CloseInterruptWindowEvent", "CombatVeteranEvent", "CommandEvent", "CommunicationsEvent", "ConsolidatePowerEvent", "ConsultTheHybridPassEvent", "CrashLandingFailEvent", "CreateDestinyDeckEvent", "CreateLoyaltyDeckEvent", "CrisisStepEvent", "CriticalSituationEvent", "CylonFleetEvent", "CylonGenocidePassEvent", "CylonsWinEvent", "DamageBasestarEvent", "DamageGalacticaEvent", "DamageHumanFighterEvent", "DamageLocationEvent", "DamagePegasusEvent", "DamageVipersEvent", "DealLoyaltyCardsEvent", "DeclareEmergencyEvent", "DecreaseJumpPreparationEvent", "DefendingAPrisonerFailEvent", "DefendingAPrisonerFailResultEvent", "DerelictBasestarEvent", "DestroyCivilianShipEvent", "DestroyCivilianShipsEvent", "DestroyCylonShipsEvent", "DestroyRaidersEvent", "DestroyRaptorEvent", "DetermineNextAdmiralEvent", "DetermineNextCagEvent", "DetermineNextPresidentEvent", "DetermineSkillCheckAbilitiesOrderEvent", "DetermineSkillCheckResultEvent", "Discard1MutinyCardEvent", "DiscardAllSkillCardsEvent", "DiscardDownTo1MutinyCardEvent", "DiscardFromDestinyDeckEvent", "DiscardNukeTokenEvent", "DiscardQuorumCardsEvent", "DiscardRandomSkillCardsEvent", "DiscardSkillCardsEvent", "DiscardStepEvent", "DogfightEvent", "DradisContactEvent", "DrawAndDestroyCivilianShipsEvent", "DrawAndResolveRecklessCardsEvent", "DrawDestinationCardsEvent", "DrawMutinyCardEvent", "DrawQuorumCardEvent", "DrawSkillCardsEvent", "DrawSkillCardsOfColorEvent", "EndGameEvent", "EndSkillCheckEvent", "EndTurnEvent", "EngineRoomEvent", "ExecuteEvent", "ExecutiveOrderEvent", "ExploitAWeaknessEvent", "FTLControlEvent", "FTLControlResultEvent", "FinishExecutionEvent", "FinishSleeperAgentPhaseEvent", "FootageTransmittedFailEvent", "ForceTheirHandEvent", "FullThrottleEvent", "GainResourceEvent", "GasCloudEvent", "GasCloudPlaceEvent", "GasGiantEvent", "GiveLoyaltyCardsEvent", "GiveSkillCardToPlayerEvent", "GiveTitlesToNextInLineEvent", "GrantEvent", "GrantedViperActivationEvent", "HangarDeckEvent", "HumanFleetInfiltrateEvent", "HumanFleetLookAtTopCrisisCardEvent", "HumanFleetLookAtTopDestinationCardEvent", "HumanPrisonerFailEvent", "IncreaseJumpPreparationEvent", "InstallUpgradesEvent", "IronWillEvent", "JumpingTheFleetEvent", "KeepCrisisCardInPlayEvent", "KeepTabsOnVisitorFailEvent", "KeepTabsOnVisitorFailResultEvent", "LaunchRaidersEvent", "LaunchReservesEvent", "LaunchViperEvent", "LeaveBrigEvent", "LookAtLoyaltyCardEvent", "LoseResourceEvent", "MainBatteriesEvent", "MainBatteriesResultEvent", "MajorVictoryResultEvent", "MakeAdmiralEvent", "MakePresidentEvent", "MakeSkillCheckEvent", "MaximumFirepowerEvent", "MoveCharacterEvent", "MoveCivilianShipEvent", "MoveCylonShipsToFleetBoardEvent", "MoveEvent", "MoveFromBrigEvent", "MovementStepEvent", "MysteriousMessagePassEvent", "NoOpEvent", "ObjectiveInstructionsEvent", "OpenInterruptWindowEvent", "PassMutineerCardEvent", "PegasusCicEvent", "PegasusCicResultEvent", "PersonalVicesEvent", "PlaceCenturionsEvent", "PlaceCivilianShipEvent", "PlaceCivilianShipsInFrontEvent", "PlaceCrisisCardOnBottomEvent", "PlaceCrisisCardOnTopEvent", "PlaceDestinationCardAtBottomEvent", "PlaceDestinationCardOnTopEvent", "PlaceInSetupLocationEvent", "PlaceRaidersBehindEvent", "PlaceShipEvent", "PlaceShipOnCylonFleetBoardEvent", "PlaceShipOnCylonFleetBoardResultEvent", "PlaceShipsEvent", "PlayCardsBeforeSkillCheckEvent", "PlayCardsIntoSkillCheckEvent", "PlayFromDestinyDeckEvent", "PlayInterruptCardEvent", "PlayQuorumCardEvent", "PlaySuperCrisisCardEvent", "PlayerDecisionEvent", "PoliticalProwessEvent", "PrepareForJumpStepEvent", "PresidentsOfficeEvent", "PressRoomEvent", "PreventivePolicyEvent", "ProtectTheFleetEvent", "PutCrisisCardOnTopEvent", "PutDestinationCardOnTopEvent", "PutDestinyCardOnTopEvent", "PutSkillCardOnTopEvent", "QuickThinkingEvent", "QuorumChamberEvent", "QuorumInUproarFailEvent", "RagnarAnchorageEvent", "ReceiveSkillsStepEvent", "ReceiveStartingSkillsEvent", "RedTapeEvent", "ReplaceMutinousPresidentEvent", "ResearchLabEvent", "ResetActingPlayerEvent", "ResetJumpPreparationEvent", "ResolveCapricaCrisisCardEvent", "ResolveCardsBeforeSkillCheckEvent", "ResolveConsequencesEvent", "ResolveCrisisCardEvent", "ResolveCrisisRollEvent", "ResolveDestinationCardEvent", "ResolveSkillCheckAbilityEvent", "ResolveSkillCheckResultEvent", "ResurrectionShipEvent", "ReturnAssaultRaptorEvent", "ReturnToCrisisStepEvent", "ReturnVipersToReservesEvent", "RevealCardsBeforeSkillCheckEvent", "RevealMutineerEvent", "RiskResultEvent", "RiskShipsEvent", "RollDieEvent", "SelectCharacterEvent", "SendToBrigEvent", "SendToSickbayEvent", "SetATrapPassEvent", "SetJumpPreparationEvent", "ShuffleAndDivideCardsEvent", "ShuffleTreacheryIntoDestinyDeckEvent", "SleeperAgentPhaseEvent", "StandoffWithPegasusPassEvent", "StartGameEvent", "StartTurnEvent", "StateOfEmergencyEvent", "StrangeBeaconPassEvent", "TiebreakCardsBeforeSkillCheckEvent", "TiebreakInterruptCardsEvent", "TotalSkillCheckStrengthEvent", "TrustInstinctsEvent", "ViolentOutburstsEvent", "ViperActivationRoundEvent", "WeaponsControlEvent" ]
     },
     "EventConstraint" : {
       "kind" : "enum",
@@ -2294,6 +2321,33 @@
           "nullable" : true,
           "t" : "ref",
           "name" : "SkillCard"
+        }
+      } ]
+    },
+    "FullThrottleEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "MovementAbilityEvent", "PlayerEvent", "SkillCardEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "SkillCard"
+        }
+      }, {
+        "name" : "destination",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
         }
       } ]
     },
@@ -3031,6 +3085,26 @@
       "kind" : "enum",
       "values" : [ "HANGAR_DECK", "EXECUTIVE_ORDER", "STATE_OF_EMERGENCY" ]
     },
+    "GrantedViperActivationEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "activation",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "ViperActivation"
+        }
+      } ]
+    },
     "HangarDeckEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -3408,6 +3482,44 @@
       "interfaces" : [ "Event" ],
       "components" : [ ]
     },
+    "LaunchReservesEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "PlayerEvent", "SkillCardEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "SkillCard"
+        }
+      }, {
+        "name" : "area",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      }, {
+        "name" : "shipTypes",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "ShipType"
+          }
+        }
+      } ]
+    },
     "LaunchViperEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -3672,6 +3784,26 @@
       "interfaces" : [ "Event" ],
       "components" : [ ]
     },
+    "MaximumFirepowerEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "PlayerEvent", "SkillCardEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "SkillCard"
+        }
+      } ]
+    },
     "MotiveCard" : {
       "kind" : "enum",
       "values" : [ "SUBJECTS_TO_STUDY", "SAVOR_THEIR_DEMISE", "NO_UNNECESSARY_FORCE", "HARVEST_THEIR_RESOURCES", "FIGHT_WITH_HONOR", "A_JUSTIFIED_RESPONSE", "A_FALSE_SENSE_OF_SECURITY", "PRESSURE_THEIR_LEADERS", "MAKE_AN_ALLY", "LEARN_TO_CHERISH", "KEEP_THEM_DOCILE", "IMPROVE_EFFICIENCY", "END_THE_CHASE" ]
@@ -3772,7 +3904,7 @@
     "MovementAbilityEvent" : {
       "kind" : "union",
       "discriminator" : "kind",
-      "members" : [ "CriticalSituationEvent", "PreventivePolicyEvent" ]
+      "members" : [ "CriticalSituationEvent", "FullThrottleEvent", "PreventivePolicyEvent" ]
     },
     "MovementStepEvent" : {
       "kind" : "record",
@@ -4420,7 +4552,7 @@
     "PlayerEvent" : {
       "kind" : "union",
       "discriminator" : "kind",
-      "members" : [ "ActivateViperEvent", "AdministrationEvent", "AdmiralsQuartersEvent", "AirlockEvent", "ArmoryEvent", "BasestarBridgeAbilityEvent", "BasestarBridgeAbilityResultEvent", "BasestarBridgeEvent", "BasestarBridgeShipsEvent", "BrigEvent", "BuildNukeEvent", "CapricaDrawAndResolveCrisisCardsEvent", "CapricaPlaySuperCrisisCardEvent", "ChangeOfPlansEvent", "ChooseCrisisSectionEvent", "ChooseCrisisTargetEvent", "ChooseDestinationEvent", "ChooseExtraLoyaltyCardEvent", "ChooseGalacticaDamageEvent", "CommandEvent", "CommunicationsEvent", "ConsolidatePowerEvent", "CriticalSituationEvent", "CylonFleetEvent", "DealLoyaltyCardsEvent", "DeclareEmergencyEvent", "DetermineSkillCheckAbilitiesOrderEvent", "Discard1MutinyCardEvent", "DiscardAllSkillCardsEvent", "DiscardDownTo1MutinyCardEvent", "DiscardFromDestinyDeckEvent", "DiscardQuorumCardsEvent", "DiscardRandomSkillCardsEvent", "DiscardSkillCardsEvent", "DogfightEvent", "DrawMutinyCardEvent", "DrawSkillCardsEvent", "DrawSkillCardsOfColorEvent", "EngineRoomEvent", "ExecuteEvent", "ExecutiveOrderEvent", "ExploitAWeaknessEvent", "FTLControlEvent", "FinishExecutionEvent", "ForceTheirHandEvent", "GasCloudEvent", "GasCloudPlaceEvent", "GasGiantEvent", "GiveLoyaltyCardsEvent", "GiveTitlesToNextInLineEvent", "GrantEvent", "HangarDeckEvent", "HumanFleetInfiltrateEvent", "HumanFleetLookAtTopCrisisCardEvent", "HumanFleetLookAtTopDestinationCardEvent", "LaunchViperEvent", "LeaveBrigEvent", "LookAtLoyaltyCardEvent", "MainBatteriesEvent", "MoveEvent", "NoOpEvent", "PassMutineerCardEvent", "PegasusCicEvent", "PlaceCivilianShipEvent", "PlaceCrisisCardOnBottomEvent", "PlaceCrisisCardOnTopEvent", "PlaceDestinationCardAtBottomEvent", "PlaceDestinationCardOnTopEvent", "PlaceInSetupLocationEvent", "PlayCardsBeforeSkillCheckEvent", "PlayCardsIntoSkillCheckEvent", "PlayInterruptCardEvent", "PlaySuperCrisisCardEvent", "PlayerDecisionEvent", "PoliticalProwessEvent", "PresidentsOfficeEvent", "PressRoomEvent", "PreventivePolicyEvent", "ProtectTheFleetEvent", "QuorumChamberEvent", "ReplaceMutinousPresidentEvent", "ResearchLabEvent", "ResolveCapricaCrisisCardEvent", "ResurrectionShipEvent", "ReturnAssaultRaptorEvent", "RevealMutineerEvent", "RiskShipsEvent", "SelectCharacterEvent", "StateOfEmergencyEvent", "WeaponsControlEvent" ]
+      "members" : [ "ActivateViperEvent", "AdministrationEvent", "AdmiralsQuartersEvent", "AirlockEvent", "ArmoryEvent", "BasestarBridgeAbilityEvent", "BasestarBridgeAbilityResultEvent", "BasestarBridgeEvent", "BasestarBridgeShipsEvent", "BrigEvent", "BuildNukeEvent", "CapricaDrawAndResolveCrisisCardsEvent", "CapricaPlaySuperCrisisCardEvent", "ChangeOfPlansEvent", "ChooseCrisisSectionEvent", "ChooseCrisisTargetEvent", "ChooseDestinationEvent", "ChooseExtraLoyaltyCardEvent", "ChooseGalacticaDamageEvent", "CombatVeteranEvent", "CommandEvent", "CommunicationsEvent", "ConsolidatePowerEvent", "CriticalSituationEvent", "CylonFleetEvent", "DealLoyaltyCardsEvent", "DeclareEmergencyEvent", "DetermineSkillCheckAbilitiesOrderEvent", "Discard1MutinyCardEvent", "DiscardAllSkillCardsEvent", "DiscardDownTo1MutinyCardEvent", "DiscardFromDestinyDeckEvent", "DiscardQuorumCardsEvent", "DiscardRandomSkillCardsEvent", "DiscardSkillCardsEvent", "DogfightEvent", "DrawMutinyCardEvent", "DrawSkillCardsEvent", "DrawSkillCardsOfColorEvent", "EngineRoomEvent", "ExecuteEvent", "ExecutiveOrderEvent", "ExploitAWeaknessEvent", "FTLControlEvent", "FinishExecutionEvent", "ForceTheirHandEvent", "FullThrottleEvent", "GasCloudEvent", "GasCloudPlaceEvent", "GasGiantEvent", "GiveLoyaltyCardsEvent", "GiveTitlesToNextInLineEvent", "GrantEvent", "GrantedViperActivationEvent", "HangarDeckEvent", "HumanFleetInfiltrateEvent", "HumanFleetLookAtTopCrisisCardEvent", "HumanFleetLookAtTopDestinationCardEvent", "LaunchReservesEvent", "LaunchViperEvent", "LeaveBrigEvent", "LookAtLoyaltyCardEvent", "MainBatteriesEvent", "MaximumFirepowerEvent", "MoveEvent", "NoOpEvent", "PassMutineerCardEvent", "PegasusCicEvent", "PlaceCivilianShipEvent", "PlaceCrisisCardOnBottomEvent", "PlaceCrisisCardOnTopEvent", "PlaceDestinationCardAtBottomEvent", "PlaceDestinationCardOnTopEvent", "PlaceInSetupLocationEvent", "PlayCardsBeforeSkillCheckEvent", "PlayCardsIntoSkillCheckEvent", "PlayInterruptCardEvent", "PlaySuperCrisisCardEvent", "PlayerDecisionEvent", "PoliticalProwessEvent", "PresidentsOfficeEvent", "PressRoomEvent", "PreventivePolicyEvent", "ProtectTheFleetEvent", "QuorumChamberEvent", "ReplaceMutinousPresidentEvent", "ResearchLabEvent", "ResolveCapricaCrisisCardEvent", "ResurrectionShipEvent", "ReturnAssaultRaptorEvent", "RevealMutineerEvent", "RiskShipsEvent", "SelectCharacterEvent", "StateOfEmergencyEvent", "ViperActivationRoundEvent", "WeaponsControlEvent" ]
     },
     "PlayerFact" : {
       "kind" : "union",
@@ -5878,7 +6010,7 @@
     "SkillCardEvent" : {
       "kind" : "union",
       "discriminator" : "kind",
-      "members" : [ "BuildNukeEvent", "ConsolidatePowerEvent", "CriticalSituationEvent", "ExecutiveOrderEvent", "PreventivePolicyEvent", "StateOfEmergencyEvent" ]
+      "members" : [ "BuildNukeEvent", "CombatVeteranEvent", "ConsolidatePowerEvent", "CriticalSituationEvent", "ExecutiveOrderEvent", "FullThrottleEvent", "LaunchReservesEvent", "MaximumFirepowerEvent", "PreventivePolicyEvent", "StateOfEmergencyEvent" ]
     },
     "SkillCardType" : {
       "kind" : "enum",
@@ -6677,6 +6809,39 @@
         }
       } ]
     },
+    "ViperActivationRoundEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "viperId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      }, {
+        "name" : "activationsLeft",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : null
+        }
+      }, {
+        "name" : "attacksOnly",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      } ]
+    },
     "Waiting" : {
       "kind" : "record",
       "tagged" : true,
@@ -6719,7 +6884,7 @@
     }
   },
   "lists" : {
-    "events" : [ "ABetterMachineEvent", "ASecondChanceEvent", "ActionStepEvent", "ActivateCylonBasestarEvent", "ActivateCylonBasestarsEvent", "ActivateCylonShipsStepEvent", "ActivateHeavyRaidersAndCenturionsEvent", "ActivateRaiderEvent", "ActivateRaidersEvent", "ActivateViperEvent", "AdministrationEvent", "AdmiralsQuartersEvent", "AdvancePursuitTrackEvent", "AirlockEvent", "AnalyzeEnemyFighterPassEvent", "ArmoryEvent", "ArmoryResultEvent", "AttackCylonShipEvent", "AttackCylonShipResultEvent", "AttackGalacticaEvent", "AttackGalacticaResultEvent", "AttackViperEvent", "AttackViperResultEvent", "BaitEvent", "BasestarBridgeAbilityEvent", "BasestarBridgeAbilityResultEvent", "BasestarBridgeEvent", "BasestarBridgeShipsEvent", "BrigEvent", "BuildNukeEvent", "CapricaDrawAndResolveCrisisCardsEvent", "CapricaPlaySuperCrisisCardEvent", "ChangeOfPlansEvent", "ChooseCrisisSectionEvent", "ChooseCrisisTargetEvent", "ChooseDestinationEvent", "ChooseExtraLoyaltyCardEvent", "ChooseGalacticaDamageEvent", "CloseInterruptWindowEvent", "CommandEvent", "CommunicationsEvent", "ConsolidatePowerEvent", "ConsultTheHybridPassEvent", "CrashLandingFailEvent", "CreateDestinyDeckEvent", "CreateLoyaltyDeckEvent", "CrisisStepEvent", "CriticalSituationEvent", "CylonFleetEvent", "CylonGenocidePassEvent", "CylonsWinEvent", "DamageBasestarEvent", "DamageGalacticaEvent", "DamageHumanFighterEvent", "DamagePegasusEvent", "DamageVipersEvent", "DealLoyaltyCardsEvent", "DeclareEmergencyEvent", "DecreaseJumpPreparationEvent", "DefendingAPrisonerFailEvent", "DefendingAPrisonerFailResultEvent", "DerelictBasestarEvent", "DestroyCivilianShipEvent", "DestroyCivilianShipsEvent", "DestroyCylonShipsEvent", "DestroyRaidersEvent", "DestroyRaptorEvent", "DetermineNextAdmiralEvent", "DetermineNextCagEvent", "DetermineNextPresidentEvent", "DetermineSkillCheckAbilitiesOrderEvent", "DetermineSkillCheckResultEvent", "Discard1MutinyCardEvent", "DiscardAllSkillCardsEvent", "DiscardDownTo1MutinyCardEvent", "DiscardFromDestinyDeckEvent", "DiscardNukeTokenEvent", "DiscardQuorumCardsEvent", "DiscardRandomSkillCardsEvent", "DiscardSkillCardsEvent", "DiscardStepEvent", "DogfightEvent", "DradisContactEvent", "DrawAndDestroyCivilianShipsEvent", "DrawAndResolveRecklessCardsEvent", "DrawDestinationCardsEvent", "DrawMutinyCardEvent", "DrawQuorumCardEvent", "DrawSkillCardsEvent", "DrawSkillCardsOfColorEvent", "EndGameEvent", "EndSkillCheckEvent", "EndTurnEvent", "EngineRoomEvent", "ExecuteEvent", "ExecutiveOrderEvent", "ExploitAWeaknessEvent", "FTLControlEvent", "FTLControlResultEvent", "FinishExecutionEvent", "FinishSleeperAgentPhaseEvent", "FootageTransmittedFailEvent", "ForceTheirHandEvent", "GainResourceEvent", "GasCloudEvent", "GasCloudPlaceEvent", "GasGiantEvent", "GiveLoyaltyCardsEvent", "GiveTitlesToNextInLineEvent", "GrantEvent", "HangarDeckEvent", "HumanFleetInfiltrateEvent", "HumanFleetLookAtTopCrisisCardEvent", "HumanFleetLookAtTopDestinationCardEvent", "HumanPrisonerFailEvent", "IncreaseJumpPreparationEvent", "InstallUpgradesEvent", "IronWillEvent", "JumpingTheFleetEvent", "KeepCrisisCardInPlayEvent", "KeepTabsOnVisitorFailEvent", "KeepTabsOnVisitorFailResultEvent", "LaunchRaidersEvent", "LaunchViperEvent", "LeaveBrigEvent", "LookAtLoyaltyCardEvent", "LoseResourceEvent", "MainBatteriesEvent", "MainBatteriesResultEvent", "MajorVictoryResultEvent", "MakeAdmiralEvent", "MakePresidentEvent", "MakeSkillCheckEvent", "MoveCivilianShipEvent", "MoveCylonShipsToFleetBoardEvent", "MoveEvent", "MoveFromBrigEvent", "MovementStepEvent", "MysteriousMessagePassEvent", "NoOpEvent", "ObjectiveInstructionsEvent", "OpenInterruptWindowEvent", "PassMutineerCardEvent", "PegasusCicEvent", "PegasusCicResultEvent", "PersonalVicesEvent", "PlaceCenturionsEvent", "PlaceCivilianShipEvent", "PlaceCivilianShipsInFrontEvent", "PlaceCrisisCardOnBottomEvent", "PlaceCrisisCardOnTopEvent", "PlaceDestinationCardAtBottomEvent", "PlaceDestinationCardOnTopEvent", "PlaceInSetupLocationEvent", "PlaceRaidersBehindEvent", "PlaceShipOnCylonFleetBoardEvent", "PlaceShipOnCylonFleetBoardResultEvent", "PlaceShipsEvent", "PlayCardsBeforeSkillCheckEvent", "PlayCardsIntoSkillCheckEvent", "PlayFromDestinyDeckEvent", "PlayInterruptCardEvent", "PlayQuorumCardEvent", "PlaySuperCrisisCardEvent", "PlayerDecisionEvent", "PoliticalProwessEvent", "PrepareForJumpStepEvent", "PresidentsOfficeEvent", "PressRoomEvent", "PreventivePolicyEvent", "ProtectTheFleetEvent", "QuickThinkingEvent", "QuorumChamberEvent", "QuorumInUproarFailEvent", "RagnarAnchorageEvent", "ReceiveSkillsStepEvent", "ReceiveStartingSkillsEvent", "RedTapeEvent", "ReplaceMutinousPresidentEvent", "ResearchLabEvent", "ResetActingPlayerEvent", "ResetJumpPreparationEvent", "ResolveCapricaCrisisCardEvent", "ResolveCardsBeforeSkillCheckEvent", "ResolveConsequencesEvent", "ResolveCrisisCardEvent", "ResolveCrisisRollEvent", "ResolveDestinationCardEvent", "ResolveSkillCheckAbilityEvent", "ResolveSkillCheckResultEvent", "ResurrectionShipEvent", "ReturnAssaultRaptorEvent", "ReturnToCrisisStepEvent", "ReturnVipersToReservesEvent", "RevealCardsBeforeSkillCheckEvent", "RevealMutineerEvent", "RiskResultEvent", "RiskShipsEvent", "RollDieEvent", "SelectCharacterEvent", "SendToBrigEvent", "SendToSickbayEvent", "SetATrapPassEvent", "ShuffleAndDivideCardsEvent", "ShuffleTreacheryIntoDestinyDeckEvent", "SleeperAgentPhaseEvent", "StandoffWithPegasusPassEvent", "StartGameEvent", "StartTurnEvent", "StateOfEmergencyEvent", "StrangeBeaconPassEvent", "TiebreakCardsBeforeSkillCheckEvent", "TiebreakInterruptCardsEvent", "TotalSkillCheckStrengthEvent", "TrustInstinctsEvent", "ViolentOutburstsEvent", "WeaponsControlEvent" ],
+    "events" : [ "ABetterMachineEvent", "ASecondChanceEvent", "ActionStepEvent", "ActivateCylonBasestarEvent", "ActivateCylonBasestarsEvent", "ActivateCylonShipsStepEvent", "ActivateHeavyRaidersAndCenturionsEvent", "ActivateRaiderEvent", "ActivateRaidersEvent", "ActivateViperEvent", "AdministrationEvent", "AdmiralsQuartersEvent", "AdvancePursuitTrackEvent", "AirlockEvent", "AnalyzeEnemyFighterPassEvent", "ArmoryEvent", "ArmoryResultEvent", "AttackCylonShipEvent", "AttackCylonShipResultEvent", "AttackGalacticaEvent", "AttackGalacticaResultEvent", "AttackViperEvent", "AttackViperResultEvent", "BaitEvent", "BasestarBridgeAbilityEvent", "BasestarBridgeAbilityResultEvent", "BasestarBridgeEvent", "BasestarBridgeShipsEvent", "BrigEvent", "BuildNukeEvent", "CapricaDrawAndResolveCrisisCardsEvent", "CapricaPlaySuperCrisisCardEvent", "ChangeOfPlansEvent", "ChooseCrisisSectionEvent", "ChooseCrisisTargetEvent", "ChooseDestinationEvent", "ChooseExtraLoyaltyCardEvent", "ChooseGalacticaDamageEvent", "CloseInterruptWindowEvent", "CombatVeteranEvent", "CommandEvent", "CommunicationsEvent", "ConsolidatePowerEvent", "ConsultTheHybridPassEvent", "CrashLandingFailEvent", "CreateDestinyDeckEvent", "CreateLoyaltyDeckEvent", "CrisisStepEvent", "CriticalSituationEvent", "CylonFleetEvent", "CylonGenocidePassEvent", "CylonsWinEvent", "DamageBasestarEvent", "DamageGalacticaEvent", "DamageHumanFighterEvent", "DamagePegasusEvent", "DamageVipersEvent", "DealLoyaltyCardsEvent", "DeclareEmergencyEvent", "DecreaseJumpPreparationEvent", "DefendingAPrisonerFailEvent", "DefendingAPrisonerFailResultEvent", "DerelictBasestarEvent", "DestroyCivilianShipEvent", "DestroyCivilianShipsEvent", "DestroyCylonShipsEvent", "DestroyRaidersEvent", "DestroyRaptorEvent", "DetermineNextAdmiralEvent", "DetermineNextCagEvent", "DetermineNextPresidentEvent", "DetermineSkillCheckAbilitiesOrderEvent", "DetermineSkillCheckResultEvent", "Discard1MutinyCardEvent", "DiscardAllSkillCardsEvent", "DiscardDownTo1MutinyCardEvent", "DiscardFromDestinyDeckEvent", "DiscardNukeTokenEvent", "DiscardQuorumCardsEvent", "DiscardRandomSkillCardsEvent", "DiscardSkillCardsEvent", "DiscardStepEvent", "DogfightEvent", "DradisContactEvent", "DrawAndDestroyCivilianShipsEvent", "DrawAndResolveRecklessCardsEvent", "DrawDestinationCardsEvent", "DrawMutinyCardEvent", "DrawQuorumCardEvent", "DrawSkillCardsEvent", "DrawSkillCardsOfColorEvent", "EndGameEvent", "EndSkillCheckEvent", "EndTurnEvent", "EngineRoomEvent", "ExecuteEvent", "ExecutiveOrderEvent", "ExploitAWeaknessEvent", "FTLControlEvent", "FTLControlResultEvent", "FinishExecutionEvent", "FinishSleeperAgentPhaseEvent", "FootageTransmittedFailEvent", "ForceTheirHandEvent", "FullThrottleEvent", "GainResourceEvent", "GasCloudEvent", "GasCloudPlaceEvent", "GasGiantEvent", "GiveLoyaltyCardsEvent", "GiveTitlesToNextInLineEvent", "GrantEvent", "GrantedViperActivationEvent", "HangarDeckEvent", "HumanFleetInfiltrateEvent", "HumanFleetLookAtTopCrisisCardEvent", "HumanFleetLookAtTopDestinationCardEvent", "HumanPrisonerFailEvent", "IncreaseJumpPreparationEvent", "InstallUpgradesEvent", "IronWillEvent", "JumpingTheFleetEvent", "KeepCrisisCardInPlayEvent", "KeepTabsOnVisitorFailEvent", "KeepTabsOnVisitorFailResultEvent", "LaunchRaidersEvent", "LaunchReservesEvent", "LaunchViperEvent", "LeaveBrigEvent", "LookAtLoyaltyCardEvent", "LoseResourceEvent", "MainBatteriesEvent", "MainBatteriesResultEvent", "MajorVictoryResultEvent", "MakeAdmiralEvent", "MakePresidentEvent", "MakeSkillCheckEvent", "MaximumFirepowerEvent", "MoveCivilianShipEvent", "MoveCylonShipsToFleetBoardEvent", "MoveEvent", "MoveFromBrigEvent", "MovementStepEvent", "MysteriousMessagePassEvent", "NoOpEvent", "ObjectiveInstructionsEvent", "OpenInterruptWindowEvent", "PassMutineerCardEvent", "PegasusCicEvent", "PegasusCicResultEvent", "PersonalVicesEvent", "PlaceCenturionsEvent", "PlaceCivilianShipEvent", "PlaceCivilianShipsInFrontEvent", "PlaceCrisisCardOnBottomEvent", "PlaceCrisisCardOnTopEvent", "PlaceDestinationCardAtBottomEvent", "PlaceDestinationCardOnTopEvent", "PlaceInSetupLocationEvent", "PlaceRaidersBehindEvent", "PlaceShipOnCylonFleetBoardEvent", "PlaceShipOnCylonFleetBoardResultEvent", "PlaceShipsEvent", "PlayCardsBeforeSkillCheckEvent", "PlayCardsIntoSkillCheckEvent", "PlayFromDestinyDeckEvent", "PlayInterruptCardEvent", "PlayQuorumCardEvent", "PlaySuperCrisisCardEvent", "PlayerDecisionEvent", "PoliticalProwessEvent", "PrepareForJumpStepEvent", "PresidentsOfficeEvent", "PressRoomEvent", "PreventivePolicyEvent", "ProtectTheFleetEvent", "QuickThinkingEvent", "QuorumChamberEvent", "QuorumInUproarFailEvent", "RagnarAnchorageEvent", "ReceiveSkillsStepEvent", "ReceiveStartingSkillsEvent", "RedTapeEvent", "ReplaceMutinousPresidentEvent", "ResearchLabEvent", "ResetActingPlayerEvent", "ResetJumpPreparationEvent", "ResolveCapricaCrisisCardEvent", "ResolveCardsBeforeSkillCheckEvent", "ResolveConsequencesEvent", "ResolveCrisisCardEvent", "ResolveCrisisRollEvent", "ResolveDestinationCardEvent", "ResolveSkillCheckAbilityEvent", "ResolveSkillCheckResultEvent", "ResurrectionShipEvent", "ReturnAssaultRaptorEvent", "ReturnToCrisisStepEvent", "ReturnVipersToReservesEvent", "RevealCardsBeforeSkillCheckEvent", "RevealMutineerEvent", "RiskResultEvent", "RiskShipsEvent", "RollDieEvent", "SelectCharacterEvent", "SendToBrigEvent", "SendToSickbayEvent", "SetATrapPassEvent", "ShuffleAndDivideCardsEvent", "ShuffleTreacheryIntoDestinyDeckEvent", "SleeperAgentPhaseEvent", "StandoffWithPegasusPassEvent", "StartGameEvent", "StartTurnEvent", "StateOfEmergencyEvent", "StrangeBeaconPassEvent", "TiebreakCardsBeforeSkillCheckEvent", "TiebreakInterruptCardsEvent", "TotalSkillCheckStrengthEvent", "TrustInstinctsEvent", "ViolentOutburstsEvent", "ViperActivationRoundEvent", "WeaponsControlEvent" ],
     "sandboxEvents" : [ "AssignTitleEvent", "ChangeResourceEvent", "DamageLocationEvent", "GiveSkillCardToPlayerEvent", "MoveCharacterEvent", "PlaceShipEvent", "PutCrisisCardOnTopEvent", "PutDestinationCardOnTopEvent", "PutDestinyCardOnTopEvent", "PutSkillCardOnTopEvent", "SetJumpPreparationEvent" ],
     "facts" : [ "BoardFact.BoardingPartyAdvanced", "BoardFact.EngineRoomActivated", "BoardFact.JumpPreparationDecreased", "BoardFact.JumpPreparationIncreased", "BoardFact.JumpPreparationReset", "BoardFact.LocationDamaged", "BoardFact.PursuitAdvanced", "BoardFact.PursuitReset", "BoardFact.ResourceDecreased", "BoardFact.ResourceIncreased", "DeckFact.CardsAddedOnTop", "DeckFact.CardsAddedToBottom", "DeckFact.CardsDiscarded", "DeckFact.CardsDrawn", "DeckFact.CardsPulled", "DeckFact.DeckShuffled", "GameFact.ActingPlayerChanged", "GameFact.CrisisCardKeptInPlay", "GameFact.CrisisCardPlayed", "GameFact.CrisisCardsCleared", "GameFact.CurrentPlayerChanged", "GameFact.DestinationReached", "GameFact.DieRollCardPlayed", "GameFact.DieRollStarted", "GameFact.DieRolled", "GameFact.GameEnded", "GameFact.GameStarted", "GameFact.LossReduced", "GameFact.LossReductionAdded", "GameFact.NukeDiscarded", "GameFact.NukeGained", "GameFact.ReturnToCrisisStepChanged", "GameFact.SkillCardPlayed", "GameFact.StepChanged", "GameFact.TurnEndedEarly", "GameFact.TurnStarted", "InterruptFact.InterruptCardPlayed", "InterruptFact.InterruptCardResolved", "InterruptFact.InterruptCardReturned", "InterruptFact.InterruptWindowClosed", "InterruptFact.InterruptWindowOpened", "InterruptFact.RaiderMissed", "InterruptFact.RaidersWillMiss", "PlayerFact.CardsGained", "PlayerFact.CardsLost", "PlayerFact.CardsSeen", "PlayerFact.CharacterMoved", "PlayerFact.CharacterRemoved", "PlayerFact.CharacterRemovedFromBoards", "PlayerFact.CharacterSelected", "PlayerFact.CivilianShipForgotten", "PlayerFact.CivilianShipRevealed", "PlayerFact.InfiltrationEnded", "PlayerFact.InfiltrationStarted", "PlayerFact.LoyaltyCardRevealed", "PlayerFact.LoyaltyCardSeen", "PlayerFact.MiracleTokenGained", "PlayerFact.MiracleTokenLost", "PlayerFact.MotiveCardRevealed", "PlayerFact.OwnTurnStarted", "ShipFact.BasestarDamageAttached", "ShipFact.BasestarDamageCleared", "ShipFact.PilotChanged", "ShipFact.ShipMoved", "SkillCheckFact.AbilityResolved", "SkillCheckFact.CardRemoved", "SkillCheckFact.CardsDrawn", "SkillCheckFact.CardsPlaced", "SkillCheckFact.CardsPlayedBefore", "SkillCheckFact.EmergencyDeclared", "SkillCheckFact.FailResultPrevented", "SkillCheckFact.PassResultReplaced", "SkillCheckFact.PlayedBeforeRevealed", "SkillCheckFact.ResultDetermined", "SkillCheckFact.SkillCheckEnded", "SkillCheckFact.SkillCheckStarted", "SkillCheckFact.TargetChosen", "SkillCheckFact.TotalStrengthDetermined", "TitleFact.AdmiralAssigned", "TitleFact.CagAssigned", "TitleFact.PresidentAssigned", "TitleFact.PresidentQuorumCardGained", "TitleFact.PresidentQuorumCardsLost" ]
   },
