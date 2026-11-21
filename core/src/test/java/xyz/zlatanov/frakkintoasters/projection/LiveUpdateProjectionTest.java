@@ -115,6 +115,8 @@ class LiveUpdateProjectionTest {
             new Sample(new GameFact.CrisisCardKeptInPlay(SkillCheckType.DETECTOR_SABOTAGE), Rule.PUBLIC),
             new Sample(new GameFact.ReturnToCrisisStepChanged(true), Rule.PUBLIC),
             new Sample(new GameFact.NukeDiscarded(), Rule.PUBLIC),
+            new Sample(new GameFact.NukeGained(), Rule.PUBLIC),
+            new Sample(new GameFact.SkillCardPlayed(1, new SkillCard(6, BUILD_NUKE)), Rule.PUBLIC),
             new Sample(new GameFact.CrisisCardsCleared(List.of(CrisisCard.DETENTE)), Rule.PUBLIC),
             new Sample(new GameFact.DestinationReached(DestinationCard.DEEP_SPACE), Rule.PUBLIC),
             new Sample(new InterruptFact.InterruptWindowOpened(new BeforeDieRoll()), Rule.PUBLIC),

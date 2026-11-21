@@ -42,6 +42,7 @@ public record GameSnapshot(Map<String, Object> values) {
         s.put("windowCards", new ArrayList<>(game.turn().windowCards()));
         s.put("resolvedInterruptCards", new ArrayList<>(game.turn().resolvedInterruptCards()));
         s.put("raidersToMiss", new TreeMap<>(game.turn().raidersToMiss()));
+        s.put("playedSkillCards", new ArrayList<>(game.turn().playedSkillCards()));
         s.put("president", game.president());
         s.put("admiral", game.admiral());
         s.put("cag", game.cag());

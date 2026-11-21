@@ -1,4 +1,4 @@
-format version 2
+format version 3
 enum Area = SPACE, RESERVES, SPACE_OR_RESERVES
 enum BasestarBridgeAbility = CAG_PLACES_CIVILIAN_SHIP, JUMP_OR_PURSUIT, BASESTAR_OR_RAIDERS, GALACTICA_DAMAGE
 enum BasestarDamage = STRUCTURAL_DAMAGE, DISABLED_WEAPONS, DISABLED_HANGAR_BAY, CRITICAL_HIT
@@ -9,6 +9,8 @@ enum DestinationCard = ASTEROID_FIELD, BARREN_PLANET, CYLON_AMBUSH, CYLON_REFINE
 enum EventConstraint = DRAW_EXACTLY_1, DRAW_EXACTLY_2, DRAW_EXACTLY_3, DRAW_EXACTLY_4, DRAW_EXACTLY_5, DRAW_EXACTLY_2_OF_ANY_COLOR, DISCARD_EXACTLY_1, DISCARD_EXACTLY_2, DISCARD_EXACTLY_3, DISCARD_EXACTLY_4, DISCARD_EXACTLY_5, DISCARD_DOWN_TO_HAND_LIMIT, MUST_LAUNCH_IN_VIPER, DESTINATION_GALACTICA
 enum GalacticaDamage = FUEL, FOOD, WEAPONS_CONTROL, HANGAR_DECK, FTL_CONTROL, COMMAND, ARMORY, ADMIRALS_QUARTERS
 enum GameStep = SETUP, RECEIVE_SKILLS, MOVEMENT, ACTION, CRISIS, ACTIVATE_CYLON_SHIPS, PREPARE_FOR_JUMP, DISCARD
+enum Grant = ACTION
+enum GrantedBy = HANGAR_DECK
 enum JumpPreparation = START, POSITION_1, POSITION_2, MINUS_3, MINUS_1
 enum Location = FTL_CONTROL, WEAPONS_CONTROL, COMMUNICATIONS, RESEARCH_LAB, ARMORY, COMMAND, ADMIRALS_QUARTERS, HANGAR_DECK, SICKBAY, BRIG, QUORUM_CHAMBER, PRESS_ROOM, PRESIDENTS_OFFICE, ADMINISTRATION, GALACTICA_SPACE_12_OCLOCK, GALACTICA_SPACE_2_OCLOCK, GALACTICA_SPACE_4_OCLOCK, GALACTICA_SPACE_6_OCLOCK, GALACTICA_SPACE_8_OCLOCK, GALACTICA_SPACE_10_OCLOCK, PEGASUS_CIC, AIRLOCK, MAIN_BATTERIES, ENGINE_ROOM, CAPRICA, CYLON_FLEET, HUMAN_FLEET, RESURRECTION_SHIP, BASESTAR_BRIDGE, CYLON_FLEET_SPACE_1, CYLON_FLEET_SPACE_2, CYLON_FLEET_SPACE_3, CYLON_FLEET_SPACE_4, CYLON_FLEET_SPACE_5_6, CYLON_FLEET_SPACE_7_8
 enum LoyaltyCard = NOT_CYLON, NOT_CYLON_USE_CAUTION, NOT_CYLON_STAND_AND_FIGHT, NOT_CYLON_SELFISH, NOT_CYLON_SELF_DESTRUCTION, NOT_CYLON_SACRIFICE, NOT_CYLON_POLITICAL_INTRIGUE, NOT_CYLON_DEVASTATION, NOT_CYLON_ACQUIRE_POWER, FINAL_FIVE_YOU_ARE_SENT_TO_BRIG, FINAL_FIVE_YOU_ARE_EXECUTED, FINAL_FIVE_THEY_ARE_EXECUTED, FINAL_FIVE_DAMAGE_GALACTICA_TWICE, FINAL_FIVE_CYLON_SHIPS_ACTIVATE, MUTINEER, CYLON_CAN_PLACE_CENTURION, CYLON_DECREASE_JUMP_TRACK, CYLON_DRAW_TREACHERY_CARDS, CYLON_SEND_TO_BRIG, CYLON_DAMAGE_GALACTICA, CYLON_REDUCE_MORALE, CYLON_SEND_TO_SICKBAY
@@ -48,6 +50,7 @@ interface PlayerFact
 interface SandboxEvent
 interface SecretEvent
 interface ShipFact
+interface SkillCardEvent
 interface SkillCheckFact
 interface TitleFact
 record ABetterMachineEvent()
@@ -97,6 +100,7 @@ record BoardFact.PursuitReset()
 record BoardFact.ResourceDecreased(resource: Resource, amount: int)
 record BoardFact.ResourceIncreased(resource: Resource, amount: int)
 record BrigEvent(playerNumber: int)
+record BuildNukeEvent(playerNumber: int, card: SkillCard)
 record CapricaDrawAndResolveCrisisCardsEvent(playerNumber: int)
 record CapricaPlaySuperCrisisCardEvent(playerNumber: int, superCrisisCard: SuperCrisisCard)
 record ChangeOfPlansEvent(playerNumber: int, changeOfPlansCard: SkillCard)
@@ -111,6 +115,7 @@ record CivilianShip(id: int, fuelCost: int, moraleCost: int, populationCost: int
 record CloseInterruptWindowEvent()
 record CommandEvent(playerNumber: int)
 record CommunicationsEvent(playerNumber: int, civilianShipId1: int?, civilianShipId2: int?)
+record ConsolidatePowerEvent(playerNumber: int, card: SkillCard)
 record ConsultTheHybridPassEvent()
 record CrashLandingFailEvent()
 record CreateDestinyDeckEvent()
@@ -192,7 +197,9 @@ record GameFact.DieRolled(value: int)
 record GameFact.GameEnded(winner: Team, winnerPlayerNumbers: List<int?>)
 record GameFact.GameStarted(playerCount: int, objective: ObjectiveCard)
 record GameFact.NukeDiscarded()
+record GameFact.NukeGained()
 record GameFact.ReturnToCrisisStepChanged(returns: boolean)
+record GameFact.SkillCardPlayed(playerNumber: int, card: SkillCard)
 record GameFact.StepChanged(step: GameStep)
 record GameFact.TurnEndedEarly()
 record GameFact.TurnStarted(turn: int)
@@ -202,6 +209,7 @@ record GasGiantEvent(playerNumber: int)
 record GiveLoyaltyCardsEvent(playerNumber: int, recipientPlayerNumber: int)
 record GiveSkillCardToPlayerEvent(targetPlayerNumber: int, card: SkillCard)
 record GiveTitlesToNextInLineEvent(playerNumber: int)
+record GrantEvent(playerNumber: int, grant: Grant, grantedBy: GrantedBy)
 record HangarDeckEvent(playerNumber: int)
 record HumanFleetInfiltrateEvent(playerNumber: int, galacticaLocation: Location)
 record HumanFleetLookAtTopCrisisCardEvent(playerNumber: int)

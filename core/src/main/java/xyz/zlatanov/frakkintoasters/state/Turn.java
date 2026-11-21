@@ -40,6 +40,8 @@ public class Turn implements TurnView {
     private final List<SkillCardType>       resolvedInterruptCards = new ArrayList<>();
     @Getter(NONE)
     private final Map<Location, Integer>    raidersToMiss          = new EnumMap<>(Location.class);
+    @Getter(NONE)
+    private final List<SkillCardType>       playedSkillCards       = new ArrayList<>();
 
     @Mutates
     public void start(int number) {
@@ -49,6 +51,17 @@ public class Turn implements TurnView {
         dieRoll = null;
         resolvedInterruptCards.clear();
         raidersToMiss.clear();
+        playedSkillCards.clear();
+    }
+
+    @Override
+    public List<SkillCardType> playedSkillCards() {
+        return List.copyOf(playedSkillCards);
+    }
+
+    @Mutates
+    public void playSkillCard(SkillCardType type) {
+        playedSkillCards.add(type);
     }
 
     @Mutates

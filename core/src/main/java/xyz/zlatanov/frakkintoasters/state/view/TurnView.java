@@ -72,4 +72,10 @@ public interface TurnView {
      * "Run Interference": how many of the raiders activating in a space area still miss, during a raider activation.
      */
     Map<Location, Integer> raidersToMiss();
+
+    /**
+     * The Skill Cards played this turn for their "Action:" or "Movement:", for the cards limited per turn, e.g. "Executive
+     * Order".
+     */
+    List<SkillCardType> playedSkillCards();
 }

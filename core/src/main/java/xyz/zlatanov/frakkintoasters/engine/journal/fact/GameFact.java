@@ -5,6 +5,7 @@ import xyz.zlatanov.frakkintoasters.state.Team;
 import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
 import xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
 
@@ -51,6 +52,13 @@ public sealed interface GameFact extends Fact {
     }
 
     record NukeDiscarded() implements GameFact {
+    }
+
+    record NukeGained() implements GameFact {
+    }
+
+    // A Skill Card played from the hand for its ability, e.g. its "Action:". The turn keeps it for the cards limited per turn.
+    record SkillCardPlayed(int playerNumber, SkillCard card) implements GameFact {
     }
 
     record CrisisCardsCleared(List<CrisisCard> cards) implements GameFact {

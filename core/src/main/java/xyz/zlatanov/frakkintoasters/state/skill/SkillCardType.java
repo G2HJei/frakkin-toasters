@@ -81,6 +81,23 @@ public enum SkillCardType {
 
     private static final Set<SkillCardType> RECKLESS_CARDS = Set.of(SUPPORT_THE_PEOPLE, AT_ANY_COST, GUTS_AND_INITIATIVE, JURY_RIGGED);
 
+    // "Action:" cards, played as the player's action (rule 4.2). "Full Throttle" is "Movement or Action:".
+    private static final Set<SkillCardType> ACTION_CARDS = Set.of(
+            CONSOLIDATE_POWER, POPULAR_INFLUENCE, NEGOTIATION, EXECUTIVE_ORDER, STATE_OF_EMERGENCY, LAUNCH_SCOUT,
+            SCOUTING_FOR_FUEL, UNORTHODOX_PLAN, MAXIMUM_FIREPOWER, FULL_THROTTLE, COMBAT_VETERAN, LAUNCH_RESERVES, REPAIR,
+            BUILD_NUKE, RAPTOR_SPECIALIST, TEST_THE_LIMITS);
+
+    // "Movement:" cards, used instead of moving in the player's own Movement step (rule 8.3.5).
+    private static final Set<SkillCardType> MOVEMENT_CARDS = Set.of(PREVENTIVE_POLICY, CRITICAL_SITUATION, FULL_THROTTLE);
+
+    public boolean isAction() {
+        return ACTION_CARDS.contains(this);
+    }
+
+    public boolean isMovementAbility() {
+        return MOVEMENT_CARDS.contains(this);
+    }
+
     public boolean hasSkillCheckAbility() {
         return SKILL_CHECK_ABILITY_CARDS.contains(this);
     }

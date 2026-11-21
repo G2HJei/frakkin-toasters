@@ -335,6 +335,25 @@ class FactApplierTest {
     }
 
     @Test
+    void nukeGainedAddsOneToken() {
+        apply(new NukeGained());
+
+        assertEquals(3, game.nukes());
+    }
+
+    // The card itself moves with CardsLost and CardsDiscarded: the turn only remembers that it was played.
+    @Test
+    void skillCardPlayedIsKeptByTheTurn() {
+        apply(new SkillCardPlayed(1, new SkillCard(1, EXECUTIVE_ORDER)));
+        apply(new SkillCardPlayed(2, new SkillCard(6, BUILD_NUKE)));
+
+        assertEquals(List.of(EXECUTIVE_ORDER, BUILD_NUKE), game.turn().playedSkillCards());
+
+        apply(new TurnStarted(2));
+        assertEquals(List.of(), game.turn().playedSkillCards());
+    }
+
+    @Test
     void gameEndedSetsTheOutcome() {
         assertEquals(Optional.empty(), game.outcome());
 

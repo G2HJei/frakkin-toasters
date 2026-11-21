@@ -3,15 +3,15 @@ package xyz.zlatanov.frakkintoasters.event.location.galactica;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
-import xyz.zlatanov.frakkintoasters.event.ActivateViperEvent;
-import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
+import xyz.zlatanov.frakkintoasters.event.action.GrantEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.LaunchViperEvent;
 import xyz.zlatanov.frakkintoasters.state.ship.HumanFighter;
 
 import java.util.List;
 
-import static xyz.zlatanov.frakkintoasters.event.Followup.*;
+import static xyz.zlatanov.frakkintoasters.event.Followup.all;
+import static xyz.zlatanov.frakkintoasters.event.action.GrantEvent.Grant.ACTION;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.MUST_LAUNCH_IN_VIPER;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_10_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.HANGAR_DECK;
@@ -30,11 +30,8 @@ class HangarDeckEventProcessorTest extends EventTestHarness<HangarDeckEvent> {
         execute(new HangarDeckEvent(1));
         assertFollowup(
                 all(
-                        single(
-                                new PlayerDecisionEvent<>(1, LaunchViperEvent.class, MUST_LAUNCH_IN_VIPER)),
-                        one(
-                                new PlayerDecisionEvent<>(1, ActivateViperEvent.class),
-                                new NoOpEvent(1))));
+                        new PlayerDecisionEvent<>(1, LaunchViperEvent.class, MUST_LAUNCH_IN_VIPER),
+                        new GrantEvent(1, ACTION, GrantEvent.GrantedBy.HANGAR_DECK)));
     }
 
     @Test
@@ -52,11 +49,8 @@ class HangarDeckEventProcessorTest extends EventTestHarness<HangarDeckEvent> {
 
         assertFollowup(
                 all(
-                        single(
-                                new PlayerDecisionEvent<>(1, LaunchViperEvent.class, MUST_LAUNCH_IN_VIPER)),
-                        one(
-                                new PlayerDecisionEvent<>(1, ActivateViperEvent.class),
-                                new NoOpEvent(1))));
+                        new PlayerDecisionEvent<>(1, LaunchViperEvent.class, MUST_LAUNCH_IN_VIPER),
+                        new GrantEvent(1, ACTION, GrantEvent.GrantedBy.HANGAR_DECK)));
     }
 
     @Test

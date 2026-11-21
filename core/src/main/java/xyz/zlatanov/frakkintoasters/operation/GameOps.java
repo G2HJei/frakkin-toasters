@@ -157,6 +157,10 @@ public class GameOps extends AbstractOps {
         record(new NukeDiscarded());
     }
 
+    public void gainNuke() {
+        record(new NukeGained());
+    }
+
     /**
      * @return the first player
      */

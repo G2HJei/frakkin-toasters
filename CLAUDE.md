@@ -83,7 +83,8 @@ whole root package, so nothing in `backend` may be named `XxxEventProcessor`.
   `skillcheck`, `skillcheck/ability`, `skillcheck/result`, `turn`). The attacks and the viper activation are in the root
   package. Also `placeholder/` (events that need player input) and
   `constraint/` (`EventConstraint`, `ConstrainedEvent`). `location/` holds `LocationActionProcessor`, the base of the
-  location action processors
+  location action processors. `action/` holds `Actions` (what a player can do now), the Skill Card plays and the grants,
+  and `action/skillcard/` an event per Skill Card played for its "Action:" or "Movement:" (see "Actions and Skill Cards")
 - `operation/` - game ops, the only code that decides what changes: `GameOps` (entry point) hands out `PlayerOps`,
   `ShipOps`, `GalacticaOps`, `PegasusOps`, `CylonFleetOps`, `SkillCheckOps`, `LoyaltyDeckOps`, `TitleOps`,
   `InterruptOps`. They extend
@@ -101,7 +102,7 @@ whole root package, so nothing in `backend` may be named `XxxEventProcessor`.
   never depends on `..operation..`, and nothing else in `core` depends on it (`ArchitectureTest`). See "Projections"
 - `state/` - game state model: `Game` (top level), `Turn` (turn number, `GameStep`, current and acting player, the
   Crisis Cards of the turn and whether it returns to the Crisis step, the `DieRoll`, the open interrupt window and its
-  cards, read through `GameView.turn()`; `number` counts player turns, not rounds), `Player` (`turns()` counts the player's own turns), `Team` (the winner in
+  cards, the Skill Cards played for their abilities, read through `GameView.turn()`; `number` counts player turns, not rounds), `Player` (`turns()` counts the player's own turns), `Team` (the winner in
   `GameView.outcome()`), `Die` (d8), `DieRoll` (a roll with the cards played on it), `Randomness`,
   `RemovedComponents`, `PlayerPile`, and the `@Mutates` marker
 - `state/interrupt/` - `InterruptWindow` (the windows, as sealed records with the cards each takes) and
@@ -382,9 +383,10 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
   `CrisisStepEvent`, `ActivateCylonShipsStepEvent`, `PrepareForJumpStepEvent`, `DiscardStepEvent`.
 - Each step records `StepChanged` and applies its own exceptions. A step a player doesn't have records nothing: revealed
   Cylons (and Cylon Leaders who aren't Infiltrating, see `isHuman()`) have no Crisis and no Activate Cylon Ships step,
-  and characters in the "Brig" no Crisis step. Movement and Action are a `OneOf` with a `NoOpEvent`. A pilot gets an
-  `ActivateViperEvent` decision instead of a location action, and a character whose location has no action he can take (e.g. in
-  "Sickbay", see `LocationEvent.canAct`) gets no Action choice.
+  and characters in the "Brig" no Crisis step. Movement and Action are a `OneOf` with a `NoOpEvent`. The Action step
+  offers what `Actions.offerAction` finds (see "Actions and Skill Cards"): an `ActionEvent` decision when the player can
+  take his location's action or play an "Action:" card, and for a pilot an `ActivateViperEvent` decision too. A
+  character with neither (e.g. in "Sickbay" without a card, see `LocationEvent.canAct`) gets no Action choice.
 - `DiscardStepEvent` asks every player over the hand limit, clockwise from the current player, with
   `DISCARD_DOWN_TO_HAND_LIMIT`: Skill Cards over `handLimit()`, and the President's Quorum Cards.
 - The Crisis step draws a card, keeps it with the turn and queues `ResolveCrisisCardEvent` (see "Crisis Cards"). The
@@ -405,6 +407,30 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
 - A Stranded Karl "Helo" Agathon is off the board until `StartTurnEvent` puts him on the Hangar Deck at his player's
   2nd turn (`PlayerView.turns()`, which an execution starts again for the new character). Until then the Movement and
   Action steps skip him, and `SendToBrigEvent` and `SendToSickbayEvent` leave him alone.
+
+### Actions and Skill Cards
+
+`event/action/` knows what a player can do now, for the Action step and everything else that gives an action.
+
+- `Actions.canTakeAction` is "his location's action (`LocationEvent.canAct`) or a playable "Action:" card", and
+  `offerAction(game, n)` builds the choice: `one(decision<ActionEvent>, NoOpEvent)`, for a pilot
+  `one(decision<ActivateViperEvent>, decision<ActionEvent> when he has a card, NoOpEvent)` (rule 11.2.1). A location
+  event fails for a pilot, who is in space. `ActivateViperEvent` isn't an `ActionEvent`, because a non-pilot's one
+  activates an unmanned viper.
+- A Skill Card played for its ability is a `SkillCardEvent` (`playerNumber`, `card`), one record per card in
+  `action/skillcard/`, which implements the interface of its timing: `ActionEvent` for "Action:". The engine's
+  `isInstance` check then accepts it only where that timing is asked. `SkillCardType.isAction()` and
+  `isMovementAbility()` list the cards, and `SkillCardEventsTest` checks that each has one event.
+- Its processor extends `SkillCardEventProcessor`, whose final `isValid()` checks the card's `type()`, the hand and
+  `isHuman()` (revealed Cylons and Cylon Leaders who aren't Infiltrating can't, rules 6.1.2.3, 6.2.1), then
+  `isValidPlay()`. Its final `process()` plays the card (`PlayerOps.play`: `CardsLost`, `SkillCardPlayed`, which
+  `TurnView.playedSkillCards()` keeps for the cards limited per turn, and the discard) before `resolve()`.
+- A card is offered and accepted only when its effect can happen, as a location's action is. `SkillCardPlays.canPlay`
+  is an exhaustive switch over `SkillCardType` that asks each card processor's static `canPlay`, so a new type doesn't
+  compile until it's mapped.
+- `GrantEvent(playerNumber, grant, grantedBy)` gives a player an action later, e.g. the "Hangar Deck"'s "1 more
+  action" once the pilot is in space. It is queued, never submitted, makes the player the acting player when it runs,
+  and offers through `Actions`.
 
 ### End of Game and Mutiny
 
@@ -517,8 +543,9 @@ and its result.
   Victory" window. "Structural Damage" adds 2.
 - `ActivateViperEvent(playerNumber, ViperActivation)`: one option of rule 11.1.1. A pilot activates his own viper,
   anyone else an unmanned one. `ProtectTheFleetEvent` takes the same `ViperActivation`, for an unmanned viper, and both
-  use `ActivateViperEventProcessor.isValidActivation` and `activate`. The Action step and the "Hangar Deck" offer the
-  activation as a decision, and "Command" only when `canActivateUnmanned`.
+  use `ActivateViperEventProcessor.isValidActivation` and `activate`. A pilot's action (`Actions.offerAction`, also
+  for the "Hangar Deck"'s extra action) offers the activation as a decision, and "Command" only when
+  `canActivateUnmanned`.
 - Every effect that places or launches a Cylon ship on the main game board goes through `AbstractOps.takeFromSupply`
   (rule 11.4.2): a ship from the supply, and when it has none left, one from the lowest-numbered Cylon space area of the
   Cylon Fleet board. Without one there either, nothing is placed.
@@ -768,6 +795,8 @@ when possible.
 - `InterruptWindowTest` plays interrupt windows through `submit`, restoring at every pause: the secret status, a pass,
   a tiebreak, an "Evasive Maneuvers" reroll. The test-only `GiveSkillCardEvent` and `PlaceRaiderEvent` set up the
   hands and the board, which a seeded game can't choose
+- `SkillCardActionsTest` plays Skill Cards for their "Action:" and "Movement:" through `submit` and `choose`,
+  restoring at every pause. `GiveSkillCardEvent` deals the cards, and a script starts at the step that offers them
 - `JumpAndKobolTest` plays four jumps and the Kobol end game through `submit` and `choose`, restoring at every pause: the
   Sleeper Agent phase, a human win, and a Personal Goal that turns it into a Cylon win. The test-only `StackDeckEvent`
   stacks the Destination and Loyalty decks, which a seeded game can't choose

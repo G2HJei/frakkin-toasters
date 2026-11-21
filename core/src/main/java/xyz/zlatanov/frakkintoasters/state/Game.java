@@ -142,6 +142,11 @@ public class Game implements GameView {
         nukes--;
     }
 
+    @Mutates
+    public void gainNuke() {
+        nukes++;
+    }
+
     @Override
     public List<DestinationCard> destinations() {
         return List.copyOf(destinations);

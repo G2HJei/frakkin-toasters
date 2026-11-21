@@ -5,6 +5,7 @@ import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedOnTop;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedToBottom;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsDiscarded;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.GameFact.SkillCardPlayed;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.*;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.ShipFact.PilotChanged;
 import xyz.zlatanov.frakkintoasters.state.Game;
@@ -117,6 +118,16 @@ public class PlayerOps extends GameOps {
             Arrays.stream(cards).forEach(this::discardToDeck);
         }
         return this;
+    }
+
+    /**
+     * Plays a Skill Card from the hand for its ability, e.g. its "Action:". It goes to its discard pile before the
+     * ability resolves.
+     */
+    public void play(SkillCard card) {
+        record(new CardsLost(player.number(), PlayerPile.SKILL, List.of(card)));
+        record(new SkillCardPlayed(player.number(), card));
+        discardToDeck(card);
     }
 
     /**

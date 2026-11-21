@@ -58,6 +58,7 @@ public final class Disclosure {
      * its actor. A component missing here counts as private, and a test fails until it is added.
      */
     public static final Map<String, Boolean> CARD_COMPONENTS = Map.ofEntries(
+            entry("BuildNukeEvent.card", true), // a card played for its ability is played face up
             entry("CapricaPlaySuperCrisisCardEvent.superCrisisCard", true),
             entry("ChangeOfPlansEvent.changeOfPlansCard", true),
             entry("ChooseCrisisSectionEvent.card", true),
@@ -66,6 +67,7 @@ public final class Disclosure {
             entry("ChooseDestinationEvent.other", false), // it goes to the bottom of the deck, only the Admiral saw it
             entry("ChooseGalacticaDamageEvent.resolved", true),
             entry("ChooseGalacticaDamageEvent.returned", false),
+            entry("ConsolidatePowerEvent.card", true),
             entry("DeclareEmergencyEvent.declareEmergencyCard", true),
             entry("DetermineSkillCheckAbilitiesOrderEvent.cardsWithAbilities", true),
             entry("Discard1MutinyCardEvent.cardToDiscard", true),
