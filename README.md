@@ -64,7 +64,7 @@ the journal, so a game can be restored from its journal alone.
 
 ## Backend
 
-The `backend` module serves the engine to browsers (`backend.drawio`, `backend-plan.md`). Users log in through Google
+The `backend` module serves the engine to browsers (`backend.drawio`). Users log in through Google
 or Discord, host and join games in the lobby, and play or observe them over a web socket. Each game runs one
 `GameEngine`, its journal is stored in Postgres, and every viewer gets only what he may see: the `projection/` package
 of `core` builds the game and the log per viewer.
@@ -100,7 +100,7 @@ of `core` builds the game and the log per viewer.
 
 ## Frontend
 
-The `frontend` module is a React app (`frontend-plan.md`): the website (login, the lobby with its games, game rooms,
+The `frontend` module is a React app: the website (login, the lobby with its games, game rooms,
 settings) and the table, where a game is played over the web socket. The table shows exactly what the server's
 projection holds: the board as our own schematic, the players, the turn, the skill check, the decks and the log. A
 choice is a button per option; a decision is answered on the board where it can be (a move by clicking a location,

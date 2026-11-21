@@ -6,8 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Web version of the Battlestar Galactica board game. Java implementation modeling the game's state, events, and
 mechanics. The game-logic `core` module holds the rules and the engine, and the Spring Boot `backend` module serves
-games to browsers (see `backend-plan.md`), and the React `frontend` module is the website and the table (see
-`frontend-plan.md`).
+games to browsers (see "Backend"), and the React `frontend` module is the website and the table (see "Frontend").
 
 ## Scope
 
@@ -55,10 +54,9 @@ Next steps, in order:
 4. ~~Create the game engine to drive the events and turns.~~ Done: `GameEngine` runs, restores and rolls back a game
    (see "Engine") and plays its turns (see "Turn Loop"), and every component of the Kobol game is built: every Crisis,
    Super Crisis, Destination, Skill, Quorum, Mutiny, Loyalty and Motive Card, every location and Title Card action,
-   Pegasus' destruction and the 99 character abilities (`skill-cards-plan.md`, `quorum-cards-plan.md`,
-   `unimplemented-components-plan.md`; `unimplemented-components.md` records the choices made where the cards and rules
-   are silent, and the few questions left open).
-5. ~~Create a working frontend with the events that exist by then.~~ Done (`backend-plan.md`, `frontend-plan.md`):
+   Pegasus' destruction and the 99 character abilities (`unimplemented-components.md` records the choices made where
+   the cards and rules are silent, and the few questions left open).
+5. ~~Create a working frontend with the events that exist by then.~~ Done:
    the backend, the sandbox, the wire schema, the table with the board, the lobby and rooms (see "Backend" and
    "Frontend"). Still open: legal-move hints (a list in `core` of the legal answers to a decision) and more inputs on
    the board (viper activation, targets of a choice lighting up).
@@ -487,8 +485,8 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
 ### Actions and Skill Cards
 
 `event/action/` knows what a player can do now, for the Action step and everything else that gives an action. Every
-"Action:" and "Movement:" Skill Card is built (`skill-cards-plan.md`), "Popular Influence" with the Quorum Cards
-(`quorum-cards-plan.md`): its player gives one drawn Quorum Card to the President and holds the other
+"Action:" and "Movement:" Skill Card is built, "Popular Influence" with the Quorum Cards
+(see "Quorum Cards"): its player gives one drawn Quorum Card to the President and holds the other
 (`PlayerPile.QUORUM`) to play it, through a decision on that card's event, or discard it.
 
 - `Actions.canTakeAction` is "his location's action (`LocationEvent.canAct`) or another one" (`canTakeOtherAction`:
@@ -563,7 +561,7 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
 
 ### Quorum Cards
 
-Every Quorum Card can be played (`quorum-cards-plan.md`). They follow the Skill Cards' pattern, with the card's choices
+Every Quorum Card can be played. They follow the Skill Cards' pattern, with the card's choices
 on its event.
 
 - A play is a `QuorumCardEvent` (an `ActionEvent`), one record per card in `action/quorum/`. The record is the card: it
@@ -911,7 +909,7 @@ the frontend owns the wording.
 ### Backend
 
 `backend` (Spring Boot 4, Java 21, package `xyz.zlatanov.frakkintoasters.backend`) runs one `GameEngine` per game,
-stores its journal in Postgres and pushes to every viewer what he may see (`backend-plan.md`). It adds no game rules.
+stores its journal in Postgres and pushes to every viewer what he may see. It adds no game rules.
 
 - `journal/` - `JournalCodec` (a `JournalEntry` to JSON and back, `FORMAT_VERSION`), `ValueCodec` (records by their
   components; a value of an interface type carries its `kind`, from the closed `TypeRegistry`; a `List<?>` of cards
@@ -956,7 +954,7 @@ stores its journal in Postgres and pushes to every viewer what he may see (`back
 `frontend/` is a React 19 + TypeScript (strict) + Vite app, built by Gradle through node-gradle (its own Node 24, `npm
 ci`): `./gradlew build` type checks, builds and tests it, and the backend's `bootJar` packs `frontend/dist` under
 `static/`, with `AppRoutesController` forwarding the app's routes to `index.html`. React Router, TanStack Query for
-REST (the lobby lists poll), Zustand for the game. See `frontend-plan.md`.
+REST (the lobby lists poll), Zustand for the game.
 
 - The wire schema: `./gradlew :backend:exportSchema` writes `frontend/src/wire/schema.json` (`backend/wire/WireSchema`:
   every record with its components and type references, unions, enums, the socket messages, the `location` of a
@@ -1037,7 +1035,7 @@ REST (the lobby lists poll), Zustand for the game. See `frontend-plan.md`.
 
 `CharacterAbility` lists the three abilities of each sheet (`CharacterAbility.of(character)`), with its `AbilityKind`
 (`ACTION`, `MOVEMENT`, `TRIGGER`, `PASSIVE`, `NEGATIVE`) and the miracle tokens a use spends (`isMiracle()`: 1, 3 for
-"Broadcast", rule 4.3.1.1). Every ability is built (`unimplemented-components-plan.md`); below, grouped by where it
+"Broadcast", rule 4.3.1.1). Every ability is built; below, grouped by where it
 hooks in. An ability that answers something is offered only to a player who can use it, so a game without its
 character pauses where it did.
 

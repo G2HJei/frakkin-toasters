@@ -1,11 +1,11 @@
 # Unimplemented Components
 
 A review of `core` on `master` at `1f5c88c` (2026-11-20) listed which game components had no events yet. Three plans
-built them: `skill-cards-plan.md`, `quorum-cards-plan.md` and `unimplemented-components-plan.md` (phases 1 to 17, done
-2026-11-21). This file is now the record of that work: what is built, the choices made where the cards and the
-rulebook are silent, and what lies beyond the rules. Only the Kobol objective is in scope.
+built them (phases 1 to 17, done 2026-11-21; the plans are deleted). This file is the record of that work: what is
+built, the choices made where the cards and the rulebook are silent, and what lies beyond the rules. Only the Kobol
+objective is in scope.
 
-`CLAUDE.md` describes how each part works. The plans' status lines list where the build differs from what they planned.
+`CLAUDE.md` describes how each part works.
 
 ## Overview
 

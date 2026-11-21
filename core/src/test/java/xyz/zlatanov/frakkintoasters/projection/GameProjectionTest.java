@@ -39,7 +39,7 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 
-// One test per row of the table in backend-plan.md phase 3: what the holder, another player and an observer see.
+// One test per row of the visibility table: what the holder, another player and an observer see.
 class GameProjectionTest extends TestHarness {
 
     private static final SkillCard CONSOLIDATE = new SkillCard(1, CONSOLIDATE_POWER);
