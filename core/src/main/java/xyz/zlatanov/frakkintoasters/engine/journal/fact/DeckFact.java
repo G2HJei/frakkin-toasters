@@ -49,4 +49,11 @@ public sealed interface DeckFact extends Fact {
             cards = List.copyOf(cards);
         }
     }
+
+    // Cards of the deck that leave the game, e.g. a "Food Rationing" that succeeded. They were in no pile.
+    record CardsRemovedFromGame(DeckId deck, List<?> cards) implements DeckFact {
+        public CardsRemovedFromGame {
+            cards = List.copyOf(cards);
+        }
+    }
 }

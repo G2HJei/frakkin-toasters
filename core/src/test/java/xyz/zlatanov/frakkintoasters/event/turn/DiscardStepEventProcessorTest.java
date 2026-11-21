@@ -65,6 +65,17 @@ class DiscardStepEventProcessorTest extends EventTestHarness<DiscardStepEvent> {
         assertFollowup(new PlayerDecisionEvent<>(1, DiscardQuorumCardsEvent.class, DISCARD_DOWN_TO_HAND_LIMIT));
     }
 
+    // The Quorum limit is 10 for every President (rule 4.4.1.1), Chief Galen Tyrol's "Reckless" included.
+    @Test
+    void theQuorumLimitIsTenForEveryPresident() {
+        president(CHIEF_GALEN_TYROL);
+        presidentHand.addOnTop(Arrays.asList(QuorumCard.values()).subList(0, 10));
+
+        execute(new DiscardStepEvent());
+
+        assertEquals(DISCARD, game.turn().step());
+    }
+
     @Test
     void theLimitCountsSkillAndQuorumCardsApart() {
         giveSkillCards(1, 10);

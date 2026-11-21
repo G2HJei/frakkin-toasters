@@ -112,6 +112,31 @@ class ActionStepEventProcessorTest extends EventTestHarness<ActionStepEvent> {
         assertEquals(ACTION, game.turn().step());
     }
 
+    // The President Title Card's action: drawing a Quorum Card needs no location (rule 8.4).
+    @Test
+    void thePresidentInSickbayMayDrawAQuorumCard() {
+        player(1).character(KARA_STARBUCK_THRACE);
+        president(KARA_STARBUCK_THRACE);
+        moveTo(SICKBAY, KARA_STARBUCK_THRACE);
+
+        execute(new ActionStepEvent());
+
+        assertFollowup(one(new PlayerDecisionEvent<>(1, ActionEvent.class), new NoOpEvent(1)));
+    }
+
+    @Test
+    void aPilotWhoIsPresidentMayTakeTheTitleActionInstead() {
+        player(1).character(KARA_STARBUCK_THRACE);
+        president(KARA_STARBUCK_THRACE);
+        moveTo(HANGAR_DECK, KARA_STARBUCK_THRACE);
+        ops.player(1).pilot(viperAt(GALACTICA_SPACE_4_OCLOCK).id());
+
+        execute(new ActionStepEvent());
+
+        assertFollowup(one(new PlayerDecisionEvent<>(1, ActivateViperEvent.class),
+                new PlayerDecisionEvent<>(1, ActionEvent.class), new NoOpEvent(1)));
+    }
+
     @Test
     void aDamagedLocationHasNoActionToTake() {
         player(1).character(KARA_STARBUCK_THRACE);

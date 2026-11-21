@@ -56,6 +56,9 @@ public final class ScriptedScenario {
         ops.titles().drawQuorumCard();
         ops.titles().drawQuorumCard();
         ops.titles().discardQuorumCards(java.util.List.of(game.presidentHand().cards().getFirst()));
+        val playedQuorumCard = game.presidentHand().cards().getFirst();
+        ops.titles().play(playedQuorumCard);
+        ops.titles().removeQuorumCardFromGame(playedQuorumCard);
         ops.loyaltyDeck().createNotACylon().create(2, 1, false);
         ops.player(1).drawLoyaltyCards(1);
         ops.skillCheck().createDestinyDeck();

@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.playersFrom;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DISCARD_DOWN_TO_HAND_LIMIT;
+import static xyz.zlatanov.frakkintoasters.operation.TitleOps.QUORUM_HAND_LIMIT;
 import static xyz.zlatanov.frakkintoasters.state.GameStep.DISCARD;
 
 public class DiscardStepEventProcessor extends EventProcessor<DiscardStepEvent> {
@@ -32,7 +33,7 @@ public class DiscardStepEventProcessor extends EventProcessor<DiscardStepEvent> 
             discards.add(new PlayerDecisionEvent<>(player.number(), DiscardSkillCardsEvent.class,
                     DISCARD_DOWN_TO_HAND_LIMIT));
         }
-        if (player.character() == game.president() && game.presidentHand().size() > player.handLimit()) {
+        if (player.character() == game.president() && game.presidentHand().size() > QUORUM_HAND_LIMIT) {
             discards.add(new PlayerDecisionEvent<>(player.number(), DiscardQuorumCardsEvent.class,
                     DISCARD_DOWN_TO_HAND_LIMIT));
         }

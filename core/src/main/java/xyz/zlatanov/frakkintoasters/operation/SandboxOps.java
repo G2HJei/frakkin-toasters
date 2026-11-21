@@ -10,10 +10,12 @@ import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedOnTop
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsPulled;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.CardsGained;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.CharacterMoved;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.TitleFact.PresidentQuorumCardGained;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.PlayerPile;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.board.Resource;
+import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import xyz.zlatanov.frakkintoasters.state.ship.CylonShip;
@@ -61,6 +63,11 @@ public class SandboxOps extends AbstractOps {
     public void giveSkillCard(int playerNumber, SkillCard card) {
         record(new CardsPulled(DeckId.of(card.type().color()), List.of(card)));
         record(new CardsGained(playerNumber, PlayerPile.SKILL, List.of(card)));
+    }
+
+    public void giveQuorumCardToPresident(QuorumCard card) {
+        record(new CardsPulled(DeckId.QUORUM, List.of(card)));
+        record(new PresidentQuorumCardGained(card));
     }
 
     public void moveCharacter(Character character, Location to) {

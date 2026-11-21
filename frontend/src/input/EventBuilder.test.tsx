@@ -4,7 +4,7 @@ import { EventBuilder } from './EventBuilder';
 import { Table, tableContext } from '../table/tableContext';
 import type { GameProjection } from '../wire/types';
 
-// A game with two players, Adama holding two Skill Cards, and a viper in space.
+// A game with two players, Adama holding two Skill Cards, Roslin President with a Quorum Card, and a viper in space.
 const game = {
   viewer: { kind: 'Sandbox' },
   players: [
@@ -16,6 +16,8 @@ const game = {
     },
     { number: 2, character: 'LAURA_ROSLIN', location: 'PRESIDENTS_OFFICE', skillCards: { count: 0, colors: {}, cards: [] } },
   ],
+  titles: { president: 'LAURA_ROSLIN', admiral: 'WILLIAM_ADAMA', cag: null },
+  presidentHand: { count: 1, revealed: null, cards: ['ENACT_PRODUCTION_QUOTAS'] },
   galactica: { ships: [{ id: 4, type: 'VIPER', location: 'GALACTICA_SPACE_4_OCLOCK' }], reserves: [], damagedVipers: [], boardingParty: [] },
   cylonFleet: { ships: [] },
   decks: [],
@@ -29,6 +31,10 @@ function renderBuilder(action: string, playerNumber: number | null) {
     </Table.Provider>,
   );
   return onSubmit;
+}
+
+function eventKinds(): string[] {
+  return Array.from((screen.getByRole('combobox', { name: 'event type' }) as HTMLSelectElement).options).map((option) => option.value);
 }
 
 describe('the event builder', () => {
@@ -50,6 +56,20 @@ describe('the event builder', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Send' }));
 
     expect(onSubmit).toHaveBeenCalledWith({ kind: 'MoveEvent', playerNumber: 1, destination: 'COMMAND', discardCard: { value: 1, type: 'LAUNCH_SCOUT' } });
+  });
+
+  it('offers only the Quorum Cards the President holds', () => {
+    renderBuilder('ActionEvent', 2);
+
+    const kinds = eventKinds();
+    expect(kinds).toContain('EnactProductionQuotasEvent');
+    expect(kinds).not.toContain('EstablishDogsvilleEvent');
+  });
+
+  it('offers no Quorum Card to a player who is not President', () => {
+    renderBuilder('ActionEvent', 1);
+
+    expect(eventKinds()).not.toContain('EnactProductionQuotasEvent');
   });
 
   it('asks an action first for the one of the player\'s location', () => {

@@ -3,6 +3,7 @@ package xyz.zlatanov.frakkintoasters.operation;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsDiscarded;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsRemovedFromGame;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.TitleFact.*;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
@@ -13,6 +14,10 @@ import java.util.List;
 import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.QUORUM;
 
 public class TitleOps extends GameOps {
+
+    // The President's Quorum hand, whatever his character's Skill Card limit is (rules 4.4.1.1, 8.8).
+    public static final int QUORUM_HAND_LIMIT = 10;
+
     public TitleOps(Game game, FactRecorder recorder) {
         super(game, recorder);
     }
@@ -47,6 +52,21 @@ public class TitleOps extends GameOps {
     public void discardQuorumCards(List<QuorumCard> cards) {
         record(new PresidentQuorumCardsLost(cards));
         record(new CardsDiscarded(QUORUM, cards));
+    }
+
+    /**
+     * Takes the card out of the President's hand to play it. It is in no pile until its text says where it goes.
+     */
+    public void play(QuorumCard card) {
+        record(new PresidentQuorumCardsLost(List.of(card)));
+    }
+
+    public void discardPlayedQuorumCard(QuorumCard card) {
+        record(new CardsDiscarded(QUORUM, List.of(card)));
+    }
+
+    public void removeQuorumCardFromGame(QuorumCard card) {
+        record(new CardsRemovedFromGame(QUORUM, List.of(card)));
     }
 
 }

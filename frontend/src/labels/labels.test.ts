@@ -58,6 +58,11 @@ describe('labels', () => {
       expect(optionLabel(section, NO_CONTEXT)).toBe('Player 2 chooses the Top of Riots No Jump');
     });
 
+    it('says which Quorum Card a player plays', () => {
+      const event = single({ kind: 'EnactProductionQuotasEvent', playerNumber: 1 });
+      expect(optionLabel(event, NO_CONTEXT)).toBe('Player 1 plays Enact Production Quotas');
+    });
+
     it('names the event and its fields when it has no template', () => {
       const event = single({ kind: 'SendToBrigEvent', targetPlayerNumber: 3 });
       expect(optionLabel(event, NO_CONTEXT)).toBe('Send to brig (target player number Player 3)');

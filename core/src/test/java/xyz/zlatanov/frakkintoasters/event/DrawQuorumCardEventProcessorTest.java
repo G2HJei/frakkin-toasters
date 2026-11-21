@@ -18,4 +18,14 @@ class DrawQuorumCardEventProcessorTest extends EventTestHarness<DrawQuorumCardEv
 
         assertEquals(List.of(ACCEPT_PROPHECY), presidentHand.cards());
     }
+
+    // Every card is in the President's hand, in play or out of the game.
+    @Test
+    void nothingToDraw() {
+        quorumDeck.clear();
+
+        execute(new DrawQuorumCardEvent());
+
+        assertEquals(List.of(), presidentHand.cards());
+    }
 }

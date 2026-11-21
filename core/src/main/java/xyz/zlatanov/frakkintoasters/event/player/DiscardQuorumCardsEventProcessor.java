@@ -7,6 +7,8 @@ import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 
 import java.util.ArrayList;
 
+import static xyz.zlatanov.frakkintoasters.operation.TitleOps.QUORUM_HAND_LIMIT;
+
 public class DiscardQuorumCardsEventProcessor extends EventProcessor<DiscardQuorumCardsEvent> {
 
     @Override
@@ -32,7 +34,7 @@ public class DiscardQuorumCardsEventProcessor extends EventProcessor<DiscardQuor
         return switch (event.discardLimit()) {
             case null -> true;
             case DISCARD_DOWN_TO_HAND_LIMIT ->
-                    game.presidentHand().size() - event.cards().size() == player.handLimit();
+                    game.presidentHand().size() - event.cards().size() == QUORUM_HAND_LIMIT;
             default -> throw new FrakCallTheAdmiralException();
         };
     }

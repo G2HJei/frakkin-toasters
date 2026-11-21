@@ -28,6 +28,12 @@ public interface DecksHolderView {
      */
     int crisisCardsLeft();
 
+    /**
+     * @return the Quorum Cards in the draw pile and the discard pile, which is shuffled in when the draw pile runs out.
+     * The others are in the President's hand, in play or out of the game
+     */
+    int quorumCardsLeft();
+
     DeckView<SkillCard> destiny();
 
     <T> DeckView<T> deck(DeckId id);

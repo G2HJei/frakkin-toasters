@@ -24,6 +24,8 @@ export interface RecordType {
   interfaces: string[];
   typeParams?: string[];
   location?: string | null;
+  // the card a Quorum Card's event plays
+  quorumCard?: string | null;
   components: Component[];
 }
 

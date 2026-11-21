@@ -135,6 +135,11 @@ public class DecksHolder implements DecksHolderView {
         return crisis.size() + crisis.discardSize();
     }
 
+    @Override
+    public int quorumCardsLeft() {
+        return quorum.size() + quorum.discardSize();
+    }
+
     public <T> Deck<T> deck(DeckId id) {
         return (Deck<T>) switch (id) {
             case CIVILIAN_SHIPS -> civilianShips;

@@ -168,6 +168,13 @@ class FactApplierTest {
     }
 
     @Test
+    void cardsRemovedFromGameGoIntoTheRemovedComponents() {
+        apply(new CardsRemovedFromGame(DeckId.QUORUM, List.of(QuorumCard.FOOD_RATIONING)));
+
+        assertEquals(List.of(QuorumCard.FOOD_RATIONING), game.removedComponents().items());
+    }
+
+    @Test
     void cardsDrawnRemovesTheTopCards() {
         val deck = game.decks().<SkillCard>deck(DeckId.POLITICS);
         val top = deck.top(2);

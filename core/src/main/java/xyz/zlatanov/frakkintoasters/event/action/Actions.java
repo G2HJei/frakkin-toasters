@@ -8,6 +8,7 @@ import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.LocationEvent;
 import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
+import xyz.zlatanov.frakkintoasters.event.action.title.PresidentTitleActionEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.MoveEvent;
 import xyz.zlatanov.frakkintoasters.state.view.GameView;
@@ -23,16 +24,27 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.BRIG;
 
 /**
  * What a player can do now, for the Action step and everything else that gives an action: the action of his location,
- * or the "Action:" of a Skill Card he holds. A pilot may activate his viper instead.
+ * or an action printed on a card he holds, the "Action:" of a Skill Card, a Quorum Card or the President's Title Card.
+ * A pilot may activate his viper instead.
  */
 @NoArgsConstructor(access = PRIVATE)
 public final class Actions {
 
     /**
-     * @return whether the player has an action to take: the action of his location, or a Skill Card's
+     * @return whether the player has an action to take: the action of his location, or a card's
      */
     public static boolean canTakeAction(GameView game, PlayerView player) {
-        return LocationEvent.canAct(game, player) || SkillCardPlays.canPlayAction(game, player);
+        return LocationEvent.canAct(game, player) || canTakeCardAction(game, player);
+    }
+
+    /**
+     * @return whether the player can take an action printed on a card: a Skill Card, a Quorum Card or his Title Card
+     * (rule 8.4)
+     */
+    public static boolean canTakeCardAction(GameView game, PlayerView player) {
+        return SkillCardPlays.canPlayAction(game, player)
+                || QuorumCardPlays.canPlayAny(game, player)
+                || PresidentTitleActionEventProcessor.canAct(game, player);
     }
 
     /**
@@ -95,9 +107,9 @@ public final class Actions {
             return List.of(); // a character off the board (a "Stranded" Karl "Helo" Agathon) takes no actions
         }
         if (isPilot(game, player)) {
-            // A pilot activates his viper, or takes another action, e.g. plays a Skill Card (rule 11.2.1). He is in
-            // space, so a location action is never his.
-            return SkillCardPlays.canPlayAction(game, player)
+            // A pilot activates his viper, or takes another action, e.g. plays a card (rule 11.2.1). He is in space,
+            // so a location action is never his.
+            return canTakeCardAction(game, player)
                     ? List.of(new PlayerDecisionEvent<>(playerNumber, ActivateViperEvent.class),
                     new PlayerDecisionEvent<>(playerNumber, ActionEvent.class))
                     : List.of(new PlayerDecisionEvent<>(playerNumber, ActivateViperEvent.class));

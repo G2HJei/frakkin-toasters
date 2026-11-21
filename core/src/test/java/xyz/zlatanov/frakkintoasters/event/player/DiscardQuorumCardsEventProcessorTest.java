@@ -11,6 +11,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DISCARD_DOWN_TO_HAND_LIMIT;
 import static xyz.zlatanov.frakkintoasters.state.card.QuorumCard.ARREST_ORDER;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.CHIEF_GALEN_TYROL;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.LAURA_ROSLIN;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.WILLIAM_ADAMA;
 
@@ -39,6 +40,16 @@ class DiscardQuorumCardsEventProcessorTest extends EventTestHarness<DiscardQuoru
         execute(new DiscardQuorumCardsEvent(1, List.of(hand.get(3)), DISCARD_DOWN_TO_HAND_LIMIT));
 
         assertEquals(10, presidentHand.size());
+    }
+
+    // "Reckless" limits Chief Galen Tyrol's Skill Cards, not the Quorum hand.
+    @Test
+    void theQuorumLimitIsTenForEveryPresident() {
+        player(3).character(CHIEF_GALEN_TYROL);
+        president(CHIEF_GALEN_TYROL);
+
+        assertInvalid(new DiscardQuorumCardsEvent(3, List.of(hand.get(0), hand.get(1), hand.get(2)),
+                DISCARD_DOWN_TO_HAND_LIMIT));
     }
 
     @Test

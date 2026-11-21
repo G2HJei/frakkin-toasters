@@ -84,8 +84,9 @@ whole root package, so nothing in `backend` may be named `XxxEventProcessor`.
   `skillcheck`, `skillcheck/ability`, `skillcheck/result`, `turn`). The attacks and the viper activation are in the root
   package. Also `placeholder/` (events that need player input) and
   `constraint/` (`EventConstraint`, `ConstrainedEvent`). `location/` holds `LocationActionProcessor`, the base of the
-  location action processors. `action/` holds `Actions` (what a player can do now), the Skill Card plays and the grants,
-  and `action/skillcard/` an event per Skill Card played for its "Action:" or "Movement:" (see "Actions and Skill Cards")
+  location action processors. `action/` holds `Actions` (what a player can do now), the Skill Card and Quorum Card
+  plays and the grants, `action/skillcard/` an event per Skill Card played for its "Action:" or "Movement:" (see
+  "Actions and Skill Cards"), `action/quorum/` an event per Quorum Card, and `action/title/` the Title Card actions
 - `operation/` - game ops, the only code that decides what changes: `GameOps` (entry point) hands out `PlayerOps`,
   `ShipOps`, `GalacticaOps`, `PegasusOps`, `CylonFleetOps`, `SkillCheckOps`, `LoyaltyDeckOps`, `TitleOps`,
   `InterruptOps`. They extend
@@ -166,7 +167,7 @@ game ops. Game ops do mechanics, and processors make decisions (targets, rules b
 
 Every state change leaves a fact in the journal, see "Journal and Replay".
 
-Placeholder events (`event/placeholder/`: `PlayerDecisionEvent`, `PlayQuorumCardEvent`, `PlaySuperCrisisCardEvent`)
+Placeholder events (`event/placeholder/`: `PlayerDecisionEvent`, `PlaySuperCrisisCardEvent`)
 have no processor. They stand for a point where a player has to choose. `PlayerDecisionEvent<T>(playerNumber,
 Class<T> action, List<EventConstraint>)` means "this player picks a concrete `T` event".
 
@@ -350,7 +351,7 @@ constructor takes any first event, and `GameEngineTest` uses the test-only `Scri
 - Rejected input throws `InvalidActionException` and changes nothing. A queued event that fails validation and a
   decision with constraints its event can't carry throw `FrakCallTheAdmiralException`. Every concrete event class has to
   have a processor, and `ProcessorRegistry.create` asserts it. The engine doesn't check for one, so the events without
-  one (e.g. `PlayQuorumCardEvent`) are still under development.
+  one (e.g. `PlaySuperCrisisCardEvent`) are still under development.
 - Rollback: anything thrown after an input was accepted rolls the call back, and the engine rethrows it as a
   `FrakCallTheAdmiralException`. `advance` notes the journal's size, and on failure `rebuild`s the engine from the
   entries before it. The same input stays pending. `view()` and `journal()` return new objects
@@ -372,7 +373,8 @@ constructor takes any first event, and `GameEngineTest` uses the test-only `Scri
   rebuilds from that prefix. A choice that led to a decision is undone on its own; before the first pause there is
   nothing to undo.
 - `event/sandbox/` holds the `SandboxEvent` marker and the setup events, plain `Event`s with typed fields (one per kind
-  of card): put a Crisis, Destination, Skill or Destiny card on top, give a Skill Card, move a character, place a ship,
+  of card): put a Crisis, Destination, Skill or Destiny card on top, give a Skill Card, give the President a Quorum
+  Card, move a character, place a ship,
   change a resource, set the jump preparation track, damage a location, assign a title. Their processors use the
   rules' ops where one fits, and `SandboxOps` (`GameOps.sandbox()`) for the rest. `DeckFact.CardsPulled` takes a
   stacked or given card out of its draw pile, so no copy appears.
@@ -393,12 +395,14 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
   Cylons (and Cylon Leaders who aren't Infiltrating, see `isHuman()`) have no Crisis and no Activate Cylon Ships step,
   and characters in the "Brig" no Crisis step. Movement and Action are a `OneOf` with a `NoOpEvent`. The Action step
   offers what `Actions.offerAction` finds (see "Actions and Skill Cards"): an `ActionEvent` decision when the player can
-  take his location's action or play an "Action:" card, and for a pilot an `ActivateViperEvent` decision too. A
+  take his location's action or a card's (`Actions.canTakeCardAction`: an "Action:" Skill Card, a Quorum Card, the
+  President's Title Card), and for a pilot an `ActivateViperEvent` decision too. A
   character with neither (e.g. in "Sickbay" without a card, see `LocationEvent.canAct`) gets no Action choice. The
   Movement step offers what `Actions.offerMovement` finds: a `MoveEvent` decision when he can move (not from the
   "Brig"), and a `MovementAbilityEvent` decision when he can play a "Movement:" card, in the "Brig" too (rule 10.4.1).
 - `DiscardStepEvent` asks every player over the hand limit, clockwise from the current player, with
-  `DISCARD_DOWN_TO_HAND_LIMIT`: Skill Cards over `handLimit()`, and the President's Quorum Cards.
+  `DISCARD_DOWN_TO_HAND_LIMIT`: Skill Cards over `handLimit()`, and the President's Quorum Cards over
+  `TitleOps.QUORUM_HAND_LIMIT` (10 for every character, rule 4.4.1.1).
 - The Crisis step draws a card, keeps it with the turn and queues `ResolveCrisisCardEvent` (see "Crisis Cards"). The
   Crisis Cards of a turn stay with it, in `TurnView.crisisCards()` (`GameOps.playCrisisCard`), for the icons the later
   steps read. `EndTurnEvent` discards them (rule 8.8), except the ones kept in play.
@@ -424,9 +428,10 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
 "Action:" and "Movement:" Skill Card is built (`skill-cards-plan.md`) but "Popular Influence", which waits for playable
 Quorum Cards: `SkillCardPlays.canPlay` keeps it `false` and `SkillCardEventsTest.NOT_BUILT_YET` lists it.
 
-- `Actions.canTakeAction` is "his location's action (`LocationEvent.canAct`) or a playable "Action:" card", and
-  `offerAction(game, n)` builds the choice: `one(decision<ActionEvent>, NoOpEvent)`, for a pilot
-  `one(decision<ActivateViperEvent>, decision<ActionEvent> when he has a card, NoOpEvent)` (rule 11.2.1). A location
+- `Actions.canTakeAction` is "his location's action (`LocationEvent.canAct`) or a card's" (`canTakeCardAction`: a
+  playable "Action:" Skill Card, a Quorum Card, the President's Title Card), and `offerAction(game, n)` builds the
+  choice: `one(decision<ActionEvent>, NoOpEvent)`, for a pilot `one(decision<ActivateViperEvent>,
+  decision<ActionEvent> when he has a card action, NoOpEvent)` (rule 11.2.1). A location
   event fails for a pilot, who is in space. `ActivateViperEvent` isn't an `ActionEvent`, because a non-pilot's one
   activates an unmanned viper.
 - A Skill Card played for its ability is a `SkillCardEvent` (`playerNumber`, `card`), one record per card in
@@ -732,7 +737,8 @@ REST (the lobby lists poll), Zustand for the game. See `frontend-plan.md`.
 
 - The wire schema: `./gradlew :backend:exportSchema` writes `frontend/src/wire/schema.json` (`backend/wire/WireSchema`:
   every record with its components and type references, unions, enums, the socket messages, the `location` of a
-  location's action, and a `role` for each int: `player`, `ship`, `scope` or `count`). `npm run gen` turns it into
+  location's action, the `quorumCard` a Quorum Card's event plays (the `EventBuilder` offers only the cards the asked
+  player holds), and a `role` for each int: `player`, `ship`, `scope` or `count`). `npm run gen` turns it into
   `src/wire/types.ts`. `WireSchemaTest` fails when the checked-in schema is stale, and `tsc` when the UI uses a field
   that went away. `GET /api/schema` serves the same JSON.
 - `src/api/` (`http.ts` sends the `XSRF-TOKEN` cookie as `X-XSRF-TOKEN`, `queries.ts` the hooks), `src/live/`

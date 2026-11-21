@@ -102,6 +102,7 @@ class LiveUpdateProjectionTest {
             new Sample(new DeckFact.CardsAddedToBottom(DeckId.DESTINATION, List.of(DestinationCard.DEEP_SPACE)), Rule.NOBODY),
             new Sample(new DeckFact.CardsDiscarded(DeckId.POLITICS, List.of(CONSOLIDATE)), Rule.PUBLIC),
             new Sample(new DeckFact.CardsDiscarded(DeckId.LOYALTY, List.of(NOT_CYLON)), Rule.NOBODY),
+            new Sample(new DeckFact.CardsRemovedFromGame(DeckId.QUORUM, List.of(QuorumCard.FOOD_RATIONING)), Rule.PUBLIC),
             new Sample(new DeckFact.CardsPulled(DeckId.CRISIS, List.of(CrisisCard.DETENTE)), Rule.NOBODY),
             new Sample(new GameFact.GameStarted(3, ObjectiveCard.KOBOL), Rule.PUBLIC),
             new Sample(new GameFact.DieRollStarted(), Rule.PUBLIC),

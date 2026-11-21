@@ -164,6 +164,8 @@ final class LiveUpdateProjector {
             case DeckFact.CardsDiscarded f -> Disclosure.FACEDOWN_DISCARDS.contains(f.deck())
                     ? hidden(f, null, null, f.deck(), null, null, f.cards())
                     : shown(f);
+            // a card that leaves the game was played face up
+            case DeckFact.CardsRemovedFromGame f -> shown(f);
         };
     }
 

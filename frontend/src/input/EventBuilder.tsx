@@ -4,6 +4,7 @@ import { concreteEvents, recordNamed } from '../wire/schema';
 import { useTable } from '../table/tableContext';
 import { askedComponents, emptyEvent, missingFields, toWire, type EventValue } from './eventModel';
 import { Field } from './widgets/Field';
+import type { GameProjection } from '../wire/types';
 
 export interface EventBuilderProps {
   // the event type the decision asks for: a record, or an interface such as ActionEvent
@@ -21,11 +22,15 @@ export interface EventBuilderProps {
 export function EventBuilder({ action, playerNumber, constraints = [], submitLabel = 'Send', onSubmit }: EventBuilderProps) {
   const table = useTable();
   const location = table.game?.players?.find((player) => player.number === playerNumber)?.location ?? null;
-  // the action of the player's location first
+  const held = heldQuorumCards(table.game, playerNumber).join(',');
+  // the action of the player's location first, and a Quorum Card's only when he holds the card
   const kinds = useMemo(() => {
-    const events = concreteEvents(action);
+    const events = concreteEvents(action).filter((event) => {
+      const card = recordNamed(event)?.quorumCard;
+      return !card || held.split(',').includes(card);
+    });
     return [...events].sort((a, b) => Number(recordNamed(b)?.location === location) - Number(recordNamed(a)?.location === location));
-  }, [action, location]);
+  }, [action, location, held]);
   const [kind, setKind] = useState<string>(kinds[0] ?? action);
   const [value, setValue] = useState<EventValue>(() => emptyEvent(kinds[0] ?? action, playerNumber));
 
@@ -106,4 +111,13 @@ export function pickedCount(value: Record<string, unknown>): number | null {
     }
   }
   return null;
+}
+
+// The Quorum Cards the player may play: the President's hand. Only a narrowing, the engine judges.
+function heldQuorumCards(game: GameProjection | null, playerNumber: number | null): string[] {
+  const character = game?.players?.find((player) => player.number === playerNumber)?.character;
+  if (!character || game?.titles?.president !== character) {
+    return [];
+  }
+  return game.presidentHand?.cards ?? [];
 }

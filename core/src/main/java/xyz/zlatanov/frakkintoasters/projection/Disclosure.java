@@ -75,6 +75,7 @@ public final class Disclosure {
             entry("Discard1MutinyCardEvent.cardToDiscard", true),
             entry("DiscardDownTo1MutinyCardEvent.cardToKeep", false),
             entry("DiscardFromDestinyDeckEvent.cards", false),
+            entry("DiscardPlayedQuorumCardEvent.card", true), // a played Quorum Card is face up
             entry("DiscardQuorumCardsEvent.cards", true),
             entry("DiscardSkillCardsEvent.cards", true),
             entry("DogfightEvent.removedCard", true),
@@ -114,6 +115,7 @@ public final class Disclosure {
             entry("TiebreakInterruptCardsEvent.keptCards", true),
             entry("UnorthodoxPlanEvent.card", true), // the window's cards show when it closes
             // the setups of a sandbox, whose one viewer sees everything
+            entry("GiveQuorumCardToPresidentEvent.card", true),
             entry("GiveSkillCardToPlayerEvent.card", true),
             entry("PutCrisisCardOnTopEvent.card", true),
             entry("PutDestinationCardOnTopEvent.card", true),

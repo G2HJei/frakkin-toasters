@@ -11,6 +11,8 @@ import xyz.zlatanov.frakkintoasters.backend.journal.ValueCodec;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.Fact;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.LocationEvent;
+import xyz.zlatanov.frakkintoasters.event.action.QuorumCardEvent;
+import xyz.zlatanov.frakkintoasters.event.action.QuorumCardEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.sandbox.SandboxEvent;
 
 import java.lang.reflect.ParameterizedType;
@@ -36,7 +38,7 @@ import static xyz.zlatanov.frakkintoasters.backend.journal.ValueCodec.typeArgume
  * types from it, and its event builder makes a form of each event from it. Nothing copies a Java record by hand.
  * <ul>
  *     <li>a record: its components with their types, the interfaces it implements, whether it carries {@code kind},
- *     and the {@code location} of a location's action</li>
+ *     the {@code location} of a location's action, and the {@code quorumCard} a Quorum Card's event plays</li>
  *     <li>an interface: the records that implement it, a union told apart by {@code kind}</li>
  *     <li>an enum: its constants</li>
  *     <li>the socket messages, told apart by {@code type}</li>
@@ -171,6 +173,9 @@ public final class WireSchema {
         if (LocationEvent.class.isAssignableFrom(type)) {
             node.put("location", location(type));
         }
+        if (QuorumCardEvent.class.isAssignableFrom(type)) {
+            node.put("quorumCard", quorumCard(type));
+        }
         val components = node.putArray("components");
         for (val component : type.getRecordComponents()) {
             val described = components.addObject();
@@ -259,6 +264,16 @@ public final class WireSchema {
             val constructor = type.getDeclaredConstructor(Arrays.stream(components).map(RecordComponent::getType).toArray(Class[]::new));
             constructor.setAccessible(true);
             return ((LocationEvent) constructor.newInstance(arguments)).location().name();
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            return null;
+        }
+    }
+
+    // The record is the card, and its processor names it.
+    private static String quorumCard(Class<?> type) {
+        try {
+            val processor = Class.forName(type.getName() + "Processor").getDeclaredConstructor().newInstance();
+            return ((QuorumCardEventProcessor<?>) processor).card().name();
         } catch (ReflectiveOperationException | RuntimeException e) {
             return null;
         }

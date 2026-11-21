@@ -4,10 +4,11 @@ import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
 import xyz.zlatanov.frakkintoasters.event.NoOpEventProcessor;
-import xyz.zlatanov.frakkintoasters.event.placeholder.PlayQuorumCardEvent;
+import xyz.zlatanov.frakkintoasters.event.placeholder.PlaySuperCrisisCardEvent;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static xyz.zlatanov.frakkintoasters.state.crisis.SuperCrisisCard.FIGHTING_BLIND;
 
 class ProcessorRegistryTest {
 
@@ -25,7 +26,7 @@ class ProcessorRegistryTest {
     @Test
     void anEventWithoutAProcessorFailsEvenWithoutAsserts() {
         // asserts are off in production, so a missing processor would be a NullPointerException
-        assertThrows(FrakCallTheAdmiralException.class, () -> ProcessorRegistry.create(new PlayQuorumCardEvent()));
+        assertThrows(FrakCallTheAdmiralException.class, () -> ProcessorRegistry.create(new PlaySuperCrisisCardEvent(1, FIGHTING_BLIND)));
     }
 
 }

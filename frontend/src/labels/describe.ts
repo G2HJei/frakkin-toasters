@@ -122,6 +122,8 @@ const EVENT_TEMPLATES: Record<string, string> = {
   PutSkillCardOnTopEvent: 'Setup: {card} on top of its deck',
   PutDestinyCardOnTopEvent: 'Setup: {card} on top of the Destiny deck',
   GiveSkillCardToPlayerEvent: 'Setup: {targetPlayerNumber} gets {card}',
+  GiveQuorumCardToPresidentEvent: 'Setup: the President gets {card}',
+  PresidentTitleActionEvent: '{playerNumber} draws a Quorum Card',
   MoveCharacterEvent: 'Setup: {character} goes to {destination}',
   PlaceShipEvent: 'Setup: a {shipType} at {location}',
   ChangeResourceEvent: 'Setup: {resource} changes by {amount}',
@@ -145,7 +147,22 @@ export function eventLabel(event: Record<string, unknown> | null | undefined, co
   }
   const kind = String(event.kind);
   const template = EVENT_TEMPLATES[kind];
-  return template ? fill(template, event, kind, context) : recordLabel(event, kind, context);
+  if (template) {
+    return fill(template, event, kind, context);
+  }
+  const card = recordNamed(kind)?.quorumCard;
+  return card ? quorumCardLabel(event, kind, card, context) : recordLabel(event, kind, context);
+}
+
+// The record of a Quorum Card's event is the card: "Player 1 plays Arrest Order (target player number Player 3)".
+function quorumCardLabel(event: Record<string, unknown>, kind: string, card: string, context: LabelContext): string {
+  const components = recordNamed(kind)?.components ?? [];
+  const player = components.find((component) => component.name === 'playerNumber');
+  const parts = components
+    .filter((component) => component !== player && event[component.name] !== null && event[component.name] !== undefined)
+    .map((component) => `${humanizeType(component.name).toLowerCase()} ${valueLabel(event[component.name], component.type, context)}`);
+  const played = `${valueLabel(event.playerNumber, player?.type, context)} plays ${constantLabel('QuorumCard', card)}`;
+  return parts.length > 0 ? `${played} (${parts.join(', ')})` : played;
 }
 
 /* options of a choice */
@@ -209,6 +226,7 @@ const FACT_TEMPLATES: Record<string, string> = {
   'SkillCheckFact.TotalStrengthDetermined': 'The skill check totals {totalStrength}',
   'SkillCheckFact.ResultDetermined': 'The skill check: {result}',
   'DeckFact.CardsDiscarded': '{deck} discards {cards}',
+  'DeckFact.CardsRemovedFromGame': '{cards} leave the game',
   'InterruptFact.InterruptCardResolved': '{card} takes effect',
 };
 

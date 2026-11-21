@@ -87,6 +87,7 @@ public final class FactApplier {
             case DeckFact.CardsAddedToBottom f -> addToBottom(game.decks().deck(f.deck()), f.cards());
             case DeckFact.CardsDiscarded f -> discard(game.decks().deck(f.deck()), f.cards());
             case DeckFact.CardsPulled f -> remove(game.decks().deck(f.deck()), f.cards());
+            case DeckFact.CardsRemovedFromGame f -> f.cards().forEach(game.removedComponents()::add);
         }
     }
 
