@@ -103,6 +103,7 @@ public final class Disclosure {
             entry("QuickThinkingEvent.cardToRemove", true),
             entry("RaptorSpecialistEvent.card", true),
             entry("RepairEvent.card", true),
+            entry("ResignationEvent.discards", true), // the Quorum discard pile is face up
             entry("ResolveCapricaCrisisCardEvent.crisisCardToPlay", true),
             entry("ResolveCapricaCrisisCardEvent.crisisCardToPutAtBottom", false),
             entry("ResolveCrisisCardEvent.card", true),

@@ -16,6 +16,7 @@ import xyz.zlatanov.frakkintoasters.event.action.quorum.ArrestOrderEvent;
 import xyz.zlatanov.frakkintoasters.event.action.quorum.EnactProductionQuotasEvent;
 import xyz.zlatanov.frakkintoasters.event.action.quorum.EstablishDogsvilleEvent;
 import xyz.zlatanov.frakkintoasters.event.action.quorum.FoodRationingEvent;
+import xyz.zlatanov.frakkintoasters.event.action.quorum.ResignationEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.ExecutiveOrderEvent;
 import xyz.zlatanov.frakkintoasters.event.action.title.PresidentTitleActionEvent;
 import xyz.zlatanov.frakkintoasters.event.endgame.CylonsWinEvent;
@@ -157,6 +158,23 @@ class QuorumCardActionsTest {
 
         assertEquals(Optional.of(BRIG), engine.view().locate(KARA_STARBUCK_THRACE));
         assertEquals(List.of(ARREST_ORDER), game().decks().quorum().discardedCards());
+        assertEquals(new Finished(CYLONS), engine.status(1));
+    }
+
+    // The new President takes the hand with the title.
+    @Test
+    void resignationGivesTheTitleAndTheHandAway() {
+        start(all(setUp(WILLIAM_ADAMA), single(new GiveQuorumCardToPresidentEvent(RESIGNATION)),
+                single(new GiveQuorumCardToPresidentEvent(EULOGY)), single(new ActionStepEvent()), CYLONS_WIN));
+
+        act(1);
+        play(engine -> engine.submit(1, new ResignationEvent(1, List.of(EULOGY))));
+        assertWaitingFor(new AwaitingDecision(new PlayerDecisionEvent<>(1, MakePresidentEvent.class)));
+        play(engine -> engine.submit(1, new MakePresidentEvent(LAURA_ROSLIN)));
+
+        assertEquals(LAURA_ROSLIN, engine.view().president());
+        assertEquals(1, game().presidentHand().size());
+        assertEquals(List.of(EULOGY, RESIGNATION), game().decks().quorum().discardedCards());
         assertEquals(new Finished(CYLONS), engine.status(1));
     }
 

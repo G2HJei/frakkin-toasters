@@ -1,4 +1,4 @@
-format version 14
+format version 15
 enum Area = SPACE, RESERVES, SPACE_OR_RESERVES
 enum BasestarBridgeAbility = CAG_PLACES_CIVILIAN_SHIP, JUMP_OR_PURSUIT, BASESTAR_OR_RAIDERS, GALACTICA_DAMAGE
 enum BasestarDamage = STRUCTURAL_DAMAGE, DISABLED_WEAPONS, DISABLED_HANGAR_BAY, CRITICAL_HIT
@@ -128,6 +128,7 @@ record CommandEvent(playerNumber: int, anywhere: boolean)
 record CommunicationsEvent(playerNumber: int, civilianShipId1: int?, civilianShipId2: int?, anywhere: boolean)
 record ConsolidatePowerEvent(playerNumber: int, card: SkillCard)
 record ConsultTheHybridPassEvent()
+record ConsultTheOracleEvent(playerNumber: int, deck: DeckId)
 record CrashLandingFailEvent()
 record CreateDestinyDeckEvent()
 record CreateLoyaltyDeckEvent()
@@ -363,6 +364,7 @@ record ReplaceMutinousPresidentEvent(playerNumber: int)
 record ResearchLabEvent(playerNumber: int, skillCardColor: SkillCardColor)
 record ResetActingPlayerEvent()
 record ResetJumpPreparationEvent()
+record ResignationEvent(playerNumber: int, discards: List<QuorumCard>)
 record ResolveCapricaCrisisCardEvent(playerNumber: int, crisisCardToPlay: CrisisCard, crisisCardToPutAtBottom: CrisisCard)
 record ResolveCardsBeforeSkillCheckEvent()
 record ResolveConsequencesEvent()
@@ -431,6 +433,7 @@ record TitleFact.PresidentQuorumCardsLost(cards: List<QuorumCard>)
 record TotalSkillCheckStrengthEvent()
 record TrustInstinctsEvent()
 record UnorthodoxPlanEvent(playerNumber: int, card: SkillCard, location: Location)
+record UnsavoryConnectionsEvent(playerNumber: int, resource: Resource)
 record ViolentOutburstsEvent()
 record ViperActivation(launchShipType: ShipType, launchLocation: Location, humanFighterId: int?, moveLocation: Location, attackCylonShipId: int?, escortCivilianShipId: int?)
 record ViperActivationRoundEvent(playerNumber: int, viperId: int, activationsLeft: int, attacksOnly: boolean)

@@ -35,9 +35,12 @@ public final class QuorumCardPlays {
             case AUTHORIZATION_OF_BRUTAL_FORCE -> AuthorizationOfBrutalForceEventProcessor.canPlay(game);
             case CIVILIAN_SELF_DEFENSE -> CivilianSelfDefenseEventProcessor.canPlay(game);
             case RESOURCES_FOR_GALACTICA -> ResourcesForGalacticaEventProcessor.canPlay(game);
+            case UNSAVORY_CONNECTIONS -> true;
+            case CONSULT_THE_ORACLE -> ConsultTheOracleEventProcessor.canPlay(game);
+            case RESIGNATION -> ResignationEventProcessor.canPlay(game, player);
             // the cards that later phases of quorum-cards-plan.md build
-            case RESIGNATION, ACCEPT_PROPHECY, ASSIGN_ARBITRATOR, ASSIGN_MISSION_SPECIALIST, ASSIGN_VICE_PRESIDENT,
-                 ASSIGN_CHIEF_OF_STAFF, CONSULT_THE_ORACLE, PROBATION, UNSAVORY_CONNECTIONS -> false;
+            case ACCEPT_PROPHECY, ASSIGN_ARBITRATOR, ASSIGN_MISSION_SPECIALIST, ASSIGN_VICE_PRESIDENT,
+                 ASSIGN_CHIEF_OF_STAFF, PROBATION -> false;
         };
     }
 
