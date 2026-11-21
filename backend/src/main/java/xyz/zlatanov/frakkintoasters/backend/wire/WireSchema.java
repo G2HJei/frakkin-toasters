@@ -60,7 +60,7 @@ public final class WireSchema {
             "turn", "turns", "size", "discardSize", "basestars", "raiders", "heavyRaiders", "centurions", "civilianShips",
             "totalStrength", "difficulty", "fuel", "food", "morale", "population", "nukes", "distanceTraveled",
             "playerCount", "calculationsModifier", "handLimit", "option", "fuelCost", "moraleCost", "populationCost",
-            "result", "formatVersion");
+            "result", "formatVersion", "activationsLeft");
 
     private WireSchema() {
     }
