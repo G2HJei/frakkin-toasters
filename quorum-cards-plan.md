@@ -1,6 +1,17 @@
 # Quorum Cards plan
 
-Status (2026-11-21): phases 1 to 8 are done.
+Status (2026-11-21): every phase is done. Where the build differs from the plan:
+
+- "Arrest Order" discards the card after the target goes to the "Brig", in the card's order. Only "Execute Prisoner"
+  discards first.
+- The Chief of Staff is asked before any card goes into the check, the Destiny cards included.
+- "Probation"'s option names how many cards the holder put in, not the cards: an option shows to its chooser, so naming
+  the cards would show them before the President decides. Those cards are the top of the check's face-down pile.
+- `SendToBrigEventProcessor` already passed the Admiral's and the CAG's titles on, so the "Not in this plan" item about
+  titles in the "Brig" was only the todos in `PlayerOps.moveTo` and `LeaveBrigEventProcessor`.
+- `DeckView.bottom()` is a default method over the draw order.
+- `WireSchema` gives the new int components a role: `holderPlayerNumber` and `administrationPlayerNumber` name players,
+  `delta` and `adjustment` are counts.
 
 Implements the 23 Quorum Card types, and everything around them that `unimplemented-components.md` lists as missing:
 

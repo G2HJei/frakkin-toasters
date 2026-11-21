@@ -63,9 +63,8 @@ Next steps, in order:
    "Investigative Committee" are played (see "Actions and Skill Cards", `skill-cards-plan.md`), and the Quorum Cards
    with the President's title action (see "Quorum Cards"). Still open, as new events that plug in: the other kinds of
    actions (character sheets, the Admiral's and the CAG's Title Cards, Mutiny Cards), Cylon reveal, Super Crisis
-   cards, and the
-   interrupts that aren't skill cards (character abilities such as Helo's reroll, and revealing a Motive Card in the
-   middle of resolving something, rule 6.2.2.1), which can reuse the interrupt windows.
+   cards, and the interrupts that aren't skill cards (character abilities such as Helo's reroll, and revealing a Motive
+   Card in the middle of resolving something, rule 6.2.2.1), which can reuse the interrupt windows.
 5. ~~Create a working frontend with the events that exist by then.~~ Done (`backend-plan.md`, `frontend-plan.md`):
    the backend, the sandbox, the wire schema, the table with the board, the lobby and rooms (see "Backend" and
    "Frontend"). Still open: legal-move hints (a list in `core` of the legal answers to a decision), more inputs on the
@@ -127,7 +126,7 @@ whole root package, so nothing in `backend` may be named `XxxEventProcessor`.
 - `state/skill/` - `SkillCard` (record), `SkillCardType`, `SkillCardColor` (6 colors), `SkillCheck` (active check with
   its card piles), `SkillCheckType`, `PlayedCard`
 - `state/card/` - card enums: `LoyaltyCard`, `QuorumCard`, `MutinyCard`, `ObjectiveCard`, `DestinationCard`,
-  `MotiveCard`
+  `MotiveCard`, and `QuorumCardInPlay` (a Quorum Card in play with its holder)
 - `state/crisis/` - `CrisisCard` (with its printed `CrisisChooser` and `CylonActivation`), `SuperCrisisCard`
 - `state/damage/` - damage card enums: `GalacticaDamage`, `PegasusDamage`, `BasestarDamage`
 - `state/track/` - `BoardingParty`, `JumpPreparation`, `Pursuit`
@@ -501,6 +500,40 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
   activates Cylon ships (`ActivateRaidersEvent`, `ActivateRaiderEvent`, `LaunchRaidersEvent`,
   `ActivateHeavyRaidersAndCenturionsEvent`, `ActivateCylonBasestarsEvent`, `ActivateCylonBasestarEvent`) does nothing
   while they are held, so a Crisis Card's activation stops too, and the "Cylon Fleet" location has no action then.
+
+### Quorum Cards
+
+Every Quorum Card can be played (`quorum-cards-plan.md`). They follow the Skill Cards' pattern, with the card's choices
+on its event.
+
+- A play is a `QuorumCardEvent` (an `ActionEvent`), one record per card in `action/quorum/`. The record is the card: it
+  has `playerNumber` and the card's choices, no card component, and its processor's `card()` names it.
+  `QuorumCardEventProcessor`'s final `isValid()` checks that the player is human and holds the card (his own held card
+  first, otherwise the President's hand), then `isValidPlay()`. Its final `process()` takes the card out of where it
+  was, then `resolve()`.
+- `QuorumCardPlays.canPlay` is an exhaustive switch over `QuorumCard` that asks each processor's static `canPlay`: a
+  card is offered only when its effect can happen. `canPlayAny` covers the President's hand, and `eventClass(card)`
+  gives the event of a card, for a decision that takes only that card.
+- Who plays: the President, as his action (rule 8.4) from his hand, also from the "Brig" and as a pilot; the President
+  at the Quorum Chamber, which draws a card and then offers `one(DrawQuorumCardEvent, decision<QuorumCardEvent>,
+  NoOpEvent)`; and the player of "Popular Influence" (see "Actions and Skill Cards").
+- `PresidentTitleActionEvent` (`action/title/`) is the President Title Card's action: draw a Quorum Card.
+- A played card is in no pile while it resolves and goes where its text says, usually last: the discard pile
+  (`DiscardPlayedQuorumCardEvent`, face up), out of the game (`DeckFact.CardsRemovedFromGame`, into
+  `GameView.removedComponents()`), or in play. A card whose fate depends on a roll settles it in its result event.
+- The deck holds 29 cards (`DecksHolder`): the second "Authorization of Brutal Force" is inferred, check the physical
+  deck. The hand limit is `TitleOps.QUORUM_HAND_LIMIT` (10) for every President. `DecksHolderView.quorumCardsLeft()`
+  counts the draw and discard piles; nothing is drawn when both are empty.
+- In play (`GameView.quorumCardsInPlay()`, `QuorumCardPutInPlay`, `QuorumCardLeftPlay`, public): the four "Assign"
+  cards and "Probation" with their holder, "Accept Prophecy" without one. A card used up leaves play
+  (`TitleOps.discardFromPlay`), and the cards given to a player go on execution and at the end of an Infiltration
+  (`TitleOps.discardQuorumCardsGivenTo`).
+- Where they act: the Arbitrator and "Accept Prophecy" at the "Admiral's Quarters", the Chief of Staff and "Probation"
+  in skill checks (see "Skill Check Sequence"), the Mission Specialist at the jump and the Vice President and "Accept
+  Prophecy" at the "Administration" (see "Jump and Kobol" and "Skill Check Sequence").
+- The sandbox gives the President a card with `GiveQuorumCardToPresidentEvent`. The wire schema names each Quorum
+  event's `quorumCard`, and the `EventBuilder` lists a Quorum event only when the asked player holds its card. The
+  mats show the cards in play face up in front of their holder.
 
 ### End of Game and Mutiny
 
@@ -877,6 +910,8 @@ when possible.
   hands and the board, which a seeded game can't choose
 - `SkillCardActionsTest` plays Skill Cards for their "Action:" and "Movement:" through `submit` and `choose`,
   restoring at every pause. `GiveSkillCardEvent` deals the cards, and a script starts at the step that offers them
+- `QuorumCardActionsTest` plays Quorum Cards the same way: the sandbox's `GiveQuorumCardToPresidentEvent` deals them,
+  and `QuorumCardEventsTest` checks that each card has exactly one event
 - `JumpAndKobolTest` plays four jumps and the Kobol end game through `submit` and `choose`, restoring at every pause: the
   Sleeper Agent phase, a human win, and a Personal Goal that turns it into a Cylon win. The test-only `StackDeckEvent`
   stacks the Destination and Loyalty decks, which a seeded game can't choose

@@ -2,8 +2,8 @@
 
 A review of `core` on `master` at `1f5c88c` (2026-11-20): which game components have no events yet. Updated on
 2026-11-21 for `skill-cards-plan.md`, which built the Skill Cards, the Action and Movement steps' offers and the
-Communications move. Only the Kobol
-objective is in scope; rules that only apply with New Caprica, the Ionian Nebula or Earth are left out.
+Communications move, and for `quorum-cards-plan.md`, which built the Quorum Cards and the President's title action.
+Only the Kobol objective is in scope; rules that only apply with New Caprica, the Ionian Nebula or Earth are left out.
 
 Card effects are short paraphrases of the images in `materials-sorted/`, not the printed text: read the card before
 implementing one. Paths are relative to `core/src/main/java/xyz/zlatanov/frakkintoasters/`. "Unverified" marks what
@@ -15,9 +15,9 @@ the review inferred but didn't check against the rules or the physical cards.
 |---|---|---|
 | Crisis Cards (136) | every card resolves | – |
 | Destination Cards (21) | every card resolves | – |
-| Location actions | every location has its action; Command, Armory, Weapons Control and Communications from anywhere through "Unorthodox Plan" | the Quorum Chamber's play is broken (see Bugs) |
-| Skill Cards (51 types) | 50 types | "Popular Influence", which needs playable Quorum Cards (see Skill Cards) |
-| Quorum Cards (23 types; the deck should hold 29) | drawn, discarded down to the limit | none can be played |
+| Location actions | every location has its action; Command, Armory, Weapons Control and Communications from anywhere through "Unorthodox Plan" | – |
+| Skill Cards (51 types) | every type | – |
+| Quorum Cards (23 types, 29 cards) | every card plays, the cards in play act | – |
 | Mutiny Cards (22) | drawn, discarded, the Brig rules | none can be played |
 | Super Crisis Cards (11) | drawn at the "Resurrection Ship"; the results of the 8 skill check cards | no way to play one; 3 cards have no effects; the Human Prisoner fail |
 | "You Are a Cylon" Loyalty Cards (7) | revealed by an execution | the voluntary reveal (rule 6.1.1) and all 7 reveal powers |
@@ -26,7 +26,7 @@ the review inferred but didn't check against the rules or the physical cards.
 | Motive Cards (13) | revealed at the end of the game | revealed during the game (rule 6.2.2.1) |
 | Cylon Leaders | Infiltrating at the "Human Fleet", ending it on execution | "return to the Resurrection Ship" as an action (rule 6.2.3.5) |
 | Character abilities (99) | 4, and 1 partly | 94 |
-| Title Card actions (4) | – | all four |
+| Title Card actions (4) | the President's | the Admiral's and the CAG's |
 | Pegasus destruction (rule 11.7.2.4) | – | missing |
 | Repairing a location | `LocationRepaired`, through "Repair" | – |
 
@@ -35,32 +35,23 @@ Detention notes on Felix Gaeta's "Coup" and Kat's "Stim Junkie", and rule 9.8.2.
 
 ## Bugs reachable today
 
-1. **Quorum Chamber.** `QuorumChamberEventProcessor` draws 1 Quorum Card and then returns `one(DrawQuorumCardEvent,
-   PlayerDecisionEvent<PlayQuorumCardEvent>)`. `PlayQuorumCardEvent` is an empty record without a processor, so once
-   the President picks "play", every answer is rolled back and the game can't go on. The card also makes the second
-   draw or the play optional ("you may then"); the code forces one of them (its own `// todo` says so).
-   `QuorumChamberEventProcessorTest` asserts the current followup.
-2. **Caprica.** `CapricaPlaySuperCrisisCardEvent` is a `LocationEvent` without a processor. A client can submit it for
+1. **Caprica.** `CapricaPlaySuperCrisisCardEvent` is a `LocationEvent` without a processor. A client can submit it for
    the Action step's `ActionEvent` decision: it fails with `FrakCallTheAdmiralException` instead of being rejected
    with `InvalidActionException`.
-3. **Pegasus.** `AttackGalacticaResultEventProcessor` always offers `one(DamageGalacticaEvent, DamagePegasusEvent)`, and
+2. **Pegasus.** `AttackGalacticaResultEventProcessor` always offers `one(DamageGalacticaEvent, DamagePegasusEvent)`, and
    `PegasusOps.damage()` draws a token and damages its location. Nothing destroys Pegasus once its four locations are
    damaged (rule 11.7.2.4: everyone aboard goes to "Sickbay" and the board leaves the game), and nothing stops offering
    it. Unverified: a fifth Pegasus hit probably fails on the empty damage deck.
-4. **Baltar's extra Loyalty Card.** `SleeperAgentPhaseEventProcessor.loyaltyCards` deals 2 cards to everyone in
+3. **Baltar's extra Loyalty Card.** `SleeperAgentPhaseEventProcessor.loyaltyCards` deals 2 cards to everyone in
    `CHARACTERS_WITH_EXTRA_CARDS`, Gaius Baltar included. Rule A3.8.5 gives Baltar the second card only at the start of
    the game; only Boomer gets 2 in the Sleeper Agent phase (rule 6.1.2.2).
-5. **Boomer's "Sleeper Agent".** After her 2 cards in the Sleeper Agent phase she moves to the "Brig". The phase
+4. **Boomer's "Sleeper Agent".** After her 2 cards in the Sleeper Agent phase she moves to the "Brig". The phase
    queues no `SendToBrigEvent` (the execution case in `FinishExecutionEventProcessor` does it).
-6. **The Quorum deck has 23 cards.** `DecksHolder` builds it with `genericDeck(QuorumCard.class)`, one card per
-   constant. Rule A2.3.13 says 29, and A4.6.1 lists "Arrest Order (x2)". Unverified guess at the duplicates, from the
-   appendix's counts: "Inspirational Speech" x4, "Food Rationing" x2, "Arrest Order" x2, "Authorization of Brutal
-   Force" x2. Check the physical deck. The Mutiny deck has the right 22.
-7. **The Quorum hand limit.** `DiscardStepEventProcessor` (and `DiscardQuorumCardsEventProcessor`) compares the
-   President's Quorum hand with `player.handLimit()`, which is 8 for Chief Galen Tyrol. The Quorum limit is always 10
-   (rule 4.4.1.1).
-8. **Latent: revealed Personal Goals.** `EndGameEventProcessor` charges every Personal Goal in
+5. **Latent: revealed Personal Goals.** `EndGameEventProcessor` charges every Personal Goal in
    `loyaltyCards().cards()`, revealed or not. It bites once Personal Goals can be revealed.
+
+`quorum-cards-plan.md` fixed the Quorum Chamber's play, the Quorum deck (29 cards; the second "Authorization of Brutal
+Force" is inferred, check the physical deck) and the Quorum hand limit (10 for every President).
 
 ## The Action and Movement steps
 
@@ -69,8 +60,8 @@ Skill Cards" in `CLAUDE.md`): the action of the player's location, the "Action:"
 viper, and in the Movement step a move or a "Movement:" card, in the "Brig" too. Revealed Cylons get only their
 location's action. What is still missing plugs in there:
 
-- the "Action:" abilities of character sheets, Title Cards, Quorum and Mutiny Cards and Loyalty Cards, and the Cylon
-  reveal (rule 6.1.1);
+- the "Action:" abilities of character sheets, the Admiral's and the CAG's Title Cards, Mutiny Cards and Loyalty
+  Cards, and the Cylon reveal (rule 6.1.1);
 - a Cylon Leader's sheet actions instead of his location's (rule 6.2.1.2), and his return to the "Resurrection Ship"
   (rule 6.2.3.5);
 - the "Movement:" abilities of character sheets.
@@ -84,11 +75,8 @@ action).
 
 ## Skill Cards
 
-`skill-cards-plan.md` built every "Action:" and "Movement:" card and "Investigative Committee", except one:
-
-| Card | Kind | Effect | What's missing |
-|---|---|---|---|
-| Popular Influence | Action | Draw 2 Quorum Cards, give 1 to the President, then play or discard the other | Playing Quorum Cards (see "Quorum Cards"), and drawing Quorum Cards that aren't the President's. `SkillCardPlays.canPlay` keeps it `false`, so it is never offered |
+`skill-cards-plan.md` built every "Action:" and "Movement:" card and "Investigative Committee", and
+`quorum-cards-plan.md` built "Popular Influence" once Quorum Cards could be played.
 
 The plan's open questions were settled the way it proposed. These are choices, not rulings: the cards and the
 rulebook don't settle them.
@@ -106,43 +94,26 @@ rulebook don't settle them.
 
 ## Quorum Cards
 
-None can be played. What every card needs:
+`quorum-cards-plan.md` built every card, the cards in play and their uses, and the President's title action (see
+"Quorum Cards" in `CLAUDE.md`). Its open questions were settled the way it proposed. These are choices, not rulings:
 
-- a play event, e.g. `PlayQuorumCardEvent(playerNumber, QuorumCard, ...targets)`, an `ActionEvent` that checks the
-  player is President and the card is in `presidentHand`; the Quorum Chamber's play option uses it too;
-- a fact for "remove this card from the game" (`RemovedComponents` only takes characters and ships);
-- for the roles (Arbitrator, Chief of Staff, Mission Specialist, Vice President, Probation) and Accept Prophecy:
-  in-play state, the card and its holder, with facts, and an event to give the card to a player. It is discarded on
-  execution (rule 7.1, `ExecuteEventProcessor` already cites the step), on a Cylon reveal (rule 6.1.1) and when an
-  Infiltration ends (rule 6.2.3.5). An Infiltrating Cylon Leader can't be Vice President (rule 6.2.3.3).
+- "Eulogy" counts any execution earlier in the game that cost morale.
+- "Destroy 3 raiders" destroys all of them when fewer are on the board.
+- "Resources for Galactica" repairs a Galactica or a Pegasus location.
+- "Consult the Oracle" takes the card decks but Loyalty and Motive, and not an empty one.
+- "Presidential Pardon" is discarded like the others, and its destination follows `MoveFromBrigEvent`.
+- "Accept Prophecy" has no holder and stays in play when the presidency changes.
+- Role holders are human players, Infiltrating Cylon Leaders included but not as Vice President. "Probation" may go to
+  the President himself.
+- "Encourage Mutiny" and "Presidential Order" don't target a character in the "Brig".
+- The Arbitrator is asked before "Political Prowess". The Chief of Staff is asked before any card goes into the check,
+  the Destiny cards included.
+- The Mission Specialist's two other cards go to the bottom in the order drawn.
+- "Popular Influence" played by someone who isn't President: "you" means its player, and "Resignation" can only be
+  discarded.
 
-| Card | Kind | Effect | Reuse, or what's missing |
-|---|---|---|---|
-| Accept Prophecy | Action, stays in play | Draw 1 Skill Card of any color. While in play: +2 difficulty when the "Admiral's Quarters" targets the President, then discard it | A `DRAW_EXACTLY_1_OF_ANY_COLOR` constraint, +2 in `DetermineSkillCheckResultEventProcessor.difficulty`. The Daybreak "Administration" lets the President discard it to keep the title: the todo in `ReplaceMutinousPresidentEventProcessor`. Its "Administration" difficulty half has nothing to apply to (no skill check there) |
-| Arrest Order | Action | Send a character to the "Brig" | `one(SendToBrigEvent...)` over `canBeSentToBrig` |
-| Assign Arbitrator | Action, then a role | The President draws 2 Politics and gives the card away. When the "Admiral's Quarters" is used, the holder may discard it to change the difficulty by 3 | `DrawSkillCardsOfColorEvent`. New: the give event, role state, an optional question at the check's start (like "Political Prowess" in `beforeSkillCheckFollowups`), a difficulty fact |
-| Assign Chief of Staff | Action, then a role | Draw 2 Politics, give it away. Before cards go into a check, the holder may discard it so Politics counts positive | Ask before `PlayCardsIntoSkillCheckEvent`, a skill check fact, a case in `TotalSkillCheckStrengthEventProcessor.countsAsPositive` |
-| Assign Mission Specialist | Action, then a role | Draw 2 Politics, give it away. At the next jump the holder chooses the destination from 3 cards, then discards it | `DrawDestinationCardsEventProcessor` hard-codes the Admiral and 2 cards, and `ChooseDestinationEvent` names one other card and requires the Admiral |
-| Assign Vice President | Action, then a role | Draw 2 Politics, give it away. While the holder isn't President, the "Administration" can't make anyone else President | Narrow the options in `ReplaceMutinousPresidentEventProcessor` (not in `MakePresidentEventProcessor.isValid`: that event is queued directly too) |
-| Authorization of Brutal Force | Action | Destroy 3 raiders, 1 heavy raider or 1 centurion, then roll: a low result loses 1 population | `DestroyRaidersEvent`, `rollDie`, `LoseResourceEvent`. Missing: destroying one heavy raider, destroying a chosen centurion (and its "Major Victory" window) |
-| Civilian Self Defense | Action | Pick a civilian ship in space: destroy 3 raiders or 1 heavy raider in its area, then roll: a low result destroys the ship | `DestroyRaidersEventProcessor.destroyRaidersIn`, `rollDie`, `DestroyCivilianShipEvent`; the heavy raider event is missing |
-| Consult the Oracle | Action | Look at the bottom card of a deck, then search the Destiny deck, discard 2 and shuffle it | `DiscardFromDestinyDeckEvent`. Missing: the bottom card on the deck view, recorded with `PlayerOps.see`. Not the Loyalty or Motive decks (rule A2.3.13.1) |
-| Enact Production Quotas | Action | +1 food, -1 morale | `GainResourceEvent`, `LoseResourceEvent` |
-| Encourage Mutiny | Action | Another player who isn't Admiral rolls: on a high result he becomes Admiral, otherwise -1 morale | `rollDie`, `MakeAdmiralEvent` (which validates nothing yet), `LoseResourceEvent` |
-| Establish Dogsville | Action | +1 population, -1 morale | Gain and lose resource |
-| Eulogy | Action | +1 morale, only if morale was lost to an execution | New state: morale lost to an execution, set in `ExecuteEventProcessor` |
-| Execute Prisoner | Action | Execute a character in the "Brig" | `one(ExecuteEvent...)` over `canBeExecuted` |
-| Food Rationing | Action | Roll: on a high result +1 food and the card leaves the game, otherwise discard it | `rollDie`, `GainResourceEvent`, the remove fact |
-| Inspirational Speech | Action | The same with +1 morale | The same |
-| Presidential Order | Action | Give the Admiral or the CAG title to a player | `MakeAdmiralEvent`; there is no `MakeCagEvent`, only `TitleOps.assignCag` |
-| Presidential Pardon | Action | Move another character from the "Brig" to another Galactica location | `MoveFromBrigEvent` |
-| Probation | Action, then a role | Give it to a player. After he plays cards into a check, the President may discard it to look at them | An optional question after that player's `PlayCardsIntoSkillCheckEvent`, `PlayerOps.see`, the projection showing him those cards |
-| Release Cylon Mugshots | Action | Look at a random Loyalty Card of another player, then roll: a low result loses 1 morale | `LookAtLoyaltyCardEvent`, `rollDie`, `LoseResourceEvent` |
-| Resignation | Action | Discard any number of Quorum Cards, draw as many, then give the President title to another character | `DiscardQuorumCardsEvent` without a constraint, `DrawQuorumCardEvent` per card, `PlayerDecisionEvent<MakePresidentEvent>` |
-| Resources for Galactica | Action | Repair up to 1 location and 2 damaged vipers | `ShipOps.repair`; location repair is missing |
-| Unsavory Connections | Action | Discard 2 random Skill Cards, draw 2 Treachery, then +1 food or +1 fuel | `DiscardRandomSkillCardsEvent`, `DrawSkillCardsOfColorEvent`, `one(GainResourceEvent...)` |
-
-The President title card's own action, "draw a Quorum Card", is unreachable too (see Title Cards).
+Still open: the Cylon reveal (rule 6.1.1) and an Infiltrating Cylon Leader's return (rule 6.2.3.5) will discard the
+cards given to the player through `TitleOps.discardQuorumCardsGivenTo`, as an execution does.
 
 ## Mutiny Cards
 
@@ -279,13 +250,14 @@ Loyalty Card (the path of `FinishExecutionEvent`). The end-game loss is in `Loya
 
 | Title | Action | State |
 |---|---|---|
-| President | Draw a Quorum Card | Unreachable: `DrawQuorumCardEvent` is a plain `Event` that only the Quorum Chamber and "Dishonest Tactics" queue |
+| President | Draw a Quorum Card | Built: `PresidentTitleActionEvent` |
 | Admiral | Launch a nuke at a space area (rule 11.6.1: a roll damages or destroys a basestar, on 7 also 3 raiders, on 8 every ship there) | No event; only `DiscardNukeTokenEvent` |
 | CAG | Activate an unmanned viper, then give the CAG title to another human | No event |
 | CAG | Once per turn, while piloting, activate an unmanned viper and take another action | No event |
 
-Also: `MakeAdmiralEvent` validates nothing and nothing queues it, there is no `MakeCagEvent`, and `PlayerOps.moveTo` and
-`LeaveBrigEventProcessor` have todos for the Admiral and CAG in the "Brig" (rule 4.4).
+`MakeAdmiralEvent` and `MakeCagEvent` check who can take the title (`canBecomeAdmiral`, `canBecomeCag`), and
+`SendToBrigEventProcessor` passes the Admiral's and the CAG's titles on. `PlayerOps.moveTo` and `LeaveBrigEventProcessor`
+still have todos for the Admiral and CAG in the "Brig" (rule 4.4).
 
 ## Characters
 
@@ -315,7 +287,7 @@ abilities are always in effect (rule 6.2.1.2); a revealed Cylon's are ignored (r
 | | Lies and Secrets | Negative | Discards his hand when a "You Are a Cylon" card is revealed | Missing |
 | "Chief" Galen Tyrol | Maintenance Engineer | Trigger | Another action after playing "Repair", once per turn | Missing, needs "Repair" |
 | | Blind Devotion | Miracle | Name a skill type; its cards count 0 in a check | Missing |
-| | Reckless | Negative | Hand limit 8 | Built: `Player.handLimit()`, but it also caps the Quorum hand (Bugs, 8) |
+| | Reckless | Negative | Hand limit 8 | Built: `Player.handLimit()` |
 | D'Anna Biers | Visions | Action | Infiltrating, look at a human's random Loyalty Card, then go back to the "Resurrection Ship" | Missing |
 | | Don't Trust Anyone | Miracle action | Draw 2 Super Crisis Cards | Missing; `PlayerOps.drawSuperCrisisCard` exists |
 | | Heretic | Negative | Discards a Super Crisis Card to leave the "Resurrection Ship" | Missing ("Hub Destroyed" clause out of scope) |
@@ -327,7 +299,7 @@ abilities are always in effect (rule 6.2.1.2); a revealed Cylon's are ignored (r
 | | Misguided | Negative | At most 3 cards into a check | Missing |
 | Gaius Baltar | Delusional Intuition | Trigger | After drawing a Crisis Card, draw a Skill Card of any type | Missing |
 | | Cylon Detector | Miracle action | Look at all of a player's Loyalty Cards | Missing |
-| | Coward | Negative | Starts with 2 Loyalty Cards | Built, but he gets 2 in the Sleeper Agent phase too (Bugs, 5) |
+| | Coward | Negative | Starts with 2 Loyalty Cards | Built, but he gets 2 in the Sleeper Agent phase too (Bugs, 3) |
 | Gaius Baltar (alt.) | Cult Leader | Action | Give or take a miracle token at his location | Missing; `hasMiracleToken` is a boolean |
 | | Broadcast | Miracle action | Spend 3 miracle tokens: +2 to a resource | Missing; needs a token count (rule 4.3.1.1) |
 | | Spiritual Crisis | Negative | Can only reveal as a Cylon in the "Brig" | Missing; no voluntary reveal yet |
@@ -344,7 +316,7 @@ abilities are always in effect (rule 6.2.1.2); a revealed Cylon's are ignored (r
 | | Secret Destiny | Miracle | Discard a revealed Crisis Card and draw another | Missing |
 | | Insubordinate | Negative | "Admiral's Quarters" is easier against her | Missing (`difficulty`) |
 | Laura Roslin | Religious Visions | Passive | Draws 2 Crisis Cards, resolves 1 | Missing (`CrisisStepEventProcessor`) |
-| | Skilled Politician | Miracle action | Draw 4 Quorum Cards and resolve 1, also when not President | Missing, needs Quorum play |
+| | Skilled Politician | Miracle action | Draw 4 Quorum Cards and resolve 1, also when not President | Missing; the drawn card can be held like "Popular Influence"'s (`PlayerPile.QUORUM`) |
 | | Terminal Illness | Negative | Discards 2 Skill Cards to use a location | Missing |
 | Lee Adama | Forward Thinker | Trigger | After his "Executive Order", use his own location | Missing, needs "Executive Order" |
 | | Choose a Different Path | Miracle | On a Crisis choice, take a "discard 5 Skill Cards" option instead | Missing |
@@ -375,7 +347,7 @@ abilities are always in effect (rule 6.2.1.2); a revealed Cylon's are ignored (r
 | | Grieving | Negative | No Skill Cards in a hazardous location | Missing (todo in `ReceiveSkillsStepEventProcessor`) |
 | Sharon "Boomer" Valerii | Recon | Trigger | At the end of her turn, look at the top Crisis Card | Missing |
 | | Mysterious Intuition | Miracle | Choose a Crisis skill check's result | Missing |
-| | Sleeper Agent | Negative | 2 Loyalty Cards in the Sleeper Agent phase, then the "Brig" | Partly: no "Brig" (Bugs, 6) |
+| | Sleeper Agent | Negative | 2 Loyalty Cards in the Sleeper Agent phase, then the "Brig" | Partly: no "Brig" (Bugs, 4) |
 | Sherman "Doc" Cottle | Treatment | Action | Draw 2 from another human's skill set, give him 2 | Missing |
 | | Quarantine | Miracle action | Look at the civilian ships and swap one | Missing |
 | | Specialized | Negative | Can't use Engineering card actions | Missing; nothing to block yet |
@@ -388,7 +360,7 @@ abilities are always in effect (rule 6.2.1.2); a revealed Cylon's are ignored (r
 | Tom Zarek (alt.) | Necessary Steps | Trigger | Picks which Mutiny Card a player draws, from 2 | Missing |
 | | Abuse Power | Miracle action | Draw 4 Mutiny Cards and play 1, no "Brig" | Missing, needs Mutiny play |
 | | Disreputable | Negative | Starts with a Mutiny Card | Missing |
-| Tory Foster | Adaptable | Trigger | After a Quorum Card action, draw 2 Skill Cards | Missing, needs Quorum play |
+| Tory Foster | Adaptable | Trigger | After a Quorum Card action, draw 2 Skill Cards | Missing; it hooks on `QuorumCardEventProcessor` |
 | | Influential | Miracle action | Reorder the top Quorum Cards | Missing |
 | | Amoral | Negative | Takes the first option of a "current player chooses" Crisis | Missing (`CrisisCardFollowups.choice`) |
 | William Adama | Inspirational Leader | Passive | Strength 1 cards count positive on his Crisis checks | Missing (`countsAsPositive`) |
@@ -417,19 +389,16 @@ The 94 missing abilities, by where they plug in:
 
 ## Missing building blocks
 
-What several of the components above need:
+What several of the components above need. `quorum-cards-plan.md` built a fact for a card that leaves the game
+(`DeckFact.CardsRemovedFromGame`), Quorum Cards in play with a holder, destroying one heavy raider or a chosen
+centurion, a destination choice for 3 cards, `MakeCagEvent` and the checks in `MakeAdmiralEvent`. Still missing:
 
 - the other kinds of actions and movement powers in `Actions` (see "The Action and Movement steps");
 - the voluntary Cylon reveal;
-- playing Super Crisis, Quorum and Mutiny Cards;
+- playing Super Crisis and Mutiny Cards;
 - launching a nuke (gaining one is `GameOps.gainNuke`);
-- a fact for a card that leaves the game;
 - moving Skill Cards between players;
-- in-play Quorum Cards with a holder, and giving a card to a player;
-- destroying one heavy raider, or a chosen centurion;
 - `PlaceShipsEvent` in a chosen area, `LaunchRaidersEvent` with a count;
-- a destination choice that isn't fixed to the Admiral and 2 cards;
-- `MakeCagEvent`, and checks in `MakeAdmiralEvent`;
 - several miracle tokens per player (rule 4.3.1.1);
 - a once-per-turn limit for the Mutiny Card from Treachery (`TurnView.playedSkillCards()` does it for Skill Cards).
 
@@ -444,15 +413,13 @@ What several of the components above need:
 
 ## Suggested order
 
-1. Fix the Quorum Chamber bug; it can stop a live game.
-2. The other kinds of actions and movement powers, in `Actions`. Without them, the character sheets, Title Cards,
-   Quorum and Mutiny Cards stay unreachable whatever events exist.
-3. The Cylon reveal: the reveal powers, the Super Crisis Card it hands out, the abilities it triggers.
-4. Playing a Super Crisis Card at "Caprica", with the three unmapped cards and the Human Prisoner fail.
-5. Quorum and Mutiny Cards, with the building blocks above, and then "Popular Influence"; the Title Card actions and
-   the nuke launch.
-6. Final Five, Personal Goals, Motive Cards during the game, the Cylon Leaders' return action.
-7. Character abilities, by hook: the actions, then the triggers (reusing the interrupt windows), the penalties and the
+1. The other kinds of actions and movement powers, in `Actions`. Without them, the character sheets, the Admiral's
+   and the CAG's Title Cards and the Mutiny Cards stay unreachable whatever events exist. The Skill and Quorum Cards
+   and the President's title action are done.
+2. The Cylon reveal: the reveal powers, the Super Crisis Card it hands out, the abilities it triggers.
+3. Playing a Super Crisis Card at "Caprica", with the three unmapped cards and the Human Prisoner fail.
+4. Mutiny Cards, with the building blocks above; the Admiral's and the CAG's Title Card actions and the nuke launch.
+5. Final Five, Personal Goals, Motive Cards during the game, the Cylon Leaders' return action.
+6. Character abilities, by hook: the actions, then the triggers (reusing the interrupt windows), the penalties and the
    rule changes.
-8. Pegasus destruction and the smaller bugs (Baltar, Boomer, the Quorum deck and hand limit, the end-game Personal
-   Goals).
+7. Pegasus destruction and the smaller bugs (Baltar, Boomer, the end-game Personal Goals).
