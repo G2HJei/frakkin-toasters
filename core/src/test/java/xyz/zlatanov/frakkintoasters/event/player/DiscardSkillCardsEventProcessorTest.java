@@ -11,7 +11,11 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 
 import java.util.List;
 
+import static xyz.zlatanov.frakkintoasters.state.character.Character.LAURA_ROSLIN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static xyz.zlatanov.frakkintoasters.state.TurnLimit.MUTINY_CARD_FROM_TREACHERY;
+import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DISCARD_DOWN_TO_3;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DISCARD_DOWN_TO_HAND_LIMIT;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DISCARD_EXACTLY_2;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.CHIEF_GALEN_TYROL;
@@ -26,6 +30,7 @@ class DiscardSkillCardsEventProcessorTest extends EventTestHarness<DiscardSkillC
 
     @BeforeEach
     void setUp() {
+        player(1).character(LAURA_ROSLIN); // a human, who draws Mutiny Cards
         player(1).gainSkillCards(politics, leadership, engineering);
     }
 
@@ -87,6 +92,23 @@ class DiscardSkillCardsEventProcessorTest extends EventTestHarness<DiscardSkillC
         assertEquals(10, player(1).skillCards().size());
     }
 
+    // A Cylon who reveals keeps 3 Skill Cards (rule 6.1.1).
+    @Test
+    void shouldDiscardDownToThree() {
+        player(1).gainSkillCards(repairs(2)); // 5 cards
+
+        execute(new DiscardSkillCardsEvent(1, List.of(politics, leadership), DISCARD_DOWN_TO_3));
+
+        assertEquals(3, player(1).skillCards().size());
+    }
+
+    @Test
+    void shouldRejectKeepingMoreThanThree() {
+        player(1).gainSkillCards(repairs(2));
+
+        assertInvalid(new DiscardSkillCardsEvent(1, List.of(politics), DISCARD_DOWN_TO_3));
+    }
+
     @Test
     void shouldRejectStayingOverTheHandLimit() {
         player(1).gainSkillCards(repairs(9));
@@ -139,6 +161,27 @@ class DiscardSkillCardsEventProcessorTest extends EventTestHarness<DiscardSkillC
         execute(new DiscardSkillCardsEvent(1, List.of(bait, dradisContact), DISCARD_EXACTLY_2));
 
         assertFollowup(new DrawMutinyCardEvent(1));
+    }
+
+    // Only one Mutiny Card a turn comes from these cards (rule A2.3.8.1).
+    @Test
+    void shouldDrawOnly1MutinyCardATurn() {
+        val dradisContact = new SkillCard(5, DRADIS_CONTACT);
+        player(1).gainSkillCards(dradisContact);
+        ops.useTurnLimit(1, MUTINY_CARD_FROM_TREACHERY); // a "Bait" discarded earlier in the turn
+
+        execute(new DiscardSkillCardsEvent(1, List.of(dradisContact)));
+    }
+
+    @Test
+    void shouldUseTheTurnLimitWhenDrawingAMutinyCard() {
+        val bait = new SkillCard(4, BAIT);
+        player(1).gainSkillCards(bait);
+
+        execute(new DiscardSkillCardsEvent(1, List.of(bait)));
+
+        assertFollowup(new DrawMutinyCardEvent(1));
+        assertTrue(game.turn().hasUsed(1, MUTINY_CARD_FROM_TREACHERY));
     }
 
     @Test

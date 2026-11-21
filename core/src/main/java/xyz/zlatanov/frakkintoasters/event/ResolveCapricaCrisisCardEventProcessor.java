@@ -1,9 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event;
 
 import xyz.zlatanov.frakkintoasters.EventProcessor;
-import xyz.zlatanov.frakkintoasters.event.crisis.ResolveCrisisCardEvent;
-
-import static xyz.zlatanov.frakkintoasters.event.Followup.single;
+import xyz.zlatanov.frakkintoasters.event.crisis.CrisisCardReveals;
 
 public class ResolveCapricaCrisisCardEventProcessor extends EventProcessor<ResolveCapricaCrisisCardEvent> {
 
@@ -18,6 +16,6 @@ public class ResolveCapricaCrisisCardEventProcessor extends EventProcessor<Resol
         // like a card of the Crisis step. There is no Activate Cylon Ships step.
         ops.playCrisisCard(event.crisisCardToPlay());
         ops.player(player.number()).placeCrisisCardOnBottom(event.crisisCardToPutAtBottom());
-        return single(new ResolveCrisisCardEvent(event.crisisCardToPlay()));
+        return CrisisCardReveals.revealed(game, event.crisisCardToPlay());
     }
 }

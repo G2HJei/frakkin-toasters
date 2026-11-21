@@ -9,6 +9,7 @@ import xyz.zlatanov.frakkintoasters.event.officials.DetermineNextPresidentEvent;
 
 import java.util.List;
 
+import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.MUTINEER;
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
@@ -32,7 +33,7 @@ class FinishExecutionEventProcessorTest extends EventTestHarness<FinishExecution
     // thoroughly, and draws one new Loyalty Card"
     @Test
     void shouldDealANewLoyaltyCard() {
-        loyaltyNotCylonDeck.nextCard(NOT_CYLON);
+        loyaltyNotCylonDeck.addOnTop(NOT_CYLON);
 
         execute(new FinishExecutionEvent(2, LAURA_ROSLIN));
 
@@ -40,11 +41,32 @@ class FinishExecutionEventProcessorTest extends EventTestHarness<FinishExecution
         assertFollowup(all(new DealLoyaltyCardsEvent(2, 1, false), new DetermineNextPresidentEvent()));
     }
 
+    // The Mutineer card stays with the player, and his new character receives it, so he draws a Mutiny Card first
+    // (rules 5.2.1 and 7.1).
+    @Test
+    void aNewMutineerDrawsAMutinyCard() {
+        player(2).loyaltyCards().addOnTop(MUTINEER);
+
+        execute(new FinishExecutionEvent(2, LAURA_ROSLIN));
+
+        assertFollowup(all(new DrawMutinyCardEvent(2), new DealLoyaltyCardsEvent(2, 1, false),
+                new DetermineNextPresidentEvent()));
+    }
+
+    // Once every "You Are Not a Cylon" card is in the game, none is added, and he still draws.
+    @Test
+    void shouldStillDealWhenNoYouAreNotACylonCardIsLeft() {
+        execute(new FinishExecutionEvent(2, LAURA_ROSLIN));
+
+        assertFalse(loyaltyDeck.wasShuffled());
+        assertFollowup(all(new DealLoyaltyCardsEvent(2, 1, false), new DetermineNextPresidentEvent()));
+    }
+
     // "If the Admiral, President or CAG is executed, the title will change hands after the new character is selected."
     @Test
     void shouldPassEveryTitleTheExecutedCharacterHeld() {
         admiral(LAURA_ROSLIN);
-        loyaltyNotCylonDeck.nextCard(NOT_CYLON);
+        loyaltyNotCylonDeck.addOnTop(NOT_CYLON);
 
         execute(new FinishExecutionEvent(2, LAURA_ROSLIN));
 

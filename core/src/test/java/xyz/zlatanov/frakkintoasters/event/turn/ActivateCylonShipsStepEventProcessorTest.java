@@ -1,11 +1,16 @@
 package xyz.zlatanov.frakkintoasters.event.turn;
 
+import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
+import xyz.zlatanov.frakkintoasters.state.crisis.CylonActivation;
+import xyz.zlatanov.frakkintoasters.event.character.ModificationsEvent;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.event.crisis.ActivateCylonBasestarsEvent;
 import xyz.zlatanov.frakkintoasters.event.crisis.ActivateRaidersEvent;
 import xyz.zlatanov.frakkintoasters.event.ship.LaunchRaidersEvent;
 
+import static xyz.zlatanov.frakkintoasters.state.character.Character.SIMON_ONEIL;
+import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
@@ -96,5 +101,39 @@ class ActivateCylonShipsStepEventProcessorTest extends EventTestHarness<Activate
         execute(new ActivateCylonShipsStepEvent());
 
         assertEquals(SETUP, game.turn().step());
+    }
+
+    // "Modifications": Simon O'Neill may pick the activation instead of the card's icon.
+    @Test
+    void simonONeillMayPickTheActivation() {
+        setUpGame(4);
+        player(1).character(KARA_STARBUCK_THRACE);
+        player(2).character(SIMON_ONEIL);
+        ops.playCrisisCard(AMBUSHED_BY_THE_PRESS);
+
+        execute(new ActivateCylonShipsStepEvent());
+
+        assertFollowup(one(new ActivateRaidersEvent(),
+                new ModificationsEvent(2, CylonActivation.ACTIVATE_RAIDERS),
+                new ModificationsEvent(2, CylonActivation.LAUNCH_RAIDERS),
+                new ModificationsEvent(2, CylonActivation.ACTIVATE_HEAVY_RAIDERS),
+                new ModificationsEvent(2, CylonActivation.ACTIVATE_BASESTARS)));
+    }
+
+    // "Modifications" is asked at the start of any player's step, also one without a Crisis Card: nothing activates
+    // unless Simon O'Neill picks something.
+    @Test
+    void simonONeillMayPickTheActivationWithoutACard() {
+        setUpGame(4);
+        player(1).character(KARA_STARBUCK_THRACE);
+        player(2).character(SIMON_ONEIL);
+
+        execute(new ActivateCylonShipsStepEvent());
+
+        assertFollowup(one(new NoOpEvent(2),
+                new ModificationsEvent(2, CylonActivation.ACTIVATE_RAIDERS),
+                new ModificationsEvent(2, CylonActivation.LAUNCH_RAIDERS),
+                new ModificationsEvent(2, CylonActivation.ACTIVATE_HEAVY_RAIDERS),
+                new ModificationsEvent(2, CylonActivation.ACTIVATE_BASESTARS)));
     }
 }

@@ -8,9 +8,13 @@ import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.LocationEvent;
 import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
-import xyz.zlatanov.frakkintoasters.event.action.title.PresidentTitleActionEventProcessor;
+import xyz.zlatanov.frakkintoasters.event.action.title.TitleActions;
+import xyz.zlatanov.frakkintoasters.event.character.CharacterMoves;
+import xyz.zlatanov.frakkintoasters.event.loyalty.RevealCylonEventProcessor;
+import xyz.zlatanov.frakkintoasters.event.loyalty.RevealPersonalGoalEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.MoveEvent;
+import xyz.zlatanov.frakkintoasters.event.player.ReturnToResurrectionShipEventProcessor;
 import xyz.zlatanov.frakkintoasters.state.view.GameView;
 import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
 
@@ -24,27 +28,34 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.BRIG;
 
 /**
  * What a player can do now, for the Action step and everything else that gives an action: the action of his location,
- * or an action printed on a card he holds, the "Action:" of a Skill Card, a Quorum Card or the President's Title Card.
- * A pilot may activate his viper instead.
+ * or another action, the "Action:" of a Skill Card, a Quorum Card or a Mutiny Card he holds, or of his Title Card. A
+ * pilot may activate his viper instead.
  */
 @NoArgsConstructor(access = PRIVATE)
 public final class Actions {
 
     /**
-     * @return whether the player has an action to take: the action of his location, or a card's
+     * @return whether the player has an action to take: the action of his location, or another one
      */
     public static boolean canTakeAction(GameView game, PlayerView player) {
-        return LocationEvent.canAct(game, player) || canTakeCardAction(game, player);
+        return LocationEvent.canAct(game, player) || canTakeOtherAction(game, player);
     }
 
     /**
-     * @return whether the player can take an action printed on a card: a Skill Card, a Quorum Card or his Title Card
-     * (rule 8.4)
+     * @return whether the player can take an action that isn't his location's: one printed on a Skill Card, a Quorum
+     * Card (rule 8.4), a Mutiny Card (rule 5.2.3.1), his Title Card (rule 4.4), the Infiltration Card (rule 6.2.3.5) or
+     * his character sheet (rule 6.2.1.2), or the reveal of a "You Are a Cylon" Loyalty Card (rule 6.1) or a Personal
+     * Goal (rule 5.3.1)
      */
-    public static boolean canTakeCardAction(GameView game, PlayerView player) {
+    public static boolean canTakeOtherAction(GameView game, PlayerView player) {
         return SkillCardPlays.canPlayAction(game, player)
                 || QuorumCardPlays.canPlayAny(game, player)
-                || PresidentTitleActionEventProcessor.canAct(game, player);
+                || MutinyCardPlays.canPlayAny(game, player)
+                || TitleActions.canAct(game, player)
+                || ReturnToResurrectionShipEventProcessor.canReturn(game, player)
+                || RevealCylonEventProcessor.canReveal(game, player)
+                || RevealPersonalGoalEventProcessor.canReveal(game, player)
+                || CharacterActions.canUseAny(game, player);
     }
 
     /**
@@ -85,7 +96,7 @@ public final class Actions {
      */
     public static boolean canMove(GameView game, PlayerView player) {
         val location = game.locate(player.character());
-        return location.isPresent() && location.get() != BRIG;
+        return location.isPresent() && location.get() != BRIG && !CharacterMoves.hereticHeld(game, player);
     }
 
     /**
@@ -95,7 +106,8 @@ public final class Actions {
     public static Followup offerMovement(GameView game, int playerNumber) {
         val player = game.player(playerNumber);
         val decisions = new ArrayList<Event>(moveDecisions(game, playerNumber));
-        if (game.locate(player.character()).isPresent() && SkillCardPlays.canPlayMovementAbility(game, player)) {
+        if (game.locate(player.character()).isPresent()
+                && (SkillCardPlays.canPlayMovementAbility(game, player) || CharacterMovements.canUseAny(game, player))) {
             decisions.add(new PlayerDecisionEvent<>(playerNumber, MovementAbilityEvent.class));
         }
         return choice(playerNumber, decisions);
@@ -109,7 +121,7 @@ public final class Actions {
         if (isPilot(game, player)) {
             // A pilot activates his viper, or takes another action, e.g. plays a card (rule 11.2.1). He is in space,
             // so a location action is never his.
-            return canTakeCardAction(game, player)
+            return canTakeOtherAction(game, player)
                     ? List.of(new PlayerDecisionEvent<>(playerNumber, ActivateViperEvent.class),
                     new PlayerDecisionEvent<>(playerNumber, ActionEvent.class))
                     : List.of(new PlayerDecisionEvent<>(playerNumber, ActivateViperEvent.class));

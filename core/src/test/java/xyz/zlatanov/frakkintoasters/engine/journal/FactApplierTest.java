@@ -1,5 +1,10 @@
 package xyz.zlatanov.frakkintoasters.engine.journal;
 
+import xyz.zlatanov.frakkintoasters.state.character.CharacterAbility;
+import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow.AfterFtlControlRoll;
+import xyz.zlatanov.frakkintoasters.state.interrupt.UsedRollAbility;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact;
+
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.*;
@@ -10,6 +15,7 @@ import xyz.zlatanov.frakkintoasters.engine.journal.fact.InterruptFact.*;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.*;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.ShipFact.*;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.TitleFact.*;
+import xyz.zlatanov.frakkintoasters.state.character.CharacterAbility;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.PlayerPile;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
@@ -37,6 +43,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.state.GameStep.MOVEMENT;
+import static xyz.zlatanov.frakkintoasters.state.TurnLimit.CAG_PILOT_ACTION;
 import static xyz.zlatanov.frakkintoasters.state.Team.CYLONS;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.board.Resource.*;
@@ -146,6 +153,15 @@ class FactApplierTest {
 
         apply(new PursuitReset());
         assertEquals(Pursuit.START, game.boards().cylonFleet().pursuitTrack());
+    }
+
+    @Test
+    void pegasusDestroyedTakesPegasusOutOfTheGame() {
+        apply(new PegasusDestroyed());
+
+        assertTrue(game.boards().pegasus().destroyed());
+        assertTrue(game.isDestroyed(AIRLOCK));
+        assertFalse(game.isDestroyed(COMMAND));
     }
 
     @Test
@@ -410,6 +426,71 @@ class FactApplierTest {
     }
 
     @Test
+    void theStartLocationIsNotedUntilTheNextTurn() {
+        apply(new StartLocationNoted(HANGAR_DECK));
+        assertEquals(Optional.of(HANGAR_DECK), game.turn().startLocation());
+
+        apply(new TurnStarted(2));
+        assertEquals(Optional.empty(), game.turn().startLocation());
+    }
+
+    @Test
+    void aTriggeredAbilityWaitsUntilItIsOffered() {
+        apply(new AbilityTriggered(2,
+                CharacterAbility.MEMENTO));
+        assertEquals(Map.of(2, Set.of(CharacterAbility.MEMENTO)),
+                game.turn().triggeredAbilities());
+
+        apply(new AbilityTriggerCleared(2,
+                CharacterAbility.MEMENTO));
+        assertEquals(Map.of(), game.turn().triggeredAbilities());
+    }
+
+    @Test
+    void aBorrowedTitleIsForgottenTheNextTurn() {
+        apply(new TitleBorrowed(
+                xyz.zlatanov.frakkintoasters.state.Title.ADMIRAL,
+                SAUL_TIGH));
+        assertEquals(Map.of(xyz.zlatanov.frakkintoasters.state.Title.ADMIRAL,
+                SAUL_TIGH), game.turn().borrowedTitles());
+
+        apply(new TurnStarted(2));
+        assertEquals(Map.of(), game.turn().borrowedTitles());
+    }
+
+    @Test
+    void aPaidActionCostIsSettledOrForgottenTheNextTurn() {
+        apply(new ActionCostPaid(2));
+        assertTrue(game.turn().actionCostPaid(2));
+        assertFalse(game.turn().actionCostPaid(1));
+
+        apply(new ActionCostPaid(null));
+        assertFalse(game.turn().actionCostPaid(2));
+
+        apply(new ActionCostPaid(2));
+        apply(new TurnStarted(2));
+        assertFalse(game.turn().actionCostPaid(2));
+    }
+
+    @Test
+    void aPlayerSentToTheBrigAtTheEndOfTheTurnIsForgottenTheNextTurn() {
+        apply(new SentToBrigAtEndOfTurn(2));
+        assertEquals(Set.of(2), game.turn().sentToBrigAtEndOfTurn());
+
+        apply(new TurnStarted(2));
+        assertEquals(Set.of(), game.turn().sentToBrigAtEndOfTurn());
+    }
+
+    @Test
+    void aTurnLimitIsUsedUntilTheNextTurn() {
+        apply(new TurnLimitUsed(1, CAG_PILOT_ACTION));
+        assertEquals(Map.of(1, Set.of(CAG_PILOT_ACTION)), game.turn().usedTurnLimits());
+
+        apply(new TurnStarted(2));
+        assertEquals(Map.of(), game.turn().usedTurnLimits());
+    }
+
+    @Test
     void aLossReductionLastsUntilItIsUsedOrTheTurnEnds() {
         apply(new LossReductionAdded(FOOD));
         apply(new LossReductionAdded(MORALE));
@@ -463,6 +544,43 @@ class FactApplierTest {
         assertThrows(FrakCallTheAdmiralException.class, () -> apply(new InterruptWindowOpened(new AfterDieRoll())));
         assertThrows(FrakCallTheAdmiralException.class,
                 () -> apply(new InterruptCardResolved(new PlayedInterruptCard(2, strategicPlanning, null))));
+    }
+
+    @Test
+    void abilitiesUsedInAWindowLeaveItWhenResolvedOrWithdrawn() {
+        val withdrawn = new UsedRollAbility(1, CharacterAbility.ECO_OFFICER, null, null);
+        val resolved = new UsedRollAbility(2, CharacterAbility.FTL_OPERATOR, null, null);
+        apply(new InterruptWindowOpened(new AfterFtlControlRoll()));
+        apply(new RollAbilityUsed(withdrawn));
+        apply(new RollAbilityUsed(resolved));
+        assertEquals(List.of(withdrawn, resolved), game.turn().windowAbilities());
+        assertThrows(FrakCallTheAdmiralException.class, () -> apply(new InterruptWindowClosed()));
+
+        apply(new RollAbilityWithdrawn(withdrawn));
+        apply(new RollAbilityResolved(resolved));
+        assertEquals(List.of(), game.turn().windowAbilities());
+
+        apply(new InterruptWindowClosed());
+        assertEquals(Optional.empty(), game.turn().interruptWindow());
+    }
+
+    @Test
+    void anAbilityCanSetTheFaceOfARoll() {
+        apply(new DieRollStarted());
+        apply(new DieRolled(2));
+        apply(new DieRollAbilityUsed(CharacterAbility.ECO_OFFICER));
+        apply(new DieRollCardPlayed(STRATEGIC_PLANNING, 2));
+        assertEquals(List.of(CharacterAbility.ECO_OFFICER), game.turn().dieRoll().abilities());
+        assertFalse(game.turn().dieRoll().replaced());
+        assertEquals(4, game.turn().dieRoll().result());
+
+        apply(new DieRollReplaced(5, false)); // "Hotshot": the cards still count
+        assertTrue(game.turn().dieRoll().replaced());
+        assertEquals(7, game.turn().dieRoll().result());
+
+        apply(new DieRollReplaced(3, true)); // "Longshot": nothing counts
+        assertTrue(game.turn().dieRoll().fixed());
+        assertEquals(3, game.turn().dieRoll().result());
     }
 
     @Test
@@ -538,6 +656,17 @@ class FactApplierTest {
         assertEquals(List.of(LoyaltyCard.NOT_CYLON), game.player(2).loyaltyCards().cards());
     }
 
+    // Everyone learns the card, which stays with its holder.
+    @Test
+    void finalFiveCardShownChangesNothing() {
+        apply(new CardsGained(2, PlayerPile.LOYALTY, List.of(LoyaltyCard.FINAL_FIVE_DAMAGE_GALACTICA_TWICE)));
+
+        apply(new PlayerFact.FinalFiveCardShown(2, LoyaltyCard.FINAL_FIVE_DAMAGE_GALACTICA_TWICE));
+
+        assertEquals(List.of(LoyaltyCard.FINAL_FIVE_DAMAGE_GALACTICA_TWICE), game.player(2).loyaltyCards().cards());
+        assertEquals(List.of(), game.player(2).loyaltyCards().revealedCards());
+    }
+
     @Test
     void infiltrationStartedMakesTheCylonLeaderInfiltrate() {
         apply(new CharacterSelected(1, AARON_DORAL));
@@ -593,6 +722,18 @@ class FactApplierTest {
         apply(new MiracleTokenLost(1));
 
         assertFalse(game.player(1).hasMiracleToken());
+    }
+
+    // The turn keeps it until the next one starts, for the "once per turn" abilities.
+    @Test
+    void abilityUsedIsKeptByTheTurn() {
+        apply(new PlayerFact.AbilityUsed(1, CharacterAbility.ECO_OFFICER));
+
+        assertTrue(game.turn().hasUsed(1, CharacterAbility.ECO_OFFICER));
+
+        apply(new GameFact.TurnStarted(2));
+
+        assertFalse(game.turn().hasUsed(1, CharacterAbility.ECO_OFFICER));
     }
 
     @Test
@@ -738,6 +879,15 @@ class FactApplierTest {
     }
 
     @Test
+    void playedBy() {
+        val check = startCheck();
+        assertNull(check.playedBy());
+
+        apply(new SkillCheckFact.PlayedBy(3));
+        assertEquals(3, check.playedBy());
+    }
+
+    @Test
     void cardsPlayedBeforeAndRevealed() {
         val check = startCheck();
 
@@ -801,6 +951,24 @@ class FactApplierTest {
 
         assertEquals(2, check.difficultyAdjustment());
         assertTrue(check.politicsCountPositive());
+    }
+
+    @Test
+    void cardsDivided() {
+        val check = startCheck();
+
+        apply(new SkillCheckFact.CardsDivided());
+
+        assertTrue(check.cardsDivided());
+    }
+
+    @Test
+    void strengthZeroed() {
+        val check = startCheck();
+
+        apply(new SkillCheckFact.StrengthZeroed(SkillCardColor.TACTICS));
+
+        assertEquals(SkillCardColor.TACTICS, check.zeroStrengthColor());
     }
 
     @Test

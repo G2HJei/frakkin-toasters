@@ -18,7 +18,7 @@ public class ArmoryEventProcessor extends LocationActionProcessor<ArmoryEvent> {
     }
 
     @Override
-    public Followup process() {
+    protected Followup act() {
         return rollDie(new ArmoryResultEvent(event.centurionId()));
     }
 }

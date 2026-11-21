@@ -14,6 +14,7 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.POLITICS;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.CONSOLIDATE_POWER;
 
@@ -23,8 +24,9 @@ class SkillCheckOpsJournalTest extends TestHarness {
     SkillCard      card  = new SkillCard(3, CONSOLIDATE_POWER);
     SkillCheckPile pile = type.skillCheckColors().contains(POLITICS) ? SkillCheckPile.MATCHING : SkillCheckPile.NON_MATCHING;
 
+    // Face down, even onto an empty pile: "Guts and Initiative" skips the Destiny cards.
     @Test
-    void playedCardsLeaveTheHandAndLandInAPile() {
+    void playedCardsLeaveTheHandAndLandFaceDown() {
         game.player(1).gainSkillCards(card);
 
         ops.skillCheck().start(type, 2);
@@ -34,9 +36,23 @@ class SkillCheckOpsJournalTest extends TestHarness {
                 new SkillCheckStarted(type),
                 new TargetChosen(2),
                 new xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.CardsLost(1, PlayerPile.SKILL, List.of(card)),
-                new CardsPlaced(pile, List.of(card), true)), journal.facts());
+                new CardsPlaced(SkillCheckPile.CARDS, List.of(card), true)), journal.facts());
         assertNoSkillCards(1);
+        assertEquals(List.of(card), game.activeSkillCheck().cards().cards());
+        assertEquals(List.of(), game.activeSkillCheck().pile(pile).cards());
+    }
+
+    // After the division, e.g. "Force Their Hand": face up on its pile.
+    @Test
+    void cardsPlayedAfterTheDivisionLandFaceUpOnTheirPile() {
+        game.player(1).gainSkillCards(card);
+        ops.skillCheck().start(type);
+        ops.skillCheck().shuffleAndDivideCards();
+
+        ops.skillCheck().playCards(1, card);
+
         assertEquals(List.of(card), game.activeSkillCheck().pile(pile).cards());
+        assertEquals(List.of(), game.activeSkillCheck().cards().cards());
     }
 
     @Test
@@ -44,6 +60,7 @@ class SkillCheckOpsJournalTest extends TestHarness {
         game.player(1).gainSkillCards(card);
         ops.skillCheck().start(type);
         ops.skillCheck().playCards(1, card);
+        ops.skillCheck().shuffleAndDivideCards();
         val before = journal.facts().size();
 
         ops.skillCheck().discard(card);
@@ -66,8 +83,10 @@ class SkillCheckOpsJournalTest extends TestHarness {
         assertEquals(List.of(
                 new CardsDrawn(SkillCheckPile.CARDS, List.of(card, second)),
                 new CardsPlaced(pile, List.of(card), false),
-                new CardsPlaced(pile, List.of(second), false)),
+                new CardsPlaced(pile, List.of(second), false),
+                new CardsDivided()),
                 journal.facts().subList(before, journal.facts().size()));
+        assertTrue(game.activeSkillCheck().cardsDivided());
         assertEquals(List.of(card, second), game.activeSkillCheck().pile(pile).cards());
     }
 }

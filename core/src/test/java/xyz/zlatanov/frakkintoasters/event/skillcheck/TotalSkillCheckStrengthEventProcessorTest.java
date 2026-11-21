@@ -11,6 +11,8 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCheck;
 
 import java.util.List;
 
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType.WATER_SABOTAGED;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.WILLIAM_ADAMA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
@@ -133,5 +135,33 @@ class TotalSkillCheckStrengthEventProcessorTest extends EventTestHarness<TotalSk
                 one(new PlayerDecisionEvent<>(2, DeclareEmergencyEvent.class), new NoOpEvent(2)),
                 one(new PlayerDecisionEvent<>(3, DeclareEmergencyEvent.class), new NoOpEvent(3)),
                 single(new DetermineSkillCheckResultEvent()));
+    }
+
+    // "Inspirational Leader": on the check of a Crisis Card William Adama drew, every 1 strength card counts positive.
+    @Test
+    void strengthOneCardsCountPositiveForWilliamAdama() {
+        player(1).character(WILLIAM_ADAMA);
+        game.endSkillCheck();
+        skillCheck = game.startSkillCheck(WATER_SABOTAGED); // politics, leadership and tactics
+        skillCheck.matchingPile().addOnTop(new SkillCard(3, EXECUTIVE_ORDER));
+        skillCheck.nonMatchingPile().addOnTop(List.of(new SkillCard(1, REPAIR), new SkillCard(2, REPAIR)));
+
+        execute(new TotalSkillCheckStrengthEvent());
+
+        assertEquals(3 + 1 - 2, skillCheck.totalStrength());
+        assertFollowup(declareEmergencyThenDetermineResult());
+    }
+
+    // Not on a location's check.
+    @Test
+    void notOnALocationsCheck() {
+        player(1).character(WILLIAM_ADAMA);
+        skillCheck.matchingPile().addOnTop(new SkillCard(3, EXECUTIVE_ORDER));
+        skillCheck.nonMatchingPile().addOnTop(new SkillCard(1, REPAIR));
+
+        execute(new TotalSkillCheckStrengthEvent());
+
+        assertEquals(2, skillCheck.totalStrength());
+        assertFollowup(declareEmergencyThenDetermineResult());
     }
 }

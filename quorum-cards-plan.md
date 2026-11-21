@@ -518,3 +518,6 @@ Each has the choice the plan makes. A different answer changes only its phase.
 - The Fully Cooperative variant (A4.6.1), Aaron Doral's Ally (Ionian Nebula) and the New Caprica rule 9.8.2.1: out of
   scope.
 - Legal-move hints for the frontend. The `EventBuilder` only narrows the Quorum events to the cards held.
+
+Note (2026-11-21): `unimplemented-components-plan.md` has built the items above since, except the legal-move
+hints and what is out of scope.

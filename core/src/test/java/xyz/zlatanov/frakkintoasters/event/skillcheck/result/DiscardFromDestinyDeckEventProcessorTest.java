@@ -7,7 +7,9 @@ import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import java.util.List;
+import java.util.Set;
 
+import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 
@@ -24,6 +26,30 @@ class DiscardFromDestinyDeckEventProcessorTest extends EventTestHarness<DiscardF
         second = new SkillCard(2, INVESTIGATIVE_COMMITTEE);
         third = new SkillCard(3, SUPPORT_THE_PEOPLE);
         destinyDeck.addOnTop(first, second, third);
+    }
+
+    // The player looked at the deck, so its cards are his options: every distinct pair, a pair of copies once.
+    @Test
+    void shouldOfferEveryDistinctPair() {
+        destinyDeck.addOnTop(new SkillCard(1, CONSOLIDATE_POWER));
+        val options = DiscardFromDestinyDeckEventProcessor.options(game, 1);
+
+        assertEquals(Set.of(Set.of(first, second), Set.of(first, third), Set.of(first), Set.of(second, third)),
+                options.stream().map(option -> Set.copyOf(option.cards())).collect(toSet()));
+        assertEquals(4, options.size());
+
+        execute(options.getFirst()); // each option is a valid discard
+    }
+
+    @Test
+    void shouldOfferTheWholeDeckWhenItHoldsFewerThan2() {
+        destinyDeck.clear();
+        destinyDeck.addOnTop(first);
+        val options = DiscardFromDestinyDeckEventProcessor.options(game, 1);
+
+        assertEquals(List.of(new DiscardFromDestinyDeckEvent(1, List.of(first))), options);
+
+        execute(options.getFirst());
     }
 
     @Test

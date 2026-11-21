@@ -1,14 +1,18 @@
 package xyz.zlatanov.frakkintoasters.state;
 
+import xyz.zlatanov.frakkintoasters.state.character.Character;
 import lombok.Getter;
+import lombok.val;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
+import xyz.zlatanov.frakkintoasters.state.character.CharacterAbility;
 import xyz.zlatanov.frakkintoasters.state.board.Resource;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow;
 import xyz.zlatanov.frakkintoasters.state.interrupt.PlayedInterruptCard;
+import xyz.zlatanov.frakkintoasters.state.interrupt.UsedRollAbility;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 import xyz.zlatanov.frakkintoasters.state.view.TurnView;
 
@@ -39,6 +43,8 @@ public class Turn implements TurnView {
     @Getter(NONE)
     private final List<PlayedInterruptCard> windowCards            = new ArrayList<>();
     @Getter(NONE)
+    private final List<UsedRollAbility>     windowAbilities        = new ArrayList<>();
+    @Getter(NONE)
     private final List<SkillCardType>       resolvedInterruptCards = new ArrayList<>();
     @Getter(NONE)
     private final Map<Location, Integer>    raidersToMiss          = new EnumMap<>(Location.class);
@@ -46,6 +52,22 @@ public class Turn implements TurnView {
     private final List<SkillCardType>       playedSkillCards       = new ArrayList<>();
     @Getter(NONE)
     private final Set<Resource>             lossReductions         = EnumSet.noneOf(Resource.class);
+    @Getter(NONE)
+    private final Map<Integer, Set<TurnLimit>> usedTurnLimits      = new TreeMap<>();
+    @Getter(NONE)
+    private final Map<Integer, Set<CharacterAbility>> usedAbilities = new TreeMap<>();
+    private final Map<Integer, Set<CharacterAbility>> triggeredAbilities = new TreeMap<>();
+    private final Map<Title, Character>     borrowedTitles         = new EnumMap<>(Title.class);
+    @Getter(NONE)
+    private       Integer                   remoteActionPlayerNumber;
+    @Getter(NONE)
+    private       Location                  remoteActionLocation;
+    @Getter(NONE)
+    private       Location                  startLocation;
+    @Getter(NONE)
+    private final Set<Integer>              sentToBrigAtEndOfTurn  = new TreeSet<>();
+    @Getter(NONE)
+    private       Integer                   actionCostPaidBy;
 
     @Mutates
     public void start(int number) {
@@ -57,7 +79,124 @@ public class Turn implements TurnView {
         raidersToMiss.clear();
         playedSkillCards.clear();
         lossReductions.clear();
+        usedTurnLimits.clear();
+        usedAbilities.clear();
+        startLocation = null;
+        sentToBrigAtEndOfTurn.clear();
+        actionCostPaidBy = null;
+        triggeredAbilities.clear();
+        borrowedTitles.clear();
+        endRemoteAction();
         cylonShipsHeld = false;
+    }
+
+    @Override
+    public Map<Integer, Set<TurnLimit>> usedTurnLimits() {
+        val copy = new TreeMap<Integer, Set<TurnLimit>>();
+        usedTurnLimits.forEach((player, limits) -> copy.put(player, EnumSet.copyOf(limits)));
+        return copy;
+    }
+
+    @Mutates
+    public void useTurnLimit(int playerNumber, TurnLimit limit) {
+        if (!usedTurnLimits.computeIfAbsent(playerNumber, ignored -> EnumSet.noneOf(TurnLimit.class)).add(limit)) {
+            throw new FrakCallTheAdmiralException("Used this turn already: " + limit);
+        }
+    }
+
+    @Override
+    public Map<Integer, Set<CharacterAbility>> usedAbilities() {
+        val copy = new TreeMap<Integer, Set<CharacterAbility>>();
+        usedAbilities.forEach((player, abilities) -> copy.put(player, EnumSet.copyOf(abilities)));
+        return copy;
+    }
+
+    // An ability may be used again in the same turn unless it says "once per turn": its processor checks that.
+    @Mutates
+    public void useAbility(int playerNumber, CharacterAbility ability) {
+        usedAbilities.computeIfAbsent(playerNumber, ignored -> EnumSet.noneOf(CharacterAbility.class)).add(ability);
+    }
+
+    @Override
+    public Map<Integer, Set<CharacterAbility>> triggeredAbilities() {
+        val copy = new TreeMap<Integer, Set<CharacterAbility>>();
+        triggeredAbilities.forEach((player, abilities) -> copy.put(player, EnumSet.copyOf(abilities)));
+        return copy;
+    }
+
+    @Mutates
+    public void triggerAbility(int playerNumber, CharacterAbility ability) {
+        triggeredAbilities.computeIfAbsent(playerNumber, ignored -> EnumSet.noneOf(CharacterAbility.class)).add(ability);
+    }
+
+    @Mutates
+    public void clearAbilityTrigger(int playerNumber, CharacterAbility ability) {
+        val abilities = triggeredAbilities.get(playerNumber);
+        if (abilities != null) {
+            abilities.remove(ability);
+            if (abilities.isEmpty()) {
+                triggeredAbilities.remove(playerNumber);
+            }
+        }
+    }
+
+    @Override
+    public Map<Title, Character> borrowedTitles() {
+        return new EnumMap<>(borrowedTitles);
+    }
+
+    @Mutates
+    public void borrowTitle(Title title, Character previousHolder) {
+        borrowedTitles.put(title, previousHolder);
+    }
+
+    @Override
+    public Optional<Location> startLocation() {
+        return Optional.ofNullable(startLocation);
+    }
+
+    @Mutates
+    public void noteStartLocation(Location location) {
+        startLocation = location;
+    }
+
+    @Override
+    public boolean actionCostPaid(int playerNumber) {
+        return actionCostPaidBy != null && actionCostPaidBy == playerNumber;
+    }
+
+    @Mutates
+    public void payActionCost(Integer playerNumber) {
+        actionCostPaidBy = playerNumber;
+    }
+
+    @Override
+    public Set<Integer> sentToBrigAtEndOfTurn() {
+        return new TreeSet<>(sentToBrigAtEndOfTurn);
+    }
+
+    @Mutates
+    public void sendToBrigAtEndOfTurn(int playerNumber) {
+        sentToBrigAtEndOfTurn.add(playerNumber);
+    }
+
+    @Override
+    public Optional<Location> remoteActionLocation(int playerNumber) {
+        return remoteActionPlayerNumber != null && remoteActionPlayerNumber == playerNumber
+                ? Optional.of(remoteActionLocation)
+                : Optional.empty();
+    }
+
+    @Mutates
+    public void allowRemoteAction(int playerNumber, Location location) {
+        remoteActionPlayerNumber = playerNumber;
+        remoteActionLocation = location;
+    }
+
+    @Mutates
+    public void endRemoteAction() {
+        remoteActionPlayerNumber = null;
+        remoteActionLocation = null;
     }
 
     @Mutates
@@ -147,6 +286,11 @@ public class Turn implements TurnView {
     }
 
     @Override
+    public List<UsedRollAbility> windowAbilities() {
+        return List.copyOf(windowAbilities);
+    }
+
+    @Override
     public List<SkillCardType> resolvedInterruptCards() {
         return List.copyOf(resolvedInterruptCards);
     }
@@ -181,9 +325,23 @@ public class Turn implements TurnView {
     }
 
     @Mutates
+    public void useRollAbility(UsedRollAbility ability) {
+        windowAbilities.add(ability);
+    }
+
+    // It resolves, or another reroll in the window comes first: either way it leaves the window.
+    @Mutates
+    public void removeRollAbility(UsedRollAbility ability) {
+        if (!windowAbilities.remove(ability)) {
+            throw new FrakCallTheAdmiralException("Not in the window: " + ability);
+        }
+    }
+
+    @Mutates
     public void closeInterruptWindow() {
-        if (!windowCards.isEmpty()) {
-            throw new FrakCallTheAdmiralException("Cards are left in the window: " + windowCards);
+        if (!windowCards.isEmpty() || !windowAbilities.isEmpty()) {
+            throw new FrakCallTheAdmiralException("Cards or abilities are left in the window: " + windowCards
+                    + windowAbilities);
         }
         interruptWindow = null;
     }

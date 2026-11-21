@@ -192,8 +192,8 @@ class QuorumCardActionsTest {
     // The Arbitrator is asked as the "Admiral's Quarters" is activated, and the card leaves play once used.
     @Test
     void theArbitratorLowersAnAdmiralsQuartersCheck() {
-        start(all(setUp(WILLIAM_ADAMA), single(new GiveQuorumCardToPresidentEvent(ASSIGN_ARBITRATOR)),
-                single(new MoveCharacterEvent(WILLIAM_ADAMA, ADMIRALS_QUARTERS)), single(new ActionStepEvent()),
+        start(all(setUp(GAIUS_BALTAR_ALT), single(new GiveQuorumCardToPresidentEvent(ASSIGN_ARBITRATOR)),
+                single(new MoveCharacterEvent(GAIUS_BALTAR_ALT, ADMIRALS_QUARTERS)), single(new ActionStepEvent()),
                 single(new ActionStepEvent()), CYLONS_WIN));
 
         act(1);
@@ -202,7 +202,8 @@ class QuorumCardActionsTest {
         play(engine -> engine.submit(1, new AdmiralsQuartersEvent(1, 3)));
         choose(2, single(new UseArbitratorEvent(2, -3)));
 
-        assertEquals(-3, engine.view().activeSkillCheck().difficultyAdjustment());
+        // and Kara Thrace's "Insubordinate" makes it 3 easier against her as she is chosen
+        assertEquals(-6, engine.view().activeSkillCheck().difficultyAdjustment());
         assertEquals(List.of(), engine.view().quorumCardsInPlay());
         assertTrue(game().decks().quorum().discardedCards().contains(ASSIGN_ARBITRATOR));
     }

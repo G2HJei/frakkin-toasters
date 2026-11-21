@@ -1,6 +1,5 @@
 package xyz.zlatanov.frakkintoasters.event.crisis;
 
-import lombok.RequiredArgsConstructor;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.event.ActivateViperEvent;
 import xyz.zlatanov.frakkintoasters.event.ActivateViperEventProcessor;
@@ -12,20 +11,21 @@ import xyz.zlatanov.frakkintoasters.event.board.AdvancePursuitTrackEvent;
 import xyz.zlatanov.frakkintoasters.event.board.DecreaseJumpPreparationEvent;
 import xyz.zlatanov.frakkintoasters.event.board.DiscardNukeTokenEvent;
 import xyz.zlatanov.frakkintoasters.event.board.PlaceCenturionsEvent;
+import xyz.zlatanov.frakkintoasters.event.character.CharacterAbilities;
+import xyz.zlatanov.frakkintoasters.event.character.ChooseADifferentPathEvent;
+import xyz.zlatanov.frakkintoasters.event.character.DeceitfulDiscards;
 import xyz.zlatanov.frakkintoasters.event.crisis.ChooseCrisisSectionEvent.Section;
 import xyz.zlatanov.frakkintoasters.event.deck.ShuffleTreacheryIntoDestinyDeckEvent;
 import xyz.zlatanov.frakkintoasters.event.officials.DetermineNextPresidentEvent;
 import xyz.zlatanov.frakkintoasters.event.officials.MakePresidentEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
-import xyz.zlatanov.frakkintoasters.event.player.DiscardAllSkillCardsEvent;
-import xyz.zlatanov.frakkintoasters.event.player.DiscardRandomSkillCardsEvent;
 import xyz.zlatanov.frakkintoasters.event.player.DrawMutinyCardEvent;
 import xyz.zlatanov.frakkintoasters.event.player.ExecuteEvent;
 import xyz.zlatanov.frakkintoasters.event.player.LaunchViperEvent;
 import xyz.zlatanov.frakkintoasters.event.player.MoveFromBrigEvent;
 import xyz.zlatanov.frakkintoasters.event.player.SendToBrigEvent;
 import xyz.zlatanov.frakkintoasters.event.player.SendToSickbayEvent;
-import xyz.zlatanov.frakkintoasters.event.ship.DamageGalacticaEvent;
+import xyz.zlatanov.frakkintoasters.event.ship.DamageBattlestarEvent;
 import xyz.zlatanov.frakkintoasters.event.ship.DamageVipersEvent;
 import xyz.zlatanov.frakkintoasters.event.ship.DestroyRaptorEvent;
 import xyz.zlatanov.frakkintoasters.event.ship.DrawAndDestroyCivilianShipsEvent;
@@ -56,16 +56,25 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.BRIG;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.COMMAND;
 import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.GALACTICA;
 import static xyz.zlatanov.frakkintoasters.state.board.Resource.*;
+import static xyz.zlatanov.frakkintoasters.state.character.CharacterAbility.AMORAL;
+import static xyz.zlatanov.frakkintoasters.state.character.CharacterAbility.CHOOSE_A_DIFFERENT_PATH;
+import static xyz.zlatanov.frakkintoasters.state.crisis.CrisisChooser.CURRENT_PLAYER;
 
 /**
  * Builds the followups of the sections of a Crisis Card (rule 8.5). The two sections of an event crisis are its top and
  * bottom. A skill check crisis has the skill check on top, and its bottom is the alternate instruction that its chooser
  * may pick instead (rule 8.5.1.1).
  */
-@RequiredArgsConstructor
 public class CrisisCardFollowups {
 
-    private final GameView game;
+    private final GameView          game;
+    // "Deceitful": one of Romo Lampkin's discards is smaller, once per card. A builder serves one card.
+    private final DeceitfulDiscards deceitful;
+
+    public CrisisCardFollowups(GameView game) {
+        this.game = game;
+        deceitful = DeceitfulDiscards.of(game, true);
+    }
 
 
     /**
@@ -73,10 +82,23 @@ public class CrisisCardFollowups {
      */
     public Followup choice(CrisisCard card) {
         val chooser = chooser(card);
-        return one(Stream.of(TOP, BOTTOM)
-                .filter(section -> canChoose(card, section))
+        val sections = Stream.of(TOP, BOTTOM).filter(section -> canChoose(game, card, section)).toList();
+        // "Amoral": Tory Foster as current player takes the first option a "current player chooses" card lists.
+        val amoral = card.chooser() == CURRENT_PLAYER && game.player(chooser).hasAbility(AMORAL);
+        val options = new ArrayList<Event>((amoral ? sections.subList(0, 1) : sections).stream()
                 .map(section -> new ChooseCrisisSectionEvent(chooser, card, section))
-                .toArray(Event[]::new));
+                .toList());
+        if (CharacterAbilities.canUseMiracle(game, game.player(chooser), CHOOSE_A_DIFFERENT_PATH)) {
+            options.add(new ChooseADifferentPathEvent(chooser, card));
+        }
+        return one(options.toArray(Event[]::new));
+    }
+
+    /**
+     * @return "Choose a Different Path"'s result: "the current player discards 5 Skill Cards"
+     */
+    public Followup differentPath() {
+        return onCurrentPlayer(discard(currentPlayer(), 5));
     }
 
     /**
@@ -100,7 +122,7 @@ public class CrisisCardFollowups {
 
     // "Discard 1 nuke token. If you do not have any nuke tokens, you cannot choose this option." Otherwise a player can
     // always choose a section, whether or not it can be fulfilled (rule 8.5.2).
-    private boolean canChoose(CrisisCard card, Section section) {
+    public static boolean canChoose(GameView game, CrisisCard card, Section section) {
         val needsANuke = section == TOP && (card == CrisisCard.ABANDON_GALACTICA || card == CrisisCard.BUILD_CYLON_DETECTOR);
         return !needsANuke || game.nukes() > 0;
     }
@@ -118,7 +140,7 @@ public class CrisisCardFollowups {
             case RESCUE_CAPRICA_SURVIVORS -> all(lose(FUEL, 1), lose(FOOD, 1), gain(POPULATION, 1));
             case RESCUE_THE_FLEET -> single(lose(POPULATION, 2));
             // galactica
-            case RAIDERS_INBOUND -> all(lose(POPULATION, 1), new DamageGalacticaEvent());
+            case RAIDERS_INBOUND -> all(lose(POPULATION, 1), new DamageBattlestarEvent());
             // sickbay
             case RESCUE_MISSION_BASESTAR, RESCUE_MISSION_RAIDER ->
                     allOf(single(lose(MORALE, 1)), onCurrentPlayer(new SendToSickbayEvent(currentPlayer())));
@@ -142,14 +164,14 @@ public class CrisisCardFollowups {
             case STARVATION_IN_DOGSVILLE -> rollDie(new ResolveCrisisRollEvent(card, TOP));
             // Exodus
             case APPOINT_HEAD_OF_SECURITY ->
-                    all(new ReturnVipersToReservesEvent(), new DiscardRandomSkillCardsEvent(admiral(), 2));
+                    all(new ReturnVipersToReservesEvent(), discardRandom(admiral(), 2));
             case INTERROGATION, THE_CIRCLE -> chooseTarget(card);
             case REQUESTED_RESIGNATION -> all(discard(president(), 2), discard(admiral(), 2));
             case MEDAL_OF_DISTINCTION -> allOf(single(gain(MORALE, 1)), placeCivilianShips(game, 2),
                     single(new ActivateRaidersEvent()));
             case TRUTH_AND_RECONCILIATION -> allOf(single(lose(MORALE, 1)), chooseCharacterForBrig(president()));
             case UNWELCOME_FACES ->
-                    allOf(single(new DiscardAllSkillCardsEvent(admiral())), chooseCharacterForBrig(admiral()));
+                    allOf(single(discardAll(admiral())), chooseCharacterForBrig(admiral()));
             // Galactica
             case DECLARE_MARTIAL_LAW -> allOf(single(lose(MORALE, 1)), admiralBecomesPresident());
             // Pegasus
@@ -184,10 +206,10 @@ public class CrisisCardFollowups {
             case EARTH_IN_RUINS -> allOf(single(lose(FOOD, 1)), onCurrentPlayer(new DrawMutinyCardEvent(currentPlayer())));
             // galactica and jump preparation
             case CONTROVERSIAL_MANUSCRIPT ->
-                    all(gain(MORALE, 1), new DamageGalacticaEvent(), new DamageGalacticaEvent());
+                    all(gain(MORALE, 1), new DamageBattlestarEvent(), new DamageBattlestarEvent());
             case LABOR_DISPUTE -> all(lose(FUEL, 1), new DecreaseJumpPreparationEvent());
-            case APPOINT_HEAD_OF_SECURITY, UNWELCOME_FACES -> all(lose(MORALE, 1), new DamageGalacticaEvent());
-            case A_GUILTY_VERDICT, ENEMY_OF_MY_ENEMY -> all(new DamageGalacticaEvent(), new DamageGalacticaEvent());
+            case APPOINT_HEAD_OF_SECURITY, UNWELCOME_FACES -> all(lose(MORALE, 1), new DamageBattlestarEvent());
+            case A_GUILTY_VERDICT, ENEMY_OF_MY_ENEMY -> all(new DamageBattlestarEvent(), new DamageBattlestarEvent());
             case RESCUE_THE_FLEET -> all(lose(MORALE, 1), new PlaceShipsEvent(1, 3, 3));
             // ships
             case RESCUE_MISSION_BASESTAR, RESCUE_MISSION_RAIDER -> all(lose(FUEL, 1), new DestroyRaptorEvent());
@@ -198,8 +220,8 @@ public class CrisisCardFollowups {
                     new ActivateHeavyRaidersAndCenturionsEvent());
             case RETURN_TO_DUTY, MYSTERIOUS_MESSAGE -> single(new ActivateCylonBasestarsEvent());
             // skill cards
-            case AMBUSHED_BY_THE_PRESS -> single(new DiscardAllSkillCardsEvent(president()));
-            case QUESTION_PROCEDURE -> all(new DamageGalacticaEvent(), discard(president(), 3));
+            case AMBUSHED_BY_THE_PRESS -> single(discardAll(president()));
+            case QUESTION_PROCEDURE -> all(new DamageBattlestarEvent(), discard(president(), 3));
             case RAIDERS_INBOUND -> all(discard(cag(), 3), discard(admiral(), 3));
             case WATER_SHORTAGE_BASESTAR_AND_JUMP, WATER_SHORTAGE_BASESTAR_NO_JUMP, WATER_SHORTAGE_RAIDERS,
                  THE_CIRCLE, TRUTH_AND_RECONCILIATION -> presidentThenCurrentPlayerDiscard();
@@ -213,20 +235,20 @@ public class CrisisCardFollowups {
             case A_DESPERATE_PACT -> allOf(single(discard(president(), 3)),
                     onCurrentPlayer(new DrawMutinyCardEvent(currentPlayer())));
             case A_TRAITOR_ACCUSED -> onCurrentPlayer(discard(currentPlayer(), 5));
-            case KEEP_TABS_ON_VISITOR -> onCurrentPlayer(new DiscardRandomSkillCardsEvent(currentPlayer(), 4));
-            case REUNITE_THE_FLEET -> onCurrentPlayer(all(new DiscardRandomSkillCardsEvent(currentPlayer(), 2),
+            case KEEP_TABS_ON_VISITOR -> onCurrentPlayer(discardRandom(currentPlayer(), 4));
+            case REUNITE_THE_FLEET -> onCurrentPlayer(all(discardRandom(currentPlayer(), 2),
                     treachery(currentPlayer(), 2)));
             case FULFILLER_OF_PROPHECY ->
                     allOf(onCurrentPlayer(discard(currentPlayer(), 1)), single(new ReturnToCrisisStepEvent()));
             case REQUISITION_FOR_DEMETRIUS -> all(new DrawMutinyCardEvent(admiral()), treachery(admiral(), 2));
-            case SUSPICIOUS_ELECTION_RESULTS -> all(new DiscardRandomSkillCardsEvent(admiral(), 1), treachery(admiral(), 1));
+            case SUSPICIOUS_ELECTION_RESULTS -> all(discardRandom(admiral(), 1), treachery(admiral(), 1));
             // each player
             case CYLON_SCREENINGS -> eachHuman(player -> single(discard(player, 2)));
             case CODE_BLUE -> eachHuman(player -> all(discard(player, 2), treachery(player, 2)));
             case THE_BLACK_MARKET -> allOf(single(lose(FOOD, 1)),
                     eachHuman(player -> all(discard(player, 1), treachery(player, 1))));
             case FORCED_WATER_MINING -> allOf(all(gain(FOOD, 1), lose(MORALE, 1)),
-                    eachHuman(player -> single(new DiscardRandomSkillCardsEvent(player, 1))));
+                    eachHuman(player -> single(discardRandom(player, 1))));
             case ASSASSINATION_PLOT -> single(new ExecuteEvent(admiral()));
             case DISHONEST_TACTICS -> all(lose(FUEL, 1), new DrawQuorumCardEvent(), new DrawQuorumCardEvent());
             case SECRET_MEETINGS -> allOf(onCurrentPlayer(new DrawMutinyCardEvent(currentPlayer())), chooseTarget(card));
@@ -305,6 +327,18 @@ public class CrisisCardFollowups {
     }
 
     /* events */
+
+    private Event discard(int playerNumber, int count) {
+        return deceitful.discard(playerNumber, count);
+    }
+
+    private Event discardRandom(int playerNumber, int count) {
+        return deceitful.discardRandom(playerNumber, count);
+    }
+
+    private Event discardAll(int playerNumber) {
+        return deceitful.discardAll(playerNumber);
+    }
 
     // A revealed Cylon ignores what a crisis does to them (rule 6.1.2.1). Only the current player can be one, when
     // resolving a card at "Caprica": nobody who holds a title is a revealed Cylon.

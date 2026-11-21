@@ -2,15 +2,21 @@ package xyz.zlatanov.frakkintoasters.operation;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsDiscarded;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.GameFact.*;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.OwnTurnStarted;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.GameStep;
 import xyz.zlatanov.frakkintoasters.state.Team;
+import xyz.zlatanov.frakkintoasters.state.TurnLimit;
+import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.board.Resource;
+import xyz.zlatanov.frakkintoasters.state.card.MutinyCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
+import xyz.zlatanov.frakkintoasters.state.character.CharacterAbility;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
+import xyz.zlatanov.frakkintoasters.state.crisis.SuperCrisisCard;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
@@ -86,6 +92,19 @@ public class GameOps extends AbstractOps {
     }
 
     /**
+     * Lets the player take the action of the location from wherever he is, e.g. through Louis Hoshi's "Organized".
+     */
+    public void allowRemoteAction(int playerNumber, Location location) {
+        record(new RemoteActionAllowed(playerNumber, location));
+    }
+
+    public void endRemoteAction() {
+        if (game.players().stream().anyMatch(p -> game.turn().remoteActionLocation(p.number()).isPresent())) {
+            record(new RemoteActionEnded());
+        }
+    }
+
+    /**
      * The current player acts again.
      */
     public void resetActingPlayer() {
@@ -128,6 +147,15 @@ public class GameOps extends AbstractOps {
         record(new CrisisCardPlayed(card));
     }
 
+    /**
+     * Takes a Crisis Card that was just revealed out of the turn and discards it, e.g. for "Secret Destiny". Its icons no
+     * longer count.
+     */
+    public void discardRevealedCrisisCard(CrisisCard card) {
+        record(new CrisisCardsCleared(List.of(card)));
+        record(new CardsDiscarded(CRISIS, List.of(card)));
+    }
+
     public void discardCrisisCards() {
         val cards = game.turn().crisisCards();
         if (cards.isEmpty()) {
@@ -154,6 +182,18 @@ public class GameOps extends AbstractOps {
         record(new ReturnToCrisisStepChanged(returns));
     }
 
+    public void discardPlayedMutinyCard(MutinyCard card) {
+        record(new CardsDiscarded(MUTINY, List.of(card)));
+    }
+
+    public void removeMutinyCardFromGame(MutinyCard card) {
+        record(new DeckFact.CardsRemovedFromGame(MUTINY, List.of(card)));
+    }
+
+    public void discardSuperCrisisCard(SuperCrisisCard card) {
+        record(new CardsDiscarded(SUPER_CRISIS, List.of(card)));
+    }
+
     public void discardNuke() {
         record(new NukeDiscarded());
     }
@@ -167,6 +207,36 @@ public class GameOps extends AbstractOps {
      */
     public void holdCylonShips() {
         record(new CylonShipsHeld());
+    }
+
+    public void useTurnLimit(int playerNumber, TurnLimit limit) {
+        record(new TurnLimitUsed(playerNumber, limit));
+    }
+
+    /**
+     * Notes where the current player is at the start of his turn, for an ability that compares it later, e.g. "Stim
+     * Junkie".
+     */
+    public void noteStartLocation(Location location) {
+        record(new StartLocationNoted(location));
+    }
+
+    /**
+     * The player goes to the "Brig" at the end of the turn, e.g. by "Kleptomania".
+     */
+    public void sendToBrigAtEndOfTurn(int playerNumber) {
+        record(new SentToBrigAtEndOfTurn(playerNumber));
+    }
+
+    /**
+     * The player paid the cost of his action, e.g. "Terminal Illness": the action follows.
+     */
+    public void payActionCost(int playerNumber) {
+        record(new ActionCostPaid(playerNumber));
+    }
+
+    public void actionCostSettled() {
+        record(new ActionCostPaid(null));
     }
 
     public void moraleLostToExecution() {
@@ -213,5 +283,16 @@ public class GameOps extends AbstractOps {
 
     public void playOnDieRoll(SkillCardType card, int modifier) {
         record(new DieRollCardPlayed(card, modifier));
+    }
+
+    public void useAbilityOnDieRoll(CharacterAbility ability) {
+        record(new DieRollAbilityUsed(ability));
+    }
+
+    /**
+     * An ability sets the face instead of the die ("Hotshot"), and a fixed one is the result as it is ("Longshot").
+     */
+    public void replaceDieRoll(int value, boolean fixed) {
+        record(new DieRollReplaced(value, fixed));
     }
 }

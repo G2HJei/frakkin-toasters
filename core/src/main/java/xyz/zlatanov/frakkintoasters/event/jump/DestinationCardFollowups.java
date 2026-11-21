@@ -6,7 +6,7 @@ import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
 import xyz.zlatanov.frakkintoasters.event.board.IncreaseJumpPreparationEvent;
 import xyz.zlatanov.frakkintoasters.event.jump.RiskShipsEvent.Risk;
-import xyz.zlatanov.frakkintoasters.event.ship.DamageGalacticaEvent;
+import xyz.zlatanov.frakkintoasters.event.ship.DamageBattlestarEvent;
 import xyz.zlatanov.frakkintoasters.event.ship.DestroyRaptorEvent;
 import xyz.zlatanov.frakkintoasters.event.ship.DrawAndDestroyCivilianShipsEvent;
 import xyz.zlatanov.frakkintoasters.event.ship.PlaceCivilianShipsInFrontEvent;
@@ -67,7 +67,7 @@ public final class DestinationCardFollowups {
             // basestar once.
             case DERELICT_BASESTAR -> all(lose(FUEL, 1), new DerelictBasestarEvent());
             // Lose 1 fuel and damage Galactica once.
-            case DYING_STAR -> all(lose(FUEL, 1), new DamageGalacticaEvent());
+            case DYING_STAR -> all(lose(FUEL, 1), new DamageBattlestarEvent());
             // The Admiral may destroy 1 viper to gain 1 fuel.
             case GAS_GIANT -> GasGiantEventProcessor.canDestroyAViper(game)
                     ? optional(admiral, new GasGiantEvent(admiral))

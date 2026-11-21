@@ -54,13 +54,16 @@ public class DecksHolder implements DecksHolderView {
     @Builder.Default
     private final Deck<SkillCard>       destiny         = new Deck<>(false);
     @Builder.Default
-    // 29 cards (rule A2.3.13). The extra copies follow A4.6.1 ("Arrest Order" x2) and A2.3.13's counts of cards that
-    // raise morale and food. The second "Authorization of Brutal Force" is inferred: it makes 29.
+    // 29 cards (rule A2.3.13): "Inspirational Speech" x4, "Authorization of Brutal Force", "Arrest Order" (A4.6.1) and
+    // "Food Rationing" x2, every other card once, as the players' deck lists give them.
     private final Deck<QuorumCard>      quorum          = genericDeck(QuorumCard.class, QuorumCard.ARREST_ORDER,
             QuorumCard.AUTHORIZATION_OF_BRUTAL_FORCE, QuorumCard.FOOD_RATIONING, QuorumCard.INSPIRATIONAL_SPEECH,
             QuorumCard.INSPIRATIONAL_SPEECH, QuorumCard.INSPIRATIONAL_SPEECH);
     @Builder.Default
-    private final Deck<CrisisCard>      crisis          = genericDeck(CrisisCard.class);
+    // 141 cards: the base game has 4 "Food Shortage" and 3 "Water Shortage" with the basestar and the jump icon
+    private final Deck<CrisisCard>      crisis          = genericDeck(CrisisCard.class, CrisisCard.FOOD_SHORTAGE,
+            CrisisCard.FOOD_SHORTAGE, CrisisCard.FOOD_SHORTAGE, CrisisCard.WATER_SHORTAGE_BASESTAR_AND_JUMP,
+            CrisisCard.WATER_SHORTAGE_BASESTAR_AND_JUMP);
     @Builder.Default
     private final Deck<SuperCrisisCard> superCrisis     = genericDeck(SuperCrisisCard.class);
     @Builder.Default

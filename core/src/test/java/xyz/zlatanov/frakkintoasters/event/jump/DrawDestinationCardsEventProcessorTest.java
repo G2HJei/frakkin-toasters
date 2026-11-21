@@ -48,4 +48,14 @@ class DrawDestinationCardsEventProcessorTest extends EventTestHarness<DrawDestin
                 new ChooseDestinationEvent(3, CYLON_AMBUSH, List.of(ICY_MOON, DEEP_SPACE))));
         assertEquals(List.of(), game.quorumCardsInPlay());
     }
+
+    // "Blind Jump": the Admiral draws 1 card, so there is nothing to choose.
+    @Test
+    void afterABlindJumpTheAdmiralDrawsOneCard() {
+        destinationDeck.nextCard(xyz.zlatanov.frakkintoasters.state.card.DestinationCard.ICY_MOON);
+
+        execute(new DrawDestinationCardsEvent(true));
+
+        assertFollowup(new ResolveDestinationCardEvent(xyz.zlatanov.frakkintoasters.state.card.DestinationCard.ICY_MOON));
+    }
 }

@@ -10,7 +10,7 @@ import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.crisis.ActivateCylonBasestarsEvent;
 import xyz.zlatanov.frakkintoasters.event.officials.GiveTitlesToNextInLineEvent;
 import xyz.zlatanov.frakkintoasters.event.player.SendToSickbayEvent;
-import xyz.zlatanov.frakkintoasters.event.ship.DamageGalacticaEvent;
+import xyz.zlatanov.frakkintoasters.event.ship.DamageBattlestarEvent;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
 
 import java.util.stream.Stream;
@@ -28,9 +28,9 @@ class ResolveConsequencesEventProcessorTest extends EventTestHarness<ResolveCons
     public static Stream<Arguments> shouldFollowupWithConsequence() {
         return Stream.of(
                 arguments(HAUNTED_BY_THE_PAST, single(new GiveTitlesToNextInLineEvent(1))),
-                arguments(POWER_FAILURE, single(new DamageGalacticaEvent())),
+                arguments(POWER_FAILURE, single(new DamageBattlestarEvent())),
                 arguments(THREAT_OF_SUPER_NOVA, single(new ActivateCylonBasestarsEvent())),
-                arguments(FIRE_ALL_MISSILES, all(new DamageGalacticaEvent(), new DamageGalacticaEvent()))
+                arguments(FIRE_ALL_MISSILES, all(new DamageBattlestarEvent(), new DamageBattlestarEvent()))
         );
     }
 

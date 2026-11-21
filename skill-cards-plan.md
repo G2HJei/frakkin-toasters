@@ -436,3 +436,6 @@ Each has the choice the plan makes. A different answer changes only its phase.
 - Pegasus destruction (rule 11.7.2.4), and the other bugs in `unimplemented-components.md` except Communications.
 - The New Caprica and Ionian Nebula rulings on these cards (8.4.2, 8.5.4, 8.3.6.2): out of scope.
 - A Stranded Karl "Helo" Agathon still takes no actions while off the board, card actions included.
+
+Note (2026-11-21): `unimplemented-components-plan.md` has built the items above since, except the legal-move
+hints and what is out of scope.

@@ -12,7 +12,7 @@ public class PresidentsOfficeEventProcessor extends LocationActionProcessor<Pres
 
     // Only the politics cards left, if fewer than 2 (rule 8.2.2.5).
     @Override
-    public Followup process() {
+    protected Followup act() {
         val count = Math.min(2, game.decks().skillCardsLeft(POLITICS));
         ops.player(event.playerNumber()).drawSkillCards(Collections.nCopies(count, POLITICS));
         return Followup.NONE;

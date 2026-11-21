@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.CardsSeen;
-import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.result.DiscardFromDestinyDeckEvent;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
@@ -41,7 +40,8 @@ class ConsultTheOracleEventProcessorTest extends EventTestHarness<ConsultTheOrac
 
         assertEquals(List.of(new CardsSeen(1, CRISIS, List.of(bottom)),
                 new CardsSeen(1, DESTINY, destinyDeck.cards())), seen());
-        assertFollowup(all(new PlayerDecisionEvent<>(1, DiscardFromDestinyDeckEvent.class),
+        // With 2 cards left, both go: the only option.
+        assertFollowup(all(new DiscardFromDestinyDeckEvent(1, destinyDeck.cards()),
                 new DiscardPlayedQuorumCardEvent(CONSULT_THE_ORACLE)));
     }
 

@@ -35,6 +35,18 @@ public enum LoyaltyCard {
     }
 
     /**
+     * @return whether it is a Final Five card, which counts as "You Are Not a Cylon" but resolves when another player
+     * looks at it or an execution reveals it (rule 5.4.1)
+     */
+    public boolean isFinalFive() {
+        return switch (this) {
+            case FINAL_FIVE_YOU_ARE_SENT_TO_BRIG, FINAL_FIVE_YOU_ARE_EXECUTED, FINAL_FIVE_THEY_ARE_EXECUTED,
+                 FINAL_FIVE_DAMAGE_GALACTICA_TWICE, FINAL_FIVE_CYLON_SHIPS_ACTIVATE -> true;
+            default -> false;
+        };
+    }
+
+    /**
      * @return the resource an unrevealed Personal Goal card reduces by 1 at the end of the game (rule 16.2), or
      * {@code null} for any other card
      */

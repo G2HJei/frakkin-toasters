@@ -2,7 +2,10 @@ package xyz.zlatanov.frakkintoasters.event.player;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
+import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.character.CharacterMoves;
+import xyz.zlatanov.frakkintoasters.event.character.HereticDiscardEvent;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.board.LocationsArea;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
@@ -10,8 +13,11 @@ import xyz.zlatanov.frakkintoasters.state.ship.ViperMarkVII;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
+import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.allOf;
+import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.DISTANCE_LOOKUP_TABLE;
 
 public class MoveEventProcessor extends EventProcessor<MoveEvent> {
@@ -34,7 +40,8 @@ public class MoveEventProcessor extends EventProcessor<MoveEvent> {
         val shouldDiscardCard = !Objects.equals(startingArea(), targetArea());
         val isDiscardingCard = discardCard != null;
         return isEligibleLocation &&
-                shouldDiscardCard == isDiscardingCard;
+                shouldDiscardCard == isDiscardingCard
+                && !CharacterMoves.hereticHeld(game, player);
     }
 
     @Override
@@ -42,6 +49,10 @@ public class MoveEventProcessor extends EventProcessor<MoveEvent> {
         if (discardCard != null) {
             ops.player(player.number()).discard(discardCard);
         }
+        // Moving between ships is a discard the player chooses (rule 10.2.1).
+        val mutinyCard = discardCard == null ? Followup.NONE
+                : TreacheryDiscards.mutinyCardFor(game, ops, player.number(), List.of(discardCard));
+        val heretic = CharacterMoves.hereticCost(game, player);
         val playerCharacter = player.character();
         val isPiloting = currentLocation().isSpaceLocation();
         val isStayingInSpace = destination.isSpaceLocation();
@@ -55,7 +66,12 @@ public class MoveEventProcessor extends EventProcessor<MoveEvent> {
         } else {
             ops.player(playerCharacter).moveTo(destination);
         }
-        return Followup.NONE;
+        // "Heretic": leaving the "Resurrection Ship" costs D'Anna Biers a Super Crisis Card of her choice.
+        return allOf(mutinyCard, heretic
+                ? one(player.superCrisisCards().cards().stream().distinct()
+                .map(card -> new HereticDiscardEvent(player.number(), card))
+                .toArray(Event[]::new))
+                : Followup.NONE);
     }
 
     private boolean isEligibleLocation() {
@@ -65,9 +81,12 @@ public class MoveEventProcessor extends EventProcessor<MoveEvent> {
         val currentLocation = currentLocation();
         val isMovingToDifferentLocation = currentLocation != destination;
         val shipToSpaceMovement = !currentLocation.isSpaceLocation() && destination.isSpaceLocation();
+        // Nobody moves to Colonial One once "Bomb on Colonial One" destroyed it.
         return isMovingToDifferentLocation
                 && !shipToSpaceMovement
                 && !hazardousLocation
+                && !game.isDestroyed(destination)
+                && !CharacterMoves.cloudedBlocks(game, player, destination)
                 && validSpaceDistance(currentLocation)
                 && isHuman != cylonLocation;
     }

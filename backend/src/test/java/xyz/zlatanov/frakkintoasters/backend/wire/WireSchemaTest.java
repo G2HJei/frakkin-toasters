@@ -52,6 +52,8 @@ class WireSchemaTest {
         assertEquals("ARMORY", armory.get("location").stringValue());
         assertTrue(contains(armory.get("interfaces"), "LocationEvent"));
         assertTrue(contains(schema.get("lists").get("sandboxEvents"), "PutCrisisCardOnTopEvent"));
+        assertTrue(contains(schema.get("lists").get("anytimeEvents"), "RevealMotiveCardEvent"));
+        assertTrue(contains(schema.get("types").get("AnytimeEvent").get("members"), "RevealMotiveCardEvent"));
         assertTrue(contains(schema.get("types").get("Event").get("members"), "MoveEvent"));
         assertEquals("GameMessage", schema.get("messages").get("game").stringValue());
         assertEquals("type", schema.get("types").get("ServerMessage").get("discriminator").stringValue());

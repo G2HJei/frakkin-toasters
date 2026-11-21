@@ -1,11 +1,14 @@
 package xyz.zlatanov.frakkintoasters.event.turn;
 
+import lombok.val;
+import xyz.zlatanov.frakkintoasters.event.character.ManipulativeEventProcessor;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.endgame.CylonsWinEvent;
 
 import java.util.stream.IntStream;
 
+import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.allOf;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.playersFrom;
 
@@ -17,9 +20,11 @@ public class EndTurnEventProcessor extends EventProcessor<EndTurnEvent> {
         if (resourceDepleted()) {
             return single(new CylonsWinEvent());
         }
+        // "Manipulative": the titles Ellen Tigh took go back at the end of her turn.
+        val successions = ManipulativeEventProcessor.giveTitlesBack(game, ops);
         // The current player token passes to the player on the left (rule 8.1).
         ops.changeCurrentPlayer(playersFrom(game, game.turn().currentPlayerNumber()).get(1).number());
-        return single(new StartTurnEvent());
+        return allOf(successions, single(new StartTurnEvent()));
     }
 
     // The only resource check (rule 16.1). A resource can reach 0 during a turn and recover before the turn ends.

@@ -5,9 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.event.endgame.CylonsWinEvent;
-import xyz.zlatanov.frakkintoasters.event.loyalty.GiveLoyaltyCardsEvent;
-import xyz.zlatanov.frakkintoasters.event.loyalty.PassMutineerCardEvent;
-import xyz.zlatanov.frakkintoasters.event.officials.GiveTitlesToNextInLineEvent;
+import xyz.zlatanov.frakkintoasters.event.loyalty.RevealCylonOnExecutionEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
 import xyz.zlatanov.frakkintoasters.state.card.QuorumCardInPlay;
@@ -19,6 +17,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.state.board.Resource.MORALE;
+import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DISCARD_EXACTLY_2;
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.*;
@@ -73,6 +72,20 @@ class ExecuteEventProcessorTest extends EventTestHarness<ExecuteEvent> {
         assertTrue(player(2).loyaltyCards().isEmpty());
         assertEquals(List.of(NOT_CYLON), loyaltyDeck.discardedCards());
         assertFalse(game.turn().endedEarly());
+        assertFollowupSelection();
+    }
+
+    // "The player discards all his Loyalty Cards", a Personal Goal he revealed included: the new character doesn't keep
+    // it.
+    @Test
+    void shouldDiscardARevealedPersonalGoal() {
+        player(2).loyaltyCards().addOnTop(NOT_CYLON, NOT_CYLON_SELFISH).reveal(NOT_CYLON_SELFISH);
+
+        execute(new ExecuteEvent(2));
+
+        assertTrue(player(2).loyaltyCards().isEmpty());
+        assertTrue(player(2).loyaltyCards().revealedCards().isEmpty());
+        assertEquals(List.of(NOT_CYLON, NOT_CYLON_SELFISH), loyaltyDeck.discardedCards());
         assertFollowupSelection();
     }
 
@@ -150,47 +163,28 @@ class ExecuteEventProcessorTest extends EventTestHarness<ExecuteEvent> {
                 new FinishExecutionEvent(1, HELENA_CAIN)));
     }
 
-    // A Cylon reveals one "You Are a Cylon" card, gives his other Loyalty Cards to a human of his choice, and resurrects.
+    // A Cylon reveals one "You Are a Cylon" card, and then follows the reveal (FinishCylonRevealEventProcessorTest).
     @Test
     void shouldRevealAnExecutedCylon() {
         player(2).loyaltyCards().addOnTop(CYLON_DAMAGE_GALACTICA, NOT_CYLON);
 
         execute(new ExecuteEvent(2));
 
-        assertEquals(List.of(CYLON_DAMAGE_GALACTICA), player(2).loyaltyCards().revealedCards());
-        assertTrue(player(2).isRevealedCylon());
+        assertFalse(player(2).isRevealedCylon());
         assertEquals(KARA_STARBUCK_THRACE, player(2).character());
-        assertEquals(RESURRECTION_SHIP, locate(KARA_STARBUCK_THRACE));
-        assertFollowup(all(
-                one(new GiveLoyaltyCardsEvent(2, 3), new GiveLoyaltyCardsEvent(2, 1)),
-                single(new GiveTitlesToNextInLineEvent(2))));
+        assertFollowup(new RevealCylonOnExecutionEvent(2, CYLON_DAMAGE_GALACTICA));
     }
 
-    // "If his character was the Mutineer, he chooses a human player and passes him the "You Are the Mutineer" Loyalty
-    // Card faceup"
+    // "he reveals one "You Are a Cylon" card": his choice when he holds two different ones.
     @Test
-    void shouldLetACylonMutineerPassTheCard() {
-        player(2).loyaltyCards().addOnTop(CYLON_DAMAGE_GALACTICA, MUTINEER);
+    void shouldLetAnExecutedCylonChooseTheCardHeReveals() {
+        player(2).loyaltyCards().addOnTop(CYLON_DAMAGE_GALACTICA, CYLON_REDUCE_MORALE);
 
         execute(new ExecuteEvent(2));
 
-        assertFollowup(all(
-                one(new PassMutineerCardEvent(2, 3), new PassMutineerCardEvent(2, 1)),
-                single(new GiveTitlesToNextInLineEvent(2))));
-    }
-
-    // "If he was piloting a viper it is returned to the Reserves." (rule 6.1.1)
-    @Test
-    void shouldReturnTheViperOfACylonPilot() {
-        player(2).loyaltyCards().addOnTop(CYLON_DAMAGE_GALACTICA);
-        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
-        ops.player(2).pilot(viper.id());
-
-        execute(new ExecuteEvent(2));
-
-        assertEquals(RESURRECTION_SHIP, locate(KARA_STARBUCK_THRACE));
-        assertTrue(galacticaBoard.reserves().contains(viper));
-        assertFollowup(new GiveTitlesToNextInLineEvent(2));
+        assertFollowup(one(
+                new RevealCylonOnExecutionEvent(2, CYLON_DAMAGE_GALACTICA),
+                new RevealCylonOnExecutionEvent(2, CYLON_REDUCE_MORALE)));
     }
 
     // "If a player is a Cylon Leader, he has no Loyalty Cards to reveal, but instead proceeds to step 4, "Cylon"."
@@ -228,9 +222,40 @@ class ExecuteEventProcessorTest extends EventTestHarness<ExecuteEvent> {
         assertFollowup(new CylonsWinEvent());
     }
 
+    // A Final Five card the execution reveals makes every other human discard 2 Skill Cards, then leaves the game.
+    @Test
+    void shouldResolveAFinalFiveCardTheExecutionReveals() {
+        player(2).loyaltyCards().addOnTop(NOT_CYLON, FINAL_FIVE_THEY_ARE_EXECUTED);
+        player(1).gainSkillCards(new SkillCard(1, LAUNCH_SCOUT));
+
+        execute(new ExecuteEvent(2));
+
+        assertTrue(player(2).loyaltyCards().isEmpty());
+        assertEquals(List.of(NOT_CYLON), loyaltyDeck.discardedCards());
+        assertTrue(game.removedComponents().contains(FINAL_FIVE_THEY_ARE_EXECUTED));
+        // Gaius Baltar holds no Skill Card, so only Helena Cain discards.
+        assertFollowup(all(
+                new PlayerDecisionEvent<>(1, DiscardSkillCardsEvent.class, DISCARD_EXACTLY_2),
+                new PlayerDecisionEvent<>(2, SelectCharacterEvent.class),
+                new FinishExecutionEvent(2, KARA_STARBUCK_THRACE)));
+    }
+
     private void assertFollowupSelection() {
         assertFollowup(all(
                 new PlayerDecisionEvent<>(2, SelectCharacterEvent.class),
                 new FinishExecutionEvent(2, KARA_STARBUCK_THRACE)));
+    }
+
+    // An execution that costs no morale, as Anastasia "Dee" Dualla's "Emotionally Fragile" makes hers.
+    @Test
+    void anExecutionWithoutTheMoraleLoss() {
+        player(2).loyaltyCards().addOnTop(NOT_CYLON);
+        val morale = galacticaBoard.morale();
+
+        execute(new ExecuteEvent(2, true));
+
+        assertEquals(morale, galacticaBoard.morale());
+        assertFalse(game.moraleLostToExecution());
+        assertFollowupSelection();
     }
 }

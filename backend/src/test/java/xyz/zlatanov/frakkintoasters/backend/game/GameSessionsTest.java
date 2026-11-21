@@ -10,6 +10,7 @@ import xyz.zlatanov.frakkintoasters.backend.game.CommandResult.Reason;
 import xyz.zlatanov.frakkintoasters.backend.game.CommandResult.Rejected;
 import xyz.zlatanov.frakkintoasters.backend.game.GameBundle.GameStatus;
 import xyz.zlatanov.frakkintoasters.backend.journal.JournalCodec;
+import xyz.zlatanov.frakkintoasters.engine.AnytimeTestEvent;
 import xyz.zlatanov.frakkintoasters.engine.FailingEvent;
 import xyz.zlatanov.frakkintoasters.engine.GameEngine;
 import xyz.zlatanov.frakkintoasters.engine.ScriptEvent;
@@ -146,6 +147,41 @@ class GameSessionsTest extends BackendTest {
         assertEquals(sequence, session.sequence());
     }
 
+    // Player 2 acts while player 1 is asked: the choice stays pending, and the event's player is the connection's.
+    @Test
+    void anAnytimeEventRunsAheadOfAnotherPlayersInput() {
+        val choice = one(single(new NoOpEvent(1)), single(new CylonsWinEvent()));
+        sessions.start(game, TestEngines.start(3, Randomness.seeded(1),
+                new ScriptEvent(all(choice, single(new CylonsWinEvent())))));
+        val sequence = rows();
+        val json = (tools.jackson.databind.node.ObjectNode) codec.writeEvent(new AnytimeTestEvent(3));
+
+        val accepted = sessions.submit(game, Viewer.player(2), sessions.status(game, Viewer.player(2)).token(), json);
+
+        assertInstanceOf(Accepted.class, accepted);
+        assertTrue(rows() > sequence);
+        sessions.evict(game);
+        assertFalse(liveGame().player(2).hasMiracleToken());
+        assertTrue(liveGame().player(3).hasMiracleToken());
+        assertInstanceOf(Choose.class, sessions.status(game, Viewer.player(1)).game().input());
+        // he has no miracle token left to spend
+        val again = sessions.submit(game, Viewer.player(2), sessions.status(game, Viewer.player(2)).token(), json);
+        assertEquals(Reason.INVALID, ((Rejected) again).reason());
+    }
+
+    // In a sandbox the user answers for everyone, so the event names the player who acts.
+    @Test
+    void aSandboxSubmitsAnAnytimeEventForThePlayerItNames() {
+        sessions.start(game, TestEngines.start(3, Randomness.seeded(1),
+                new ScriptEvent(all(one(single(new NoOpEvent(1)), single(new CylonsWinEvent())), single(new CylonsWinEvent())))));
+        val token = sessions.status(game, Viewer.sandbox()).token();
+
+        assertInstanceOf(Accepted.class, sessions.submit(game, Viewer.sandbox(), token, codec.writeEvent(new AnytimeTestEvent(3))));
+
+        assertFalse(liveGame().player(3).hasMiracleToken());
+        assertTrue(liveGame().player(1).hasMiracleToken());
+    }
+
     @Test
     void aGameOfAnotherFormatVersionIsNotOpened() {
         val old = bundles.create("old", createUser("host"), JournalCodec.FORMAT_VERSION + 1);
@@ -193,6 +229,11 @@ class GameSessionsTest extends BackendTest {
                 .map(key -> key + ": " + expected.get(key) + " != " + actual.get(key))
                 .toList();
         assertEquals(List.of(), differing);
+    }
+
+    private Game liveGame() {
+        sessions.status(game, Viewer.observer()); // loads the session
+        return (Game) sessions.cached(game).orElseThrow().view();
     }
 
     private GameSnapshot snapshot() {

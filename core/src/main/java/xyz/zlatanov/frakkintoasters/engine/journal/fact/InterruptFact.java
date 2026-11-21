@@ -3,6 +3,7 @@ package xyz.zlatanov.frakkintoasters.engine.journal.fact;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow;
 import xyz.zlatanov.frakkintoasters.state.interrupt.PlayedInterruptCard;
+import xyz.zlatanov.frakkintoasters.state.interrupt.UsedRollAbility;
 
 /**
  * Facts about the interrupt windows of the turn and the effects of the cards played into them that outlast the window.
@@ -24,6 +25,17 @@ public sealed interface InterruptFact extends Fact {
     }
 
     record InterruptWindowClosed() implements InterruptFact {
+    }
+
+    // A character ability used in the window, secret until it closes.
+    record RollAbilityUsed(UsedRollAbility ability) implements InterruptFact {
+    }
+
+    // Another reroll of the window comes first, so the ability isn't used and stays available.
+    record RollAbilityWithdrawn(UsedRollAbility ability) implements InterruptFact {
+    }
+
+    record RollAbilityResolved(UsedRollAbility ability) implements InterruptFact {
     }
 
     // "Run Interference": the next raiders activating in the space area miss.

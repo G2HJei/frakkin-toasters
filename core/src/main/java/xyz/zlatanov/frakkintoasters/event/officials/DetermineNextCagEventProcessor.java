@@ -7,6 +7,7 @@ import xyz.zlatanov.frakkintoasters.state.character.Character;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.BRIG;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
@@ -42,13 +43,17 @@ public class DetermineNextCagEventProcessor extends EventProcessor<DetermineNext
                 TORY_FOSTER,
                 ROMO_LAMPKIN,
                 LAURA_ROSLIN));
-        lineOfSuccession.removeAll(galacticaBoard.charactersIn(BRIG));
         return lineOfSuccession;
     }
 
     @Override
     public Followup process() {
-        ops.titles().assignCag(calcNextInLine(game, event.excludedPlayerNumber()));
+        val brig = galacticaBoard.charactersIn(BRIG);
+        // The highest in line outside the "Brig". When every human is in it, the highest in line there, until one of
+        // them leaves it (rules 4.4.2.3 and 4.4.3.2).
+        val next = Optional.ofNullable(nextInLine(game, event.excludedPlayerNumber(), character -> !brig.contains(character)))
+                .orElseGet(() -> nextInLine(game, event.excludedPlayerNumber(), character -> true));
+        ops.titles().assignCag(next);
         return Followup.NONE;
     }
 

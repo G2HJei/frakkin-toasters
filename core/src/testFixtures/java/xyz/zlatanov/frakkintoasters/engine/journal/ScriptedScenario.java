@@ -6,6 +6,7 @@ import xyz.zlatanov.frakkintoasters.engine.journal.fact.Fact;
 import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
 import xyz.zlatanov.frakkintoasters.operation.GameOps;
 import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
+import xyz.zlatanov.frakkintoasters.state.character.CharacterAbility;
 import xyz.zlatanov.frakkintoasters.state.Die;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Randomness;
@@ -14,7 +15,9 @@ import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
 import xyz.zlatanov.frakkintoasters.state.board.Resource;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow.BeforeRaidersActivate;
+import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow.AfterDieRoll;
 import xyz.zlatanov.frakkintoasters.state.interrupt.PlayedInterruptCard;
+import xyz.zlatanov.frakkintoasters.state.interrupt.UsedRollAbility;
 import xyz.zlatanov.frakkintoasters.state.ship.*;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
 
@@ -97,9 +100,21 @@ public final class ScriptedScenario {
         ops.gainNuke();
         ops.moraleLostToExecution();
         ops.holdCylonShips();
+        ops.useTurnLimit(1, xyz.zlatanov.frakkintoasters.state.TurnLimit.CAG_PILOT_ACTION);
+        ops.allowRemoteAction(1, xyz.zlatanov.frakkintoasters.state.board.Location.RESEARCH_LAB);
+        ops.noteStartLocation(xyz.zlatanov.frakkintoasters.state.board.Location.HANGAR_DECK);
+        ops.sendToBrigAtEndOfTurn(2);
+        ops.payActionCost(1);
+        ops.actionCostSettled();
+        xyz.zlatanov.frakkintoasters.operation.TestOps.triggerAbility(ops, 2, CharacterAbility.MEMENTO);
+        ops.player(2).clearAbilityTrigger(CharacterAbility.MEMENTO);
+        xyz.zlatanov.frakkintoasters.operation.TestOps.triggerAbility(ops, 1, CharacterAbility.MEMENTO); // still pending
+        ops.titles().borrow(xyz.zlatanov.frakkintoasters.state.Title.ADMIRAL, LOUANNE_KAT_KATRAINE); // from Felix Gaeta
+        ops.endRemoteAction();
         ops.reduceNextLoss(xyz.zlatanov.frakkintoasters.state.board.Resource.FOOD);
         ops.galactica().decreaseResource(xyz.zlatanov.frakkintoasters.state.board.Resource.FOOD, 1); // reduced to nothing
         ops.player(2).lookAtLoyaltyCard(1);
+        ops.player(1).showFinalFiveCard(xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.FINAL_FIVE_DAMAGE_GALACTICA_TWICE);
 
         // a skill check, in an event scope, then a choice the event queued
         val scope = journal.openScope(null, 1, Journal.ROOT_SCOPE);
@@ -109,6 +124,7 @@ public final class ScriptedScenario {
         ops.skillCheck().revealPlayedBefore();
         ops.skillCheck().adjustDifficulty(3);
         ops.skillCheck().makePoliticsCountPositive();
+        ops.skillCheck().zeroStrength(xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.TREACHERY);
         ops.skillCheck().lookAt(1, 2, java.util.List.of());
         val shown = List.of(game.player(2).skillCards().cards().get(0), game.player(2).skillCards().cards().get(1));
         ops.skillCheck().playCards(2, shown);
@@ -129,7 +145,7 @@ public final class ScriptedScenario {
         val option = single(new NoOpEvent(1));
         journal.closeScope(one(option, NONE));
         journal.recordChoice(scope, 1, option);
-        ops.skillCheck().start(SkillCheckType.values()[1]); // a second check, that fails and is prevented
+        ops.skillCheck().startSuperCrisis(SkillCheckType.values()[1], 1); // a second check, that fails and is prevented
         ops.skillCheck().determineResult(xyz.zlatanov.frakkintoasters.state.skill.SkillCheckResult.FAIL);
         ops.skillCheck().preventFailResult();
         ops.skillCheck().revealAndDiscardTreacheryCard();
@@ -173,6 +189,10 @@ public final class ScriptedScenario {
         ops.pegasus().damage();
         ops.pegasus().repairLocation(game.boards().pegasus().damagedLocations().iterator().next());
         ops.pegasus().activateEngineRoom();
+        while (!game.boards().pegasus().damagedLocations().containsAll(game.boards().pegasus().locations())) {
+            ops.pegasus().damage();
+        }
+        ops.pegasus().destroy(); // its board leaves the game
         ops.galactica().decreasePopulation(2);
         ops.galactica().decreaseMorale(1);
         ops.galactica().decreaseResource(Resource.FUEL, 1);
@@ -184,10 +204,10 @@ public final class ScriptedScenario {
         ops.cylonFleet().place(ShipType.BASESTAR, CYLON_FLEET_SPACE_2);
         ops.cylonFleet().advancePursuit();
         ops.cylonFleet().advancePursuit();
-        ops.cylonFleet().moveShipsToGalactica(ShipType.RAIDER, CYLON_FLEET_SPACE_1);
+        ops.cylonFleet().moveShipsToGalactica(CYLON_FLEET_SPACE_1);
         ops.cylonFleet().resetPursuit();
         ops.cylonFleet().advancePursuit();
-        ops.cylonFleet().moveShipsToGalactica(ShipType.BASESTAR, CYLON_FLEET_SPACE_2);
+        ops.cylonFleet().moveShipsToGalactica(CYLON_FLEET_SPACE_2);
         ops.ship(galactica.shipsInSpace(Basestar.class).getFirst().id()).damage(); // stays alive with its damage
         val newViper = ops.galactica().launchHumanFighter(ShipType.VIPER, GALACTICA_SPACE_6_OCLOCK, null);
         ops.player(1).pilot(newViper); // stays alive with its pilot
@@ -195,6 +215,7 @@ public final class ScriptedScenario {
         // players
         ops.player(3).infiltrateGalactica(BRIG);
         ops.player(2).lookAtShip(2005);
+        ops.player(2).useAbility(CharacterAbility.CYLON_DETECTOR); // a miracle: the token goes
         ops.player(2).gainMiracleToken();
         ops.player(2).sendTo(SICKBAY);
         ops.actingPlayer(3);
@@ -216,12 +237,22 @@ public final class ScriptedScenario {
         ops.interrupts().returnToHand(returned);
         ops.interrupts().resolve(resolved);
         ops.interrupts().closeWindow();
+        // abilities on the roll: a reroll withdrawn, another one resolved, then a face set instead of the die
+        val withdrawn = new UsedRollAbility(3, CharacterAbility.FTL_OPERATOR, null, null);
+        val usedAbility = new UsedRollAbility(2, CharacterAbility.ECO_OFFICER, null, null);
+        ops.interrupts().openWindow(new AfterDieRoll());
+        ops.interrupts().useAbility(withdrawn);
+        ops.interrupts().useAbility(usedAbility);
+        ops.interrupts().withdraw(withdrawn);
+        ops.interrupts().resolve(usedAbility);
+        ops.interrupts().closeWindow();
+        ops.replaceDieRoll(6, true);
         ops.interrupts().raidersWillMiss(GALACTICA_SPACE_6_OCLOCK, 2);
         ops.interrupts().raiderMissed(GALACTICA_SPACE_6_OCLOCK);
 
         // an execution's facts
         ops.player(3).endInfiltration();
-        ops.player(1).loseMiracleToken();
+        ops.player(1).loseMiracleTokens();
         ops.player(1).revealLoyaltyCard(game.player(1).loyaltyCards().cards().getFirst());
         ops.player(3).revealMotiveCard(game.player(3).motiveCards().cards().getFirst());
         ops.player(2).removeCharacter();

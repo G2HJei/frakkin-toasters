@@ -1,5 +1,11 @@
 package xyz.zlatanov.frakkintoasters.operation;
 
+import java.util.Set;
+import static xyz.zlatanov.frakkintoasters.state.board.Resource.MORALE;
+import static xyz.zlatanov.frakkintoasters.state.board.Resource.POPULATION;
+import static xyz.zlatanov.frakkintoasters.state.character.CharacterAbility.EMOTIONALLY_FRAGILE;
+import static xyz.zlatanov.frakkintoasters.state.character.CharacterAbility.MEMENTO;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.AbilityTriggered;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedOnTop;
@@ -39,6 +45,8 @@ import static xyz.zlatanov.frakkintoasters.state.ship.ShipZone.CYLON_SUPPLY;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipZone.GALACTICA_SPACE;
 
 public abstract class AbstractOps {
+
+    static final int EMOTIONALLY_FRAGILE_MORALE = 2;
 
     protected final Game         game;
     protected final FactRecorder recorder;
@@ -155,8 +163,38 @@ public abstract class AbstractOps {
         }
         if (amount > 0) {
             record(new ResourceDecreased(resource, amount));
+            if (resource == POPULATION) {
+                triggerMemento();
+            }
+            if (resource == MORALE) {
+                triggerEmotionallyFragile();
+            }
         }
         return Math.max(amount, 0);
+    }
+
+    // Brendan "Hot Dog" Costanza's "Memento" answers a population loss right after the event that lost it, once a turn.
+    private void triggerMemento() {
+        for (val player : game.players()) {
+            if (player.hasAbility(MEMENTO)
+                    && !game.turn().hasUsed(player.number(), MEMENTO)
+                    && !game.turn().triggeredAbilities().getOrDefault(player.number(), Set.of()).contains(MEMENTO)) {
+                record(new AbilityTriggered(player.number(), MEMENTO));
+            }
+        }
+    }
+
+    // Anastasia "Dee" Dualla's "Emotionally Fragile": morale reduced to 2 or less executes her, right after the event.
+    private void triggerEmotionallyFragile() {
+        if (game.boards().galactica().morale() > EMOTIONALLY_FRAGILE_MORALE) {
+            return;
+        }
+        for (val player : game.players()) {
+            if (player.hasAbility(EMOTIONALLY_FRAGILE)
+                    && !game.turn().triggeredAbilities().getOrDefault(player.number(), Set.of()).contains(EMOTIONALLY_FRAGILE)) {
+                record(new AbilityTriggered(player.number(), EMOTIONALLY_FRAGILE));
+            }
+        }
     }
 
     protected GalacticaBoard galacticaBoard() {

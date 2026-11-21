@@ -15,12 +15,14 @@ import java.util.List;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.MUTINEER;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.GAIUS_BALTAR;
+import static xyz.zlatanov.frakkintoasters.state.character.CharacterAbility.COWARD;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.SHARON_BOOMER_VALERII;
 import static xyz.zlatanov.frakkintoasters.state.character.CharacterType.CYLON_LEADER;
 
 public class CreateLoyaltyDeckEventProcessor extends EventProcessor<CreateLoyaltyDeckEvent> {
 
-    // The characters whose player is dealt an additional Loyalty Card, at the start of the game and in the Sleeper Agent phase
+    // Each adds a "You Are Not a Cylon" card to the deck (rule A3.8.3), for Baltar's second card at the start of the game
+    // and Boomer's in the Sleeper Agent phase.
     public static final List<Character> CHARACTERS_WITH_EXTRA_CARDS = List.of(SHARON_BOOMER_VALERII, GAIUS_BALTAR);
 
     @Override
@@ -47,7 +49,7 @@ public class CreateLoyaltyDeckEventProcessor extends EventProcessor<CreateLoyalt
             if (player.character().type() == CYLON_LEADER) {
                 continue;    // A Cylon Leader gets Motive Cards instead (rule A3.8.5).
             }
-            val cardsToDraw = player.character() == GAIUS_BALTAR ? 2 : 1;
+            val cardsToDraw = player.hasAbility(COWARD) ? 2 : 1; // Gaius Baltar's "Coward"
             ops.player(player.number()).drawLoyaltyCards(cardsToDraw);
         }
     }

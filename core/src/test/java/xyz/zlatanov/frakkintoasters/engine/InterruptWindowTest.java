@@ -3,6 +3,7 @@ package xyz.zlatanov.frakkintoasters.engine;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.engine.EngineStatus.Finished;
+import xyz.zlatanov.frakkintoasters.engine.PendingInput.AwaitingChoice;
 import xyz.zlatanov.frakkintoasters.engine.PendingInput.AwaitingDecision;
 import xyz.zlatanov.frakkintoasters.engine.journal.GameSnapshot;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ScopeOpened;
@@ -26,6 +27,7 @@ import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
 import xyz.zlatanov.frakkintoasters.state.interrupt.PlayedInterruptCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
@@ -109,9 +111,12 @@ class InterruptWindowTest {
         assertWaitingFor(new AwaitingDecision(new PlayerDecisionEvent<>(3, PlayInterruptCardEvent.class)));
         play(engine -> engine.submit(3, PlayInterruptCardEvent.play(3, STRATEGIC_PLANNING_4)));
 
-        assertWaitingFor(new AwaitingDecision(new PlayerDecisionEvent<>(1, TiebreakInterruptCardsEvent.class)));
+        // The current player sees the two cards as his options.
+        val kept2 = single(new TiebreakInterruptCardsEvent(new PlayedInterruptCard(2, STRATEGIC_PLANNING_3, null)));
+        val kept3 = single(new TiebreakInterruptCardsEvent(new PlayedInterruptCard(3, STRATEGIC_PLANNING_4, null)));
+        assertWaitingFor(new AwaitingChoice(1, new LinkedHashSet<>(List.of(kept2, kept3))));
         engine = GameEngine.restore(engine.journal());
-        play(engine -> engine.submit(1, new TiebreakInterruptCardsEvent(new PlayedInterruptCard(3, STRATEGIC_PLANNING_4, null))));
+        play(engine -> engine.choose(1, kept3));
 
         assertEquals(new Finished(CYLONS), engine.status(1));
         assertEquals(List.of(STRATEGIC_PLANNING), engine.view().turn().dieRoll().cards());

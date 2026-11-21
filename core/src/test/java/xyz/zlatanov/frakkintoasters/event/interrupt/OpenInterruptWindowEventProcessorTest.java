@@ -43,6 +43,18 @@ class OpenInterruptWindowEventProcessorTest extends EventTestHarness<OpenInterru
         assertNull(game.turn().dieRoll().value()); // the roll it comes before has started
     }
 
+    // "Longshot": the result Anders chose isn't modified or rerolled, so no window opens after it.
+    @Test
+    void shouldNotOpenAfterAFixedResult() {
+        player(2).skillCards().addOnTop(calculations);
+        ops.startDieRoll();
+        ops.replaceDieRoll(5, true);
+
+        execute(new OpenInterruptWindowEvent(new AfterDieRoll()));
+
+        assertEquals(Optional.empty(), game.turn().interruptWindow());
+    }
+
     @Test
     void shouldAskTheHoldersClockwiseFromTheCurrentPlayer() {
         game.turn().currentPlayerNumber(2);

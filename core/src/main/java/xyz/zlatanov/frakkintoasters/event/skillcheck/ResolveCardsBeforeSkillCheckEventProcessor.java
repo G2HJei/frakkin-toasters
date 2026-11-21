@@ -4,6 +4,8 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
+import xyz.zlatanov.frakkintoasters.event.character.BlindDevotionEventProcessor;
+import xyz.zlatanov.frakkintoasters.event.character.FastLearnerEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.DrawSkillCardsEvent;
@@ -14,6 +16,7 @@ import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
 import java.util.ArrayList;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
+import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.allOf;
 import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.eachPlayerFromTheLeft;
 import static xyz.zlatanov.frakkintoasters.state.card.QuorumCard.ASSIGN_CHIEF_OF_STAFF;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.POLITICS;
@@ -42,12 +45,18 @@ public class ResolveCardsBeforeSkillCheckEventProcessor extends EventProcessor<R
                 .filter(holder -> !game.activeSkillCheck().type().skillCheckColors().contains(POLITICS))
                 .map(holder -> one(new UseChiefOfStaffEvent(holder), new NoOpEvent(holder)))
                 .ifPresent(followUps::add);
+        // "Fast Learner" comes before any card goes into the check.
+        followUps.add(FastLearnerEventProcessor.offer(game));
         if (!cardInPlay(GUTS_AND_INITIATIVE)) {
             followUps.add(single(new PlayFromDestinyDeckEvent()));
         }
-        followUps.add(eachPlayerFromTheLeft(game, PlayCardsIntoSkillCheckEvent.class));
+        // Only the players who may put a card in are asked, e.g. not Aaron Doral in another player's Action step.
+        followUps.add(eachPlayerFromTheLeft(game, PlayCardsIntoSkillCheckEvent.class,
+                player -> PlayCardsIntoSkillCheckEventProcessor.maxCards(game, player) > 0));
+        // "Blind Devotion": once every card is in, before they are revealed.
+        followUps.add(BlindDevotionEventProcessor.offer(game));
         followUps.add(single(new ShuffleAndDivideCardsEvent()));
-        return all(followUps.toArray(Followup[]::new));
+        return allOf(followUps.toArray(Followup[]::new)); // the offers nobody can take are NONE
     }
 
     private boolean cardInPlay(SkillCardType skillCardType) {

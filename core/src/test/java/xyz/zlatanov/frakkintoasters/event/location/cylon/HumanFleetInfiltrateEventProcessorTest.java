@@ -21,4 +21,14 @@ class HumanFleetInfiltrateEventProcessorTest extends EventTestHarness<HumanFleet
         assertTrue(player(1).isInfiltrating());
         assertEquals(RESEARCH_LAB, locate(CAPRICA_SIX));
     }
+
+    // Not again while Infiltrating, e.g. back at the "Human Fleet" through "Resolute" (errata A2.1.1.1).
+    @Test
+    void shouldNotInfiltrateAgain() {
+        player(1).character(CAPRICA_SIX);
+        player(1).infiltrateGalactica();
+        moveTo(HUMAN_FLEET, CAPRICA_SIX);
+
+        assertInvalid(new HumanFleetInfiltrateEvent(1, RESEARCH_LAB));
+    }
 }

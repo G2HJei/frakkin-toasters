@@ -7,6 +7,7 @@ import xyz.zlatanov.frakkintoasters.engine.PendingInput.AwaitingDecision;
 import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
 import xyz.zlatanov.frakkintoasters.engine.journal.GameReplayer;
 import xyz.zlatanov.frakkintoasters.engine.journal.Journal;
+import xyz.zlatanov.frakkintoasters.event.AnytimeEvent;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.Followup.AllOf;
@@ -15,6 +16,7 @@ import xyz.zlatanov.frakkintoasters.event.Followup.OneOf;
 import xyz.zlatanov.frakkintoasters.event.Followup.Single;
 import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
 import xyz.zlatanov.frakkintoasters.event.constraint.ConstrainedEvent;
+import xyz.zlatanov.frakkintoasters.event.character.AbilityTriggers;
 import xyz.zlatanov.frakkintoasters.event.endgame.WinChecks;
 import xyz.zlatanov.frakkintoasters.event.sandbox.SandboxEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
@@ -131,7 +133,8 @@ public class GameEngine {
     }
 
     /**
-     * Answers the pending decision, then runs the game to the next input.
+     * Answers the pending decision, then runs the game to the next input. An {@link AnytimeEvent} answers nothing: it
+     * runs ahead of the pending input, a decision or a choice, which stays pending.
      *
      * @throws InvalidActionException      if the event doesn't answer the decision or isn't valid. Nothing changes, and
      *                                     the decision stays pending
@@ -139,6 +142,13 @@ public class GameEngine {
      *                                     the call, and the decision stays pending
      */
     public void submit(int player, Event event) {
+        if (event instanceof AnytimeEvent anytime) {
+            if (anytime.playerNumber() != player) {
+                throw new InvalidActionException("Player " + player + " can't submit for player " + anytime.playerNumber());
+            }
+            runAhead(anytime);
+            return;
+        }
         val frame = agenda.top().orElseThrow(() -> new InvalidActionException("The game is over"));
         val decision = getDecision(player, event, frame);
         val answerEvent = event instanceof ConstrainedEvent constrained
@@ -187,18 +197,12 @@ public class GameEngine {
      * @throws FrakCallTheAdmiralException if anything fails after the event was accepted. The game rolls back
      */
     public void inject(SandboxEvent event) {
-        if (agenda.isEmpty()) {
-            throw new InvalidActionException("The game is over");
-        }
-        ProcessorRegistry.create(event).prepare(game, event);
-        advance(() -> {
-            journal.recordInjection(event);
-            agenda.push(single(event), ROOT_SCOPE);
-        });
+        runAhead(event);
     }
 
     /**
-     * Goes back to the pause before the last input: a decision answered, an option picked or an event injected. A
+     * Goes back to the pause before the last input: a decision answered, an option picked, an event injected or an
+     * {@link AnytimeEvent}. A
      * choice that led to a decision is undone on its own, and a finished game can be undone too.
      *
      * @throws InvalidActionException if there was no input yet
@@ -208,6 +212,19 @@ public class GameEngine {
             throw new InvalidActionException("Nothing to undo");
         }
         rebuild(new Journal(journal.entries().subList(0, inputStarts.peekLast())));
+    }
+
+    // An injected setup event or an anytime event: it runs at once, ahead of the pending input, with the win checks of
+    // the run loop. AgendaReplayer pushes it again from the EventInjected entry, and undo takes it back on its own.
+    private void runAhead(Event event) {
+        if (agenda.isEmpty()) {
+            throw new InvalidActionException("The game is over");
+        }
+        ProcessorRegistry.create(event).prepare(game, event);
+        advance(() -> {
+            journal.recordInjection(event);
+            agenda.push(single(event), ROOT_SCOPE);
+        });
     }
 
     /**
@@ -318,8 +335,9 @@ public class GameEngine {
     private void run(EventProcessor<?> processor, Event event, int actor, int parentScope) {
         val scope = journal.openScope(event, actor, parentScope);
         val queued = processor.run(ops);
-        // A win runs before what the event queued. The journal records both, so restore never runs the checks.
-        val followup = allOf(WinChecks.check(game), queued);
+        // A win runs before what the event queued, then the abilities it triggered ("Memento"). The journal records
+        // them all, so restore never runs the checks.
+        val followup = allOf(WinChecks.check(game), AbilityTriggers.check(game), queued);
         journal.closeScope(followup);
         agenda.push(followup, scope);
         if (game.outcome().isPresent()) {

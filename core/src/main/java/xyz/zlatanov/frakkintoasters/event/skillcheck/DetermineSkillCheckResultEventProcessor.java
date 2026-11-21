@@ -3,6 +3,8 @@ package xyz.zlatanov.frakkintoasters.event.skillcheck;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.character.CommandAuthorityEventProcessor;
+import xyz.zlatanov.frakkintoasters.event.character.OfferCommandAuthorityEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.ability.InstallUpgradesEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.ability.IronWillEvent;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
@@ -91,6 +93,10 @@ public class DetermineSkillCheckResultEventProcessor extends EventProcessor<Dete
         followups.add(single(new ResolveSkillCheckResultEvent()));
         if (playedBefore(game.activeSkillCheck(), A_SECOND_CHANCE) && passedPrintedDifficultyBy(A_SECOND_CHANCE_MARGIN, strength)) {
             followups.add(single(new ASecondChanceEvent()));
+        }
+        // "Command Authority" takes the cards once the result is resolved, when someone may have it.
+        if (CommandAuthorityEventProcessor.mayBeOffered(game)) {
+            followups.add(single(new OfferCommandAuthorityEvent()));
         }
         // after everything the result queued
         followups.add(single(new EndSkillCheckEvent()));

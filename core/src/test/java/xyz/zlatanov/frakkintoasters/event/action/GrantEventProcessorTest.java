@@ -148,4 +148,24 @@ class GrantEventProcessorTest extends EventTestHarness<GrantEvent> {
                 .map(ActingPlayerChanged.class::cast)
                 .toList();
     }
+
+    // Expert Pilot's second action belongs to her Action step, which is over.
+    @Test
+    void expertPilotsSecondActionEndsWithTheTurn() {
+        player(1).character(KARA_STARBUCK_THRACE);
+        moveTo(HANGAR_DECK, KARA_STARBUCK_THRACE);
+        ops.endTurnEarly();
+
+        execute(new GrantEvent(1, ACTION, GrantEvent.GrantedBy.EXPERT_PILOT));
+    }
+
+    // "Aggressive Tactics": the actions of his own turn, which ended.
+    @Test
+    void anAggressiveTacticsGrantDoesNothingOnceTheTurnEndedEarly() {
+        player(1).character(CAVIL);
+        moveTo(CYLON_FLEET, CAVIL);
+        ops.endTurnEarly();
+
+        execute(new GrantEvent(1, ACTION, GrantedBy.AGGRESSIVE_TACTICS));
+    }
 }

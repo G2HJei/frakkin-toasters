@@ -10,6 +10,8 @@ import xyz.zlatanov.frakkintoasters.state.ship.HumanFighter;
 
 import java.util.List;
 
+import static xyz.zlatanov.frakkintoasters.state.board.Location.BRIG;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.action.GrantEvent.Grant.ACTION;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.MUST_LAUNCH_IN_VIPER;
@@ -70,5 +72,15 @@ class HangarDeckEventProcessorTest extends EventTestHarness<HangarDeckEvent> {
             place(GALACTICA_SPACE_10_OCLOCK, fighter);
         });
         return fighters;
+    }
+
+    // Not from the "Brig", e.g. through "Resolute" (errata A2.1.1.1).
+    @Test
+    void shouldNotBeUsedFromTheBrig() {
+        moveTo(BRIG, KARA_STARBUCK_THRACE);
+        ops.allowRemoteAction(1, HANGAR_DECK); // as "Resolute" would
+
+        assertFalse(HangarDeckEventProcessor.canAct(game, player(1)));
+        assertInvalid(new HangarDeckEvent(1));
     }
 }

@@ -58,8 +58,13 @@ public class Deck<T> implements DeckView<T> {
 
     @Mutates
     public Deck<T> remove(List<T> cardsToRemove) {
-        assert new HashSet<>(cards).containsAll(cardsToRemove);
-        cardsToRemove.forEach(cards::remove);
+        for (T card : cardsToRemove) {
+            // a revealed card can leave too, e.g. the revealed Personal Goal of an executed character
+            if (!cards.remove(card)) {
+                assert revealedCards.contains(card);
+                revealedCards.remove(card);
+            }
+        }
         return this;
     }
 

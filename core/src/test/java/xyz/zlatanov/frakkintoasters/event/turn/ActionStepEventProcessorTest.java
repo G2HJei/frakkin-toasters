@@ -9,11 +9,13 @@ import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
+import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.GameStep.ACTION;
+import static xyz.zlatanov.frakkintoasters.state.GameStep.SETUP;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
-import static xyz.zlatanov.frakkintoasters.state.GameStep.SETUP;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.BUILD_NUKE;
 
 class ActionStepEventProcessorTest extends EventTestHarness<ActionStepEvent> {
@@ -150,6 +152,7 @@ class ActionStepEventProcessorTest extends EventTestHarness<ActionStepEvent> {
     void ftlControlHasNoActionToTakeInTheRedZone() {
         player(1).character(FELIX_GAETA);
         moveTo(FTL_CONTROL, FELIX_GAETA);
+        ops.player(1).loseMiracleTokens(); // otherwise "Coup" is his action
 
         execute(new ActionStepEvent());
     }
@@ -175,5 +178,32 @@ class ActionStepEventProcessorTest extends EventTestHarness<ActionStepEvent> {
         execute(new ActionStepEvent());
 
         assertEquals(SETUP, game.turn().step());
+    }
+
+    @Test
+    void expertPilotGivesStarbuckASecondAction() {
+        player(1).character(KARA_STARBUCK_THRACE);
+        ops.player(1).pilot(viperAt(GALACTICA_SPACE_4_OCLOCK).id());
+        ops.player(1).useAbility(xyz.zlatanov.frakkintoasters.state.character.CharacterAbility.EXPERT_PILOT);
+
+        execute(new ActionStepEvent());
+
+        assertFollowup(xyz.zlatanov.frakkintoasters.event.Followup.all(
+                xyz.zlatanov.frakkintoasters.event.action.Actions.offerAction(game, 1),
+                xyz.zlatanov.frakkintoasters.event.Followup.single(new xyz.zlatanov.frakkintoasters.event.action.GrantEvent(1,
+                        xyz.zlatanov.frakkintoasters.event.action.GrantEvent.Grant.ACTION,
+                        xyz.zlatanov.frakkintoasters.event.action.GrantEvent.GrantedBy.EXPERT_PILOT))));
+    }
+
+    // "Stim Junkie" acts once the step is over.
+    @Test
+    void theStepEndsForAnAbilityThatActsThen() {
+        player(1).character(LOUANNE_KAT_KATRAINE);
+        moveTo(HANGAR_DECK, LOUANNE_KAT_KATRAINE);
+
+        execute(new ActionStepEvent());
+
+        assertFollowup(all(one(new PlayerDecisionEvent<>(1, ActionEvent.class), new NoOpEvent(1)),
+                single(new EndOfActionStepEvent())));
     }
 }

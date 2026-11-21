@@ -7,20 +7,30 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
+import xyz.zlatanov.frakkintoasters.event.character.HereticDiscardEvent;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.ship.AssaultRaptor;
 import xyz.zlatanov.frakkintoasters.state.ship.HumanFighter;
 import xyz.zlatanov.frakkintoasters.state.ship.Viper;
 import xyz.zlatanov.frakkintoasters.state.ship.ViperMarkVII;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
 
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
+import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.CAPRICA_SIX;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.DANNA_BIERS;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.LEOBEN_CONOY;
+import static xyz.zlatanov.frakkintoasters.state.crisis.SuperCrisisCard.FLEET_MOBILIZATION;
+import static xyz.zlatanov.frakkintoasters.state.crisis.SuperCrisisCard.INBOUND_NUKES;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.ALL_HANDS_ON_DECK;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.BAIT;
+import static xyz.zlatanov.frakkintoasters.state.TurnLimit.MUTINY_CARD_FROM_TREACHERY;
 
 class MoveEventProcessorTest extends EventTestHarness<MoveEvent> {
 
@@ -55,10 +65,50 @@ class MoveEventProcessorTest extends EventTestHarness<MoveEvent> {
         assertEquals(skillCard, leadershipDeck.lastDiscarded());
     }
 
+    // Moving between ships is a discard the player chooses: "Bait" draws him a Mutiny Card, once a turn (rule 10.2.1).
+    @Test
+    void shouldDrawAMutinyCardForDiscardingBaitToMoveBetweenShips() {
+        moveTo(ADMIRALS_QUARTERS, KARA_STARBUCK_THRACE);
+        val bait = new SkillCard(0, BAIT);
+        player(1).gainSkillCards(bait);
+
+        execute(new MoveEvent(1, PRESIDENTS_OFFICE, bait));
+
+        assertFollowup(new DrawMutinyCardEvent(1));
+    }
+
+    @Test
+    void shouldDrawOnlyOneMutinyCardATurnForTreachery() {
+        moveTo(ADMIRALS_QUARTERS, KARA_STARBUCK_THRACE);
+        val bait = new SkillCard(0, BAIT);
+        player(1).gainSkillCards(bait);
+        ops.useTurnLimit(1, MUTINY_CARD_FROM_TREACHERY);
+
+        execute(new MoveEvent(1, PRESIDENTS_OFFICE, bait));
+    }
+
     @Test
     void shouldNotBeAbleToHazardousLocations() {
         moveTo(ADMIRALS_QUARTERS, KARA_STARBUCK_THRACE);
         assertInvalid(new MoveEvent(1, BRIG, null));
+    }
+
+    @Test
+    void shouldNotMoveToADestroyedColonialOne() {
+        moveTo(ADMIRALS_QUARTERS, KARA_STARBUCK_THRACE);
+        player(1).gainSkillCards(skillCard);
+        ops.keepCrisisCardInPlay(SkillCheckType.BOMB_ON_COLONIAL_1);
+
+        assertInvalid(new MoveEvent(1, PRESIDENTS_OFFICE, skillCard));
+    }
+
+    @Test
+    void shouldNotMoveToADestroyedPegasus() {
+        moveTo(ADMIRALS_QUARTERS, KARA_STARBUCK_THRACE);
+        player(1).gainSkillCards(skillCard);
+        pegasusBoard.destroy();
+
+        assertInvalid(new MoveEvent(1, ENGINE_ROOM, skillCard));
     }
 
     @Test
@@ -127,5 +177,49 @@ class MoveEventProcessorTest extends EventTestHarness<MoveEvent> {
         } else {
             assertInvalid(event);
         }
+    }
+
+    // "Clouded": Leoben Conoy chooses no location where another character stands.
+    @Test
+    void cloudedKeepsLeobenFromAnOccupiedLocation() {
+        player(2).character(LEOBEN_CONOY);
+        player(3).character(CAPRICA_SIX);
+        moveTo(HUMAN_FLEET, LEOBEN_CONOY);
+        moveTo(CAPRICA, CAPRICA_SIX);
+
+        assertInvalid(new MoveEvent(2, CAPRICA, null));
+    }
+
+    @Test
+    void cloudedLeobenMovesToAnEmptyLocation() {
+        player(2).character(LEOBEN_CONOY);
+        player(3).character(CAPRICA_SIX);
+        moveTo(HUMAN_FLEET, LEOBEN_CONOY);
+        moveTo(CAPRICA, CAPRICA_SIX);
+
+        execute(new MoveEvent(2, CYLON_FLEET, null));
+
+        assertEquals(CYLON_FLEET, locate(LEOBEN_CONOY));
+    }
+
+    // "Heretic": D'Anna Biers leaves the "Resurrection Ship" by discarding a Super Crisis Card of her choice.
+    @Test
+    void hereticCostsDannaASuperCrisisCard() {
+        player(2).character(DANNA_BIERS);
+        moveTo(RESURRECTION_SHIP, DANNA_BIERS);
+        player(2).superCrisisCards().addOnTop(INBOUND_NUKES, FLEET_MOBILIZATION);
+
+        execute(new MoveEvent(2, CAPRICA, null));
+
+        assertEquals(CAPRICA, locate(DANNA_BIERS));
+        assertFollowup(one(new HereticDiscardEvent(2, INBOUND_NUKES), new HereticDiscardEvent(2, FLEET_MOBILIZATION)));
+    }
+
+    @Test
+    void hereticKeepsDannaWithoutASuperCrisisCard() {
+        player(2).character(DANNA_BIERS);
+        moveTo(RESURRECTION_SHIP, DANNA_BIERS);
+
+        assertInvalid(new MoveEvent(2, CAPRICA, null));
     }
 }

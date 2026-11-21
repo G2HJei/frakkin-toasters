@@ -23,6 +23,7 @@ import xyz.zlatanov.frakkintoasters.engine.PendingInput.AwaitingChoice;
 import xyz.zlatanov.frakkintoasters.engine.PendingInput.AwaitingDecision;
 import xyz.zlatanov.frakkintoasters.engine.journal.Journal;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry;
+import xyz.zlatanov.frakkintoasters.event.AnytimeEvent;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
 import xyz.zlatanov.frakkintoasters.event.sandbox.SandboxEvent;
@@ -146,9 +147,13 @@ public class GameSessions {
 
     /**
      * Answers the pending decision with the event. The event is read only if its type fits the decision, and its
-     * player is the viewer's.
+     * player is the viewer's. An {@link AnytimeEvent} answers nothing: it runs ahead of the pending input, whoever is
+     * asked.
      */
     public CommandResult submit(UUID gameBundleId, Viewer viewer, String token, JsonNode event) {
+        if (isAnytime(event)) {
+            return anytime(gameBundleId, viewer, token, event);
+        }
         return command(gameBundleId, viewer, token, (session, player) -> {
             if (!(session.engine().pendingInput().orElse(null) instanceof AwaitingDecision(var decision))
                     || decision.playerNumber() != player) {
@@ -162,6 +167,28 @@ public class GameSessions {
             }
             return run(session, () -> session.engine().submit(player, answer));
         });
+    }
+
+    // A player's event is his; in a sandbox the event names the player who acts.
+    private CommandResult anytime(UUID gameBundleId, Viewer viewer, String token, JsonNode json) {
+        return command(gameBundleId, viewer, token, (session, ignoredAsked) -> {
+            final Event event;
+            try {
+                event = decode(json, AnytimeEvent.class,
+                        viewer instanceof Viewer.PlayerViewer(int player) ? player : null);
+            } catch (CodecException e) {
+                return rejected(Reason.INVALID, e.getMessage());
+            }
+            val submitter = ((AnytimeEvent) event).playerNumber();
+            return run(session, () -> session.engine().submit(submitter, event));
+        });
+    }
+
+    private boolean isAnytime(JsonNode json) {
+        return json != null && json.isObject() && json.hasNonNull(ValueCodec.KIND) && json.get(ValueCodec.KIND).isString()
+                && codec.values().registry().typeOf(json.get(ValueCodec.KIND).stringValue())
+                .filter(AnytimeEvent.class::isAssignableFrom)
+                .isPresent();
     }
 
     /**

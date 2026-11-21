@@ -181,6 +181,12 @@ final class LiveUpdateProjector {
             case InterruptFact.InterruptWindowClosed f -> shown(f);
             case InterruptFact.RaidersWillMiss f -> shown(f);
             case InterruptFact.RaiderMissed f -> shown(f);
+            // secret until the window closes, when RollAbilityResolved or RollAbilityWithdrawn shows it
+            case InterruptFact.RollAbilityUsed f -> sees(f.ability().playerNumber())
+                    ? shown(f)
+                    : hidden(f, f.ability().playerNumber(), null, null, null, null, List.of());
+            case InterruptFact.RollAbilityWithdrawn f -> shown(f);
+            case InterruptFact.RollAbilityResolved f -> shown(f);
         };
     }
 
@@ -195,6 +201,7 @@ final class LiveUpdateProjector {
             case PlayerFact.LoyaltyCardSeen f -> sees(f.playerNumber())
                     ? shown(f)
                     : hidden(f, f.playerNumber(), f.targetPlayerNumber(), null, PlayerPile.LOYALTY, null, List.of(f.card()));
+            case PlayerFact.FinalFiveCardShown f -> shown(f);
             case PlayerFact.CardsSeen f -> sees(f.playerNumber())
                     ? shown(f)
                     : hidden(f, f.playerNumber(), null, f.deck(), null, null, f.cards());
@@ -204,6 +211,9 @@ final class LiveUpdateProjector {
             case PlayerFact.CharacterRemoved f -> shown(f);
             case PlayerFact.MiracleTokenGained f -> shown(f);
             case PlayerFact.MiracleTokenLost f -> shown(f);
+            case PlayerFact.AbilityUsed f -> shown(f);
+            case PlayerFact.AbilityTriggered f -> shown(f);
+            case PlayerFact.AbilityTriggerCleared f -> shown(f);
             case PlayerFact.LoyaltyCardRevealed f -> shown(f);
             case PlayerFact.MotiveCardRevealed f -> shown(f);
             case PlayerFact.InfiltrationStarted f -> shown(f);
@@ -232,6 +242,7 @@ final class LiveUpdateProjector {
                     : shown(f);
             case SkillCheckFact.SkillCheckStarted f -> shown(f);
             case SkillCheckFact.TargetChosen f -> shown(f);
+            case SkillCheckFact.PlayedBy f -> shown(f);
             case SkillCheckFact.PlayedBeforeRevealed f -> shown(f);
             case SkillCheckFact.CardsShown f -> shown(f);
             case SkillCheckFact.CardsLookedAt f -> sees(f.playerNumber())
@@ -239,6 +250,8 @@ final class LiveUpdateProjector {
                     : hidden(f, f.playerNumber(), null, null, null, null, f.cards());
             case SkillCheckFact.DifficultyAdjusted f -> shown(f);
             case SkillCheckFact.PoliticsCountPositive f -> shown(f);
+            case SkillCheckFact.StrengthZeroed f -> shown(f);
+            case SkillCheckFact.CardsDivided f -> shown(f);
             case SkillCheckFact.CardRemoved f -> shown(f);
             case SkillCheckFact.AbilityResolved f -> shown(f);
             case SkillCheckFact.EmergencyDeclared f -> shown(f);

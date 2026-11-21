@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event;
 
+import xyz.zlatanov.frakkintoasters.event.character.CharacterPenalties;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.state.ship.AssaultRaptor;
@@ -29,8 +30,17 @@ public class AttackViperResultEventProcessor extends EventProcessor<AttackViperR
         } else if (roll >= ROLL_TO_DESTROY) {
             ops.ship(fighter.id()).destroy();
         } else if (roll >= (fighter instanceof ViperMarkVII ? LOWEST_ROLL_TO_DAMAGE_A_MARK_VII : LOWEST_ROLL_TO_DAMAGE_A_VIPER)) {
-            ops.ship(fighter.id()).damage();
+            damage(fighter.id());
         }
         return Followup.NONE;
+    }
+
+    // "Forced to Eject": Brendan "Hot Dog" Costanza's viper is destroyed instead.
+    private void damage(int fighterId) {
+        if (CharacterPenalties.destroyedInsteadOfDamaged(game, fighterId)) {
+            ops.ship(fighterId).destroy();
+        } else {
+            ops.ship(fighterId).damage();
+        }
     }
 }

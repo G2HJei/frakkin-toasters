@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event.action.skillcard;
 
+import xyz.zlatanov.frakkintoasters.event.character.OfferAlertViperPilotEvent;
 import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.LEE_APOLLO_ADAMA;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.WILLIAM_ADAMA;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.LAUNCH_RESERVES;
@@ -71,5 +73,18 @@ class LaunchReservesEventProcessorTest extends EventTestHarness<LaunchReservesEv
     @Test
     void notARaptor() {
         assertInvalid(new LaunchReservesEvent(1, LAUNCH_RESERVES_5, GALACTICA_SPACE_10_OCLOCK, List.of(RAPTOR)));
+    }
+
+    // Lee "Apollo" Adama's "Alert Viper Pilot" is offered when the vipers are placed, before the card activates them.
+    @Test
+    void alertViperPilotComesBeforeTheActivations() {
+        player(3).character(LEE_APOLLO_ADAMA);
+        val first = galacticaBoard.reserves().stream().filter(Viper.class::isInstance).map(Ship::id).toList();
+
+        execute(new LaunchReservesEvent(1, LAUNCH_RESERVES_5, GALACTICA_SPACE_10_OCLOCK, List.of(VIPER, VIPER)));
+
+        assertFollowup(all(new OfferAlertViperPilotEvent(List.of(first.get(0), first.get(1))),
+                new ViperActivationRoundEvent(1, first.get(0), 1, false),
+                new ViperActivationRoundEvent(1, first.get(1), 1, false)));
     }
 }

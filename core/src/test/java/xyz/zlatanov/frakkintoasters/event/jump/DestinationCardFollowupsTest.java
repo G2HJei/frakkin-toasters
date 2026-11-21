@@ -8,7 +8,7 @@ import xyz.zlatanov.frakkintoasters.TestHarness;
 import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
 import xyz.zlatanov.frakkintoasters.event.board.IncreaseJumpPreparationEvent;
 import xyz.zlatanov.frakkintoasters.event.jump.RiskShipsEvent.Risk;
-import xyz.zlatanov.frakkintoasters.event.ship.DamageGalacticaEvent;
+import xyz.zlatanov.frakkintoasters.event.ship.DamageBattlestarEvent;
 import xyz.zlatanov.frakkintoasters.event.ship.DestroyRaptorEvent;
 import xyz.zlatanov.frakkintoasters.event.ship.DrawAndDestroyCivilianShipsEvent;
 import xyz.zlatanov.frakkintoasters.event.ship.PlaceCivilianShipsInFrontEvent;
@@ -81,7 +81,7 @@ class DestinationCardFollowupsTest extends TestHarness {
     @Test
     void damageAndDestruction() {
         assertEquals(all(lose(FUEL, 2), new DrawAndDestroyCivilianShipsEvent(1)), effects(game, ASTEROID_FIELD));
-        assertEquals(all(lose(FUEL, 1), new DamageGalacticaEvent()), effects(game, DYING_STAR));
+        assertEquals(all(lose(FUEL, 1), new DamageBattlestarEvent()), effects(game, DYING_STAR));
         assertEquals(all(lose(FUEL, 1), new DestroyRaptorEvent()), effects(game, REMOTE_PLANET));
     }
 

@@ -146,6 +146,8 @@ public enum SkillCheckType {
     private final List<SkillCardColor> skillCheckColors;
 
     private static final Set<SkillCheckType> LOCATION_SKILL_CHECKS = Set.of(ADMIRALS_QUARTERS, AIRLOCK, BRIG);
+    private static final Set<SkillCheckType> SUPER_CRISES          = Set.of(BOMB_ON_COLONIAL_1, CYLON_INTRUDERS,
+            FIRE_ALL_MISSILES, FLEET_MOBILIZATION, FOOTAGE_TRANSMITTED, HUMAN_PRISONER, INBOUND_NUKES, THE_FARM);
 
     SkillCheckType(int difficulty, SkillCardColor... colors) {
         this(difficulty, null, colors);
@@ -161,5 +163,20 @@ public enum SkillCheckType {
 
     public boolean triggeredByLocation() {
         return LOCATION_SKILL_CHECKS.contains(this);
+    }
+
+    /**
+     * @return whether this is the skill check of a Super Crisis Card, which the character abilities that affect Crisis
+     * Cards or skill checks can't touch (rule 6.1.2.5)
+     */
+    public boolean isSuperCrisis() {
+        return SUPER_CRISES.contains(this);
+    }
+
+    /**
+     * @return whether this is the skill check of a Crisis Card: not a location's, not a Super Crisis Card's
+     */
+    public boolean onCrisisCard() {
+        return !triggeredByLocation() && !isSuperCrisis();
     }
 }

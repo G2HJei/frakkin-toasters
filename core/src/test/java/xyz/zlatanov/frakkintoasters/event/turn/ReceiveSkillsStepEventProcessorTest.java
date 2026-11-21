@@ -9,6 +9,7 @@ import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static xyz.zlatanov.frakkintoasters.event.Followup.NONE;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.*;
 import static xyz.zlatanov.frakkintoasters.state.GameStep.RECEIVE_SKILLS;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
@@ -90,6 +91,101 @@ class ReceiveSkillsStepEventProcessorTest extends EventTestHarness<ReceiveSkills
     @Test
     void strandedHeloDrawsToo() {
         player(1).character(KARL_HELO_AGATHON);
+
+        execute(new ReceiveSkillsStepEvent());
+
+        assertDraws(DRAW_EXACTLY_5);
+    }
+
+    // Aaron Doral's "Industrious": Infiltrating, 2 extra instead of 1
+    @Test
+    void anInfiltratingDoralDrawsTwoMore() {
+        current(AARON_DORAL, HANGAR_DECK);
+        player(1).infiltrateGalactica();
+
+        execute(new ReceiveSkillsStepEvent());
+
+        assertDraws(DRAW_EXACTLY_4);
+    }
+
+    @Test
+    void doralInSickbayDrawsOne() {
+        current(AARON_DORAL, SICKBAY);
+        player(1).infiltrateGalactica();
+
+        execute(new ReceiveSkillsStepEvent());
+
+        assertDraws(DRAW_EXACTLY_1);
+    }
+
+    // Karl "Helo" Agathon (alt.)'s "Family Commitments"
+    @Test
+    void heloAwayFromGalacticaDrawsOneFewer() {
+        current(KARL_HELO_AGATHON_ALT, PRESS_ROOM);
+
+        execute(new ReceiveSkillsStepEvent());
+
+        assertDraws(DRAW_EXACTLY_4);
+    }
+
+    @Test
+    void heloOnGalacticaDrawsHisSkillSet() {
+        current(KARL_HELO_AGATHON_ALT, ADMIRALS_QUARTERS);
+
+        execute(new ReceiveSkillsStepEvent());
+
+        assertDraws(DRAW_EXACTLY_5);
+    }
+
+    // A revealed Cylon's abilities are ignored (rule 6.1.2.2): he draws the revealed Cylon's 2.
+    @Test
+    void aRevealedHeloIgnoresFamilyCommitments() {
+        current(KARL_HELO_AGATHON_ALT, CAPRICA);
+        revealCylon();
+
+        execute(new ReceiveSkillsStepEvent());
+
+        assertDraws(DRAW_EXACTLY_2);
+    }
+
+    // Sharon "Athena" Agathon's "Grieving"
+    @Test
+    void athenaInAHazardousLocationDrawsNothing() {
+        current(SHARON_ATHENA_AGATHON, BRIG);
+        player(1).infiltrateGalactica();
+
+        execute(new ReceiveSkillsStepEvent());
+
+        assertEquals(RECEIVE_SKILLS, game.turn().step());
+        assertFollowup(NONE);
+    }
+
+    @Test
+    void athenaOnTheResurrectionShipDrawsNothing() {
+        current(SHARON_ATHENA_AGATHON, RESURRECTION_SHIP);
+
+        execute(new ReceiveSkillsStepEvent());
+
+        assertFollowup(NONE);
+    }
+
+    // Samuel T. Anders' "Starts on the Bench": not on his first turn, and from the second on as usual
+    @Test
+    void andersSkipsTheStepOfHisFirstTurn() {
+        current(SAMUEL_T_ANDERS, ARMORY);
+        player(1).countTurn();
+
+        execute(new ReceiveSkillsStepEvent());
+
+        assertEquals(RECEIVE_SKILLS, game.turn().step());
+        assertFollowup(NONE);
+    }
+
+    @Test
+    void andersDrawsFromHisSecondTurn() {
+        current(SAMUEL_T_ANDERS, ARMORY);
+        player(1).countTurn();
+        player(1).countTurn();
 
         execute(new ReceiveSkillsStepEvent());
 

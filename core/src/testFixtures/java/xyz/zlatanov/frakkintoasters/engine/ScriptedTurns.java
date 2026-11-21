@@ -1,5 +1,7 @@
 package xyz.zlatanov.frakkintoasters.engine;
 
+import xyz.zlatanov.frakkintoasters.event.character.ReligiousVisionsEvent;
+import xyz.zlatanov.frakkintoasters.event.crisis.ResolveCrisisCardEvent;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.event.ActionEvent;
 import xyz.zlatanov.frakkintoasters.event.Event;
@@ -39,7 +41,9 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.*;
  */
 public final class ScriptedTurns {
 
-    public static final List<CrisisCard> CRISIS_CARDS = List.of(RIOTS_NO_JUMP, DETENTE, RIOTS_NO_JUMP, RIOTS_NO_JUMP);
+    // Laura Roslin draws 2 ("Religious Visions") and puts the "Riots" she leaves at the bottom, so 5 are stacked.
+    public static final List<CrisisCard> CRISIS_CARDS = List.of(RIOTS_NO_JUMP, DETENTE, RIOTS_NO_JUMP, RIOTS_NO_JUMP,
+            RIOTS_NO_JUMP);
     public static final long             SEED         = 42;
 
     /**
@@ -89,23 +93,29 @@ public final class ScriptedTurns {
         inputs.add(game -> submit(first.apply(game), p -> new MoveEvent(p, RESEARCH_LAB, null)));
         inputs.add(game -> chooseDecision(first.apply(game), ActionEvent.class));
         inputs.add(game -> submit(first.apply(game), p -> new ResearchLabEvent(p, ENGINEERING)));
+        inputs.add(game -> letItResolve(game, RIOTS_NO_JUMP));
         inputs.add(game -> crisisTop(game, RIOTS_NO_JUMP));
 
         // turns 2 and 3: the others draw and pass, and the CAG places the civilian ship that "Detente" brings
         inputs.add(game -> draw(second.apply(game), Map.of(POLITICS, 3, LEADERSHIP, 2)));
         inputs.add(game -> pass(second.apply(game)));
         inputs.add(game -> pass(second.apply(game)));
+        inputs.add(game -> new Input(second.apply(game), null,
+                single(new ReligiousVisionsEvent(second.apply(game), DETENTE, RIOTS_NO_JUMP))));
+        inputs.add(game -> letItResolve(game, DETENTE));
         inputs.add(game -> crisisTop(game, DETENTE));
         inputs.add(game -> submit(game.playerNumber(game.cag()), p -> new PlaceCivilianShipEvent(p, GALACTICA_SPACE_12_OCLOCK)));
         inputs.add(game -> draw(third.apply(game), Map.of(TACTICS, 2, PILOTING, 2, LEADERSHIP, 1)));
         inputs.add(game -> pass(third.apply(game)));
         inputs.add(game -> pass(third.apply(game)));
+        inputs.add(game -> letItResolve(game, RIOTS_NO_JUMP));
         inputs.add(game -> crisisTop(game, RIOTS_NO_JUMP));
 
         // turn 4: Adama ends his turn with 11 cards, so he discards 1
         inputs.add(game -> draw(first.apply(game), Map.of(LEADERSHIP, 3, TACTICS, 2)));
         inputs.add(game -> pass(first.apply(game)));
         inputs.add(game -> pass(first.apply(game)));
+        inputs.add(game -> letItResolve(game, RIOTS_NO_JUMP));
         inputs.add(game -> crisisTop(game, RIOTS_NO_JUMP));
         inputs.add(game -> {
             val player = first.apply(game);
@@ -147,6 +157,11 @@ public final class ScriptedTurns {
 
     private static Input chooseDecision(int player, Class<? extends Event> action) {
         return new Input(player, null, single(new PlayerDecisionEvent<>(player, action)));
+    }
+
+    // Kara "Starbuck" Thrace may replace the revealed card ("Secret Destiny"), and lets it resolve.
+    private static Input letItResolve(GameView game, CrisisCard card) {
+        return new Input(game.playerNumber(KARA_STARBUCK_THRACE), null, single(new ResolveCrisisCardEvent(card)));
     }
 
     // The title holder that the card names chooses its top section.

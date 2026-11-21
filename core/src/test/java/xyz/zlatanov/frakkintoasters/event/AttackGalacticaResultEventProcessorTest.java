@@ -2,10 +2,10 @@ package xyz.zlatanov.frakkintoasters.event;
 
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
-import xyz.zlatanov.frakkintoasters.event.ship.DamageGalacticaEvent;
-import xyz.zlatanov.frakkintoasters.event.ship.DamagePegasusEvent;
+import xyz.zlatanov.frakkintoasters.event.ship.DamageBattlestarEvent;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
+import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_4_OCLOCK;
 
 class AttackGalacticaResultEventProcessorTest extends EventTestHarness<AttackGalacticaResultEvent> {
@@ -26,7 +26,7 @@ class AttackGalacticaResultEventProcessorTest extends EventTestHarness<AttackGal
 
         execute(new AttackGalacticaResultEvent(raiderId));
 
-        assertFollowup(one(new DamageGalacticaEvent(), new DamagePegasusEvent()));
+        assertFollowup(single(new DamageBattlestarEvent()));
     }
 
     @Test
@@ -44,6 +44,6 @@ class AttackGalacticaResultEventProcessorTest extends EventTestHarness<AttackGal
 
         execute(new AttackGalacticaResultEvent(basestarId));
 
-        assertFollowup(one(new DamageGalacticaEvent(), new DamagePegasusEvent()));
+        assertFollowup(single(new DamageBattlestarEvent()));
     }
 }

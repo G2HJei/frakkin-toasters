@@ -23,8 +23,9 @@ public class LoyaltyDeckOps extends AbstractOps {
 
     public LoyaltyDeckOps createNotACylon() {
         record(new CardsAddedOnTop(LOYALTY_NOT_CYLON,
-                //todo check correct vanilla non-cylon cards count
-                List.of(NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON,
+                // 18 plain cards, 8 Personal Goals and 5 Final Five (Appendix, the Loyalty Cards' component list)
+                List.of(NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON,
+                        NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON, NOT_CYLON,
                         NOT_CYLON_USE_CAUTION,
                         NOT_CYLON_STAND_AND_FIGHT,
                         NOT_CYLON_SELFISH,
@@ -58,6 +59,9 @@ public class LoyaltyDeckOps extends AbstractOps {
      * an executed human (rule 7.1).
      */
     public LoyaltyDeckOps addNotACylon() {
+        if (game.decks().deck(LOYALTY_NOT_CYLON).isEmpty()) {
+            return this; // every "You Are Not a Cylon" card is in the game already
+        }
         LoyaltyCard card = draw(LOYALTY_NOT_CYLON);
         record(new CardsAddedOnTop(LOYALTY, List.of(card)));
         shuffle(LOYALTY);

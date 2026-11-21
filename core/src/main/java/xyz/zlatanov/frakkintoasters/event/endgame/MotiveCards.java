@@ -9,10 +9,14 @@ import xyz.zlatanov.frakkintoasters.state.ship.Raider;
 import xyz.zlatanov.frakkintoasters.state.view.GameView;
 import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
 
+import java.util.EnumSet;
+import java.util.Set;
+
 import static lombok.AccessLevel.PRIVATE;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.ADMIRALS_QUARTERS;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.BRIG;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.FTL_CONTROL;
+import static xyz.zlatanov.frakkintoasters.state.card.MotiveCard.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.ENGINEERING;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.POLITICS;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.TACTICS;
@@ -21,12 +25,24 @@ import static xyz.zlatanov.frakkintoasters.state.track.JumpPreparation.MINUS_1;
 import static xyz.zlatanov.frakkintoasters.state.track.JumpPreparation.MINUS_3;
 
 /**
- * When a Cylon Leader can reveal a Motive Card (rule 6.2.2.1), as printed on the cards. The cards that say "if the game
- * is over" are only asked at the end of the game, after the Personal Goals (rule 16.3.1). Revealing a card in the middle
- * of a game is not built yet.
+ * When a Cylon Leader can reveal a Motive Card (rule 6.2.2.1), as printed on the cards. He may reveal one any time its
+ * requirement is met, in the middle of resolving something too ({@code RevealMotiveCardEvent}), and at the end of the
+ * game, after the Personal Goals (rule 16.3.1). The cards that say "if the game is over" wait for the end.
  */
 @NoArgsConstructor(access = PRIVATE)
 public final class MotiveCards {
+
+    private static final Set<MotiveCard> ONLY_AT_THE_END = EnumSet.of(A_FALSE_SENSE_OF_SECURITY, FIGHT_WITH_HONOR,
+            HARVEST_THEIR_RESOURCES, SAVOR_THEIR_DEMISE, SUBJECTS_TO_STUDY, IMPROVE_EFFICIENCY, KEEP_THEM_DOCILE,
+            LEARN_TO_CHERISH, PRESSURE_THEIR_LEADERS);
+
+    /**
+     * @return whether the player can reveal the card while the game goes on: it doesn't wait for the end, and its
+     * requirement is met now
+     */
+    public static boolean canReveal(GameView game, PlayerView player, MotiveCard card) {
+        return !ONLY_AT_THE_END.contains(card) && canRevealAtTheEnd(game, player, card);
+    }
 
     /**
      * @return whether the player can reveal the card now that the game is over

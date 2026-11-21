@@ -3,6 +3,7 @@ package xyz.zlatanov.frakkintoasters.event.turn;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.character.ModificationsEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.crisis.CrisisCardFollowups;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.NONE;
@@ -22,10 +23,13 @@ public class ActivateCylonShipsStepEventProcessor extends EventProcessor<Activat
         ops.changeStep(ACTIVATE_CYLON_SHIPS);
         val cards = game.turn().crisisCards();
         if (cards.isEmpty()) {
-            return NONE; // no Crisis step, e.g. in the "Brig", so no card shows an icon
+            // No Crisis step, e.g. in the "Brig", so no card shows an icon. "Modifications" still may pick one, at the
+            // start of any player's step.
+            return ModificationsEventProcessor.offerWithoutCard(game);
         }
         // The icon of the card that was drawn last (rule 8.6).
-        val activation = single(CrisisCardFollowups.activation(cards.getLast().activation()));
+        // "Modifications" may pick another activation instead.
+        val activation = ModificationsEventProcessor.offer(game, CrisisCardFollowups.activation(cards.getLast().activation()));
         if (!game.turn().returnsToCrisisStep()) {
             return activation;
         }

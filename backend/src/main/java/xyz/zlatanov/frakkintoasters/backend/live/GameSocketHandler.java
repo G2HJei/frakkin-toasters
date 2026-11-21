@@ -27,7 +27,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * <ul>
  *     <li>{@code status}: the game again</li>
  *     <li>{@code history}: the game and the whole log again</li>
- *     <li>{@code submit}: the token and an {@code event}, which answers the pending decision</li>
+ *     <li>{@code submit}: the token and an {@code event}, which answers the pending decision, or, an
+ *     {@code AnytimeEvent}, runs ahead of it</li>
  *     <li>{@code choose}: the token and the index of an {@code option} of the pending choice</li>
  *     <li>{@code undo}: the token; a sandbox goes back to the pause before its last input</li>
  *     <li>{@code inject}: the token and a setup {@code event}, which a sandbox runs ahead of the pending input</li>

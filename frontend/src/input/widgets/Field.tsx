@@ -17,14 +17,16 @@ export interface FieldProps {
   onChange(value: Value): void;
   // the record the field belongs to, so a card picker knows a setup from an answer
   owner: string;
+  // the constants an enum offers, by the enum's name, e.g. the Motive Cards a Cylon Leader holds; all of them otherwise
+  choices?: Record<string, string[]>;
 }
 
-export function Field({ component, value, onChange, owner }: FieldProps) {
+export function Field({ component, value, onChange, owner, choices }: FieldProps) {
   const label = humanizeType(component.name);
   return (
     <div className="field" data-field={component.name}>
       <span className="field-name">{label}</span>
-      <Widget type={component.type} value={value} onChange={onChange} owner={owner} name={label} />
+      <Widget type={component.type} value={value} onChange={onChange} owner={owner} name={label} choices={choices} />
     </div>
   );
 }
@@ -35,6 +37,7 @@ interface WidgetProps {
   onChange(value: Value): void;
   owner: string;
   name: string;
+  choices?: Record<string, string[]>;
 }
 
 function Widget(props: WidgetProps) {
@@ -127,7 +130,7 @@ function NumberInput(props: WidgetProps) {
 
 function EnumSelect(props: WidgetProps) {
   const { type, value, onChange } = props;
-  const values = enumValues(type.name ?? '');
+  const values = props.choices?.[type.name ?? ''] ?? enumValues(type.name ?? '');
   const art = value === null ? null : enumArt(type.name ?? '', value as string);
   return (
     <>
@@ -181,10 +184,16 @@ function ClassSelect({ value, onChange }: WidgetProps) {
   );
 }
 
-// A setup takes a card from a deck; an answer takes one from the asked player's hand. Equal cards exist, so a card is
-// picked by its position.
+// The abilities of a skill check's cards that take another card out of the check, which lies face up.
+const FROM_THE_CHECK = ['DogfightEvent', 'QuickThinkingEvent'];
+
+// A setup takes a card from a deck; a card's ability in a check takes one from the check; any other answer takes one
+// from the asked player's hand. Equal cards exist, so a card is picked by its position.
 function skillCardsFor(owner: string, table: ReturnType<typeof useTable>): SkillCard[] {
-  return schema.lists.sandboxEvents.includes(owner) ? table.deckSkillCards() : table.hand(table.askedPlayer);
+  if (schema.lists.sandboxEvents.includes(owner)) {
+    return table.deckSkillCards();
+  }
+  return FROM_THE_CHECK.includes(owner) ? table.checkCards() : table.hand(table.askedPlayer);
 }
 
 function SkillCardPicker(props: WidgetProps) {

@@ -4,12 +4,15 @@ import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
+import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
+import xyz.zlatanov.frakkintoasters.event.character.AlertViperPilotEvent;
 import xyz.zlatanov.frakkintoasters.state.ship.AssaultRaptor;
 import xyz.zlatanov.frakkintoasters.state.ship.HumanFighter;
 import xyz.zlatanov.frakkintoasters.state.ship.Viper;
 import xyz.zlatanov.frakkintoasters.state.ship.ViperMarkVII;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.*;
@@ -58,6 +61,18 @@ class LaunchViperEventProcessorTest extends EventTestHarness<LaunchViperEvent> {
     void shouldLaunchViper() {
         execute(new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_4_OCLOCK));
         assertShipCount(GALACTICA_SPACE_4_OCLOCK, Viper.class, 1);
+    }
+
+    // An unmanned viper from the "Reserves": Lee "Apollo" Adama may pilot it ("Alert Viper Pilot").
+    @Test
+    void apolloMayPilotAnUnmannedViperFromTheReserves() {
+        player(3).character(LEE_APOLLO_ADAMA);
+        moveTo(COMMAND, LEE_APOLLO_ADAMA);
+
+        execute(new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_4_OCLOCK));
+
+        val viperId = galacticaBoard.shipsIn(GALACTICA_SPACE_4_OCLOCK, Viper.class).getFirst().id();
+        assertFollowup(one(new AlertViperPilotEvent(3, viperId), new NoOpEvent(3)));
     }
 
     @Test

@@ -2,8 +2,8 @@ package xyz.zlatanov.frakkintoasters.event;
 
 import lombok.NoArgsConstructor;
 import lombok.val;
-import xyz.zlatanov.frakkintoasters.event.ship.DamageGalacticaEvent;
-import xyz.zlatanov.frakkintoasters.event.ship.DamagePegasusEvent;
+import xyz.zlatanov.frakkintoasters.event.character.MysteriousIntuitionEventProcessor;
+import xyz.zlatanov.frakkintoasters.event.ship.DamageBattlestarEvent;
 import xyz.zlatanov.frakkintoasters.event.board.GainResourceEvent;
 import xyz.zlatanov.frakkintoasters.event.board.LoseResourceEvent;
 import xyz.zlatanov.frakkintoasters.event.interrupt.OpenInterruptWindowEvent;
@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static lombok.AccessLevel.PRIVATE;
@@ -84,10 +85,11 @@ public class FollowupUtils {
     }
 
     /**
-     * @return Galactica's damage, or the current player draws a Pegasus damage token instead (rule 11.7.2)
+     * @return Galactica's damage, or the current player draws a Pegasus damage token instead while Pegasus is in play
+     * (rule 11.7.2)
      */
     public static Followup damageGalactica() {
-        return one(new DamageGalacticaEvent(), new DamagePegasusEvent());
+        return single(new DamageBattlestarEvent());
     }
 
     public static Event discard(int playerNumber, int count) {
@@ -133,6 +135,11 @@ public class FollowupUtils {
      */
     public static Followup beforeSkillCheckFollowups(GameView game) {
         val followups = new ArrayList<Followup>();
+        // "Mysterious Intuition" decides a Crisis Card's check before anything else happens in it.
+        val intuition = MysteriousIntuitionEventProcessor.offer(game);
+        if (intuition != Followup.NONE) {
+            followups.add(intuition);
+        }
         if (game.activeSkillCheck().type().triggeredByLocation()) {
             followups.addAll(playOrPassDecisions(game, PoliticalProwessEvent.class));
         }
@@ -154,8 +161,18 @@ public class FollowupUtils {
      * the current player, as players play Skill Cards into a skill check (rule 10.3.1)
      */
     public static Followup eachPlayerFromTheLeft(GameView game, Class<? extends PlayerEvent> eventClass) {
+        return eachPlayerFromTheLeft(game, eventClass, player -> true);
+    }
+
+    /**
+     * @return {@link #eachPlayerFromTheLeft(GameView, Class)} for the players who are asked, e.g. those who may put
+     * cards into the check
+     */
+    public static Followup eachPlayerFromTheLeft(GameView game, Class<? extends PlayerEvent> eventClass,
+                                                 Predicate<PlayerView> asked) {
         val fromTheCurrent = playersFrom(game, game.turn().currentPlayerNumber());
         return all(Stream.concat(fromTheCurrent.stream().skip(1), Stream.of(fromTheCurrent.getFirst()))
+                .filter(asked)
                 .map(player -> new PlayerDecisionEvent<>(player.number(), eventClass))
                 .toArray(Event[]::new));
     }

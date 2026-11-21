@@ -14,7 +14,7 @@ public class MainBatteriesEventProcessor extends LocationActionProcessor<MainBat
     }
 
     @Override
-    public Followup process() {
+    protected Followup act() {
         return rollDie(new MainBatteriesResultEvent(event.spaceLocation()));
     }
 }

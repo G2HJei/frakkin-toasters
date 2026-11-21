@@ -14,6 +14,8 @@ import xyz.zlatanov.frakkintoasters.event.board.AdvancePursuitTrackEvent;
 import xyz.zlatanov.frakkintoasters.event.board.DecreaseJumpPreparationEvent;
 import xyz.zlatanov.frakkintoasters.event.board.GainResourceEvent;
 import xyz.zlatanov.frakkintoasters.event.board.LoseResourceEvent;
+import xyz.zlatanov.frakkintoasters.event.character.ChooseADifferentPathEvent;
+import xyz.zlatanov.frakkintoasters.event.character.DeceitfulEvent;
 import xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint;
 import xyz.zlatanov.frakkintoasters.event.crisis.ChooseCrisisSectionEvent.Section;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
@@ -22,7 +24,7 @@ import xyz.zlatanov.frakkintoasters.event.player.DiscardSkillCardsEvent;
 import xyz.zlatanov.frakkintoasters.event.player.DrawMutinyCardEvent;
 import xyz.zlatanov.frakkintoasters.event.player.LaunchViperEvent;
 import xyz.zlatanov.frakkintoasters.event.player.SendToSickbayEvent;
-import xyz.zlatanov.frakkintoasters.event.ship.DamageGalacticaEvent;
+import xyz.zlatanov.frakkintoasters.event.ship.DamageBattlestarEvent;
 import xyz.zlatanov.frakkintoasters.event.ship.DestroyRaptorEvent;
 import xyz.zlatanov.frakkintoasters.event.ship.DrawAndDestroyCivilianShipsEvent;
 import xyz.zlatanov.frakkintoasters.event.ship.LaunchRaidersEvent;
@@ -44,6 +46,8 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.rollDie;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DISCARD_EXACTLY_2;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DISCARD_EXACTLY_3;
+import static xyz.zlatanov.frakkintoasters.event.player.DiscardKind.CHOSEN;
+import static xyz.zlatanov.frakkintoasters.event.player.DiscardKind.RANDOM;
 import static xyz.zlatanov.frakkintoasters.event.crisis.ChooseCrisisSectionEvent.Section.BOTTOM;
 import static xyz.zlatanov.frakkintoasters.event.crisis.ChooseCrisisSectionEvent.Section.TOP;
 import static xyz.zlatanov.frakkintoasters.state.board.Resource.*;
@@ -67,10 +71,10 @@ class CrisisCardFollowupsTest extends TestHarness {
         player(CURRENT).character(currentPlayer);
         player(PRESIDENT).character(LAURA_ROSLIN);
         player(ADMIRAL).character(WILLIAM_ADAMA);
-        player(CAG).character(LEE_APOLLO_ADAMA);
+        player(CAG).character(LOUANNE_KAT_KATRAINE);
         president(LAURA_ROSLIN);
         admiral(WILLIAM_ADAMA);
-        cag(LEE_APOLLO_ADAMA);
+        cag(LOUANNE_KAT_KATRAINE);
     }
 
     static Stream<CrisisCard> cardsWithAChooser() {
@@ -148,7 +152,7 @@ class CrisisCardFollowupsTest extends TestHarness {
     void shouldLetEveryPilotLaunchBeforeTheRaidersLaunch() {
         setUpPlayers(KARA_STARBUCK_THRACE);
         moveTo(Location.HANGAR_DECK, KARA_STARBUCK_THRACE);
-        moveTo(Location.COMMAND, LEE_APOLLO_ADAMA);
+        moveTo(Location.COMMAND, LOUANNE_KAT_KATRAINE);
 
         assertEquals(all(
                 all(Followup.one(launchHimself(CURRENT), new NoOpEvent(CURRENT)),
@@ -175,6 +179,44 @@ class CrisisCardFollowupsTest extends TestHarness {
         revealCylon();
         assertEquals(Followup.NONE, followup(RAPTOR_MALFUNCTION, BOTTOM));
         assertEquals(Followup.NONE, followup(A_TRAITOR_ACCUSED, BOTTOM));
+    }
+
+    // "Amoral": Tory Foster, as current player, takes the first option of a card the current player chooses on.
+    @Test
+    void amoralTakesTheFirstOption() {
+        setUpPlayers(TORY_FOSTER);
+
+        assertEquals(single(new ChooseCrisisSectionEvent(CURRENT, WATER_SABOTAGED, TOP)),
+                new CrisisCardFollowups(game).choice(WATER_SABOTAGED));
+    }
+
+    // "Choose a Different Path": Lee Adama may make the result "the current player discards 5 Skill Cards" instead.
+    @Test
+    void leeAdamaMayChooseADifferentPath() {
+        setUpPlayers(LEE_ADAMA);
+
+        assertEquals(Followup.one(
+                        new ChooseCrisisSectionEvent(CURRENT, WATER_SABOTAGED, TOP),
+                        new ChooseCrisisSectionEvent(CURRENT, WATER_SABOTAGED, BOTTOM),
+                        new ChooseADifferentPathEvent(CURRENT, WATER_SABOTAGED)),
+                new CrisisCardFollowups(game).choice(WATER_SABOTAGED));
+        assertEquals(single(discard(CURRENT, EventConstraint.DISCARD_EXACTLY_5)), new CrisisCardFollowups(game).differentPath());
+        ops.player(CURRENT).loseMiracleTokens();
+        assertEquals(Followup.one(
+                        new ChooseCrisisSectionEvent(CURRENT, WATER_SABOTAGED, TOP),
+                        new ChooseCrisisSectionEvent(CURRENT, WATER_SABOTAGED, BOTTOM)),
+                new CrisisCardFollowups(game).choice(WATER_SABOTAGED));
+    }
+
+    // "Deceitful": Romo Lampkin's first discard of the card is 1 smaller, the others' aren't.
+    @Test
+    void deceitfulReducesRomoLampkinsDiscard() {
+        setUpPlayers(ROMO_LAMPKIN);
+
+        assertEquals(single(new DeceitfulEvent(CURRENT, CHOSEN, 5)), followup(A_TRAITOR_ACCUSED, BOTTOM));
+        assertEquals(all(new DeceitfulEvent(CURRENT, CHOSEN, 2), discard(PRESIDENT, DISCARD_EXACTLY_2),
+                discard(ADMIRAL, DISCARD_EXACTLY_2), discard(CAG, DISCARD_EXACTLY_2)), followup(CYLON_SCREENINGS, BOTTOM));
+        assertEquals(single(new DeceitfulEvent(CURRENT, RANDOM, 4)), followup(KEEP_TABS_ON_VISITOR, BOTTOM));
     }
 
     @Test
@@ -257,7 +299,7 @@ class CrisisCardFollowupsTest extends TestHarness {
     @Test
     void shouldResolveControversialManuscript() {
         assertEquals(single(lose(MORALE, 1)), followup(CONTROVERSIAL_MANUSCRIPT, TOP));
-        assertEquals(all(new GainResourceEvent(MORALE, 1), new DamageGalacticaEvent(), new DamageGalacticaEvent()),
+        assertEquals(all(new GainResourceEvent(MORALE, 1), new DamageBattlestarEvent(), new DamageBattlestarEvent()),
                 followup(CONTROVERSIAL_MANUSCRIPT, BOTTOM));
     }
 
@@ -293,13 +335,13 @@ class CrisisCardFollowupsTest extends TestHarness {
     @Test
     void shouldResolveQuestionProcedure() {
         assertEquals(single(lose(MORALE, 1)), followup(QUESTION_PROCEDURE, TOP));
-        assertEquals(all(new DamageGalacticaEvent(), discard(PRESIDENT, DISCARD_EXACTLY_3)),
+        assertEquals(all(new DamageBattlestarEvent(), discard(PRESIDENT, DISCARD_EXACTLY_3)),
                 followup(QUESTION_PROCEDURE, BOTTOM));
     }
 
     @Test
     void shouldResolveRaidersInbound() {
-        assertEquals(all(lose(POPULATION, 1), new DamageGalacticaEvent()), followup(RAIDERS_INBOUND, TOP));
+        assertEquals(all(lose(POPULATION, 1), new DamageBattlestarEvent()), followup(RAIDERS_INBOUND, TOP));
         assertEquals(all(discard(CAG, DISCARD_EXACTLY_3), discard(ADMIRAL, DISCARD_EXACTLY_3)),
                 followup(RAIDERS_INBOUND, BOTTOM));
     }

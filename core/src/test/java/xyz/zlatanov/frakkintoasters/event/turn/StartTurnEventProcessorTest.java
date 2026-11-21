@@ -78,4 +78,39 @@ class StartTurnEventProcessorTest extends EventTestHarness<StartTurnEvent> {
         assertTrue(game.locate(KARL_HELO_AGATHON).isEmpty());
         assertFollowup(STEPS);
     }
+
+    // Expert Pilot: starting her turn in a viper gives her 2 actions in her Action step.
+    @Test
+    void starbuckStartingHerTurnInAViperUsesExpertPilot() {
+        player(1).character(KARA_STARBUCK_THRACE);
+        ops.player(1).pilot(viperAt(xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_4_OCLOCK).id());
+
+        execute(new StartTurnEvent());
+
+        assertTrue(game.turn().hasUsed(1, xyz.zlatanov.frakkintoasters.state.character.CharacterAbility.EXPERT_PILOT));
+        assertFollowup(STEPS);
+    }
+
+    // "Stim Junkie" compares the end of Kat's Action step with this.
+    @Test
+    void katsStartLocationIsNoted() {
+        player(1).character(LOUANNE_KAT_KATRAINE);
+        moveTo(HANGAR_DECK, LOUANNE_KAT_KATRAINE);
+
+        execute(new StartTurnEvent());
+
+        assertEquals(Optional.of(HANGAR_DECK), game.turn().startLocation());
+        assertFollowup(STEPS);
+    }
+
+    @Test
+    void nobodyElsesStartLocationIsNoted() {
+        player(1).character(LAURA_ROSLIN);
+        moveTo(HANGAR_DECK, LAURA_ROSLIN);
+
+        execute(new StartTurnEvent());
+
+        assertEquals(Optional.empty(), game.turn().startLocation());
+        assertFollowup(STEPS);
+    }
 }

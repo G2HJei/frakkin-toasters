@@ -28,6 +28,7 @@ import xyz.zlatanov.frakkintoasters.event.skillcheck.ShuffleAndDivideCardsEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.result.KeepTabsOnVisitorFailEvent;
 import xyz.zlatanov.frakkintoasters.operation.GameOps;
 import xyz.zlatanov.frakkintoasters.projection.LiveUpdateProjection.*;
+import xyz.zlatanov.frakkintoasters.state.character.CharacterAbility;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.GameStep;
 import xyz.zlatanov.frakkintoasters.state.PlayerPile;
@@ -44,6 +45,7 @@ import xyz.zlatanov.frakkintoasters.state.damage.GalacticaDamage;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow.BeforeDieRoll;
 import xyz.zlatanov.frakkintoasters.state.interrupt.PlayedInterruptCard;
+import xyz.zlatanov.frakkintoasters.state.interrupt.UsedRollAbility;
 import xyz.zlatanov.frakkintoasters.state.ship.ShipZone;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckPile;
@@ -62,6 +64,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
+import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.FINAL_FIVE_DAMAGE_GALACTICA_TWICE;
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.NOT_CYLON;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.*;
@@ -95,6 +98,7 @@ class LiveUpdateProjectionTest {
             new Sample(new BoardFact.PursuitAdvanced(), Rule.PUBLIC),
             new Sample(new BoardFact.PursuitReset(), Rule.PUBLIC),
             new Sample(new BoardFact.EngineRoomActivated(), Rule.PUBLIC),
+            new Sample(new BoardFact.PegasusDestroyed(), Rule.PUBLIC),
             new Sample(new DeckFact.DeckShuffled(DeckId.CRISIS, List.of(CrisisCard.DETENTE)), Rule.NOBODY),
             new Sample(new DeckFact.CardsDrawn(DeckId.POLITICS, List.of(CONSOLIDATE)), Rule.NOBODY),
             new Sample(new DeckFact.CardsAddedOnTop(DeckId.CRISIS, List.of(CrisisCard.DETENTE)), Rule.NOBODY),
@@ -108,6 +112,8 @@ class LiveUpdateProjectionTest {
             new Sample(new GameFact.DieRollStarted(), Rule.PUBLIC),
             new Sample(new GameFact.DieRolled(4), Rule.PUBLIC),
             new Sample(new GameFact.DieRollCardPlayed(STRATEGIC_PLANNING, 2), Rule.PUBLIC),
+            new Sample(new GameFact.DieRollAbilityUsed(CharacterAbility.ECO_OFFICER), Rule.PUBLIC),
+            new Sample(new GameFact.DieRollReplaced(6, true), Rule.PUBLIC),
             new Sample(new GameFact.StepChanged(GameStep.ACTION), Rule.PUBLIC),
             new Sample(new GameFact.TurnStarted(2), Rule.PUBLIC),
             new Sample(new GameFact.TurnEndedEarly(), Rule.PUBLIC),
@@ -121,6 +127,13 @@ class LiveUpdateProjectionTest {
             new Sample(new GameFact.MoraleLostToExecution(), Rule.PUBLIC),
             new Sample(new SkillCheckFact.CardsShown(1, List.of(new SkillCard(3, EXECUTIVE_ORDER))), Rule.PUBLIC),
             new Sample(new GameFact.CylonShipsHeld(), Rule.PUBLIC),
+            new Sample(new GameFact.TurnLimitUsed(1, xyz.zlatanov.frakkintoasters.state.TurnLimit.CAG_PILOT_ACTION), Rule.PUBLIC),
+            new Sample(new GameFact.RemoteActionAllowed(1, xyz.zlatanov.frakkintoasters.state.board.Location.RESEARCH_LAB), Rule.PUBLIC),
+            new Sample(new GameFact.RemoteActionEnded(), Rule.PUBLIC),
+            new Sample(new GameFact.StartLocationNoted(xyz.zlatanov.frakkintoasters.state.board.Location.HANGAR_DECK), Rule.PUBLIC),
+            new Sample(new GameFact.SentToBrigAtEndOfTurn(1), Rule.PUBLIC),
+            new Sample(new GameFact.ActionCostPaid(1), Rule.PUBLIC),
+            new Sample(new GameFact.TitleBorrowed(xyz.zlatanov.frakkintoasters.state.Title.ADMIRAL, ELLEN_TIGH), Rule.PUBLIC),
             new Sample(new GameFact.LossReductionAdded(Resource.FOOD), Rule.PUBLIC),
             new Sample(new GameFact.LossReduced(Resource.FOOD), Rule.PUBLIC),
             new Sample(new GameFact.SkillCardPlayed(1, new SkillCard(6, BUILD_NUKE)), Rule.PUBLIC),
@@ -133,6 +146,9 @@ class LiveUpdateProjectionTest {
             new Sample(new InterruptFact.InterruptWindowClosed(), Rule.PUBLIC),
             new Sample(new InterruptFact.RaidersWillMiss(GALACTICA_SPACE_2_OCLOCK, 2), Rule.PUBLIC),
             new Sample(new InterruptFact.RaiderMissed(GALACTICA_SPACE_2_OCLOCK), Rule.PUBLIC),
+            new Sample(new InterruptFact.RollAbilityUsed(new UsedRollAbility(1, CharacterAbility.LONGSHOT, null, 6)), Rule.PLAYER_1),
+            new Sample(new InterruptFact.RollAbilityWithdrawn(new UsedRollAbility(1, CharacterAbility.ECO_OFFICER, null, null)), Rule.PUBLIC),
+            new Sample(new InterruptFact.RollAbilityResolved(new UsedRollAbility(1, CharacterAbility.ECO_OFFICER, null, null)), Rule.PUBLIC),
             new Sample(new PlayerFact.CharacterSelected(2, WILLIAM_ADAMA), Rule.PUBLIC),
             new Sample(new PlayerFact.CharacterMoved(LAURA_ROSLIN, COMMAND), Rule.PUBLIC),
             new Sample(new PlayerFact.CharacterRemovedFromBoards(LAURA_ROSLIN), Rule.PUBLIC),
@@ -141,6 +157,9 @@ class LiveUpdateProjectionTest {
             new Sample(new PlayerFact.CardsLost(1, PlayerPile.LOYALTY, List.of(NOT_CYLON)), Rule.PLAYER_1),
             new Sample(new PlayerFact.MiracleTokenGained(1), Rule.PUBLIC),
             new Sample(new PlayerFact.MiracleTokenLost(1), Rule.PUBLIC),
+            new Sample(new PlayerFact.AbilityUsed(1, CharacterAbility.CYLON_DETECTOR), Rule.PUBLIC),
+            new Sample(new PlayerFact.AbilityTriggered(1, CharacterAbility.MEMENTO), Rule.PUBLIC),
+            new Sample(new PlayerFact.AbilityTriggerCleared(1, CharacterAbility.MEMENTO), Rule.PUBLIC),
             new Sample(new PlayerFact.LoyaltyCardRevealed(1, NOT_CYLON), Rule.PUBLIC),
             new Sample(new PlayerFact.MotiveCardRevealed(1, MotiveCard.values()[0]), Rule.PUBLIC),
             new Sample(new PlayerFact.InfiltrationStarted(1), Rule.PUBLIC),
@@ -149,6 +168,7 @@ class LiveUpdateProjectionTest {
             new Sample(new PlayerFact.CivilianShipForgotten(1, 2001), Rule.PUBLIC),
             new Sample(new PlayerFact.OwnTurnStarted(1), Rule.PUBLIC),
             new Sample(new PlayerFact.LoyaltyCardSeen(1, 2, NOT_CYLON), Rule.PLAYER_1),
+            new Sample(new PlayerFact.FinalFiveCardShown(2, FINAL_FIVE_DAMAGE_GALACTICA_TWICE), Rule.PUBLIC),
             new Sample(new PlayerFact.CardsSeen(1, DeckId.DESTINATION, List.of(DestinationCard.DEEP_SPACE)), Rule.PLAYER_1),
             new Sample(new ShipFact.ShipMoved(1, ShipZone.RESERVES, ShipZone.GALACTICA_SPACE, GALACTICA_SPACE_4_OCLOCK), Rule.PUBLIC),
             new Sample(new ShipFact.PilotChanged(1, LAURA_ROSLIN), Rule.PUBLIC),
@@ -156,10 +176,13 @@ class LiveUpdateProjectionTest {
             new Sample(new ShipFact.BasestarDamageCleared(1000), Rule.PUBLIC),
             new Sample(new SkillCheckFact.SkillCheckStarted(SkillCheckType.ADMIRALS_QUARTERS), Rule.PUBLIC),
             new Sample(new SkillCheckFact.TargetChosen(2), Rule.PUBLIC),
+            new Sample(new SkillCheckFact.PlayedBy(2), Rule.PUBLIC),
             new Sample(new SkillCheckFact.CardsPlayedBefore(1, List.of(CONSOLIDATE)), Rule.PLAYER_1),
             new Sample(new SkillCheckFact.CardsLookedAt(1, 2, List.of(CONSOLIDATE)), Rule.PLAYER_1),
             new Sample(new SkillCheckFact.DifficultyAdjusted(3), Rule.PUBLIC),
             new Sample(new SkillCheckFact.PoliticsCountPositive(), Rule.PUBLIC),
+            new Sample(new SkillCheckFact.StrengthZeroed(xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.TACTICS), Rule.PUBLIC),
+            new Sample(new SkillCheckFact.CardsDivided(), Rule.PUBLIC),
             new Sample(new SkillCheckFact.PlayedBeforeRevealed(), Rule.PUBLIC),
             new Sample(new SkillCheckFact.CardsPlaced(SkillCheckPile.CARDS, List.of(CONSOLIDATE), true), Rule.NOBODY),
             new Sample(new SkillCheckFact.CardsPlaced(SkillCheckPile.MATCHING, List.of(CONSOLIDATE), false), Rule.PUBLIC),

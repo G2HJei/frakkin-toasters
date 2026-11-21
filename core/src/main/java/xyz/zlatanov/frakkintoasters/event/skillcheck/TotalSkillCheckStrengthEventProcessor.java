@@ -8,6 +8,7 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 
 import java.util.ArrayList;
 
+import static xyz.zlatanov.frakkintoasters.state.character.CharacterAbility.INSPIRATIONAL_LEADER;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.playOrPassDecisions;
@@ -49,6 +50,9 @@ public class TotalSkillCheckStrengthEventProcessor extends EventProcessor<TotalS
     }
 
     private boolean countsAsPositive(SkillCard card) {
+        if (game.activeSkillCheck().cardValue(card) == 1 && inspirationalLeader()) {
+            return true;
+        }
         return switch (card.type().color()) {
             case ENGINEERING -> playedBefore(SCIENTIFIC_RESEARCH);
             case TREACHERY -> playedBefore(AT_ANY_COST);
@@ -67,6 +71,15 @@ public class TotalSkillCheckStrengthEventProcessor extends EventProcessor<TotalS
                 .filter(card -> skillCheck.cardValue(card) == 0)
                 .count();
         return (int) zeroStrengthCards;
+    }
+
+    // "Inspirational Leader": on the check of a Crisis Card William Adama drew, 1 strength cards count positive. He drew
+    // it when he is the current player and acts, which a Cylon at "Caprica" on his turn wouldn't be.
+    private boolean inspirationalLeader() {
+        val acting = game.actingPlayer();
+        return game.activeSkillCheck().type().onCrisisCard()
+                && acting.number() == game.turn().currentPlayerNumber()
+                && acting.hasAbility(INSPIRATIONAL_LEADER);
     }
 
     private boolean playedBefore(SkillCardType type) {

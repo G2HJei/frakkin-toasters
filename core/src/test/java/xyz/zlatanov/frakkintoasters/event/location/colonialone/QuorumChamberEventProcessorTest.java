@@ -15,21 +15,21 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.QUORUM_CHAMBER;
 import static xyz.zlatanov.frakkintoasters.state.card.QuorumCard.ENACT_PRODUCTION_QUOTAS;
 import static xyz.zlatanov.frakkintoasters.state.card.QuorumCard.EULOGY;
-import static xyz.zlatanov.frakkintoasters.state.character.Character.LAURA_ROSLIN;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.ROMO_LAMPKIN;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.TOM_ZAREK;
 
 class QuorumChamberEventProcessorTest extends EventTestHarness<QuorumChamberEvent> {
 
     @BeforeEach
     void setUpAtLocation() {
-        player(1).character(LAURA_ROSLIN);
-        moveTo(QUORUM_CHAMBER, LAURA_ROSLIN);
+        player(1).character(ROMO_LAMPKIN);
+        moveTo(QUORUM_CHAMBER, ROMO_LAMPKIN);
     }
 
     // The President draws, then may draw again, play a card (the one just drawn too) or stop.
     @Test
     void thePresidentDrawsThenMayDrawAgainOrPlay() {
-        president(LAURA_ROSLIN);
+        president(ROMO_LAMPKIN);
         quorumDeck.nextCard(ENACT_PRODUCTION_QUOTAS);
 
         execute(new QuorumChamberEvent(1));
@@ -43,7 +43,7 @@ class QuorumChamberEventProcessorTest extends EventTestHarness<QuorumChamberEven
 
     @Test
     void noPlayWithoutACardThatCanBePlayed() {
-        president(LAURA_ROSLIN);
+        president(ROMO_LAMPKIN);
         quorumDeck.nextCard(EULOGY); // nobody was executed
 
         execute(new QuorumChamberEvent(1));
@@ -54,7 +54,7 @@ class QuorumChamberEventProcessorTest extends EventTestHarness<QuorumChamberEven
     // Every card is in a hand, in play or out of the game.
     @Test
     void nothingToDrawAndNothingToPlay() {
-        president(LAURA_ROSLIN);
+        president(ROMO_LAMPKIN);
         quorumDeck.clear();
 
         execute(new QuorumChamberEvent(1));

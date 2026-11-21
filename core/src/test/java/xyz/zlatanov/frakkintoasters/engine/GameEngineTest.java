@@ -9,6 +9,7 @@ import xyz.zlatanov.frakkintoasters.engine.PendingInput.AwaitingDecision;
 import xyz.zlatanov.frakkintoasters.engine.journal.GameSnapshot;
 import xyz.zlatanov.frakkintoasters.engine.journal.Journal;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ChoiceMade;
+import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.EventInjected;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.FactRecorded;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ScopeClosed;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ScopeOpened;
@@ -17,6 +18,7 @@ import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
 import xyz.zlatanov.frakkintoasters.event.board.LoseResourceEvent;
+import xyz.zlatanov.frakkintoasters.event.interrupt.PlayInterruptCardEvent;
 import xyz.zlatanov.frakkintoasters.event.endgame.CylonsWinEvent;
 import xyz.zlatanov.frakkintoasters.event.location.galactica.CommandEvent;
 import xyz.zlatanov.frakkintoasters.event.location.galactica.ResearchLabEvent;
@@ -236,6 +238,81 @@ class GameEngineTest {
         assertEquals(new Finished(CYLONS), engine.status(1));
         assertThrows(InvalidActionException.class, () -> engine.submit(1, new NoOpEvent(1)));
         assertThrows(InvalidActionException.class, () -> engine.choose(1, single(new NoOpEvent(1))));
+    }
+
+    /* anytime */
+
+    // An anytime event answers nothing: the decision stays pending, and the journal marks it as run ahead of it.
+    @Test
+    void anAnytimeEventRunsAheadOfThePendingDecision() {
+        val before = engine.journal().size();
+
+        engine.submit(2, new AnytimeTestEvent(2));
+
+        assertFalse(engine.view().player(2).hasMiracleToken());
+        assertWaitingFor(new AwaitingDecision(PLAYER_1_SELECTS));
+        assertEquals(new EventInjected(new AnytimeTestEvent(2)), engine.journal().entries().get(before));
+        assertEquals(new ScopeOpened(2, ROOT_SCOPE, new AnytimeTestEvent(2), 2), scopesOpened().get(1));
+        assertRestoresTheSameGame();
+    }
+
+    @Test
+    void anAnytimeEventRunsAheadOfAPendingChoice() {
+        engine.submit(1, new SelectCharacterEvent(1, HELENA_CAIN));
+
+        engine.submit(3, new AnytimeTestEvent(3));
+
+        assertFalse(engine.view().player(3).hasMiracleToken());
+        assertWaitingFor(new AwaitingChoice(1, options(CAIN_SETUP)));
+        assertRestoresTheSameGame();
+        engine.choose(1, single(new PlaceInSetupLocationEvent(1, COMMAND)));
+        assertWaitingFor(new AwaitingDecision(PLAYER_2_SELECTS));
+    }
+
+    // A player who isn't asked doesn't learn about a secret decision, and can still act at any time.
+    @Test
+    void anAnytimeEventRunsAheadOfASecretDecision() {
+        val secret = new PlayerDecisionEvent<>(2, PlayInterruptCardEvent.class);
+        engine = start(all(single(secret), CYLONS_WIN));
+
+        engine.submit(1, new AnytimeTestEvent(1));
+
+        assertFalse(engine.view().player(1).hasMiracleToken());
+        assertEquals(EngineStatus.waiting(), engine.status(1));
+        assertEquals(EngineStatus.waiting(new AwaitingDecision(secret)), engine.status(2));
+        assertRestoresTheSameGame();
+    }
+
+    @Test
+    void undoTakesBackAnAnytimeEventOnItsOwn() {
+        engine.submit(1, new SelectCharacterEvent(1, HELENA_CAIN));
+        val beforeIt = engine.journal().entries();
+        engine.submit(3, new AnytimeTestEvent(3));
+
+        engine.undo();
+
+        assertEquals(beforeIt, engine.journal().entries());
+        assertTrue(engine.view().player(3).hasMiracleToken());
+        assertWaitingFor(new AwaitingChoice(1, options(CAIN_SETUP)));
+    }
+
+    @Test
+    void anInvalidAnytimeEventIsRejected() {
+        engine.submit(2, new AnytimeTestEvent(2));
+
+        assertRejected(() -> engine.submit(2, new AnytimeTestEvent(2))); // he has no miracle token left
+    }
+
+    @Test
+    void aPlayerCanSubmitOnlyHisOwnAnytimeEvent() {
+        assertRejected(() -> engine.submit(1, new AnytimeTestEvent(2)));
+    }
+
+    @Test
+    void aFinishedGameTakesNoAnytimeEvent() {
+        engine = start(CYLONS_WIN);
+
+        assertThrows(InvalidActionException.class, () -> engine.submit(1, new AnytimeTestEvent(1)));
     }
 
     /* restore */

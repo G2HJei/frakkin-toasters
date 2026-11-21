@@ -90,7 +90,7 @@ public class ChooseCrisisTargetEventProcessor extends EventProcessor<ChooseCrisi
         switch (card) {
             // "another player", who can have a miracle token (rules 4.3.1 to 4.3.3)
             case AN_AMBITIOUS_OPERATION -> game.players().stream()
-                    .filter(p -> p.number() != chooser && !p.hasMiracleToken() && !p.isRevealedCylon())
+                    .filter(p -> p.number() != chooser && p.canGainMiracleToken())
                     .forEach(p -> targets.add(p.number()));
             case SECRET_MEETINGS -> game.players().forEach(p -> targets.add(p.number()));
             // "another player to send to Sickbay" (rule 9.3.2)

@@ -53,6 +53,7 @@ export const TYPE_LABELS: Record<string, string> = {
   PlayCardsIntoSkillCheckEvent: 'Play cards into the skill check',
   PlayCardsBeforeSkillCheckEvent: 'Play cards before the skill check',
   PlayInterruptCardEvent: 'Play an interrupt card',
+  UseRollAbilityEvent: 'Use an ability on the roll',
   ChooseCrisisSectionEvent: 'Choose a section',
   FTLControlEvent: 'FTL Control',
   PegasusCicEvent: 'Pegasus CIC',

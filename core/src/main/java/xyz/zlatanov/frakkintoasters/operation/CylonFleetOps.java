@@ -73,11 +73,11 @@ public class CylonFleetOps extends GameOps {
         cylonFleetBoard().shipsInSpace().forEach(this::moveToGalactica);
     }
 
-    public void moveShipsToGalactica(ShipType shipType, Location from) {
-        cylonFleetBoard()
-                .shipsIn(from).stream()
-                .filter(s -> ShipType.of(s.getClass()).equals(shipType))
-                .forEach(s -> moveToGalactica(s, from));
+    /**
+     * Moves every ship of the Cylon space area, of all types, to the corresponding space area of the main game board.
+     */
+    public void moveShipsToGalactica(Location from) {
+        cylonFleetBoard().shipsIn(from).forEach(s -> moveToGalactica(s, from));
     }
 
     private void moveToGalactica(Ship ship, Location cylonFleetLocation) {

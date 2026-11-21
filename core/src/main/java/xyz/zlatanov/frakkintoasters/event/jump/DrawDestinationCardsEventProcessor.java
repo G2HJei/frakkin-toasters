@@ -11,16 +11,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
+import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.card.QuorumCard.ASSIGN_MISSION_SPECIALIST;
 
 public class DrawDestinationCardsEventProcessor extends EventProcessor<DrawDestinationCardsEvent> {
 
     private static final int ADMIRAL_CARDS            = 2;
     private static final int MISSION_SPECIALIST_CARDS = 3;
+    private static final int BLIND_JUMP_CARDS         = 1;
 
-    // The Admiral draws 2 cards, or the Mission Specialist 3 instead, whose card is then used up.
+    // The Admiral draws 2 cards, or the Mission Specialist 3 instead, whose card is then used up. After a "Blind Jump"
+    // the Admiral draws only 1, and the Mission Specialist's card stays for the next jump.
     @Override
     public Followup process() {
+        if (event.blindJump()) {
+            // One card leaves nothing to choose: the fleet goes there.
+            val card = ops.galactica().drawDestinationCards(BLIND_JUMP_CARDS).getFirst();
+            return single(new ResolveDestinationCardEvent(card));
+        }
         val specialist = game.quorumCardHolder(ASSIGN_MISSION_SPECIALIST);
         val chooser = specialist.orElseGet(() -> game.playerNumber(game.admiral()));
         if (specialist.isPresent()) {

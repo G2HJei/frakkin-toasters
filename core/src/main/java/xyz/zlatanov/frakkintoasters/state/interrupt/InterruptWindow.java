@@ -8,7 +8,7 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 
 /**
  * A moment when players may play a Skill Card in response to something, outside their Action step, and the cards it
- * takes. Players who want to play at the same time answer one at a time, and the current player settles conflicts
+ * takes. A player may use a character ability there too (`RollAbilities`). Players who want to play at the same time answer one at a time, and the current player settles conflicts
  * (rule 13.3).
  */
 public sealed interface InterruptWindow {
@@ -19,6 +19,13 @@ public sealed interface InterruptWindow {
      * @return whether a die roll follows the window, so the window starts it
      */
     default boolean startsDieRoll() {
+        return false;
+    }
+
+    /**
+     * @return whether the window comes right after a die roll, so a reroll can be asked in it
+     */
+    default boolean followsDieRoll() {
         return false;
     }
 
@@ -59,6 +66,25 @@ public sealed interface InterruptWindow {
         public Set<SkillCardType> cards() {
             return Set.of(CALCULATIONS);
         }
+
+        @Override
+        public boolean followsDieRoll() {
+            return true;
+        }
+    }
+
+    // The roll of the "FTL Control" action, which Felix Gaeta's "FTL Operator" may reroll. Otherwise an AfterDieRoll.
+    record AfterFtlControlRoll() implements InterruptWindow {
+
+        @Override
+        public Set<SkillCardType> cards() {
+            return Set.of(CALCULATIONS);
+        }
+
+        @Override
+        public boolean followsDieRoll() {
+            return true;
+        }
     }
 
     // The roll of an attack on a viper. "Evasive Maneuvers": "Play after any viper is attacked to reroll the die. If the
@@ -68,6 +94,11 @@ public sealed interface InterruptWindow {
         @Override
         public Set<SkillCardType> cards() {
             return Set.of(CALCULATIONS, EVASIVE_MANOEUVRES);
+        }
+
+        @Override
+        public boolean followsDieRoll() {
+            return true;
         }
     }
 

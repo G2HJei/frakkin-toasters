@@ -15,6 +15,7 @@ import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
 import xyz.zlatanov.frakkintoasters.event.crisis.ChooseCrisisSectionEvent;
+import xyz.zlatanov.frakkintoasters.event.crisis.ResolveCrisisCardEvent;
 import xyz.zlatanov.frakkintoasters.event.deck.CreateDestinyDeckEvent;
 import xyz.zlatanov.frakkintoasters.event.endgame.CylonsWinEvent;
 import xyz.zlatanov.frakkintoasters.event.location.galactica.AdmiralsQuartersEvent;
@@ -127,7 +128,7 @@ class LocationSkillCheckTest {
         assertWaitingFor(new AwaitingDecision(new PlayerDecisionEvent<>(1, LeaveBrigEvent.class, DESTINATION_GALACTICA)));
         play(engine -> engine.submit(1, new LeaveBrigEvent(1, COMMAND)));
 
-        assertEquals(Optional.of(COMMAND), engine.view().locate(WILLIAM_ADAMA));
+        assertEquals(Optional.of(COMMAND), engine.view().locate(GAIUS_BALTAR_ALT));
         assertSkillCheckEnded();
     }
 
@@ -181,6 +182,7 @@ class LocationSkillCheckTest {
 
         // "Lose 1 morale", and the character leaves the game.
         assertEquals(morale - 1, engine.view().boards().galactica().morale());
+        discardForFinalFiveCards();
         assertWaitingFor(new AwaitingDecision(new PlayerDecisionEvent<>(target, SelectCharacterEvent.class)));
         assertNull(engine.view().player(target).character());
         assertTrue(engine.view().removedComponents().contains(targetCharacter));
@@ -190,6 +192,11 @@ class LocationSkillCheckTest {
         assertEquals(1, engine.view().player(target).loyaltyCards().size());
         assertNull(engine.view().activeSkillCheck());
         assertTrue(scopesOpened().stream().anyMatch(event -> event instanceof EndSkillCheckEvent));
+        // Kara "Starbuck" Thrace, unless she was the one executed, lets the revealed Crisis Card resolve ("Secret Destiny").
+        if (engine.view().players().stream().anyMatch(player -> player.character() == KARA_STARBUCK_THRACE)) {
+            val starbuck = engine.view().playerNumber(KARA_STARBUCK_THRACE);
+            play(engine -> engine.choose(starbuck, single(new ResolveCrisisCardEvent(RIOTS_NO_JUMP))));
+        }
         // Helena Cain's turn goes on: she is the Admiral, so she chooses the top of the Crisis Card, which costs 1 food and
         // 1 morale on top of the execution's.
         assertWaitingFor(new AwaitingChoice(1, Set.of(single(new ChooseCrisisSectionEvent(1, RIOTS_NO_JUMP, TOP)),
@@ -286,11 +293,11 @@ class LocationSkillCheckTest {
 
     /* the game */
 
-    // William Adama at the "Admiral's Quarters", Laura Roslin at the "President's Office", Kara Thrace on the "Hangar
+    // Gaius Baltar (alt.) at the "Admiral's Quarters", Laura Roslin at the "President's Office", Kara Thrace on the "Hangar
     // Deck". Player 1 is the current player.
     private static Followup setUp() {
         return all(
-                new SelectCharacterEvent(1, WILLIAM_ADAMA),
+                new SelectCharacterEvent(1, GAIUS_BALTAR_ALT),
                 new SelectCharacterEvent(2, LAURA_ROSLIN),
                 new SelectCharacterEvent(3, KARA_STARBUCK_THRACE),
                 new CreateDestinyDeckEvent(),
@@ -347,5 +354,16 @@ class LocationSkillCheckTest {
 
     private static List<EngineStatus> statuses(GameEngine engine) {
         return IntStream.rangeClosed(1, 3).mapToObj(engine::status).toList();
+    }
+
+    // A Final Five card the seed dealt to the executed player makes the other humans discard 2 Skill Cards (rule
+    // 5.4.1.2).
+    private void discardForFinalFiveCards() {
+        while (engine.pendingInput().orElseThrow() instanceof AwaitingDecision(var decision)
+                && decision.action() == DiscardSkillCardsEvent.class) {
+            val player = decision.playerNumber();
+            val hand = engine.view().player(player).skillCards().cards();
+            play(engine -> engine.submit(player, new DiscardSkillCardsEvent(player, hand.subList(0, Math.min(2, hand.size())))));
+        }
     }
 }

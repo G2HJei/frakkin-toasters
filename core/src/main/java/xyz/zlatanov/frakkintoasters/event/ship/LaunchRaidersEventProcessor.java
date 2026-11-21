@@ -22,7 +22,7 @@ public class LaunchRaidersEventProcessor extends EventProcessor<LaunchRaidersEve
         }
         val basestars = galacticaBoard.shipsInSpace(BasestarView.class);
         if (basestars.isEmpty()) {
-            return placeBasestarOnCylonFleetBoard();
+            return event.icon() ? placeBasestarOnCylonFleetBoard() : NONE;
         } else {
             return launchRaidersFromEachBasestar(basestars);
         }
@@ -34,10 +34,18 @@ public class LaunchRaidersEventProcessor extends EventProcessor<LaunchRaidersEve
                 new AdvancePursuitTrackEvent());
     }
 
+    /**
+     * @return whether the basestar can launch raiders or heavy raiders: not with a "Disabled Hangar" token on it (rule
+     * 11.7.3), wherever the launch comes from
+     */
+    public static boolean canLaunch(BasestarView basestar) {
+        return !basestar.damage().contains(DISABLED_HANGAR_BAY);
+    }
+
     private Followup launchRaidersFromEachBasestar(List<BasestarView> basestars) {
         basestars.stream()
-                .filter(b -> !b.damage().contains(DISABLED_HANGAR_BAY))
-                .forEach(b -> ops.ship(b.id()).launchRaiders(3));
+                .filter(LaunchRaidersEventProcessor::canLaunch)
+                .forEach(b -> ops.ship(b.id()).launchRaiders(event.raidersPerBasestar()));
         return NONE;
     }
 }

@@ -1,6 +1,8 @@
 package xyz.zlatanov.frakkintoasters.event.action.skillcard;
 
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.event.character.OfferAlertViperPilotEvent;
+import xyz.zlatanov.frakkintoasters.event.character.AlertViperPilotEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.action.SkillCardEventProcessor;
@@ -47,12 +49,21 @@ public class LaunchReservesEventProcessor extends SkillCardEventProcessor<Launch
     // Each launched viper is activated once.
     @Override
     protected Followup resolve() {
+        val events = new ArrayList<Event>();
         val rounds = new ArrayList<Event>();
+        val viperIds = new ArrayList<Integer>();
         for (val type : event.shipTypes()) {
             int viperId = ops.galactica().launchHumanFighter(type, event.area(), null);
+            viperIds.add(viperId);
             rounds.add(new ViperActivationRoundEvent(player.number(), viperId, 1, false));
         }
-        return all(rounds.toArray(Event[]::new));
+        // Lee "Apollo" Adama's "Alert Viper Pilot" when the vipers are placed, before the card activates them. A viper
+        // he pilots then is his: its round skips it, as it isn't unmanned any more.
+        if (AlertViperPilotEventProcessor.mayBeOffered(game)) {
+            events.add(new OfferAlertViperPilotEvent(viperIds));
+        }
+        events.addAll(rounds);
+        return all(events.toArray(Event[]::new));
     }
 
     private boolean hasPilotedViper(Location area) {

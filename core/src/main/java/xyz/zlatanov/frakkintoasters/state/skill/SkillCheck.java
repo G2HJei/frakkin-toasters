@@ -27,6 +27,7 @@ public class SkillCheck implements SkillCheckView {
 
     private final SkillCheckType                type;
     private       Integer                       targetPlayerNumber;
+    private       Integer                       playedBy;
     private final Map<Integer, List<SkillCard>> playedBeforeSkillCheck = new LinkedHashMap<>();
     private       boolean                       playedBeforeRevealed   = false;
     private final Map<Integer, List<SkillCard>> shownCards             = new LinkedHashMap<>();
@@ -37,6 +38,8 @@ public class SkillCheck implements SkillCheckView {
     private       boolean                       emergencyDeclared      = false;
     private       int                           difficultyAdjustment   = 0;
     private       boolean                       politicsCountPositive  = false;
+    private       boolean                       cardsDivided           = false;
+    private       SkillCardColor                zeroStrengthColor;
     private       Integer                       totalStrength;
     private       SkillCheckResult              result;
     private       boolean                       passResultReplaced     = false; //by change of plans
@@ -59,6 +62,13 @@ public class SkillCheck implements SkillCheckView {
     public SkillCheck targetPlayerNumber(int targetPlayerNumber) {
         assert this.targetPlayerNumber == null : "Skill check target already chosen";
         this.targetPlayerNumber = targetPlayerNumber;
+        return this;
+    }
+
+    @Mutates
+    public SkillCheck playedBy(int playerNumber) {
+        assert this.playedBy == null : "Skill check card already played";
+        this.playedBy = playerNumber;
         return this;
     }
 
@@ -164,6 +174,16 @@ public class SkillCheck implements SkillCheckView {
     }
 
     @Mutates
+    public void divideCards() {
+        cardsDivided = true;
+    }
+
+    @Mutates
+    public void zeroStrength(SkillCardColor color) {
+        zeroStrengthColor = color;
+    }
+
+    @Mutates
     public SkillCheck totalStrength(int totalStrength) {
         assert this.totalStrength == null : "Skill check strength already totaled";
         this.totalStrength = totalStrength;
@@ -194,6 +214,9 @@ public class SkillCheck implements SkillCheckView {
     @Override
     public int cardValue(SkillCard card) {
         assert nonMatchingPile.cards().contains(card) || matchingPile.cards().contains(card) : "Card not in skill check";
+        if (card.type().color() == zeroStrengthColor) {
+            return 0; // "Blind Devotion"
+        }
         val faceValue = card.value();
         val valueDoubled = card.type().color() == ENGINEERING &&
                 resolvedAbilities.contains(ESTABLISH_NETWORK);

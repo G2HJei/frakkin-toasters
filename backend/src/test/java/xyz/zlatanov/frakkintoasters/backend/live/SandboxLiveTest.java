@@ -83,7 +83,8 @@ class SandboxLiveTest {
         }
         // the turn's Crisis Card is stacked, so the inputs that follow fit it
         inject(client, inMemory, new PutCrisisCardOnTopEvent(CrisisCard.RIOTS_NO_JUMP));
-        for (val next : inputs.subList(3, 11)) {
+        // through turn 1's Crisis Card, which Kara "Starbuck" Thrace lets resolve before the Admiral chooses
+        for (val next : inputs.subList(3, 12)) {
             play(client, inMemory, next.apply(inMemory.view()));
         }
 

@@ -40,11 +40,18 @@ public record GameSnapshot(Map<String, Object> values) {
         s.put("dieRoll", dieRoll(game.turn().dieRoll()));
         s.put("interruptWindow", game.turn().interruptWindow());
         s.put("windowCards", new ArrayList<>(game.turn().windowCards()));
+        s.put("windowAbilities", new ArrayList<>(game.turn().windowAbilities()));
         s.put("resolvedInterruptCards", new ArrayList<>(game.turn().resolvedInterruptCards()));
         s.put("raidersToMiss", new TreeMap<>(game.turn().raidersToMiss()));
         s.put("playedSkillCards", new ArrayList<>(game.turn().playedSkillCards()));
         s.put("lossReductions", new TreeSet<>(game.turn().lossReductions()));
         s.put("cylonShipsHeld", game.turn().cylonShipsHeld());
+        s.put("usedTurnLimits", game.turn().usedTurnLimits());
+        s.put("usedAbilities", game.turn().usedAbilities());
+        s.put("triggeredAbilities", game.turn().triggeredAbilities());
+        s.put("borrowedTitles", game.turn().borrowedTitles());
+        s.put("remoteActions", game.players().stream()
+                .map(p -> p.number() + "=" + game.turn().remoteActionLocation(p.number()).orElse(null)).toList());
         s.put("president", game.president());
         s.put("admiral", game.admiral());
         s.put("cag", game.cag());
@@ -61,7 +68,7 @@ public record GameSnapshot(Map<String, Object> values) {
             for (val pile : PlayerPile.values()) {
                 s.put(prefix + pile, deck(player.pile(pile)));
             }
-            s.put(prefix + "miracleToken", player.hasMiracleToken());
+            s.put(prefix + "miracleTokens", player.miracleTokens());
             s.put(prefix + "infiltrating", player.isInfiltrating());
             s.put(prefix + "revealedCivilianShips", new ArrayList<>(player.revealedCivilianShipIds()));
             s.put(prefix + "turns", player.turns());
@@ -72,6 +79,7 @@ public record GameSnapshot(Map<String, Object> values) {
         s.put("pegasus.characters", new TreeMap<>(characters(pegasus)));
         s.put("pegasus.damagedLocations", sorted(pegasus.damagedLocations()));
         s.put("pegasus.engineRoomActivated", pegasus.engineRoomActivated());
+        s.put("pegasus.destroyed", pegasus.destroyed());
         val fleet = game.boards().cylonFleet();
         s.put("fleet.pursuit", fleet.pursuitTrack());
         s.put("fleet.characters", new TreeMap<>(characters(fleet)));
@@ -113,7 +121,8 @@ public record GameSnapshot(Map<String, Object> values) {
     }
 
     private static Object dieRoll(DieRollView dieRoll) {
-        return dieRoll == null ? null : List.of(String.valueOf(dieRoll.value()), dieRoll.cards(), dieRoll.modifier());
+        return dieRoll == null ? null : List.of(String.valueOf(dieRoll.value()), dieRoll.cards(), dieRoll.modifier(),
+                dieRoll.abilities(), dieRoll.replaced(), dieRoll.fixed());
     }
 
     private static Object skillCheck(SkillCheck check) {
@@ -123,6 +132,7 @@ public record GameSnapshot(Map<String, Object> values) {
         val result = new TreeMap<String, Object>();
         result.put("type", check.type());
         result.put("target", check.targetPlayerNumber());
+        result.put("playedBy", check.playedBy());
         result.put("playedBefore", new TreeMap<>(playedBefore(check)));
         result.put("playedBeforeRevealed", check.playedBeforeRevealed());
         result.put("shownCards", new TreeMap<>(shownCards(check)));
@@ -133,6 +143,7 @@ public record GameSnapshot(Map<String, Object> values) {
         result.put("emergencyDeclared", check.emergencyDeclared());
         result.put("difficultyAdjustment", check.difficultyAdjustment());
         result.put("politicsCountPositive", check.politicsCountPositive());
+        result.put("zeroStrengthColor", check.zeroStrengthColor());
         result.put("totalStrength", check.totalStrength());
         result.put("result", check.result());
         result.put("passResultReplaced", check.passResultReplaced());

@@ -25,7 +25,7 @@ public class QuorumChamberEventProcessor extends LocationActionProcessor<QuorumC
     }
 
     @Override
-    public Followup process() {
+    protected Followup act() {
         if (game.decks().quorumCardsLeft() > 0) {
             ops.titles().drawQuorumCard();
         }

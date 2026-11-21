@@ -20,6 +20,12 @@ public record GrantEvent(int playerNumber, Grant grant, GrantedBy grantedBy) imp
     public enum GrantedBy {
         HANGAR_DECK,
         EXECUTIVE_ORDER,
-        STATE_OF_EMERGENCY
+        STATE_OF_EMERGENCY,
+        CAG_TITLE,
+        EXPERT_PILOT,
+        METICULOUS,
+        AGGRESSIVE_TACTICS,
+        MAINTENANCE_ENGINEER,
+        ALERT_VIPER_PILOT
     }
 }

@@ -20,6 +20,7 @@ class ForceTheirHandEventProcessorTest extends EventTestHarness<ForceTheirHandEv
     void setUp() {
         player(1).character(KARA_STARBUCK_THRACE);
         game.startSkillCheck(ADMIRALS_QUARTERS);
+        game.activeSkillCheck().divideCards(); // its ability resolves after the cards were divided
     }
 
     @Test

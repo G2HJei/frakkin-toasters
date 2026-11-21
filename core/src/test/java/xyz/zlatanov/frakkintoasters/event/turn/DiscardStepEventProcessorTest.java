@@ -1,9 +1,14 @@
 package xyz.zlatanov.frakkintoasters.event.turn;
 
+import static xyz.zlatanov.frakkintoasters.state.character.Character.LEE_APOLLO_ADAMA;
+import xyz.zlatanov.frakkintoasters.event.player.DiscardRandomSkillCardsEvent;
+import xyz.zlatanov.frakkintoasters.event.character.ReconEvent;
+import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.event.Event;
+import xyz.zlatanov.frakkintoasters.event.character.KleptomaniaBrigEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.DiscardQuorumCardsEvent;
 import xyz.zlatanov.frakkintoasters.event.player.DiscardSkillCardsEvent;
@@ -13,6 +18,8 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
+import static xyz.zlatanov.frakkintoasters.state.character.Character.SHARON_BOOMER_VALERII;
+import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DISCARD_DOWN_TO_HAND_LIMIT;
@@ -94,5 +101,39 @@ class DiscardStepEventProcessorTest extends EventTestHarness<DiscardStepEvent> {
 
     private static Event discardSkillCards(int playerNumber) {
         return new PlayerDecisionEvent<>(playerNumber, DiscardSkillCardsEvent.class, DISCARD_DOWN_TO_HAND_LIMIT);
+    }
+
+    // "Kleptomania": he goes to the "Brig" at the end of the turn, after the discards.
+    @Test
+    void aPlayerSentToTheBrigAtTheEndOfTheTurnGoesAfterTheDiscards() {
+        giveSkillCards(2, 11);
+        ops.sendToBrigAtEndOfTurn(3);
+
+        execute(new DiscardStepEvent());
+
+        assertFollowup(all(discardSkillCards(2), new KleptomaniaBrigEvent(3)));
+    }
+
+    // "Recon": at the very end of her turn, Sharon "Boomer" Valerii may look at the top Crisis Card.
+    @Test
+    void boomerMayLookAtTheTopCrisisCardLast() {
+        setUpGame();
+        player(1).character(SHARON_BOOMER_VALERII);
+
+        execute(new DiscardStepEvent());
+
+        assertFollowup(one(new ReconEvent(1), new NoOpEvent(1)));
+    }
+
+    // "Headstrong": Lee "Apollo" Adama's cards over the limit go at random.
+    @Test
+    void apolloDiscardsAtRandom() {
+        setUpGame();
+        player(1).character(LEE_APOLLO_ADAMA);
+        giveSkillCards(1, 12);
+
+        execute(new DiscardStepEvent());
+
+        assertFollowup(new DiscardRandomSkillCardsEvent(1, 2));
     }
 }

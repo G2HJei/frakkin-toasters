@@ -1,32 +1,24 @@
 package xyz.zlatanov.frakkintoasters.event.location.cylon;
 
-import java.util.List;
-import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.deck.LookAtTopCardEvent;
 import xyz.zlatanov.frakkintoasters.event.location.LocationActionProcessor;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.DrawSkillCardsEvent;
-import xyz.zlatanov.frakkintoasters.event.player.PlaceCrisisCardOnBottomEvent;
-import xyz.zlatanov.frakkintoasters.event.player.PlaceCrisisCardOnTopEvent;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
-import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DRAW_EXACTLY_2;
+import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.CRISIS;
 
 public class HumanFleetLookAtTopCrisisCardEventProcessor extends LocationActionProcessor<HumanFleetLookAtTopCrisisCardEvent> {
 
+    // The look is LookAtTopCardEvent's, which "Armed Resistance" and "Betrayal of Trust" share.
     @Override
-    public Followup process() {
+    protected Followup act() {
         val playerNumber = event.playerNumber();
-        val card = ops.player(playerNumber).drawCrisisCard();
-        ops.player(playerNumber).see(DeckId.CRISIS, List.of(card));
         return all(
-                Followup.one(
-                        new PlaceCrisisCardOnTopEvent(playerNumber, card),
-                        new PlaceCrisisCardOnBottomEvent(playerNumber, card)),
-                single(
-                        new PlayerDecisionEvent<>(playerNumber, DrawSkillCardsEvent.class, DRAW_EXACTLY_2))
-        );
+                new LookAtTopCardEvent(playerNumber, CRISIS),
+                new PlayerDecisionEvent<>(playerNumber, DrawSkillCardsEvent.class, DRAW_EXACTLY_2));
     }
 }

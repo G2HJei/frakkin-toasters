@@ -1,7 +1,12 @@
 package xyz.zlatanov.frakkintoasters.operation;
 
+import xyz.zlatanov.frakkintoasters.state.Title;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.GameFact.TitleBorrowed;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedOnTop;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsDrawn;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedToBottom;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsDiscarded;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsRemovedFromGame;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.TitleFact.*;
@@ -33,6 +38,19 @@ public class TitleOps extends GameOps {
 
     public void assignPresident(Character character) {
         record(new PresidentAssigned(character));
+    }
+
+    /**
+     * The current player's character takes the title for his turn ("Manipulative"). It goes back at the end of it.
+     */
+    public void borrow(Title title, Character character) {
+        val previousHolder = title == Title.ADMIRAL ? game.admiral() : game.president();
+        record(new TitleBorrowed(title, previousHolder));
+        if (title == Title.ADMIRAL) {
+            assignAdmiral(character);
+        } else {
+            assignPresident(character);
+        }
     }
 
     public void drawQuorumCard() {
@@ -97,6 +115,38 @@ public class TitleOps extends GameOps {
                 .map(QuorumCardInPlay::card)
                 .toList()
                 .forEach(this::discardFromPlay);
+    }
+
+    /**
+     * Puts Quorum Cards from the President's hand at the bottom of the Quorum deck, in the order given ("Set the
+     * Agenda").
+     */
+    /**
+     * Puts drawn Quorum Cards, which are in no pile, at the bottom of the deck, e.g. after Laura Roslin's "Skilled
+     * Politician".
+     */
+    public void putDrawnQuorumCardsAtBottom(List<QuorumCard> cards) {
+        if (!cards.isEmpty()) {
+            record(new CardsAddedToBottom(QUORUM, cards));
+        }
+    }
+
+    public void putQuorumCardsAtBottom(List<QuorumCard> cards) {
+        if (!cards.isEmpty()) {
+            record(new PresidentQuorumCardsLost(cards));
+            record(new CardsAddedToBottom(QUORUM, cards));
+        }
+    }
+
+    /**
+     * Puts the top Quorum Cards back in another order, the first on top, e.g. Tory Foster's "Influential". The cards
+     * come off without a draw, so an emptied deck doesn't take its discard pile in.
+     */
+    public void reorderTopQuorumCards(List<QuorumCard> order) {
+        if (!order.isEmpty()) {
+            record(new CardsDrawn(QUORUM, List.copyOf(game.decks().deck(QUORUM).cards().subList(0, order.size()))));
+            record(new CardsAddedOnTop(QUORUM, order));
+        }
     }
 
     public void removeQuorumCardFromGame(QuorumCard card) {

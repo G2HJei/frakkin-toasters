@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { useRoom } from '../api/queries';
+import { AnytimePanel } from '../input/AnytimePanel';
 import { InputPanel } from '../input/InputPanel';
 import type { EventValue } from '../input/eventModel';
 import { GameSocket } from '../live/GameSocket';
@@ -112,6 +113,7 @@ function LiveTable({ gameId, name, seed, userNames }: { gameId: string; name: st
             <div className="table-side left">
               <TurnPanel name={name} connection={connection} />
               <InputPanel onChoose={(option) => send(chooseMessage(token, option))} onSubmit={(event) => send(submitMessage(token, event))} />
+              <AnytimePanel onSubmit={(event) => send(submitMessage(token, event))} />
               {pendingMove && asked !== null && (
                 <section className="panel cf move-prompt" aria-label="discard to move">
                   <h2>Moving to {constantLabel('Location', pendingMove)}: discard a Skill Card</h2>

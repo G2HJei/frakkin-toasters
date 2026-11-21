@@ -33,7 +33,6 @@ public class ShipOps extends GameOps {
     }
 
     public void moveTo(Location location) {
-        //todo move to cylon fleet board location when jumping
         assert LocationsArea.GALACTICA_SPACE.locations().contains(location);
         galacticaBoard().shipInSpace(shipId, Ship.class); // fails when the ship is not in space
         record(new ShipMoved(shipId, GALACTICA_SPACE, GALACTICA_SPACE, location));

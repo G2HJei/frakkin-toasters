@@ -16,7 +16,7 @@ public class AllCardsProvider {
 
     public static Deck<CivilianShip> civilianShipsDeck() {
         val deck = new Deck<CivilianShip>(false);
-        //todo randomize civ ship ids to avoid frontend cheating
+        // the ids say nothing about the cargo: every shuffle deals them anew (AbstractOps.shuffle)
         deck.addOnTop(new CivilianShip(2001, 0, 0, 0));
         deck.addOnTop(new CivilianShip(2002, 0, 0, 0));
         deck.addOnTop(new CivilianShip(2003, 0, 0, 2));
@@ -44,6 +44,9 @@ public class AllCardsProvider {
                 .addOnTop(Arrays.asList(repeatedCards));
     }
 
+    // Each color has 35 cards (Appendix A2.3.8): five 0, nine 1, seven 2, six 3, four 4, three 5 and one 6. The 21 of
+    // the base game, one of each strength from 1 to 6 (Pegasus), three 0 cards (Exodus), and two 0 cards and one each of
+    // 3, 4 and 5 (Daybreak), told apart by the set symbol on the card.
     public static Deck<SkillCard> politicsCards() {
         return new Deck<SkillCard>()
                 .addOnTop(skills(8, 1, CONSOLIDATE_POWER))
@@ -57,13 +60,13 @@ public class AllCardsProvider {
                 .addOnTop(skills(1, 4, PREVENTIVE_POLICY))
                 .addOnTop(skills(1, 5, PREVENTIVE_POLICY))
                 .addOnTop(skills(1, 6, POLITICAL_PROWESS))
-                //todo check correct quantities of the following
+                .addOnTop(skills(3, 0, RED_TAPE)) // Exodus, as the other colors' three 0 cards
                 .addOnTop(skills(1, 3, POPULAR_INFLUENCE))
                 .addOnTop(skills(1, 4, POPULAR_INFLUENCE))
                 .addOnTop(skills(1, 5, NEGOTIATION))
-                .addOnTop(skills(1, 0, FORCE_THEIR_HAND))
-                .addOnTop(skills(1, 0, RED_TAPE));
+                .addOnTop(skills(2, 0, FORCE_THEIR_HAND));
     }
+
 
     public static Deck<SkillCard> leadershipCards() {
         return new Deck<SkillCard>()
@@ -79,8 +82,7 @@ public class AllCardsProvider {
                 .addOnTop(skills(1, 5, AT_ANY_COST))
                 .addOnTop(skills(3, 0, IRON_WILL))
                 .addOnTop(skills(1, 6, STATE_OF_EMERGENCY))
-                //todo check correct quantities of the deck
-                .addOnTop(skills(1, 0, ALL_HANDS_ON_DECK))
+                .addOnTop(skills(2, 0, ALL_HANDS_ON_DECK))
                 .addOnTop(skills(1, 3, RESTORE_ORDER))
                 .addOnTop(skills(1, 4, RESTORE_ORDER))
                 .addOnTop(skills(1, 5, CHANGE_OF_PLANS));
@@ -100,11 +102,10 @@ public class AllCardsProvider {
                 .addOnTop(skills(1, 5, CRITICAL_SITUATION))
                 .addOnTop(skills(3, 0, TRUST_INSTINCTS))
                 .addOnTop(skills(1, 6, SCOUTING_FOR_FUEL))
-                //todo check quantities below
                 .addOnTop(skills(1, 3, UNORTHODOX_PLAN))
                 .addOnTop(skills(1, 4, UNORTHODOX_PLAN))
                 .addOnTop(skills(1, 5, A_SECOND_CHANCE))
-                .addOnTop(skills(1, 0, QUICK_THINKING));
+                .addOnTop(skills(2, 0, QUICK_THINKING));
     }
 
     public static Deck<SkillCard> pilotingCards() {
@@ -121,8 +122,7 @@ public class AllCardsProvider {
                 .addOnTop(skills(1, 5, RUN_INTERFERENCE))
                 .addOnTop(skills(3, 0, PROTECT_THE_FLEET))
                 .addOnTop(skills(1, 6, BEST_OF_THE_BEST))
-                //todo check quantities below
-                .addOnTop(skills(1, 0, DOGFIGHT))
+                .addOnTop(skills(2, 0, DOGFIGHT))
                 .addOnTop(skills(1, 3, COMBAT_VETERAN))
                 .addOnTop(skills(1, 4, COMBAT_VETERAN))
                 .addOnTop(skills(1, 5, LAUNCH_RESERVES));
@@ -142,8 +142,7 @@ public class AllCardsProvider {
                 .addOnTop(skills(1, 5, CALCULATIONS))
                 .addOnTop(skills(3, 0, ESTABLISH_NETWORK))
                 .addOnTop(skills(1, 6, BUILD_NUKE))
-                // todo check quantities
-                .addOnTop(skills(1, 0, INSTALL_UPGRADES))
+                .addOnTop(skills(2, 0, INSTALL_UPGRADES))
                 .addOnTop(skills(1, 3, RAPTOR_SPECIALIST))
                 .addOnTop(skills(1, 4, RAPTOR_SPECIALIST))
                 .addOnTop(skills(1, 5, TEST_THE_LIMITS));
@@ -151,13 +150,14 @@ public class AllCardsProvider {
 
     public static Deck<SkillCard> treacheryCards() {
         return new Deck<SkillCard>()
-                //todo check quantities below
-                .addOnTop(skills(1, 0, DRADIS_CONTACT))
-                .addOnTop(skills(1, 0, BAIT))
-                .addOnTop(skills(1, 3, A_BETTER_MACHINE))
-                .addOnTop(skills(1, 3, PERSONAL_VICES))
-                .addOnTop(skills(1, 4, VIOLENT_OUTBURSTS))
-                .addOnTop(skills(1, 5, EXPLOIT_A_WEAKNESS));
+                // 26 cards (Appendix A2.3.8): twelve 0, eight 3, three 4 and three 5. How the 0s and the 3s split between
+                // their two cards isn't printed anywhere, so they split evenly.
+                .addOnTop(skills(6, 0, DRADIS_CONTACT))
+                .addOnTop(skills(6, 0, BAIT))
+                .addOnTop(skills(4, 3, A_BETTER_MACHINE))
+                .addOnTop(skills(4, 3, PERSONAL_VICES))
+                .addOnTop(skills(3, 4, VIOLENT_OUTBURSTS))
+                .addOnTop(skills(3, 5, EXPLOIT_A_WEAKNESS));
     }
 
     private static List<SkillCard> skills(int quantity, int value, SkillCardType type) {

@@ -24,6 +24,21 @@ class LaunchRaidersEventProcessorTest extends EventTestHarness<LaunchRaidersEven
         assertFollowup(all(new PlaceShipOnCylonFleetBoardEvent(BASESTAR), new AdvancePursuitTrackEvent()));
     }
 
+    // e.g. "Weapons Armed": with no basestar on the main game board nothing goes to the Cylon Fleet board (rule 9.6)
+    @Test
+    void aCardLaunchesNothingWithoutABasestar() {
+        execute(LaunchRaidersEvent.fromEachBasestar(2));
+    }
+
+    @Test
+    void aCardLaunchesItsCountFromEachBasestar() {
+        basestarAt(GALACTICA_SPACE_8_OCLOCK);
+
+        execute(LaunchRaidersEvent.fromEachBasestar(2));
+
+        assertShipCount(GALACTICA_SPACE_8_OCLOCK, Raider.class, 2);
+    }
+
     @Test
     void shouldLaunchThreeRaidersFromBasestar() {
         basestarAt(GALACTICA_SPACE_8_OCLOCK);

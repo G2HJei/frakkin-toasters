@@ -7,6 +7,8 @@ import xyz.zlatanov.frakkintoasters.event.location.galactica.*;
 import xyz.zlatanov.frakkintoasters.event.location.pegasus.AirlockEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.location.pegasus.EngineRoomEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.location.pegasus.PegasusCicEventProcessor;
+import xyz.zlatanov.frakkintoasters.event.character.ActionCosts;
+import xyz.zlatanov.frakkintoasters.event.character.CharacterBans;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.view.GameView;
 import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
@@ -37,6 +39,9 @@ public interface LocationEvent extends ActionEvent {
         if (game.boards().galactica().isDamaged(location) || game.boards().pegasus().isDamaged(location)) {
             return false;
         }
+        if (game.isDestroyed(location)) {
+            return false; // nobody is left there after "Bomb on Colonial One", and nobody can come back (rule 9.4)
+        }
         return canActIgnoringDamage(game, player, location);
     }
 
@@ -45,6 +50,10 @@ public interface LocationEvent extends ActionEvent {
      * "Unorthodox Plan"
      */
     static boolean canActIgnoringDamage(GameView game, PlayerView player, Location location) {
+        // The negative abilities that forbid a location, or make him pay to activate it, wherever he does it from.
+        if (!CharacterBans.canActivate(game, player, location) || !ActionCosts.canPayLocationCost(game, player, location)) {
+            return false;
+        }
         return switch (location) {
             case ADMIRALS_QUARTERS -> AdmiralsQuartersEventProcessor.canAct(game);
             case ARMORY -> ArmoryEventProcessor.canAct(game);

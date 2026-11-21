@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event;
 
+import xyz.zlatanov.frakkintoasters.event.character.CharacterPenalties;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.state.view.GameView;
@@ -16,7 +17,12 @@ public class DamageHumanFighterEventProcessor extends EventProcessor<DamageHuman
 
     @Override
     public Followup process() {
-        ops.ship(event.shipId()).damage();
+        // "Forced to Eject": Brendan "Hot Dog" Costanza's viper is destroyed instead.
+        if (CharacterPenalties.destroyedInsteadOfDamaged(game, event.shipId())) {
+            ops.ship(event.shipId()).destroy();
+        } else {
+            ops.ship(event.shipId()).damage();
+        }
         return Followup.NONE;
     }
 

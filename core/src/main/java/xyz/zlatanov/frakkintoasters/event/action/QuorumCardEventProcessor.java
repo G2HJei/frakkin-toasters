@@ -1,10 +1,17 @@
 package xyz.zlatanov.frakkintoasters.event.action;
 
+import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.action.quorum.DiscardPlayedQuorumCardEvent;
+import xyz.zlatanov.frakkintoasters.event.character.AdaptableEventProcessor;
+import xyz.zlatanov.frakkintoasters.event.character.OfferAdaptableEvent;
 import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
+
+import static xyz.zlatanov.frakkintoasters.event.Followup.NONE;
+import static xyz.zlatanov.frakkintoasters.event.Followup.single;
+import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.allOf;
 
 /**
  * Plays a Quorum Card. The player has to be human and hold the card, and subclasses check the details of the event in
@@ -32,7 +39,9 @@ public abstract class QuorumCardEventProcessor<T extends QuorumCardEvent> extend
         } else {
             ops.titles().play(card());
         }
-        return resolve();
+        // Tory Foster's "Adaptable" answers any player's Quorum Card, after its action.
+        val adaptable = AdaptableEventProcessor.mayBeOffered(game) ? single(new OfferAdaptableEvent()) : NONE;
+        return allOf(resolve(), adaptable);
     }
 
     protected abstract Followup resolve();

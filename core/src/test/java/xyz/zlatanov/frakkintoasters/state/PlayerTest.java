@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.CYLON_SEND_TO_BRIG;
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.MUTINEER;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
+import static xyz.zlatanov.frakkintoasters.state.character.CharacterAbility.RECKLESS;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.REPAIR;
 
 class PlayerTest {
@@ -35,6 +36,43 @@ class PlayerTest {
         assertFalse(xo.hasMiracleToken());
         xo.gainMiracleToken();
         assertTrue(xo.hasMiracleToken());
+    }
+
+    // "A player can have only one miracle token at any time" (rule 4.3.1).
+    @Test
+    void shouldHoldOneMiracleToken() {
+        assertEquals(1, xo.miracleTokens());
+        assertFalse(xo.canGainMiracleToken());
+        assertThrows(FrakCallTheAdmiralException.class, () -> xo.gainMiracleToken());
+    }
+
+    // Gaius Baltar (alt.) holds up to three (rule 4.3.1.1).
+    @Test
+    void baltarHoldsThreeMiracleTokens() {
+        val baltar = new Player(3).character(GAIUS_BALTAR_ALT);
+        baltar.gainMiracleToken();
+        baltar.gainMiracleToken();
+
+        assertEquals(3, baltar.miracleTokens());
+        assertFalse(baltar.canGainMiracleToken());
+    }
+
+    // "Revealed Cylon players cannot gain miracle tokens" (rule 4.3.2).
+    @Test
+    void aRevealedCylonCantGainAMiracleToken() {
+        xo.exhaustMiracleToken();
+        xo.loyaltyCards().addOnTop(CYLON_SEND_TO_BRIG).reveal(CYLON_SEND_TO_BRIG);
+
+        assertFalse(xo.canGainMiracleToken());
+    }
+
+    // A revealed Cylon's abilities are ignored (rule 6.1.2.2), and he discards down to 10 (rule 6.1.2.3).
+    @Test
+    void aRevealedChiefHasTheUsualHandLimit() {
+        chief.loyaltyCards().addOnTop(CYLON_SEND_TO_BRIG).reveal(CYLON_SEND_TO_BRIG);
+
+        assertFalse(chief.hasAbility(RECKLESS));
+        assertEquals(10, chief.handLimit());
     }
 
     @Test

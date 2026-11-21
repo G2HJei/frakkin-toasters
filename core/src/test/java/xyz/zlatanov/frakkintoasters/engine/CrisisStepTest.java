@@ -1,5 +1,7 @@
 package xyz.zlatanov.frakkintoasters.engine;
 
+import xyz.zlatanov.frakkintoasters.event.character.SecretDestinyEvent;
+import xyz.zlatanov.frakkintoasters.event.crisis.ResolveCrisisCardEvent;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.engine.PendingInput.AwaitingChoice;
@@ -78,6 +80,7 @@ class CrisisStepTest {
     void theCurrentPlayerChoosesTheSkillCheck() {
         start(all(setUp(WATER_SABOTAGED), single(new CrisisStepEvent()), CYLONS_WIN));
 
+        letItResolve(WATER_SABOTAGED);
         assertWaitingFor(sectionChoice(1, WATER_SABOTAGED));
         play(engine -> engine.choose(1, section(1, WATER_SABOTAGED, TOP)));
 
@@ -92,6 +95,7 @@ class CrisisStepTest {
     void theCurrentPlayerChoosesTheAlternateInstruction() {
         start(all(setUp(WATER_SABOTAGED), single(new CrisisStepEvent()), CYLONS_WIN));
 
+        letItResolve(WATER_SABOTAGED);
         play(engine -> engine.choose(1, section(1, WATER_SABOTAGED, BOTTOM)));
 
         assertNull(engine.view().activeSkillCheck());
@@ -104,6 +108,7 @@ class CrisisStepTest {
         start(all(setUp(FULFILLER_OF_PROPHECY, RIOTS_NO_JUMP),
                 single(new CrisisStepEvent()), single(new ActivateCylonShipsStepEvent()), CYLONS_WIN));
 
+        letItResolve(FULFILLER_OF_PROPHECY);
         play(engine -> engine.choose(1, section(1, FULFILLER_OF_PROPHECY, BOTTOM)));
         assertWaitingFor(new AwaitingDecision(new PlayerDecisionEvent<>(1, DiscardSkillCardsEvent.class, DISCARD_EXACTLY_1)));
         play(engine -> engine.submit(1, new DiscardSkillCardsEvent(1, List.of()))); // nothing to discard
@@ -116,6 +121,7 @@ class CrisisStepTest {
 
         assertEquals(CRISIS, engine.view().turn().step());
         assertEquals(List.of(FULFILLER_OF_PROPHECY, RIOTS_NO_JUMP), engine.view().turn().crisisCards());
+        letItResolve(RIOTS_NO_JUMP);
         assertWaitingFor(sectionChoice(1, RIOTS_NO_JUMP)); // the Admiral
         play(engine -> engine.choose(1, section(1, RIOTS_NO_JUMP, TOP)));
 
@@ -128,7 +134,28 @@ class CrisisStepTest {
         assertEquals(new EngineStatus.Finished(xyz.zlatanov.frakkintoasters.state.Team.CYLONS), engine.status(1));
     }
 
+    // "Secret Destiny": the revealed card is discarded and the one Kara "Starbuck" Thrace draws instead resolves.
+    @Test
+    void starbuckReplacesTheRevealedCard() {
+        start(all(setUp(WATER_SABOTAGED, RIOTS_NO_JUMP), single(new CrisisStepEvent()), CYLONS_WIN));
+
+        play(engine -> engine.choose(3, single(new SecretDestinyEvent(3, WATER_SABOTAGED))));
+
+        assertEquals(List.of(RIOTS_NO_JUMP), engine.view().turn().crisisCards());
+        assertEquals(List.of(WATER_SABOTAGED), engine.view().decks().<CrisisCard>deck(xyz.zlatanov.frakkintoasters.state.deck.DeckId.CRISIS).discardedCards());
+        assertEquals(0, engine.view().player(3).miracleTokens());
+        // She can't replace the new one: her miracle token is spent.
+        assertWaitingFor(sectionChoice(1, RIOTS_NO_JUMP));
+    }
+
     /* inputs */
+
+    // Kara "Starbuck" Thrace may replace each revealed card ("Secret Destiny"). Here she lets it resolve.
+    private void letItResolve(CrisisCard card) {
+        assertWaitingFor(new AwaitingChoice(3, Set.of(
+                single(new SecretDestinyEvent(3, card)), single(new ResolveCrisisCardEvent(card)))));
+        play(engine -> engine.choose(3, single(new ResolveCrisisCardEvent(card))));
+    }
 
     private static AwaitingChoice sectionChoice(int chooser, CrisisCard card) {
         return new AwaitingChoice(chooser, Set.of(section(chooser, card, TOP), section(chooser, card, BOTTOM)));

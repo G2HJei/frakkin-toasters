@@ -3,6 +3,8 @@ package xyz.zlatanov.frakkintoasters.event.player;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.character.CharacterMoves;
+import xyz.zlatanov.frakkintoasters.event.officials.BrigTitles;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.BRIG;
@@ -17,11 +19,10 @@ public class LeaveBrigEventProcessor extends EventProcessor<LeaveBrigEvent> {
                 && meetsDestinationLimit();
     }
 
-    // todo if all human players are in the "Brig", the first one to leave becomes Admiral and CAG (rule 4.4)
     @Override
     public Followup process() {
         ops.player(player.number()).moveTo(event.destination());
-        return Followup.NONE;
+        return BrigTitles.afterLeaving(game);
     }
 
     // As with normal movement, the character can't move to space, a hazardous location or a Cylon location.
@@ -29,7 +30,9 @@ public class LeaveBrigEventProcessor extends EventProcessor<LeaveBrigEvent> {
         val destination = event.destination();
         return destination != null && !destination.isSpaceLocation()
                 && !destination.isHazardousLocation()
-                && !destination.isCylonLocation();
+                && !destination.isCylonLocation()
+                && !game.isDestroyed(destination) // nobody goes back to a destroyed Colonial One or Pegasus
+                && !CharacterMoves.cloudedBlocks(game, player, destination);
     }
 
     private boolean meetsDestinationLimit() {

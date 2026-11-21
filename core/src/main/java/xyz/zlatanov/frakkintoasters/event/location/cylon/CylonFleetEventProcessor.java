@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event.location.cylon;
 
+import xyz.zlatanov.frakkintoasters.event.ship.LaunchRaidersEventProcessor;
 import xyz.zlatanov.frakkintoasters.state.view.GameView;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.event.Followup;
@@ -27,7 +28,7 @@ public class CylonFleetEventProcessor extends LocationActionProcessor<CylonFleet
     }
 
     @Override
-    public Followup process() {
+    protected Followup act() {
         val shipType = event.typeToActivate();
         if (shipType == null) {
             launch2RaidersAndHeavyRaider();
@@ -42,6 +43,9 @@ public class CylonFleetEventProcessor extends LocationActionProcessor<CylonFleet
 
     private void launch2RaidersAndHeavyRaider() {
         for (val basestar : galacticaBoard.shipsInSpace(BasestarView.class)) {
+            if (!LaunchRaidersEventProcessor.canLaunch(basestar)) {
+                continue;
+            }
             ops.ship(basestar.id()).launchRaiders(2);
             ops.ship(basestar.id()).launchHeavyRaider();
         }

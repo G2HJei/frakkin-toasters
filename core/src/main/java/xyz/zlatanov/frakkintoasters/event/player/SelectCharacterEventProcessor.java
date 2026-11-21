@@ -5,6 +5,7 @@ import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
+import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.ship.Viper;
@@ -18,21 +19,25 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static xyz.zlatanov.frakkintoasters.event.Followup.NONE;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
+import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.allOf;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.MUST_LAUNCH_IN_VIPER;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.HANGAR_DECK;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
+import static xyz.zlatanov.frakkintoasters.state.character.CharacterAbility.DISREPUTABLE;
 import static xyz.zlatanov.frakkintoasters.state.character.CharacterType.CYLON_LEADER;
 import static xyz.zlatanov.frakkintoasters.state.character.CharacterType.SUPPORT;
 
 public class SelectCharacterEventProcessor extends EventProcessor<SelectCharacterEvent> {
 
+    // The alternate versions of rule A3.7.2.1. Boomer and Athena aren't versions of one character: both may be in the
+    // same game (rule 6.2.4).
     private static final List<Character[]> VERSIONS = List.of(
             new Character[]{GAIUS_BALTAR, GAIUS_BALTAR_ALT},
             new Character[]{KARL_HELO_AGATHON, KARL_HELO_AGATHON_ALT},
             new Character[]{TOM_ZAREK, TOM_ZAREK_ALT},
-            new Character[]{SHARON_BOOMER_VALERII, SHARON_ATHENA_AGATHON},
             new Character[]{LEE_APOLLO_ADAMA, LEE_ADAMA});
 
     private Character selectedCharacter;
@@ -73,12 +78,19 @@ public class SelectCharacterEventProcessor extends EventProcessor<SelectCharacte
     @Override
     public Followup process() {
         ops.player(player.number()).selectCharacter(selectedCharacter);
-        val setup = selectedCharacter.setup();
-        if (setup.length == 1) {
-            moveToSetup();
-            return Followup.NONE;
-        } else if (setup.length > 1) {
-            return multipleSetupOptionsFollowup();
+        // Tom Zarek (alt.)'s "Disreputable": he starts the game holding a Mutiny Card, and draws it at once when he
+        // replaces an executed character (rule A2.1.1.18).
+        val mutinyCard = player.hasAbility(DISREPUTABLE) ? single(new DrawMutinyCardEvent(player.number())) : NONE;
+        return allOf(startLocation(), mutinyCard);
+    }
+
+    private Followup startLocation() {
+        val setup = PlaceInSetupLocationEventProcessor.startLocations(game, selectedCharacter);
+        if (setup.size() == 1) {
+            moveToSetup(setup.getFirst());
+            return NONE;
+        } else if (setup.size() > 1) {
+            return multipleSetupOptionsFollowup(setup);
         } else {
             return specialSetupFollowup();
         }
@@ -115,14 +127,18 @@ public class SelectCharacterEventProcessor extends EventProcessor<SelectCharacte
         return mostPlentiful.contains(selectedType);
     }
 
+    // "Only one Cylon Leader may be chosen in any game. To play a seven player game, one player must play a Cylon Leader,
+    // but Cylon Leaders may not be used in a three player game." (rule A3.7.2.2)
     private static boolean respectsCylonLeaderRule(GameView game, Character character) {
         val playerCount = game.players().size();
-        if (character.type() != CYLON_LEADER) {
-            return playerCount < 7;
-        }
         val cylonLeaderSelected = selectedCharacters(game).stream()
                 .map(Character::type)
                 .anyMatch(t -> t == CYLON_LEADER);
+        if (character.type() != CYLON_LEADER) {
+            // The last player to choose in a 7 player game must be the Leader if nobody else is.
+            val lastToChoose = selectedCharacters(game).size() == playerCount - 1;
+            return playerCount < 7 || cylonLeaderSelected || !lastToChoose;
+        }
         return playerCount > 3 && !cylonLeaderSelected;
     }
 
@@ -134,25 +150,19 @@ public class SelectCharacterEventProcessor extends EventProcessor<SelectCharacte
                 .toList();
     }
 
-    private void moveToSetup() {
-        val setupLocation = selectedCharacter.setup()[0];
-        if (selectedCharacter == SHARON_ATHENA_AGATHON) {
-            // Sharon "Athena" Agathon starts the game Infiltrating (rule 6.2.1.1).
-            ops.player(selectedCharacter).infiltrateGalactica(setupLocation);
-        } else {
-            ops.player(selectedCharacter).moveTo(setupLocation);
-        }
+    private void moveToSetup(Location setupLocation) {
+        PlaceInSetupLocationEventProcessor.startAt(ops, selectedCharacter, setupLocation);
     }
 
-    private Followup multipleSetupOptionsFollowup() {
-        return one(Arrays.stream(selectedCharacter.setup())
+    private Followup multipleSetupOptionsFollowup(List<Location> setup) {
+        return one(setup.stream()
                 .map(loc -> (Event) new PlaceInSetupLocationEvent(event.playerNumber(), loc))
                 .toArray(Event[]::new));
     }
 
     private Followup specialSetupFollowup() {
         return switch (selectedCharacter) {
-            case KARL_HELO_AGATHON -> Followup.NONE;
+            case KARL_HELO_AGATHON -> NONE;
             case LEE_APOLLO_ADAMA -> launchApollo();
             default -> throw new FrakCallTheAdmiralException();
         };
@@ -163,7 +173,7 @@ public class SelectCharacterEventProcessor extends EventProcessor<SelectCharacte
     private Followup launchApollo() {
         if (galacticaBoard.reserves().stream().noneMatch(Viper.class::isInstance)) {
             ops.player(selectedCharacter).moveTo(HANGAR_DECK);
-            return Followup.NONE;
+            return NONE;
         }
         return single(new PlayerDecisionEvent<>(event.playerNumber(), LaunchViperEvent.class, MUST_LAUNCH_IN_VIPER));
     }

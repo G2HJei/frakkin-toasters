@@ -5,6 +5,7 @@ import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedOnTop;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedToBottom;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsDiscarded;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsRemovedFromGame;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.GameFact.SkillCardPlayed;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.*;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.ShipFact.PilotChanged;
@@ -18,14 +19,18 @@ import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
 import xyz.zlatanov.frakkintoasters.state.card.MutinyCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
+import xyz.zlatanov.frakkintoasters.state.character.CharacterAbility;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
+import xyz.zlatanov.frakkintoasters.state.crisis.SuperCrisisCard;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import xyz.zlatanov.frakkintoasters.state.ship.HumanFighter;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 
 public class PlayerOps extends GameOps {
@@ -50,7 +55,8 @@ public class PlayerOps extends GameOps {
         return loyaltyCards;
     }
 
-    public void moveTo(Location location) { //todo move to brig makes Admiral lose its title
+    // Into the "Brig" only through SendToBrigEvent, which passes the Admiral's and the CAG's titles on (rule 4.4).
+    public void moveTo(Location location) {
         assert !location.isSpaceLocation();
         record(new CharacterMoved(player.character(), location));
     }
@@ -66,11 +72,17 @@ public class PlayerOps extends GameOps {
         drawSkillCards(Arrays.stream(colors).toList());
     }
 
-    public void drawSkillCards(List<SkillCardColor> colors) {
+    /**
+     * @return the cards drawn, in the order of the colors
+     */
+    public List<SkillCard> drawSkillCards(List<SkillCardColor> colors) {
+        val drawn = new ArrayList<SkillCard>();
         for (val color : colors) {
             SkillCard card = draw(DeckId.of(color));
             gain(PlayerPile.SKILL, List.of(card));
+            drawn.add(card);
         }
+        return drawn;
     }
 
     public CrisisCard drawCrisisCard() {
@@ -81,6 +93,24 @@ public class PlayerOps extends GameOps {
         val card = draw(DeckId.SUPER_CRISIS);
         gain(PlayerPile.SUPER_CRISIS, List.of(card));
         return this;
+    }
+
+    /**
+     * Draws Mutiny Cards to choose from, e.g. for Tom Zarek (alt.)'s "Abuse Power": they are in no pile and in no hand
+     * until the caller says where they go, so drawing them sends nobody to the "Brig".
+     */
+    public List<MutinyCard> drawMutinyCardsToChoose(int count) {
+        return draw(DeckId.MUTINY, count);
+    }
+
+    public void holdMutinyCard(MutinyCard card) {
+        gain(PlayerPile.MUTINY, List.of(card));
+    }
+
+    public void putMutinyCardsAtBottom(List<MutinyCard> cards) {
+        if (!cards.isEmpty()) {
+            record(new CardsAddedToBottom(DeckId.MUTINY, cards));
+        }
     }
 
     public void drawMutinyCard() {
@@ -141,11 +171,44 @@ public class PlayerOps extends GameOps {
 
     /**
      * Looks at 1 random Loyalty Card of the target that isn't revealed, if he has one.
+     *
+     * @return the card seen, empty when he has none
      */
-    public void lookAtLoyaltyCard(int targetPlayerNumber) {
+    public Optional<LoyaltyCard> lookAtLoyaltyCard(int targetPlayerNumber) {
         val cards = game.player(targetPlayerNumber).loyaltyCards().cards();
+        if (cards.isEmpty()) {
+            return Optional.empty();
+        }
+        val card = game.randomness().shuffled(cards).getFirst();
+        record(new LoyaltyCardSeen(player.number(), targetPlayerNumber, card));
+        return Optional.of(card);
+    }
+
+    /**
+     * Looks at every Loyalty Card of the target that isn't revealed, e.g. for "Cylon Detector".
+     *
+     * @return the cards seen
+     */
+    public List<LoyaltyCard> lookAtAllLoyaltyCards(int targetPlayerNumber) {
+        val cards = game.player(targetPlayerNumber).loyaltyCards().cards();
+        cards.forEach(card -> record(new LoyaltyCardSeen(player.number(), targetPlayerNumber, card)));
+        return cards;
+    }
+
+    /**
+     * Shows one of his Final Five cards to everyone after another player looked at it (rule 5.4.1.1).
+     */
+    public void showFinalFiveCard(LoyaltyCard card) {
+        record(new FinalFiveCardShown(player.number(), card));
+    }
+
+    /**
+     * Takes Loyalty Cards out of the game, e.g. the Final Five cards an execution reveals (rule 5.4.1.2).
+     */
+    public void removeLoyaltyCardsFromGame(List<LoyaltyCard> cards) {
         if (!cards.isEmpty()) {
-            record(new LoyaltyCardSeen(player.number(), targetPlayerNumber, game.randomness().shuffled(cards).getFirst()));
+            record(new CardsLost(player.number(), PlayerPile.LOYALTY, cards));
+            record(new CardsRemovedFromGame(DeckId.LOYALTY, cards));
         }
     }
 
@@ -163,6 +226,73 @@ public class PlayerOps extends GameOps {
     public void discardHeldQuorumCard(QuorumCard card) {
         playHeldQuorumCard(card);
         discardToDeck(card);
+    }
+
+    /**
+     * Gives Skill Cards from his hand to another player. Each of them sees the cards, the others only how many.
+     */
+    public void giveSkillCards(int recipientPlayerNumber, List<SkillCard> cards) {
+        if (!cards.isEmpty()) {
+            record(new CardsLost(player.number(), PlayerPile.SKILL, cards));
+            record(new CardsGained(recipientPlayerNumber, PlayerPile.SKILL, cards));
+        }
+    }
+
+    /**
+     * Takes random Skill Cards from another player's hand, as many as he has up to {@code count}.
+     */
+    public void takeRandomSkillCards(int fromPlayerNumber, int count) {
+        val hand = game.randomness().shuffled(game.player(fromPlayerNumber).skillCards().cards());
+        player(fromPlayerNumber).giveSkillCards(player.number(), hand.stream().limit(count).toList());
+    }
+
+    /**
+     * Takes a Mutiny Card out of his hand to play it. It is in no pile until its text says where it goes.
+     */
+    public void playMutinyCard(MutinyCard card) {
+        record(new CardsLost(player.number(), PlayerPile.MUTINY, List.of(card)));
+    }
+
+    /**
+     * Takes a Super Crisis Card out of his hand to play it at "Caprica". It is in no pile while it resolves.
+     */
+    public void playSuperCrisisCard(SuperCrisisCard card) {
+        record(new CardsLost(player.number(), PlayerPile.SUPER_CRISIS, List.of(card)));
+    }
+
+    /**
+     * Discards a Super Crisis Card from his hand without playing it, e.g. for D'Anna Biers' "Heretic".
+     */
+    public void discardSuperCrisisCard(SuperCrisisCard card) {
+        playSuperCrisisCard(card);
+        record(new CardsDiscarded(DeckId.SUPER_CRISIS, List.of(card)));
+    }
+
+    /**
+     * Draws cards from the top of the Destiny deck into his hand, e.g. for Leoben Conoy's "Glimpse the Face of God". An
+     * empty Destiny deck is built anew before the next card, as after a skill check.
+     */
+    public void drawFromDestinyDeck(int count) {
+        for (int i = 0; i < count; i++) {
+            if (game.decks().destiny().isEmpty()) {
+                skillCheck().createDestinyDeck();
+            }
+            SkillCard card = draw(DeckId.DESTINY);
+            gain(PlayerPile.SKILL, List.of(card));
+        }
+        if (game.decks().destiny().isEmpty()) {
+            skillCheck().createDestinyDeck();
+        }
+    }
+
+    /**
+     * Puts Skill Cards from his hand on top of the Destiny deck, the first one on top.
+     */
+    public void placeOnDestinyDeck(List<SkillCard> cards) {
+        if (!cards.isEmpty()) {
+            record(new CardsLost(player.number(), PlayerPile.SKILL, cards));
+            record(new CardsAddedOnTop(DeckId.DESTINY, cards));
+        }
     }
 
     public void discard(MutinyCard... cards) {
@@ -197,12 +327,45 @@ public class PlayerOps extends GameOps {
         gain(PlayerPile.SKILL, List.of(card));
     }
 
-    public void gainMiracleToken() {
-        record(new MiracleTokenGained(player.number()));
+    // "He can do so only if he does not currently have one" (rule 4.3.1), up to three for Gaius Baltar (alt.), and never
+    // as a revealed Cylon (rule 4.3.2).
+    /**
+     * The ability that was triggered for this player has been offered, e.g. "Memento".
+     */
+    public void clearAbilityTrigger(CharacterAbility ability) {
+        record(new AbilityTriggerCleared(player.number(), ability));
     }
 
-    public void loseMiracleToken() {
-        if (player.hasMiracleToken()) {
+    public void gainMiracleToken() {
+        if (player.canGainMiracleToken()) {
+            record(new MiracleTokenGained(player.number()));
+        }
+    }
+
+    /**
+     * Gives one of his miracle tokens to another player, who has room for it, e.g. Gaius Baltar (alt.)'s "Cult Leader".
+     */
+    public void giveMiracleToken(int recipientPlayerNumber) {
+        record(new MiracleTokenLost(player.number()));
+        player(recipientPlayerNumber).gainMiracleToken();
+    }
+
+    /**
+     * Discards all of his miracle tokens, e.g. when he reveals as a Cylon or is executed.
+     */
+    public void loseMiracleTokens() {
+        val tokens = player.miracleTokens(); // each fact applies at once
+        for (int i = 0; i < tokens; i++) {
+            record(new MiracleTokenLost(player.number()));
+        }
+    }
+
+    /**
+     * Uses an ability of his character sheet. A miracle ability spends its miracle tokens (rule 4.3).
+     */
+    public void useAbility(CharacterAbility ability) {
+        record(new AbilityUsed(player.number(), ability));
+        for (int i = 0; i < ability.miracleTokens(); i++) {
             record(new MiracleTokenLost(player.number()));
         }
     }
@@ -239,8 +402,23 @@ public class PlayerOps extends GameOps {
         record(new CharacterRemoved(player.number(), character));
     }
 
+    /**
+     * Ends the Cylon Leader's Infiltration, for any reason (rule 6.2.3.5): he goes back to the "Resurrection Ship" and
+     * discards the Quorum Cards given to him, without effect, and his Mutiny Cards. He keeps his miracle token (rule
+     * 4.3.2).
+     */
     public void endInfiltration() {
+        endInfiltration(Location.RESURRECTION_SHIP);
+    }
+
+    /**
+     * Ends the Infiltration at another Cylon location, as Aaron Doral's "Meticulous" lets him.
+     */
+    public void endInfiltration(Location destination) {
         record(new InfiltrationEnded(player.number()));
+        sendTo(destination);
+        titles().discardQuorumCardsGivenTo(player.number());
+        discard(player.mutinyCards().cards().toArray(MutinyCard[]::new));
     }
 
     private void gain(PlayerPile pile, List<?> cards) {

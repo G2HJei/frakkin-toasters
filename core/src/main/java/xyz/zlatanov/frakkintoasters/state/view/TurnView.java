@@ -1,11 +1,16 @@
 package xyz.zlatanov.frakkintoasters.state.view;
 
+import xyz.zlatanov.frakkintoasters.state.character.Character;
+import xyz.zlatanov.frakkintoasters.state.Title;
 import xyz.zlatanov.frakkintoasters.state.GameStep;
+import xyz.zlatanov.frakkintoasters.state.TurnLimit;
+import xyz.zlatanov.frakkintoasters.state.character.CharacterAbility;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.board.Resource;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow;
 import xyz.zlatanov.frakkintoasters.state.interrupt.PlayedInterruptCard;
+import xyz.zlatanov.frakkintoasters.state.interrupt.UsedRollAbility;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 
 import java.util.List;
@@ -66,6 +71,11 @@ public interface TurnView {
     List<PlayedInterruptCard> windowCards();
 
     /**
+     * The character abilities used in the open window on its die roll, secret until the window closes.
+     */
+    List<UsedRollAbility> windowAbilities();
+
+    /**
      * The interrupt cards that took effect this turn, for "Major Victory", which is limited to 1 a turn.
      */
     List<SkillCardType> resolvedInterruptCards();
@@ -90,4 +100,56 @@ public interface TurnView {
      * "Negotiation": no Cylon ship launches or activates for the rest of the turn.
      */
     boolean cylonShipsHeld();
+
+    /**
+     * What each player did this turn of what is limited to once a turn, e.g. the CAG's action while piloting.
+     */
+    Map<Integer, Set<TurnLimit>> usedTurnLimits();
+
+    default boolean hasUsed(int playerNumber, TurnLimit limit) {
+        return usedTurnLimits().getOrDefault(playerNumber, Set.of()).contains(limit);
+    }
+
+    /**
+     * The character abilities each player used this turn, for the ones limited to once a turn.
+     */
+    Map<Integer, Set<CharacterAbility>> usedAbilities();
+
+    default boolean hasUsed(int playerNumber, CharacterAbility ability) {
+        return usedAbilities().getOrDefault(playerNumber, Set.of()).contains(ability);
+    }
+
+    /**
+     * The abilities something just triggered and that wait to be offered, e.g. "Memento" after population was lost. The
+     * engine asks for them after every event ({@code AbilityTriggers}).
+     */
+    Map<Integer, Set<CharacterAbility>> triggeredAbilities();
+
+    /**
+     * The titles the current player took for his turn ("Manipulative"), with the character who held them before.
+     */
+    Map<Title, Character> borrowedTitles();
+
+    /**
+     * @return the location whose action the player may take from wherever he is right now, e.g. through Louis Hoshi's
+     * "Organized". Only that location's action then
+     */
+    Optional<Location> remoteActionLocation(int playerNumber);
+
+    /**
+     * Where the current player was at the start of his turn, a location or a space area. It is noted only when an
+     * ability asks for it, Louanne "Kat" Katraine's "Stim Junkie".
+     */
+    Optional<Location> startLocation();
+
+    /**
+     * The players who go to the "Brig" at the end of the turn, e.g. by Romo Lampkin's "Kleptomania".
+     */
+    Set<Integer> sentToBrigAtEndOfTurn();
+
+    /**
+     * Whether the player paid the cost an ability puts on the action he is taking, e.g. the 2 Skill Cards of Laura
+     * Roslin's "Terminal Illness". The action then follows.
+     */
+    boolean actionCostPaid(int playerNumber);
 }

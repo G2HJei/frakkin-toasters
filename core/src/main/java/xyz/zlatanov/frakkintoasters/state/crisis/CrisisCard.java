@@ -164,8 +164,7 @@ public enum CrisisCard {
     THE_BLACK_MARKET(SkillCheckType.THE_BLACK_MARKET, CURRENT_PLAYER, ACTIVATE_RAIDERS, true),
     TRAINING_SNAFU(SkillCheckType.TRAINING_SNAFU, ACTIVATE_BASESTARS, true),
     UNSETTLING_STORIES(SkillCheckType.UNSETTLING_STORIES, CURRENT_PLAYER, ACTIVATE_RAIDERS, true);
-    //todo the rulebook counts 141 Crisis Cards and these are the 136 different ones, so 5 cards are extra copies. Which
-    // ones can't be told from the card images.
+    // The 136 different cards. The deck has 141 (Appendix A2.3.9): DecksHolder adds the base game's extra copies.
 
     /**
      * The skill check of a skill check crisis, {@code null} for an event crisis.

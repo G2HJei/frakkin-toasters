@@ -14,6 +14,7 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.action.GrantEvent.Grant.ACTION;
 import static xyz.zlatanov.frakkintoasters.event.action.GrantEvent.GrantedBy.HANGAR_DECK;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.MUST_LAUNCH_IN_VIPER;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.BRIG;
 
 public class HangarDeckEventProcessor extends LocationActionProcessor<HangarDeckEvent> {
 
@@ -21,12 +22,15 @@ public class HangarDeckEventProcessor extends LocationActionProcessor<HangarDeck
         val galactica = game.boards().galactica();
         val fighterInReserves = galactica.reserves().stream().anyMatch(HumanFighterView.class::isInstance);
         val unmannedFighterInSpace = galactica.shipsInSpace(HumanFighterView.class).stream().anyMatch(s -> s.pilot() == null);
+        // Not from the "Brig", e.g. through "Resolute" (errata A2.1.1.1): the launch would take the prisoner out of it.
+        val inBrig = game.locate(player.character()).filter(BRIG::equals).isPresent();
         return player.character().canPilot()
+                && !inBrig
                 && (fighterInReserves || unmannedFighterInSpace);
     }
 
     @Override
-    public Followup process() {
+    protected Followup act() {
         return all(
                 new PlayerDecisionEvent<>(player.number(), LaunchViperEvent.class, MUST_LAUNCH_IN_VIPER),
                 // The launched pilot is in space, so his 1 more action is his viper's or a Skill Card's (rule 11.2.1),

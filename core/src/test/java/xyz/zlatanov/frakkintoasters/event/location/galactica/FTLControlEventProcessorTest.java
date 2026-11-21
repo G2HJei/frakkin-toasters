@@ -4,6 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
 
+import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow.AfterFtlControlRoll;
+import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow.BeforeDieRoll;
+
 import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.rollDie;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.FTL_CONTROL;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.FELIX_GAETA;
@@ -24,7 +27,7 @@ class FTLControlEventProcessorTest extends EventTestHarness<FTLControlEvent> {
     void shouldRollForTheJump() {
         execute(new FTLControlEvent(1));
 
-        assertFollowup(rollDie(new FTLControlResultEvent()));
+        assertFollowup(rollDie(new BeforeDieRoll(), new AfterFtlControlRoll(), new FTLControlResultEvent()));
     }
 
     @Test

@@ -58,15 +58,20 @@ public final class Disclosure {
      * its actor. A component missing here counts as private, and a test fails until it is added.
      */
     public static final Map<String, Boolean> CARD_COMPONENTS = Map.ofEntries(
+            entry("AssumeCommandEvent.discards", true), // the Skill Card discard piles are face up
             entry("BuildNukeEvent.card", true), // a card played for its ability is played face up
             entry("CapricaPlaySuperCrisisCardEvent.superCrisisCard", true),
             entry("ChangeOfPlansEvent.changeOfPlansCard", true),
+            entry("ChooseADifferentPathEvent.card", true),
             entry("ChooseCrisisSectionEvent.card", true),
             entry("ChooseCrisisTargetEvent.card", true),
             entry("ChooseDestinationEvent.chosen", true),
             entry("ChooseDestinationEvent.others", false), // they go to the bottom of the deck, only the chooser saw them
             entry("ChooseGalacticaDamageEvent.resolved", true),
             entry("ChooseGalacticaDamageEvent.returned", false),
+            entry("ChooseGalacticaDamageTokensEvent.resolved", true),
+            entry("ChooseGalacticaDamageTokensEvent.returned", false), // back in the pile, only the chooser saw them
+            entry("ChooseSuperCrisisSectionEvent.card", true),
             entry("CombatVeteranEvent.card", true),
             entry("ConsolidatePowerEvent.card", true),
             entry("CriticalSituationEvent.card", true),
@@ -76,9 +81,11 @@ public final class Disclosure {
             entry("DiscardDownTo1MutinyCardEvent.cardToKeep", false),
             entry("DiscardFromDestinyDeckEvent.cards", false),
             entry("DiscardHeldQuorumCardEvent.card", true), // the Quorum discard pile is face up
+            entry("DiscardPlayedMutinyCardEvent.card", true), // the Mutiny discard pile is face up (rule A2.3.3)
             entry("DiscardPlayedQuorumCardEvent.card", true), // a played Quorum Card is face up
             entry("DiscardQuorumCardsEvent.cards", true),
             entry("DiscardSkillCardsEvent.cards", true),
+            entry("DiscardSuperCrisisCardEvent.card", true), // the Super Crisis discard pile is face up
             entry("DogfightEvent.removedCard", true),
             entry("EngineRoomEvent.discardCard1", true),
             entry("EngineRoomEvent.discardCard2", true),
@@ -86,10 +93,14 @@ public final class Disclosure {
             entry("ForceTheirHandEvent.skillCard", true),
             entry("FullThrottleEvent.card", true),
             entry("GasCloudPlaceEvent.cards", false),
+            entry("GlimpseTheFaceOfGodPlaceEvent.cards", false), // they go on the Destiny deck, only he knows them
+            entry("HereticDiscardEvent.card", true), // the Super Crisis discard pile is face up
+            entry("ImpeachmentEvent.discards", true),
             entry("LaunchReservesEvent.card", true),
             entry("LaunchScoutEvent.card", true),
             entry("MaximumFirepowerEvent.card", true),
             entry("NegotiationEvent.card", true),
+            entry("MoralCompassEvent.card", true),
             entry("MoveEvent.discardCard", true),
             entry("PlaceCrisisCardOnBottomEvent.card", false),
             entry("PlaceCrisisCardOnTopEvent.card", false),
@@ -98,7 +109,8 @@ public final class Disclosure {
             entry("PlayCardsBeforeSkillCheckEvent.skillCards", false), // face down until they are revealed
             entry("PlayCardsIntoSkillCheckEvent.skillCards", false), // nobody may know who played which card
             entry("PlayInterruptCardEvent.card", false),
-            entry("PlaySuperCrisisCardEvent.superCrisisCard", true),
+            entry("UseRollAbilityEvent.card", false),
+            entry("PoliticallyAdroitEvent.card", false), // only the two players know it
             entry("PoliticalProwessEvent.politicalProwessCard", true),
             entry("PopularInfluenceEvent.card", true),
             entry("PopularInfluenceChoiceEvent.given", false), // only the player and the President learn it
@@ -107,19 +119,50 @@ public final class Disclosure {
             entry("QuickThinkingEvent.cardToRemove", true),
             entry("RaptorSpecialistEvent.card", true),
             entry("RepairEvent.card", true),
+            entry("ReligiousVisionsEvent.crisisCardToPlay", true),
+            entry("ReligiousVisionsEvent.crisisCardToPutAtBottom", false), // only Laura Roslin saw it
+            entry("RemoveMutinyCardFromGameEvent.card", true),
             entry("ResignationEvent.discards", true), // the Quorum discard pile is face up
             entry("ResolveCapricaCrisisCardEvent.crisisCardToPlay", true),
+            entry("ResolveFinalFiveCardEvent.card", true),
+            entry("ResolveFinalFiveCardsEvent.cards", true),
+            entry("RevealCylonEvent.card", true), // revealed
+            entry("RevealCylonOnExecutionEvent.card", true),
+            entry("RevealMotiveCardEvent.card", true), // revealed
+            entry("RevealPersonalGoalEvent.card", true), // revealed
+            entry("RevealPersonalGoalEvent.discards", true),
             entry("ResolveCapricaCrisisCardEvent.crisisCardToPutAtBottom", false),
             entry("ResolveCrisisCardEvent.card", true),
+            entry("ResolveSuperCrisisCardEvent.card", true),
+            entry("ResolveCrisisSectionEvent.card", true),
             entry("ResolveCrisisRollEvent.card", true),
             entry("ResolveDestinationCardEvent.card", true),
+            entry("SecretDestinyEvent.card", true),
             entry("ScoutForFuelEvent.card", true),
+            entry("SetTheAgendaChoiceEvent.cards", false), // only the player and the President know them
             entry("StateOfEmergencyEvent.card", true),
             entry("TestTheLimitsEvent.card", true),
             entry("TiebreakCardsBeforeSkillCheckEvent.keptCards", true), // the cards were revealed
             entry("TiebreakInterruptCardsEvent.keptCards", true),
             entry("UnorthodoxPlanEvent.card", true), // the window's cards show when it closes
+            entry("AbusePowerChoiceEvent.chosen", false), // only he saw the cards he drew; the card shows when he plays it
+            entry("AbusePowerChoiceEvent.others", false), // to the bottom of the deck, only he saw them
+            entry("ReorderTopQuorumCardsEvent.order", false), // only she looked at the top of the deck
+            entry("SkilledPoliticianChoiceEvent.chosen", false), // the card shows when she plays it
+            entry("SkilledPoliticianChoiceEvent.others", false), // to the bottom of the deck, only she saw them
+            entry("StarPlayerEvent.discards", true), // the Skill Card discard piles are face up
+            entry("TreatmentGiveEvent.cards", false), // only the two players know them
+            entry("LogicBoundEvent.card", true), // it goes in face up
+            entry("FastLearnerIntoCheckEvent.cards", false), // only Dee saw them, they go in face down
+            entry("QuickFixEvent.card", true), // a revealed card of the check
+            entry("HumanDelusionEvent.cards", true), // they go in face up
+            entry("DutifulEvent.card", true), // discarded face up
+            entry("NecessaryStepsEvent.given", false), // only Zarek and the player who gets it know it
+            entry("NecessaryStepsEvent.bottom", false), // only Zarek saw it
             // the setups of a sandbox, whose one viewer sees everything
+            entry("GiveLoyaltyCardToPlayerEvent.card", true),
+            entry("GiveMutinyCardToPlayerEvent.card", true),
+            entry("GiveSuperCrisisCardToPlayerEvent.card", true),
             entry("GiveQuorumCardToPresidentEvent.card", true),
             entry("GiveSkillCardToPlayerEvent.card", true),
             entry("PutCrisisCardOnTopEvent.card", true),

@@ -9,8 +9,11 @@ import xyz.zlatanov.frakkintoasters.backend.journal.TypeRegistry;
 import xyz.zlatanov.frakkintoasters.backend.journal.TypeWalker;
 import xyz.zlatanov.frakkintoasters.backend.journal.ValueCodec;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.Fact;
+import xyz.zlatanov.frakkintoasters.event.AnytimeEvent;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.LocationEvent;
+import xyz.zlatanov.frakkintoasters.event.action.MutinyCardEvent;
+import xyz.zlatanov.frakkintoasters.event.action.MutinyCardEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.action.QuorumCardEvent;
 import xyz.zlatanov.frakkintoasters.event.action.QuorumCardEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.sandbox.SandboxEvent;
@@ -38,7 +41,8 @@ import static xyz.zlatanov.frakkintoasters.backend.journal.ValueCodec.typeArgume
  * types from it, and its event builder makes a form of each event from it. Nothing copies a Java record by hand.
  * <ul>
  *     <li>a record: its components with their types, the interfaces it implements, whether it carries {@code kind},
- *     the {@code location} of a location's action, and the {@code quorumCard} a Quorum Card's event plays</li>
+ *     the {@code location} of a location's action, and the {@code quorumCard} or {@code mutinyCard} a card's event
+ *     plays</li>
  *     <li>an interface: the records that implement it, a union told apart by {@code kind}</li>
  *     <li>an enum: its constants</li>
  *     <li>the socket messages, told apart by {@code type}</li>
@@ -56,13 +60,14 @@ public final class WireSchema {
     private static final Set<String> PLAYERS = Set.of("playerNumber", "targetPlayerNumber", "targetPlayer",
             "recipientPlayerNumber", "excludedPlayerNumber", "targetHumanPlayer", "ownerPlayerNumber", "otherPlayerNumber",
             "chooser", "actor", "player", "currentPlayer", "actingPlayer", "winnerPlayerNumbers", "winners",
-            "waitingForPlayerNumber", "targetPlayers", "holderPlayerNumber", "administrationPlayerNumber");
+            "waitingForPlayerNumber", "targetPlayers", "holderPlayerNumber", "administrationPlayerNumber",
+            "drawerPlayerNumber", "lookerPlayerNumber", "discarderPlayerNumber");
     private static final Set<String> SCOPES = Set.of("scopeId", "parentId");
     private static final Set<String> COUNTS = Set.of("count", "amount", "value", "modifier", "distanceBefore", "number",
             "turn", "turns", "size", "discardSize", "basestars", "raiders", "heavyRaiders", "centurions", "civilianShips",
             "totalStrength", "difficulty", "fuel", "food", "morale", "population", "nukes", "distanceTraveled",
             "playerCount", "calculationsModifier", "handLimit", "option", "fuelCost", "moraleCost", "populationCost",
-            "result", "formatVersion", "activationsLeft", "delta", "adjustment");
+            "result", "formatVersion", "activationsLeft", "delta", "adjustment", "raidersPerBasestar", "miracleTokens");
 
     private WireSchema() {
     }
@@ -111,6 +116,9 @@ public final class WireSchema {
                 .map(names::get).toList()));
         lists.set("sandboxEvents", sorted(types.stream()
                 .filter(type -> type.isRecord() && SandboxEvent.class.isAssignableFrom(type))
+                .map(names::get).toList()));
+        lists.set("anytimeEvents", sorted(types.stream()
+                .filter(type -> type.isRecord() && AnytimeEvent.class.isAssignableFrom(type))
                 .map(names::get).toList()));
         lists.set("facts", sorted(types.stream()
                 .filter(type -> type.isRecord() && Fact.class.isAssignableFrom(type))
@@ -175,6 +183,9 @@ public final class WireSchema {
         }
         if (QuorumCardEvent.class.isAssignableFrom(type)) {
             node.put("quorumCard", quorumCard(type));
+        }
+        if (MutinyCardEvent.class.isAssignableFrom(type)) {
+            node.put("mutinyCard", mutinyCard(type));
         }
         val components = node.putArray("components");
         for (val component : type.getRecordComponents()) {
@@ -274,6 +285,16 @@ public final class WireSchema {
         try {
             val processor = Class.forName(type.getName() + "Processor").getDeclaredConstructor().newInstance();
             return ((QuorumCardEventProcessor<?>) processor).card().name();
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            return null;
+        }
+    }
+
+    // The record is the card, and its processor names it.
+    private static String mutinyCard(Class<?> type) {
+        try {
+            val processor = Class.forName(type.getName() + "Processor").getDeclaredConstructor().newInstance();
+            return ((MutinyCardEventProcessor<?>) processor).card().name();
         } catch (ReflectiveOperationException | RuntimeException e) {
             return null;
         }

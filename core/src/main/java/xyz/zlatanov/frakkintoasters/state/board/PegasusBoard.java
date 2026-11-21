@@ -20,6 +20,7 @@ public class PegasusBoard implements BattlestarBoard, PegasusBoardView {
     private final EnumSet<Location>            damagedLocations    = EnumSet.noneOf(Location.class);
     private final EnumMap<Character, Location> characters          = new EnumMap<>(Character.class);
     private       boolean                      engineRoomActivated = false;
+    private       boolean                      destroyed           = false;
 
     @Override
     public Set<Location> locations() {
@@ -39,6 +40,17 @@ public class PegasusBoard implements BattlestarBoard, PegasusBoardView {
     @Override
     public boolean engineRoomActivated() {
         return engineRoomActivated;
+    }
+
+    @Override
+    public boolean destroyed() {
+        return destroyed;
+    }
+
+    @Mutates
+    public PegasusBoard destroy() {
+        destroyed = true;
+        return this;
     }
 
     @Mutates

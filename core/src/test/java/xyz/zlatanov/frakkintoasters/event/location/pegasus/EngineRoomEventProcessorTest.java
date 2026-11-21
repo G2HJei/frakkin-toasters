@@ -4,20 +4,22 @@ import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
+import xyz.zlatanov.frakkintoasters.event.player.DrawMutinyCardEvent;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.ENGINE_ROOM;
-import static xyz.zlatanov.frakkintoasters.state.character.Character.HELENA_CAIN;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.FELIX_GAETA;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.A_BETTER_MACHINE;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.DRADIS_CONTACT;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.GUTS_AND_INITIATIVE;
 
 class EngineRoomEventProcessorTest extends EventTestHarness<EngineRoomEvent> {
 
     @BeforeEach
     void setUpAtLocation() {
-        player(1).character(HELENA_CAIN);
-        moveTo(ENGINE_ROOM, HELENA_CAIN);
+        player(1).character(FELIX_GAETA);
+        moveTo(ENGINE_ROOM, FELIX_GAETA);
     }
 
     @Test
@@ -32,6 +34,18 @@ class EngineRoomEventProcessorTest extends EventTestHarness<EngineRoomEvent> {
         assertTrue(game.decks().tactics().discardedCards().contains(skillCard1));
         assertTrue(game.decks().treachery().discardedCards().contains(skillCard2));
         assertTrue(pegasusBoard.engineRoomActivated());
+    }
+
+    // Discarding "Dradis Contact" draws a Mutiny Card (rule 10.2.1).
+    @Test
+    void shouldDrawAMutinyCardForDiscardingDradisContact() {
+        val skillCard1 = new SkillCard(0, GUTS_AND_INITIATIVE);
+        val skillCard2 = new SkillCard(1, DRADIS_CONTACT);
+        player(1).gainSkillCards(skillCard1, skillCard2);
+
+        execute(new EngineRoomEvent(1, skillCard1, skillCard2));
+
+        assertFollowup(new DrawMutinyCardEvent(1));
     }
 
     @Test

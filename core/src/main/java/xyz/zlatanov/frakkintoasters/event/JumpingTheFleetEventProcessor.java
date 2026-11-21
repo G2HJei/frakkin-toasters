@@ -1,6 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event;
 
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.event.character.NoOneGetsLeftBehindEventProcessor;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.endgame.EndGameEvent;
 import xyz.zlatanov.frakkintoasters.event.jump.DrawDestinationCardsEvent;
@@ -11,6 +12,7 @@ import xyz.zlatanov.frakkintoasters.state.ship.AssaultRaptor;
 
 import java.util.ArrayList;
 
+import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.allOf;
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
 
 /**
@@ -40,9 +42,11 @@ public class JumpingTheFleetEventProcessor extends EventProcessor<JumpingTheFlee
         steps.add(single(new ReturnVipersToReservesEvent(true)));
         // 2. Move Cylon Ships.
         steps.add(single(new MoveCylonShipsToFleetBoardEvent()));
+        // Karl "Helo" Agathon (alt.)'s "No One Gets Left Behind" belongs to the removal of the ships.
+        steps.add(NoOneGetsLeftBehindEventProcessor.offer(game));
         // 3. Remove Mission Cards belongs to the Earth Objective, which is out of scope.
         // 4. Choose Destination, then the rest.
-        steps.add(single(new DrawDestinationCardsEvent()));
-        return all(steps.toArray(Followup[]::new));
+        steps.add(single(new DrawDestinationCardsEvent(event.blindJump())));
+        return allOf(steps.toArray(Followup[]::new));
     }
 }

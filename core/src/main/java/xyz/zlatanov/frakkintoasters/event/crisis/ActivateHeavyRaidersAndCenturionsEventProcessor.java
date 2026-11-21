@@ -1,6 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event.crisis;
 
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.event.ship.LaunchRaidersEventProcessor;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.board.AdvancePursuitTrackEvent;
@@ -55,7 +56,9 @@ public class ActivateHeavyRaidersAndCenturionsEventProcessor extends EventProces
     }
 
     private Followup launchHeavyRaiders(List<BasestarView> basestars) {
-        basestars.forEach(basestar -> ops.ship(basestar.id()).launchHeavyRaider());
+        basestars.stream()
+                .filter(LaunchRaidersEventProcessor::canLaunch)
+                .forEach(basestar -> ops.ship(basestar.id()).launchHeavyRaider());
         return Followup.NONE;
     }
 }

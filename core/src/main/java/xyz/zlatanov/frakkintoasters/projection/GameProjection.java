@@ -16,12 +16,14 @@ import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
 import xyz.zlatanov.frakkintoasters.state.card.QuorumCardInPlay;
 import xyz.zlatanov.frakkintoasters.state.card.SeenLoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
+import xyz.zlatanov.frakkintoasters.state.character.CharacterAbility;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.crisis.SuperCrisisCard;
 import xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow;
 import xyz.zlatanov.frakkintoasters.state.interrupt.PlayedInterruptCard;
+import xyz.zlatanov.frakkintoasters.state.interrupt.UsedRollAbility;
 import xyz.zlatanov.frakkintoasters.state.ship.ShipType;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
@@ -76,6 +78,7 @@ public record GameProjection(
      * @param interruptWindow the open window, {@code null} for a viewer who may not know of it: it opens only when
      *                        someone holds a card for it
      * @param windowCards     the cards in the open window that the viewer played
+     * @param windowAbilities the abilities used in the open window that the viewer used
      */
     public record TurnProjection(int number,
                                  GameStep step,
@@ -87,14 +90,18 @@ public record GameProjection(
                                  DieRollProjection dieRoll,
                                  InterruptWindow interruptWindow,
                                  List<PlayedInterruptCard> windowCards,
+                                 List<UsedRollAbility> windowAbilities,
                                  List<SkillCardType> resolvedInterruptCards,
                                  Map<Location, Integer> raidersToMiss) {
     }
 
     /**
-     * @param value {@code null} until the die is rolled
+     * @param value     {@code null} until the die is rolled
+     * @param abilities the character abilities used on the roll
+     * @param fixed     "Longshot" chose the result, which nothing modifies
      */
-    public record DieRollProjection(Integer value, List<SkillCardType> cards, int modifier, Integer result) {
+    public record DieRollProjection(Integer value, List<SkillCardType> cards, int modifier, Integer result,
+                                    List<CharacterAbility> abilities, boolean fixed) {
     }
 
     /**
@@ -112,7 +119,7 @@ public record GameProjection(
                                    HiddenCards<MutinyCard> mutinyCards,
                                    HiddenCards<SuperCrisisCard> superCrisisCards,
                                    HiddenCards<QuorumCard> quorumCards,
-                                   boolean miracleToken,
+                                   int miracleTokens,
                                    boolean infiltrating,
                                    Boolean human,
                                    boolean revealedCylon,
@@ -157,7 +164,7 @@ public record GameProjection(
                                       List<CenturionProjection> boardingParty) {
     }
 
-    public record PegasusProjection(boolean engineRoomActivated, List<LocationProjection> locations) {
+    public record PegasusProjection(boolean engineRoomActivated, boolean destroyed, List<LocationProjection> locations) {
     }
 
     public record CylonFleetProjection(Pursuit pursuit, List<LocationProjection> locations, List<ShipProjection> ships) {
@@ -209,6 +216,7 @@ public record GameProjection(
                                        List<SkillCardType> resolvedAbilities,
                                        boolean emergencyDeclared,
                                        boolean politicsCountPositive,
+                                       SkillCardColor zeroStrengthColor,
                                        Integer totalStrength,
                                        SkillCheckResult result,
                                        boolean passResultReplaced,

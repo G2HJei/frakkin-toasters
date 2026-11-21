@@ -4,6 +4,7 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.RemovedComponents;
 import xyz.zlatanov.frakkintoasters.state.Team;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
+import xyz.zlatanov.frakkintoasters.state.board.LocationsArea;
 import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
 import xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard;
 import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
@@ -52,6 +53,23 @@ public interface GameView {
      * The skill checks of the Crisis Cards that are kept in play, e.g. "Detector Sabotage" and "Legendary Discovery".
      */
     List<SkillCheckType> crisisCardsInPlay();
+
+    /**
+     * @return whether "Bomb on Colonial One" failed and stays in play: nobody may move to Colonial One for the rest of the
+     * game (rule 9.4), and its locations have no action
+     */
+    default boolean colonialOneDestroyed() {
+        return crisisCardsInPlay().contains(SkillCheckType.BOMB_ON_COLONIAL_1);
+    }
+
+    /**
+     * @return whether the location is on a destroyed Colonial One or a destroyed Pegasus: nobody moves or starts there,
+     * and it has no action
+     */
+    default boolean isDestroyed(Location location) {
+        return colonialOneDestroyed() && LocationsArea.COLONIAL_ONE.locations().contains(location)
+                || boards().pegasus().destroyed() && LocationsArea.PEGASUS.locations().contains(location);
+    }
 
     Character president();
 

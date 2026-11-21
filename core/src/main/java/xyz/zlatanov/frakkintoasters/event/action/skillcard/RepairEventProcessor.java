@@ -1,6 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event.action.skillcard;
 
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.event.character.MaintenanceEngineerEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.action.SkillCardEventProcessor;
 import xyz.zlatanov.frakkintoasters.operation.GameOps;
@@ -63,11 +64,13 @@ public class RepairEventProcessor extends SkillCardEventProcessor<RepairEvent> {
         } else {
             event.viperIds().stream().filter(Objects::nonNull).forEach(id -> ops.ship(id).repair());
         }
-        return NONE;
+        return MaintenanceEngineerEventProcessor.offer(game, player); // "Chief" Galen Tyrol's another action
     }
 
     public static boolean isDamaged(GameView game, Location location) {
-        return game.boards().galactica().isDamaged(location) || game.boards().pegasus().isDamaged(location);
+        // A destroyed Pegasus is out of the game, damage tokens and all (rule 11.7.2.4).
+        return game.boards().galactica().isDamaged(location)
+                || game.boards().pegasus().isDamaged(location) && !game.boards().pegasus().destroyed();
     }
 
     /**

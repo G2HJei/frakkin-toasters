@@ -74,6 +74,7 @@ public final class FactApplier {
             case BoardFact.PursuitAdvanced ignored -> game.boards().cylonFleet().advancePursuit();
             case BoardFact.PursuitReset ignored -> game.boards().cylonFleet().resetPursuit();
             case BoardFact.EngineRoomActivated ignored -> game.boards().pegasus().engineRoomActivated(true);
+            case BoardFact.PegasusDestroyed ignored -> game.boards().pegasus().destroy();
         }
     }
 
@@ -100,6 +101,8 @@ public final class FactApplier {
             case GameFact.DieRollStarted ignored -> game.turn().startDieRoll();
             case GameFact.DieRolled f -> dieRoll(game).roll(f.value());
             case GameFact.DieRollCardPlayed f -> dieRoll(game).play(f.card(), f.modifier());
+            case GameFact.DieRollAbilityUsed f -> dieRoll(game).useAbility(f.ability());
+            case GameFact.DieRollReplaced f -> dieRoll(game).replace(f.value(), f.fixed());
             case GameFact.StepChanged f -> game.turn().step(f.step());
             case GameFact.TurnStarted f -> game.turn().start(f.turn());
             case GameFact.TurnEndedEarly ignored -> game.turn().endEarly();
@@ -116,6 +119,13 @@ public final class FactApplier {
             case GameFact.LossReductionAdded f -> game.turn().addLossReduction(f.resource());
             case GameFact.LossReduced f -> game.turn().useLossReduction(f.resource());
             case GameFact.CylonShipsHeld ignored -> game.turn().holdCylonShips();
+            case GameFact.TurnLimitUsed f -> game.turn().useTurnLimit(f.playerNumber(), f.limit());
+            case GameFact.StartLocationNoted f -> game.turn().noteStartLocation(f.location());
+            case GameFact.SentToBrigAtEndOfTurn f -> game.turn().sendToBrigAtEndOfTurn(f.playerNumber());
+            case GameFact.ActionCostPaid f -> game.turn().payActionCost(f.playerNumber());
+            case GameFact.TitleBorrowed f -> game.turn().borrowTitle(f.title(), f.previousHolder());
+            case GameFact.RemoteActionAllowed f -> game.turn().allowRemoteAction(f.playerNumber(), f.location());
+            case GameFact.RemoteActionEnded ignored -> game.turn().endRemoteAction();
             case GameFact.GameEnded f -> game.end(f.winner(), f.winnerPlayerNumbers());
             case GameFact.DestinationReached f -> game.reachDestination(f.card());
         }
@@ -129,6 +139,9 @@ public final class FactApplier {
             case InterruptFact.InterruptCardReturned f -> turn.returnInterruptCard(f.card());
             case InterruptFact.InterruptCardResolved f -> turn.resolveInterruptCard(f.card());
             case InterruptFact.InterruptWindowClosed ignored -> turn.closeInterruptWindow();
+            case InterruptFact.RollAbilityUsed f -> turn.useRollAbility(f.ability());
+            case InterruptFact.RollAbilityWithdrawn f -> turn.removeRollAbility(f.ability());
+            case InterruptFact.RollAbilityResolved f -> turn.removeRollAbility(f.ability());
             case InterruptFact.RaidersWillMiss f -> turn.raidersWillMiss(f.area(), f.count());
             case InterruptFact.RaiderMissed f -> turn.raiderMissed(f.area());
         }
@@ -154,6 +167,9 @@ public final class FactApplier {
             case PlayerFact.CardsLost f -> remove(game.player(f.playerNumber()).pile(f.pile()), f.cards());
             case PlayerFact.MiracleTokenGained f -> game.player(f.playerNumber()).gainMiracleToken();
             case PlayerFact.MiracleTokenLost f -> game.player(f.playerNumber()).exhaustMiracleToken();
+            case PlayerFact.AbilityUsed f -> game.turn().useAbility(f.playerNumber(), f.ability());
+            case PlayerFact.AbilityTriggered f -> game.turn().triggerAbility(f.playerNumber(), f.ability());
+            case PlayerFact.AbilityTriggerCleared f -> game.turn().clearAbilityTrigger(f.playerNumber(), f.ability());
             case PlayerFact.LoyaltyCardRevealed f -> game.player(f.playerNumber()).loyaltyCards().reveal(f.card());
             case PlayerFact.MotiveCardRevealed f -> game.player(f.playerNumber()).motiveCards().reveal(f.card());
             case PlayerFact.InfiltrationStarted f -> game.player(f.playerNumber()).infiltrateGalactica();
@@ -168,6 +184,9 @@ public final class FactApplier {
             }
             case PlayerFact.LoyaltyCardSeen f -> game.player(f.playerNumber())
                     .seeLoyaltyCard(new SeenLoyaltyCard(f.targetPlayerNumber(), f.card()));
+            case PlayerFact.FinalFiveCardShown ignored -> {
+                // the holder keeps the card, everyone learns it
+            }
         }
     }
 
@@ -186,6 +205,7 @@ public final class FactApplier {
         switch (fact) {
             case SkillCheckFact.SkillCheckStarted f -> game.startSkillCheck(f.type());
             case SkillCheckFact.TargetChosen f -> game.activeSkillCheck().targetPlayerNumber(f.playerNumber());
+            case SkillCheckFact.PlayedBy f -> game.activeSkillCheck().playedBy(f.playerNumber());
             case SkillCheckFact.CardsPlayedBefore f ->
                     game.activeSkillCheck().playedBefore(f.playerNumber(), f.cards());
             case SkillCheckFact.PlayedBeforeRevealed ignored -> game.activeSkillCheck().revealPlayedBefore();
@@ -207,6 +227,8 @@ public final class FactApplier {
             case SkillCheckFact.EmergencyDeclared ignored -> game.activeSkillCheck().declareEmergency();
             case SkillCheckFact.DifficultyAdjusted f -> game.activeSkillCheck().adjustDifficulty(f.delta());
             case SkillCheckFact.PoliticsCountPositive ignored -> game.activeSkillCheck().makePoliticsCountPositive();
+            case SkillCheckFact.StrengthZeroed f -> game.activeSkillCheck().zeroStrength(f.color());
+            case SkillCheckFact.CardsDivided ignored -> game.activeSkillCheck().divideCards();
             case SkillCheckFact.CardsLookedAt ignored -> {
                 // what a player learns changes no component
             }

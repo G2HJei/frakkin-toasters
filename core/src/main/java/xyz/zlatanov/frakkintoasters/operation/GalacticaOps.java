@@ -33,8 +33,6 @@ public class GalacticaOps extends BattlestarOps {
         super(game, recorder);
     }
 
-    // todo certain effects destroy a random civ ship ( Misjump destination / Helena Cain miracle ability ). To handle this outside of ShipOps, probably GalacticaOps
-
     public void damage() {
         resolveDamage(draw(GALACTICA_DAMAGE));
     }

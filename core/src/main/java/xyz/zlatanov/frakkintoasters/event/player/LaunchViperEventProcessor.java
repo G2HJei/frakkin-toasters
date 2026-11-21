@@ -1,6 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event.player;
 
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.event.character.AlertViperPilotEventProcessor;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
@@ -8,6 +9,7 @@ import xyz.zlatanov.frakkintoasters.state.ship.ShipType;
 import xyz.zlatanov.frakkintoasters.state.view.GameView;
 import xyz.zlatanov.frakkintoasters.state.view.HumanFighterView;
 
+import java.util.List;
 import java.util.Set;
 
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.*;
@@ -27,8 +29,12 @@ public class LaunchViperEventProcessor extends EventProcessor<LaunchViperEvent> 
         val humanFighterId = ops.galactica().launchHumanFighter(event.shipType(), event.location(), event.unmannedViperId());
         if (event.pilot() != null) {
             ops.player(event.pilot()).pilot(humanFighterId);
+            return Followup.NONE;
         }
-        return Followup.NONE;
+        // An unmanned viper placed from the "Reserves": Lee "Apollo" Adama's "Alert Viper Pilot"
+        return event.unmannedViperId() == null
+                ? AlertViperPilotEventProcessor.offer(game, List.of(humanFighterId))
+                : Followup.NONE;
     }
 
     // A viper (a mark VII or an assault raptor too) from the "Reserves", into a space area with a viper launch icon.

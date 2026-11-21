@@ -19,7 +19,7 @@ public class BasestarBridgeEventProcessor extends LocationActionProcessor<Basest
     // "he chooses two of the four listed abilities to resolve, one at a time. Note that he may only resolve each ability
     // once per activation of the location." (rule 9.7)
     @Override
-    public Followup process() {
+    protected Followup act() {
         val playerNumber = player.number();
         val first = event.firstAbility();
         val second = one(Arrays.stream(BasestarBridgeAbility.values())

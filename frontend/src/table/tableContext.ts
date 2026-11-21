@@ -21,6 +21,8 @@ export interface TableContext extends LabelContext {
   ships(): ShipChoice[];
   hand(playerNumber: number | null): SkillCard[];
   deckSkillCards(): SkillCard[];
+  // the cards of the active skill check once they are divided, face up
+  checkCards(): SkillCard[];
   playedBefore(): PlayedCard[];
   windowCards(): PlayedInterruptCard[];
 }
@@ -68,6 +70,7 @@ export function tableContext(
       (game?.decks ?? [])
         .filter((deck) => ['POLITICS', 'LEADERSHIP', 'TACTICS', 'PILOTING', 'ENGINEERING', 'TREACHERY', 'DESTINY'].includes(deck.deck ?? ''))
         .flatMap((deck) => (deck.drawPile ?? []) as SkillCard[]),
+    checkCards: () => [...(game?.skillCheck?.matchingPile ?? []), ...(game?.skillCheck?.nonMatchingPile ?? [])],
     playedBefore: () =>
       (game?.skillCheck?.playedBefore ?? []).flatMap((played) =>
         (played.cards?.cards ?? []).map((skillCard) => ({ playerNumber: played.player, skillCard })),
@@ -86,6 +89,7 @@ export const Table = createContext<TableContext>({
   ships: () => [],
   hand: () => [],
   deckSkillCards: () => [],
+  checkCards: () => [],
   playedBefore: () => [],
   windowCards: () => [],
 });

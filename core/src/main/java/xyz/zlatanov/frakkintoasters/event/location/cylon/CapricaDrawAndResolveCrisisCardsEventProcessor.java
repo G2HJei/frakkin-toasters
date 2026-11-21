@@ -13,7 +13,7 @@ public class CapricaDrawAndResolveCrisisCardsEventProcessor extends LocationActi
 
 
     @Override
-    public Followup process() {
+    protected Followup act() {
         val firstCrisis = ops.player(event.playerNumber()).drawCrisisCard();
         val secondCrisis = ops.player(event.playerNumber()).drawCrisisCard();
         ops.player(event.playerNumber()).see(DeckId.CRISIS, List.of(firstCrisis, secondCrisis));

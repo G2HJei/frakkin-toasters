@@ -215,6 +215,7 @@ function SkillCheck() {
           {check.targetPlayer !== null && <span>about {table.playerName(check.targetPlayer)}</span>}
           {check.emergencyDeclared && <span>emergency declared</span>}
           {check.politicsCountPositive && <span>Politics counts positive</span>}
+          {check.zeroStrengthColor && <span>{constantLabel('SkillCardColor', check.zeroStrengthColor)} counts 0</span>}
           <span className="check-figure">
             Difficulty <strong>{check.difficulty}</strong>
           </span>

@@ -1,6 +1,9 @@
 package xyz.zlatanov.frakkintoasters.event.location.colonialone;
 
+import lombok.val;
+import xyz.zlatanov.frakkintoasters.event.character.NecessaryStepsEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.character.CharacterPenalties;
 import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
 import xyz.zlatanov.frakkintoasters.event.deck.Discard1MutinyCardEvent;
 import xyz.zlatanov.frakkintoasters.event.deck.DiscardDownTo1MutinyCardEvent;
@@ -29,15 +32,24 @@ public class PressRoomEventProcessor extends LocationActionProcessor<PressRoomEv
     }
 
     @Override
-    public Followup process() {
-        ops.player(event.targetPlayer()).drawMutinyCard(); // not a DrawMutinyCardEvent, he doesn't move to the "Brig"
-        return allOf(keepOneMutinyCard(), mayDiscardAMutinyCard());
+    protected Followup act() {
+        // not a DrawMutinyCardEvent: he doesn't move to the "Brig". "Necessary Steps" still picks his card.
+        val necessarySteps = NecessaryStepsEventProcessor.drawFor(game, ops, event.targetPlayer(), true);
+        if (necessarySteps.isPresent()) {
+            return allOf(necessarySteps.get(), mayDiscardAMutinyCard());
+        }
+        ops.player(event.targetPlayer()).drawMutinyCard();
+        return allOf(keepOneMutinyCard(game, event.targetPlayer()), mayDiscardAMutinyCard());
     }
 
-    private Followup keepOneMutinyCard() {
-        return game.player(event.targetPlayer()).mutinyCards().size() > 1
-                ? single(new PlayerDecisionEvent<>(event.targetPlayer(), DiscardDownTo1MutinyCardEvent.class))
+    /**
+     * @return the choice of the one Mutiny Card the target keeps, when he holds more
+     */
+    public static Followup keepOneMutinyCard(GameView game, int targetPlayer) {
+        val keepOne = game.player(targetPlayer).mutinyCards().size() > 1
+                ? single(new PlayerDecisionEvent<>(targetPlayer, DiscardDownTo1MutinyCardEvent.class))
                 : NONE;
+        return allOf(CharacterPenalties.mutinyCardDrawn(game, game.player(targetPlayer)), keepOne); // "Moral Dilemma"
     }
 
     private Followup mayDiscardAMutinyCard() {

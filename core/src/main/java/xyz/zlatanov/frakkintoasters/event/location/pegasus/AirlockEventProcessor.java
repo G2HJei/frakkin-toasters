@@ -21,7 +21,7 @@ public class AirlockEventProcessor extends LocationActionProcessor<AirlockEvent>
     }
 
     @Override
-    public Followup process() {
+    protected Followup act() {
         ops.skillCheck().start(AIRLOCK, event.targetPlayer());
         return FollowupUtils.beforeSkillCheckFollowups(game);
     }

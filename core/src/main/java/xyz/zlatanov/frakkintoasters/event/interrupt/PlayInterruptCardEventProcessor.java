@@ -52,6 +52,8 @@ public class PlayInterruptCardEventProcessor extends EventProcessor<PlayInterrup
         return switch (type) {
             // "Only 1 "Calculations" card may be used per die roll", which a reroll doesn't change.
             case CALCULATIONS -> !game.turn().dieRoll().cards().contains(CALCULATIONS);
+            // A reroll needs a die: not after "Hotshot" set the face.
+            case EVASIVE_MANOEUVRES -> RollAbilities.canReroll(game.turn().dieRoll());
             // "The first 4 raiders activating in your space area": the player pilots a viper where raiders are.
             case RUN_INTERFERENCE -> pilotedFighterArea(game, player)
                     .filter(area -> !game.boards().galactica().shipsIn(area, Raider.class).isEmpty())

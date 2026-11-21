@@ -5,12 +5,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
+import xyz.zlatanov.frakkintoasters.event.officials.DetermineNextAdmiralEvent;
+import xyz.zlatanov.frakkintoasters.event.officials.DetermineNextCagEvent;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DESTINATION_GALACTICA;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.GAIUS_BALTAR;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.WILLIAM_ADAMA;
+import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 
 class LeaveBrigEventProcessorTest extends EventTestHarness<LeaveBrigEvent> {
 
@@ -52,5 +56,35 @@ class LeaveBrigEventProcessorTest extends EventTestHarness<LeaveBrigEvent> {
         moveTo(COMMAND, GAIUS_BALTAR);
 
         assertInvalid(new LeaveBrigEvent(1, ARMORY));
+    }
+
+    // Every human was in the "Brig", so the Admiral and the CAG are there: the first to leave takes their titles (rules
+    // 4.4.2.3 and 4.4.3.2).
+    @Test
+    void shouldHandTheTitlesOnWhenTheAdmiralAndTheCagAreInTheBrig() {
+        ops.titles().assignAdmiral(GAIUS_BALTAR);
+        ops.titles().assignCag(GAIUS_BALTAR);
+        player(2).character(WILLIAM_ADAMA);
+        moveTo(BRIG, WILLIAM_ADAMA);
+
+        execute(new LeaveBrigEvent(2, COMMAND));
+
+        assertFollowup(all(new DetermineNextAdmiralEvent(), new DetermineNextCagEvent()));
+    }
+
+    @Test
+    void shouldKeepTheTitlesOfAnAdmiralOutsideTheBrig() {
+        player(2).character(WILLIAM_ADAMA);
+        moveTo(COMMAND, WILLIAM_ADAMA);
+        ops.titles().assignAdmiral(WILLIAM_ADAMA);
+
+        execute(new LeaveBrigEvent(1, ARMORY));
+    }
+
+    @Test
+    void shouldNotLeaveForADestroyedPegasus() {
+        pegasusBoard.destroy();
+
+        assertInvalid(new LeaveBrigEvent(1, AIRLOCK));
     }
 }

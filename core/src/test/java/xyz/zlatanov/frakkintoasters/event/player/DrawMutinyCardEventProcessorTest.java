@@ -1,5 +1,10 @@
 package xyz.zlatanov.frakkintoasters.event.player;
 
+import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DISCARD_EXACTLY_2;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.CONSOLIDATE_POWER;
+import xyz.zlatanov.frakkintoasters.event.player.DiscardSkillCardsEvent;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.LEE_ADAMA;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.event.Followup;
@@ -140,5 +145,17 @@ class DrawMutinyCardEventProcessorTest extends EventTestHarness<DrawMutinyCardEv
     private void holdingOneMutinyCard() {
         player(1).character(LAURA_ROSLIN).mutinyCards().addOnTop(FEED_THE_PEOPLE);
         mutinyDeck.nextCard(PANIC);
+    }
+
+    // "Moral Dilemma": Lee Adama discards 2 Skill Cards for the Mutiny Card he draws.
+    @Test
+    void leeAdamaDiscardsForTheMutinyCard() {
+        player(1).character(LEE_ADAMA);
+        player(1).skillCards().addOnTop(new SkillCard(1, CONSOLIDATE_POWER));
+        mutinyDeck.nextCard(PANIC);
+
+        execute(new DrawMutinyCardEvent(1));
+
+        assertFollowup(new PlayerDecisionEvent<>(1, DiscardSkillCardsEvent.class, DISCARD_EXACTLY_2));
     }
 }

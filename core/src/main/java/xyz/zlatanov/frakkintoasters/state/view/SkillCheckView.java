@@ -13,6 +13,12 @@ public interface SkillCheckView {
      */
     Integer targetPlayerNumber();
 
+    /**
+     * The revealed Cylon who played the Super Crisis Card of this skill check at "Caprica", e.g. for "Human Prisoner".
+     * {@code null} for other skill checks.
+     */
+    Integer playedBy();
+
     DeckView<SkillCard> cards();
 
     DeckView<SkillCard> matchingPile();
@@ -61,6 +67,17 @@ public interface SkillCheckView {
      * @return whether the Politics Cards in the check count positive, after "Assign Chief of Staff"
      */
     boolean politicsCountPositive();
+
+    /**
+     * @return whether the cards were shuffled and divided into their piles. Before that, a card put into the check goes
+     * face down onto the pile of cards
+     */
+    boolean cardsDivided();
+
+    /**
+     * @return the color whose cards count as strength 0 in the check after "Blind Devotion", {@code null} when none
+     */
+    SkillCardColor zeroStrengthColor();
 
     /**
      * The matching pile strength minus the non-matching pile strength, {@code null} until the strength is totaled.

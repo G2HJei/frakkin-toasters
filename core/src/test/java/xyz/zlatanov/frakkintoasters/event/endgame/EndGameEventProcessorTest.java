@@ -64,6 +64,17 @@ class EndGameEventProcessorTest extends EventTestHarness<EndGameEvent> {
         assertEquals(Optional.of(CYLONS), game.outcome());
     }
 
+    // Only the unrevealed Personal Goals count: one revealed during the game reduces nothing (rule 16.2).
+    @Test
+    void aRevealedPersonalGoalReducesNothing() {
+        player(1).loyaltyCards().addOnTop(NOT_CYLON_SELFISH).reveal(NOT_CYLON_SELFISH);
+        val fuel = galacticaBoard.fuel();
+
+        execute(new EndGameEvent());
+
+        assertEquals(fuel, galacticaBoard.fuel());
+    }
+
     // "If a revealed Cylon player has an unrevealed Personal Goal Card at the end of the game, do not reduce the resource."
     @Test
     void aRevealedCylonDoesNotReduceAnything() {

@@ -10,7 +10,7 @@ public class AdministrationEventProcessor extends LocationActionProcessor<Admini
 
     // The President's Mutiny Cards count after the draw, which may be the player's own as President.
     @Override
-    public Followup process() {
+    protected Followup act() {
         return all(new DrawMutinyCardEvent(player.number()), new ReplaceMutinousPresidentEvent(player.number()));
     }
 }

@@ -27,7 +27,7 @@ public class ResearchLabEventProcessor extends LocationActionProcessor<ResearchL
     }
 
     @Override
-    public Followup process() {
+    protected Followup act() {
         ops.player(player.number()).drawSkillCards(event.skillCardColor());
         return Followup.NONE;
     }

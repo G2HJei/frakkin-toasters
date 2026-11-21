@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.state;
 
+import xyz.zlatanov.frakkintoasters.state.character.CharacterAbility;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 import xyz.zlatanov.frakkintoasters.state.view.DieRollView;
@@ -16,9 +17,12 @@ public class DieRoll implements DieRollView {
     private static final int LOWEST  = 1;
     private static final int HIGHEST = 8;
 
-    private       Integer             value;
-    private final List<SkillCardType> cards = new ArrayList<>();
-    private       int                 modifier;
+    private       Integer                value;
+    private final List<SkillCardType>    cards     = new ArrayList<>();
+    private       int                    modifier;
+    private final List<CharacterAbility> abilities = new ArrayList<>();
+    private       boolean                replaced;
+    private       boolean                fixed;
 
     @Override
     public Integer value() {
@@ -36,9 +40,27 @@ public class DieRoll implements DieRollView {
     }
 
     @Override
+    public List<CharacterAbility> abilities() {
+        return List.copyOf(abilities);
+    }
+
+    @Override
+    public boolean replaced() {
+        return replaced;
+    }
+
+    @Override
+    public boolean fixed() {
+        return fixed;
+    }
+
+    @Override
     public int result() {
         if (value == null) {
             throw new FrakCallTheAdmiralException("The die wasn't rolled yet");
+        }
+        if (fixed) {
+            return value; // "Longshot": nothing modifies the result he chose
         }
         return Math.clamp(value + modifier, LOWEST, HIGHEST);
     }
@@ -46,6 +68,18 @@ public class DieRoll implements DieRollView {
     @Mutates
     public void roll(int value) {
         this.value = value;
+    }
+
+    @Mutates
+    public void useAbility(CharacterAbility ability) {
+        abilities.add(ability);
+    }
+
+    @Mutates
+    public void replace(int value, boolean fixed) {
+        this.value = value;
+        this.replaced = true;
+        this.fixed = fixed;
     }
 
     @Mutates

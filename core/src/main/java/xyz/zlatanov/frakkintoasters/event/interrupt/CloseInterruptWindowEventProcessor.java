@@ -1,13 +1,15 @@
 package xyz.zlatanov.frakkintoasters.event.interrupt;
 
+import xyz.zlatanov.frakkintoasters.event.player.TreacheryDiscards;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
+import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
-import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow;
 import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow.AfterViperAttacked;
 import xyz.zlatanov.frakkintoasters.state.interrupt.PlayedInterruptCard;
+import xyz.zlatanov.frakkintoasters.state.interrupt.UsedRollAbility;
 import xyz.zlatanov.frakkintoasters.state.ship.Raider;
 import xyz.zlatanov.frakkintoasters.state.view.GameView;
 import xyz.zlatanov.frakkintoasters.state.view.HumanFighterView;
@@ -20,11 +22,17 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static xyz.zlatanov.frakkintoasters.event.Followup.NONE;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
+import static xyz.zlatanov.frakkintoasters.event.Followup.one;
+import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.allOf;
 import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.rollDie;
 import static xyz.zlatanov.frakkintoasters.event.interrupt.PlayInterruptCardEventProcessor.pilotedFighterArea;
+import static xyz.zlatanov.frakkintoasters.event.interrupt.RollAbilities.hotshotResult;
+import static xyz.zlatanov.frakkintoasters.event.interrupt.RollAbilities.rerolls;
+import static xyz.zlatanov.frakkintoasters.state.character.CharacterAbility.LONGSHOT;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.EVASIVE_MANOEUVRES;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.RUN_INTERFERENCE;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.STRATEGIC_PLANNING;
 
 public class CloseInterruptWindowEventProcessor extends EventProcessor<CloseInterruptWindowEvent> {
 
@@ -39,20 +47,57 @@ public class CloseInterruptWindowEventProcessor extends EventProcessor<CloseInte
 
     @Override
     public Followup process() {
-        // Everyone has answered, so the cards are revealed, and the current player settles the conflicts (rule 13.3).
-        if (!conflicts(game).isEmpty()) {
+        // Everyone has answered, so the cards are revealed, and the current player settles the conflicts (rule 13.3). He
+        // picks among the ways to keep one card of each conflict: the options show him the cards, which he couldn't
+        // see while the window was secret.
+        val conflicts = conflicts(game);
+        if (!conflicts.isEmpty()) {
             return all(
-                    new PlayerDecisionEvent<>(game.turn().currentPlayerNumber(), TiebreakInterruptCardsEvent.class),
-                    new CloseInterruptWindowEvent());
+                    one(tiebreaks(conflicts).stream().map(TiebreakInterruptCardsEvent::new).toArray(Event[]::new)),
+                    single(new CloseInterruptWindowEvent()));
         }
         val window = game.turn().interruptWindow().orElseThrow();
+        val longshot = game.turn().windowAbilities().stream().anyMatch(used -> used.ability() == LONGSHOT);
         val effects = new ArrayList<Followup>();
+        var rerolled = false;
         for (val card : game.turn().windowCards()) { // in the order they were played, clockwise from the current player
+            if (longshot && card.card().type() == STRATEGIC_PLANNING) {
+                ops.interrupts().returnToHand(card); // nothing modifies the result "Longshot" chose, so it isn't played
+                continue;
+            }
             ops.interrupts().resolve(card);
             effects.add(resolve(window, card));
+            rerolled |= card.card().type() == EVASIVE_MANOEUVRES;
+        }
+        for (val ability : game.turn().windowAbilities()) {
+            if (rerolled && rerolls(ability.ability())) {
+                // One reroll a window: the window opens again on the new roll, where the ability can still be used.
+                ops.interrupts().withdraw(ability);
+                continue;
+            }
+            ops.interrupts().resolve(ability);
+            effects.add(resolve(window, ability));
+            rerolled |= rerolls(ability.ability());
         }
         ops.interrupts().closeWindow();
         return allOf(effects.toArray(Followup[]::new));
+    }
+
+    // Every way to keep one card of each group.
+    private static List<List<PlayedInterruptCard>> tiebreaks(List<List<PlayedInterruptCard>> conflicts) {
+        List<List<PlayedInterruptCard>> kept = List.of(List.of());
+        for (val group : conflicts) {
+            val next = new ArrayList<List<PlayedInterruptCard>>();
+            for (val partial : kept) {
+                for (val card : group) {
+                    val extended = new ArrayList<>(partial);
+                    extended.add(card);
+                    next.add(List.copyOf(extended));
+                }
+            }
+            kept = next;
+        }
+        return kept;
     }
 
     public static List<List<PlayedInterruptCard>> conflicts(GameView game) {
@@ -82,6 +127,22 @@ public class CloseInterruptWindowEventProcessor extends EventProcessor<CloseInte
             case RUN_INTERFERENCE -> runInterference(card);
             case MAJOR_VICTORY -> rollDie(new MajorVictoryResultEvent());
             default -> throw new FrakCallTheAdmiralException("Not an interrupt card: " + card);
+        };
+    }
+
+    private Followup resolve(InterruptWindow window, UsedRollAbility used) {
+        return switch (used.ability()) {
+            case ECO_OFFICER, FTL_OPERATOR -> all(new RollDieEvent(), new OpenInterruptWindowEvent(window));
+            case LONGSHOT -> {
+                ops.replaceDieRoll(used.result(), true);
+                yield NONE;
+            }
+            case HOTSHOT -> {
+                ops.player(used.playerNumber()).discard(used.card());
+                ops.replaceDieRoll(hotshotResult(used.card()), false);
+                yield TreacheryDiscards.mutinyCardFor(game, ops, used.playerNumber(), List.of(used.card()));
+            }
+            default -> throw new FrakCallTheAdmiralException("Not a die roll ability: " + used);
         };
     }
 

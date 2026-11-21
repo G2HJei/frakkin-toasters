@@ -42,4 +42,9 @@ public sealed interface BoardFact extends Fact {
 
     record EngineRoomActivated() implements BoardFact {
     }
+
+    // All four Pegasus locations are damaged: the board leaves the game (rule 11.7.2.4). The characters on it go to
+    // "Sickbay" with their own facts.
+    record PegasusDestroyed() implements BoardFact {
+    }
 }

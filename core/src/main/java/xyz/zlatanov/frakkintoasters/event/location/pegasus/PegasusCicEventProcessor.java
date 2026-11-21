@@ -19,7 +19,7 @@ public class PegasusCicEventProcessor extends LocationActionProcessor<PegasusCic
     }
 
     @Override
-    public Followup process() {
+    protected Followup act() {
         return rollDie(new PegasusCicResultEvent(event.basestarId()));
     }
 

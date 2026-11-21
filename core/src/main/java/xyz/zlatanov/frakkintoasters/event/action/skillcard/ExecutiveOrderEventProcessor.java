@@ -1,6 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event.action.skillcard;
 
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.event.character.OfferForwardThinkerEvent;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.action.Actions;
 import xyz.zlatanov.frakkintoasters.event.action.GrantEvent;
@@ -10,6 +11,9 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 import xyz.zlatanov.frakkintoasters.state.view.GameView;
 import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
 
+import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.allOf;
+import static xyz.zlatanov.frakkintoasters.state.character.CharacterAbility.FORWARD_THINKER;
+import static xyz.zlatanov.frakkintoasters.event.Followup.NONE;
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
 import static xyz.zlatanov.frakkintoasters.event.action.GrantEvent.Grant.ACTION;
 import static xyz.zlatanov.frakkintoasters.event.action.GrantEvent.Grant.MOVE;
@@ -53,6 +57,8 @@ public class ExecutiveOrderEventProcessor extends SkillCardEventProcessor<Execut
                 ? one(all(new GrantEvent(target, MOVE, EXECUTIVE_ORDER), new GrantEvent(target, ACTION, EXECUTIVE_ORDER)),
                 twoActions)
                 : twoActions;
-        return all(choice, single(new ResetActingPlayerEvent()));
+        // Lee Adama's "Forward Thinker", once the target is done
+        val forwardThinker = player.hasAbility(FORWARD_THINKER) ? single(new OfferForwardThinkerEvent(player.number())) : NONE;
+        return allOf(choice, single(new ResetActingPlayerEvent()), forwardThinker);
     }
 }

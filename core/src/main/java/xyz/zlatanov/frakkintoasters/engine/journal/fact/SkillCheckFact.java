@@ -1,6 +1,7 @@
 package xyz.zlatanov.frakkintoasters.engine.journal.fact;
 
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckPile;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckResult;
@@ -17,6 +18,10 @@ public sealed interface SkillCheckFact extends Fact {
     }
 
     record TargetChosen(int playerNumber) implements SkillCheckFact {
+    }
+
+    // The revealed Cylon who played the Super Crisis Card of the check.
+    record PlayedBy(int playerNumber) implements SkillCheckFact {
     }
 
     record CardsPlayedBefore(int playerNumber, List<SkillCard> cards) implements SkillCheckFact {
@@ -62,6 +67,15 @@ public sealed interface SkillCheckFact extends Fact {
 
     // "Assign Chief of Staff": the Politics Cards in the check count positive.
     record PoliticsCountPositive() implements SkillCheckFact {
+    }
+
+    // The cards of the check were shuffled and divided into their piles. A card put into the check later is face up on
+    // its pile, e.g. "Trust Instincts"' Destiny cards.
+    record CardsDivided() implements SkillCheckFact {
+    }
+
+    // "Blind Devotion": the cards of the color count as strength 0 in the check.
+    record StrengthZeroed(SkillCardColor color) implements SkillCheckFact {
     }
 
     // The player looked at cards another player put into the check, e.g. through "Probation". It changes nothing.

@@ -1,5 +1,5 @@
 {
-  "formatVersion" : 19,
+  "formatVersion" : 37,
   "types" : {
     "ABetterMachineEvent" : {
       "kind" : "record",
@@ -12,6 +12,50 @@
       "tagged" : true,
       "interfaces" : [ "Event" ],
       "components" : [ ]
+    },
+    "AbusePowerChoiceEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "chosen",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "MutinyCard"
+        }
+      }, {
+        "name" : "others",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "MutinyCard"
+          }
+        }
+      } ]
+    },
+    "AbusePowerEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
     },
     "AcceptProphecyEvent" : {
       "kind" : "record",
@@ -30,7 +74,7 @@
     "ActionEvent" : {
       "kind" : "union",
       "discriminator" : "kind",
-      "members" : [ "AcceptProphecyEvent", "AdministrationEvent", "AdmiralsQuartersEvent", "AirlockEvent", "ArmoryEvent", "ArrestOrderEvent", "AssignArbitratorEvent", "AssignChiefOfStaffEvent", "AssignMissionSpecialistEvent", "AssignVicePresidentEvent", "AuthorizationOfBrutalForceEvent", "BasestarBridgeEvent", "BrigEvent", "BuildNukeEvent", "CapricaDrawAndResolveCrisisCardsEvent", "CapricaPlaySuperCrisisCardEvent", "CivilianSelfDefenseEvent", "CombatVeteranEvent", "CommandEvent", "CommunicationsEvent", "ConsolidatePowerEvent", "ConsultTheOracleEvent", "CylonFleetEvent", "EnactProductionQuotasEvent", "EncourageMutinyEvent", "EngineRoomEvent", "EstablishDogsvilleEvent", "EulogyEvent", "ExecutePrisonerEvent", "ExecutiveOrderEvent", "FTLControlEvent", "FoodRationingEvent", "FullThrottleEvent", "HangarDeckEvent", "HumanFleetInfiltrateEvent", "HumanFleetLookAtTopCrisisCardEvent", "HumanFleetLookAtTopDestinationCardEvent", "InspirationalSpeechEvent", "LaunchReservesEvent", "LaunchScoutEvent", "MainBatteriesEvent", "MaximumFirepowerEvent", "NegotiationEvent", "PegasusCicEvent", "PopularInfluenceEvent", "PresidentTitleActionEvent", "PresidentialOrderEvent", "PresidentialPardonEvent", "PresidentsOfficeEvent", "PressRoomEvent", "ProbationEvent", "QuorumChamberEvent", "RaptorSpecialistEvent", "ReleaseCylonMugshotsEvent", "RepairEvent", "ResearchLabEvent", "ResignationEvent", "ResourcesForGalacticaEvent", "ResurrectionShipEvent", "ScoutForFuelEvent", "StateOfEmergencyEvent", "TestTheLimitsEvent", "UnorthodoxPlanEvent", "UnsavoryConnectionsEvent", "WeaponsControlEvent" ]
+      "members" : [ "AbusePowerEvent", "AcceptProphecyEvent", "AdministrationEvent", "AdmiralsQuartersEvent", "AirlockEvent", "ArmedResistanceEvent", "ArmoryEvent", "ArrestOrderEvent", "AssignArbitratorEvent", "AssignChiefOfStaffEvent", "AssignMissionSpecialistEvent", "AssignVicePresidentEvent", "AssumeCommandEvent", "AttorneyEvent", "AuthorizationOfBrutalForceEvent", "BaitAndSwitchEvent", "BasestarBridgeEvent", "BetrayalOfTrustEvent", "BlackmailEvent", "BlindJumpEvent", "BrigEvent", "BroadcastEvent", "BuildNukeEvent", "CagAbilityEvent", "CagPilotActionEvent", "CapricaDrawAndResolveCrisisCardsEvent", "CapricaPlaySuperCrisisCardEvent", "CivilianSelfDefenseEvent", "ClippedWingsEvent", "CombatVeteranEvent", "CommandEvent", "CommunicationsEvent", "ConsolidatePowerEvent", "ConsultTheOracleEvent", "ControversialSpeechEvent", "CoupEvent", "CrypticMessageEvent", "CultLeaderEvent", "CylonDetectorEvent", "CylonFleetEvent", "DeclareMartialLawEvent", "DischargeOfAFirearmEvent", "DontTrustAnyoneEvent", "EnactProductionQuotasEvent", "EncourageMutinyEvent", "EngineRoomEvent", "EstablishDogsvilleEvent", "EulogyEvent", "ExecutePrisonerEvent", "ExecutiveOrderEvent", "FTLControlEvent", "FeedThePeopleEvent", "FoodRationingEvent", "FullThrottleEvent", "HangarDeckEvent", "HumanFleetInfiltrateEvent", "HumanFleetLookAtTopCrisisCardEvent", "HumanFleetLookAtTopDestinationCardEvent", "ImpeachmentEvent", "InfluentialEvent", "InspirationalSpeechEvent", "LaunchNukeEvent", "LaunchReservesEvent", "LaunchScoutEvent", "MainBatteriesEvent", "MakeADealEvent", "MaximumFirepowerEvent", "NecessaryRiskEvent", "NegotiationEvent", "OrganizedEvent", "PanicEvent", "PassCagTitleEvent", "PeacefulResistanceEvent", "PegasusCicEvent", "PopularInfluenceEvent", "PresidentTitleActionEvent", "PresidentialOrderEvent", "PresidentialPardonEvent", "PresidentsOfficeEvent", "PressRoomEvent", "PrimacyEvent", "ProbationEvent", "QuarantineEvent", "QuorumChamberEvent", "RaptorSpecialistEvent", "ReleaseCylonMugshotsEvent", "RepairEvent", "ResearchLabEvent", "ResignationEvent", "ResoluteEvent", "ResourcesForGalacticaEvent", "ResurrectionShipEvent", "ReturnToResurrectionShipEvent", "RevealCylonEvent", "RevealPersonalGoalEvent", "RuinedReputationEvent", "SacrificeEvent", "ScavengingForPartsEvent", "ScoutForFuelEvent", "SelfishActEvent", "SendAMessageEvent", "SetTheAgendaEvent", "SkilledPoliticianEvent", "StarPlayerEvent", "StateOfEmergencyEvent", "TestTheLimitsEvent", "TheStrongSurviveEvent", "TreatmentEvent", "UnauthorizedUsageEvent", "UnconventionalTacticsEvent", "UnorthodoxPlanEvent", "UnsavoryConnectionsEvent", "ViolentProtestEvent", "VisionsEvent", "WeaponsArmedEvent", "WeaponsControlEvent" ]
     },
     "ActionStepEvent" : {
       "kind" : "record",
@@ -69,6 +113,47 @@
       "interfaces" : [ "Event" ],
       "components" : [ ]
     },
+    "ActivateRaiderAreaEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "area",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      }, {
+        "name" : "raiderShipIds",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "t" : "int",
+            "nullable" : false,
+            "role" : "ship"
+          }
+        }
+      } ]
+    },
+    "ActivateRaiderAreasEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "raiderShipIds",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "t" : "int",
+            "nullable" : false,
+            "role" : "ship"
+          }
+        }
+      } ]
+    },
     "ActivateRaiderEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -88,6 +173,26 @@
       "interfaces" : [ "Event" ],
       "components" : [ ]
     },
+    "ActivateUnmannedViperEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "activation",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "ViperActivation"
+        }
+      } ]
+    },
     "ActivateViperEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -105,6 +210,19 @@
           "nullable" : true,
           "t" : "ref",
           "name" : "ViperActivation"
+        }
+      } ]
+    },
+    "AdaptableEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
         }
       } ]
     },
@@ -161,6 +279,12 @@
       "interfaces" : [ "InterruptWindow" ],
       "components" : [ ]
     },
+    "AfterFtlControlRoll" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "InterruptWindow" ],
+      "components" : [ ]
+    },
     "AfterViperAttacked" : {
       "kind" : "record",
       "tagged" : true,
@@ -171,6 +295,19 @@
           "t" : "int",
           "nullable" : false,
           "role" : "ship"
+        }
+      } ]
+    },
+    "AggressiveTacticsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "CharacterMovementEvent", "Event", "MovementAbilityEvent", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
         }
       } ]
     },
@@ -192,6 +329,26 @@
           "t" : "int",
           "nullable" : false,
           "role" : "player"
+        }
+      } ]
+    },
+    "AlertViperPilotEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "viperId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
         }
       } ]
     },
@@ -218,6 +375,11 @@
       "interfaces" : [ "Event" ],
       "components" : [ ]
     },
+    "AnytimeEvent" : {
+      "kind" : "union",
+      "discriminator" : "kind",
+      "members" : [ "RevealMotiveCardEvent" ]
+    },
     "AnywhereLocationEvent" : {
       "kind" : "union",
       "discriminator" : "kind",
@@ -226,6 +388,20 @@
     "Area" : {
       "kind" : "enum",
       "values" : [ "SPACE", "RESERVES", "SPACE_OR_RESERVES" ]
+    },
+    "ArmedResistanceEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "MutinyCardEvent", "PlayerEvent" ],
+      "mutinyCard" : "ARMED_RESISTANCE",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
     },
     "ArmoryEvent" : {
       "kind" : "record",
@@ -392,6 +568,31 @@
         }
       } ]
     },
+    "AssumeCommandEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "MutinyCardEvent", "PlayerEvent" ],
+      "mutinyCard" : "ASSUME_COMMAND",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "discards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "SkillCard"
+          }
+        }
+      } ]
+    },
     "AttackCylonShipEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -491,6 +692,33 @@
         }
       } ]
     },
+    "AttorneyEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "targetPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "destination",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      } ]
+    },
     "AuthorizationOfBrutalForceEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -521,6 +749,20 @@
       "tagged" : true,
       "interfaces" : [ "Event" ],
       "components" : [ ]
+    },
+    "BaitAndSwitchEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "MutinyCardEvent", "PlayerEvent" ],
+      "mutinyCard" : "BAIT_AND_SWITCH",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
     },
     "BaitEvent" : {
       "kind" : "record",
@@ -642,10 +884,71 @@
       "interfaces" : [ "InterruptWindow" ],
       "components" : [ ]
     },
+    "BetrayalOfTrustEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "MutinyCardEvent", "PlayerEvent" ],
+      "mutinyCard" : "BETRAYAL_OF_TRUST",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "BlackmailEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "MutinyCardEvent", "PlayerEvent" ],
+      "mutinyCard" : "BLACKMAIL",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "BlindDevotionEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "color",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "SkillCardColor"
+        }
+      } ]
+    },
+    "BlindJumpEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
     "BoardFact" : {
       "kind" : "union",
       "discriminator" : "kind",
-      "members" : [ "BoardFact.BoardingPartyAdvanced", "BoardFact.EngineRoomActivated", "BoardFact.JumpPreparationDecreased", "BoardFact.JumpPreparationIncreased", "BoardFact.JumpPreparationReset", "BoardFact.LocationDamaged", "BoardFact.LocationRepaired", "BoardFact.PursuitAdvanced", "BoardFact.PursuitReset", "BoardFact.ResourceDecreased", "BoardFact.ResourceIncreased" ]
+      "members" : [ "BoardFact.BoardingPartyAdvanced", "BoardFact.EngineRoomActivated", "BoardFact.JumpPreparationDecreased", "BoardFact.JumpPreparationIncreased", "BoardFact.JumpPreparationReset", "BoardFact.LocationDamaged", "BoardFact.LocationRepaired", "BoardFact.PegasusDestroyed", "BoardFact.PursuitAdvanced", "BoardFact.PursuitReset", "BoardFact.ResourceDecreased", "BoardFact.ResourceIncreased" ]
     },
     "BoardFact.BoardingPartyAdvanced" : {
       "kind" : "record",
@@ -702,6 +1005,12 @@
           "name" : "Location"
         }
       } ]
+    },
+    "BoardFact.PegasusDestroyed" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "BoardFact", "Fact" ],
+      "components" : [ ]
     },
     "BoardFact.PursuitAdvanced" : {
       "kind" : "record",
@@ -773,6 +1082,26 @@
         }
       } ]
     },
+    "BroadcastEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "resource",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Resource"
+        }
+      } ]
+    },
     "BuildNukeEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -790,6 +1119,39 @@
           "nullable" : true,
           "t" : "ref",
           "name" : "SkillCard"
+        }
+      } ]
+    },
+    "CagAbilityEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "CagPilotActionEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "activation",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "ViperActivation"
         }
       } ]
     },
@@ -919,6 +1281,20 @@
       "kind" : "enum",
       "values" : [ "AARON_DORAL", "ANASTASIA_DEE_DUALLA", "BRENDAN_HOTDOG_COSTANZA", "CALLANDRA_CALLY_TYROL", "CAPRICA_SIX", "CAVIL", "CHIEF_GALEN_TYROL", "DANNA_BIERS", "ELLEN_TIGH", "FELIX_GAETA", "GAIUS_BALTAR", "GAIUS_BALTAR_ALT", "HELENA_CAIN", "KARL_HELO_AGATHON", "KARL_HELO_AGATHON_ALT", "KARA_STARBUCK_THRACE", "LAURA_ROSLIN", "LEE_ADAMA", "LEE_APOLLO_ADAMA", "LEOBEN_CONOY", "LOUANNE_KAT_KATRAINE", "LOUIS_HOSHI", "ROMO_LAMPKIN", "SAMUEL_T_ANDERS", "SAUL_TIGH", "SHARON_ATHENA_AGATHON", "SHARON_BOOMER_VALERII", "SHERMAN_DOC_COTTLE", "SIMON_ONEIL", "TOM_ZAREK", "TOM_ZAREK_ALT", "TORY_FOSTER", "WILLIAM_ADAMA" ]
     },
+    "CharacterAbility" : {
+      "kind" : "enum",
+      "values" : [ "INDUSTRIOUS", "METICULOUS", "VANITY", "EFFICIENT", "FAST_LEARNER", "EMOTIONALLY_FRAGILE", "MEMENTO", "ESCORT", "FORCED_TO_EJECT", "QUICK_FIX", "DISCHARGE_OF_A_FIREARM", "IMPULSIVE", "INTIMATE", "HUMAN_DELUSION", "CONFLICTED_LOYALTIES", "PRIMACY", "AGGRESSIVE_TACTICS", "LIES_AND_SECRETS", "MAINTENANCE_ENGINEER", "BLIND_DEVOTION", "RECKLESS", "VISIONS", "DONT_TRUST_ANYONE", "HERETIC", "POLITICALLY_ADROIT", "MANIPULATIVE", "NOTHING_BUT_TROUBLE", "FTL_OPERATOR", "COUP", "MISGUIDED", "DELUSIONAL_INTUITION", "CYLON_DETECTOR", "COWARD", "CULT_LEADER", "BROADCAST", "SPIRITUAL_CRISIS", "INTOLERANT", "BLIND_JUMP", "BENT_ON_REVENGE", "ECO_OFFICER", "MORAL_COMPASS", "STRANDED", "RAPTOR_PILOT", "NO_ONE_GETS_LEFT_BEHIND", "FAMILY_COMMITMENTS", "EXPERT_PILOT", "SECRET_DESTINY", "INSUBORDINATE", "RELIGIOUS_VISIONS", "SKILLED_POLITICIAN", "TERMINAL_ILLNESS", "FORWARD_THINKER", "CHOOSE_A_DIFFERENT_PATH", "MORAL_DILEMMA", "ALERT_VIPER_PILOT", "CAG", "HEADSTRONG", "GLIMPSE_THE_FACE_OF_GOD", "CRYPTIC_MESSAGE", "CLOUDED", "HOTSHOT", "SACRIFICE", "STIM_JUNKIE", "DUTIFUL", "ORGANIZED", "RELUCTANT", "DECEITFUL", "ATTORNEY", "KLEPTOMANIA", "STAR_PLAYER", "LONGSHOT", "STARTS_ON_THE_BENCH", "CYLON_HATRED", "DECLARE_MARTIAL_LAW", "ALCOHOLIC", "FOR_LOVE", "RESOLUTE", "GRIEVING", "RECON", "MYSTERIOUS_INTUITION", "SLEEPER_AGENT", "TREATMENT", "QUARANTINE", "SPECIALIZED", "CALCULATING", "MODIFICATIONS", "LOGIC_BOUND", "FRIENDS_IN_LOW_PLACES", "UNCONVENTIONAL_TACTICS", "CONVICTED_CRIMINAL", "NECESSARY_STEPS", "ABUSE_POWER", "DISREPUTABLE", "ADAPTABLE", "INFLUENTIAL", "AMORAL", "INSPIRATIONAL_LEADER", "COMMAND_AUTHORITY", "EMOTIONALLY_ATTACHED" ]
+    },
+    "CharacterActionEvent" : {
+      "kind" : "union",
+      "discriminator" : "kind",
+      "members" : [ "AbusePowerEvent", "AttorneyEvent", "BlindJumpEvent", "BroadcastEvent", "CagAbilityEvent", "CoupEvent", "CrypticMessageEvent", "CultLeaderEvent", "CylonDetectorEvent", "DeclareMartialLawEvent", "DischargeOfAFirearmEvent", "DontTrustAnyoneEvent", "InfluentialEvent", "OrganizedEvent", "PrimacyEvent", "QuarantineEvent", "ResoluteEvent", "SacrificeEvent", "SkilledPoliticianEvent", "StarPlayerEvent", "TreatmentEvent", "UnconventionalTacticsEvent", "VisionsEvent" ]
+    },
+    "CharacterMovementEvent" : {
+      "kind" : "union",
+      "discriminator" : "kind",
+      "members" : [ "AggressiveTacticsEvent", "GlimpseTheFaceOfGodEvent", "IntimateEvent" ]
+    },
     "Choice" : {
       "kind" : "enum",
       "values" : [ "BUILD_ASSAULT_RAPTOR", "RETURN_RAPTOR" ]
@@ -998,6 +1374,26 @@
             "t" : "ref",
             "name" : "Followup"
           }
+        }
+      } ]
+    },
+    "ChooseADifferentPathEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "CrisisCard"
         }
       } ]
     },
@@ -1133,6 +1529,41 @@
         }
       } ]
     },
+    "ChooseGalacticaDamageTokensEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "resolved",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "GalacticaDamage"
+          }
+        }
+      }, {
+        "name" : "returned",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "GalacticaDamage"
+          }
+        }
+      } ]
+    },
     "ChooseMessage" : {
       "kind" : "record",
       "type" : "choose",
@@ -1149,6 +1580,33 @@
           "t" : "int",
           "nullable" : false,
           "role" : "count"
+        }
+      } ]
+    },
+    "ChooseSuperCrisisSectionEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "SuperCrisisCard"
+        }
+      }, {
+        "name" : "section",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Section"
         }
       } ]
     },
@@ -1232,6 +1690,20 @@
       "discriminator" : "type",
       "members" : [ "ChooseMessage", "HistoryMessage", "InjectMessage", "StatusMessage", "SubmitMessage", "UndoMessage" ]
     },
+    "ClippedWingsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "MutinyCardEvent", "PlayerEvent" ],
+      "mutinyCard" : "CLIPPED_WINGS",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
     "CloseInterruptWindowEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -1262,6 +1734,19 @@
           "nullable" : true,
           "t" : "ref",
           "name" : "ViperActivation"
+        }
+      } ]
+    },
+    "CommandAuthorityEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
         }
       } ]
     },
@@ -1371,6 +1856,39 @@
         }
       } ]
     },
+    "ControversialSpeechEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "MutinyCardEvent", "PlayerEvent" ],
+      "mutinyCard" : "CONTROVERSIAL_SPEECH",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "ControversialSpeechResultEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "CoupEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
     "CrashLandingFailEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -1422,6 +1940,76 @@
           "nullable" : true,
           "t" : "ref",
           "name" : "SkillCard"
+        }
+      } ]
+    },
+    "CrypticMessageEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "targetPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "CultLeaderEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "targetPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "give",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      } ]
+    },
+    "CylonActivation" : {
+      "kind" : "enum",
+      "values" : [ "ACTIVATE_RAIDERS", "LAUNCH_RAIDERS", "ACTIVATE_HEAVY_RAIDERS", "ACTIVATE_BASESTARS" ]
+    },
+    "CylonDetectorEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "targetPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
         }
       } ]
     },
@@ -1487,6 +2075,124 @@
       "interfaces" : [ "Event" ],
       "components" : [ ]
     },
+    "CylonHatredEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "CylonPowerDamageGalacticaEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "CylonPowerDecreaseJumpTrackEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "CylonPowerDrawTreacheryEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "CylonPowerPlaceCenturionEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "CylonPowerReduceMoraleEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "CylonPowerSendToBrigEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "targetPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "CylonPowerSendToSickbayEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "targetPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
     "CylonSupply" : {
       "kind" : "record",
       "tagged" : false,
@@ -1533,6 +2239,32 @@
       "interfaces" : [ "Event" ],
       "components" : [ {
         "name" : "basestarId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      } ]
+    },
+    "DamageBattlestarEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "DamageChosenViperEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "humanFighterId",
         "type" : {
           "t" : "int",
           "nullable" : false,
@@ -1621,6 +2353,33 @@
         "type" : {
           "t" : "boolean",
           "nullable" : false
+        }
+      } ]
+    },
+    "DeceitfulEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "discard",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "DiscardKind"
+        }
+      }, {
+        "name" : "count",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
         }
       } ]
     },
@@ -1856,6 +2615,19 @@
         }
       } ]
     },
+    "DeclareMartialLawEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
     "DecreaseJumpPreparationEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -1900,6 +2672,19 @@
       "interfaces" : [ "Event" ],
       "components" : [ ]
     },
+    "DelusionalIntuitionEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
     "DerelictBasestarEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -1933,6 +2718,12 @@
           "t" : "int",
           "nullable" : false,
           "role" : "ship"
+        }
+      }, {
+        "name" : "escortOffered",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
         }
       } ]
     },
@@ -1974,6 +2765,12 @@
           "role" : "ship"
         }
       } ]
+    },
+    "DestroyPegasusEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
     },
     "DestroyRaidersEvent" : {
       "kind" : "record",
@@ -2103,6 +2900,23 @@
           "nullable" : true,
           "role" : "count"
         }
+      }, {
+        "name" : "abilities",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "CharacterAbility"
+          }
+        }
+      }, {
+        "name" : "fixed",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
       } ]
     },
     "Discard1MutinyCardEvent" : {
@@ -2202,11 +3016,28 @@
         }
       } ]
     },
+    "DiscardKind" : {
+      "kind" : "enum",
+      "values" : [ "CHOSEN", "RANDOM", "HAND" ]
+    },
     "DiscardNukeTokenEvent" : {
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event" ],
       "components" : [ ]
+    },
+    "DiscardPlayedMutinyCardEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "MutinyCard"
+        }
+      } ]
     },
     "DiscardPlayedQuorumCardEvent" : {
       "kind" : "record",
@@ -2309,6 +3140,39 @@
       "interfaces" : [ "Event" ],
       "components" : [ ]
     },
+    "DiscardSuperCrisisCardEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "SuperCrisisCard"
+        }
+      } ]
+    },
+    "DischargeOfAFirearmEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "targetPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
     "DogfightEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -2333,6 +3197,19 @@
           "nullable" : true,
           "t" : "ref",
           "name" : "SkillCard"
+        }
+      } ]
+    },
+    "DontTrustAnyoneEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
         }
       } ]
     },
@@ -2365,7 +3242,13 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event" ],
-      "components" : [ ]
+      "components" : [ {
+        "name" : "blindJump",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      } ]
     },
     "DrawMutinyCardEvent" : {
       "kind" : "record",
@@ -2449,6 +3332,46 @@
         }
       } ]
     },
+    "DutifulEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "location",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "SkillCard"
+        }
+      } ]
+    },
+    "EmotionallyFragileEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
     "EnactProductionQuotasEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -2503,6 +3426,44 @@
       "interfaces" : [ "Event" ],
       "components" : [ ]
     },
+    "EndInfiltrationEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "EndOfActionStepEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "EndOfMovementStepEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "EndRemoteActionEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
     "EndSkillCheckEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -2543,6 +3504,33 @@
         }
       } ]
     },
+    "EscortEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "civilianShipId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      }, {
+        "name" : "viperId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      } ]
+    },
     "EstablishDogsvilleEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -2574,11 +3562,11 @@
     "Event" : {
       "kind" : "union",
       "discriminator" : "kind",
-      "members" : [ "ABetterMachineEvent", "ASecondChanceEvent", "AcceptProphecyEvent", "ActionStepEvent", "ActivateCylonBasestarEvent", "ActivateCylonBasestarsEvent", "ActivateCylonShipsStepEvent", "ActivateHeavyRaidersAndCenturionsEvent", "ActivateRaiderEvent", "ActivateRaidersEvent", "ActivateViperEvent", "AdministrationEvent", "AdmiralsQuartersEvent", "AdvancePursuitTrackEvent", "AirlockEvent", "AnalyzeEnemyFighterPassEvent", "ArmoryEvent", "ArmoryResultEvent", "ArrestOrderEvent", "AssignArbitratorEvent", "AssignChiefOfStaffEvent", "AssignMissionSpecialistEvent", "AssignTitleEvent", "AssignVicePresidentEvent", "AttackCylonShipEvent", "AttackCylonShipResultEvent", "AttackGalacticaEvent", "AttackGalacticaResultEvent", "AttackViperEvent", "AttackViperResultEvent", "AuthorizationOfBrutalForceEvent", "AuthorizationOfBrutalForceResultEvent", "BaitEvent", "BasestarBridgeAbilityEvent", "BasestarBridgeAbilityResultEvent", "BasestarBridgeEvent", "BasestarBridgeShipsEvent", "BrigEvent", "BuildNukeEvent", "CapricaDrawAndResolveCrisisCardsEvent", "CapricaPlaySuperCrisisCardEvent", "ChangeOfPlansEvent", "ChangeResourceEvent", "ChooseCrisisSectionEvent", "ChooseCrisisTargetEvent", "ChooseDestinationEvent", "ChooseExtraLoyaltyCardEvent", "ChooseGalacticaDamageEvent", "CivilianSelfDefenseEvent", "CivilianSelfDefenseResultEvent", "CloseInterruptWindowEvent", "CombatVeteranEvent", "CommandEvent", "CommunicationsEvent", "ConsolidatePowerEvent", "ConsultTheHybridPassEvent", "ConsultTheOracleEvent", "CrashLandingFailEvent", "CreateDestinyDeckEvent", "CreateLoyaltyDeckEvent", "CrisisStepEvent", "CriticalSituationEvent", "CylonFleetEvent", "CylonGenocidePassEvent", "CylonsWinEvent", "DamageBasestarEvent", "DamageGalacticaEvent", "DamageHumanFighterEvent", "DamageLocationEvent", "DamagePegasusEvent", "DamageVipersEvent", "DealLoyaltyCardsEvent", "DeclareEmergencyEvent", "DecreaseJumpPreparationEvent", "DefendPresidencyEvent", "DefendingAPrisonerFailEvent", "DefendingAPrisonerFailResultEvent", "DerelictBasestarEvent", "DestroyCenturionEvent", "DestroyCivilianShipEvent", "DestroyCivilianShipsEvent", "DestroyCylonShipsEvent", "DestroyHeavyRaiderEvent", "DestroyRaidersEvent", "DestroyRaptorEvent", "DetermineNextAdmiralEvent", "DetermineNextCagEvent", "DetermineNextPresidentEvent", "DetermineSkillCheckAbilitiesOrderEvent", "DetermineSkillCheckResultEvent", "Discard1MutinyCardEvent", "DiscardAllSkillCardsEvent", "DiscardDownTo1MutinyCardEvent", "DiscardFromDestinyDeckEvent", "DiscardHeldQuorumCardEvent", "DiscardNukeTokenEvent", "DiscardPlayedQuorumCardEvent", "DiscardQuorumCardsEvent", "DiscardRandomSkillCardsEvent", "DiscardSkillCardsEvent", "DiscardStepEvent", "DogfightEvent", "DradisContactEvent", "DrawAndDestroyCivilianShipsEvent", "DrawAndResolveRecklessCardsEvent", "DrawDestinationCardsEvent", "DrawMutinyCardEvent", "DrawQuorumCardEvent", "DrawSkillCardsEvent", "DrawSkillCardsOfColorEvent", "EnactProductionQuotasEvent", "EncourageMutinyEvent", "EncourageMutinyResultEvent", "EndGameEvent", "EndSkillCheckEvent", "EndTurnEvent", "EngineRoomEvent", "EstablishDogsvilleEvent", "EulogyEvent", "ExecuteEvent", "ExecutePrisonerEvent", "ExecutiveOrderEvent", "ExploitAWeaknessEvent", "FTLControlEvent", "FTLControlResultEvent", "FinishExecutionEvent", "FinishSleeperAgentPhaseEvent", "FoodRationingEvent", "FoodRationingResultEvent", "FootageTransmittedFailEvent", "ForceTheirHandEvent", "FullThrottleEvent", "GainResourceEvent", "GasCloudEvent", "GasCloudPlaceEvent", "GasGiantEvent", "GiveLoyaltyCardsEvent", "GiveQuorumCardToPresidentEvent", "GiveSkillCardToPlayerEvent", "GiveTitlesToNextInLineEvent", "GrantEvent", "GrantedViperActivationEvent", "HangarDeckEvent", "HumanFleetInfiltrateEvent", "HumanFleetLookAtTopCrisisCardEvent", "HumanFleetLookAtTopDestinationCardEvent", "HumanPrisonerFailEvent", "IncreaseJumpPreparationEvent", "InspirationalSpeechEvent", "InspirationalSpeechResultEvent", "InstallUpgradesEvent", "IronWillEvent", "JumpingTheFleetEvent", "KeepCrisisCardInPlayEvent", "KeepTabsOnVisitorFailEvent", "KeepTabsOnVisitorFailResultEvent", "LaunchRaidersEvent", "LaunchReservesEvent", "LaunchScoutEvent", "LaunchScoutResultEvent", "LaunchViperEvent", "LeaveBrigEvent", "LookAtLoyaltyCardEvent", "LookAtTopCardEvent", "LoseResourceEvent", "MainBatteriesEvent", "MainBatteriesResultEvent", "MajorVictoryResultEvent", "MakeAdmiralEvent", "MakeCagEvent", "MakePresidentEvent", "MakeSkillCheckEvent", "MaximumFirepowerEvent", "MoveCharacterEvent", "MoveCivilianShipEvent", "MoveCylonShipsToFleetBoardEvent", "MoveEvent", "MoveFromBrigEvent", "MovementStepEvent", "MysteriousMessagePassEvent", "NegotiationEvent", "NoOpEvent", "ObjectiveInstructionsEvent", "OpenInterruptWindowEvent", "PassMutineerCardEvent", "PegasusCicEvent", "PegasusCicResultEvent", "PersonalVicesEvent", "PlaceCenturionsEvent", "PlaceCivilianShipEvent", "PlaceCivilianShipsInFrontEvent", "PlaceCrisisCardOnBottomEvent", "PlaceCrisisCardOnTopEvent", "PlaceDestinationCardAtBottomEvent", "PlaceDestinationCardOnTopEvent", "PlaceInSetupLocationEvent", "PlaceRaidersBehindEvent", "PlaceShipEvent", "PlaceShipOnCylonFleetBoardEvent", "PlaceShipOnCylonFleetBoardResultEvent", "PlaceShipsEvent", "PlayCardsBeforeSkillCheckEvent", "PlayCardsIntoSkillCheckEvent", "PlayFromDestinyDeckEvent", "PlayInterruptCardEvent", "PlaySuperCrisisCardEvent", "PlayerDecisionEvent", "PoliticalProwessEvent", "PopularInfluenceChoiceEvent", "PopularInfluenceEvent", "PrepareForJumpStepEvent", "PresidentTitleActionEvent", "PresidentialOrderEvent", "PresidentialPardonEvent", "PresidentsOfficeEvent", "PressRoomEvent", "PreventivePolicyEvent", "ProbationEvent", "ProtectTheFleetEvent", "PutCrisisCardOnTopEvent", "PutDestinationCardOnTopEvent", "PutDestinyCardOnTopEvent", "PutSkillCardOnTopEvent", "QuickThinkingEvent", "QuorumChamberEvent", "QuorumInUproarFailEvent", "RagnarAnchorageEvent", "RaptorSpecialistEvent", "ReceiveSkillsStepEvent", "ReceiveStartingSkillsEvent", "RedTapeEvent", "ReleaseCylonMugshotsEvent", "ReleaseCylonMugshotsResultEvent", "RepairEvent", "ReplaceMutinousPresidentEvent", "ResearchLabEvent", "ResetActingPlayerEvent", "ResetJumpPreparationEvent", "ResignationEvent", "ResolveCapricaCrisisCardEvent", "ResolveCardsBeforeSkillCheckEvent", "ResolveConsequencesEvent", "ResolveCrisisCardEvent", "ResolveCrisisRollEvent", "ResolveDestinationCardEvent", "ResolveSkillCheckAbilityEvent", "ResolveSkillCheckResultEvent", "ResourcesForGalacticaEvent", "ResurrectionShipEvent", "ReturnAssaultRaptorEvent", "ReturnToCrisisStepEvent", "ReturnVipersToReservesEvent", "RevealCardsBeforeSkillCheckEvent", "RevealMutineerEvent", "RiskResultEvent", "RiskShipsEvent", "RollDieEvent", "ScoutForFuelEvent", "ScoutForFuelResultEvent", "SelectCharacterEvent", "SendToBrigEvent", "SendToSickbayEvent", "SetATrapPassEvent", "SetJumpPreparationEvent", "ShuffleAndDivideCardsEvent", "ShuffleTreacheryIntoDestinyDeckEvent", "SleeperAgentPhaseEvent", "StandoffWithPegasusPassEvent", "StartGameEvent", "StartTurnEvent", "StateOfEmergencyEvent", "StrangeBeaconPassEvent", "TestTheLimitsEvent", "TestTheLimitsResultEvent", "TiebreakCardsBeforeSkillCheckEvent", "TiebreakInterruptCardsEvent", "TotalSkillCheckStrengthEvent", "TrustInstinctsEvent", "UnorthodoxPlanEvent", "UnsavoryConnectionsEvent", "UseArbitratorEvent", "UseChiefOfStaffEvent", "UseProbationEvent", "ViolentOutburstsEvent", "ViperActivationRoundEvent", "WeaponsControlEvent" ]
+      "members" : [ "ABetterMachineEvent", "ASecondChanceEvent", "AbusePowerChoiceEvent", "AbusePowerEvent", "AcceptProphecyEvent", "ActionStepEvent", "ActivateCylonBasestarEvent", "ActivateCylonBasestarsEvent", "ActivateCylonShipsStepEvent", "ActivateHeavyRaidersAndCenturionsEvent", "ActivateRaiderAreaEvent", "ActivateRaiderAreasEvent", "ActivateRaiderEvent", "ActivateRaidersEvent", "ActivateUnmannedViperEvent", "ActivateViperEvent", "AdaptableEvent", "AdministrationEvent", "AdmiralsQuartersEvent", "AdvancePursuitTrackEvent", "AggressiveTacticsEvent", "AirlockEvent", "AlertViperPilotEvent", "AnalyzeEnemyFighterPassEvent", "ArmedResistanceEvent", "ArmoryEvent", "ArmoryResultEvent", "ArrestOrderEvent", "AssignArbitratorEvent", "AssignChiefOfStaffEvent", "AssignMissionSpecialistEvent", "AssignTitleEvent", "AssignVicePresidentEvent", "AssumeCommandEvent", "AttackCylonShipEvent", "AttackCylonShipResultEvent", "AttackGalacticaEvent", "AttackGalacticaResultEvent", "AttackViperEvent", "AttackViperResultEvent", "AttorneyEvent", "AuthorizationOfBrutalForceEvent", "AuthorizationOfBrutalForceResultEvent", "BaitAndSwitchEvent", "BaitEvent", "BasestarBridgeAbilityEvent", "BasestarBridgeAbilityResultEvent", "BasestarBridgeEvent", "BasestarBridgeShipsEvent", "BetrayalOfTrustEvent", "BlackmailEvent", "BlindDevotionEvent", "BlindJumpEvent", "BrigEvent", "BroadcastEvent", "BuildNukeEvent", "CagAbilityEvent", "CagPilotActionEvent", "CapricaDrawAndResolveCrisisCardsEvent", "CapricaPlaySuperCrisisCardEvent", "ChangeOfPlansEvent", "ChangeResourceEvent", "ChooseADifferentPathEvent", "ChooseCrisisSectionEvent", "ChooseCrisisTargetEvent", "ChooseDestinationEvent", "ChooseExtraLoyaltyCardEvent", "ChooseGalacticaDamageEvent", "ChooseGalacticaDamageTokensEvent", "ChooseSuperCrisisSectionEvent", "CivilianSelfDefenseEvent", "CivilianSelfDefenseResultEvent", "ClippedWingsEvent", "CloseInterruptWindowEvent", "CombatVeteranEvent", "CommandAuthorityEvent", "CommandEvent", "CommunicationsEvent", "ConsolidatePowerEvent", "ConsultTheHybridPassEvent", "ConsultTheOracleEvent", "ControversialSpeechEvent", "ControversialSpeechResultEvent", "CoupEvent", "CrashLandingFailEvent", "CreateDestinyDeckEvent", "CreateLoyaltyDeckEvent", "CrisisStepEvent", "CriticalSituationEvent", "CrypticMessageEvent", "CultLeaderEvent", "CylonDetectorEvent", "CylonFleetEvent", "CylonGenocidePassEvent", "CylonHatredEvent", "CylonPowerDamageGalacticaEvent", "CylonPowerDecreaseJumpTrackEvent", "CylonPowerDrawTreacheryEvent", "CylonPowerPlaceCenturionEvent", "CylonPowerReduceMoraleEvent", "CylonPowerSendToBrigEvent", "CylonPowerSendToSickbayEvent", "CylonsWinEvent", "DamageBasestarEvent", "DamageBattlestarEvent", "DamageChosenViperEvent", "DamageGalacticaEvent", "DamageHumanFighterEvent", "DamageLocationEvent", "DamagePegasusEvent", "DamageVipersEvent", "DealLoyaltyCardsEvent", "DeceitfulEvent", "DeclareEmergencyEvent", "DeclareMartialLawEvent", "DecreaseJumpPreparationEvent", "DefendPresidencyEvent", "DefendingAPrisonerFailEvent", "DefendingAPrisonerFailResultEvent", "DelusionalIntuitionEvent", "DerelictBasestarEvent", "DestroyCenturionEvent", "DestroyCivilianShipEvent", "DestroyCivilianShipsEvent", "DestroyCylonShipsEvent", "DestroyHeavyRaiderEvent", "DestroyPegasusEvent", "DestroyRaidersEvent", "DestroyRaptorEvent", "DetermineNextAdmiralEvent", "DetermineNextCagEvent", "DetermineNextPresidentEvent", "DetermineSkillCheckAbilitiesOrderEvent", "DetermineSkillCheckResultEvent", "Discard1MutinyCardEvent", "DiscardAllSkillCardsEvent", "DiscardDownTo1MutinyCardEvent", "DiscardFromDestinyDeckEvent", "DiscardHeldQuorumCardEvent", "DiscardNukeTokenEvent", "DiscardPlayedMutinyCardEvent", "DiscardPlayedQuorumCardEvent", "DiscardQuorumCardsEvent", "DiscardRandomSkillCardsEvent", "DiscardSkillCardsEvent", "DiscardStepEvent", "DiscardSuperCrisisCardEvent", "DischargeOfAFirearmEvent", "DogfightEvent", "DontTrustAnyoneEvent", "DradisContactEvent", "DrawAndDestroyCivilianShipsEvent", "DrawAndResolveRecklessCardsEvent", "DrawDestinationCardsEvent", "DrawMutinyCardEvent", "DrawQuorumCardEvent", "DrawSkillCardsEvent", "DrawSkillCardsOfColorEvent", "DutifulEvent", "EmotionallyFragileEvent", "EnactProductionQuotasEvent", "EncourageMutinyEvent", "EncourageMutinyResultEvent", "EndGameEvent", "EndInfiltrationEvent", "EndOfActionStepEvent", "EndOfMovementStepEvent", "EndRemoteActionEvent", "EndSkillCheckEvent", "EndTurnEvent", "EngineRoomEvent", "EscortEvent", "EstablishDogsvilleEvent", "EulogyEvent", "ExecuteEvent", "ExecutePrisonerEvent", "ExecutiveOrderEvent", "ExploitAWeaknessEvent", "FTLControlEvent", "FTLControlResultEvent", "FastLearnerEvent", "FastLearnerIntoCheckEvent", "FeedThePeopleEvent", "FinishCylonRevealEvent", "FinishExecutionEvent", "FinishSleeperAgentPhaseEvent", "FoodRationingEvent", "FoodRationingResultEvent", "FootageTransmittedFailEvent", "ForLoveEvent", "ForceTheirHandEvent", "ForcedDiscardEvent", "ForwardThinkerEvent", "FriendsInLowPlacesEvent", "FullThrottleEvent", "GainResourceEvent", "GasCloudEvent", "GasCloudPlaceEvent", "GasGiantEvent", "GiveLoyaltyCardToPlayerEvent", "GiveLoyaltyCardsEvent", "GiveMutinyCardToPlayerEvent", "GiveQuorumCardToPresidentEvent", "GiveSkillCardToPlayerEvent", "GiveSuperCrisisCardToPlayerEvent", "GiveTitlesToNextInLineEvent", "GlimpseTheFaceOfGodEvent", "GlimpseTheFaceOfGodPlaceEvent", "GrantEvent", "GrantedViperActivationEvent", "HangarDeckEvent", "HereticDiscardEvent", "HumanDelusionEvent", "HumanFleetInfiltrateEvent", "HumanFleetLookAtTopCrisisCardEvent", "HumanFleetLookAtTopDestinationCardEvent", "HumanPrisonerFailEvent", "HumanPrisonerTakeHandEvent", "ImpeachmentEvent", "IncreaseJumpPreparationEvent", "InfluentialEvent", "InspirationalSpeechEvent", "InspirationalSpeechResultEvent", "InstallUpgradesEvent", "IntimateEvent", "IntolerantEvent", "IronWillEvent", "JumpingTheFleetEvent", "KeepCrisisCardInPlayEvent", "KeepTabsOnVisitorFailEvent", "KeepTabsOnVisitorFailResultEvent", "KleptomaniaBrigEvent", "LaunchNukeEvent", "LaunchRaidersEvent", "LaunchReservesEvent", "LaunchScoutEvent", "LaunchScoutResultEvent", "LaunchViperEvent", "LeaveBrigEvent", "LogicBoundEvent", "LookAtAllLoyaltyCardsEvent", "LookAtLoyaltyCardEvent", "LookAtTopCardEvent", "LoseResourceEvent", "MainBatteriesEvent", "MainBatteriesResultEvent", "MaintenanceEngineerEvent", "MajorVictoryResultEvent", "MakeADealEvent", "MakeAdmiralEvent", "MakeCagEvent", "MakePresidentEvent", "MakeSkillCheckEvent", "ManipulativeEvent", "MaximumFirepowerEvent", "MementoEvent", "MeticulousEvent", "ModificationsEvent", "MoralCompassEvent", "MoveCharacterEvent", "MoveCivilianShipEvent", "MoveCylonShipsToFleetBoardEvent", "MoveEvent", "MoveFromBrigEvent", "MovementStepEvent", "MysteriousIntuitionEvent", "MysteriousMessagePassEvent", "NecessaryRiskEvent", "NecessaryStepsEvent", "NegotiationEvent", "NoOneGetsLeftBehindEvent", "NoOpEvent", "NukeBasestarEvent", "NukeResultEvent", "ObjectiveInstructionsEvent", "OfferAdaptableEvent", "OfferAlertViperPilotEvent", "OfferCommandAuthorityEvent", "OfferDutifulEvent", "OfferForwardThinkerEvent", "OfferMementoEvent", "OpenInterruptWindowEvent", "OrganizedEvent", "OrganizedLocationEvent", "OrganizedNextEvent", "PanicEvent", "PassCagTitleEvent", "PassMutineerCardEvent", "PeacefulResistanceEvent", "PeacefulResistanceResultEvent", "PegasusCicEvent", "PegasusCicResultEvent", "PersonalVicesEvent", "PlaceCenturionsEvent", "PlaceCivilianShipEvent", "PlaceCivilianShipsInFrontEvent", "PlaceCrisisCardOnBottomEvent", "PlaceCrisisCardOnTopEvent", "PlaceDestinationCardAtBottomEvent", "PlaceDestinationCardOnTopEvent", "PlaceInSetupLocationEvent", "PlaceRaidersBehindEvent", "PlaceShipEvent", "PlaceShipOnCylonFleetBoardEvent", "PlaceShipOnCylonFleetBoardResultEvent", "PlaceShipsEvent", "PlayCardsBeforeSkillCheckEvent", "PlayCardsIntoSkillCheckEvent", "PlayFromDestinyDeckEvent", "PlayInterruptCardEvent", "PlayerDecisionEvent", "PoliticalProwessEvent", "PoliticallyAdroitEvent", "PopularInfluenceChoiceEvent", "PopularInfluenceEvent", "PrepareForJumpStepEvent", "PresidentTitleActionEvent", "PresidentialOrderEvent", "PresidentialPardonEvent", "PresidentsOfficeEvent", "PressRoomEvent", "PreventivePolicyEvent", "PrimacyEvent", "ProbationEvent", "ProtectTheFleetEvent", "PutCrisisCardOnTopEvent", "PutDestinationCardOnTopEvent", "PutDestinyCardOnTopEvent", "PutSkillCardOnTopEvent", "QuarantineChoiceEvent", "QuarantineEvent", "QuickFixEvent", "QuickThinkingEvent", "QuorumChamberEvent", "QuorumInUproarFailEvent", "RagnarAnchorageEvent", "RaptorPilotEvent", "RaptorSpecialistEvent", "ReceiveSkillsStepEvent", "ReceiveStartingSkillsEvent", "ReconEvent", "RedTapeEvent", "ReleaseCylonMugshotsEvent", "ReleaseCylonMugshotsResultEvent", "ReligiousVisionsEvent", "RemoveMutinyCardFromGameEvent", "ReorderTopQuorumCardsEvent", "RepairEvent", "ReplaceDestinyDeckEvent", "ReplaceMutinousPresidentEvent", "ResearchLabEvent", "ResetActingPlayerEvent", "ResetJumpPreparationEvent", "ResignationEvent", "ResoluteEvent", "ResolveCapricaCrisisCardEvent", "ResolveCardsBeforeSkillCheckEvent", "ResolveConsequencesEvent", "ResolveCrisisCardEvent", "ResolveCrisisRollEvent", "ResolveCrisisSectionEvent", "ResolveDestinationCardEvent", "ResolveFinalFiveCardEvent", "ResolveFinalFiveCardsEvent", "ResolveSkillCheckAbilityEvent", "ResolveSkillCheckResultEvent", "ResolveSuperCrisisCardEvent", "ResourcesForGalacticaEvent", "ResurrectionShipEvent", "ReturnAssaultRaptorEvent", "ReturnToCrisisStepEvent", "ReturnToResurrectionShipEvent", "ReturnVipersToReservesEvent", "RevealCardsBeforeSkillCheckEvent", "RevealCylonEvent", "RevealCylonOnExecutionEvent", "RevealMotiveCardEvent", "RevealMutineerEvent", "RevealPersonalGoalEvent", "RiskResultEvent", "RiskShipsEvent", "RollDieEvent", "RuinedReputationEvent", "RuinedReputationResultEvent", "SacrificeEvent", "ScavengingForPartsEvent", "ScoutForFuelEvent", "ScoutForFuelResultEvent", "SecretDestinyEvent", "SelectCharacterEvent", "SelfishActEvent", "SendAMessageEvent", "SendAMessageResultEvent", "SendToBrigEvent", "SendToSickbayEvent", "SetATrapPassEvent", "SetJumpPreparationEvent", "SetTheAgendaChoiceEvent", "SetTheAgendaEvent", "SetTheAgendaLookEvent", "ShuffleAndDivideCardsEvent", "ShuffleCivilianShipIntoDeckEvent", "ShuffleTreacheryIntoDestinyDeckEvent", "SkilledPoliticianChoiceEvent", "SkilledPoliticianEvent", "SleeperAgentEvent", "SleeperAgentPhaseEvent", "StandoffWithPegasusPassEvent", "StarPlayerEvent", "StartGameEvent", "StartTurnEvent", "StateOfEmergencyEvent", "StrangeBeaconPassEvent", "TestTheLimitsEvent", "TestTheLimitsResultEvent", "TheStrongSurviveEvent", "TiebreakCardsBeforeSkillCheckEvent", "TiebreakInterruptCardsEvent", "TotalSkillCheckStrengthEvent", "TreatmentEvent", "TreatmentGiveEvent", "TrustInstinctsEvent", "UnauthorizedUsageEvent", "UnconventionalTacticsEvent", "UnmannedViperRoundEvent", "UnorthodoxPlanEvent", "UnsavoryConnectionsEvent", "UseArbitratorEvent", "UseChiefOfStaffEvent", "UseProbationEvent", "UseRollAbilityEvent", "ViolentOutburstsEvent", "ViolentProtestEvent", "ViperActivationRoundEvent", "VisionsEvent", "WeaponsArmedEvent", "WeaponsControlEvent" ]
     },
     "EventConstraint" : {
       "kind" : "enum",
-      "values" : [ "DRAW_EXACTLY_1", "DRAW_EXACTLY_2", "DRAW_EXACTLY_3", "DRAW_EXACTLY_4", "DRAW_EXACTLY_5", "DRAW_EXACTLY_1_OF_ANY_COLOR", "DRAW_EXACTLY_2_OF_ANY_COLOR", "DISCARD_EXACTLY_1", "DISCARD_EXACTLY_2", "DISCARD_EXACTLY_3", "DISCARD_EXACTLY_4", "DISCARD_EXACTLY_5", "DISCARD_DOWN_TO_HAND_LIMIT", "MUST_LAUNCH_IN_VIPER", "ANYWHERE_EVEN_IF_DAMAGED", "DESTINATION_GALACTICA" ]
+      "values" : [ "DRAW_EXACTLY_1", "DRAW_EXACTLY_2", "DRAW_EXACTLY_3", "DRAW_EXACTLY_4", "DRAW_EXACTLY_5", "DRAW_EXACTLY_1_OF_ANY_COLOR", "DRAW_EXACTLY_2_OF_ANY_COLOR", "DISCARD_EXACTLY_1", "DISCARD_EXACTLY_2", "DISCARD_EXACTLY_3", "DISCARD_EXACTLY_4", "DISCARD_EXACTLY_5", "DISCARD_DOWN_TO_HAND_LIMIT", "DISCARD_DOWN_TO_1", "DISCARD_DOWN_TO_3", "MUST_LAUNCH_IN_VIPER", "ANYWHERE_EVEN_IF_DAMAGED", "DESTINATION_GALACTICA" ]
     },
     "EventInjected" : {
       "kind" : "record",
@@ -2603,6 +3591,12 @@
           "t" : "int",
           "nullable" : false,
           "role" : "player"
+        }
+      }, {
+        "name" : "withoutMoraleLoss",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
         }
       } ]
     },
@@ -2697,7 +3691,7 @@
     "Fact" : {
       "kind" : "union",
       "discriminator" : "kind",
-      "members" : [ "BoardFact.BoardingPartyAdvanced", "BoardFact.EngineRoomActivated", "BoardFact.JumpPreparationDecreased", "BoardFact.JumpPreparationIncreased", "BoardFact.JumpPreparationReset", "BoardFact.LocationDamaged", "BoardFact.LocationRepaired", "BoardFact.PursuitAdvanced", "BoardFact.PursuitReset", "BoardFact.ResourceDecreased", "BoardFact.ResourceIncreased", "DeckFact.CardsAddedOnTop", "DeckFact.CardsAddedToBottom", "DeckFact.CardsDiscarded", "DeckFact.CardsDrawn", "DeckFact.CardsPulled", "DeckFact.CardsRemovedFromGame", "DeckFact.DeckShuffled", "GameFact.ActingPlayerChanged", "GameFact.CrisisCardKeptInPlay", "GameFact.CrisisCardPlayed", "GameFact.CrisisCardsCleared", "GameFact.CurrentPlayerChanged", "GameFact.CylonShipsHeld", "GameFact.DestinationReached", "GameFact.DieRollCardPlayed", "GameFact.DieRollStarted", "GameFact.DieRolled", "GameFact.GameEnded", "GameFact.GameStarted", "GameFact.LossReduced", "GameFact.LossReductionAdded", "GameFact.MoraleLostToExecution", "GameFact.NukeDiscarded", "GameFact.NukeGained", "GameFact.ReturnToCrisisStepChanged", "GameFact.SkillCardPlayed", "GameFact.StepChanged", "GameFact.TurnEndedEarly", "GameFact.TurnStarted", "InterruptFact.InterruptCardPlayed", "InterruptFact.InterruptCardResolved", "InterruptFact.InterruptCardReturned", "InterruptFact.InterruptWindowClosed", "InterruptFact.InterruptWindowOpened", "InterruptFact.RaiderMissed", "InterruptFact.RaidersWillMiss", "PlayerFact.CardsGained", "PlayerFact.CardsLost", "PlayerFact.CardsSeen", "PlayerFact.CharacterMoved", "PlayerFact.CharacterRemoved", "PlayerFact.CharacterRemovedFromBoards", "PlayerFact.CharacterSelected", "PlayerFact.CivilianShipForgotten", "PlayerFact.CivilianShipRevealed", "PlayerFact.InfiltrationEnded", "PlayerFact.InfiltrationStarted", "PlayerFact.LoyaltyCardRevealed", "PlayerFact.LoyaltyCardSeen", "PlayerFact.MiracleTokenGained", "PlayerFact.MiracleTokenLost", "PlayerFact.MotiveCardRevealed", "PlayerFact.OwnTurnStarted", "ShipFact.BasestarDamageAttached", "ShipFact.BasestarDamageCleared", "ShipFact.PilotChanged", "ShipFact.ShipMoved", "SkillCheckFact.AbilityResolved", "SkillCheckFact.CardRemoved", "SkillCheckFact.CardsDrawn", "SkillCheckFact.CardsLookedAt", "SkillCheckFact.CardsPlaced", "SkillCheckFact.CardsPlayedBefore", "SkillCheckFact.CardsShown", "SkillCheckFact.DifficultyAdjusted", "SkillCheckFact.EmergencyDeclared", "SkillCheckFact.FailResultPrevented", "SkillCheckFact.PassResultReplaced", "SkillCheckFact.PlayedBeforeRevealed", "SkillCheckFact.PoliticsCountPositive", "SkillCheckFact.ResultDetermined", "SkillCheckFact.SkillCheckEnded", "SkillCheckFact.SkillCheckStarted", "SkillCheckFact.TargetChosen", "SkillCheckFact.TotalStrengthDetermined", "TitleFact.AdmiralAssigned", "TitleFact.CagAssigned", "TitleFact.PresidentAssigned", "TitleFact.PresidentQuorumCardGained", "TitleFact.PresidentQuorumCardsLost", "TitleFact.QuorumCardLeftPlay", "TitleFact.QuorumCardPutInPlay" ]
+      "members" : [ "BoardFact.BoardingPartyAdvanced", "BoardFact.EngineRoomActivated", "BoardFact.JumpPreparationDecreased", "BoardFact.JumpPreparationIncreased", "BoardFact.JumpPreparationReset", "BoardFact.LocationDamaged", "BoardFact.LocationRepaired", "BoardFact.PegasusDestroyed", "BoardFact.PursuitAdvanced", "BoardFact.PursuitReset", "BoardFact.ResourceDecreased", "BoardFact.ResourceIncreased", "DeckFact.CardsAddedOnTop", "DeckFact.CardsAddedToBottom", "DeckFact.CardsDiscarded", "DeckFact.CardsDrawn", "DeckFact.CardsPulled", "DeckFact.CardsRemovedFromGame", "DeckFact.DeckShuffled", "GameFact.ActingPlayerChanged", "GameFact.ActionCostPaid", "GameFact.CrisisCardKeptInPlay", "GameFact.CrisisCardPlayed", "GameFact.CrisisCardsCleared", "GameFact.CurrentPlayerChanged", "GameFact.CylonShipsHeld", "GameFact.DestinationReached", "GameFact.DieRollAbilityUsed", "GameFact.DieRollCardPlayed", "GameFact.DieRollReplaced", "GameFact.DieRollStarted", "GameFact.DieRolled", "GameFact.GameEnded", "GameFact.GameStarted", "GameFact.LossReduced", "GameFact.LossReductionAdded", "GameFact.MoraleLostToExecution", "GameFact.NukeDiscarded", "GameFact.NukeGained", "GameFact.RemoteActionAllowed", "GameFact.RemoteActionEnded", "GameFact.ReturnToCrisisStepChanged", "GameFact.SentToBrigAtEndOfTurn", "GameFact.SkillCardPlayed", "GameFact.StartLocationNoted", "GameFact.StepChanged", "GameFact.TitleBorrowed", "GameFact.TurnEndedEarly", "GameFact.TurnLimitUsed", "GameFact.TurnStarted", "InterruptFact.InterruptCardPlayed", "InterruptFact.InterruptCardResolved", "InterruptFact.InterruptCardReturned", "InterruptFact.InterruptWindowClosed", "InterruptFact.InterruptWindowOpened", "InterruptFact.RaiderMissed", "InterruptFact.RaidersWillMiss", "InterruptFact.RollAbilityResolved", "InterruptFact.RollAbilityUsed", "InterruptFact.RollAbilityWithdrawn", "PlayerFact.AbilityTriggerCleared", "PlayerFact.AbilityTriggered", "PlayerFact.AbilityUsed", "PlayerFact.CardsGained", "PlayerFact.CardsLost", "PlayerFact.CardsSeen", "PlayerFact.CharacterMoved", "PlayerFact.CharacterRemoved", "PlayerFact.CharacterRemovedFromBoards", "PlayerFact.CharacterSelected", "PlayerFact.CivilianShipForgotten", "PlayerFact.CivilianShipRevealed", "PlayerFact.FinalFiveCardShown", "PlayerFact.InfiltrationEnded", "PlayerFact.InfiltrationStarted", "PlayerFact.LoyaltyCardRevealed", "PlayerFact.LoyaltyCardSeen", "PlayerFact.MiracleTokenGained", "PlayerFact.MiracleTokenLost", "PlayerFact.MotiveCardRevealed", "PlayerFact.OwnTurnStarted", "ShipFact.BasestarDamageAttached", "ShipFact.BasestarDamageCleared", "ShipFact.PilotChanged", "ShipFact.ShipMoved", "SkillCheckFact.AbilityResolved", "SkillCheckFact.CardRemoved", "SkillCheckFact.CardsDivided", "SkillCheckFact.CardsDrawn", "SkillCheckFact.CardsLookedAt", "SkillCheckFact.CardsPlaced", "SkillCheckFact.CardsPlayedBefore", "SkillCheckFact.CardsShown", "SkillCheckFact.DifficultyAdjusted", "SkillCheckFact.EmergencyDeclared", "SkillCheckFact.FailResultPrevented", "SkillCheckFact.PassResultReplaced", "SkillCheckFact.PlayedBeforeRevealed", "SkillCheckFact.PlayedBy", "SkillCheckFact.PoliticsCountPositive", "SkillCheckFact.ResultDetermined", "SkillCheckFact.SkillCheckEnded", "SkillCheckFact.SkillCheckStarted", "SkillCheckFact.StrengthZeroed", "SkillCheckFact.TargetChosen", "SkillCheckFact.TotalStrengthDetermined", "TitleFact.AdmiralAssigned", "TitleFact.CagAssigned", "TitleFact.PresidentAssigned", "TitleFact.PresidentQuorumCardGained", "TitleFact.PresidentQuorumCardsLost", "TitleFact.QuorumCardLeftPlay", "TitleFact.QuorumCardPutInPlay" ]
     },
     "FactProjection" : {
       "kind" : "union",
@@ -2721,6 +3715,83 @@
           "nullable" : true,
           "t" : "ref",
           "name" : "Fact"
+        }
+      } ]
+    },
+    "FastLearnerEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "color",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "SkillCardColor"
+        }
+      } ]
+    },
+    "FastLearnerIntoCheckEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "cards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "SkillCard"
+          }
+        }
+      } ]
+    },
+    "FeedThePeopleEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "MutinyCardEvent", "PlayerEvent" ],
+      "mutinyCard" : "FEED_THE_PEOPLE",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "FinishCylonRevealEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "drawsSuperCrisisCard",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
         }
       } ]
     },
@@ -2781,6 +3852,40 @@
       "interfaces" : [ "Event" ],
       "components" : [ ]
     },
+    "ForLoveEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "discarderPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "discard",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "DiscardKind"
+        }
+      }, {
+        "name" : "count",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      } ]
+    },
     "ForceTheirHandEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -2798,6 +3903,72 @@
           "nullable" : true,
           "t" : "ref",
           "name" : "SkillCard"
+        }
+      } ]
+    },
+    "ForcedDiscardEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "discarderPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "discard",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "DiscardKind"
+        }
+      }, {
+        "name" : "count",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "forLoveAsked",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      } ]
+    },
+    "ForwardThinkerEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "FriendsInLowPlacesEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "adjustment",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
         }
       } ]
     },
@@ -2957,9 +4128,22 @@
     "GameFact" : {
       "kind" : "union",
       "discriminator" : "kind",
-      "members" : [ "GameFact.ActingPlayerChanged", "GameFact.CrisisCardKeptInPlay", "GameFact.CrisisCardPlayed", "GameFact.CrisisCardsCleared", "GameFact.CurrentPlayerChanged", "GameFact.CylonShipsHeld", "GameFact.DestinationReached", "GameFact.DieRollCardPlayed", "GameFact.DieRollStarted", "GameFact.DieRolled", "GameFact.GameEnded", "GameFact.GameStarted", "GameFact.LossReduced", "GameFact.LossReductionAdded", "GameFact.MoraleLostToExecution", "GameFact.NukeDiscarded", "GameFact.NukeGained", "GameFact.ReturnToCrisisStepChanged", "GameFact.SkillCardPlayed", "GameFact.StepChanged", "GameFact.TurnEndedEarly", "GameFact.TurnStarted" ]
+      "members" : [ "GameFact.ActingPlayerChanged", "GameFact.ActionCostPaid", "GameFact.CrisisCardKeptInPlay", "GameFact.CrisisCardPlayed", "GameFact.CrisisCardsCleared", "GameFact.CurrentPlayerChanged", "GameFact.CylonShipsHeld", "GameFact.DestinationReached", "GameFact.DieRollAbilityUsed", "GameFact.DieRollCardPlayed", "GameFact.DieRollReplaced", "GameFact.DieRollStarted", "GameFact.DieRolled", "GameFact.GameEnded", "GameFact.GameStarted", "GameFact.LossReduced", "GameFact.LossReductionAdded", "GameFact.MoraleLostToExecution", "GameFact.NukeDiscarded", "GameFact.NukeGained", "GameFact.RemoteActionAllowed", "GameFact.RemoteActionEnded", "GameFact.ReturnToCrisisStepChanged", "GameFact.SentToBrigAtEndOfTurn", "GameFact.SkillCardPlayed", "GameFact.StartLocationNoted", "GameFact.StepChanged", "GameFact.TitleBorrowed", "GameFact.TurnEndedEarly", "GameFact.TurnLimitUsed", "GameFact.TurnStarted" ]
     },
     "GameFact.ActingPlayerChanged" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "GameFact" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "player"
+        }
+      } ]
+    },
+    "GameFact.ActionCostPaid" : {
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Fact", "GameFact" ],
@@ -3047,6 +4231,19 @@
         }
       } ]
     },
+    "GameFact.DieRollAbilityUsed" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "GameFact" ],
+      "components" : [ {
+        "name" : "ability",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "CharacterAbility"
+        }
+      } ]
+    },
     "GameFact.DieRollCardPlayed" : {
       "kind" : "record",
       "tagged" : true,
@@ -3064,6 +4261,25 @@
           "t" : "int",
           "nullable" : false,
           "role" : "count"
+        }
+      } ]
+    },
+    "GameFact.DieRollReplaced" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "GameFact" ],
+      "components" : [ {
+        "name" : "value",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "fixed",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
         }
       } ]
     },
@@ -3174,6 +4390,32 @@
       "interfaces" : [ "Fact", "GameFact" ],
       "components" : [ ]
     },
+    "GameFact.RemoteActionAllowed" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "GameFact" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "location",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      } ]
+    },
+    "GameFact.RemoteActionEnded" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "GameFact" ],
+      "components" : [ ]
+    },
     "GameFact.ReturnToCrisisStepChanged" : {
       "kind" : "record",
       "tagged" : true,
@@ -3183,6 +4425,19 @@
         "type" : {
           "t" : "boolean",
           "nullable" : false
+        }
+      } ]
+    },
+    "GameFact.SentToBrigAtEndOfTurn" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "GameFact" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
         }
       } ]
     },
@@ -3206,6 +4461,19 @@
         }
       } ]
     },
+    "GameFact.StartLocationNoted" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "GameFact" ],
+      "components" : [ {
+        "name" : "location",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      } ]
+    },
     "GameFact.StepChanged" : {
       "kind" : "record",
       "tagged" : true,
@@ -3219,11 +4487,51 @@
         }
       } ]
     },
+    "GameFact.TitleBorrowed" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "GameFact" ],
+      "components" : [ {
+        "name" : "title",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Title"
+        }
+      }, {
+        "name" : "previousHolder",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Character"
+        }
+      } ]
+    },
     "GameFact.TurnEndedEarly" : {
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Fact", "GameFact" ],
       "components" : [ ]
+    },
+    "GameFact.TurnLimitUsed" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "GameFact" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "limit",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "TurnLimit"
+        }
+      } ]
     },
     "GameFact.TurnStarted" : {
       "kind" : "record",
@@ -3497,6 +4805,26 @@
         }
       } ]
     },
+    "GiveLoyaltyCardToPlayerEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "SandboxEvent" ],
+      "components" : [ {
+        "name" : "targetPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "LoyaltyCard"
+        }
+      } ]
+    },
     "GiveLoyaltyCardsEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -3514,6 +4842,26 @@
           "t" : "int",
           "nullable" : false,
           "role" : "player"
+        }
+      } ]
+    },
+    "GiveMutinyCardToPlayerEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "SandboxEvent" ],
+      "components" : [ {
+        "name" : "targetPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "MutinyCard"
         }
       } ]
     },
@@ -3550,6 +4898,26 @@
         }
       } ]
     },
+    "GiveSuperCrisisCardToPlayerEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "SandboxEvent" ],
+      "components" : [ {
+        "name" : "targetPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "SuperCrisisCard"
+        }
+      } ]
+    },
     "GiveTitlesToNextInLineEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -3560,6 +4928,43 @@
           "t" : "int",
           "nullable" : false,
           "role" : "player"
+        }
+      } ]
+    },
+    "GlimpseTheFaceOfGodEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "CharacterMovementEvent", "Event", "MovementAbilityEvent", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "GlimpseTheFaceOfGodPlaceEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "cards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "SkillCard"
+          }
         }
       } ]
     },
@@ -3596,7 +5001,7 @@
     },
     "GrantedBy" : {
       "kind" : "enum",
-      "values" : [ "HANGAR_DECK", "EXECUTIVE_ORDER", "STATE_OF_EMERGENCY" ]
+      "values" : [ "HANGAR_DECK", "EXECUTIVE_ORDER", "STATE_OF_EMERGENCY", "CAG_TITLE", "EXPERT_PILOT", "METICULOUS", "AGGRESSIVE_TACTICS", "MAINTENANCE_ENGINEER", "ALERT_VIPER_PILOT" ]
     },
     "GrantedViperActivationEvent" : {
       "kind" : "record",
@@ -3629,6 +5034,26 @@
           "t" : "int",
           "nullable" : false,
           "role" : "player"
+        }
+      } ]
+    },
+    "HereticDiscardEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "SuperCrisisCard"
         }
       } ]
     },
@@ -3745,6 +5170,30 @@
       "interfaces" : [ "ClientMessage" ],
       "components" : [ ]
     },
+    "HumanDelusionEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "cards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "SkillCard"
+          }
+        }
+      } ]
+    },
     "HumanFleetInfiltrateEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -3800,11 +5249,69 @@
       "interfaces" : [ "Event" ],
       "components" : [ ]
     },
+    "HumanPrisonerTakeHandEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "targetPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "ImpeachmentEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "MutinyCardEvent", "PlayerEvent" ],
+      "mutinyCard" : "IMPEACHMENT",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "discards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "SkillCard"
+          }
+        }
+      } ]
+    },
     "IncreaseJumpPreparationEvent" : {
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event" ],
       "components" : [ ]
+    },
+    "InfluentialEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
     },
     "InjectMessage" : {
       "kind" : "record",
@@ -3865,7 +5372,7 @@
     "InterruptFact" : {
       "kind" : "union",
       "discriminator" : "kind",
-      "members" : [ "InterruptFact.InterruptCardPlayed", "InterruptFact.InterruptCardResolved", "InterruptFact.InterruptCardReturned", "InterruptFact.InterruptWindowClosed", "InterruptFact.InterruptWindowOpened", "InterruptFact.RaiderMissed", "InterruptFact.RaidersWillMiss" ]
+      "members" : [ "InterruptFact.InterruptCardPlayed", "InterruptFact.InterruptCardResolved", "InterruptFact.InterruptCardReturned", "InterruptFact.InterruptWindowClosed", "InterruptFact.InterruptWindowOpened", "InterruptFact.RaiderMissed", "InterruptFact.RaidersWillMiss", "InterruptFact.RollAbilityResolved", "InterruptFact.RollAbilityUsed", "InterruptFact.RollAbilityWithdrawn" ]
     },
     "InterruptFact.InterruptCardPlayed" : {
       "kind" : "record",
@@ -3958,10 +5465,96 @@
         }
       } ]
     },
+    "InterruptFact.RollAbilityResolved" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "InterruptFact" ],
+      "components" : [ {
+        "name" : "ability",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "UsedRollAbility"
+        }
+      } ]
+    },
+    "InterruptFact.RollAbilityUsed" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "InterruptFact" ],
+      "components" : [ {
+        "name" : "ability",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "UsedRollAbility"
+        }
+      } ]
+    },
+    "InterruptFact.RollAbilityWithdrawn" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "InterruptFact" ],
+      "components" : [ {
+        "name" : "ability",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "UsedRollAbility"
+        }
+      } ]
+    },
     "InterruptWindow" : {
       "kind" : "union",
       "discriminator" : "kind",
-      "members" : [ "AfterBasestarOrCenturionDestroyed", "AfterDieRoll", "AfterViperAttacked", "BeforeDieRoll", "BeforePilotedViperAttack", "BeforeRaidersActivate" ]
+      "members" : [ "AfterBasestarOrCenturionDestroyed", "AfterDieRoll", "AfterFtlControlRoll", "AfterViperAttacked", "BeforeDieRoll", "BeforePilotedViperAttack", "BeforeRaidersActivate" ]
+    },
+    "IntimateEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "CharacterMovementEvent", "Event", "MovementAbilityEvent", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "targetPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "deck",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "SkillCardColor"
+        }
+      } ]
+    },
+    "IntolerantEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "targetPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
     },
     "IronWillEvent" : {
       "kind" : "record",
@@ -3982,7 +5575,13 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event" ],
-      "components" : [ ]
+      "components" : [ {
+        "name" : "blindJump",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      } ]
     },
     "KeepCrisisCardInPlayEvent" : {
       "kind" : "record",
@@ -4009,11 +5608,57 @@
       "interfaces" : [ "Event" ],
       "components" : [ ]
     },
+    "KleptomaniaBrigEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "LaunchNukeEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "area",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      } ]
+    },
     "LaunchRaidersEvent" : {
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event" ],
-      "components" : [ ]
+      "components" : [ {
+        "name" : "raidersPerBasestar",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "icon",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      } ]
     },
     "LaunchReservesEvent" : {
       "kind" : "record",
@@ -4234,6 +5879,46 @@
         }
       } ]
     },
+    "LogicBoundEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "SkillCard"
+        }
+      } ]
+    },
+    "LookAtAllLoyaltyCardsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "targetPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
     "LookAtLoyaltyCardEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -4332,11 +6017,59 @@
         }
       } ]
     },
+    "MaintenanceEngineerEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
     "MajorVictoryResultEvent" : {
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event" ],
       "components" : [ ]
+    },
+    "MakeADealEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "MutinyCardEvent", "PlayerEvent" ],
+      "mutinyCard" : "MAKE_A_DEAL",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "targetPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "destination",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      }, {
+        "name" : "drawerPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
     },
     "MakeAdmiralEvent" : {
       "kind" : "record",
@@ -4383,6 +6116,26 @@
       "interfaces" : [ "Event" ],
       "components" : [ ]
     },
+    "ManipulativeEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "title",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Title"
+        }
+      } ]
+    },
     "MaximumFirepowerEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -4400,6 +6153,86 @@
           "nullable" : true,
           "t" : "ref",
           "name" : "SkillCard"
+        }
+      } ]
+    },
+    "MementoEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "MeticulousEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "location",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      } ]
+    },
+    "ModificationsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "activation",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "CylonActivation"
+        }
+      } ]
+    },
+    "MoralCompassEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "CrisisCard"
+        }
+      }, {
+        "name" : "section",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Section"
         }
       } ]
     },
@@ -4503,7 +6336,7 @@
     "MovementAbilityEvent" : {
       "kind" : "union",
       "discriminator" : "kind",
-      "members" : [ "CriticalSituationEvent", "FullThrottleEvent", "PreventivePolicyEvent" ]
+      "members" : [ "AggressiveTacticsEvent", "CriticalSituationEvent", "FullThrottleEvent", "GlimpseTheFaceOfGodEvent", "IntimateEvent", "PreventivePolicyEvent" ]
     },
     "MovementStepEvent" : {
       "kind" : "record",
@@ -4515,11 +6348,96 @@
       "kind" : "enum",
       "values" : [ "WEAPONS_ARMED", "VIOLENT_PROTEST", "UNAUTHORIZED_USAGE", "THE_STRONG_SURVIVE", "SET_THE_AGENDA", "SEND_A_MESSAGE", "SELFISH_ACT", "SCAVENGING_FOR_PARTS", "RUINED_REPUTATION", "PEACEFUL_RESISTANCE", "PANIC", "NECESSARY_RISK", "MAKE_A_DEAL", "IMPEACHMENT", "FEED_THE_PEOPLE", "CONTROVERSIAL_SPEECH", "CLIPPED_WINGS", "BLACKMAIL", "BETRAYAL_OF_TRUST", "BAIT_AND_SWITCH", "ASSUME_COMMAND", "ARMED_RESISTANCE" ]
     },
+    "MutinyCardEvent" : {
+      "kind" : "union",
+      "discriminator" : "kind",
+      "members" : [ "ArmedResistanceEvent", "AssumeCommandEvent", "BaitAndSwitchEvent", "BetrayalOfTrustEvent", "BlackmailEvent", "ClippedWingsEvent", "ControversialSpeechEvent", "FeedThePeopleEvent", "ImpeachmentEvent", "MakeADealEvent", "NecessaryRiskEvent", "PanicEvent", "PeacefulResistanceEvent", "RuinedReputationEvent", "ScavengingForPartsEvent", "SelfishActEvent", "SendAMessageEvent", "SetTheAgendaEvent", "TheStrongSurviveEvent", "UnauthorizedUsageEvent", "ViolentProtestEvent", "WeaponsArmedEvent" ]
+    },
+    "MysteriousIntuitionEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "pass",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      } ]
+    },
     "MysteriousMessagePassEvent" : {
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event" ],
       "components" : [ ]
+    },
+    "NecessaryRiskEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "MutinyCardEvent", "PlayerEvent" ],
+      "mutinyCard" : "NECESSARY_RISK",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "area",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      } ]
+    },
+    "NecessaryStepsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "drawerPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "given",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "MutinyCard"
+        }
+      }, {
+        "name" : "bottom",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "MutinyCard"
+        }
+      }, {
+        "name" : "staysPut",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      } ]
     },
     "NegotiationEvent" : {
       "kind" : "record",
@@ -4541,6 +6459,19 @@
         }
       } ]
     },
+    "NoOneGetsLeftBehindEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
     "NoOpEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -4559,6 +6490,53 @@
       "tagged" : true,
       "interfaces" : [ "Followup" ],
       "components" : [ ]
+    },
+    "NukeBasestarEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "basestarId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      }, {
+        "name" : "result",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      } ]
+    },
+    "NukeResultEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "area",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      } ]
     },
     "ObjectiveCard" : {
       "kind" : "enum",
@@ -4582,6 +6560,81 @@
       "tagged" : true,
       "interfaces" : [ "Viewer" ],
       "components" : [ ]
+    },
+    "OfferAdaptableEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "OfferAlertViperPilotEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "viperIds",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "t" : "int",
+            "nullable" : false,
+            "role" : "ship"
+          }
+        }
+      } ]
+    },
+    "OfferCommandAuthorityEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
+    },
+    "OfferDutifulEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "location",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      } ]
+    },
+    "OfferForwardThinkerEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "OfferMementoEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
     },
     "OneOf" : {
       "kind" : "record",
@@ -4613,6 +6666,74 @@
         }
       } ]
     },
+    "OrganizedEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "OrganizedLocationEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "location",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      }, {
+        "name" : "used",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "Location"
+          }
+        }
+      } ]
+    },
+    "OrganizedNextEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "used",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "Location"
+          }
+        }
+      } ]
+    },
     "Outcome" : {
       "kind" : "record",
       "tagged" : false,
@@ -4634,6 +6755,47 @@
             "nullable" : false,
             "role" : "player"
           }
+        }
+      } ]
+    },
+    "PanicEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "MutinyCardEvent", "PlayerEvent" ],
+      "mutinyCard" : "PANIC",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "PassCagTitleEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "activation",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "ViperActivation"
+        }
+      }, {
+        "name" : "targetPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
         }
       } ]
     },
@@ -4662,6 +6824,26 @@
           "nullable" : false
         }
       } ]
+    },
+    "PeacefulResistanceEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "MutinyCardEvent", "PlayerEvent" ],
+      "mutinyCard" : "PEACEFUL_RESISTANCE",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "PeacefulResistanceResultEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ ]
     },
     "PegasusCicEvent" : {
       "kind" : "record",
@@ -4707,6 +6889,12 @@
       "interfaces" : [ ],
       "components" : [ {
         "name" : "engineRoomActivated",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      }, {
+        "name" : "destroyed",
         "type" : {
           "t" : "boolean",
           "nullable" : false
@@ -4960,6 +7148,13 @@
           "nullable" : false,
           "role" : "count"
         }
+      }, {
+        "name" : "cylonArea",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
       } ]
     },
     "PlayCardsBeforeSkillCheckEvent" : {
@@ -5040,26 +7235,6 @@
           "t" : "int",
           "nullable" : true,
           "role" : "count"
-        }
-      } ]
-    },
-    "PlaySuperCrisisCardEvent" : {
-      "kind" : "record",
-      "tagged" : true,
-      "interfaces" : [ "Event", "PlayerEvent" ],
-      "components" : [ {
-        "name" : "playerNumber",
-        "type" : {
-          "t" : "int",
-          "nullable" : false,
-          "role" : "player"
-        }
-      }, {
-        "name" : "superCrisisCard",
-        "type" : {
-          "nullable" : true,
-          "t" : "enum",
-          "name" : "SuperCrisisCard"
         }
       } ]
     },
@@ -5165,12 +7340,72 @@
     "PlayerEvent" : {
       "kind" : "union",
       "discriminator" : "kind",
-      "members" : [ "AcceptProphecyEvent", "ActivateViperEvent", "AdministrationEvent", "AdmiralsQuartersEvent", "AirlockEvent", "ArmoryEvent", "ArrestOrderEvent", "AssignArbitratorEvent", "AssignChiefOfStaffEvent", "AssignMissionSpecialistEvent", "AssignVicePresidentEvent", "AuthorizationOfBrutalForceEvent", "BasestarBridgeAbilityEvent", "BasestarBridgeAbilityResultEvent", "BasestarBridgeEvent", "BasestarBridgeShipsEvent", "BrigEvent", "BuildNukeEvent", "CapricaDrawAndResolveCrisisCardsEvent", "CapricaPlaySuperCrisisCardEvent", "ChangeOfPlansEvent", "ChooseCrisisSectionEvent", "ChooseCrisisTargetEvent", "ChooseDestinationEvent", "ChooseExtraLoyaltyCardEvent", "ChooseGalacticaDamageEvent", "CivilianSelfDefenseEvent", "CombatVeteranEvent", "CommandEvent", "CommunicationsEvent", "ConsolidatePowerEvent", "ConsultTheOracleEvent", "CriticalSituationEvent", "CylonFleetEvent", "DealLoyaltyCardsEvent", "DeclareEmergencyEvent", "DefendPresidencyEvent", "DetermineSkillCheckAbilitiesOrderEvent", "Discard1MutinyCardEvent", "DiscardAllSkillCardsEvent", "DiscardDownTo1MutinyCardEvent", "DiscardFromDestinyDeckEvent", "DiscardHeldQuorumCardEvent", "DiscardQuorumCardsEvent", "DiscardRandomSkillCardsEvent", "DiscardSkillCardsEvent", "DogfightEvent", "DrawMutinyCardEvent", "DrawSkillCardsEvent", "DrawSkillCardsOfColorEvent", "EnactProductionQuotasEvent", "EncourageMutinyEvent", "EngineRoomEvent", "EstablishDogsvilleEvent", "EulogyEvent", "ExecuteEvent", "ExecutePrisonerEvent", "ExecutiveOrderEvent", "ExploitAWeaknessEvent", "FTLControlEvent", "FinishExecutionEvent", "FoodRationingEvent", "ForceTheirHandEvent", "FullThrottleEvent", "GasCloudEvent", "GasCloudPlaceEvent", "GasGiantEvent", "GiveLoyaltyCardsEvent", "GiveTitlesToNextInLineEvent", "GrantEvent", "GrantedViperActivationEvent", "HangarDeckEvent", "HumanFleetInfiltrateEvent", "HumanFleetLookAtTopCrisisCardEvent", "HumanFleetLookAtTopDestinationCardEvent", "InspirationalSpeechEvent", "LaunchReservesEvent", "LaunchScoutEvent", "LaunchScoutResultEvent", "LaunchViperEvent", "LeaveBrigEvent", "LookAtLoyaltyCardEvent", "LookAtTopCardEvent", "MainBatteriesEvent", "MaximumFirepowerEvent", "MoveEvent", "NegotiationEvent", "NoOpEvent", "PassMutineerCardEvent", "PegasusCicEvent", "PlaceCivilianShipEvent", "PlaceCrisisCardOnBottomEvent", "PlaceCrisisCardOnTopEvent", "PlaceDestinationCardAtBottomEvent", "PlaceDestinationCardOnTopEvent", "PlaceInSetupLocationEvent", "PlayCardsBeforeSkillCheckEvent", "PlayCardsIntoSkillCheckEvent", "PlayInterruptCardEvent", "PlaySuperCrisisCardEvent", "PlayerDecisionEvent", "PoliticalProwessEvent", "PopularInfluenceChoiceEvent", "PopularInfluenceEvent", "PresidentTitleActionEvent", "PresidentialOrderEvent", "PresidentialPardonEvent", "PresidentsOfficeEvent", "PressRoomEvent", "PreventivePolicyEvent", "ProbationEvent", "ProtectTheFleetEvent", "QuorumChamberEvent", "RaptorSpecialistEvent", "ReleaseCylonMugshotsEvent", "RepairEvent", "ReplaceMutinousPresidentEvent", "ResearchLabEvent", "ResignationEvent", "ResolveCapricaCrisisCardEvent", "ResourcesForGalacticaEvent", "ResurrectionShipEvent", "ReturnAssaultRaptorEvent", "RevealMutineerEvent", "RiskShipsEvent", "ScoutForFuelEvent", "SelectCharacterEvent", "StateOfEmergencyEvent", "TestTheLimitsEvent", "UnorthodoxPlanEvent", "UnsavoryConnectionsEvent", "UseArbitratorEvent", "UseChiefOfStaffEvent", "UseProbationEvent", "ViperActivationRoundEvent", "WeaponsControlEvent" ]
+      "members" : [ "AbusePowerChoiceEvent", "AbusePowerEvent", "AcceptProphecyEvent", "ActivateUnmannedViperEvent", "ActivateViperEvent", "AdaptableEvent", "AdministrationEvent", "AdmiralsQuartersEvent", "AggressiveTacticsEvent", "AirlockEvent", "AlertViperPilotEvent", "ArmedResistanceEvent", "ArmoryEvent", "ArrestOrderEvent", "AssignArbitratorEvent", "AssignChiefOfStaffEvent", "AssignMissionSpecialistEvent", "AssignVicePresidentEvent", "AssumeCommandEvent", "AttorneyEvent", "AuthorizationOfBrutalForceEvent", "BaitAndSwitchEvent", "BasestarBridgeAbilityEvent", "BasestarBridgeAbilityResultEvent", "BasestarBridgeEvent", "BasestarBridgeShipsEvent", "BetrayalOfTrustEvent", "BlackmailEvent", "BlindDevotionEvent", "BlindJumpEvent", "BrigEvent", "BroadcastEvent", "BuildNukeEvent", "CagAbilityEvent", "CagPilotActionEvent", "CapricaDrawAndResolveCrisisCardsEvent", "CapricaPlaySuperCrisisCardEvent", "ChangeOfPlansEvent", "ChooseADifferentPathEvent", "ChooseCrisisSectionEvent", "ChooseCrisisTargetEvent", "ChooseDestinationEvent", "ChooseExtraLoyaltyCardEvent", "ChooseGalacticaDamageEvent", "ChooseGalacticaDamageTokensEvent", "ChooseSuperCrisisSectionEvent", "CivilianSelfDefenseEvent", "ClippedWingsEvent", "CombatVeteranEvent", "CommandAuthorityEvent", "CommandEvent", "CommunicationsEvent", "ConsolidatePowerEvent", "ConsultTheOracleEvent", "ControversialSpeechEvent", "CoupEvent", "CriticalSituationEvent", "CrypticMessageEvent", "CultLeaderEvent", "CylonDetectorEvent", "CylonFleetEvent", "CylonHatredEvent", "CylonPowerDamageGalacticaEvent", "CylonPowerDecreaseJumpTrackEvent", "CylonPowerDrawTreacheryEvent", "CylonPowerPlaceCenturionEvent", "CylonPowerReduceMoraleEvent", "CylonPowerSendToBrigEvent", "CylonPowerSendToSickbayEvent", "DamageChosenViperEvent", "DealLoyaltyCardsEvent", "DeceitfulEvent", "DeclareEmergencyEvent", "DeclareMartialLawEvent", "DefendPresidencyEvent", "DelusionalIntuitionEvent", "DetermineSkillCheckAbilitiesOrderEvent", "Discard1MutinyCardEvent", "DiscardAllSkillCardsEvent", "DiscardDownTo1MutinyCardEvent", "DiscardFromDestinyDeckEvent", "DiscardHeldQuorumCardEvent", "DiscardQuorumCardsEvent", "DiscardRandomSkillCardsEvent", "DiscardSkillCardsEvent", "DischargeOfAFirearmEvent", "DogfightEvent", "DontTrustAnyoneEvent", "DrawMutinyCardEvent", "DrawSkillCardsEvent", "DrawSkillCardsOfColorEvent", "DutifulEvent", "EmotionallyFragileEvent", "EnactProductionQuotasEvent", "EncourageMutinyEvent", "EndInfiltrationEvent", "EndRemoteActionEvent", "EngineRoomEvent", "EscortEvent", "EstablishDogsvilleEvent", "EulogyEvent", "ExecuteEvent", "ExecutePrisonerEvent", "ExecutiveOrderEvent", "ExploitAWeaknessEvent", "FTLControlEvent", "FastLearnerEvent", "FastLearnerIntoCheckEvent", "FeedThePeopleEvent", "FinishCylonRevealEvent", "FinishExecutionEvent", "FoodRationingEvent", "ForLoveEvent", "ForceTheirHandEvent", "ForwardThinkerEvent", "FriendsInLowPlacesEvent", "FullThrottleEvent", "GasCloudEvent", "GasCloudPlaceEvent", "GasGiantEvent", "GiveLoyaltyCardsEvent", "GiveTitlesToNextInLineEvent", "GlimpseTheFaceOfGodEvent", "GlimpseTheFaceOfGodPlaceEvent", "GrantEvent", "GrantedViperActivationEvent", "HangarDeckEvent", "HereticDiscardEvent", "HumanDelusionEvent", "HumanFleetInfiltrateEvent", "HumanFleetLookAtTopCrisisCardEvent", "HumanFleetLookAtTopDestinationCardEvent", "HumanPrisonerTakeHandEvent", "ImpeachmentEvent", "InfluentialEvent", "InspirationalSpeechEvent", "IntimateEvent", "IntolerantEvent", "KleptomaniaBrigEvent", "LaunchNukeEvent", "LaunchReservesEvent", "LaunchScoutEvent", "LaunchScoutResultEvent", "LaunchViperEvent", "LeaveBrigEvent", "LogicBoundEvent", "LookAtAllLoyaltyCardsEvent", "LookAtLoyaltyCardEvent", "LookAtTopCardEvent", "MainBatteriesEvent", "MaintenanceEngineerEvent", "MakeADealEvent", "ManipulativeEvent", "MaximumFirepowerEvent", "MementoEvent", "MeticulousEvent", "ModificationsEvent", "MoralCompassEvent", "MoveEvent", "MysteriousIntuitionEvent", "NecessaryRiskEvent", "NecessaryStepsEvent", "NegotiationEvent", "NoOneGetsLeftBehindEvent", "NoOpEvent", "NukeBasestarEvent", "NukeResultEvent", "OfferDutifulEvent", "OfferForwardThinkerEvent", "OfferMementoEvent", "OrganizedEvent", "OrganizedLocationEvent", "OrganizedNextEvent", "PanicEvent", "PassCagTitleEvent", "PassMutineerCardEvent", "PeacefulResistanceEvent", "PegasusCicEvent", "PlaceCivilianShipEvent", "PlaceCrisisCardOnBottomEvent", "PlaceCrisisCardOnTopEvent", "PlaceDestinationCardAtBottomEvent", "PlaceDestinationCardOnTopEvent", "PlaceInSetupLocationEvent", "PlayCardsBeforeSkillCheckEvent", "PlayCardsIntoSkillCheckEvent", "PlayInterruptCardEvent", "PlayerDecisionEvent", "PoliticalProwessEvent", "PoliticallyAdroitEvent", "PopularInfluenceChoiceEvent", "PopularInfluenceEvent", "PresidentTitleActionEvent", "PresidentialOrderEvent", "PresidentialPardonEvent", "PresidentsOfficeEvent", "PressRoomEvent", "PreventivePolicyEvent", "PrimacyEvent", "ProbationEvent", "ProtectTheFleetEvent", "QuarantineChoiceEvent", "QuarantineEvent", "QuickFixEvent", "QuorumChamberEvent", "RaptorPilotEvent", "RaptorSpecialistEvent", "ReconEvent", "ReleaseCylonMugshotsEvent", "ReligiousVisionsEvent", "ReorderTopQuorumCardsEvent", "RepairEvent", "ReplaceMutinousPresidentEvent", "ResearchLabEvent", "ResignationEvent", "ResoluteEvent", "ResolveCapricaCrisisCardEvent", "ResolveSuperCrisisCardEvent", "ResourcesForGalacticaEvent", "ResurrectionShipEvent", "ReturnAssaultRaptorEvent", "ReturnToResurrectionShipEvent", "RevealCylonEvent", "RevealCylonOnExecutionEvent", "RevealMotiveCardEvent", "RevealMutineerEvent", "RevealPersonalGoalEvent", "RiskShipsEvent", "RuinedReputationEvent", "SacrificeEvent", "ScavengingForPartsEvent", "ScoutForFuelEvent", "SecretDestinyEvent", "SelectCharacterEvent", "SelfishActEvent", "SendAMessageEvent", "SetTheAgendaChoiceEvent", "SetTheAgendaEvent", "SetTheAgendaLookEvent", "SkilledPoliticianChoiceEvent", "SkilledPoliticianEvent", "SleeperAgentEvent", "StarPlayerEvent", "StateOfEmergencyEvent", "TestTheLimitsEvent", "TheStrongSurviveEvent", "TreatmentEvent", "TreatmentGiveEvent", "UnauthorizedUsageEvent", "UnconventionalTacticsEvent", "UnmannedViperRoundEvent", "UnorthodoxPlanEvent", "UnsavoryConnectionsEvent", "UseArbitratorEvent", "UseChiefOfStaffEvent", "UseProbationEvent", "UseRollAbilityEvent", "ViolentProtestEvent", "ViperActivationRoundEvent", "VisionsEvent", "WeaponsArmedEvent", "WeaponsControlEvent" ]
     },
     "PlayerFact" : {
       "kind" : "union",
       "discriminator" : "kind",
-      "members" : [ "PlayerFact.CardsGained", "PlayerFact.CardsLost", "PlayerFact.CardsSeen", "PlayerFact.CharacterMoved", "PlayerFact.CharacterRemoved", "PlayerFact.CharacterRemovedFromBoards", "PlayerFact.CharacterSelected", "PlayerFact.CivilianShipForgotten", "PlayerFact.CivilianShipRevealed", "PlayerFact.InfiltrationEnded", "PlayerFact.InfiltrationStarted", "PlayerFact.LoyaltyCardRevealed", "PlayerFact.LoyaltyCardSeen", "PlayerFact.MiracleTokenGained", "PlayerFact.MiracleTokenLost", "PlayerFact.MotiveCardRevealed", "PlayerFact.OwnTurnStarted" ]
+      "members" : [ "PlayerFact.AbilityTriggerCleared", "PlayerFact.AbilityTriggered", "PlayerFact.AbilityUsed", "PlayerFact.CardsGained", "PlayerFact.CardsLost", "PlayerFact.CardsSeen", "PlayerFact.CharacterMoved", "PlayerFact.CharacterRemoved", "PlayerFact.CharacterRemovedFromBoards", "PlayerFact.CharacterSelected", "PlayerFact.CivilianShipForgotten", "PlayerFact.CivilianShipRevealed", "PlayerFact.FinalFiveCardShown", "PlayerFact.InfiltrationEnded", "PlayerFact.InfiltrationStarted", "PlayerFact.LoyaltyCardRevealed", "PlayerFact.LoyaltyCardSeen", "PlayerFact.MiracleTokenGained", "PlayerFact.MiracleTokenLost", "PlayerFact.MotiveCardRevealed", "PlayerFact.OwnTurnStarted" ]
+    },
+    "PlayerFact.AbilityTriggerCleared" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "PlayerFact" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "ability",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "CharacterAbility"
+        }
+      } ]
+    },
+    "PlayerFact.AbilityTriggered" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "PlayerFact" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "ability",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "CharacterAbility"
+        }
+      } ]
+    },
+    "PlayerFact.AbilityUsed" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "PlayerFact" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "ability",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "CharacterAbility"
+        }
+      } ]
     },
     "PlayerFact.CardsGained" : {
       "kind" : "record",
@@ -5360,6 +7595,26 @@
           "t" : "int",
           "nullable" : false,
           "role" : "ship"
+        }
+      } ]
+    },
+    "PlayerFact.FinalFiveCardShown" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "PlayerFact" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "LoyaltyCard"
         }
       } ]
     },
@@ -5592,10 +7847,11 @@
           } ]
         }
       }, {
-        "name" : "miracleToken",
+        "name" : "miracleTokens",
         "type" : {
-          "t" : "boolean",
-          "nullable" : false
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
         }
       }, {
         "name" : "infiltrating",
@@ -5695,6 +7951,33 @@
         "type" : {
           "t" : "boolean",
           "nullable" : false
+        }
+      } ]
+    },
+    "PoliticallyAdroitEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "targetPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "SkillCard"
         }
       } ]
     },
@@ -5882,6 +8165,32 @@
         }
       } ]
     },
+    "PrimacyEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "removedBasestarId",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "ship"
+        }
+      }, {
+        "name" : "placeRaidersAndCivilianShip",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      } ]
+    },
     "ProbationEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -5979,6 +8288,59 @@
         }
       } ]
     },
+    "QuarantineChoiceEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "civilianShipId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      } ]
+    },
+    "QuarantineEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "QuickFixEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "SkillCard"
+        }
+      } ]
+    },
     "QuickThinkingEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -6047,6 +8409,26 @@
       "interfaces" : [ "Event" ],
       "components" : [ ]
     },
+    "RaptorPilotEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "deck",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "DeckId"
+        }
+      } ]
+    },
     "RaptorSpecialistEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -6085,6 +8467,19 @@
       "tagged" : true,
       "interfaces" : [ "Event" ],
       "components" : [ ]
+    },
+    "ReconEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
     },
     "RedTapeEvent" : {
       "kind" : "record",
@@ -6137,6 +8532,70 @@
       "interfaces" : [ "Event" ],
       "components" : [ ]
     },
+    "ReligiousVisionsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "crisisCardToPlay",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "CrisisCard"
+        }
+      }, {
+        "name" : "crisisCardToPutAtBottom",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "CrisisCard"
+        }
+      } ]
+    },
+    "RemoveMutinyCardFromGameEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "MutinyCard"
+        }
+      } ]
+    },
+    "ReorderTopQuorumCardsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "order",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "QuorumCard"
+          }
+        }
+      } ]
+    },
     "RepairEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -6165,6 +8624,26 @@
             "nullable" : false,
             "role" : "ship"
           }
+        }
+      } ]
+    },
+    "ReplaceDestinyDeckEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "color",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "SkillCardColor"
+        }
+      }, {
+        "name" : "count",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
         }
       } ]
     },
@@ -6236,6 +8715,26 @@
             "t" : "enum",
             "name" : "QuorumCard"
           }
+        }
+      } ]
+    },
+    "ResoluteEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "location",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
         }
       } ]
     },
@@ -6311,6 +8810,26 @@
         }
       } ]
     },
+    "ResolveCrisisSectionEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "CrisisCard"
+        }
+      }, {
+        "name" : "section",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Section"
+        }
+      } ]
+    },
     "ResolveDestinationCardEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -6321,6 +8840,64 @@
           "nullable" : true,
           "t" : "enum",
           "name" : "DestinationCard"
+        }
+      } ]
+    },
+    "ResolveFinalFiveCardEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "holderPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "LoyaltyCard"
+        }
+      }, {
+        "name" : "lookerPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "ResolveFinalFiveCardsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "holderPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "cards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "LoyaltyCard"
+          }
+        }
+      }, {
+        "name" : "lookerPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
         }
       } ]
     },
@@ -6342,6 +8919,26 @@
       "tagged" : true,
       "interfaces" : [ "Event" ],
       "components" : [ ]
+    },
+    "ResolveSuperCrisisCardEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "SuperCrisisCard"
+        }
+      } ]
     },
     "Resource" : {
       "kind" : "enum",
@@ -6419,6 +9016,19 @@
       "interfaces" : [ "Event" ],
       "components" : [ ]
     },
+    "ReturnToResurrectionShipEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
     "ReturnVipersToReservesEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -6437,6 +9047,66 @@
       "interfaces" : [ "Event" ],
       "components" : [ ]
     },
+    "RevealCylonEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "LoyaltyCard"
+        }
+      } ]
+    },
+    "RevealCylonOnExecutionEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "LoyaltyCard"
+        }
+      } ]
+    },
+    "RevealMotiveCardEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "AnytimeEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "MotiveCard"
+        }
+      } ]
+    },
     "RevealMutineerEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -6453,6 +9123,37 @@
         "type" : {
           "t" : "boolean",
           "nullable" : false
+        }
+      } ]
+    },
+    "RevealPersonalGoalEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "LoyaltyCard"
+        }
+      }, {
+        "name" : "discards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "SkillCard"
+          }
         }
       } ]
     },
@@ -6499,6 +9200,64 @@
       "interfaces" : [ "Event" ],
       "components" : [ ]
     },
+    "RuinedReputationEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "MutinyCardEvent", "PlayerEvent" ],
+      "mutinyCard" : "RUINED_REPUTATION",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "targetPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "RuinedReputationResultEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "targetPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "SacrificeEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "shipIds",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "t" : "int",
+            "nullable" : false,
+            "role" : "ship"
+          }
+        }
+      } ]
+    },
     "Sandbox" : {
       "kind" : "record",
       "tagged" : true,
@@ -6508,7 +9267,28 @@
     "SandboxEvent" : {
       "kind" : "union",
       "discriminator" : "kind",
-      "members" : [ "AssignTitleEvent", "ChangeResourceEvent", "DamageLocationEvent", "GiveQuorumCardToPresidentEvent", "GiveSkillCardToPlayerEvent", "MoveCharacterEvent", "PlaceShipEvent", "PutCrisisCardOnTopEvent", "PutDestinationCardOnTopEvent", "PutDestinyCardOnTopEvent", "PutSkillCardOnTopEvent", "SetJumpPreparationEvent" ]
+      "members" : [ "AssignTitleEvent", "ChangeResourceEvent", "DamageLocationEvent", "GiveLoyaltyCardToPlayerEvent", "GiveMutinyCardToPlayerEvent", "GiveQuorumCardToPresidentEvent", "GiveSkillCardToPlayerEvent", "GiveSuperCrisisCardToPlayerEvent", "MoveCharacterEvent", "PlaceShipEvent", "PutCrisisCardOnTopEvent", "PutDestinationCardOnTopEvent", "PutDestinyCardOnTopEvent", "PutSkillCardOnTopEvent", "SetJumpPreparationEvent" ]
+    },
+    "ScavengingForPartsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "MutinyCardEvent", "PlayerEvent" ],
+      "mutinyCard" : "SCAVENGING_FOR_PARTS",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "civilianShipId",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "ship"
+        }
+      } ]
     },
     "ScopeClosed" : {
       "kind" : "record",
@@ -6642,10 +9422,30 @@
       "interfaces" : [ "Event" ],
       "components" : [ ]
     },
+    "SecretDestinyEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "CrisisCard"
+        }
+      } ]
+    },
     "SecretEvent" : {
       "kind" : "union",
       "discriminator" : "kind",
-      "members" : [ "PlayInterruptCardEvent" ]
+      "members" : [ "PlayInterruptCardEvent", "UseRollAbilityEvent" ]
     },
     "Section" : {
       "kind" : "enum",
@@ -6688,6 +9488,54 @@
           "nullable" : true,
           "t" : "enum",
           "name" : "Character"
+        }
+      } ]
+    },
+    "SelfishActEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "MutinyCardEvent", "PlayerEvent" ],
+      "mutinyCard" : "SELFISH_ACT",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "SendAMessageEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "MutinyCardEvent", "PlayerEvent" ],
+      "mutinyCard" : "SEND_A_MESSAGE",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "centurionId",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "ship"
+        }
+      } ]
+    },
+    "SendAMessageResultEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "centurionId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
         }
       } ]
     },
@@ -6738,6 +9586,57 @@
           "nullable" : true,
           "t" : "enum",
           "name" : "JumpPreparation"
+        }
+      } ]
+    },
+    "SetTheAgendaChoiceEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "cards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "QuorumCard"
+          }
+        }
+      } ]
+    },
+    "SetTheAgendaEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "MutinyCardEvent", "PlayerEvent" ],
+      "mutinyCard" : "SET_THE_AGENDA",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "SetTheAgendaLookEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
         }
       } ]
     },
@@ -6936,6 +9835,19 @@
       "interfaces" : [ "Event" ],
       "components" : [ ]
     },
+    "ShuffleCivilianShipIntoDeckEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event" ],
+      "components" : [ {
+        "name" : "civilianShipId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      } ]
+    },
     "ShuffleTreacheryIntoDestinyDeckEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -6998,7 +9910,7 @@
     "SkillCheckFact" : {
       "kind" : "union",
       "discriminator" : "kind",
-      "members" : [ "SkillCheckFact.AbilityResolved", "SkillCheckFact.CardRemoved", "SkillCheckFact.CardsDrawn", "SkillCheckFact.CardsLookedAt", "SkillCheckFact.CardsPlaced", "SkillCheckFact.CardsPlayedBefore", "SkillCheckFact.CardsShown", "SkillCheckFact.DifficultyAdjusted", "SkillCheckFact.EmergencyDeclared", "SkillCheckFact.FailResultPrevented", "SkillCheckFact.PassResultReplaced", "SkillCheckFact.PlayedBeforeRevealed", "SkillCheckFact.PoliticsCountPositive", "SkillCheckFact.ResultDetermined", "SkillCheckFact.SkillCheckEnded", "SkillCheckFact.SkillCheckStarted", "SkillCheckFact.TargetChosen", "SkillCheckFact.TotalStrengthDetermined" ]
+      "members" : [ "SkillCheckFact.AbilityResolved", "SkillCheckFact.CardRemoved", "SkillCheckFact.CardsDivided", "SkillCheckFact.CardsDrawn", "SkillCheckFact.CardsLookedAt", "SkillCheckFact.CardsPlaced", "SkillCheckFact.CardsPlayedBefore", "SkillCheckFact.CardsShown", "SkillCheckFact.DifficultyAdjusted", "SkillCheckFact.EmergencyDeclared", "SkillCheckFact.FailResultPrevented", "SkillCheckFact.PassResultReplaced", "SkillCheckFact.PlayedBeforeRevealed", "SkillCheckFact.PlayedBy", "SkillCheckFact.PoliticsCountPositive", "SkillCheckFact.ResultDetermined", "SkillCheckFact.SkillCheckEnded", "SkillCheckFact.SkillCheckStarted", "SkillCheckFact.StrengthZeroed", "SkillCheckFact.TargetChosen", "SkillCheckFact.TotalStrengthDetermined" ]
     },
     "SkillCheckFact.AbilityResolved" : {
       "kind" : "record",
@@ -7032,6 +9944,12 @@
           "role" : "player"
         }
       } ]
+    },
+    "SkillCheckFact.CardsDivided" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "SkillCheckFact" ],
+      "components" : [ ]
     },
     "SkillCheckFact.CardsDrawn" : {
       "kind" : "record",
@@ -7203,6 +10121,19 @@
       "interfaces" : [ "Fact", "SkillCheckFact" ],
       "components" : [ ]
     },
+    "SkillCheckFact.PlayedBy" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "SkillCheckFact" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
     "SkillCheckFact.PoliticsCountPositive" : {
       "kind" : "record",
       "tagged" : true,
@@ -7238,6 +10169,19 @@
           "nullable" : true,
           "t" : "enum",
           "name" : "SkillCheckType"
+        }
+      } ]
+    },
+    "SkillCheckFact.StrengthZeroed" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Fact", "SkillCheckFact" ],
+      "components" : [ {
+        "name" : "color",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "SkillCardColor"
         }
       } ]
     },
@@ -7377,6 +10321,13 @@
           "nullable" : false
         }
       }, {
+        "name" : "zeroStrengthColor",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "SkillCardColor"
+        }
+      }, {
         "name" : "totalStrength",
         "type" : {
           "t" : "int",
@@ -7452,6 +10403,63 @@
         }
       } ]
     },
+    "SkilledPoliticianChoiceEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "chosen",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "QuorumCard"
+        }
+      }, {
+        "name" : "others",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "QuorumCard"
+          }
+        }
+      } ]
+    },
+    "SkilledPoliticianEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "SleeperAgentEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
     "SleeperAgentPhaseEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -7463,6 +10471,37 @@
       "tagged" : true,
       "interfaces" : [ "Event" ],
       "components" : [ ]
+    },
+    "StarPlayerEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "discards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "SkillCard"
+          }
+        }
+      }, {
+        "name" : "color",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "SkillCardColor"
+        }
+      } ]
     },
     "StartGameEvent" : {
       "kind" : "record",
@@ -7560,6 +10599,20 @@
       "tagged" : true,
       "interfaces" : [ "Event" ],
       "components" : [ ]
+    },
+    "TheStrongSurviveEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "MutinyCardEvent", "PlayerEvent" ],
+      "mutinyCard" : "THE_STRONG_SURVIVE",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
     },
     "TiebreakCardsBeforeSkillCheckEvent" : {
       "kind" : "record",
@@ -7739,11 +10792,77 @@
       "interfaces" : [ "Event" ],
       "components" : [ ]
     },
+    "TreatmentEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "targetPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "colors",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "SkillCardColor"
+          }
+        }
+      } ]
+    },
+    "TreatmentGiveEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "targetPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "cards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "SkillCard"
+          }
+        }
+      } ]
+    },
     "TrustInstinctsEvent" : {
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event" ],
       "components" : [ ]
+    },
+    "TurnLimit" : {
+      "kind" : "enum",
+      "values" : [ "CAG_PILOT_ACTION", "MUTINY_CARD_FROM_TREACHERY" ]
     },
     "TurnProjection" : {
       "kind" : "record",
@@ -7826,6 +10945,17 @@
           }
         }
       }, {
+        "name" : "windowAbilities",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "UsedRollAbility"
+          }
+        }
+      }, {
         "name" : "resolvedInterruptCards",
         "type" : {
           "nullable" : true,
@@ -7854,6 +10984,47 @@
         }
       } ]
     },
+    "UnauthorizedUsageEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "MutinyCardEvent", "PlayerEvent" ],
+      "mutinyCard" : "UNAUTHORIZED_USAGE",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "area",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Location"
+        }
+      } ]
+    },
+    "UnconventionalTacticsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "resource",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Resource"
+        }
+      } ]
+    },
     "UndoMessage" : {
       "kind" : "record",
       "type" : "undo",
@@ -7863,6 +11034,26 @@
         "type" : {
           "t" : "string",
           "nullable" : true
+        }
+      } ]
+    },
+    "UnmannedViperRoundEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "activationsLeft",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
         }
       } ]
     },
@@ -7987,6 +11178,74 @@
         }
       } ]
     },
+    "UseRollAbilityEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Event", "PlayerEvent", "SecretEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "ability",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "CharacterAbility"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "SkillCard"
+        }
+      }, {
+        "name" : "result",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "count"
+        }
+      } ]
+    },
+    "UsedRollAbility" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "ability",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "CharacterAbility"
+        }
+      }, {
+        "name" : "card",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "SkillCard"
+        }
+      }, {
+        "name" : "result",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "count"
+        }
+      } ]
+    },
     "Viewer" : {
       "kind" : "union",
       "discriminator" : "kind",
@@ -7997,6 +11256,20 @@
       "tagged" : true,
       "interfaces" : [ "Event" ],
       "components" : [ ]
+    },
+    "ViolentProtestEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "MutinyCardEvent", "PlayerEvent" ],
+      "mutinyCard" : "VIOLENT_PROTEST",
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
     },
     "ViperActivation" : {
       "kind" : "record",
@@ -8079,6 +11352,26 @@
         }
       } ]
     },
+    "VisionsEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "components" : [ {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "targetPlayerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
     "Waiting" : {
       "kind" : "record",
       "tagged" : true,
@@ -8091,6 +11384,20 @@
       "interfaces" : [ "InputProjection" ],
       "components" : [ {
         "name" : "player",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      } ]
+    },
+    "WeaponsArmedEvent" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "ActionEvent", "Event", "MutinyCardEvent", "PlayerEvent" ],
+      "mutinyCard" : "WEAPONS_ARMED",
+      "components" : [ {
+        "name" : "playerNumber",
         "type" : {
           "t" : "int",
           "nullable" : false,
@@ -8127,9 +11434,10 @@
     }
   },
   "lists" : {
-    "events" : [ "ABetterMachineEvent", "ASecondChanceEvent", "AcceptProphecyEvent", "ActionStepEvent", "ActivateCylonBasestarEvent", "ActivateCylonBasestarsEvent", "ActivateCylonShipsStepEvent", "ActivateHeavyRaidersAndCenturionsEvent", "ActivateRaiderEvent", "ActivateRaidersEvent", "ActivateViperEvent", "AdministrationEvent", "AdmiralsQuartersEvent", "AdvancePursuitTrackEvent", "AirlockEvent", "AnalyzeEnemyFighterPassEvent", "ArmoryEvent", "ArmoryResultEvent", "ArrestOrderEvent", "AssignArbitratorEvent", "AssignChiefOfStaffEvent", "AssignMissionSpecialistEvent", "AssignVicePresidentEvent", "AttackCylonShipEvent", "AttackCylonShipResultEvent", "AttackGalacticaEvent", "AttackGalacticaResultEvent", "AttackViperEvent", "AttackViperResultEvent", "AuthorizationOfBrutalForceEvent", "AuthorizationOfBrutalForceResultEvent", "BaitEvent", "BasestarBridgeAbilityEvent", "BasestarBridgeAbilityResultEvent", "BasestarBridgeEvent", "BasestarBridgeShipsEvent", "BrigEvent", "BuildNukeEvent", "CapricaDrawAndResolveCrisisCardsEvent", "CapricaPlaySuperCrisisCardEvent", "ChangeOfPlansEvent", "ChooseCrisisSectionEvent", "ChooseCrisisTargetEvent", "ChooseDestinationEvent", "ChooseExtraLoyaltyCardEvent", "ChooseGalacticaDamageEvent", "CivilianSelfDefenseEvent", "CivilianSelfDefenseResultEvent", "CloseInterruptWindowEvent", "CombatVeteranEvent", "CommandEvent", "CommunicationsEvent", "ConsolidatePowerEvent", "ConsultTheHybridPassEvent", "ConsultTheOracleEvent", "CrashLandingFailEvent", "CreateDestinyDeckEvent", "CreateLoyaltyDeckEvent", "CrisisStepEvent", "CriticalSituationEvent", "CylonFleetEvent", "CylonGenocidePassEvent", "CylonsWinEvent", "DamageBasestarEvent", "DamageGalacticaEvent", "DamageHumanFighterEvent", "DamagePegasusEvent", "DamageVipersEvent", "DealLoyaltyCardsEvent", "DeclareEmergencyEvent", "DecreaseJumpPreparationEvent", "DefendPresidencyEvent", "DefendingAPrisonerFailEvent", "DefendingAPrisonerFailResultEvent", "DerelictBasestarEvent", "DestroyCenturionEvent", "DestroyCivilianShipEvent", "DestroyCivilianShipsEvent", "DestroyCylonShipsEvent", "DestroyHeavyRaiderEvent", "DestroyRaidersEvent", "DestroyRaptorEvent", "DetermineNextAdmiralEvent", "DetermineNextCagEvent", "DetermineNextPresidentEvent", "DetermineSkillCheckAbilitiesOrderEvent", "DetermineSkillCheckResultEvent", "Discard1MutinyCardEvent", "DiscardAllSkillCardsEvent", "DiscardDownTo1MutinyCardEvent", "DiscardFromDestinyDeckEvent", "DiscardHeldQuorumCardEvent", "DiscardNukeTokenEvent", "DiscardPlayedQuorumCardEvent", "DiscardQuorumCardsEvent", "DiscardRandomSkillCardsEvent", "DiscardSkillCardsEvent", "DiscardStepEvent", "DogfightEvent", "DradisContactEvent", "DrawAndDestroyCivilianShipsEvent", "DrawAndResolveRecklessCardsEvent", "DrawDestinationCardsEvent", "DrawMutinyCardEvent", "DrawQuorumCardEvent", "DrawSkillCardsEvent", "DrawSkillCardsOfColorEvent", "EnactProductionQuotasEvent", "EncourageMutinyEvent", "EncourageMutinyResultEvent", "EndGameEvent", "EndSkillCheckEvent", "EndTurnEvent", "EngineRoomEvent", "EstablishDogsvilleEvent", "EulogyEvent", "ExecuteEvent", "ExecutePrisonerEvent", "ExecutiveOrderEvent", "ExploitAWeaknessEvent", "FTLControlEvent", "FTLControlResultEvent", "FinishExecutionEvent", "FinishSleeperAgentPhaseEvent", "FoodRationingEvent", "FoodRationingResultEvent", "FootageTransmittedFailEvent", "ForceTheirHandEvent", "FullThrottleEvent", "GainResourceEvent", "GasCloudEvent", "GasCloudPlaceEvent", "GasGiantEvent", "GiveLoyaltyCardsEvent", "GiveTitlesToNextInLineEvent", "GrantEvent", "GrantedViperActivationEvent", "HangarDeckEvent", "HumanFleetInfiltrateEvent", "HumanFleetLookAtTopCrisisCardEvent", "HumanFleetLookAtTopDestinationCardEvent", "HumanPrisonerFailEvent", "IncreaseJumpPreparationEvent", "InspirationalSpeechEvent", "InspirationalSpeechResultEvent", "InstallUpgradesEvent", "IronWillEvent", "JumpingTheFleetEvent", "KeepCrisisCardInPlayEvent", "KeepTabsOnVisitorFailEvent", "KeepTabsOnVisitorFailResultEvent", "LaunchRaidersEvent", "LaunchReservesEvent", "LaunchScoutEvent", "LaunchScoutResultEvent", "LaunchViperEvent", "LeaveBrigEvent", "LookAtLoyaltyCardEvent", "LookAtTopCardEvent", "LoseResourceEvent", "MainBatteriesEvent", "MainBatteriesResultEvent", "MajorVictoryResultEvent", "MakeAdmiralEvent", "MakeCagEvent", "MakePresidentEvent", "MakeSkillCheckEvent", "MaximumFirepowerEvent", "MoveCivilianShipEvent", "MoveCylonShipsToFleetBoardEvent", "MoveEvent", "MoveFromBrigEvent", "MovementStepEvent", "MysteriousMessagePassEvent", "NegotiationEvent", "NoOpEvent", "ObjectiveInstructionsEvent", "OpenInterruptWindowEvent", "PassMutineerCardEvent", "PegasusCicEvent", "PegasusCicResultEvent", "PersonalVicesEvent", "PlaceCenturionsEvent", "PlaceCivilianShipEvent", "PlaceCivilianShipsInFrontEvent", "PlaceCrisisCardOnBottomEvent", "PlaceCrisisCardOnTopEvent", "PlaceDestinationCardAtBottomEvent", "PlaceDestinationCardOnTopEvent", "PlaceInSetupLocationEvent", "PlaceRaidersBehindEvent", "PlaceShipOnCylonFleetBoardEvent", "PlaceShipOnCylonFleetBoardResultEvent", "PlaceShipsEvent", "PlayCardsBeforeSkillCheckEvent", "PlayCardsIntoSkillCheckEvent", "PlayFromDestinyDeckEvent", "PlayInterruptCardEvent", "PlaySuperCrisisCardEvent", "PlayerDecisionEvent", "PoliticalProwessEvent", "PopularInfluenceChoiceEvent", "PopularInfluenceEvent", "PrepareForJumpStepEvent", "PresidentTitleActionEvent", "PresidentialOrderEvent", "PresidentialPardonEvent", "PresidentsOfficeEvent", "PressRoomEvent", "PreventivePolicyEvent", "ProbationEvent", "ProtectTheFleetEvent", "QuickThinkingEvent", "QuorumChamberEvent", "QuorumInUproarFailEvent", "RagnarAnchorageEvent", "RaptorSpecialistEvent", "ReceiveSkillsStepEvent", "ReceiveStartingSkillsEvent", "RedTapeEvent", "ReleaseCylonMugshotsEvent", "ReleaseCylonMugshotsResultEvent", "RepairEvent", "ReplaceMutinousPresidentEvent", "ResearchLabEvent", "ResetActingPlayerEvent", "ResetJumpPreparationEvent", "ResignationEvent", "ResolveCapricaCrisisCardEvent", "ResolveCardsBeforeSkillCheckEvent", "ResolveConsequencesEvent", "ResolveCrisisCardEvent", "ResolveCrisisRollEvent", "ResolveDestinationCardEvent", "ResolveSkillCheckAbilityEvent", "ResolveSkillCheckResultEvent", "ResourcesForGalacticaEvent", "ResurrectionShipEvent", "ReturnAssaultRaptorEvent", "ReturnToCrisisStepEvent", "ReturnVipersToReservesEvent", "RevealCardsBeforeSkillCheckEvent", "RevealMutineerEvent", "RiskResultEvent", "RiskShipsEvent", "RollDieEvent", "ScoutForFuelEvent", "ScoutForFuelResultEvent", "SelectCharacterEvent", "SendToBrigEvent", "SendToSickbayEvent", "SetATrapPassEvent", "ShuffleAndDivideCardsEvent", "ShuffleTreacheryIntoDestinyDeckEvent", "SleeperAgentPhaseEvent", "StandoffWithPegasusPassEvent", "StartGameEvent", "StartTurnEvent", "StateOfEmergencyEvent", "StrangeBeaconPassEvent", "TestTheLimitsEvent", "TestTheLimitsResultEvent", "TiebreakCardsBeforeSkillCheckEvent", "TiebreakInterruptCardsEvent", "TotalSkillCheckStrengthEvent", "TrustInstinctsEvent", "UnorthodoxPlanEvent", "UnsavoryConnectionsEvent", "UseArbitratorEvent", "UseChiefOfStaffEvent", "UseProbationEvent", "ViolentOutburstsEvent", "ViperActivationRoundEvent", "WeaponsControlEvent" ],
-    "sandboxEvents" : [ "AssignTitleEvent", "ChangeResourceEvent", "DamageLocationEvent", "GiveQuorumCardToPresidentEvent", "GiveSkillCardToPlayerEvent", "MoveCharacterEvent", "PlaceShipEvent", "PutCrisisCardOnTopEvent", "PutDestinationCardOnTopEvent", "PutDestinyCardOnTopEvent", "PutSkillCardOnTopEvent", "SetJumpPreparationEvent" ],
-    "facts" : [ "BoardFact.BoardingPartyAdvanced", "BoardFact.EngineRoomActivated", "BoardFact.JumpPreparationDecreased", "BoardFact.JumpPreparationIncreased", "BoardFact.JumpPreparationReset", "BoardFact.LocationDamaged", "BoardFact.LocationRepaired", "BoardFact.PursuitAdvanced", "BoardFact.PursuitReset", "BoardFact.ResourceDecreased", "BoardFact.ResourceIncreased", "DeckFact.CardsAddedOnTop", "DeckFact.CardsAddedToBottom", "DeckFact.CardsDiscarded", "DeckFact.CardsDrawn", "DeckFact.CardsPulled", "DeckFact.CardsRemovedFromGame", "DeckFact.DeckShuffled", "GameFact.ActingPlayerChanged", "GameFact.CrisisCardKeptInPlay", "GameFact.CrisisCardPlayed", "GameFact.CrisisCardsCleared", "GameFact.CurrentPlayerChanged", "GameFact.CylonShipsHeld", "GameFact.DestinationReached", "GameFact.DieRollCardPlayed", "GameFact.DieRollStarted", "GameFact.DieRolled", "GameFact.GameEnded", "GameFact.GameStarted", "GameFact.LossReduced", "GameFact.LossReductionAdded", "GameFact.MoraleLostToExecution", "GameFact.NukeDiscarded", "GameFact.NukeGained", "GameFact.ReturnToCrisisStepChanged", "GameFact.SkillCardPlayed", "GameFact.StepChanged", "GameFact.TurnEndedEarly", "GameFact.TurnStarted", "InterruptFact.InterruptCardPlayed", "InterruptFact.InterruptCardResolved", "InterruptFact.InterruptCardReturned", "InterruptFact.InterruptWindowClosed", "InterruptFact.InterruptWindowOpened", "InterruptFact.RaiderMissed", "InterruptFact.RaidersWillMiss", "PlayerFact.CardsGained", "PlayerFact.CardsLost", "PlayerFact.CardsSeen", "PlayerFact.CharacterMoved", "PlayerFact.CharacterRemoved", "PlayerFact.CharacterRemovedFromBoards", "PlayerFact.CharacterSelected", "PlayerFact.CivilianShipForgotten", "PlayerFact.CivilianShipRevealed", "PlayerFact.InfiltrationEnded", "PlayerFact.InfiltrationStarted", "PlayerFact.LoyaltyCardRevealed", "PlayerFact.LoyaltyCardSeen", "PlayerFact.MiracleTokenGained", "PlayerFact.MiracleTokenLost", "PlayerFact.MotiveCardRevealed", "PlayerFact.OwnTurnStarted", "ShipFact.BasestarDamageAttached", "ShipFact.BasestarDamageCleared", "ShipFact.PilotChanged", "ShipFact.ShipMoved", "SkillCheckFact.AbilityResolved", "SkillCheckFact.CardRemoved", "SkillCheckFact.CardsDrawn", "SkillCheckFact.CardsLookedAt", "SkillCheckFact.CardsPlaced", "SkillCheckFact.CardsPlayedBefore", "SkillCheckFact.CardsShown", "SkillCheckFact.DifficultyAdjusted", "SkillCheckFact.EmergencyDeclared", "SkillCheckFact.FailResultPrevented", "SkillCheckFact.PassResultReplaced", "SkillCheckFact.PlayedBeforeRevealed", "SkillCheckFact.PoliticsCountPositive", "SkillCheckFact.ResultDetermined", "SkillCheckFact.SkillCheckEnded", "SkillCheckFact.SkillCheckStarted", "SkillCheckFact.TargetChosen", "SkillCheckFact.TotalStrengthDetermined", "TitleFact.AdmiralAssigned", "TitleFact.CagAssigned", "TitleFact.PresidentAssigned", "TitleFact.PresidentQuorumCardGained", "TitleFact.PresidentQuorumCardsLost", "TitleFact.QuorumCardLeftPlay", "TitleFact.QuorumCardPutInPlay" ]
+    "events" : [ "ABetterMachineEvent", "ASecondChanceEvent", "AbusePowerChoiceEvent", "AbusePowerEvent", "AcceptProphecyEvent", "ActionStepEvent", "ActivateCylonBasestarEvent", "ActivateCylonBasestarsEvent", "ActivateCylonShipsStepEvent", "ActivateHeavyRaidersAndCenturionsEvent", "ActivateRaiderAreaEvent", "ActivateRaiderAreasEvent", "ActivateRaiderEvent", "ActivateRaidersEvent", "ActivateUnmannedViperEvent", "ActivateViperEvent", "AdaptableEvent", "AdministrationEvent", "AdmiralsQuartersEvent", "AdvancePursuitTrackEvent", "AggressiveTacticsEvent", "AirlockEvent", "AlertViperPilotEvent", "AnalyzeEnemyFighterPassEvent", "ArmedResistanceEvent", "ArmoryEvent", "ArmoryResultEvent", "ArrestOrderEvent", "AssignArbitratorEvent", "AssignChiefOfStaffEvent", "AssignMissionSpecialistEvent", "AssignVicePresidentEvent", "AssumeCommandEvent", "AttackCylonShipEvent", "AttackCylonShipResultEvent", "AttackGalacticaEvent", "AttackGalacticaResultEvent", "AttackViperEvent", "AttackViperResultEvent", "AttorneyEvent", "AuthorizationOfBrutalForceEvent", "AuthorizationOfBrutalForceResultEvent", "BaitAndSwitchEvent", "BaitEvent", "BasestarBridgeAbilityEvent", "BasestarBridgeAbilityResultEvent", "BasestarBridgeEvent", "BasestarBridgeShipsEvent", "BetrayalOfTrustEvent", "BlackmailEvent", "BlindDevotionEvent", "BlindJumpEvent", "BrigEvent", "BroadcastEvent", "BuildNukeEvent", "CagAbilityEvent", "CagPilotActionEvent", "CapricaDrawAndResolveCrisisCardsEvent", "CapricaPlaySuperCrisisCardEvent", "ChangeOfPlansEvent", "ChooseADifferentPathEvent", "ChooseCrisisSectionEvent", "ChooseCrisisTargetEvent", "ChooseDestinationEvent", "ChooseExtraLoyaltyCardEvent", "ChooseGalacticaDamageEvent", "ChooseGalacticaDamageTokensEvent", "ChooseSuperCrisisSectionEvent", "CivilianSelfDefenseEvent", "CivilianSelfDefenseResultEvent", "ClippedWingsEvent", "CloseInterruptWindowEvent", "CombatVeteranEvent", "CommandAuthorityEvent", "CommandEvent", "CommunicationsEvent", "ConsolidatePowerEvent", "ConsultTheHybridPassEvent", "ConsultTheOracleEvent", "ControversialSpeechEvent", "ControversialSpeechResultEvent", "CoupEvent", "CrashLandingFailEvent", "CreateDestinyDeckEvent", "CreateLoyaltyDeckEvent", "CrisisStepEvent", "CriticalSituationEvent", "CrypticMessageEvent", "CultLeaderEvent", "CylonDetectorEvent", "CylonFleetEvent", "CylonGenocidePassEvent", "CylonHatredEvent", "CylonPowerDamageGalacticaEvent", "CylonPowerDecreaseJumpTrackEvent", "CylonPowerDrawTreacheryEvent", "CylonPowerPlaceCenturionEvent", "CylonPowerReduceMoraleEvent", "CylonPowerSendToBrigEvent", "CylonPowerSendToSickbayEvent", "CylonsWinEvent", "DamageBasestarEvent", "DamageBattlestarEvent", "DamageChosenViperEvent", "DamageGalacticaEvent", "DamageHumanFighterEvent", "DamagePegasusEvent", "DamageVipersEvent", "DealLoyaltyCardsEvent", "DeceitfulEvent", "DeclareEmergencyEvent", "DeclareMartialLawEvent", "DecreaseJumpPreparationEvent", "DefendPresidencyEvent", "DefendingAPrisonerFailEvent", "DefendingAPrisonerFailResultEvent", "DelusionalIntuitionEvent", "DerelictBasestarEvent", "DestroyCenturionEvent", "DestroyCivilianShipEvent", "DestroyCivilianShipsEvent", "DestroyCylonShipsEvent", "DestroyHeavyRaiderEvent", "DestroyPegasusEvent", "DestroyRaidersEvent", "DestroyRaptorEvent", "DetermineNextAdmiralEvent", "DetermineNextCagEvent", "DetermineNextPresidentEvent", "DetermineSkillCheckAbilitiesOrderEvent", "DetermineSkillCheckResultEvent", "Discard1MutinyCardEvent", "DiscardAllSkillCardsEvent", "DiscardDownTo1MutinyCardEvent", "DiscardFromDestinyDeckEvent", "DiscardHeldQuorumCardEvent", "DiscardNukeTokenEvent", "DiscardPlayedMutinyCardEvent", "DiscardPlayedQuorumCardEvent", "DiscardQuorumCardsEvent", "DiscardRandomSkillCardsEvent", "DiscardSkillCardsEvent", "DiscardStepEvent", "DiscardSuperCrisisCardEvent", "DischargeOfAFirearmEvent", "DogfightEvent", "DontTrustAnyoneEvent", "DradisContactEvent", "DrawAndDestroyCivilianShipsEvent", "DrawAndResolveRecklessCardsEvent", "DrawDestinationCardsEvent", "DrawMutinyCardEvent", "DrawQuorumCardEvent", "DrawSkillCardsEvent", "DrawSkillCardsOfColorEvent", "DutifulEvent", "EmotionallyFragileEvent", "EnactProductionQuotasEvent", "EncourageMutinyEvent", "EncourageMutinyResultEvent", "EndGameEvent", "EndInfiltrationEvent", "EndOfActionStepEvent", "EndOfMovementStepEvent", "EndRemoteActionEvent", "EndSkillCheckEvent", "EndTurnEvent", "EngineRoomEvent", "EscortEvent", "EstablishDogsvilleEvent", "EulogyEvent", "ExecuteEvent", "ExecutePrisonerEvent", "ExecutiveOrderEvent", "ExploitAWeaknessEvent", "FTLControlEvent", "FTLControlResultEvent", "FastLearnerEvent", "FastLearnerIntoCheckEvent", "FeedThePeopleEvent", "FinishCylonRevealEvent", "FinishExecutionEvent", "FinishSleeperAgentPhaseEvent", "FoodRationingEvent", "FoodRationingResultEvent", "FootageTransmittedFailEvent", "ForLoveEvent", "ForceTheirHandEvent", "ForcedDiscardEvent", "ForwardThinkerEvent", "FriendsInLowPlacesEvent", "FullThrottleEvent", "GainResourceEvent", "GasCloudEvent", "GasCloudPlaceEvent", "GasGiantEvent", "GiveLoyaltyCardsEvent", "GiveTitlesToNextInLineEvent", "GlimpseTheFaceOfGodEvent", "GlimpseTheFaceOfGodPlaceEvent", "GrantEvent", "GrantedViperActivationEvent", "HangarDeckEvent", "HereticDiscardEvent", "HumanDelusionEvent", "HumanFleetInfiltrateEvent", "HumanFleetLookAtTopCrisisCardEvent", "HumanFleetLookAtTopDestinationCardEvent", "HumanPrisonerFailEvent", "HumanPrisonerTakeHandEvent", "ImpeachmentEvent", "IncreaseJumpPreparationEvent", "InfluentialEvent", "InspirationalSpeechEvent", "InspirationalSpeechResultEvent", "InstallUpgradesEvent", "IntimateEvent", "IntolerantEvent", "IronWillEvent", "JumpingTheFleetEvent", "KeepCrisisCardInPlayEvent", "KeepTabsOnVisitorFailEvent", "KeepTabsOnVisitorFailResultEvent", "KleptomaniaBrigEvent", "LaunchNukeEvent", "LaunchRaidersEvent", "LaunchReservesEvent", "LaunchScoutEvent", "LaunchScoutResultEvent", "LaunchViperEvent", "LeaveBrigEvent", "LogicBoundEvent", "LookAtAllLoyaltyCardsEvent", "LookAtLoyaltyCardEvent", "LookAtTopCardEvent", "LoseResourceEvent", "MainBatteriesEvent", "MainBatteriesResultEvent", "MaintenanceEngineerEvent", "MajorVictoryResultEvent", "MakeADealEvent", "MakeAdmiralEvent", "MakeCagEvent", "MakePresidentEvent", "MakeSkillCheckEvent", "ManipulativeEvent", "MaximumFirepowerEvent", "MementoEvent", "MeticulousEvent", "ModificationsEvent", "MoralCompassEvent", "MoveCivilianShipEvent", "MoveCylonShipsToFleetBoardEvent", "MoveEvent", "MoveFromBrigEvent", "MovementStepEvent", "MysteriousIntuitionEvent", "MysteriousMessagePassEvent", "NecessaryRiskEvent", "NecessaryStepsEvent", "NegotiationEvent", "NoOneGetsLeftBehindEvent", "NoOpEvent", "NukeBasestarEvent", "NukeResultEvent", "ObjectiveInstructionsEvent", "OfferAdaptableEvent", "OfferAlertViperPilotEvent", "OfferCommandAuthorityEvent", "OfferDutifulEvent", "OfferForwardThinkerEvent", "OfferMementoEvent", "OpenInterruptWindowEvent", "OrganizedEvent", "OrganizedLocationEvent", "OrganizedNextEvent", "PanicEvent", "PassCagTitleEvent", "PassMutineerCardEvent", "PeacefulResistanceEvent", "PeacefulResistanceResultEvent", "PegasusCicEvent", "PegasusCicResultEvent", "PersonalVicesEvent", "PlaceCenturionsEvent", "PlaceCivilianShipEvent", "PlaceCivilianShipsInFrontEvent", "PlaceCrisisCardOnBottomEvent", "PlaceCrisisCardOnTopEvent", "PlaceDestinationCardAtBottomEvent", "PlaceDestinationCardOnTopEvent", "PlaceInSetupLocationEvent", "PlaceRaidersBehindEvent", "PlaceShipOnCylonFleetBoardEvent", "PlaceShipOnCylonFleetBoardResultEvent", "PlaceShipsEvent", "PlayCardsBeforeSkillCheckEvent", "PlayCardsIntoSkillCheckEvent", "PlayFromDestinyDeckEvent", "PlayInterruptCardEvent", "PlayerDecisionEvent", "PoliticalProwessEvent", "PoliticallyAdroitEvent", "PopularInfluenceChoiceEvent", "PopularInfluenceEvent", "PrepareForJumpStepEvent", "PresidentTitleActionEvent", "PresidentialOrderEvent", "PresidentialPardonEvent", "PresidentsOfficeEvent", "PressRoomEvent", "PreventivePolicyEvent", "PrimacyEvent", "ProbationEvent", "ProtectTheFleetEvent", "QuarantineChoiceEvent", "QuarantineEvent", "QuickFixEvent", "QuickThinkingEvent", "QuorumChamberEvent", "QuorumInUproarFailEvent", "RagnarAnchorageEvent", "RaptorPilotEvent", "RaptorSpecialistEvent", "ReceiveSkillsStepEvent", "ReceiveStartingSkillsEvent", "ReconEvent", "RedTapeEvent", "ReleaseCylonMugshotsEvent", "ReleaseCylonMugshotsResultEvent", "ReligiousVisionsEvent", "RemoveMutinyCardFromGameEvent", "ReorderTopQuorumCardsEvent", "RepairEvent", "ReplaceDestinyDeckEvent", "ReplaceMutinousPresidentEvent", "ResearchLabEvent", "ResetActingPlayerEvent", "ResetJumpPreparationEvent", "ResignationEvent", "ResoluteEvent", "ResolveCapricaCrisisCardEvent", "ResolveCardsBeforeSkillCheckEvent", "ResolveConsequencesEvent", "ResolveCrisisCardEvent", "ResolveCrisisRollEvent", "ResolveCrisisSectionEvent", "ResolveDestinationCardEvent", "ResolveFinalFiveCardEvent", "ResolveFinalFiveCardsEvent", "ResolveSkillCheckAbilityEvent", "ResolveSkillCheckResultEvent", "ResolveSuperCrisisCardEvent", "ResourcesForGalacticaEvent", "ResurrectionShipEvent", "ReturnAssaultRaptorEvent", "ReturnToCrisisStepEvent", "ReturnToResurrectionShipEvent", "ReturnVipersToReservesEvent", "RevealCardsBeforeSkillCheckEvent", "RevealCylonEvent", "RevealCylonOnExecutionEvent", "RevealMotiveCardEvent", "RevealMutineerEvent", "RevealPersonalGoalEvent", "RiskResultEvent", "RiskShipsEvent", "RollDieEvent", "RuinedReputationEvent", "RuinedReputationResultEvent", "SacrificeEvent", "ScavengingForPartsEvent", "ScoutForFuelEvent", "ScoutForFuelResultEvent", "SecretDestinyEvent", "SelectCharacterEvent", "SelfishActEvent", "SendAMessageEvent", "SendAMessageResultEvent", "SendToBrigEvent", "SendToSickbayEvent", "SetATrapPassEvent", "SetTheAgendaChoiceEvent", "SetTheAgendaEvent", "SetTheAgendaLookEvent", "ShuffleAndDivideCardsEvent", "ShuffleCivilianShipIntoDeckEvent", "ShuffleTreacheryIntoDestinyDeckEvent", "SkilledPoliticianChoiceEvent", "SkilledPoliticianEvent", "SleeperAgentEvent", "SleeperAgentPhaseEvent", "StandoffWithPegasusPassEvent", "StarPlayerEvent", "StartGameEvent", "StartTurnEvent", "StateOfEmergencyEvent", "StrangeBeaconPassEvent", "TestTheLimitsEvent", "TestTheLimitsResultEvent", "TheStrongSurviveEvent", "TiebreakCardsBeforeSkillCheckEvent", "TiebreakInterruptCardsEvent", "TotalSkillCheckStrengthEvent", "TreatmentEvent", "TreatmentGiveEvent", "TrustInstinctsEvent", "UnauthorizedUsageEvent", "UnconventionalTacticsEvent", "UnmannedViperRoundEvent", "UnorthodoxPlanEvent", "UnsavoryConnectionsEvent", "UseArbitratorEvent", "UseChiefOfStaffEvent", "UseProbationEvent", "UseRollAbilityEvent", "ViolentOutburstsEvent", "ViolentProtestEvent", "ViperActivationRoundEvent", "VisionsEvent", "WeaponsArmedEvent", "WeaponsControlEvent" ],
+    "sandboxEvents" : [ "AssignTitleEvent", "ChangeResourceEvent", "DamageLocationEvent", "GiveLoyaltyCardToPlayerEvent", "GiveMutinyCardToPlayerEvent", "GiveQuorumCardToPresidentEvent", "GiveSkillCardToPlayerEvent", "GiveSuperCrisisCardToPlayerEvent", "MoveCharacterEvent", "PlaceShipEvent", "PutCrisisCardOnTopEvent", "PutDestinationCardOnTopEvent", "PutDestinyCardOnTopEvent", "PutSkillCardOnTopEvent", "SetJumpPreparationEvent" ],
+    "anytimeEvents" : [ "RevealMotiveCardEvent" ],
+    "facts" : [ "BoardFact.BoardingPartyAdvanced", "BoardFact.EngineRoomActivated", "BoardFact.JumpPreparationDecreased", "BoardFact.JumpPreparationIncreased", "BoardFact.JumpPreparationReset", "BoardFact.LocationDamaged", "BoardFact.LocationRepaired", "BoardFact.PegasusDestroyed", "BoardFact.PursuitAdvanced", "BoardFact.PursuitReset", "BoardFact.ResourceDecreased", "BoardFact.ResourceIncreased", "DeckFact.CardsAddedOnTop", "DeckFact.CardsAddedToBottom", "DeckFact.CardsDiscarded", "DeckFact.CardsDrawn", "DeckFact.CardsPulled", "DeckFact.CardsRemovedFromGame", "DeckFact.DeckShuffled", "GameFact.ActingPlayerChanged", "GameFact.ActionCostPaid", "GameFact.CrisisCardKeptInPlay", "GameFact.CrisisCardPlayed", "GameFact.CrisisCardsCleared", "GameFact.CurrentPlayerChanged", "GameFact.CylonShipsHeld", "GameFact.DestinationReached", "GameFact.DieRollAbilityUsed", "GameFact.DieRollCardPlayed", "GameFact.DieRollReplaced", "GameFact.DieRollStarted", "GameFact.DieRolled", "GameFact.GameEnded", "GameFact.GameStarted", "GameFact.LossReduced", "GameFact.LossReductionAdded", "GameFact.MoraleLostToExecution", "GameFact.NukeDiscarded", "GameFact.NukeGained", "GameFact.RemoteActionAllowed", "GameFact.RemoteActionEnded", "GameFact.ReturnToCrisisStepChanged", "GameFact.SentToBrigAtEndOfTurn", "GameFact.SkillCardPlayed", "GameFact.StartLocationNoted", "GameFact.StepChanged", "GameFact.TitleBorrowed", "GameFact.TurnEndedEarly", "GameFact.TurnLimitUsed", "GameFact.TurnStarted", "InterruptFact.InterruptCardPlayed", "InterruptFact.InterruptCardResolved", "InterruptFact.InterruptCardReturned", "InterruptFact.InterruptWindowClosed", "InterruptFact.InterruptWindowOpened", "InterruptFact.RaiderMissed", "InterruptFact.RaidersWillMiss", "InterruptFact.RollAbilityResolved", "InterruptFact.RollAbilityUsed", "InterruptFact.RollAbilityWithdrawn", "PlayerFact.AbilityTriggerCleared", "PlayerFact.AbilityTriggered", "PlayerFact.AbilityUsed", "PlayerFact.CardsGained", "PlayerFact.CardsLost", "PlayerFact.CardsSeen", "PlayerFact.CharacterMoved", "PlayerFact.CharacterRemoved", "PlayerFact.CharacterRemovedFromBoards", "PlayerFact.CharacterSelected", "PlayerFact.CivilianShipForgotten", "PlayerFact.CivilianShipRevealed", "PlayerFact.FinalFiveCardShown", "PlayerFact.InfiltrationEnded", "PlayerFact.InfiltrationStarted", "PlayerFact.LoyaltyCardRevealed", "PlayerFact.LoyaltyCardSeen", "PlayerFact.MiracleTokenGained", "PlayerFact.MiracleTokenLost", "PlayerFact.MotiveCardRevealed", "PlayerFact.OwnTurnStarted", "ShipFact.BasestarDamageAttached", "ShipFact.BasestarDamageCleared", "ShipFact.PilotChanged", "ShipFact.ShipMoved", "SkillCheckFact.AbilityResolved", "SkillCheckFact.CardRemoved", "SkillCheckFact.CardsDivided", "SkillCheckFact.CardsDrawn", "SkillCheckFact.CardsLookedAt", "SkillCheckFact.CardsPlaced", "SkillCheckFact.CardsPlayedBefore", "SkillCheckFact.CardsShown", "SkillCheckFact.DifficultyAdjusted", "SkillCheckFact.EmergencyDeclared", "SkillCheckFact.FailResultPrevented", "SkillCheckFact.PassResultReplaced", "SkillCheckFact.PlayedBeforeRevealed", "SkillCheckFact.PlayedBy", "SkillCheckFact.PoliticsCountPositive", "SkillCheckFact.ResultDetermined", "SkillCheckFact.SkillCheckEnded", "SkillCheckFact.SkillCheckStarted", "SkillCheckFact.StrengthZeroed", "SkillCheckFact.TargetChosen", "SkillCheckFact.TotalStrengthDetermined", "TitleFact.AdmiralAssigned", "TitleFact.CagAssigned", "TitleFact.PresidentAssigned", "TitleFact.PresidentQuorumCardGained", "TitleFact.PresidentQuorumCardsLost", "TitleFact.QuorumCardLeftPlay", "TitleFact.QuorumCardPutInPlay" ]
   },
   "messages" : {
     "choose" : "ChooseMessage",

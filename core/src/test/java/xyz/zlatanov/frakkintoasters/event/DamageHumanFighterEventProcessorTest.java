@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event;
 
+import static xyz.zlatanov.frakkintoasters.state.character.Character.BRENDAN_HOTDOG_COSTANZA;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
@@ -65,5 +66,19 @@ class DamageHumanFighterEventProcessorTest extends EventTestHarness<DamageHumanF
     @Test
     void shouldNotDamageARaptor() {
         assertInvalid(new DamageHumanFighterEvent(11));
+    }
+
+    // "Forced to Eject": Brendan "Hot Dog" Costanza's viper is destroyed, not damaged; he still goes to "Sickbay".
+    @Test
+    void hotDogsViperIsDestroyed() {
+        player(1).character(BRENDAN_HOTDOG_COSTANZA);
+        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
+        viper.pilot(BRENDAN_HOTDOG_COSTANZA);
+
+        execute(new DamageHumanFighterEvent(viper.id()));
+
+        assertEquals(SICKBAY, locate(BRENDAN_HOTDOG_COSTANZA));
+        assertFalse(galacticaBoard.damagedShips().contains(viper));
+        assertTrue(game.removedComponents().items().contains(viper));
     }
 }

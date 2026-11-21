@@ -128,9 +128,10 @@ final class GameProjector {
                 turn.endedEarly(),
                 turn.returnsToCrisisStep(),
                 dieRoll == null ? null : new DieRollProjection(dieRoll.value(), dieRoll.cards(), dieRoll.modifier(),
-                        dieRoll.value() == null ? null : dieRoll.result()),
+                        dieRoll.value() == null ? null : dieRoll.result(), dieRoll.abilities(), dieRoll.fixed()),
                 turn.interruptWindow().orElse(null),
                 turn.windowCards().stream().filter(card -> sees(card.playerNumber())).toList(),
+                turn.windowAbilities().stream().filter(used -> sees(used.playerNumber())).toList(),
                 turn.resolvedInterruptCards(),
                 turn.raidersToMiss());
     }
@@ -151,7 +152,7 @@ final class GameProjector {
                 hidden(player.mutinyCards(), owner),
                 hidden(player.superCrisisCards(), owner),
                 hidden(player.quorumCards(), owner),
-                player.hasMiracleToken(),
+                player.miracleTokens(),
                 player.isInfiltrating(),
                 character == null ? null : player.isHuman(),
                 character != null && player.isRevealedCylon(),
@@ -228,7 +229,7 @@ final class GameProjector {
 
     private PegasusProjection pegasus() {
         val board = game.boards().pegasus();
-        return new PegasusProjection(board.engineRoomActivated(), locations(board, board));
+        return new PegasusProjection(board.engineRoomActivated(), board.destroyed(), locations(board, board));
     }
 
     private CylonFleetProjection cylonFleet() {
@@ -317,6 +318,7 @@ final class GameProjector {
                 check.resolvedAbilities(),
                 check.emergencyDeclared(),
                 check.politicsCountPositive(),
+                check.zeroStrengthColor(),
                 check.totalStrength(),
                 check.result(),
                 check.passResultReplaced(),

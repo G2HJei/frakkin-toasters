@@ -3,6 +3,7 @@ package xyz.zlatanov.frakkintoasters.event.crisis;
 import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.board.AdvancePursuitTrackEvent;
@@ -10,6 +11,7 @@ import xyz.zlatanov.frakkintoasters.event.ship.PlaceShipOnCylonFleetBoardEvent;
 import xyz.zlatanov.frakkintoasters.state.ship.Centurion;
 import xyz.zlatanov.frakkintoasters.state.ship.HeavyRaider;
 
+import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.DISABLED_HANGAR_BAY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
@@ -49,6 +51,16 @@ class ActivateHeavyRaidersAndCenturionsEventProcessorTest extends EventTestHarne
     void shouldSpawnNewHeavyRaiderIfNoneOnBoard() {
         execute(event);
         assertShipCount(GALACTICA_SPACE_8_OCLOCK, HeavyRaider.class, 1);
+    }
+
+    // "Disabled Hangar": the basestar may not launch heavy raiders (rule 11.7.3).
+    @Test
+    void shouldNotLaunchAHeavyRaiderFromABasestarWithADisabledHangar() {
+        galacticaBoard.shipsIn(GALACTICA_SPACE_8_OCLOCK, Basestar.class).getFirst().damage(DISABLED_HANGAR_BAY);
+
+        execute(event);
+
+        assertShipCount(GALACTICA_SPACE_8_OCLOCK, HeavyRaider.class, 0);
     }
 
     @Test

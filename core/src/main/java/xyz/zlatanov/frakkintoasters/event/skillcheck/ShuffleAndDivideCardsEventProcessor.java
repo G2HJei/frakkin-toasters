@@ -3,12 +3,14 @@ package xyz.zlatanov.frakkintoasters.event.skillcheck;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.character.HumanDelusionEventProcessor;
+import xyz.zlatanov.frakkintoasters.event.character.QuickFixEventProcessor;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 
 import java.util.ArrayList;
 
-import static xyz.zlatanov.frakkintoasters.event.Followup.all;
+import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.allOf;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.RESTORE_ORDER;
 
@@ -20,6 +22,10 @@ public class ShuffleAndDivideCardsEventProcessor extends EventProcessor<ShuffleA
                 .filter(SkillCard::hasSkillCheckAbility)
                 .toList();
         val followups = new ArrayList<Followup>();
+        // Once the cards are revealed, before the abilities: "Quick Fix" may discard one, then "Human Delusion" may add
+        // some.
+        followups.add(QuickFixEventProcessor.offer(game));
+        followups.add(HumanDelusionEventProcessor.offer(game));
         // "Restore Order": "Do not resolve skill check abilities while resolving this skill check."
         if (!cardsWithAbilities.isEmpty() && !playedBefore(RESTORE_ORDER)) {
             followups.add(single(new DetermineSkillCheckAbilitiesOrderEvent(game.turn().currentPlayerNumber(), cardsWithAbilities)));
@@ -34,7 +40,7 @@ public class ShuffleAndDivideCardsEventProcessor extends EventProcessor<ShuffleA
             followups.add(single(new DrawAndResolveRecklessCardsEvent()));
         }
         followups.add(single(new TotalSkillCheckStrengthEvent()));
-        return all(followups.toArray(Followup[]::new));
+        return allOf(followups.toArray(Followup[]::new));
     }
 
     private boolean reckless() {

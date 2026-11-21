@@ -15,7 +15,7 @@ public class ResourcesForGalacticaEventProcessor extends QuorumCardEventProcesso
     // Any damaged location, Galactica's or Pegasus': the card names no ship.
     public static boolean canPlay(GameView game) {
         return !game.boards().galactica().damagedLocations().isEmpty()
-                || !game.boards().pegasus().damagedLocations().isEmpty()
+                || !game.boards().pegasus().destroyed() && !game.boards().pegasus().damagedLocations().isEmpty()
                 || !game.boards().galactica().damagedShips().isEmpty();
     }
 

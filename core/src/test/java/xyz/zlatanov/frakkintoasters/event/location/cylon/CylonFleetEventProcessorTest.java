@@ -17,6 +17,7 @@ import xyz.zlatanov.frakkintoasters.state.ship.ShipType;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
+import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.DISABLED_HANGAR_BAY;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.CYLON_FLEET;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_4_OCLOCK;
@@ -48,6 +49,17 @@ class CylonFleetEventProcessorTest extends EventTestHarness<CylonFleetEvent> {
         execute(new CylonFleetEvent(1, null));
 
         assertCylonShips(GALACTICA_SPACE_2_OCLOCK, GALACTICA_SPACE_4_OCLOCK);
+    }
+
+    // "Disabled Hangar": the basestar launches neither raiders nor heavy raiders (rule 11.7.3).
+    @Test
+    void shouldNotLaunchFromABasestarWithADisabledHangar() {
+        basestarAt(GALACTICA_SPACE_2_OCLOCK).damage(DISABLED_HANGAR_BAY);
+
+        execute(new CylonFleetEvent(1, null));
+
+        assertShipCount(GALACTICA_SPACE_2_OCLOCK, Raider.class, 0);
+        assertShipCount(GALACTICA_SPACE_2_OCLOCK, HeavyRaider.class, 0);
     }
 
     @Test

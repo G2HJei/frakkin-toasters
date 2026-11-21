@@ -1,5 +1,8 @@
 package xyz.zlatanov.frakkintoasters.engine;
 
+import xyz.zlatanov.frakkintoasters.event.character.ReligiousVisionsEvent;
+import xyz.zlatanov.frakkintoasters.event.character.SecretDestinyEvent;
+import xyz.zlatanov.frakkintoasters.event.crisis.ResolveCrisisCardEvent;
 import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,6 +13,8 @@ import xyz.zlatanov.frakkintoasters.event.ActionEvent;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
+import xyz.zlatanov.frakkintoasters.event.action.MovementAbilityEvent;
+import xyz.zlatanov.frakkintoasters.event.action.SkillCardPlays;
 import xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint;
 import xyz.zlatanov.frakkintoasters.event.crisis.ChooseCrisisSectionEvent;
 import xyz.zlatanov.frakkintoasters.event.location.galactica.ResearchLabEvent;
@@ -50,7 +55,9 @@ class TurnLoopTest {
 
     // Simple Crisis Cards, one a turn: nothing to ask but the chooser's section, and no die rolls or interrupt windows. "Riots"
     // costs 1 food and 1 morale on top, and "Detente" advances the Pursuit track, so the CAG places a civilian ship.
-    private static final List<CrisisCard> CRISIS_CARDS = List.of(RIOTS_NO_JUMP, DETENTE, RIOTS_NO_JUMP, RIOTS_NO_JUMP);
+    // Laura Roslin draws 2 each turn ("Religious Visions"), so more are stacked than turns are played.
+    private static final List<CrisisCard> CRISIS_CARDS = List.of(RIOTS_NO_JUMP, DETENTE, RIOTS_NO_JUMP, RIOTS_NO_JUMP,
+            RIOTS_NO_JUMP, RIOTS_NO_JUMP);
 
     private GameEngine engine;
     // The seats clockwise from the first player, who the seed picks.
@@ -107,6 +114,7 @@ class TurnLoopTest {
         assertTurn(2, second, RECEIVE_SKILLS);
         draw(second, Map.of(POLITICS, 3, LEADERSHIP, 2));
         passMovementAndAction(second);
+        religiousVisions(second, DETENTE, RIOTS_NO_JUMP);
         resolveCrisis(DETENTE);
         placeACivilianShip();
         assertTurn(3, third, RECEIVE_SKILLS);
@@ -146,13 +154,13 @@ class TurnLoopTest {
 
         draw(first, Map.of(POLITICS, 3, LEADERSHIP, 2));
         passMovementAndAction(first);
+        religiousVisions(first, RIOTS_NO_JUMP, DETENTE);
         resolveCrisis(RIOTS_NO_JUMP); // Helo is the Admiral, even off the board
 
         // his 1st turn: he draws, then has no Movement and no Action step to take
         assertTurn(2, second, RECEIVE_SKILLS);
         draw(second, Map.of(LEADERSHIP, 2, TACTICS, 2, PILOTING, 1));
-        resolveCrisis(DETENTE); // but he has a Crisis step
-        placeACivilianShip();
+        resolveCrisis(RIOTS_NO_JUMP); // but he has a Crisis step
         assertTurn(3, third, RECEIVE_SKILLS);
         assertEquals(Optional.empty(), engine.view().locate(KARL_HELO_AGATHON));
         assertEquals(2, crisisCardsDiscarded());
@@ -162,13 +170,17 @@ class TurnLoopTest {
         resolveCrisis(RIOTS_NO_JUMP);
         draw(first, Map.of(POLITICS, 3, LEADERSHIP, 2));
         passMovementAndAction(first);
-        resolveCrisis(RIOTS_NO_JUMP);
+        resolveCrisis(RIOTS_NO_JUMP); // she drew 2 "Riots", so there was nothing to choose
 
         // his 2nd turn
         assertTurn(5, second, RECEIVE_SKILLS);
         assertEquals(Optional.of(HANGAR_DECK), engine.view().locate(KARL_HELO_AGATHON));
         draw(second, Map.of(LEADERSHIP, 2, TACTICS, 2, PILOTING, 1));
-        assertWaitingFor(new AwaitingChoice(second, options(decision(second, MoveEvent.class), new NoOpEvent(second))));
+        // he has his Movement step, with a "Movement:" card when the seed dealt him one
+        val movementCard = SkillCardPlays.canPlayMovementAbility(engine.view(), engine.view().player(second));
+        assertWaitingFor(new AwaitingChoice(second, movementCard
+                ? options(decision(second, MoveEvent.class), decision(second, MovementAbilityEvent.class), new NoOpEvent(second))
+                : options(decision(second, MoveEvent.class), new NoOpEvent(second))));
     }
 
     /* inputs: each one checks restore at the pause it leads to */
@@ -186,8 +198,20 @@ class TurnLoopTest {
         play(engine -> engine.choose(player, single(new NoOpEvent(player))));
     }
 
-    // The title holder that the card names chooses its top section.
+    // "Religious Visions": Laura Roslin draws 2 and keeps the first.
+    private void religiousVisions(int roslin, CrisisCard kept, CrisisCard putAtBottom) {
+        assertWaitingFor(new AwaitingChoice(roslin, options(new ReligiousVisionsEvent(roslin, kept, putAtBottom),
+                new ReligiousVisionsEvent(roslin, putAtBottom, kept))));
+        play(engine -> engine.choose(roslin, single(new ReligiousVisionsEvent(roslin, kept, putAtBottom))));
+    }
+
+    // Kara "Starbuck" Thrace lets the revealed card resolve ("Secret Destiny"), then the title holder that the card names
+    // chooses its top section.
     private void resolveCrisis(CrisisCard card) {
+        val starbuck = engine.view().playerNumber(KARA_STARBUCK_THRACE);
+        assertWaitingFor(new AwaitingChoice(starbuck, options(new SecretDestinyEvent(starbuck, card),
+                new ResolveCrisisCardEvent(card))));
+        play(engine -> engine.choose(starbuck, single(new ResolveCrisisCardEvent(card))));
         val game = engine.view();
         val holder = switch (card.chooser()) {
             case ADMIRAL -> game.admiral();

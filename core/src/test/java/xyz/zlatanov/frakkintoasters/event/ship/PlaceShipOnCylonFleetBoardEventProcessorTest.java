@@ -30,6 +30,29 @@ class PlaceShipOnCylonFleetBoardEventProcessorTest extends EventTestHarness<Plac
         assertShipCount(GALACTICA_SPACE_8_OCLOCK, 2); // area 7-8 is in front of Galactica (rule 11.4)
     }
 
+    // "He then moves all ships of all types in that space area" (rule 11.4.1.2).
+    @Test
+    void shouldTransferEveryShipOfTheSpaceArea() {
+        raiderAt(CYLON_FLEET_SPACE_5_6);
+        basestarAt(CYLON_FLEET_SPACE_5_6);
+        outOfRaiders();
+
+        execute(new PlaceShipOnCylonFleetBoardEvent(RAIDER));
+
+        assertNoShips(CYLON_FLEET_SPACE_5_6);
+    }
+
+    // No raider on the Cylon Fleet board either: nothing moves.
+    @Test
+    void shouldMoveNothingWithoutAShipOfTheTypeOnTheCylonFleetBoard() {
+        basestarAt(CYLON_FLEET_SPACE_5_6);
+        outOfRaiders();
+
+        execute(new PlaceShipOnCylonFleetBoardEvent(RAIDER));
+
+        assertShipCount(CYLON_FLEET_SPACE_5_6, 1);
+    }
+
     private void outOfRaiders() {
         cylonShips.raider().ifPresent(r -> outOfRaiders());
     }

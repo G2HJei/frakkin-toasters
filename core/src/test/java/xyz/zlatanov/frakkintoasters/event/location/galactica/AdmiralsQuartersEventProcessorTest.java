@@ -1,5 +1,11 @@
 package xyz.zlatanov.frakkintoasters.event.location.galactica;
 
+import static xyz.zlatanov.frakkintoasters.state.board.Location.COMMAND;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.HANGAR_DECK;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.SAUL_TIGH;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
+import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.allOf;
+import xyz.zlatanov.frakkintoasters.event.character.CylonHatredEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
@@ -22,8 +28,8 @@ class AdmiralsQuartersEventProcessorTest extends EventTestHarness<AdmiralsQuarte
 
     @BeforeEach
     void setUpAtLocation() {
-        player(1).character(WILLIAM_ADAMA);
-        moveTo(Location.ADMIRALS_QUARTERS, WILLIAM_ADAMA);
+        player(1).character(ELLEN_TIGH);
+        moveTo(Location.ADMIRALS_QUARTERS, ELLEN_TIGH);
         player(3).character(GAIUS_BALTAR);
         moveTo(RESEARCH_LAB, GAIUS_BALTAR);
     }
@@ -56,7 +62,7 @@ class AdmiralsQuartersEventProcessorTest extends EventTestHarness<AdmiralsQuarte
 
     @Test
     void acceptProphecyStaysAgainstAnotherCharacter() {
-        president(WILLIAM_ADAMA);
+        president(ELLEN_TIGH);
         ops.titles().putInPlay(QuorumCard.ACCEPT_PROPHECY, null);
 
         execute(new AdmiralsQuartersEvent(1, 3));
@@ -93,5 +99,28 @@ class AdmiralsQuartersEventProcessorTest extends EventTestHarness<AdmiralsQuarte
     @Test
     void shouldNotChooseSomeoneWhoIsNotPlaying() {
         assertInvalid(new AdmiralsQuartersEvent(1, 4));
+    }
+
+    // "Insubordinate": the check is 3 easier when Kara Thrace is chosen.
+    @Test
+    void insubordinateMakesTheCheckEasierAgainstStarbuck() {
+        player(2).character(KARA_STARBUCK_THRACE);
+        moveTo(HANGAR_DECK, KARA_STARBUCK_THRACE);
+
+        execute(new AdmiralsQuartersEvent(1, 2));
+
+        assertEquals(-3, game.activeSkillCheck().difficultyAdjustment());
+        assertSkillCheckTriggered(ADMIRALS_QUARTERS);
+    }
+
+    // "Cylon Hatred": Saul Tigh is asked as the location is activated.
+    @Test
+    void cylonHatredIsOffered() {
+        player(2).character(SAUL_TIGH);
+        moveTo(COMMAND, SAUL_TIGH);
+
+        execute(new AdmiralsQuartersEvent(1, 3));
+
+        assertFollowup(allOf(one(new CylonHatredEvent(2), new NoOpEvent(2)), FollowupUtils.beforeSkillCheckFollowups(game)));
     }
 }

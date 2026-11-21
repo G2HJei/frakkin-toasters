@@ -1,6 +1,5 @@
 package xyz.zlatanov.frakkintoasters.event.skillcheck;
 
-import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 
@@ -8,10 +7,8 @@ public class ASecondChanceEventProcessor extends EventProcessor<ASecondChanceEve
 
     @Override
     public Followup process() {
-        val currentPlayer = game.currentPlayer();
-        if (!currentPlayer.isRevealedCylon()) {
-            ops.player(currentPlayer.number()).gainMiracleToken();
-        }
+        // "the current player gains 1 miracle token", if he can (rules 4.3.1, 4.3.2)
+        ops.player(game.currentPlayer().number()).gainMiracleToken();
         return Followup.NONE;
     }
 }

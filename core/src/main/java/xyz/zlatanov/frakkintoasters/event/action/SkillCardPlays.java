@@ -1,6 +1,8 @@
 package xyz.zlatanov.frakkintoasters.event.action;
 
 import lombok.NoArgsConstructor;
+import xyz.zlatanov.frakkintoasters.event.character.ActionCosts;
+import xyz.zlatanov.frakkintoasters.event.character.CharacterBans;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.*;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
@@ -25,6 +27,10 @@ public final class SkillCardPlays {
     public static boolean canPlay(GameView game, PlayerView player, SkillCardType type) {
         // Revealed Cylons, and Cylon Leaders who aren't Infiltrating, can't use them (rules 6.1.2.3, 6.2.1).
         if (!player.isHuman()) {
+            return false;
+        }
+        // "Specialized" forbids some cards, "Reluctant" costs another card.
+        if (!CharacterBans.canUseSkillCardAction(player, type) || !ActionCosts.canPaySkillCardCost(game, player, type)) {
             return false;
         }
         return switch (type) {

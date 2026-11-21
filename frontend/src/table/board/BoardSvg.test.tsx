@@ -32,7 +32,7 @@ const game = {
     damagedVipers: [],
     boardingParty: [{ id: 1040, position: 'POSITION_1' }],
   },
-  pegasus: { engineRoomActivated: false, locations: [location('AIRLOCK', ['LAURA_ROSLIN'])] },
+  pegasus: { engineRoomActivated: false, destroyed: false, locations: [location('AIRLOCK', ['LAURA_ROSLIN'])] },
   cylonFleet: {
     pursuit: 'START',
     locations: [location('CYLON_FLEET_SPACE_2')],
@@ -120,6 +120,15 @@ describe('the board', () => {
     const groups = groupShips([ship(5, 'RAIDER'), ship(1, 'VIPER', { pilot: 'LEE_ADAMA' }), ship(2, 'RAIDER'), ship(9, 'BASESTAR', { damage: ['CRITICAL_HIT'] }), ship(3, 'VIPER')]);
 
     expect(groups.map((group) => group.ships.map((one) => one.id))).toEqual([[9], [2, 5], [1], [3]]);
+  });
+
+  it('veils the locations of a destroyed Pegasus', () => {
+    const destroyed = { ...game, pegasus: { ...game.pegasus, destroyed: true } } as unknown as GameProjection;
+    expect(renderBoard().querySelector('[data-location="AIRLOCK"]')?.classList).not.toContain('destroyed');
+    const board = renderBoard(undefined, destroyed);
+    expect(board.querySelector('[data-location="AIRLOCK"]')?.classList).toContain('destroyed');
+    expect(board.querySelector('[data-location="AIRLOCK"] .destroyed-veil')).not.toBeNull();
+    expect(board.querySelector('[data-location="RESEARCH_LAB"]')?.classList).not.toContain('destroyed');
   });
 
   it('labels a damaged location inside it, under its printed name, and puts the markers on the tracks', () => {

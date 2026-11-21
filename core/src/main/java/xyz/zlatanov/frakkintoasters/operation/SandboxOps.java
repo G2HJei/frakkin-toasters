@@ -15,8 +15,11 @@ import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.PlayerPile;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.board.Resource;
+import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
+import xyz.zlatanov.frakkintoasters.state.card.MutinyCard;
 import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
+import xyz.zlatanov.frakkintoasters.state.crisis.SuperCrisisCard;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import xyz.zlatanov.frakkintoasters.state.ship.CylonShip;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
@@ -63,6 +66,27 @@ public class SandboxOps extends AbstractOps {
     public void giveSkillCard(int playerNumber, SkillCard card) {
         record(new CardsPulled(DeckId.of(card.type().color()), List.of(card)));
         record(new CardsGained(playerNumber, PlayerPile.SKILL, List.of(card)));
+    }
+
+    public void giveMutinyCard(int playerNumber, MutinyCard card) {
+        record(new CardsPulled(DeckId.MUTINY, List.of(card)));
+        record(new CardsGained(playerNumber, PlayerPile.MUTINY, List.of(card)));
+    }
+
+    /**
+     * Gives a Loyalty Card out of the deck it is in, {@code null} for a "You Are a Cylon" card, which isn't in a deck
+     * before it is dealt.
+     */
+    public void giveLoyaltyCard(int playerNumber, LoyaltyCard card, DeckId from) {
+        if (from != null) {
+            record(new CardsPulled(from, List.of(card)));
+        }
+        record(new CardsGained(playerNumber, PlayerPile.LOYALTY, List.of(card)));
+    }
+
+    public void giveSuperCrisisCard(int playerNumber, SuperCrisisCard card) {
+        record(new CardsPulled(DeckId.SUPER_CRISIS, List.of(card)));
+        record(new CardsGained(playerNumber, PlayerPile.SUPER_CRISIS, List.of(card)));
     }
 
     public void giveQuorumCardToPresident(QuorumCard card) {

@@ -3,6 +3,7 @@ package xyz.zlatanov.frakkintoasters.event.loyalty;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
+import xyz.zlatanov.frakkintoasters.event.character.SleeperAgentEvent;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
@@ -43,9 +44,9 @@ class SleeperAgentPhaseEventProcessorTest extends EventTestHarness<SleeperAgentP
                 single(new FinishSleeperAgentPhaseEvent())));
     }
 
-    // Boomer's and Baltar's extra cards (rule 6.1.2.2, A2.1.1.6), unless they are revealed Cylons.
+    // Boomer's "Sleeper Agent": 2 cards, then the "Brig". Baltar's "Coward" card comes at the start of the game only.
     @Test
-    void boomerAndBaltarAreDealtTwo() {
+    void boomerIsDealtTwoThenGoesToTheBrigAndBaltarOne() {
         setUpGame(3);
         player(1).character(SHARON_BOOMER_VALERII);
         player(2).character(GAIUS_BALTAR);
@@ -54,8 +55,8 @@ class SleeperAgentPhaseEventProcessorTest extends EventTestHarness<SleeperAgentP
         execute(new SleeperAgentPhaseEvent());
 
         assertFollowup(all(
-                single(new DealLoyaltyCardsEvent(1, 2, false)),
-                single(new DealLoyaltyCardsEvent(2, 2, false)),
+                all(new DealLoyaltyCardsEvent(1, 2, false), new SleeperAgentEvent(1)),
+                single(new DealLoyaltyCardsEvent(2, 1, false)),
                 single(new DealLoyaltyCardsEvent(3, 1, false)),
                 single(new FinishSleeperAgentPhaseEvent())));
     }

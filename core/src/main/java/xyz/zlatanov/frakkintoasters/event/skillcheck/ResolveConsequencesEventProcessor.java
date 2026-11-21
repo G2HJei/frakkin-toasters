@@ -4,7 +4,7 @@ import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.crisis.ActivateCylonBasestarsEvent;
 import xyz.zlatanov.frakkintoasters.event.officials.GiveTitlesToNextInLineEvent;
-import xyz.zlatanov.frakkintoasters.event.ship.DamageGalacticaEvent;
+import xyz.zlatanov.frakkintoasters.event.ship.DamageBattlestarEvent;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
 import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.chooseCharacterForSickbay;
@@ -16,9 +16,9 @@ public class ResolveConsequencesEventProcessor extends EventProcessor<ResolveCon
         return switch (game.activeSkillCheck().type()) {
             case DIVISIVE_BEHAVIOR, IN_THE_RING -> chooseCharacterForSickbay(game);
             case HAUNTED_BY_THE_PAST -> single(new GiveTitlesToNextInLineEvent(game.turn().currentPlayerNumber()));
-            case POWER_FAILURE -> single(new DamageGalacticaEvent());
+            case POWER_FAILURE -> single(new DamageBattlestarEvent());
             case THREAT_OF_SUPER_NOVA -> single(new ActivateCylonBasestarsEvent());
-            case FIRE_ALL_MISSILES -> all(new DamageGalacticaEvent(), new DamageGalacticaEvent());
+            case FIRE_ALL_MISSILES -> all(new DamageBattlestarEvent(), new DamageBattlestarEvent());
             default -> NONE;
         };
     }

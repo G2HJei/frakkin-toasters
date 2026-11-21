@@ -12,6 +12,9 @@ public class RollDieEventProcessor extends EventProcessor<RollDieEvent> {
 
     @Override
     public Followup process() {
+        if (game.turn().dieRoll().replaced()) {
+            return Followup.NONE; // "Hotshot" or "Longshot" set the face instead
+        }
         ops.rollDie();
         return Followup.NONE;
     }

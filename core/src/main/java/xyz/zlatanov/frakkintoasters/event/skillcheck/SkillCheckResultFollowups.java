@@ -1,13 +1,15 @@
 package xyz.zlatanov.frakkintoasters.event.skillcheck;
 
-import lombok.RequiredArgsConstructor;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.character.IntolerantEvent;
+import xyz.zlatanov.frakkintoasters.event.character.IntolerantEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
 import xyz.zlatanov.frakkintoasters.event.board.DecreaseJumpPreparationEvent;
 import xyz.zlatanov.frakkintoasters.event.board.IncreaseJumpPreparationEvent;
 import xyz.zlatanov.frakkintoasters.event.board.PlaceCenturionsEvent;
+import xyz.zlatanov.frakkintoasters.event.character.DeceitfulDiscards;
 import xyz.zlatanov.frakkintoasters.event.crisis.ActivateCylonBasestarsEvent;
 import xyz.zlatanov.frakkintoasters.event.crisis.ActivateHeavyRaidersAndCenturionsEvent;
 import xyz.zlatanov.frakkintoasters.event.crisis.ActivateRaidersEvent;
@@ -50,12 +52,18 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.TREACHERY;
  * to one skill check use the specialized events in {@code event.skillcheck.result}. "No effect" results give
  * {@link Followup#NONE}. Skill checks with the same result are grouped together.
  */
-@RequiredArgsConstructor
 public class SkillCheckResultFollowups {
 
     private static final int LOW_SUPPLIES_FOOD_THRESHOLD = 6;
 
-    private final GameView game;
+    private final GameView          game;
+    // "Deceitful": one of Romo Lampkin's discards of a Crisis Card's check is smaller. A builder serves one result.
+    private final DeceitfulDiscards deceitful;
+
+    public SkillCheckResultFollowups(GameView game) {
+        this.game = game;
+        deceitful = DeceitfulDiscards.of(game, game.activeSkillCheck().type().onCrisisCard());
+    }
 
     public Followup followup() {
         val skillCheck = game.activeSkillCheck();
@@ -69,7 +77,7 @@ public class SkillCheckResultFollowups {
     private Followup pass(SkillCheckType type) {
         return switch (type) {
             // game board locations, acting on the character chosen by the location action
-            case ADMIRALS_QUARTERS -> single(sendTo(Location.BRIG, target()));
+            case ADMIRALS_QUARTERS -> intolerant(sendTo(Location.BRIG, target()));
             case AIRLOCK -> single(new ExecuteEvent(target()));
             // "Pass this skill check to move to any location", on Galactica only (rule 9.2.4)
             case BRIG -> inBrig(game.player(target()))
@@ -143,7 +151,7 @@ public class SkillCheckResultFollowups {
             case REVIEW_GALACTICAS_LOGS -> single(discard(admiral(), 3));
             case AN_OFFER_OF_PEACE, INCITEMENT_TO_MUTINY -> single(new ShuffleTreacheryIntoDestinyDeckEvent(2));
             case CYLON_INTRUDERS -> single(new PlaceCenturionsEvent(1));
-            case FOOTAGE_TRANSMITTED -> each(PlayerView::isRevealedCylon, p -> single(treachery(p, 2)));
+            case FOOTAGE_TRANSMITTED -> each(p -> !p.isHuman(), p -> single(treachery(p, 2)));
             case MANDATORY_TESTING, TERRORIST_INVESTIGATIONS, MEDICAL_BREAKTHROUGH -> NONE;
             default -> throw new FrakCallTheAdmiralException(); // no partial pass result printed
         };
@@ -176,7 +184,7 @@ public class SkillCheckResultFollowups {
             case TERRORIST_BOMBER, IN_THE_RING, DOMESTIC_DISPUTE ->
                     all(lose(MORALE, 1), sendTo(SICKBAY, currentPlayer()));
             case SEND_SURVEY_TEAM -> all(sendTo(SICKBAY, currentPlayer()), new DestroyRaptorEvent());
-            case AIRLOCK_LEAK -> all(new DamageGalacticaEvent(), sendTo(SICKBAY, currentPlayer()));
+            case AIRLOCK_LEAK -> all(new DamageBattlestarEvent(), sendTo(SICKBAY, currentPlayer()));
             case CENTURION_ASSAULT -> all(new DestroyRaptorEvent(), sendTo(SICKBAY, currentPlayer()));
             case SET_A_TRAP -> all(new PlaceCenturionsEvent(1), sendTo(SICKBAY, currentPlayer()));
             case A_TRAITOR_ACCUSED -> single(new PlayerDecisionEvent<>(currentPlayer(), SendToBrigEvent.class));
@@ -202,21 +210,21 @@ public class SkillCheckResultFollowups {
             case MEDICAL_BREAKTHROUGH, REUNITE_THE_FLEET, UNSETTLING_STORIES ->
                     allOf(single(lose(MORALE, 1)), eachPlayerDiscardsAndDrawsTreachery());
             case UNEXPECTED_REUNION ->
-                    allOf(single(lose(MORALE, 1)), onCurrentPlayer(new DiscardAllSkillCardsEvent(currentPlayer())));
-            case FAMILIAR_FACE -> all(lose(MORALE, 1), new DiscardAllSkillCardsEvent(admiral()));
+                    allOf(single(lose(MORALE, 1)), onCurrentPlayer(discardAll(currentPlayer())));
+            case FAMILIAR_FACE -> all(lose(MORALE, 1), discardAll(admiral()));
             case MYSTERIOUS_GUIDE ->
-                    allOf(single(lose(FUEL, 1)), onCurrentPlayer(new DiscardAllSkillCardsEvent(currentPlayer())));
-            case UNFAIR_BIAS -> allOf(single(new DamageGalacticaEvent()),
-                    onCurrentPlayer(new DiscardAllSkillCardsEvent(currentPlayer())));
-            case GUILTY_CONSCIENCE -> onCurrentPlayer(new DiscardRandomSkillCardsEvent(currentPlayer(), 3));
-            case HAUNTED_BY_THE_PAST -> eachHuman(p -> single(new DiscardRandomSkillCardsEvent(p, 1)));
+                    allOf(single(lose(FUEL, 1)), onCurrentPlayer(discardAll(currentPlayer())));
+            case UNFAIR_BIAS -> allOf(single(new DamageBattlestarEvent()),
+                    onCurrentPlayer(discardAll(currentPlayer())));
+            case GUILTY_CONSCIENCE -> onCurrentPlayer(discardRandom(currentPlayer(), 3));
+            case HAUNTED_BY_THE_PAST -> eachHuman(p -> single(discardRandom(p, 1)));
             case QUORUM_IN_UPROAR ->
-                    all(new QuorumInUproarFailEvent(), new DiscardRandomSkillCardsEvent(president(), 2));
+                    all(new QuorumInUproarFailEvent(), discardRandom(president(), 2));
             case INSUBORDINATE_CREW -> allOf(single(lose(MORALE, 1)),
                     each(p -> p.mutinyCards().isEmpty(), p -> single(new DrawMutinyCardEvent(p))));
             case RALLYING_SUPPORT ->
                     all(lose(POPULATION, 1), new DrawMutinyCardEvent(currentPlayer()), treachery(currentPlayer(), 1));
-            case FOOTAGE_TRANSMITTED -> allOf(each(PlayerView::isRevealedCylon, p -> single(treachery(p, 2))),
+            case FOOTAGE_TRANSMITTED -> allOf(each(p -> !p.isHuman(), p -> single(treachery(p, 2))),
                     single(new FootageTransmittedFailEvent()));
             // destiny deck
             case AN_OFFER_OF_PEACE -> all(lose(MORALE, 1), new ShuffleTreacheryIntoDestinyDeckEvent(2));
@@ -227,10 +235,10 @@ public class SkillCheckResultFollowups {
             case PRISONER_REVOLT -> allOf(single(lose(POPULATION, 1)), presidentChoosesAnotherPresident());
             case A_DESPERATE_PACT -> all(lose(MORALE, 1), new DetermineNextPresidentEvent(president()));
             // galactica, jump preparation and boarding party
-            case THREAT_OF_SUPER_NOVA -> all(lose(POPULATION, 1), new DamageGalacticaEvent());
-            case GALACTICA_FALLING_APART -> all(lose(MORALE, 1), new DamageGalacticaEvent());
-            case ENEMY_OF_MY_ENEMY -> all(lose(MORALE, 2), new DamageGalacticaEvent());
-            case CYLON_INTRUDERS -> all(new DamageGalacticaEvent(), new PlaceCenturionsEvent(2));
+            case THREAT_OF_SUPER_NOVA -> all(lose(POPULATION, 1), new DamageBattlestarEvent());
+            case GALACTICA_FALLING_APART -> all(lose(MORALE, 1), new DamageBattlestarEvent());
+            case ENEMY_OF_MY_ENEMY -> all(lose(MORALE, 2), new DamageBattlestarEvent());
+            case CYLON_INTRUDERS -> all(new DamageBattlestarEvent(), new PlaceCenturionsEvent(2));
             case NETWORK_COMPUTERS -> all(lose(POPULATION, 1), new PlaceCenturionsEvent(1));
             case JUMP_COMPUTER_FAILURE -> all(lose(POPULATION, 1), new DecreaseJumpPreparationEvent());
             case POWER_FAILURE, STRANGE_BEACON, TEMPLE_OF_THE_FIVE -> single(new DecreaseJumpPreparationEvent());
@@ -238,7 +246,7 @@ public class SkillCheckResultFollowups {
             case SCOUTING_FOR_FUEL, SCOUTING_FOR_WATER -> all(lose(FUEL, 1), new DestroyRaptorEvent());
             case LEGENDARY_DISCOVERY -> all(lose(FOOD, 1), new DestroyRaptorEvent());
             case HERA_RESCUED -> all(lose(MORALE, 2), new DestroyRaptorEvent());
-            case RAPTOR_MALFUNCTION -> all(new DamageGalacticaEvent(), new DestroyRaptorEvent());
+            case RAPTOR_MALFUNCTION -> all(new DamageBattlestarEvent(), new DestroyRaptorEvent());
             case CYLON_TRACKING_DEVICE -> all(new DestroyRaptorEvent(), new PlaceShipsEvent(1, 0, 2));
             case HANGAR_ACCIDENT -> all(lose(POPULATION, 1), new DamageVipersEvent(2, RESERVES));
             case STANDOFF_WITH_PEGASUS -> all(lose(POPULATION, 1), lose(MORALE, 1), new DamageVipersEvent(1, SPACE));
@@ -312,6 +320,18 @@ public class SkillCheckResultFollowups {
 
     /* events */
 
+    private Event discard(int playerNumber, int count) {
+        return deceitful.discard(playerNumber, count);
+    }
+
+    private Event discardRandom(int playerNumber, int count) {
+        return deceitful.discardRandom(playerNumber, count);
+    }
+
+    private Event discardAll(int playerNumber) {
+        return deceitful.discardAll(playerNumber);
+    }
+
     // A revealed Cylon ignores the penalties of a skill check (rule 6.1.2.1). Only the current player can be one, when he
     // resolves a Crisis Card at "Caprica".
     private Followup onCurrentPlayer(Event penalty) {
@@ -319,6 +339,13 @@ public class SkillCheckResultFollowups {
     }
 
     // A revealed Cylon ignores being sent to "Sickbay" or the "Brig" (rule 6.1.2.1), e.g. at "Caprica".
+    // "Intolerant": Helena Cain may have the target executed instead, on a strong enough pass.
+    private Followup intolerant(Event toTheBrig) {
+        return IntolerantEventProcessor.user(game)
+                .map(cain -> one(new IntolerantEvent(cain.number(), target()), toTheBrig))
+                .orElse(single(toTheBrig));
+    }
+
     private Event sendTo(Location destination, int playerNumber) {
         if (!game.player(playerNumber).isHuman()) {
             return new NoOpEvent(playerNumber);

@@ -7,6 +7,7 @@ import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
 import xyz.zlatanov.frakkintoasters.state.ship.Raider;
 
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_4_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.CYLON_FLEET_SPACE_4;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_8_OCLOCK;
 
@@ -20,6 +21,21 @@ class PlaceShipsEventProcessorTest extends EventTestHarness<PlaceShipsEvent> {
         assertShipCount(GALACTICA_SPACE_8_OCLOCK, Basestar.class, 1);
         assertShipCount(GALACTICA_SPACE_8_OCLOCK, Raider.class, 3);
         assertShipCount(GALACTICA_SPACE_2_OCLOCK, CivilianShip.class, 2);
+    }
+
+    // e.g. "Necessary Risk": the Cylon ships go to the chosen space area, the civilian ships still behind Galactica
+    @Test
+    void shouldPlaceTheCylonShipsInTheChosenArea() {
+        execute(new PlaceShipsEvent(1, 3, 1, GALACTICA_SPACE_4_OCLOCK));
+
+        assertShipCount(GALACTICA_SPACE_4_OCLOCK, Basestar.class, 1);
+        assertShipCount(GALACTICA_SPACE_4_OCLOCK, Raider.class, 3);
+        assertShipCount(GALACTICA_SPACE_2_OCLOCK, CivilianShip.class, 1);
+    }
+
+    @Test
+    void notInALocationThatIsNoSpaceArea() {
+        assertInvalid(new PlaceShipsEvent(1, 0, 0, CYLON_FLEET_SPACE_4));
     }
 
     @Test

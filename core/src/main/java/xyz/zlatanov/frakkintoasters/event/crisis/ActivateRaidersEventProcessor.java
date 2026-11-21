@@ -1,6 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event.crisis;
 
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.event.ship.LaunchRaidersEventProcessor;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
@@ -47,16 +48,17 @@ public class ActivateRaidersEventProcessor extends EventProcessor<ActivateRaider
                 .toList();
     }
 
+    // The raiders on the board now are the ones that activate, one space area at a time (rule 11.5).
     private Followup activateRaidersOneByOne(List<Raider> raiders, GalacticaBoardView galactica) {
-        //noinspection SuspiciousToArrayCall
-        return Followup.all(Stream.concat(
-                        Stream.of(new OpenInterruptWindowEvent(new BeforeRaidersActivate())), // "Run Interference"
-                        raiders.stream().map(r -> new ActivateRaiderEvent(r.id())))
-                .toArray(Event[]::new));
+        return Followup.all(
+                new OpenInterruptWindowEvent(new BeforeRaidersActivate()), // "Run Interference"
+                new ActivateRaiderAreasEvent(raiders.stream().map(Raider::id).toList()));
     }
 
     private Followup launchRaiders(List<BasestarView> basestars) {
-        basestars.forEach(basestar -> ops.ship(basestar.id()).launchRaiders(2));
+        basestars.stream()
+                .filter(LaunchRaidersEventProcessor::canLaunch)
+                .forEach(basestar -> ops.ship(basestar.id()).launchRaiders(2));
         return Followup.NONE;
     }
 

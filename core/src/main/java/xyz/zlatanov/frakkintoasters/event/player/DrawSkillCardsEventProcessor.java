@@ -4,6 +4,7 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint;
+import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.character.SkillSetOption;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
@@ -77,9 +78,20 @@ public class DrawSkillCardsEventProcessor extends EventProcessor<DrawSkillCardsE
     // Each card takes the place of an option that has its color. Options can share a color, as in Helena Cain's
     // "2xL, 2xTa, 1xTa/L", so a card may have to try each of them.
     private boolean fitsSkillSet(List<SkillCardColor> colors) {
-        val options = List.copyOf(player.character().skillSet());
+        return fits(player.character(), colors, extraCards());
+    }
+
+    /**
+     * @return whether the cards fit the skill set of the character, e.g. for Sherman "Doc" Cottle's "Treatment"
+     */
+    public static boolean fitsSkillSet(Character character, List<SkillCardColor> colors) {
+        return fits(character, colors, 0);
+    }
+
+    private static boolean fits(Character character, List<SkillCardColor> colors, int extra) {
+        val options = List.copyOf(character.skillSet());
         val room = options.stream().mapToInt(SkillSetOption::count).toArray();
-        return fits(colors, 0, options, room, extraCards());
+        return fits(colors, 0, options, room, extra);
     }
 
     private static boolean fits(List<SkillCardColor> colors, int next, List<SkillSetOption> options, int[] room,

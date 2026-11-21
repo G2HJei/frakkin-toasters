@@ -5,12 +5,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.PRESIDENTS_OFFICE;
-import static xyz.zlatanov.frakkintoasters.state.character.Character.LAURA_ROSLIN;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.ROMO_LAMPKIN;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.POLITICS;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.CONSOLIDATE_POWER;
 
@@ -18,8 +19,15 @@ class PresidentsOfficeEventProcessorTest extends EventTestHarness<PresidentsOffi
 
     @BeforeEach
     void setUpAtLocation() {
-        player(1).character(LAURA_ROSLIN);
-        moveTo(PRESIDENTS_OFFICE, LAURA_ROSLIN);
+        player(1).character(ROMO_LAMPKIN);
+        moveTo(PRESIDENTS_OFFICE, ROMO_LAMPKIN);
+    }
+
+    // Only a sandbox can leave a character on a destroyed Colonial One: its locations have no action (rule 9.4).
+    @Test
+    void shouldHaveNoActionOnADestroyedColonialOne() {
+        ops.keepCrisisCardInPlay(SkillCheckType.BOMB_ON_COLONIAL_1);
+        assertInvalid(new PresidentsOfficeEvent(1));
     }
 
     @Test

@@ -29,6 +29,11 @@ public class FinishExecutionEventProcessor extends EventProcessor<FinishExecutio
         // thoroughly, and draws one new Loyalty Card"
         ops.loyaltyDeck().addNotACylon();
         val followups = new ArrayList<Event>();
+        if (player.isMutineer()) {
+            // The new character "immediately receives the "You Are the Mutineer" Card faceup" (rule 7.1), and "anytime a
+            // human player receives" it, he draws one Mutiny Card (rule 5.2.1). He has no title to give away.
+            followups.add(new DrawMutinyCardEvent(player.number()));
+        }
         followups.add(new DealLoyaltyCardsEvent(player.number(), loyaltyCardsToDeal(), false));
         if (player.character() == SHARON_BOOMER_VALERII && sleeperAgentPhaseDone()) {
             // "If selected after the Sleeper Agent phase, she is immediately placed in the "Brig"" (rule A2.1.1.15)

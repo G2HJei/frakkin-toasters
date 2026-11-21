@@ -91,7 +91,8 @@ export function BoardSvg({ targets, onLocation, actAt, onAct }: BoardSvgProps) {
         }
         const isTarget = targets?.has(name) ?? false;
         const space = place.area === 'galacticaSpace' || place.area === 'cylonFleetSpace';
-        const destroyed = place.area === 'colonialOne' && (galactica?.colonialOneDestroyed ?? false);
+        const destroyed = (place.area === 'colonialOne' && (galactica?.colonialOneDestroyed ?? false))
+          || (place.area === 'pegasus' && (game.pegasus?.destroyed ?? false));
         // the location's card, large enough to read, on hover; the space areas have none
         const card = locationArt(name);
         return (
@@ -394,7 +395,7 @@ function FreeSpace({ game }: { game: GameProjection }) {
 
 // ---------------------------------------------------------------- the locations
 
-// Colonial One, destroyed, gets a veil, and the Engine Room a label once activated.
+// A destroyed Colonial One or Pegasus gets a veil, and the Engine Room a label once activated.
 function LocationMarks({ place, destroyed, engineRoom }: { place: Place; destroyed: boolean; engineRoom: boolean }) {
   return (
     <>

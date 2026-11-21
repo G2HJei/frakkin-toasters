@@ -3,13 +3,16 @@ package xyz.zlatanov.frakkintoasters.event.player;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
+import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.MUST_LAUNCH_IN_VIPER;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
+import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.GALACTICA;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.VIPER;
 
@@ -51,6 +54,25 @@ class SelectCharacterEventProcessorTest extends EventTestHarness<SelectCharacter
                 one(
                         new PlaceInSetupLocationEvent(1, PEGASUS_CIC),
                         new PlaceInSetupLocationEvent(1, COMMAND)));
+    }
+
+    // A Colonial One start after "Bomb on Colonial One": any Galactica location that isn't hazardous.
+    @Test
+    void shouldStartInSickbayWhenColonialOneIsDestroyed() {
+        ops.keepCrisisCardInPlay(SkillCheckType.BOMB_ON_COLONIAL_1);
+
+        execute(select(LAURA_ROSLIN));
+
+        // "the character starts in "Sickbay" instead" (rule 7.4)
+        assertEquals(SICKBAY, locate(LAURA_ROSLIN));
+    }
+
+    // Tom Zarek (alt.)'s "Disreputable": he starts the game holding a Mutiny Card.
+    @Test
+    void disreputableZarekDrawsAMutinyCard() {
+        execute(select(TOM_ZAREK_ALT));
+
+        assertFollowup(new DrawMutinyCardEvent(1));
     }
 
     @Test
@@ -134,10 +156,42 @@ class SelectCharacterEventProcessorTest extends EventTestHarness<SelectCharacter
         execute(select(CAVIL));
     }
 
+    // The last player to choose in a 7 player game has to be the Cylon Leader if nobody else is.
     @Test
     void shoudlForbidNonCylonLeaderIn7PlayerGame() {
         setup7playerGame();
         assertInvalid(select(WILLIAM_ADAMA));
+    }
+
+    @Test
+    void shouldAllowAHumanBeforeTheLastSeatOfA7PlayerGame() {
+        setUpGame(7);
+        player(2).character(CHIEF_GALEN_TYROL);
+
+        execute(select(ANASTASIA_DEE_DUALLA));
+
+        assertEquals(ANASTASIA_DEE_DUALLA, player(1).character());
+    }
+
+    @Test
+    void shouldAllowAHumanInTheLastSeatOnceTheCylonLeaderIsChosen() {
+        setUpGame(7);
+        player(2).character(CHIEF_GALEN_TYROL);
+        player(3).character(ANASTASIA_DEE_DUALLA);
+        player(4).character(CALLANDRA_CALLY_TYROL);
+        player(5).character(GAIUS_BALTAR_ALT);
+        player(6).character(SHERMAN_DOC_COTTLE);
+        player(7).character(CAVIL);
+
+        execute(select(WILLIAM_ADAMA));
+    }
+
+    // Boomer and Athena aren't versions of one character: both may be in the same game (rule 6.2.4).
+    @Test
+    void shouldAllowBoomerAndAthenaInTheSameGame() {
+        player(2).character(SHARON_BOOMER_VALERII);
+
+        execute(select(SHARON_ATHENA_AGATHON));
     }
 
     @Test

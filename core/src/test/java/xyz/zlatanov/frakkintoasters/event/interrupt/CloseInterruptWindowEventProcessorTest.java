@@ -4,11 +4,12 @@ import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
-import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
+import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow;
 import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow.*;
 import xyz.zlatanov.frakkintoasters.state.interrupt.PlayedInterruptCard;
+import xyz.zlatanov.frakkintoasters.state.interrupt.UsedRollAbility;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 
@@ -16,11 +17,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
+import static xyz.zlatanov.frakkintoasters.event.Followup.one;
+import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.rollDie;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
+import static xyz.zlatanov.frakkintoasters.state.character.CharacterAbility.ECO_OFFICER;
+import static xyz.zlatanov.frakkintoasters.state.character.CharacterAbility.HOTSHOT;
+import static xyz.zlatanov.frakkintoasters.state.character.CharacterAbility.LONGSHOT;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 
 class CloseInterruptWindowEventProcessorTest extends EventTestHarness<CloseInterruptWindowEvent> {
@@ -74,7 +80,7 @@ class CloseInterruptWindowEventProcessorTest extends EventTestHarness<CloseInter
 
         execute(new CloseInterruptWindowEvent());
 
-        assertFollowup(all(new PlayerDecisionEvent<>(1, TiebreakInterruptCardsEvent.class), new CloseInterruptWindowEvent()));
+        assertFollowup(tiebreak());
         assertEquals(2, game.turn().windowCards().size());
     }
 
@@ -102,7 +108,15 @@ class CloseInterruptWindowEventProcessorTest extends EventTestHarness<CloseInter
 
         execute(new CloseInterruptWindowEvent());
 
-        assertFollowup(all(new PlayerDecisionEvent<>(1, TiebreakInterruptCardsEvent.class), new CloseInterruptWindowEvent()));
+        assertFollowup(tiebreak());
+    }
+
+    // The current player keeps one of the two cards: an option each, which shows him the cards.
+    private Followup tiebreak() {
+        val cards = game.turn().windowCards();
+        return all(
+                one(new TiebreakInterruptCardsEvent(cards.get(0)), new TiebreakInterruptCardsEvent(cards.get(1))),
+                single(new CloseInterruptWindowEvent()));
     }
 
     @Test
@@ -165,6 +179,73 @@ class CloseInterruptWindowEventProcessorTest extends EventTestHarness<CloseInter
 
         assertFollowup(rollDie(new MajorVictoryResultEvent()));
         assertEquals(List.of(MAJOR_VICTORY), game.turn().resolvedInterruptCards());
+    }
+
+    @Test
+    void shouldRerollWithAnAbilityAndOpenTheWindowAgain() {
+        rolled(2);
+        ops.interrupts().openWindow(new AfterDieRoll());
+        ops.interrupts().useAbility(new UsedRollAbility(1, ECO_OFFICER, null, null));
+
+        execute(new CloseInterruptWindowEvent());
+
+        assertFollowup(all(new RollDieEvent(), new OpenInterruptWindowEvent(new AfterDieRoll())));
+        assertEquals(List.of(ECO_OFFICER), game.turn().dieRoll().abilities());
+        assertTrue(game.turn().hasUsed(1, ECO_OFFICER));
+        assertEquals(List.of(), game.turn().windowAbilities());
+        assertEquals(Optional.empty(), game.turn().interruptWindow());
+    }
+
+    // One reroll a window: the ability stays unused, for the window that opens again on the new roll.
+    @Test
+    void shouldRerollOnceAWindow() {
+        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
+        rolled(7);
+        open(new AfterViperAttacked(viper.id()), 2, EVASIVE_MANOEUVRES, null);
+        ops.interrupts().useAbility(new UsedRollAbility(1, ECO_OFFICER, null, null));
+
+        execute(new CloseInterruptWindowEvent());
+
+        assertFollowup(all(new RollDieEvent(), new OpenInterruptWindowEvent(new AfterViperAttacked(viper.id()))));
+        assertEquals(List.of(), game.turn().dieRoll().abilities());
+        assertFalse(game.turn().hasUsed(1, ECO_OFFICER));
+        assertEquals(List.of(), game.turn().windowAbilities());
+    }
+
+    // "Longshot": nothing modifies the result Anders chose, so a "Strategic Planning" played with it goes back unused.
+    @Test
+    void shouldFixTheResultWithLongshotAndGiveStrategicPlanningBack() {
+        ops.startDieRoll();
+        val card = open(new BeforeDieRoll(), 2, STRATEGIC_PLANNING, null);
+        ops.interrupts().useAbility(new UsedRollAbility(3, LONGSHOT, null, 7));
+
+        execute(new CloseInterruptWindowEvent());
+
+        assertEquals(7, game.turn().dieRoll().result());
+        assertTrue(game.turn().dieRoll().fixed());
+        assertEquals(List.of(), game.turn().dieRoll().cards());
+        assertEquals(List.of(card.card()), player(2).skillCards().cards());
+        assertEquals(0, player(3).miracleTokens()); // a miracle
+        assertEquals(List.of(), game.turn().resolvedInterruptCards());
+    }
+
+    // "Hotshot": the discarded card's strength +2 instead of the roll, which the cards still modify.
+    @Test
+    void shouldUseTheStrengthOfTheCardDiscardedForHotshot() {
+        ops.startDieRoll();
+        val discarded = new SkillCard(4, CONSOLIDATE_POWER);
+        player(2).skillCards().addOnTop(discarded);
+        open(new BeforeDieRoll(), 3, STRATEGIC_PLANNING, null);
+        ops.interrupts().useAbility(new UsedRollAbility(2, HOTSHOT, discarded, null));
+
+        execute(new CloseInterruptWindowEvent());
+
+        assertEquals(6, game.turn().dieRoll().value());
+        assertEquals(8, game.turn().dieRoll().result());
+        assertTrue(game.turn().dieRoll().replaced());
+        assertFalse(game.turn().dieRoll().fixed());
+        assertEquals(List.of(), player(2).skillCards().cards());
+        assertEquals(List.of(discarded), politicsDeck.discardedCards());
     }
 
     @Test

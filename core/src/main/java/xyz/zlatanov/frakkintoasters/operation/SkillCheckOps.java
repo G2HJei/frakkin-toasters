@@ -46,6 +46,15 @@ public class SkillCheckOps extends GameOps {
         return this;
     }
 
+    /**
+     * Starts the skill check of a Super Crisis Card that a revealed Cylon played.
+     */
+    public SkillCheckOps startSuperCrisis(SkillCheckType type, int playedBy) {
+        record(new SkillCheckStarted(type));
+        record(new PlayedBy(playedBy));
+        return this;
+    }
+
     public SkillCheckOps start(SkillCheckType type, int targetPlayerNumber) {
         record(new SkillCheckStarted(type));
         record(new TargetChosen(targetPlayerNumber));
@@ -70,7 +79,7 @@ public class SkillCheckOps extends GameOps {
         return playFromDestinyDeck(count, false);
     }
 
-    public List<SkillCard> playFromDestinyDeck(int count, boolean faceUp) { //todo always 2? check rules
+    public List<SkillCard> playFromDestinyDeck(int count, boolean faceUp) {
         List<SkillCard> cards = draw(DeckId.DESTINY, count);
         if (faceUp) {
             cards.forEach(this::addOnTopOfPile);
@@ -96,7 +105,9 @@ public class SkillCheckOps extends GameOps {
     public void playCards(int playerNumber, List<SkillCard> cards) {
         for (val card : cards) {
             record(new CardsLost(playerNumber, PlayerPile.SKILL, List.of(card)));
-            if (game.activeSkillCheck().cards().isEmpty()) {
+            // Face down until the shuffle, even onto an empty pile ("Guts and Initiative" skips the Destiny cards). After it,
+            // face up on its pile, e.g. "Force Their Hand".
+            if (game.activeSkillCheck().cardsDivided()) {
                 addOnTopOfPile(card);
             } else {
                 record(new CardsPlaced(CARDS, List.of(card), true));
@@ -107,6 +118,7 @@ public class SkillCheckOps extends GameOps {
     public List<SkillCard> shuffleAndDivideCards() {
         val cards = drawAllAndSort();
         splitIntoPiles(cards);
+        record(new CardsDivided());
         return cards;
     }
 
@@ -117,6 +129,15 @@ public class SkillCheckOps extends GameOps {
     public void discard(SkillCard card) {
         record(new CardRemoved(card, null));
         discardToDeck(card);
+    }
+
+    /**
+     * The player takes a revealed card of the check into his hand ("Command Authority"). The card leaves its pile, not
+     * the cards he played before the check.
+     */
+    public void takeRevealedCard(SkillCard card, int playerNumber) {
+        record(new CardRemoved(card, null));
+        player(playerNumber).receiveSkillCard(card);
     }
 
     public void giveCardToPlayer(SkillCard card, int playerNumber) {
@@ -138,6 +159,21 @@ public class SkillCheckOps extends GameOps {
 
     public void makePoliticsCountPositive() {
         record(new PoliticsCountPositive());
+    }
+
+    public void zeroStrength(SkillCardColor color) {
+        record(new StrengthZeroed(color));
+    }
+
+    /**
+     * Puts cards from the player's hand into the check after its cards were revealed ("Human Delusion"): face up, each
+     * on its pile.
+     */
+    public void addRevealedCards(int playerNumber, List<SkillCard> cards) {
+        for (val card : cards) {
+            record(new CardsLost(playerNumber, PlayerPile.SKILL, List.of(card)));
+            addOnTopOfPile(card);
+        }
     }
 
     public void lookAt(int playerNumber, int targetPlayerNumber, List<SkillCard> cards) {
@@ -207,6 +243,23 @@ public class SkillCheckOps extends GameOps {
     private boolean matchesSkillCheckColors(SkillCard card) {
         val cardColor = card.type().color();
         return game.activeSkillCheck().type().skillCheckColors().contains(cardColor);
+    }
+
+    /**
+     * Discards the whole Destiny deck and builds a new one from {@code count} cards of the color, as many as are left
+     * ("Psychological Warfare"). Once it runs out, the next one is built as usual.
+     */
+    public void replaceDestinyDeck(SkillCardColor color, int count) {
+        val destiny = game.decks().destiny().cards();
+        destiny.forEach(this::discardToDeck);
+        record(new DeckShuffled(DeckId.DESTINY, List.of()));
+        List<SkillCard> cards = draw(DeckId.of(color), Math.min(count, game.decks().skillCardsLeft(color)));
+        if (cards.isEmpty()) {
+            createDestinyDeck();
+            return;
+        }
+        record(new CardsAddedOnTop(DeckId.DESTINY, cards));
+        shuffle(DeckId.DESTINY);
     }
 
     public void shuffleIntoDestinyDeck(SkillCardColor... skillCardColor) {

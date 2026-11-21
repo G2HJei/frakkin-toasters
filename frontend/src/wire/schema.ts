@@ -24,8 +24,9 @@ export interface RecordType {
   interfaces: string[];
   typeParams?: string[];
   location?: string | null;
-  // the card a Quorum Card's event plays
+  // the card a Quorum Card's or a Mutiny Card's event plays
   quorumCard?: string | null;
+  mutinyCard?: string | null;
   components: Component[];
 }
 
@@ -45,7 +46,8 @@ export type SchemaType = RecordType | UnionType | EnumType;
 export interface Schema {
   formatVersion: number;
   types: Record<string, SchemaType>;
-  lists: { events: string[]; sandboxEvents: string[]; facts: string[] };
+  // anytimeEvents: what a player may do at any pause, without being asked (`AnytimeEvent`)
+  lists: { events: string[]; sandboxEvents: string[]; anytimeEvents: string[]; facts: string[] };
   messages: Record<string, string>;
 }
 

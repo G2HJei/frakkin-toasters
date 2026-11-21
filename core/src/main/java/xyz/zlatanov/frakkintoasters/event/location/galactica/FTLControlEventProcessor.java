@@ -2,6 +2,8 @@ package xyz.zlatanov.frakkintoasters.event.location.galactica;
 
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.location.LocationActionProcessor;
+import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow.AfterFtlControlRoll;
+import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow.BeforeDieRoll;
 import xyz.zlatanov.frakkintoasters.state.track.JumpPreparation;
 import xyz.zlatanov.frakkintoasters.state.view.GameView;
 
@@ -20,7 +22,7 @@ public class FTLControlEventProcessor extends LocationActionProcessor<FTLControl
     }
 
     @Override
-    public Followup process() {
-        return rollDie(new FTLControlResultEvent());
+    protected Followup act() {
+        return rollDie(new BeforeDieRoll(), new AfterFtlControlRoll(), new FTLControlResultEvent()); // "FTL Operator" may reroll it
     }
 }

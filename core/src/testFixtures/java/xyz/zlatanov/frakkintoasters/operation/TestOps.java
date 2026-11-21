@@ -1,5 +1,7 @@
 package xyz.zlatanov.frakkintoasters.operation;
 
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.AbilityTriggered;
+import xyz.zlatanov.frakkintoasters.state.character.CharacterAbility;
 import lombok.NoArgsConstructor;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedOnTop;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
@@ -20,6 +22,11 @@ public class TestOps {
     // The cards don't come out of their decks, as GiveSkillCardEvent's don't.
     public static void stackDestinyDeck(GameOps ops, List<SkillCard> topFirst) {
         ops.record(new CardsAddedOnTop(DESTINY, topFirst));
+    }
+
+    // Only a loss of population triggers one in play ("Memento"), and that needs Brendan "Hot Dog" Costanza.
+    public static void triggerAbility(GameOps ops, int playerNumber, CharacterAbility ability) {
+        ops.record(new AbilityTriggered(playerNumber, ability));
     }
 
     // Cards of a deck that the game builds later or from the whole enum, so a test knows what a draw gives.

@@ -4,7 +4,10 @@ import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.NONE;
+import static xyz.zlatanov.frakkintoasters.event.action.GrantEvent.GrantedBy.AGGRESSIVE_TACTICS;
 import static xyz.zlatanov.frakkintoasters.event.action.GrantEvent.GrantedBy.EXECUTIVE_ORDER;
+import static xyz.zlatanov.frakkintoasters.event.action.GrantEvent.GrantedBy.EXPERT_PILOT;
+import static xyz.zlatanov.frakkintoasters.event.action.GrantEvent.GrantedBy.MAINTENANCE_ENGINEER;
 
 public class GrantEventProcessor extends EventProcessor<GrantEvent> {
 
@@ -20,6 +23,10 @@ public class GrantEventProcessor extends EventProcessor<GrantEvent> {
             // (A2.3.8.4). It stops when the current player is executed or revealed, unlike a "State of Emergency"
             // (A2.3.8.6).
             return NONE;
+        }
+        if ((event.grantedBy() == EXPERT_PILOT || event.grantedBy() == AGGRESSIVE_TACTICS
+                || event.grantedBy() == MAINTENANCE_ENGINEER) && game.turn().endedEarly()) {
+            return NONE; // the actions of his own turn, which is over
         }
         int playerNumber = event.playerNumber();
         if (game.turn().actingPlayerNumber() != playerNumber) {

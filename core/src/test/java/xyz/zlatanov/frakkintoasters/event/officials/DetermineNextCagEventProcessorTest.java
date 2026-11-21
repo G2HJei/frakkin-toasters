@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.BRIG;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.LEE_APOLLO_ADAMA;
@@ -38,13 +37,13 @@ class DetermineNextCagEventProcessorTest extends EventTestHarness<DetermineNextC
     }
 
     @Test
-    void shouldElectNoOneWhenAllAreInBrig() {
+    void shouldElectTheHighestInTheBrigWhenAllAreThere() {
         moveTo(BRIG, KARA_STARBUCK_THRACE);
         moveTo(BRIG, LEE_APOLLO_ADAMA);
 
         execute(new DetermineNextCagEvent());
 
-        assertNull(cag());
+        assertEquals(LEE_APOLLO_ADAMA, cag()); // until one of them leaves the "Brig" (rule 4.4.3.2)
     }
 
 }

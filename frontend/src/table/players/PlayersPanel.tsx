@@ -59,7 +59,7 @@ function PlayerMat({ player }: { player: PlayerProjection }) {
           {player.human === false && !player.revealedCylon && <Badge className="cylon" art={null} label="Not human" />}
           {current && <TokenBadge token="CURRENT_PLAYER" label="Current" />}
           {turn?.actingPlayer === player.number && turn.actingPlayer !== turn.currentPlayer && <Badge className="token" art={null} label="Acting" />}
-          {player.miracleToken && <TokenBadge token="MIRACLE" label="Miracle" />}
+          {player.miracleTokens > 0 && <TokenBadge token="MIRACLE" label={player.miracleTokens > 1 ? `${player.miracleTokens} miracles` : 'Miracle'} />}
         </p>
       </div>
       <div className="mat-body">

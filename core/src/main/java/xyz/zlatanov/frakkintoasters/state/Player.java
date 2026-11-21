@@ -10,7 +10,6 @@ import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
 import xyz.zlatanov.frakkintoasters.state.card.MutinyCard;
 import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
 import xyz.zlatanov.frakkintoasters.state.card.SeenLoyaltyCard;
-import xyz.zlatanov.frakkintoasters.state.card.SeenLoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.crisis.SuperCrisisCard;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
@@ -25,7 +24,7 @@ import java.util.List;
 import java.util.Set;
 
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.MUTINEER;
-import static xyz.zlatanov.frakkintoasters.state.character.Character.CHIEF_GALEN_TYROL;
+import static xyz.zlatanov.frakkintoasters.state.character.CharacterAbility.RECKLESS;
 import static xyz.zlatanov.frakkintoasters.state.character.CharacterType.CYLON_LEADER;
 
 @RequiredArgsConstructor
@@ -41,7 +40,7 @@ public class Player implements PlayerView {
     private final Deck<MutinyCard>      mutinyCards             = new Deck<>();
     private final Deck<SuperCrisisCard> superCrisisCards        = new Deck<>();
     private final Deck<QuorumCard>      quorumCards             = new Deck<>();
-    private       boolean               hasMiracleToken         = true;
+    private       int                   miracleTokens           = 1;
     private       boolean               isInfiltrating          = false;
     private final Set<Integer>          revealedCivilianShipIds = new LinkedHashSet<>();
     private       int                   turns                   = 0;
@@ -97,25 +96,23 @@ public class Player implements PlayerView {
 
     @Override
     public int handLimit() {
-        return character == CHIEF_GALEN_TYROL ? 8 : 10;
+        return hasAbility(RECKLESS) ? 8 : 10; // "Chief" Galen Tyrol's "Reckless"
     }
 
     @Mutates
     public void exhaustMiracleToken() {
-        if (!hasMiracleToken) {
-            throw new FrakCallTheAdmiralException();
+        if (miracleTokens == 0) {
+            throw new FrakCallTheAdmiralException("No miracle token to lose");
         }
-        hasMiracleToken = false;
+        miracleTokens--;
     }
 
     @Mutates
     public void gainMiracleToken() {
-        hasMiracleToken = true;
-    }
-
-    @Override
-    public boolean hasMiracleToken() {
-        return hasMiracleToken;
+        if (miracleTokens >= maxMiracleTokens()) {
+            throw new FrakCallTheAdmiralException("No room for another miracle token");
+        }
+        miracleTokens++;
     }
 
     @Override

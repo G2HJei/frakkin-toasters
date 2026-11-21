@@ -49,26 +49,19 @@ Next steps, in order:
 1. ~~Complete the skill check sequence according to `skill-check.drawio`.~~ Done, see "Skill Check Sequence".
 2. ~~Reanalyze existing events: `PlayerEvent` or current player.~~ Done. `GrantEvent` calls `GameOps.actingPlayer`
    for "Executive Order" and "State of Emergency" (see "Actions and Skill Cards").
-3. ~~Create the journal and tie it to the ops classes in `operation/`.~~ Done, see "Journal and Replay". Still open:
-   Done since: per-viewer hiding (`projection/`, see "Projections") and JSON (the backend's `JournalCodec`). The pending
-   followups are the engine's `Agenda`.
-4. ~~Create the game engine to drive the events and turns.~~ Done: the journal lives in `engine/journal/`, the turn state is grouped in `state/Turn`, `GameEngine` runs events through `submit` and `choose`, it restores a
-   game from its journal and rolls back a failed input (see "Engine"), `GameEngine.start` sets up a game and plays
-   its turns (see "Turn Loop"), processors check what players submit (see "Validation"), the Cylons can win (see
-   "End of Game and Mutiny"), a skill check runs from the action that starts it to its end, with every location
-   action in scope (see "Skill Check Sequence" and "Execution"), and the six interrupt Skill Cards are played in
-   secret windows around die rolls and attacks (see "Interrupt Cards" and "Combat"), and the Crisis step resolves every
-   Crisis Card and activates the Cylon ships by its icon (see "Crisis Cards"), and the fleet jumps through the Sleeper Agent
-   phase to the Kobol end game (see "Jump and Kobol"), and the Skill Cards with an "Action:" or a "Movement:" and
-   "Investigative Committee" are played (see "Actions and Skill Cards", `skill-cards-plan.md`), and the Quorum Cards
-   with the President's title action (see "Quorum Cards"). Still open, as new events that plug in: the other kinds of
-   actions (character sheets, the Admiral's and the CAG's Title Cards, Mutiny Cards), Cylon reveal, Super Crisis
-   cards, and the interrupts that aren't skill cards (character abilities such as Helo's reroll, and revealing a Motive
-   Card in the middle of resolving something, rule 6.2.2.1), which can reuse the interrupt windows.
+3. ~~Create the journal and tie it to the ops classes in `operation/`.~~ Done, see "Journal and Replay", with
+   per-viewer hiding (`projection/`, see "Projections") and JSON (the backend's `JournalCodec`). The pending followups
+   are the engine's `Agenda`.
+4. ~~Create the game engine to drive the events and turns.~~ Done: `GameEngine` runs, restores and rolls back a game
+   (see "Engine") and plays its turns (see "Turn Loop"), and every component of the Kobol game is built: every Crisis,
+   Super Crisis, Destination, Skill, Quorum, Mutiny, Loyalty and Motive Card, every location and Title Card action,
+   Pegasus' destruction and the 99 character abilities (`skill-cards-plan.md`, `quorum-cards-plan.md`,
+   `unimplemented-components-plan.md`; `unimplemented-components.md` records the choices made where the cards and rules
+   are silent, and the few questions left open).
 5. ~~Create a working frontend with the events that exist by then.~~ Done (`backend-plan.md`, `frontend-plan.md`):
    the backend, the sandbox, the wire schema, the table with the board, the lobby and rooms (see "Backend" and
-   "Frontend"). Still open: legal-move hints (a list in `core` of the legal answers to a decision), more inputs on the
-   board (viper activation, targets of a choice lighting up), and the events still open in the engine.
+   "Frontend"). Still open: legal-move hints (a list in `core` of the legal answers to a decision) and more inputs on
+   the board (viper activation, targets of a choice lighting up).
 
 ## Project Structure
 
@@ -79,14 +72,18 @@ whole root package, so nothing in `backend` may be named `XxxEventProcessor`.
 ### Key Packages
 
 - root - `EventProcessor` (base class for all processors)
-- `event/` - event records and their processors, grouped by area (`action`, `board`, `crisis`, `deck`, `endgame`,
-  `interrupt`, `jump`, `location/{galactica,pegasus,colonialone,cylon}`, `loyalty`, `officials`, `player`, `ship`,
-  `skillcheck`, `skillcheck/ability`, `skillcheck/result`, `turn`). The attacks and the viper activation are in the root
-  package. Also `placeholder/` (events that need player input) and
-  `constraint/` (`EventConstraint`, `ConstrainedEvent`). `location/` holds `LocationActionProcessor`, the base of the
-  location action processors. `action/` holds `Actions` (what a player can do now), the Skill Card and Quorum Card
-  plays and the grants, `action/skillcard/` an event per Skill Card played for its "Action:" or "Movement:" (see
-  "Actions and Skill Cards"), `action/quorum/` an event per Quorum Card, and `action/title/` the Title Card actions
+- `event/` - event records and their processors, grouped by area (`action`, `board`, `character`, `crisis`, `deck`,
+  `endgame`, `interrupt`, `jump`, `location/{galactica,pegasus,colonialone,cylon}`, `loyalty`, `officials`, `player`,
+  `sandbox`, `ship`, `skillcheck`, `skillcheck/ability`, `skillcheck/result`, `turn`). The attacks and the viper
+  activation are in the root package. Also `placeholder/` (`PlayerDecisionEvent`) and `constraint/`
+  (`EventConstraint`, `ConstrainedEvent`). `location/` holds `LocationActionProcessor`, the base of the location action
+  processors. `action/` holds `Actions` (what a player can do now), the Skill, Quorum and Mutiny Card plays, the
+  character actions and movements, and the grants; below it an event per Skill Card played for its "Action:" or
+  "Movement:" (`action/skillcard/`), per Quorum Card (`action/quorum/`), per Mutiny Card (`action/mutiny/`), per
+  "Action:" and "Movement:" ability of a character sheet (`action/character/`), and the Title Card actions
+  (`action/title/`). `character/` holds `CharacterAbilities`, the bans, costs and penalties, and the events of the
+  other character abilities (see "Character Abilities"). `loyalty/` holds the Cylon reveal, the Final Five, the
+  Personal Goals and the Motive Cards (see "Cylons and Loyalty Cards")
 - `operation/` - game ops, the only code that decides what changes: `GameOps` (entry point) hands out `PlayerOps`,
   `ShipOps`, `GalacticaOps`, `PegasusOps`, `CylonFleetOps`, `SkillCheckOps`, `LoyaltyDeckOps`, `TitleOps`,
   `InterruptOps`. They extend
@@ -104,8 +101,9 @@ whole root package, so nothing in `backend` may be named `XxxEventProcessor`.
   never depends on `..operation..`, and nothing else in `core` depends on it (`ArchitectureTest`). See "Projections"
 - `state/` - game state model: `Game` (top level), `Turn` (turn number, `GameStep`, current and acting player, the
   Crisis Cards of the turn and whether it returns to the Crisis step, the `DieRoll`, the open interrupt window and its
-  cards, the Skill Cards played for their abilities, the "Preventative Policy" loss reductions and the "Negotiation"
-  hold, read through
+  cards, the Skill Cards played for their abilities, the "Preventative Policy" loss reductions, the "Negotiation"
+  hold, the `TurnLimit`s each player used (what is limited to once a turn, e.g. the CAG's pilot action,
+  `TurnView.hasUsed(n, limit)`) and the character abilities each used (`TurnView.hasUsed(n, ability)`), read through
   `GameView.turn()`; `number` counts player turns, not rounds), `Player` (`turns()` counts the player's own turns), `Team` (the winner in
   `GameView.outcome()`), `Die` (d8), `DieRoll` (a roll with the cards played on it), `Randomness`,
   `RemovedComponents`, `PlayerPile`, and the `@Mutates` marker
@@ -130,8 +128,10 @@ whole root package, so nothing in `backend` may be named `XxxEventProcessor`.
 - `state/crisis/` - `CrisisCard` (with its printed `CrisisChooser` and `CylonActivation`), `SuperCrisisCard`
 - `state/damage/` - damage card enums: `GalacticaDamage`, `PegasusDamage`, `BasestarDamage`
 - `state/track/` - `BoardingParty`, `JumpPreparation`, `Pursuit`
-- `state/character/` - `Character` enum (33 BSG characters), `CharacterType` enum
-- `state/util/` - `AllCardsProvider` (builds the full decks in canonical order)
+- `state/character/` - `Character` enum (33 BSG characters), `CharacterType` enum, `CharacterAbility` (the 99 abilities
+  of the sheets, with their character, `AbilityKind` and the miracle tokens a use spends)
+- `state/util/` - `AllCardsProvider` (builds the full decks in canonical order; the Skill decks follow the strengths of
+  Appendix A2.3.8, `AllCardsProviderTest`)
 - `state/exception/` - `InvalidActionException` (an event failed validation) and `FrakCallTheAdmiralException` (should
   never happen, i.e. a programming error)
 
@@ -167,8 +167,8 @@ game ops. Game ops do mechanics, and processors make decisions (targets, rules b
 
 Every state change leaves a fact in the journal, see "Journal and Replay".
 
-Placeholder events (`event/placeholder/`: `PlayerDecisionEvent`, `PlaySuperCrisisCardEvent`)
-have no processor. They stand for a point where a player has to choose. `PlayerDecisionEvent<T>(playerNumber,
+The placeholder event (`event/placeholder/`: `PlayerDecisionEvent`) has no processor. It stands for a point where a
+player has to choose. `PlayerDecisionEvent<T>(playerNumber,
 Class<T> action, List<EventConstraint>)` means "this player picks a concrete `T` event".
 
 `FollowupUtils` builds shared followup sequences, e.g. `beforeSkillCheckFollowups(game)`, and holds the helpers that
@@ -182,14 +182,20 @@ the state at that moment what follows.
 
 - A location action or a Crisis Card (`ResolveCrisisCardEventProcessor`, `ChooseCrisisSectionEventProcessor`) calls
   `ops.skillCheck().start(type)` and returns
-  `FollowupUtils.beforeSkillCheckFollowups(game)`: a "Political Prowess" decision per player for a location check,
-  then `MakeSkillCheckEvent`. That skips the check when "Political Prowess" decided it, and otherwise asks for the
+  `FollowupUtils.beforeSkillCheckFollowups(game)`: "Mysterious Intuition" for a Crisis Card's check when Boomer can
+  use it, a "Political Prowess" decision per player for a location check, then `MakeSkillCheckEvent`. That skips the
+  check when one of them decided it, and otherwise asks for the
   cards played before the check, from the player to the left of the current player (`eachPlayerFromTheLeft`).
 - `RevealCardsBeforeSkillCheckEvent` (and a tiebreak), `ResolveCardsBeforeSkillCheckEvent` (Support the People, the
-  Destiny cards, the cards played into the check), `ShuffleAndDivideCardsEvent` (the abilities unless "Restore
-  Order" was played, the "consequence" when a card with the ability icon was played in, a Reckless check's Treachery
-  cards), `TotalSkillCheckStrengthEvent` (Declare Emergency), `DetermineSkillCheckResultEvent`, then the result, and
-  `EndSkillCheckEvent` last.
+  Chief of Staff, "Fast Learner", the Destiny cards, the cards played into the check, then "Blind Devotion"),
+  `ShuffleAndDivideCardsEvent` ("Quick Fix" and "Human Delusion" once the cards are revealed, the abilities unless
+  "Restore Order" was played, the "consequence" when a card with the ability icon was played in, a Reckless check's
+  Treachery cards), `TotalSkillCheckStrengthEvent` (Declare Emergency), `DetermineSkillCheckResultEvent`, then the
+  result, `OfferCommandAuthorityEvent` (queued only when someone has "Command Authority" and its token), and
+  `EndSkillCheckEvent` last. The character abilities in a check are under "Character Abilities".
+- A card put into the check goes face down onto its pile of cards, even an empty one ("Guts and Initiative" skips the
+  Destiny cards), until `ShuffleAndDivideCardsEvent` records `SkillCheckFact.CardsDivided`
+  (`SkillCheckView.cardsDivided()`). A card added after that goes face up onto its pile, e.g. "Force Their Hand".
 - The current player resolves the abilities one at a time, in his order (rule 10.4.2).
   `DetermineSkillCheckAbilitiesOrderEvent` offers the ones left as a `OneOf` of `ResolveSkillCheckAbilityEvent`s and
   queues itself after the pick, so an ability whose card was removed first doesn't resolve. Only the cards from the
@@ -237,9 +243,11 @@ moment. Its pass and fail switches list every type, so a new `SkillCheckType` do
 ### Crisis Cards
 
 `ResolveCrisisCardEvent(card)` resolves a Crisis Card. The Crisis step queues it for the card it draws, and so does
-`ResolveCapricaCrisisCardEvent` for the one a Cylon chooses at "Caprica". The deck has 136 cards (the Cylon attack
-cards are left out, rule A2.7.2), and every one resolves: the Cylon Fleet crises, the base game, Pegasus, Exodus and
-Daybreak.
+`ResolveCapricaCrisisCardEvent` for the one a Cylon chooses at "Caprica", both through `CrisisCardReveals` (`drawn`:
+"Delusional Intuition" for the player who drew it, `revealed`: "Secret Destiny" before the card resolves). The deck has
+141 cards (the Cylon attack cards are left out, rule A2.7.2): the 136 different ones and the base game's extra copies of
+"Food Shortage" and "Water Shortage" (`DecksHolder`). Every one resolves: the Cylon Fleet crises, the base game,
+Pegasus, Exodus and Daybreak.
 
 A `CrisisCard` constant lists what is printed on the card: its `SkillCheckType` (`null` for an event crisis), its
 `CrisisChooser`, its `CylonActivation` icon and whether it has the "prepare for jump" icon. The images in
@@ -255,8 +263,14 @@ instruction.
   the chooser, because the engine derives who answers a `OneOf` from its options (see "Engine") and
   most sections name no player. Don't put the effects of a section directly into the `one(...)`. A section a card
   forbids isn't offered: the "nuke token" sections of "Abandon Galactica" and "Build Cylon Detector" need a nuke token.
-- `ChooseCrisisSectionEventProcessor` starts the skill check on the top of a skill check crisis, and otherwise asks
-  `followup(card, section)` for the effects of the section.
+- `ChooseCrisisSectionEventProcessor.resolve` starts the skill check on the top of a skill check crisis, and otherwise
+  asks `followup(card, section)` for the effects of the section. When "Moral Compass" can change the choice, the
+  processor offers `one(MoralCompassEvent, ResolveCrisisSectionEvent)` first, which resolve through the same method.
+- `choice(card)` applies "Amoral" (only the first section for Tory Foster as current player) and adds "Choose a
+  Different Path" (`ChooseADifferentPathEvent`, then `differentPath()`) for a chooser who can use it. Each builder
+  serves one card, and gets Romo Lampkin's discards from `DeceitfulDiscards` ("Deceitful": his first is 1 card
+  smaller, a `DeceitfulEvent`), as `SkillCheckResultFollowups` does for a Crisis Card's check. Every discard it gives
+  is a forced one, which "For Love" may make smaller (`ForcedDiscards`, see "Character Abilities").
 - An effect on the current player goes through `onCurrentPlayer`, because a revealed Cylon resolving the card at
   "Caprica" ignores it (rule 6.1.2.1). So does "each player", for the humans (`eachHuman`).
 - "Roll a die. On a 4 or lower, ..." queues `rollDie(new ResolveCrisisRollEvent(card, section))`, and `rollResult` holds
@@ -271,6 +285,30 @@ instruction.
 - "Fulfiller of Prophecy" returns to the Crisis step after the Activate Cylon Ships step (see "Turn Loop").
 - The Activate Cylon Ships step activates the icon of the card drawn last. The Cylon ships go through the same events
   as the skill check crises, e.g. `ActivateRaidersEvent`, in `CrisisCardFollowups.activation`.
+
+### Super Crisis Cards
+
+A revealed Cylon draws one when he reveals (not on an execution) and with the "Resurrection Ship"'s action (no limit),
+and plays one with the first option of "Caprica" (`CapricaPlaySuperCrisisCardEvent`, `event/location/cylon/`).
+
+- `SuperCrisisCard` lists what is printed: its `SkillCheckType`, or for "Fighting Blind", "Psychological Warfare" and
+  "Demand Peace Manifesto" the title holder who chooses (`CrisisChooser`). None has an activation or jump icon, and
+  there is no Activate Cylon Ships step after it.
+- The play takes the card out of the hand (`PlayerOps.playSuperCrisisCard`) and queues
+  `ResolveSuperCrisisCardEvent(playerNumber, card)`, then `DiscardSuperCrisisCardEvent`, which leaves a card kept in
+  play out of the discard pile. The resolve starts the skill check with `SkillCheckOps.startSuperCrisis`, which records
+  who played it (`SkillCheckFact.PlayedBy`, `SkillCheckView.playedBy()`), or offers the chooser
+  `ChooseSuperCrisisSectionEvent`s, whose effects are in `SuperCrisisCardFollowups`. The skill check results are in
+  `SkillCheckResultFollowups`, with the Crisis Cards'.
+- `SkillCheckType.isSuperCrisis()`: the character abilities that affect Crisis Cards or skill checks can't touch these
+  (rule 6.1.2.5).
+- "Human Prisoner"'s fail lets the Cylon who played it pick a human (`HumanPrisonerTakeHandEvent`), who gives him his
+  Skill Cards and goes to "Sickbay". "Psychological Warfare" rebuilds the Destiny deck from 6 Treachery cards
+  (`ReplaceDestinyDeckEvent`, as many as are left).
+- "Bomb on Colonial One" kept in play destroys Colonial One (rule 9.4, `GameView.colonialOneDestroyed()`,
+  `isDestroyed(location)`): nobody moves there, its locations have no action, and a new character whose start is
+  there starts in "Sickbay" (rule 7.4, `PlaceInSetupLocationEventProcessor.startLocations`). "The Farm" kept in play blocks the humans' miracle
+  abilities (`CharacterAbilities.canUseMiracle`).
 
 ### Followups
 
@@ -288,19 +326,17 @@ nested `Followup` varargs, so you can write "choose between a single event or a 
 
 ```java
 return one(
-        single(new PlaySuperCrisisCardEvent(playerNumber)),
-
-all(new DrawCrisisCardsEvent(playerNumber),
-                new
-
-ResolveCapricaCrisisEvent(playerNumber)));
+        single(new NoOpEvent(playerNumber)),
+        all(new DecreaseJumpPreparationEvent(), new DecreaseJumpPreparationEvent()));
 ```
 
 ### Event Constraints
 
 `EventConstraint` is a plain enum of extra rules that can be pinned onto an event (e.g. `DRAW_EXACTLY_2`,
-`DRAW_EXACTLY_2_OF_ANY_COLOR`, `DISCARD_EXACTLY_4`, `DISCARD_DOWN_TO_HAND_LIMIT`, `MUST_LAUNCH_IN_VIPER`,
-`DESTINATION_GALACTICA`), and `drawExactly(n)` and `discardExactly(n)` give the counted ones. A processor attaches them to a
+`DRAW_EXACTLY_2_OF_ANY_COLOR`, `DISCARD_EXACTLY_4`, `DISCARD_DOWN_TO_HAND_LIMIT`, `DISCARD_DOWN_TO_3`,
+`DISCARD_DOWN_TO_1`, `MUST_LAUNCH_IN_VIPER`, `DESTINATION_GALACTICA`), and `drawExactly(n)`, `discardExactly(n)` and
+`discardDownTo(1 or 3)` give
+the counted ones. A processor attaches them to a
 `PlayerDecisionEvent`, e.g. `new PlayerDecisionEvent<>(n, DrawSkillCardsEvent.class, DRAW_EXACTLY_2)`. When the
 decision is answered, the engine copies them onto the submitted event with `ConstrainedEvent.withConstraints`,
 replacing whatever the client sent, so a client can't drop one.
@@ -321,9 +357,12 @@ instead, e.g. `FollowupUtils.chooseCharacterForSickbay` (rule 9.3.2).
 
 - Location action processors extend `LocationActionProcessor`. Its final `isValid()` checks that the player is at
   `event.location()` and that `LocationEvent.canAct` allows the action (for an "Unorthodox Plan" only
-  `canActIgnoringDamage`, see "Actions and Skill Cards"), then calls `isValidAction()` for the details of the event. `LocationEvent.canAct` is an exhaustive switch over `Location`, so a new location doesn't compile until
-  it's mapped. A damaged location has no action (rule 11.7.2.2), and a location with preconditions asks the static
-  `canAct` of its processor, e.g. FTL Control out of the red zone.
+  `canActIgnoringDamage`, see "Actions and Skill Cards"), then calls `isValidAction()` for the details of the event,
+  and its final `process()` calls `act()`. `LocationEvent.canAct` is an exhaustive switch over `Location`, so a new
+  location doesn't compile until it's mapped. A damaged location has no action (rule 11.7.2.2), and a location with
+  preconditions asks the static `canAct` of its processor, e.g. FTL Control out of the red zone. The character bans
+  and costs come first in `canActIgnoringDamage` (`CharacterBans.canActivate`, `ActionCosts.canPayLocationCost`), so
+  they bind every way of activating a location (see "Character Abilities").
 - A rule that another processor or a followup needs too is a public static check on its processor, e.g.
   `SendToBrigEventProcessor.canBeSentToBrig`, `MakePresidentEventProcessor.canBecomePresident` or
   `MakeAdmiralEventProcessor.canBecomeAdmiral` (and `MakeCagEventProcessor.canBecomeCag`: not in the "Brig").
@@ -348,7 +387,8 @@ constructor takes any first event, and `GameEngineTest` uses the test-only `Scri
 - `Agenda` is a stack of `(followup, parentScope)` frames, so followups run depth first. Pushing flattens a followup:
   `None` adds nothing and `AllOf` pushes its children in reverse, so every frame is a `Single` or a `OneOf`.
 - The run loop takes the event on top, gets a new processor from `ProcessorRegistry`, `prepare`s it, opens its scope,
-  runs it, puts the result of `WinChecks` before the followup, closes the scope with both and pushes them. It stops at a
+  runs it, puts the results of `WinChecks` and `AbilityTriggers` ("Memento") before the followup, closes the scope with
+  them all and pushes them. It stops at a
   `PlayerDecisionEvent` or a `OneOf`, and clears the agenda once the game has an outcome. Only that empties the
   agenda: running out of events before the game ends throws `FrakCallTheAdmiralException`.
 - The chooser of a `OneOf` is the player of the `PlayerEvent`s in its options, otherwise the current player. That
@@ -358,8 +398,7 @@ constructor takes any first event, and `GameEngineTest` uses the test-only `Scri
   and a submitted `PlayerEvent` names the submitter.
 - Rejected input throws `InvalidActionException` and changes nothing. A queued event that fails validation and a
   decision with constraints its event can't carry throw `FrakCallTheAdmiralException`. Every concrete event class has to
-  have a processor, and `ProcessorRegistry.create` asserts it. The engine doesn't check for one, so the events without
-  one (e.g. `PlaySuperCrisisCardEvent`) are still under development.
+  have a processor, and `ProcessorRegistry.create` asserts it, also without asserts (`ProcessorRegistryTest`).
 - Rollback: anything thrown after an input was accepted rolls the call back, and the engine rethrows it as a
   `FrakCallTheAdmiralException`. `advance` notes the journal's size, and on failure `rebuild`s the engine from the
   entries before it. The same input stays pending. `view()` and `journal()` return new objects
@@ -380,8 +419,15 @@ constructor takes any first event, and `GameEngineTest` uses the test-only `Scri
   `AgendaReplayer.replayWithInputs`: the scope that answered a decision, each `ChoiceMade`, each `EventInjected`), and
   rebuilds from that prefix. A choice that led to a decision is undone on its own; before the first pause there is
   nothing to undo.
+- Anytime input: an `AnytimeEvent` (a `PlayerEvent`, e.g. `RevealMotiveCardEvent`) is something a player may do at any
+  pause without being asked. `submit` takes one from its own player at any pause, a choice or a secret decision too,
+  and runs it ahead of the pending input as `inject` does (`runAhead`, recorded as `EventInjected`), so restore and undo
+  treat it as one input. It answers nothing: the pending input stays as it was. A finished game, an event that names
+  another player or fails `isValid()` is rejected and changes nothing.
 - `event/sandbox/` holds the `SandboxEvent` marker and the setup events, plain `Event`s with typed fields (one per kind
-  of card): put a Crisis, Destination, Skill or Destiny card on top, give a Skill Card, give the President a Quorum
+  of card): put a Crisis, Destination, Skill or Destiny card on top, give a Skill Card, a Mutiny Card, a Super Crisis
+  Card or a Loyalty Card (`GiveLoyaltyCardToPlayerEvent`: from the Loyalty or the "You Are Not a Cylon" deck, or a "You
+  Are a Cylon" card nobody has), give the President a Quorum
   Card, move a character, place a ship,
   change a resource, set the jump preparation track, damage a location, assign a title. Their processors use the
   rules' ops where one fits, and `SandboxOps` (`GameOps.sandbox()`) for the rest. `DeckFact.CardsPulled` takes a
@@ -395,7 +441,9 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
 - `StartGameEvent` follows rule A3.1 for the Kobol objective: `ops.startGame()`, `ops.galactica().setUp()`, a random
   first player (`GameOps.chooseFirstPlayer`), then queues `CreateDestinyDeckEvent`, the `SelectCharacterEvent`
   decisions clockwise from the first player, the three `DetermineNext...` events, `CreateLoyaltyDeckEvent`,
-  `ReceiveStartingSkillsEvent` (everyone but the first player) and the first `StartTurnEvent`.
+  `ReceiveStartingSkillsEvent` (everyone but the first player) and the first `StartTurnEvent`. A 7 player game needs
+  one Cylon Leader, a 3 player game none (rule A3.7.2.2): the last seat to choose must take the Leader if nobody has.
+  Boomer and Athena may both play (rule 6.2.4); the alternate versions are Lee, Tom Zarek, Helo and Baltar.
 - `StartTurnEvent` records the turn (`GameOps.startTurn()` counts it for the game and the current player) and queues
   one event per step, then `EndTurnEvent`: `ReceiveSkillsStepEvent`, `MovementStepEvent`, `ActionStepEvent`,
   `CrisisStepEvent`, `ActivateCylonShipsStepEvent`, `PrepareForJumpStepEvent`, `DiscardStepEvent`.
@@ -403,15 +451,21 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
   Cylons (and Cylon Leaders who aren't Infiltrating, see `isHuman()`) have no Crisis and no Activate Cylon Ships step,
   and characters in the "Brig" no Crisis step. Movement and Action are a `OneOf` with a `NoOpEvent`. The Action step
   offers what `Actions.offerAction` finds (see "Actions and Skill Cards"): an `ActionEvent` decision when the player can
-  take his location's action or a card's (`Actions.canTakeCardAction`: an "Action:" Skill Card, a Quorum Card, the
-  President's Title Card), and for a pilot an `ActivateViperEvent` decision too. A
+  take his location's action or another one (`Actions.canTakeOtherAction`: an "Action:" Skill Card, a Quorum Card, a
+  Mutiny Card, a Title Card's action, the Cylon reveal, a Personal Goal's reveal, an Infiltrating Cylon Leader's
+  return, an "Action:" of his character sheet), and for a pilot an
+  `ActivateViperEvent` decision too. A
   character with neither (e.g. in "Sickbay" without a card, see `LocationEvent.canAct`) gets no Action choice. The
   Movement step offers what `Actions.offerMovement` finds: a `MoveEvent` decision when he can move (not from the
-  "Brig"), and a `MovementAbilityEvent` decision when he can play a "Movement:" card, in the "Brig" too (rule 10.4.1).
+  "Brig"), and a `MovementAbilityEvent` decision when he can play a "Movement:" card or use a "Movement:" ability of
+  his sheet, in the "Brig" too (rule 10.4.1). The Movement and Action steps queue `EndOfMovementStepEvent` and
+  `EndOfActionStepEvent` after the player's choice, only when he has an ability that acts then (see "Character
+  Abilities").
 - `DiscardStepEvent` asks every player over the hand limit, clockwise from the current player, with
   `DISCARD_DOWN_TO_HAND_LIMIT`: Skill Cards over `handLimit()`, and the President's Quorum Cards over
   `TitleOps.QUORUM_HAND_LIMIT` (10 for every character, rule 4.4.1.1).
-- The Crisis step draws a card, keeps it with the turn and queues `ResolveCrisisCardEvent` (see "Crisis Cards"). The
+- The Crisis step draws a card, keeps it with the turn and queues `ResolveCrisisCardEvent` through `CrisisCardReveals`
+  (see "Crisis Cards"); Laura Roslin draws 2 and picks one (`ReligiousVisionsEvent`, the other to the bottom). The
   Crisis Cards of a turn stay with it, in `TurnView.crisisCards()` (`GameOps.playCrisisCard`), for the icons the later
   steps read. `EndTurnEvent` discards them (rule 8.8), except the ones kept in play.
 - The Activate Cylon Ships step activates the icon of the card drawn last (rule 8.6). "Fulfiller of Prophecy" sets
@@ -437,10 +491,15 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
 (`quorum-cards-plan.md`): its player gives one drawn Quorum Card to the President and holds the other
 (`PlayerPile.QUORUM`) to play it, through a decision on that card's event, or discard it.
 
-- `Actions.canTakeAction` is "his location's action (`LocationEvent.canAct`) or a card's" (`canTakeCardAction`: a
-  playable "Action:" Skill Card, a Quorum Card, the President's Title Card), and `offerAction(game, n)` builds the
-  choice: `one(decision<ActionEvent>, NoOpEvent)`, for a pilot `one(decision<ActivateViperEvent>,
-  decision<ActionEvent> when he has a card action, NoOpEvent)` (rule 11.2.1). A location
+- `Actions.canTakeAction` is "his location's action (`LocationEvent.canAct`) or another one" (`canTakeOtherAction`:
+  a playable "Action:" Skill Card, a Quorum Card, a Mutiny Card, a Title Card's action through `TitleActions.canAct`,
+  the Cylon reveal through `RevealCylonEventProcessor.canReveal`, a Personal Goal through
+  `RevealPersonalGoalEventProcessor.canReveal`, the Infiltration Card's return through
+  `ReturnToResurrectionShipEventProcessor.canReturn`, an "Action:" of the character sheet through
+  `CharacterActions.canUseAny`),
+  and
+  `offerAction(game, n)` builds the choice: `one(decision<ActionEvent>, NoOpEvent)`, for a pilot
+  `one(decision<ActivateViperEvent>, decision<ActionEvent> when he has another action, NoOpEvent)` (rule 11.2.1). A location
   event fails for a pilot, who is in space. `ActivateViperEvent` isn't an `ActionEvent`, because a non-pilot's one
   activates an unmanned viper.
 - A Skill Card played for its ability is a `SkillCardEvent` (`playerNumber`, `card`), one record per card in
@@ -450,8 +509,9 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
   `isMovementAbility()` list the cards, and `SkillCardEventsTest` checks that each has one event.
 - Its processor extends `SkillCardEventProcessor`, whose final `isValid()` checks the card's `type()`, the hand and
   `isHuman()` (revealed Cylons and Cylon Leaders who aren't Infiltrating can't, rules 6.1.2.3, 6.2.1), then
-  `isValidPlay()`. Its final `process()` plays the card (`PlayerOps.play`: `CardsLost`, `SkillCardPlayed`, which
-  `TurnView.playedSkillCards()` keeps for the cards limited per turn, and the discard) before `resolve()`.
+  `isValidPlay()`, and "Specialized" and "Reluctant" (`CharacterBans`, `ActionCosts`). Its final `process()` plays the
+  card (`PlayerOps.play`: `CardsLost`, `SkillCardPlayed`, which `TurnView.playedSkillCards()` keeps for the cards
+  limited per turn, and the discard) before `resolve()`.
 - A card is offered and accepted only when its effect can happen, as a location's action is. `SkillCardPlays.canPlay`
   is an exhaustive switch over `SkillCardType` that asks each card processor's static `canPlay`, so a new type doesn't
   compile until it's mapped.
@@ -480,8 +540,8 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
 - "Launch Scout" and "Scout for Fuel" need a raptor in the "Reserves" (rule 13.5) and roll through
   `FollowupUtils.rollDie` with a result event in `action/skillcard/`. A scout looks at a card through
   `LookAtTopCardEvent(playerNumber, deck)` (`event/deck/`, `CardsSeen`, then top or bottom). "Test the Limits" plays
-  only before the blue spaces of the jump track (`MINUS_3`, `MINUS_1`, as printed) and damages through
-  `FollowupUtils.damageGalactica()`, the choice of rule 11.7.2 that a Galactica attack offers too.
+  only before the blue spaces of the jump track (`MINUS_3`, `MINUS_1`, as printed) and damages Galactica like every
+  other effect (see "Combat").
 - "Raptor Specialist" builds an assault raptor from `GalacticaBoardView.supply()` (ship zone `HUMAN_SUPPLY`: ids 22 to
   24, 4 assault raptors in all, A2.4.4) for a raptor from the "Reserves", or returns a destroyed raptor.
 - "Repair" repairs the player's damaged location, or at the "Hangar Deck" up to 2 damaged vipers (`ShipOps.repair`, to
@@ -517,7 +577,8 @@ on its event.
 - Who plays: the President, as his action (rule 8.4) from his hand, also from the "Brig" and as a pilot; the President
   at the Quorum Chamber, which draws a card and then offers `one(DrawQuorumCardEvent, decision<QuorumCardEvent>,
   NoOpEvent)`; and the player of "Popular Influence" (see "Actions and Skill Cards").
-- `PresidentTitleActionEvent` (`action/title/`) is the President Title Card's action: draw a Quorum Card.
+- `PresidentTitleActionEvent` (`action/title/`) is the President Title Card's action: draw a Quorum Card. The
+  Admiral's and the CAG's are beside it (see "Combat").
 - A played card is in no pile while it resolves and goes where its text says, usually last: the discard pile
   (`DiscardPlayedQuorumCardEvent`, face up), out of the game (`DeckFact.CardsRemovedFromGame`, into
   `GameView.removedComponents()`), or in play. A card whose fate depends on a roll settles it in its result event.
@@ -535,7 +596,7 @@ on its event.
   event's `quorumCard`, and the `EventBuilder` lists a Quorum event only when the asked player holds its card. The
   mats show the cards in play face up in front of their holder.
 
-### End of Game and Mutiny
+### End of Game and Titles
 
 - `WinChecks` (`event/endgame/`) holds the Cylon wins that happen at once (rule 16.1): a centurion at the end of the
   Boarding Party track, and 6 damaged Galactica locations. The engine asks after every event, and `ScopeClosed` records
@@ -543,29 +604,103 @@ on its event.
 - `CylonsWinEvent` ends the game for the Cylons through `EndGame.end` (the `GameEnded` fact), and `GameView.outcome()` gives the winning `Team`,
   which `Finished(winner)` reports, and `GameView.winners()` the players who won. A test script that plays to the end has to end the game, e.g. with a
   `CylonsWinEvent`.
+- Titles in the "Brig" (rules 4.4.2.3 and 4.4.3.2): `DetermineNextAdmiralEvent` and `DetermineNextCagEvent` pick the
+  highest in line outside the "Brig", and when every human is in it, the highest in line there.
+  `LineOfSuccessionSelector.nextInLine` skips revealed Cylons. Leaving the "Brig" (`LeaveBrigEvent`,
+  `MoveFromBrigEvent`) queues them again while the Admiral or the CAG is still inside (`BrigTitles.afterLeaving`), so
+  the one who left takes the title.
+- The Admiral's and the CAG's Title Card actions are under "Combat", the President's under "Quorum Cards".
+
+### Mutiny Cards
+
 - To draw a Mutiny Card, queue a `DrawMutinyCardEvent`. Its processor sends the player to the "Brig" on the second card
   (the Mutineer on the third, `PlayerView.isMutineer()`), and asks for a `Discard1MutinyCardEvent` per card over the
   limit (rules 5.2.3.2 and 5.2.3.3). In the "Brig" and off the board (a Stranded Helo) the player only discards. Only
-  the Press Room calls `PlayerOps.drawMutinyCard()`, because its target doesn't move.
+  the Press Room calls `PlayerOps.drawMutinyCard()`, because its target doesn't move. Discarding a "Bait" or a "Dradis
+  Contact" by choice draws one once a turn per player (`TurnLimit.MUTINY_CARD_FROM_TREACHERY`, rule A2.3.8.1): every
+  discard of cards the player picked asks `TreacheryDiscards.mutinyCardFor` (`DiscardSkillCardsEvent`, moving between
+  ships, the "Engine Room", "Star Player", "Selfish", "Hotshot"), not a random one or the whole hand. A new character
+  who keeps the Mutineer card after an execution draws one too (`FinishExecutionEvent`, rule 5.2.1).
+- Every Mutiny Card is played as an action (rule 5.2.3.1), following the Quorum Cards' pattern: a
+  `MutinyCardEvent` (an `ActionEvent`), one record per card in `action/mutiny/` with the card's choices on it, and a
+  processor extending `MutinyCardEventProcessor`, whose final `isValid()` checks a human (an Infiltrating Cylon Leader
+  counts, rules 5.2.3.4 and 5.2.3.5) holding the card, also in the "Brig", then `isValidPlay()`. Its final `process()`
+  takes the card out of the hand (`PlayerOps.playMutinyCard`), then `resolve()` ends with its fate:
+  `DiscardPlayedMutinyCardEvent` (face up) or `RemoveMutinyCardFromGameEvent`. `MutinyCardPlays.canPlay` is an
+  exhaustive switch over `MutinyCard` asking each processor's static `canPlay` (the card's "can't play" line), and
+  `MutinyCardEventsTest` checks one event per card.
+- What they share: `PlayerOps.giveSkillCards` and `takeRandomSkillCards` ("Blackmail"), `PlaceShipsEvent`'s
+  `cylonArea` ("Necessary Risk"), `LaunchRaidersEvent.fromEachBasestar(n)` (unlike the icon, nothing goes to the Cylon
+  Fleet board without a basestar, rule 9.6), `ActivateUnmannedViperEvent` (a decision's answer: an unmanned viper even
+  for a pilot, "Panic"), `ShuffleCivilianShipIntoDeckEvent`, `LookAtTopCardEvent` (also the "Human Fleet"'s look),
+  `NukeResultEvent` ("Unauthorized Usage" discards every nuke, errata A2.3.3.2) and `TitleOps.putQuorumCardsAtBottom`
+  ("Set the Agenda", after a `CardsSeen` of the President's hand). The sandbox deals one with
+  `GiveMutinyCardToPlayerEvent`.
 
 ### Execution
 
 `ExecuteEvent(playerNumber)` follows rule 7.1. Its player carries out the steps, so he is the player of the event.
 `ExecuteEventProcessor.canBeExecuted` allows humans only: a revealed Cylon ignores it (rule 6.1.2.1).
 
-- The player discards his Skill and Mutiny Cards, his miracle token, and the Quorum Cards given to him
+- The player discards his Skill and Mutiny Cards, his miracle tokens, and the Quorum Cards given to him
   (`TitleOps.discardQuorumCardsGivenTo`, also for an Infiltrating Cylon Leader, rule 6.2.3.5).
 - A human: lose 1 morale (`MoraleLostToExecution` when the loss happens, `GameView.moraleLostToExecution()`, which
   "Eulogy" asks for), the character leaves the game (`CharacterRemoved`, into `GameView.removedComponents()`), the
-  Loyalty Cards are discarded but the Mutineer card stays, and the player chooses a new character. Once the game is
+  Loyalty Cards are discarded but the Mutineer card stays, and the player chooses a new character. Each Final Five card
+  among them makes every other human with Skill Cards discard 2 (rule 5.4.1.2), then leaves the game
+  (`CardsRemovedFromGame(LOYALTY)`). Once the game is
   under way, `SelectCharacterEventProcessor.canBeSelected` allows any type but a Cylon Leader, and never an executed
   character or its other version. `FinishExecutionEvent` then adds a "You Are Not a Cylon" card to the Loyalty deck and
   deals one (`DealLoyaltyCardsEvent`, with extra cards for Boomer and Baltar before the Sleeper Agent phase), and hands on
   the titles the executed character held. No character left to choose: `CylonsWinEvent`.
-- A hidden Cylon reveals a "You Are a Cylon" card (`LoyaltyCardRevealed`), gives his other Loyalty Cards to a human
-  (`GiveLoyaltyCardsEvent`) and the Mutineer card too (`PassMutineerCardEvent`), moves to the "Resurrection Ship" and
-  loses his titles. From 7 distance on he keeps his other Loyalty Cards. An Infiltrating Cylon Leader only goes back to the "Resurrection Ship" (`InfiltrationEnded`).
+- A hidden Cylon reveals a "You Are a Cylon" card through `RevealCylonOnExecutionEvent`, his choice when he holds two
+  different ones, without its power, then follows `FinishCylonRevealEvent(n, false)`: no Super Crisis Card. An
+  Infiltrating Cylon Leader's Infiltration ends (`PlayerOps.endInfiltration`). See "Cylons and Loyalty Cards".
 - The executed current player's turn ends early (see "Turn Loop").
+
+### Cylons and Loyalty Cards
+
+The Loyalty Cards' actions and effects, in `event/loyalty/`, and the Cylon Leaders.
+
+- The voluntary reveal (rule 6.1) is an action: `RevealCylonEvent(n, card)`, for a hidden Cylon who isn't a Cylon
+  Leader. It records `LoyaltyCardRevealed`, then follows rule 6.1.1 in this order: step 1 (all Mutiny Cards, the miracle
+  token, the Quorum Cards given to him, and down to 3 Skill Cards through a `DISCARD_DOWN_TO_3` decision), the card's
+  power (none in the "Brig"), then `FinishCylonRevealEvent(n, true)`: the titles first (`GiveTitlesToNextInLineEvent`),
+  the "Resurrection Ship" (a piloted viper goes back to the "Reserves"), a Super Crisis Card, the other Loyalty Cards
+  to a human (not from 7 distance on), the Mutineer card to a human, and the end of his turn if it is his. "Draw
+  Treachery Cards" says its player discards down to 3 before he draws, hence the order.
+- `CylonRevealPowers.power` gives each card's power as concrete `CylonPower...Event`s that name the revealer, in a
+  `one(..., NoOpEvent)` for the "may" ones (all but "Draw Treachery Cards"). "Send to Brig" and "Send to Sickbay" target a
+  character on a Galactica location (`CylonRevealPowers.isOnGalactica`). "Damage Galactica" draws up to 5 tokens and
+  offers every pair as a `ChooseGalacticaDamageTokensEvent` (resolved, returned).
+- Every look at another player's Loyalty Cards goes through `LookAtLoyaltyCardEvent` (1 random card) or
+  `LookAtAllLoyaltyCardsEvent` (all of them, e.g. "Cylon Detector"), whose processors call `PlayerOps.lookAtLoyaltyCard`
+  and `lookAtAllLoyaltyCards` (they return what was seen, `LoyaltyCardSeen` each) and stop while "Detector Sabotage" is
+  in play.
+- `FinalFiveCards.seen(looker, holder, cards)` turns the Final Five cards seen by another player (rule 5.4.1.1) into
+  `ResolveFinalFiveCardEvent(holder, card, looker)`, several in the order the current player picks
+  (`ResolveFinalFiveCardsEvent`: plain events, so he chooses). The holder shows the card to everyone
+  (`PlayerFact.FinalFiveCardShown`, which applies nothing) and keeps it. The effects skip revealed Cylons: the Cylon
+  ships activate by the card's icons (raiders, basestars, heavy raiders), Galactica is damaged twice, the looker is
+  executed or sent to the "Brig", or the holder is executed (the card leaves the game with him, unresolved by that
+  execution) and every other human discards 2 random Skill Cards. An execution resolves the Final Five cards it
+  reveals (see "Execution").
+- A player reveals a Personal Goal with `RevealPersonalGoalEvent(playerNumber, card, discards)`, an `ActionEvent`
+  offered while its condition holds (`RevealPersonalGoalEventProcessor.canReveal`, rule 5.3.1; `discards` only for
+  "Selfish", 20 strength). At 6 distance or less a "You Are Not a Cylon" card goes into the Loyalty deck and he is dealt
+  a new card, as after an execution (`LoyaltyDeckOps.addNotACylon`, which adds nothing once that deck is empty). A
+  revealed card leaves `loyaltyCards().cards()` for `revealedCards()`, so the end game charges only the unrevealed ones,
+  and an execution discards the revealed ones too (`Deck.remove` takes revealed cards).
+- `PlayerOps.endInfiltration()` ends a Cylon Leader's Infiltration for any reason (rule 6.2.3.5): `InfiltrationEnded`,
+  back to the "Resurrection Ship", the Quorum Cards given to him and his Mutiny Cards discarded. He keeps his miracle
+  token (rule 4.3.2). `ReturnToResurrectionShipEvent` (`event/player/`) is the Infiltration Card's action, which
+  `Actions.canTakeOtherAction` offers; from the "Brig" it then asks for a discard down to 3 Skill Cards
+  (`DISCARD_DOWN_TO_3`). A Cylon Leader who starts on a location of the humans starts Infiltrating there
+  (`PlaceInSetupLocationEventProcessor.startAt`): Sharon "Athena" Agathon, and D'Anna Biers at the "Press Room".
+- During the game a Cylon Leader reveals a Motive Card with `RevealMotiveCardEvent(playerNumber, card)`, an
+  `AnytimeEvent` (see "Engine"), while its requirement is met (`MotiveCards.canReveal`: the cards that say "if the game
+  is over" wait for the end, rule 6.2.2.1). A revealed card stays revealed, and `EndGame.end` reveals at the end what
+  is left (see "Jump and Kobol").
 
 ### Jump and Kobol
 
@@ -586,19 +721,20 @@ and from `IncreaseJumpPreparationEvent` (the track has no "Auto Jump" space, the
   the "Reserves"), `GasGiantEvent`, the "Civilian Convoy" trade and `GasCloudPlaceEvent`. "Ragnar Anchorage" repairs as
   many ships as possible without asking.
 - `ObjectiveInstructionsEvent` queues `SleeperAgentPhaseEvent` when the distance reaches 4 for the first time.
-  It deals a card per player with `DealLoyaltyCardsEvent` (two to Boomer and Baltar unless revealed Cylons, Motive Cards to
-  a Cylon Leader), then `FinishSleeperAgentPhaseEvent` has the revealed Cylons pass on the Mutineer card and hand their
+  It deals a card per player with `DealLoyaltyCardsEvent` (Motive Cards to a Cylon Leader), two to Boomer, whose "Sleeper
+  Agent" then sends her to the "Brig" (`SleeperAgentEvent`) unless she is a revealed Cylon; Baltar's "Coward" card
+  comes at the start of the game only. Then `FinishSleeperAgentPhaseEvent` has the revealed Cylons pass on the Mutineer card and hand their
   cards to a human, and the current player choose who draws an extra card when nobody got the Mutineer card. From 7
   distance on no Loyalty Cards are handed off (`FinishSleeperAgentPhaseEventProcessor.canHandOffLoyaltyCards`).
 - `RevealMutineerEvent(playerNumber, drawsLoyaltyCard)`: the card stays among the Loyalty Cards and everybody knows it
-  (describers show it faceup). The player loses the titles, draws a Mutiny Card and, when dealt it facedown, another
+  (the projections show it faceup). The player loses the titles, draws a Mutiny Card and, when dealt it facedown, another
   Loyalty Card.
 - `EndGameEvent` follows rules 16.1 and 16.2: each unrevealed Personal Goal of a human reduces its resource by 1
   (`LoyaltyCard.personalGoalResource`), and the Cylons win if a resource is 0. Every ending goes through
   `EndGame.end(game, ops, team)`: the Cylon Leaders reveal the Motive Cards they can (`MotiveCards`, the requirements as
   printed, `MotiveCard.allegiance`), and `GameEnded` carries the winning players (`GameView.winners()`), the Leaders with
-  at least two revealed cards of the winning allegiance and at most one unrevealed included (rule 16.3.2).
-- Not built yet: revealing a Motive Card or a Personal Goal in the middle of a game, and the Final Five cards.
+  at least two revealed cards of the winning allegiance and at most one unrevealed included (rule 16.3.2). The Motive
+  Cards and Personal Goals revealed during the game are under "Cylons and Loyalty Cards".
 
 ### Interrupt Cards
 
@@ -607,24 +743,33 @@ Six Skill Cards are played in response to something, outside the Action step: "S
 in `event/interrupt/`.
 
 - `InterruptWindow` (`state/interrupt/`) is a sealed set of records, one per window, and `cards()` lists the card types
-  each takes: before a die roll, before a piloted viper's attack roll, after a die roll, after a viper is attacked,
-  before raiders activate, after a basestar or centurion is destroyed.
+  each takes: before a die roll, before a piloted viper's attack roll, after a die roll, after the "FTL Control" roll
+  (`AfterFtlControlRoll`, for "FTL Operator"), after a viper is attacked, before raiders activate, after a basestar or
+  centurion is destroyed. `startsDieRoll()` and `followsDieRoll()` say where it stands to its roll.
 - `OpenInterruptWindowEvent(window)` is an ordinary queued event. Its processor asks, as the hands are at that moment,
   each player who can play a card for the window, one at a time and clockwise from the current player
-  (`PlayInterruptCardEventProcessor.canPlay`: humans only, rule 6.1.2.3, plus each card's own condition). The question
-  is a decision on `PlayInterruptCardEvent`, and no card means a pass. Without holders the window doesn't open and the
-  game doesn't pause.
-- `PlayInterruptCardEvent` is a `SecretEvent`, so `PendingInput.secret()` is true while it is pending, and
-  `GameEngine.status` shows it only to the player who answers. The others get a plain `Waiting`.
+  (`PlayInterruptCardEventProcessor.canPlay`: humans only, rule 6.1.2.3, plus each card's own condition), then the same
+  player again when he has a character ability for it (`RollAbilities.canUse`, see "Character Abilities"). The
+  questions are decisions on `PlayInterruptCardEvent` and `UseRollAbilityEvent`, and no card or ability means a pass.
+  Without holders the window doesn't open and the game doesn't pause.
+- `PlayInterruptCardEvent` and `UseRollAbilityEvent` are `SecretEvent`s, so `PendingInput.secret()` is true while one
+  is pending, and `GameEngine.status` shows it only to the player who answers. The others get a plain `Waiting`.
 - `CloseInterruptWindowEvent` runs once everyone has answered. Two cards of a type conflict ("Run Interference" only in
-  the same space area), and the current player keeps one with a `TiebreakInterruptCardsEvent` (rule 13.3), the other
-  goes back to its owner's hand. Then each card resolves in play order (`InterruptCardResolved`, into the discard pile)
-  and the window closes. Windows never nest: a window closes before what its cards queue runs.
+  the same space area), and the current player keeps one, choosing among `TiebreakInterruptCardsEvent` options, one per
+  way to keep a card of each conflict (rule 13.3): the options show him the cards. The other goes back to its owner's
+  hand. Then each card resolves in play order (`InterruptCardResolved`, into the discard pile),
+  then each ability (`RollAbilityResolved`, which records its use), and the window closes. One reroll a window: a
+  reroll ability after an "Evasive Maneuvers" or another reroll is withdrawn (`RollAbilityWithdrawn`) and can be used
+  in the window that opens again on the new roll. Windows never nest: a window closes before what its cards queue
+  runs.
 - Die rolls: `FollowupUtils.rollDie(result)` returns `all(window before, RollDieEvent, window after, result)`, and the
   result event reads `TurnView.dieRoll()`. The window before a roll starts a new `DieRoll` (`DieRollStarted`), and
   `DieRollCardPlayed(card, modifier)` records each card that takes effect on it. A reroll is another `DieRolled` and
   keeps the cards (rule A2.1.1.10). The result is clamped to 1-8 after all of them (rule 13.1). An `ArchitectureTest`
-  rule lets only `RollDieEventProcessor` call `GameOps.rollDie()`.
+  rule lets only `RollDieEventProcessor` call `GameOps.rollDie()`. An ability that sets the face instead of the die
+  (`DieRollReplaced`: "Hotshot", "Longshot") makes `RollDieEvent` roll nothing, and a fixed face ("Longshot") is the
+  result as it is: no window opens after it. `DieRollAbilityUsed` records each ability on the roll
+  (`DieRollView.abilities()`).
 - A processor that rolls queues the roll, and a `XxxResultEvent` in its package does what the roll decides, e.g.
   `ArmoryEvent` and `ArmoryResultEvent`.
 - Card effects: "Strategic Planning" +2, "Calculations" +1 or -1 once per roll. "Evasive Maneuvers" queues a reroll and
@@ -641,8 +786,18 @@ and its result.
 
 - `AttackViperEvent(raiderId, humanFighterId)`: a raider attacks a viper or an assault raptor. The window after the
   roll takes "Evasive Maneuvers".
-- `AttackGalacticaEvent(cylonShipId)`: a raider or a basestar. A hit is a `one(DamageGalacticaEvent,
-  DamagePegasusEvent)`. `ActivateCylonBasestarEvent` queues it unless the weapons are disabled.
+- `AttackGalacticaEvent(cylonShipId)`: a raider or a basestar. A hit is a `DamageBattlestarEvent`.
+  `ActivateCylonBasestarEvent` queues it unless the weapons are disabled.
+- Every effect that damages Galactica queues `DamageBattlestarEvent` (`FollowupUtils.damageGalactica()`), which
+  decides when it runs: `one(DamageGalacticaEvent, DamagePegasusEvent)` for the current player while Pegasus is in
+  play (rule 11.7.2), only Galactica once it is destroyed. The fourth damaged Pegasus location queues
+  `DestroyPegasusEvent` (rule 11.7.2.4, also after the sandbox's `DamageLocationEvent`): everyone on Pegasus goes to
+  "Sickbay" and `PegasusDestroyed` takes the board out of the game (`PegasusBoardView.destroyed()`). Its locations are
+  then `GameView.isDestroyed`, as a destroyed Colonial One's are: no move, start (Helena Cain starts at "Command"),
+  action or repair there, and the board veils them.
+- `DamageVipersEvent(count, area)` damages one fighter at a time: the player taking an action picks it, the current
+  player when nobody is (rule 11.3.2.2), from `DamageChosenViperEvent` options, one per kind of fighter in each place
+  (a single kind needs no choice). An assault raptor counts as a viper and is destroyed (rule 11.3.2.3).
 - `AttackCylonShipEvent(humanFighterId, cylonShipId)`: a fighter, or Galactica with "Weapons Control" (`byGalactica`),
   attacks a raider, a heavy raider or a basestar. A piloted fighter's roll gets the "Best of the Best" window. A hit on
   a basestar is a `DamageBasestarEvent`, which destroys it at 3 damage (a critical hit counts 2) and opens the "Major
@@ -653,11 +808,28 @@ and its result.
   fighter in space. A pilot's action (`Actions.offerAction`, also
   for the "Hangar Deck"'s extra action) offers the activation as a decision, and "Command" only when
   `canActivateUnmanned`.
+- The Admiral's nuke (`LaunchNukeEvent(playerNumber, area)`, `action/title/`, rule 11.6.1: a space area, not the Title
+  Card's older "a basestar") spends a nuke and rolls. `NukeResultEvent` reads the roll: an 8 destroys every ship in the
+  area (a pilot goes to "Sickbay", a civilian ship costs its resources), a 7 without a basestar still destroys 3
+  raiders, otherwise a `NukeBasestarEvent(playerNumber, basestarId, result)` per basestar there, which the launcher
+  picks: 1-2 damage it twice, 3-6 destroy it, 7 destroy it and 3 raiders. A destroyed basestar opens the "Major
+  Victory" window.
+- The CAG's Title Card actions: `PassCagTitleEvent(playerNumber, activation, targetPlayerNumber)` activates an
+  unmanned viper, then gives the title to another human who can hold it, and `CagPilotActionEvent(playerNumber,
+  activation)`, once a turn (`TurnLimit.CAG_PILOT_ACTION`) while piloting, activates an unmanned viper, then grants
+  another action (`GrantEvent(ACTION, CAG_TITLE)`). Both check the activation like `ProtectTheFleetEvent`.
 - `DestroyCenturionEvent` destroys a centurion on the Boarding Party track and opens the "Major Victory" window (the
   "Armory" result, "Authorization of Brutal Force"). `DestroyHeavyRaiderEvent` destroys a heavy raider in space.
 - Every effect that places or launches a Cylon ship on the main game board goes through `AbstractOps.takeFromSupply`
   (rule 11.4.2): a ship from the supply, and when it has none left, one from the lowest-numbered Cylon space area of the
-  Cylon Fleet board. Without one there either, nothing is placed.
+  Cylon Fleet board. Without one there either, nothing is placed. A ship placed on the Cylon Fleet board with none left
+  in the supply moves every ship of the highest-numbered Cylon space area holding one of its type to the main board
+  instead (rule 11.4.1.2, `PlaceShipOnCylonFleetBoardEvent`), and nothing when there is none.
+- The raiders of an activation activate one space area at a time, in the order the current player chooses (rule 11.5):
+  `ActivateRaiderAreasEvent` offers the areas left as `ActivateRaiderAreaEvent` options, without a choice for one area.
+  Basestars and heavy raiders activate clockwise, where the order can't change the outcome. A basestar with a "Disabled
+  Hangar" launches no raider or heavy raider, wherever the launch comes from (`LaunchRaidersEventProcessor.canLaunch`,
+  rule 11.7.3).
 
 ### Journal and Replay
 
@@ -694,8 +866,8 @@ Rules for facts and ops:
 3. **Ops never write to components.** They compute a fact from the current state and call `record(fact)`. Drawing is
    `draw(DeckId)` (peek, record `CardsDrawn`, log the reshuffle when the draw empties a reshuffling deck), shuffling is
    `shuffle(DeckId)`. A drawn card is in no pile until another fact says where it went.
-4. **Fact fields are complete and immutable.** Cards are listed in full. Hiding them is the describers' job (not built
-   yet).
+4. **Fact fields are complete and immutable.** Cards are listed in full. Hiding them is the projections' job (see
+   "Projections").
 5. **`@Mutates`** marks every component method that changes state. `ArchitectureTest` (ArchUnit) allows calls only from
    `..journal..` and `..state..`, and checks that `..event..` and `..operation..` never call them. Tests are not
    analyzed. Mutable collections that getters expose (e.g. `CylonShips.raiders()`) can't be marked, don't change
@@ -760,7 +932,9 @@ stores its journal in Postgres and pushes to every viewer what he may see (`back
   at most) or an observer, leave, and start by the host with 3 to 7 players (the seats close up to 1..n).
 - `live/` - `/ws/games/{id}`: the handshake needs a participant and an allowed `Origin`, and gives the connection its
   `Viewer`. `ConnectionPool` is the `ProjectionSink`; each `LiveConnection` sends from its own queue. Client messages:
-  `status`, `history`, `submit` (token, event), `choose` (token, option index). Server messages: `game` (token,
+  `status`, `history`, `submit` (token, event: an answer to the pending decision, or an `AnytimeEvent`, which
+  `GameSessions` runs ahead of it, with the player of the connection, the one it names in a sandbox), `choose` (token,
+  option index). Server messages: `game` (token,
   projection), `update`, `log`, `rejected`. A new connection gets `game`, then `log`. A game that can't be opened
   (e.g. saved by another `FORMAT_VERSION`) gets `rejected` (`UNAVAILABLE`, with the reason) and then the close 1008
   (`LiveConnection.closeAfterSending`), after which `GameSocket` doesn't reconnect; the table shows the reason, and the
@@ -786,8 +960,8 @@ REST (the lobby lists poll), Zustand for the game. See `frontend-plan.md`.
 
 - The wire schema: `./gradlew :backend:exportSchema` writes `frontend/src/wire/schema.json` (`backend/wire/WireSchema`:
   every record with its components and type references, unions, enums, the socket messages, the `location` of a
-  location's action, the `quorumCard` a Quorum Card's event plays (the `EventBuilder` offers only the cards the asked
-  player holds), and a `role` for each int: `player`, `ship`, `scope` or `count`). `npm run gen` turns it into
+  location's action, the `quorumCard` or `mutinyCard` a card's event plays (the `EventBuilder` offers only the cards
+  the asked player holds), and a `role` for each int: `player`, `ship`, `scope` or `count`). `npm run gen` turns it into
   `src/wire/types.ts`. `WireSchemaTest` fails when the checked-in schema is stale, and `tsc` when the UI uses a field
   that went away. `GET /api/schema` serves the same JSON.
 - `src/api/` (`http.ts` sends the `XSRF-TOKEN` cookie as `X-XSRF-TOKEN`, `queries.ts` the hooks), `src/live/`
@@ -795,7 +969,9 @@ REST (the lobby lists poll), Zustand for the game. See `frontend-plan.md`.
   `src/labels/` (all wording: a humanized fallback, `overrides.ts` for names, templates for events, facts and options;
   only names, never a card's printed text), `src/input/` (the input panel: a choice is a button per option, answered
   by index; a decision is the `EventBuilder`, a form made from the schema, which builds exactly the codec's JSON and
-  leaves the player and the constraints to the server), `src/table/` (the board and the panels around it, see "The
+  leaves the player and the constraints to the server; under it the `AnytimePanel`, the `AnytimeEvent`s of the
+  schema's `anytimeEvents` for each player the viewer acts for who can use one, e.g. a Cylon Leader with Motive Cards,
+  built by the `EventBuilder` with its `choices` narrowing an enum to his cards), `src/table/` (the board and the panels around it, see "The
   table"), `src/sandbox/` (undo, export, restart with the seed, setup by injecting a `SandboxEvent`, the inspector),
   `src/pages/`.
 - The browser holds no game rules: a picker only narrows to plausible answers, the engine judges them.
@@ -857,6 +1033,136 @@ REST (the lobby lists poll), Zustand for the game. See `frontend-plan.md`.
   origin), `npm test` (Vitest), `npm run gen`, `npm run e2e` (Playwright, against the running app with the `dev`
   profile, `E2E_BASE_URL` to point elsewhere).
 
+### Character Abilities
+
+`CharacterAbility` lists the three abilities of each sheet (`CharacterAbility.of(character)`), with its `AbilityKind`
+(`ACTION`, `MOVEMENT`, `TRIGGER`, `PASSIVE`, `NEGATIVE`) and the miracle tokens a use spends (`isMiracle()`: 1, 3 for
+"Broadcast", rule 4.3.1.1). Every ability is built (`unimplemented-components-plan.md`); below, grouped by where it
+hooks in. An ability that answers something is offered only to a player who can use it, so a game without its
+character pauses where it did.
+
+- `PlayerView.hasAbility(ability)`: the character prints it and it is in effect. A revealed Cylon's are ignored (rule
+  6.1.2.2), a Cylon Leader's always apply (rule 6.2.1.2). E.g. "Reckless" (`handLimit()`) and "Starts on the Bench".
+- `CharacterAbilities` (`event/character/`): `canUseMiracle` (the ability, its tokens, and no "The Farm" in play for
+  a human), `canUseOncePerTurn`, and `canAffectSkillCheck` (false for a Super Crisis Card's check, rule 6.1.2.5).
+- `PlayerOps.useAbility(ability)` records `PlayerFact.AbilityUsed` (public, for the log and the turn's
+  `usedAbilities()`) and a `MiracleTokenLost` per token a miracle spends.
+- Miracle tokens are a count (`PlayerView.miracleTokens()`, `maxMiracleTokens()`: 1, 3 for Gaius Baltar (alt.)).
+  `PlayerOps.gainMiracleToken` gains one only when `canGainMiracleToken()` (below the maximum, not a revealed Cylon,
+  rules 4.3.1 to 4.3.3), and `loseMiracleTokens()` discards them all.
+- Setup and skill draws: "Disreputable" (`SelectCharacterEventProcessor` draws the Mutiny Card, at setup and for a
+  new character), "Coward" (`CreateLoyaltyDeckEventProcessor`), "Sleeper Agent" (`SleeperAgentEvent`), "Industrious",
+  "Family Commitments", "Grieving" and "Starts on the Bench" (`ReceiveSkillsStepEventProcessor`, no decision when he
+  draws none), "Reckless", "Stranded" and "Nothing But Trouble" (its skill set).
+- The "Action:" abilities follow the Mutiny Cards' pattern: a `CharacterActionEvent` (an `ActionEvent`) per ability in
+  `event/action/character/`, named after it, with its choices on it. `CharacterActionEventProcessor`'s final
+  `isValid()` asks `CharacterActions.canUse` (the ability in effect, its miracle tokens, and the processor's static
+  `canUse`), then `isValidUse()`; its final `process()` records the use, then `resolve()`. `CharacterActions` has an
+  exhaustive switch over `CharacterAbility` (`canUse`, `eventClass`), and `canUseAny` feeds
+  `Actions.canTakeOtherAction`. A Cylon Leader gets them beside his location's action (rule 6.2.1.2), a revealed
+  Cylon doesn't (rule 6.1.2.2). `CharacterActionEventsTest` checks one event per `ACTION` ability.
+- A choice that depends on what the ability reveals comes after it as concrete options naming the player
+  (`SkilledPoliticianChoiceEvent`, `AbusePowerChoiceEvent`, `QuarantineChoiceEvent`, `TreatmentGiveEvent`) or a
+  decision (`ReorderTopQuorumCardsEvent`). "Skilled Politician" holds the chosen Quorum Card (`PlayerPile.QUORUM`) and
+  plays it through a decision on its event, as "Popular Influence" does; "Abuse Power" holds the chosen Mutiny Card to
+  play it, which sends nobody to the "Brig" (`PlayerOps.drawMutinyCardsToChoose`, `holdMutinyCard`).
+- Actions at another location ("Organized", "Resolute", `RemoteActions`): `GameFact.RemoteActionAllowed(player,
+  location)` lets that player take the location's action from wherever he is, through the location's own decision
+  (`TurnView.remoteActionLocation`, which `LocationActionProcessor` honours: only that location then), and
+  `EndRemoteActionEvent` ends it. `RemoteActions.locations` lists those he could act at: undamaged, with an action, not
+  the "Brig".
+- "Blind Jump" queues `JumpingTheFleetEvent(true)`: the Admiral draws 1 Destination Card and the fleet goes there
+  (`DrawDestinationCardsEvent(blindJump)`). "Expert Pilot" records its use when Starbuck starts her turn piloting;
+  the Action step then adds `GrantEvent(ACTION, EXPERT_PILOT)`. "Meticulous" turns Aaron Doral's return action into a
+  choice of `MeticulousEvent`s (the "Resurrection Ship", or another Cylon location and `GrantEvent(ACTION,
+  METICULOUS)`).
+- The "Movement:" abilities ("Intimate", "Aggressive Tactics", "Glimpse the Face of God") are
+  `CharacterMovementEvent`s (`MovementAbilityEvent`s) with `CharacterMovementEventProcessor` and `CharacterMovements`,
+  as the actions have; `Actions.offerMovement` asks `CharacterMovements.canUseAny`, Cylon Leaders included (rule
+  6.1.3.2). "Aggressive Tactics" grants two actions (`GrantEvent(ACTION, AGGRESSIVE_TACTICS)`), and "Glimpse the Face
+  of God" draws from the Destiny deck into the hand (`PlayerOps.drawFromDestinyDeck`), then asks for
+  `GlimpseTheFaceOfGodPlaceEvent` (`PlayerOps.placeOnDestinyDeck`, the first card on top).
+- The die-roll abilities are answers in the interrupt windows (`RollAbilities`, `UseRollAbilityEvent`, see "Interrupt
+  Cards"): "ECO Officer" (Helo on his turn, once a turn) and "FTL Operator" (Gaeta, once on each "FTL Control" roll)
+  reroll in a window after the roll; "Longshot" (Anders on his turn, a miracle) chooses the result and "Hotshot" (Kat
+  in her own Action step) discards a card for its strength +2, in a window before it. "Longshot" sends a "Strategic
+  Planning" played with it back to the hand; "Hotshot"'s face takes the cards; neither face can be rerolled.
+- Moving (`CharacterMoves`): "Clouded" refuses a destination with another character for every move Leoben chooses
+  (`MoveEvent`, the "Human Fleet" infiltration, `LeaveBrigEvent`, the return to the "Resurrection Ship"); "Heretic" makes D'Anna pay a Super Crisis Card to
+  leave the "Resurrection Ship" (`HereticDiscardEvent` options after the move, `PlayerOps.discardSuperCrisisCard`), and
+  `Actions.canMove` is false while she has none.
+- The ends of steps: `EndOfMovementStepEvent` offers "Politically Adroit" (`PoliticallyAdroitEvent`: a card to another
+  human there, then a `DRAW_EXACTLY_2` decision) and applies "Kleptomania" (a forced discard of 2, or
+  `GameFact.SentToBrigAtEndOfTurn`, which the Discard step turns into a `KleptomaniaBrigEvent` after the discards).
+  `EndOfActionStepEvent` applies "Stim Junkie": `StartTurnEvent` notes Kat's start (`GameFact.StartLocationNoted`,
+  `TurnView.startLocation()`), and she goes to "Sickbay" when she ends her Action step there.
+- The Crisis Card abilities, none of which touches a Super Crisis Card (`SkillCheckType.onCrisisCard()`):
+  - Drawing: "Religious Visions" (the Crisis step draws 2, `ReligiousVisionsEvent`, nothing to choose between two
+    copies), "Delusional Intuition" (`DelusionalIntuitionEvent`, a `DRAW_EXACTLY_1_OF_ANY_COLOR` decision, also after the Gas
+    Cloud's draw), "Secret
+    Destiny" (`SecretDestinyEvent`: `GameOps.discardRevealedCrisisCard`, then a new card is drawn and revealed), all
+    through `CrisisCardReveals`. "Inspirational Leader" counts 1 strength cards positive on a Crisis Card's check
+    while William Adama is the current and the acting player (`TotalSkillCheckStrengthEventProcessor`).
+  - Choosing: "Amoral", "Choose a Different Path" and "Deceitful" in `CrisisCardFollowups` (see "Crisis Cards"),
+    "Moral Compass" after a section choice (`MoralCompassEvent`, only on another player's choice).
+  - "Mysterious Intuition" (`MysteriousIntuitionEvent`, a pass, a fail or nothing) before a Crisis Card's check;
+    "Modifications" (`ModificationsEvent`, one per `CylonActivation`) instead of the card's icon at the start of an
+    Activate Cylon Ships step, also one without a Crisis Card (`offerWithoutCard`); "Recon" (`ReconEvent`, then `LookAtTopCardEvent`) last in the Discard step.
+  - Where the alternative is to go on, the option to go on is the plain event that follows (e.g.
+    `one(SecretDestinyEvent, ResolveCrisisCardEvent)`): it names nobody, so the chooser is the ability's player.
+- The skill check abilities, none of which affects a Super Crisis Card's check (`canAffectSkillCheck`),
+  each with an `offer(game)` that is `NONE` when nobody can use it (see "Skill Check Sequence" for where):
+  - Cards into a check: `PlayCardsIntoSkillCheckEventProcessor.maxCards` and `canContribute` hold the limits, "Vanity",
+    "Calculating" and "Misguided" included, and "Impulsive" (never exactly 1 outside the "Brig"). Only a player who may
+    put a card in is asked (`eachPlayerFromTheLeft` with a filter). "Logic-Bound" then asks Simon O'Neill which of his
+    cards goes face up (`LogicBoundEvent`, a `CardsShown`).
+  - "Fast Learner" (`FastLearnerEvent`: the top 3 of a deck into Dee's hand, then `FastLearnerIntoCheckEvent` or not),
+    "Blind Devotion" (`BlindDevotionEvent`, `SkillCheckFact.StrengthZeroed`: the color counts 0 in
+    `SkillCheck.cardValue`), "Quick Fix" (`QuickFixEvent`: Cally discards a revealed card on her turn), "Human Delusion"
+    (a decision on `HumanDelusionEvent`: cards from her hand face up into their piles, `SkillCheckOps.addRevealedCards`,
+    for the strength only, their abilities don't resolve) and "Command Authority" (`CommandAuthorityEvent`:
+    `SkillCheckOps.takeRevealedCard` for each revealed card).
+  - Location checks: "Insubordinate" (-3 when Starbuck is chosen) and "Cylon Hatred" (`CylonHatredEvent`, -3) at the
+    "Admiral's Quarters", "Friends in Low Places" (`FriendsInLowPlacesEvent`, ±2) at the "Brig", through
+    `SkillCheckFact.DifficultyAdjusted`, and "Intolerant" (`IntolerantEvent` beside the `SendToBrigEvent` of an
+    "Admiral's Quarters" pass of 10 or more, `SkillCheckResultFollowups`).
+- The other triggers, queued only in games with their character, each offered only when it can be used:
+  - Right after any event that caused it: an op notes the trigger (`PlayerFact.AbilityTriggered`,
+    `TurnView.triggeredAbilities()`), and the engine's `AbilityTriggers.check` (after `WinChecks`) queues its offer,
+    which clears it (`AbilityTriggerCleared`). `AbstractOps.loseResource` notes "Memento" on a population loss
+    (`OfferMementoEvent` offers `MementoEvent`: 3 Piloting cards drawn, one discarded) and "Emotionally Fragile" when
+    morale ends at 2 or less (`EmotionallyFragileEvent` queues `ExecuteEvent(n, withoutMoraleLoss = true)`).
+  - "For Love": the discards a player is made to do go through `ForcedDiscards` (`DiscardKind`: chosen, random, the
+    whole hand), which in a game with Sharon "Athena" Agathon queues a `ForcedDiscardEvent` that asks her
+    (`ForLoveEvent`) before the discard happens. `DeceitfulDiscards`, the reveal powers and the Final Five discards use
+    it; a cost a player chooses, the hand limit and a Super Crisis Card don't.
+  - Where they happen: "Escort" (`EscortEventProcessor.offer` in `DestroyCivilianShipEvent`, unless `escortOffered`),
+    "Necessary Steps" (`NecessaryStepsEventProcessor.drawFor` in `DrawMutinyCardEvent` and the "Press Room";
+    `DrawMutinyCardEventProcessor.afterDrawing` then applies the "Brig" rules), "Dutiful" (`OfferDutifulEvent` after
+    "Command", "Communications" and "Weapons Control", wherever he activated them from, a remote action again from
+    elsewhere, never inside "Organized"), "Alert Viper Pilot" (after an unmanned launch from the "Reserves", and when
+    "Launch Reserves" places its vipers, before it activates them, `GrantEvent(ACTION, ALERT_VIPER_PILOT)`), "Forward Thinker"
+    (`OfferForwardThinkerEvent` after an "Executive Order", a decision on any `LocationEvent`), "Maintenance Engineer"
+    (after "Repair", `GrantEvent(ACTION, MAINTENANCE_ENGINEER)`), "Raptor Pilot" (`RaptorPilotEvent` instead of "Launch
+    Scout"'s look), "Adaptable" (`OfferAdaptableEvent` after any Quorum Card), "No One Gets Left Behind" (in the jump,
+    after the Cylon ships move), "Manipulative" (first in `StartTurnEvent`, `GameFact.TitleBorrowed`, given back by
+    `EndTurnEvent`) and "Efficient" (Dee's "Communications" looks at every civilian ship).
+- The penalties (`CharacterPenalties`), each adding nothing to a game without its character: "Lies and Secrets" (Cavil
+  discards his hand after any "You Are a Cylon" reveal, by action or execution), "Moral Dilemma" (2 cards after each
+  Mutiny Card Lee Adama gets, in `DrawMutinyCardEventProcessor.afterDrawing` and the "Press Room"), "Alcoholic" (first
+  in `StartTurnEvent`), "Forced to Eject" (`destroyedInsteadOfDamaged`, where a fighter in space is damaged) and
+  "Headstrong" (`ForcedDiscards` makes Apollo's chosen discards random, and so does his hand limit).
+- The bans (`CharacterBans`): "Emotionally Attached", "Bent on Revenge" and "Convicted Criminal" in
+  `LocationEvent.canActIgnoringDamage`, "Specialized" in `SkillCardPlays.canPlay` and `SkillCardEventProcessor`,
+  "Spiritual Crisis" in `RevealCylonEventProcessor.canReveal`. "Nothing But Trouble"'s note bans nothing that exists:
+  no Treachery Card has an action, their text resolves in skill checks (`CharacterBansTest` pins it).
+- The costs (`ActionCosts`): "Terminal Illness" (2 cards before any location), "Conflicted Loyalties" (1 for the
+  "Cylon Fleet") and "Reluctant" (1 more for a Skill Card's "Action:"). The player pays first: the processor records
+  `GameFact.ActionCostPaid(n)` and queues the discard and the same event again, which then acts and settles it
+  (`ActionCostPaid(null)`), or does nothing when the discard took away what it needed. The location cost is a
+  `discardExactly(n)` decision, "Reluctant"'s a choice of the other cards, so the card played stays in the hand. An
+  action that can't be paid isn't offered.
+
 ### Lombok Usage
 
 Uses Lombok extensively: `@Builder`, `@Getter`, `@Accessors(fluent = true)`, `@RequiredArgsConstructor`, `val`.
@@ -885,13 +1191,16 @@ when possible.
   with its replayed twin. `ScriptedScenario.play(journal)` records every kind of fact, which `GameReplayerTest`
   checks. One of its scopes has no event, so only `GameReplayer` rebuilds it, not `GameEngine.restore`
 - `ScriptedTurns` is `TurnLoopTest`'s seeded game as a list of inputs, each computed from the game when it's its turn,
-  for tests that drive a game from outside (the codec, the sessions, the web socket)
+  for tests that drive a game from outside (the codec, the sessions, the web socket). Starbuck lets each revealed
+  Crisis Card resolve ("Secret Destiny") and Laura Roslin picks from her 2 ("Religious Visions"), so 5 cards are
+  stacked
 - Op tests also assert the logged facts (`journal.facts()`), and `FactApplierTest` covers each fact
 - `GameEngineTest` plays a script of real events through `submit` and `choose`, started by the test-only `ScriptEvent`
   (it calls `ops.startGame()` and queues the script). The registry finds test processors such as
   `ScriptEventProcessor` too, because it scans the whole classpath. At every pause, `restore` has to give the same
-  `GameSnapshot` and statuses. The test-only `FailingEvent` changes the game and then throws, to test rollback. Engine
-  tests use a seeded `Randomness`, not `FakeDeck`, because restore rebuilds the real decks
+  `GameSnapshot` and statuses. The test-only `FailingEvent` changes the game and then throws, to test rollback, and the
+  test-only `AnytimeTestEvent` (spends its player's miracle token) runs ahead of decisions, choices and secret inputs.
+  Engine tests use a seeded `Randomness`, not `FakeDeck`, because restore rebuilds the real decks
 - `TurnLoopTest` plays a seeded game through several full turns, restoring at every pause. Its inputs are relative to
   the first player the seed picks. The test-only `StackedStartGameEvent` starts the game like `StartGameEvent` and puts
   simple Crisis Cards on top of the deck (nothing to ask but the section, no die rolls), so the turns don't depend on
@@ -903,15 +1212,44 @@ when possible.
   processor records the fact through `TestOps` (in the fixtures' `operation` package), because only the ops can record
   one. `StackCrisisCardEvent` and `SetUpGalacticaEvent` set up the turn that the Airlock check is part of
 - `CrisisStepTest` plays the Crisis step to the end of the Activate Cylon Ships step: the skill check or the alternate
-  instruction of a card, and "Fulfiller of Prophecy" returning to the step. `CrisisCardResolutionTest` runs every section
+  instruction of a card, "Fulfiller of Prophecy" returning to the step, and "Secret Destiny". `CrisisAbilitiesTest`
+  plays the other abilities that act on Crisis Cards, and `SkillCheckAbilitiesTest` the ones that act in a skill check,
+  each from the location action to the end of the check. `CharacterTriggersTest` plays the triggers that answer
+  something wherever it happens ("Memento", "For Love", "Necessary Steps", "Adaptable", "Manipulative"), and
+  `CharacterPenaltiesTest` the penalties, bans and costs. `CrisisCardResolutionTest` runs every section
   of every card through the real processors with a minimal engine, so a section can't end in an event without a processor
 - `InterruptWindowTest` plays interrupt windows through `submit`, restoring at every pause: the secret status, a pass,
   a tiebreak, an "Evasive Maneuvers" reroll. The test-only `GiveSkillCardEvent` and `PlaceRaiderEvent` set up the
   hands and the board, which a seeded game can't choose
+- `RollAbilitiesTest` plays the die-roll abilities the same way: a reroll, a card and an ability from one player in a
+  secret window, "Longshot", "FTL Operator" on a scripted "FTL Control" roll, and "Hotshot" in a real Action step
 - `SkillCardActionsTest` plays Skill Cards for their "Action:" and "Movement:" through `submit` and `choose`,
   restoring at every pause. `GiveSkillCardEvent` deals the cards, and a script starts at the step that offers them
 - `QuorumCardActionsTest` plays Quorum Cards the same way: the sandbox's `GiveQuorumCardToPresidentEvent` deals them,
-  and `QuorumCardEventsTest` checks that each card has exactly one event
+  and `QuorumCardEventsTest` checks that each card has exactly one event. `MutinyCardActionsTest` and
+  `MutinyCardEventsTest` do the same for Mutiny Cards, dealt with `GiveMutinyCardToPlayerEvent`
+- `CharacterActionsTest` uses "Action:" abilities of character sheets through `submit` and `choose` ("Organized"'s
+  three locations, "Skilled Politician", "Abuse Power"), stacking decks with `StackDeckEvent`, and
+  `CharacterActionEventsTest` checks that each `ACTION` ability has exactly one event. `CharacterMovementTest` does the
+  same for the "Movement:" abilities and the ones that act on moving or at the end of a step, in 4-player games (a
+  Cylon Leader needs more than 3 players), and `CharacterMovementEventsTest` checks one event per `MOVEMENT` ability
+- `SuperCrisisCardTest` has a revealed Cylon play Super Crisis Cards at "Caprica" through `submit` and `choose`, dealt
+  with `GiveSuperCrisisCardToPlayerEvent`, and `SuperCrisisCardResolutionTest` runs every section and result of every
+  card through the real processors, like `CrisisCardResolutionTest`
+- The other engine tests play one row of `unimplemented-components.md` each through `submit` and `choose`, restoring
+  at every pause: `TitleCardActionsTest` (the nuke, the CAG's two actions), `CylonRevealTest` (a power, the discards
+  before it, a reveal on another player's turn, the execution's choice), `CylonLeaderTest` (the return to the
+  "Resurrection Ship"), `FinalFiveTest`, `PegasusDestructionTest` and `SevenPlayerSetupTest` (a 7 player start with
+  its Cylon Leader)
+- `MotiveCardRevealTest` has a Cylon Leader reveal a Motive Card through `submit` while another player decides and while
+  he chooses, restoring at every pause. The test-only `DrawMotiveCardsEvent` deals the cards a `StackDeckEvent` put on
+  top of the Motive deck
+- `PersonalGoalTest` reveals a Personal Goal through `submit`, restoring at every pause: "Self Destruction" with the
+  new Loyalty Card, and "Selfish" with its discards. `CreateLoyaltyDeckEvent` builds the decks, the sandbox's
+  `GiveLoyaltyCardToPlayerEvent` deals the card
+- `CharacterSetupTest` starts a seeded game with Tom Zarek (alt.) and Samuel T. Anders through `submit` and `choose`,
+  restoring at every pause: the Mutiny Card "Disreputable" starts with, and the Receive Skills step "Starts on the
+  Bench" skips
 - `JumpAndKobolTest` plays four jumps and the Kobol end game through `submit` and `choose`, restoring at every pause: the
   Sleeper Agent phase, a human win, and a Personal Goal that turns it into a Cylon win. The test-only `StackDeckEvent`
   stacks the Destination and Loyalty decks, which a seeded game can't choose
