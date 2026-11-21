@@ -204,7 +204,12 @@ the state at that moment what follows.
 - `EndSkillCheckEvent` runs after everything the result queued: it discards the cards of the check, the ones played
   before it too, and records `SkillCheckEnded`, which clears `GameView.activeSkillCheck()`.
 - `DetermineSkillCheckResultEventProcessor.difficulty(game)` is the difficulty so far: Declare Emergency, Jury Rigged,
-  and 4 less at the "Airlock" on a character in the "Brig".
+  4 less at the "Airlock" on a character in the "Brig", and what the Quorum Cards in play changed
+  (`SkillCheckView.difficultyAdjustment()`, `SkillCheckFact.DifficultyAdjusted`).
+- The Quorum Cards in play act in a check (see "Quorum Cards"): "Accept Prophecy" and the Arbitrator
+  (`UseArbitratorEvent`) as the "Admiral's Quarters" is activated, the Chief of Staff (`UseChiefOfStaffEvent`,
+  `SkillCheckView.politicsCountPositive()`) before any card goes in, and "Probation" (`UseProbationEvent`, a
+  `CardsLookedAt` only the President sees) after its holder put cards in, which are then the top of the pile.
 - The game board skill checks are the "Admiral's Quarters", the "Brig" and the "Airlock" (rule 10.3.3). The Daybreak
   "Administration" has no skill check: it draws a Mutiny Card, and `ReplaceMutinousPresidentEvent` then lets the
   player choose a new President if the President holds one. `SkillCheckView.targetPlayerNumber()` is the character the

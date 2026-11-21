@@ -205,6 +205,11 @@ public final class FactApplier {
             case SkillCheckFact.CardRemoved f -> game.activeSkillCheck().remove(f.card(), f.playerNumber());
             case SkillCheckFact.AbilityResolved f -> game.activeSkillCheck().resolved(f.type());
             case SkillCheckFact.EmergencyDeclared ignored -> game.activeSkillCheck().declareEmergency();
+            case SkillCheckFact.DifficultyAdjusted f -> game.activeSkillCheck().adjustDifficulty(f.delta());
+            case SkillCheckFact.PoliticsCountPositive ignored -> game.activeSkillCheck().makePoliticsCountPositive();
+            case SkillCheckFact.CardsLookedAt ignored -> {
+                // what a player learns changes no component
+            }
             case SkillCheckFact.TotalStrengthDetermined f -> game.activeSkillCheck().totalStrength(f.totalStrength());
             case SkillCheckFact.ResultDetermined f -> game.activeSkillCheck().result(f.result());
             case SkillCheckFact.PassResultReplaced ignored -> game.activeSkillCheck().replacePassResult();

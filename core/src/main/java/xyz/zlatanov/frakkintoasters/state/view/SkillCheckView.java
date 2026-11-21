@@ -53,6 +53,16 @@ public interface SkillCheckView {
     boolean emergencyDeclared();
 
     /**
+     * @return what the cards in play changed the difficulty by, e.g. "Assign Arbitrator" or "Accept Prophecy"
+     */
+    int difficultyAdjustment();
+
+    /**
+     * @return whether the Politics Cards in the check count positive, after "Assign Chief of Staff"
+     */
+    boolean politicsCountPositive();
+
+    /**
      * The matching pile strength minus the non-matching pile strength, {@code null} until the strength is totaled.
      */
     Integer totalStrength();

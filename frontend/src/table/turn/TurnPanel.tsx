@@ -214,6 +214,7 @@ function SkillCheck() {
           {!fromCrisis && <b>{name}</b>}
           {check.targetPlayer !== null && <span>about {table.playerName(check.targetPlayer)}</span>}
           {check.emergencyDeclared && <span>emergency declared</span>}
+          {check.politicsCountPositive && <span>Politics counts positive</span>}
           <span className="check-figure">
             Difficulty <strong>{check.difficulty}</strong>
           </span>

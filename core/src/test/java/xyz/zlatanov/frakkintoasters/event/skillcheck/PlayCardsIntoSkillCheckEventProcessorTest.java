@@ -5,15 +5,19 @@ import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
+import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
+import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.DANNA_BIERS;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARL_HELO_AGATHON;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.LAURA_ROSLIN;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType.ADMIRALS_QUARTERS;
 
@@ -94,6 +98,29 @@ class PlayCardsIntoSkillCheckEventProcessorTest extends EventTestHarness<PlayCar
 
         assertEquals(List.of(card), check.shownCards(1));
         assertTrue(check.cards().cards().contains(card)); // in the pile like any other
+    }
+
+    // The President may look at what the holder of "Probation" put in.
+    @Test
+    void thePresidentMayUseProbation() {
+        player(2).character(LAURA_ROSLIN);
+        president(LAURA_ROSLIN);
+        ops.titles().putInPlay(QuorumCard.PROBATION, 1);
+        val card = new SkillCard(1, CALCULATIONS);
+        player(1).gainSkillCards(card);
+
+        execute(new PlayCardsIntoSkillCheckEvent(1, List.of(card)));
+
+        assertFollowup(one(new UseProbationEvent(2, 1, 1), new NoOpEvent(2)));
+    }
+
+    @Test
+    void probationAsksNothingWhenTheHolderPutsNothingIn() {
+        player(2).character(LAURA_ROSLIN);
+        president(LAURA_ROSLIN);
+        ops.titles().putInPlay(QuorumCard.PROBATION, 1);
+
+        execute(new PlayCardsIntoSkillCheckEvent(1, List.of()));
     }
 
     @Test

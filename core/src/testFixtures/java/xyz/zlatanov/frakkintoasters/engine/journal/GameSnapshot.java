@@ -131,6 +131,8 @@ public record GameSnapshot(Map<String, Object> values) {
         }
         result.put("resolvedAbilities", new ArrayList<>(check.resolvedAbilities()));
         result.put("emergencyDeclared", check.emergencyDeclared());
+        result.put("difficultyAdjustment", check.difficultyAdjustment());
+        result.put("politicsCountPositive", check.politicsCountPositive());
         result.put("totalStrength", check.totalStrength());
         result.put("result", check.result());
         result.put("passResultReplaced", check.passResultReplaced());

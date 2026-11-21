@@ -7,8 +7,10 @@ import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.DrawSkillCardsEvent;
+import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
 
 import java.util.List;
 
@@ -31,6 +33,28 @@ class ResolveCardsBeforeSkillCheckEventProcessorTest extends EventTestHarness<Re
     @Test
     void shouldFollowUpWithDestinyDeckWhenNoCardPlayed() {
         execute(new ResolveCardsBeforeSkillCheckEvent());
+        assertFollowup(all(single(new PlayFromDestinyDeckEvent()), playCardsInto(), shuffleAndDivide()));
+    }
+
+    // The Chief of Staff is asked before any card goes into the check.
+    @Test
+    void theChiefOfStaffMayMakePoliticsCountPositive() {
+        ops.titles().putInPlay(QuorumCard.ASSIGN_CHIEF_OF_STAFF, 2);
+
+        execute(new ResolveCardsBeforeSkillCheckEvent());
+
+        assertFollowup(all(one(new UseChiefOfStaffEvent(2), new NoOpEvent(2)), single(new PlayFromDestinyDeckEvent()),
+                playCardsInto(), shuffleAndDivide()));
+    }
+
+    @Test
+    void theChiefOfStaffIsNotAskedWhenPoliticsCountsPositiveAlready() {
+        game.endSkillCheck();
+        game.startSkillCheck(SkillCheckType.BRIG);
+        ops.titles().putInPlay(QuorumCard.ASSIGN_CHIEF_OF_STAFF, 2);
+
+        execute(new ResolveCardsBeforeSkillCheckEvent());
+
         assertFollowup(all(single(new PlayFromDestinyDeckEvent()), playCardsInto(), shuffleAndDivide()));
     }
 

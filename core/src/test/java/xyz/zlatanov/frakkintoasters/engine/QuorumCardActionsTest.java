@@ -13,6 +13,7 @@ import xyz.zlatanov.frakkintoasters.event.action.GrantEvent;
 import xyz.zlatanov.frakkintoasters.event.action.GrantEvent.GrantedBy;
 import xyz.zlatanov.frakkintoasters.event.action.QuorumCardEvent;
 import xyz.zlatanov.frakkintoasters.event.action.quorum.ArrestOrderEvent;
+import xyz.zlatanov.frakkintoasters.event.action.quorum.AssignArbitratorEvent;
 import xyz.zlatanov.frakkintoasters.event.action.quorum.EnactProductionQuotasEvent;
 import xyz.zlatanov.frakkintoasters.event.action.quorum.EstablishDogsvilleEvent;
 import xyz.zlatanov.frakkintoasters.event.action.quorum.FoodRationingEvent;
@@ -21,11 +22,13 @@ import xyz.zlatanov.frakkintoasters.event.action.skillcard.ExecutiveOrderEvent;
 import xyz.zlatanov.frakkintoasters.event.action.title.PresidentTitleActionEvent;
 import xyz.zlatanov.frakkintoasters.event.endgame.CylonsWinEvent;
 import xyz.zlatanov.frakkintoasters.event.location.colonialone.QuorumChamberEvent;
+import xyz.zlatanov.frakkintoasters.event.location.galactica.AdmiralsQuartersEvent;
 import xyz.zlatanov.frakkintoasters.event.officials.MakePresidentEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.SelectCharacterEvent;
 import xyz.zlatanov.frakkintoasters.event.sandbox.GiveQuorumCardToPresidentEvent;
 import xyz.zlatanov.frakkintoasters.event.sandbox.MoveCharacterEvent;
+import xyz.zlatanov.frakkintoasters.event.skillcheck.UseArbitratorEvent;
 import xyz.zlatanov.frakkintoasters.event.turn.ActionStepEvent;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Randomness;
@@ -43,6 +46,7 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.event.action.GrantEvent.Grant.ACTION;
 import static xyz.zlatanov.frakkintoasters.state.Team.CYLONS;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.ADMIRALS_QUARTERS;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.BRIG;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.QUORUM_CHAMBER;
 import static xyz.zlatanov.frakkintoasters.state.card.QuorumCard.*;
@@ -176,6 +180,24 @@ class QuorumCardActionsTest {
         assertEquals(1, game().presidentHand().size());
         assertEquals(List.of(EULOGY, RESIGNATION), game().decks().quorum().discardedCards());
         assertEquals(new Finished(CYLONS), engine.status(1));
+    }
+
+    // The Arbitrator is asked as the "Admiral's Quarters" is activated, and the card leaves play once used.
+    @Test
+    void theArbitratorLowersAnAdmiralsQuartersCheck() {
+        start(all(setUp(WILLIAM_ADAMA), single(new GiveQuorumCardToPresidentEvent(ASSIGN_ARBITRATOR)),
+                single(new MoveCharacterEvent(WILLIAM_ADAMA, ADMIRALS_QUARTERS)), single(new ActionStepEvent()),
+                single(new ActionStepEvent()), CYLONS_WIN));
+
+        act(1);
+        play(engine -> engine.submit(1, new AssignArbitratorEvent(1, 2)));
+        act(1);
+        play(engine -> engine.submit(1, new AdmiralsQuartersEvent(1, 3)));
+        choose(2, single(new UseArbitratorEvent(2, -3)));
+
+        assertEquals(-3, engine.view().activeSkillCheck().difficultyAdjustment());
+        assertEquals(List.of(), engine.view().quorumCardsInPlay());
+        assertTrue(game().decks().quorum().discardedCards().contains(ASSIGN_ARBITRATOR));
     }
 
     // The first player's character becomes President.

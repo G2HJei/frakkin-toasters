@@ -52,6 +52,7 @@ public class TotalSkillCheckStrengthEventProcessor extends EventProcessor<TotalS
         return switch (card.type().color()) {
             case ENGINEERING -> playedBefore(SCIENTIFIC_RESEARCH);
             case TREACHERY -> playedBefore(AT_ANY_COST);
+            case POLITICS -> game.activeSkillCheck().politicsCountPositive();
             default -> false;
         };
     }

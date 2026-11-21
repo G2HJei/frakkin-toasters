@@ -207,6 +207,7 @@ public record GameProjection(
                                        List<SkillCard> nonMatchingPile,
                                        List<SkillCardType> resolvedAbilities,
                                        boolean emergencyDeclared,
+                                       boolean politicsCountPositive,
                                        Integer totalStrength,
                                        SkillCheckResult result,
                                        boolean passResultReplaced,

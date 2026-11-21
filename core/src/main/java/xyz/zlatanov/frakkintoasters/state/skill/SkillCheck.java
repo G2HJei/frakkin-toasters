@@ -35,6 +35,8 @@ public class SkillCheck implements SkillCheckView {
     private final Deck<SkillCard>               nonMatchingPile        = new Deck<>();
     private final List<SkillCardType>           resolvedAbilities      = new ArrayList<>();
     private       boolean                       emergencyDeclared      = false;
+    private       int                           difficultyAdjustment   = 0;
+    private       boolean                       politicsCountPositive  = false;
     private       Integer                       totalStrength;
     private       SkillCheckResult              result;
     private       boolean                       passResultReplaced     = false; //by change of plans
@@ -149,6 +151,16 @@ public class SkillCheck implements SkillCheckView {
     public void declareEmergency() {
         assert !emergencyDeclared : "Limit of 1 Declare Emergency per skill check";
         emergencyDeclared = true;
+    }
+
+    @Mutates
+    public void adjustDifficulty(int delta) {
+        difficultyAdjustment += delta;
+    }
+
+    @Mutates
+    public void makePoliticsCountPositive() {
+        politicsCountPositive = true;
     }
 
     @Mutates

@@ -56,6 +56,21 @@ public sealed interface SkillCheckFact extends Fact {
     record EmergencyDeclared() implements SkillCheckFact {
     }
 
+    // A Quorum Card in play changed the difficulty, e.g. "Assign Arbitrator".
+    record DifficultyAdjusted(int delta) implements SkillCheckFact {
+    }
+
+    // "Assign Chief of Staff": the Politics Cards in the check count positive.
+    record PoliticsCountPositive() implements SkillCheckFact {
+    }
+
+    // The player looked at cards another player put into the check, e.g. through "Probation". It changes nothing.
+    record CardsLookedAt(int playerNumber, int targetPlayerNumber, List<SkillCard> cards) implements SkillCheckFact {
+        public CardsLookedAt {
+            cards = List.copyOf(cards);
+        }
+    }
+
     record TotalStrengthDetermined(int totalStrength) implements SkillCheckFact {
     }
 

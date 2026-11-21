@@ -791,6 +791,19 @@ class FactApplierTest {
     }
 
     @Test
+    void theQuorumCardsInPlayChangeTheCheck() {
+        val check = startCheck();
+
+        apply(new SkillCheckFact.DifficultyAdjusted(3));
+        apply(new SkillCheckFact.DifficultyAdjusted(-1));
+        apply(new SkillCheckFact.PoliticsCountPositive());
+        apply(new SkillCheckFact.CardsLookedAt(1, 2, List.of()));
+
+        assertEquals(2, check.difficultyAdjustment());
+        assertTrue(check.politicsCountPositive());
+    }
+
+    @Test
     void failResultPrevented() {
         val check = startCheck();
         apply(new SkillCheckFact.ResultDetermined(SkillCheckResult.FAIL));

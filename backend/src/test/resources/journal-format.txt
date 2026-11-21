@@ -1,4 +1,4 @@
-format version 16
+format version 17
 enum Area = SPACE, RESERVES, SPACE_OR_RESERVES
 enum BasestarBridgeAbility = CAG_PLACES_CIVILIAN_SHIP, JUMP_OR_PURSUIT, BASESTAR_OR_RAIDERS, GALACTICA_DAMAGE
 enum BasestarDamage = STRUCTURAL_DAMAGE, DISABLED_WEAPONS, DISABLED_HANGAR_BAY, CRITICAL_HIT
@@ -409,13 +409,16 @@ record SkillCard(value: int, type: SkillCardType)
 record SkillCheckFact.AbilityResolved(type: SkillCardType)
 record SkillCheckFact.CardRemoved(card: SkillCard, playerNumber: int?)
 record SkillCheckFact.CardsDrawn(pile: SkillCheckPile, cards: List<SkillCard>)
+record SkillCheckFact.CardsLookedAt(playerNumber: int, targetPlayerNumber: int, cards: List<SkillCard>)
 record SkillCheckFact.CardsPlaced(pile: SkillCheckPile, cards: List<SkillCard>, onTop: boolean)
 record SkillCheckFact.CardsPlayedBefore(playerNumber: int, cards: List<SkillCard>)
 record SkillCheckFact.CardsShown(playerNumber: int, cards: List<SkillCard>)
+record SkillCheckFact.DifficultyAdjusted(delta: int)
 record SkillCheckFact.EmergencyDeclared()
 record SkillCheckFact.FailResultPrevented()
 record SkillCheckFact.PassResultReplaced()
 record SkillCheckFact.PlayedBeforeRevealed()
+record SkillCheckFact.PoliticsCountPositive()
 record SkillCheckFact.ResultDetermined(result: SkillCheckResult)
 record SkillCheckFact.SkillCheckEnded()
 record SkillCheckFact.SkillCheckStarted(type: SkillCheckType)
@@ -442,6 +445,9 @@ record TotalSkillCheckStrengthEvent()
 record TrustInstinctsEvent()
 record UnorthodoxPlanEvent(playerNumber: int, card: SkillCard, location: Location)
 record UnsavoryConnectionsEvent(playerNumber: int, resource: Resource)
+record UseArbitratorEvent(playerNumber: int, adjustment: int)
+record UseChiefOfStaffEvent(playerNumber: int)
+record UseProbationEvent(playerNumber: int, holderPlayerNumber: int, count: int)
 record ViolentOutburstsEvent()
 record ViperActivation(launchShipType: ShipType, launchLocation: Location, humanFighterId: int?, moveLocation: Location, attackCylonShipId: int?, escortCivilianShipId: int?)
 record ViperActivationRoundEvent(playerNumber: int, viperId: int, activationsLeft: int, attacksOnly: boolean)

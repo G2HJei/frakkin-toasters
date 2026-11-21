@@ -15,6 +15,8 @@ import java.util.ArrayList;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
 import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.eachPlayerFromTheLeft;
+import static xyz.zlatanov.frakkintoasters.state.card.QuorumCard.ASSIGN_CHIEF_OF_STAFF;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.POLITICS;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.GUTS_AND_INITIATIVE;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.SUPPORT_THE_PEOPLE;
 
@@ -34,6 +36,12 @@ public class ResolveCardsBeforeSkillCheckEventProcessor extends EventProcessor<R
                     .forEach(followUps::add);
 
         }
+        // The Chief of Staff may use the card before any card is added to the check, when Politics doesn't count
+        // positive already.
+        game.quorumCardHolder(ASSIGN_CHIEF_OF_STAFF)
+                .filter(holder -> !game.activeSkillCheck().type().skillCheckColors().contains(POLITICS))
+                .map(holder -> one(new UseChiefOfStaffEvent(holder), new NoOpEvent(holder)))
+                .ifPresent(followUps::add);
         if (!cardInPlay(GUTS_AND_INITIATIVE)) {
             followUps.add(single(new PlayFromDestinyDeckEvent()));
         }

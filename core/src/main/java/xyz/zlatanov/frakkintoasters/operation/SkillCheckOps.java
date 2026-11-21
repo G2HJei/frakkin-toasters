@@ -132,6 +132,18 @@ public class SkillCheckOps extends GameOps {
         record(new EmergencyDeclared());
     }
 
+    public void adjustDifficulty(int delta) {
+        record(new DifficultyAdjusted(delta));
+    }
+
+    public void makePoliticsCountPositive() {
+        record(new PoliticsCountPositive());
+    }
+
+    public void lookAt(int playerNumber, int targetPlayerNumber, List<SkillCard> cards) {
+        record(new CardsLookedAt(playerNumber, targetPlayerNumber, cards));
+    }
+
     public void totalStrength(int totalStrength) {
         record(new TotalStrengthDetermined(totalStrength));
     }

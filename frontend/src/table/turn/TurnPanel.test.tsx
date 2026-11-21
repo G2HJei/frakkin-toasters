@@ -113,6 +113,14 @@ describe('the turn', () => {
     ]);
   });
 
+  it('says when the Politics Cards count positive', () => {
+    const skillCheck = { type: 'BRIG', targetPlayer: 1, difficulty: 7, cards: { count: 0, colors: null, cards: null }, totalStrength: null, politicsCountPositive: true };
+    const panel = renderPanel({ step: 'ACTION', currentPlayer: 1, actingPlayer: 1 }, { skillCheck });
+    const check = panel.querySelector('section.turn [aria-label="skill check"]')!;
+
+    expect([...check.querySelectorAll('.block-text > *')].map((line) => line.textContent)).toContain('Politics counts positive');
+  });
+
   it('leaves the objective to the board', () => {
     const panel = renderPanel({ step: 'CRISIS', currentPlayer: 1, actingPlayer: 1 });
 

@@ -30,7 +30,7 @@ public class DetermineSkillCheckResultEventProcessor extends EventProcessor<Dete
     private static final int A_SECOND_CHANCE_MARGIN      = 4;
 
     /**
-     * @return the difficulty of the active skill check, with what reduces it so far
+     * @return the difficulty of the active skill check, with what changed it so far
      */
     public static int difficulty(GameView game) {
         val skillCheck = game.activeSkillCheck();
@@ -38,7 +38,8 @@ public class DetermineSkillCheckResultEventProcessor extends EventProcessor<Dete
         return skillCheck.type().difficulty()
                 - (skillCheck.emergencyDeclared() ? DECLARE_EMERGENCY_REDUCTION : 0)
                 - (playedBefore(skillCheck, JURY_RIGGED) ? JURY_RIGGED_REDUCTION : 0)
-                - (airlockOnPrisoner(game) ? AIRLOCK_BRIG_REDUCTION : 0);
+                - (airlockOnPrisoner(game) ? AIRLOCK_BRIG_REDUCTION : 0)
+                + skillCheck.difficultyAdjustment();
     }
 
     // Airlock: "Reduce the difficulty of this check by 4 if the character is in the "Brig.""

@@ -315,6 +315,7 @@ final class GameProjector {
                 check.nonMatchingPile().cards(),
                 check.resolvedAbilities(),
                 check.emergencyDeclared(),
+                check.politicsCountPositive(),
                 check.totalStrength(),
                 check.result(),
                 check.passResultReplaced(),

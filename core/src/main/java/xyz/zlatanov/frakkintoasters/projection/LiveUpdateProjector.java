@@ -234,6 +234,11 @@ final class LiveUpdateProjector {
             case SkillCheckFact.TargetChosen f -> shown(f);
             case SkillCheckFact.PlayedBeforeRevealed f -> shown(f);
             case SkillCheckFact.CardsShown f -> shown(f);
+            case SkillCheckFact.CardsLookedAt f -> sees(f.playerNumber())
+                    ? shown(f)
+                    : hidden(f, f.playerNumber(), null, null, null, null, f.cards());
+            case SkillCheckFact.DifficultyAdjusted f -> shown(f);
+            case SkillCheckFact.PoliticsCountPositive f -> shown(f);
             case SkillCheckFact.CardRemoved f -> shown(f);
             case SkillCheckFact.AbilityResolved f -> shown(f);
             case SkillCheckFact.EmergencyDeclared f -> shown(f);

@@ -107,6 +107,9 @@ public final class ScriptedScenario {
         val played = game.player(1).skillCards().cards().getFirst();
         ops.skillCheck().playBeforeSkillCheck(1, java.util.List.of(played));
         ops.skillCheck().revealPlayedBefore();
+        ops.skillCheck().adjustDifficulty(3);
+        ops.skillCheck().makePoliticsCountPositive();
+        ops.skillCheck().lookAt(1, 2, java.util.List.of());
         val shown = List.of(game.player(2).skillCards().cards().get(0), game.player(2).skillCards().cards().get(1));
         ops.skillCheck().playCards(2, shown);
         ops.skillCheck().show(2, shown);
