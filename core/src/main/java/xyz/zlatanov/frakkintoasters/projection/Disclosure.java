@@ -75,6 +75,7 @@ public final class Disclosure {
             entry("Discard1MutinyCardEvent.cardToDiscard", true),
             entry("DiscardDownTo1MutinyCardEvent.cardToKeep", false),
             entry("DiscardFromDestinyDeckEvent.cards", false),
+            entry("DiscardHeldQuorumCardEvent.card", true), // the Quorum discard pile is face up
             entry("DiscardPlayedQuorumCardEvent.card", true), // a played Quorum Card is face up
             entry("DiscardQuorumCardsEvent.cards", true),
             entry("DiscardSkillCardsEvent.cards", true),
@@ -99,6 +100,9 @@ public final class Disclosure {
             entry("PlayInterruptCardEvent.card", false),
             entry("PlaySuperCrisisCardEvent.superCrisisCard", true),
             entry("PoliticalProwessEvent.politicalProwessCard", true),
+            entry("PopularInfluenceEvent.card", true),
+            entry("PopularInfluenceChoiceEvent.given", false), // only the player and the President learn it
+            entry("PopularInfluenceChoiceEvent.other", false), // shown once it is played or discarded
             entry("PreventivePolicyEvent.card", true),
             entry("QuickThinkingEvent.cardToRemove", true),
             entry("RaptorSpecialistEvent.card", true),

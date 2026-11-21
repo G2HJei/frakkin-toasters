@@ -48,6 +48,37 @@ public final class QuorumCardPlays {
     }
 
     /**
+     * @return the event that plays the card, for a decision that takes only that card, e.g. after "Popular Influence"
+     */
+    public static Class<? extends QuorumCardEvent> eventClass(QuorumCard card) {
+        return switch (card) {
+            case ACCEPT_PROPHECY -> AcceptProphecyEvent.class;
+            case ARREST_ORDER -> ArrestOrderEvent.class;
+            case ASSIGN_ARBITRATOR -> AssignArbitratorEvent.class;
+            case ASSIGN_CHIEF_OF_STAFF -> AssignChiefOfStaffEvent.class;
+            case ASSIGN_MISSION_SPECIALIST -> AssignMissionSpecialistEvent.class;
+            case ASSIGN_VICE_PRESIDENT -> AssignVicePresidentEvent.class;
+            case AUTHORIZATION_OF_BRUTAL_FORCE -> AuthorizationOfBrutalForceEvent.class;
+            case CIVILIAN_SELF_DEFENSE -> CivilianSelfDefenseEvent.class;
+            case CONSULT_THE_ORACLE -> ConsultTheOracleEvent.class;
+            case ENACT_PRODUCTION_QUOTAS -> EnactProductionQuotasEvent.class;
+            case ENCOURAGE_MUTINY -> EncourageMutinyEvent.class;
+            case ESTABLISH_DOGSVILLE -> EstablishDogsvilleEvent.class;
+            case EULOGY -> EulogyEvent.class;
+            case EXECUTE_PRISONER -> ExecutePrisonerEvent.class;
+            case FOOD_RATIONING -> FoodRationingEvent.class;
+            case INSPIRATIONAL_SPEECH -> InspirationalSpeechEvent.class;
+            case PRESIDENTIAL_ORDER -> PresidentialOrderEvent.class;
+            case PRESIDENTIAL_PARDON -> PresidentialPardonEvent.class;
+            case PROBATION -> ProbationEvent.class;
+            case RELEASE_CYLON_MUGSHOTS -> ReleaseCylonMugshotsEvent.class;
+            case RESIGNATION -> ResignationEvent.class;
+            case RESOURCES_FOR_GALACTICA -> ResourcesForGalacticaEvent.class;
+            case UNSAVORY_CONNECTIONS -> UnsavoryConnectionsEvent.class;
+        };
+    }
+
+    /**
      * @return whether the player is President and holds a Quorum Card he can play now
      */
     public static boolean canPlayAny(GameView game, PlayerView player) {

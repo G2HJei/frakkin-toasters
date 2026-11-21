@@ -27,7 +27,11 @@ public abstract class QuorumCardEventProcessor<T extends QuorumCardEvent> extend
 
     @Override
     public final Followup process() {
-        ops.titles().play(card());
+        if (player.quorumCards().cards().contains(card())) {
+            ops.player(player.number()).playHeldQuorumCard(card());
+        } else {
+            ops.titles().play(card());
+        }
         return resolve();
     }
 
@@ -38,9 +42,11 @@ public abstract class QuorumCardEventProcessor<T extends QuorumCardEvent> extend
         return new DiscardPlayedQuorumCardEvent(card());
     }
 
-    // Only the President plays from the Quorum hand (rule 4.4.1.1), also from the "Brig" (rule 4.4.1.2).
+    // The card the player holds himself ("Popular Influence"), otherwise one from the President's hand, which only the
+    // President plays (rule 4.4.1.1), also from the "Brig" (rule 4.4.1.2).
     private boolean holdsCard() {
-        return player.character() != null
+        return player.quorumCards().cards().contains(card())
+                || player.character() != null
                 && player.character() == game.president()
                 && game.presidentHand().cards().contains(card());
     }

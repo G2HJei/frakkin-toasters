@@ -19,9 +19,6 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
  */
 class SkillCardEventsTest {
 
-    // the cards that later phases of skill-cards-plan.md build
-    private static final Set<SkillCardType> NOT_BUILT_YET = EnumSet.of(
-            POPULAR_INFLUENCE);
 
     @Test
     void eachActionOrMovementCardHasOneEvent() {
@@ -30,7 +27,6 @@ class SkillCardEventsTest {
         eventsByType.forEach((type, events) -> assertEquals(1, events.size(), type + ": " + events));
         val expected = Arrays.stream(SkillCardType.values())
                 .filter(type -> type.isAction() || type.isMovementAbility())
-                .filter(type -> !NOT_BUILT_YET.contains(type))
                 .collect(toSet());
         assertEquals(expected, eventsByType.keySet());
     }

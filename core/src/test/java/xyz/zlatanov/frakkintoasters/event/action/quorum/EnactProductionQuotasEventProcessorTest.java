@@ -39,6 +39,29 @@ class EnactProductionQuotasEventProcessorTest extends EventTestHarness<EnactProd
         assertInvalid(new EnactProductionQuotasEvent(2));
     }
 
+    // "Popular Influence" left player 2 the card to play.
+    @Test
+    void aHeldCardIsPlayedByItsHolder() {
+        ops.player(2).holdQuorumCard(ENACT_PRODUCTION_QUOTAS);
+
+        execute(new EnactProductionQuotasEvent(2));
+
+        assertEquals(List.of(), player(2).quorumCards().cards());
+        assertEquals(List.of(ENACT_PRODUCTION_QUOTAS), presidentHand.cards()); // the President's copy stays
+        assertFollowup(all(gain(FOOD, 1), lose(MORALE, 1), new DiscardPlayedQuorumCardEvent(ENACT_PRODUCTION_QUOTAS)));
+    }
+
+    @Test
+    void thePresidentPlaysHisHeldCopyFirst() {
+        ops.player(1).holdQuorumCard(ENACT_PRODUCTION_QUOTAS);
+
+        execute(new EnactProductionQuotasEvent(1));
+
+        assertEquals(List.of(), player(1).quorumCards().cards());
+        assertEquals(List.of(ENACT_PRODUCTION_QUOTAS), presidentHand.cards());
+        assertFollowup(all(gain(FOOD, 1), lose(MORALE, 1), new DiscardPlayedQuorumCardEvent(ENACT_PRODUCTION_QUOTAS)));
+    }
+
     @Test
     void notWithoutTheCard() {
         presidentHand.removeTop(1);

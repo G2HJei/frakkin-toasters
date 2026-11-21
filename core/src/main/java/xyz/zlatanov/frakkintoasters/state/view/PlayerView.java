@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.state.view;
 
+import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
 import xyz.zlatanov.frakkintoasters.state.card.MutinyCard;
@@ -28,6 +29,12 @@ public interface PlayerView {
     DeckView<MutinyCard> mutinyCards();
 
     DeckView<SuperCrisisCard> superCrisisCards();
+
+    /**
+     * @return the Quorum Cards the player holds outside the President's hand: only the one "Popular Influence" leaves
+     * him to play or discard
+     */
+    DeckView<QuorumCard> quorumCards();
 
     boolean hasMiracleToken();
 

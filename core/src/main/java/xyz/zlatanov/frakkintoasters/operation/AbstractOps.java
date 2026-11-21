@@ -17,6 +17,7 @@ import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.board.LocationsArea;
 import xyz.zlatanov.frakkintoasters.state.board.Resource;
 import xyz.zlatanov.frakkintoasters.state.card.MutinyCard;
+import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
 import xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage;
 import xyz.zlatanov.frakkintoasters.state.damage.GalacticaDamage;
 import xyz.zlatanov.frakkintoasters.state.damage.PegasusDamage;
@@ -115,6 +116,7 @@ public abstract class AbstractOps {
             case SkillCard skillCard ->
                     record(new CardsDiscarded(DeckId.of(skillCard.type().color()), List.of(skillCard)));
             case MutinyCard mutinyCard -> record(new CardsDiscarded(MUTINY, List.of(mutinyCard)));
+            case QuorumCard quorumCard -> record(new CardsDiscarded(DeckId.QUORUM, List.of(quorumCard)));
             case GalacticaDamage damage -> record(new CardsAddedOnTop(GALACTICA_DAMAGE, List.of(damage)));
             case BasestarDamage damage -> record(new CardsAddedOnTop(BASESTAR_DAMAGE, List.of(damage)));
             case PegasusDamage damage -> record(new CardsAddedOnTop(PEGASUS_DAMAGE, List.of(damage)));

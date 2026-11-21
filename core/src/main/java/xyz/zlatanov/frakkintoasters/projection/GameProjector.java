@@ -150,6 +150,7 @@ final class GameProjector {
                 hidden(player.motiveCards(), owner),
                 hidden(player.mutinyCards(), owner),
                 hidden(player.superCrisisCards(), owner),
+                hidden(player.quorumCards(), owner),
                 player.hasMiracleToken(),
                 player.isInfiltrating(),
                 character == null ? null : player.isHuman(),

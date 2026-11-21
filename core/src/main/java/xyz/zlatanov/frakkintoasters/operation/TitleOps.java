@@ -41,6 +41,18 @@ public class TitleOps extends GameOps {
     }
 
     /**
+     * @return Quorum Cards drawn for a player who isn't drawing into the President's hand, e.g. for "Popular
+     * Influence". They are in no pile yet
+     */
+    public List<QuorumCard> drawQuorumCards(int count) {
+        return draw(QUORUM, count);
+    }
+
+    public void giveQuorumCardToPresident(QuorumCard card) {
+        record(new PresidentQuorumCardGained(card));
+    }
+
+    /**
      * The President discards random Quorum Cards, as many as he has up to {@code count}.
      */
     public void discardRandomQuorumCards(int count) {

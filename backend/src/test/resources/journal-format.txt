@@ -1,4 +1,4 @@
-format version 18
+format version 19
 enum Area = SPACE, RESERVES, SPACE_OR_RESERVES
 enum BasestarBridgeAbility = CAG_PLACES_CIVILIAN_SHIP, JUMP_OR_PURSUIT, BASESTAR_OR_RAIDERS, GALACTICA_DAMAGE
 enum BasestarDamage = STRUCTURAL_DAMAGE, DISABLED_WEAPONS, DISABLED_HANGAR_BAY, CRITICAL_HIT
@@ -19,7 +19,7 @@ enum MotiveCard = SUBJECTS_TO_STUDY, SAVOR_THEIR_DEMISE, NO_UNNECESSARY_FORCE, H
 enum MutinyCard = WEAPONS_ARMED, VIOLENT_PROTEST, UNAUTHORIZED_USAGE, THE_STRONG_SURVIVE, SET_THE_AGENDA, SEND_A_MESSAGE, SELFISH_ACT, SCAVENGING_FOR_PARTS, RUINED_REPUTATION, PEACEFUL_RESISTANCE, PANIC, NECESSARY_RISK, MAKE_A_DEAL, IMPEACHMENT, FEED_THE_PEOPLE, CONTROVERSIAL_SPEECH, CLIPPED_WINGS, BLACKMAIL, BETRAYAL_OF_TRUST, BAIT_AND_SWITCH, ASSUME_COMMAND, ARMED_RESISTANCE
 enum ObjectiveCard = KOBOL
 enum PegasusDamage = PEGASUS_CIC, MAIN_BATTERIES, ENGINE_ROOM, AIRLOCK
-enum PlayerPile = SKILL, MOTIVE, LOYALTY, MUTINY, SUPER_CRISIS
+enum PlayerPile = SKILL, MOTIVE, LOYALTY, MUTINY, SUPER_CRISIS, QUORUM
 enum QuorumCard = ESTABLISH_DOGSVILLE, PRESIDENTIAL_ORDER, RESIGNATION, ACCEPT_PROPHECY, ARREST_ORDER, ASSIGN_ARBITRATOR, ASSIGN_MISSION_SPECIALIST, ASSIGN_VICE_PRESIDENT, AUTHORIZATION_OF_BRUTAL_FORCE, ENCOURAGE_MUTINY, FOOD_RATIONING, INSPIRATIONAL_SPEECH, PRESIDENTIAL_PARDON, RELEASE_CYLON_MUGSHOTS, ASSIGN_CHIEF_OF_STAFF, CIVILIAN_SELF_DEFENSE, CONSULT_THE_ORACLE, ENACT_PRODUCTION_QUOTAS, EULOGY, EXECUTE_PRISONER, PROBATION, RESOURCES_FOR_GALACTICA, UNSAVORY_CONNECTIONS
 enum Resource = FUEL, FOOD, MORALE, POPULATION
 enum Risk = CYLON_REFINERY, ICY_MOON, TYLIUM_PLANET
@@ -178,6 +178,7 @@ record Discard1MutinyCardEvent(playerNumber: int, cardToDiscard: MutinyCard)
 record DiscardAllSkillCardsEvent(playerNumber: int)
 record DiscardDownTo1MutinyCardEvent(playerNumber: int, cardToKeep: MutinyCard)
 record DiscardFromDestinyDeckEvent(playerNumber: int, cards: List<SkillCard>)
+record DiscardHeldQuorumCardEvent(playerNumber: int, card: QuorumCard)
 record DiscardNukeTokenEvent()
 record DiscardPlayedQuorumCardEvent(card: QuorumCard)
 record DiscardQuorumCardsEvent(playerNumber: int, cards: List<QuorumCard>, discardLimit: EventConstraint)
@@ -343,6 +344,8 @@ record PlayerFact.MiracleTokenLost(playerNumber: int)
 record PlayerFact.MotiveCardRevealed(playerNumber: int, card: MotiveCard)
 record PlayerFact.OwnTurnStarted(playerNumber: int)
 record PoliticalProwessEvent(playerNumber: int, politicalProwessCard: SkillCard, pass: boolean)
+record PopularInfluenceChoiceEvent(playerNumber: int, given: QuorumCard, other: QuorumCard)
+record PopularInfluenceEvent(playerNumber: int, card: SkillCard)
 record PrepareForJumpStepEvent()
 record PresidentTitleActionEvent(playerNumber: int)
 record PresidentialOrderEvent(playerNumber: int, targetPlayerNumber: int, title: Title)

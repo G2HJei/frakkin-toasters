@@ -19,7 +19,10 @@ import xyz.zlatanov.frakkintoasters.event.action.quorum.EnactProductionQuotasEve
 import xyz.zlatanov.frakkintoasters.event.action.quorum.EstablishDogsvilleEvent;
 import xyz.zlatanov.frakkintoasters.event.action.quorum.FoodRationingEvent;
 import xyz.zlatanov.frakkintoasters.event.action.quorum.ResignationEvent;
+import xyz.zlatanov.frakkintoasters.event.action.skillcard.DiscardHeldQuorumCardEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.ExecutiveOrderEvent;
+import xyz.zlatanov.frakkintoasters.event.action.skillcard.PopularInfluenceChoiceEvent;
+import xyz.zlatanov.frakkintoasters.event.action.skillcard.PopularInfluenceEvent;
 import xyz.zlatanov.frakkintoasters.event.action.title.PresidentTitleActionEvent;
 import xyz.zlatanov.frakkintoasters.event.endgame.CylonsWinEvent;
 import xyz.zlatanov.frakkintoasters.event.jump.DrawDestinationCardsEvent;
@@ -54,6 +57,7 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.QUORUM_CHAMBER;
 import static xyz.zlatanov.frakkintoasters.state.card.QuorumCard.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.EXECUTIVE_ORDER;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.POPULAR_INFLUENCE;
 
 /**
  * Quorum Cards played through {@code submit} and {@code choose} alone, restoring the game at every pause. The President
@@ -64,7 +68,8 @@ class QuorumCardActionsTest {
     // Only the end of the game empties the agenda, so the script ends it.
     private static final Followup CYLONS_WIN = single(new CylonsWinEvent());
 
-    private static final SkillCard EXECUTIVE_ORDER_1 = new SkillCard(1, EXECUTIVE_ORDER);
+    private static final SkillCard EXECUTIVE_ORDER_1   = new SkillCard(1, EXECUTIVE_ORDER);
+    private static final SkillCard POPULAR_INFLUENCE_3 = new SkillCard(3, POPULAR_INFLUENCE);
 
     private GameEngine engine;
 
@@ -215,6 +220,28 @@ class QuorumCardActionsTest {
         assertEquals(3, choice.player());
         assertEquals(3, choice.options().size());
         assertEquals(List.of(), engine.view().quorumCardsInPlay());
+    }
+
+    // A player who isn't President gives one card to the President and discards the other.
+    @Test
+    void popularInfluenceGivesOneCardAndDiscardsTheOther() {
+        start(all(setUp(WILLIAM_ADAMA), single(new MakePresidentEvent(LAURA_ROSLIN)),
+                single(new GiveSkillCardEvent(1, POPULAR_INFLUENCE_3)), single(new ActionStepEvent()), CYLONS_WIN));
+
+        act(1);
+        play(engine -> engine.submit(1, new PopularInfluenceEvent(1, POPULAR_INFLUENCE_3)));
+        val choice = (AwaitingChoice) engine.pendingInput().orElseThrow();
+        val option = (Followup.Single) choice.options().iterator().next();
+        val picked = (PopularInfluenceChoiceEvent) option.event();
+        play(engine -> engine.choose(1, option));
+
+        assertTrue(game().presidentHand().cards().contains(picked.given()));
+        assertEquals(List.of(picked.other()), engine.view().player(1).quorumCards().cards());
+        choose(1, single(new DiscardHeldQuorumCardEvent(1, picked.other())));
+
+        assertEquals(List.of(), engine.view().player(1).quorumCards().cards());
+        assertEquals(List.of(picked.other()), game().decks().quorum().discardedCards());
+        assertEquals(new Finished(CYLONS), engine.status(1));
     }
 
     // The first player's character becomes President.

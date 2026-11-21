@@ -76,6 +76,10 @@ function PlayerMat({ player }: { player: PlayerProjection }) {
           <Pile label="Mutiny" cards={player.mutinyCards} enumName="MutinyCard" deck="MUTINY" owner={player.number} />
           <Pile label="Super Crisis" cards={player.superCrisisCards} enumName="SuperCrisisCard" deck="SUPER_CRISIS" owner={player.number} />
           {president && <Pile label="Quorum" cards={game?.presidentHand ?? null} enumName="QuorumCard" deck="QUORUM" owner={player.number} />}
+          {/* the Quorum Card "Popular Influence" left him to play or discard */}
+          {(player.quorumCards?.count ?? 0) > 0 && (
+            <Pile label="Quorum to play" cards={player.quorumCards} enumName="QuorumCard" deck="QUORUM" owner={player.number} />
+          )}
         </div>
         <InPlay cards={quorumCardsInPlay(game?.quorumCardsInPlay ?? [], player.number, president)} />
         <Learned player={player} />

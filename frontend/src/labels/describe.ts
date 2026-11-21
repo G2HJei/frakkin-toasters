@@ -124,6 +124,8 @@ const EVENT_TEMPLATES: Record<string, string> = {
   GiveSkillCardToPlayerEvent: 'Setup: {targetPlayerNumber} gets {card}',
   GiveQuorumCardToPresidentEvent: 'Setup: the President gets {card}',
   PresidentTitleActionEvent: '{playerNumber} draws a Quorum Card',
+  PopularInfluenceChoiceEvent: '{playerNumber} gives {given} to the President and keeps {other}',
+  DiscardHeldQuorumCardEvent: '{playerNumber} discards {card}',
   MoveCharacterEvent: 'Setup: {character} goes to {destination}',
   PlaceShipEvent: 'Setup: a {shipType} at {location}',
   ChangeResourceEvent: 'Setup: {resource} changes by {amount}',

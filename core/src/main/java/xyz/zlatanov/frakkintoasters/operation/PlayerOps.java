@@ -12,6 +12,7 @@ import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Player;
 import xyz.zlatanov.frakkintoasters.state.PlayerPile;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
+import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
 import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
@@ -146,6 +147,22 @@ public class PlayerOps extends GameOps {
         if (!cards.isEmpty()) {
             record(new LoyaltyCardSeen(player.number(), targetPlayerNumber, game.randomness().shuffled(cards).getFirst()));
         }
+    }
+
+    public void holdQuorumCard(QuorumCard card) {
+        gain(PlayerPile.QUORUM, List.of(card));
+    }
+
+    /**
+     * Takes a Quorum Card the player holds himself out of his pile to play it.
+     */
+    public void playHeldQuorumCard(QuorumCard card) {
+        record(new CardsLost(player.number(), PlayerPile.QUORUM, List.of(card)));
+    }
+
+    public void discardHeldQuorumCard(QuorumCard card) {
+        playHeldQuorumCard(card);
+        discardToDeck(card);
     }
 
     public void discard(MutinyCard... cards) {

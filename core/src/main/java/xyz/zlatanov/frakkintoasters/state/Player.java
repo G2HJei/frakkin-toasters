@@ -8,6 +8,7 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
 import xyz.zlatanov.frakkintoasters.state.card.MutinyCard;
+import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
 import xyz.zlatanov.frakkintoasters.state.card.SeenLoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.card.SeenLoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
@@ -39,6 +40,7 @@ public class Player implements PlayerView {
     private final Deck<LoyaltyCard>     loyaltyCards            = new Deck<>();
     private final Deck<MutinyCard>      mutinyCards             = new Deck<>();
     private final Deck<SuperCrisisCard> superCrisisCards        = new Deck<>();
+    private final Deck<QuorumCard>      quorumCards             = new Deck<>();
     private       boolean               hasMiracleToken         = true;
     private       boolean               isInfiltrating          = false;
     private final Set<Integer>          revealedCivilianShipIds = new LinkedHashSet<>();
@@ -54,6 +56,7 @@ public class Player implements PlayerView {
             case LOYALTY -> loyaltyCards;
             case MUTINY -> mutinyCards;
             case SUPER_CRISIS -> superCrisisCards;
+            case QUORUM -> quorumCards;
         };
     }
 

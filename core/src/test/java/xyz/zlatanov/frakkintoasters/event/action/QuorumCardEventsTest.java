@@ -25,6 +25,13 @@ class QuorumCardEventsTest {
         assertEquals(EnumSet.allOf(QuorumCard.class), eventsByCard.keySet());
     }
 
+    @Test
+    void eachCardNamesItsEvent() {
+        for (val event : cardEvents()) {
+            assertEquals(event, QuorumCardPlays.eventClass(cardOf(event)));
+        }
+    }
+
     private static List<Class<?>> cardEvents() {
         return EventCatalog.types().stream()
                 .filter(QuorumCardEvent.class::isAssignableFrom)

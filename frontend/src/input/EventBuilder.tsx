@@ -113,11 +113,13 @@ export function pickedCount(value: Record<string, unknown>): number | null {
   return null;
 }
 
-// The Quorum Cards the player may play: the President's hand. Only a narrowing, the engine judges.
+// The Quorum Cards the player may play: the one "Popular Influence" left him, and the President's hand. Only a
+// narrowing, the engine judges.
 function heldQuorumCards(game: GameProjection | null, playerNumber: number | null): string[] {
-  const character = game?.players?.find((player) => player.number === playerNumber)?.character;
-  if (!character || game?.titles?.president !== character) {
-    return [];
+  const player = game?.players?.find((candidate) => candidate.number === playerNumber);
+  const held = (player?.quorumCards?.cards ?? []).flatMap((card) => (card ? [card] : []));
+  if (!player?.character || game?.titles?.president !== player.character) {
+    return held;
   }
-  return game.presidentHand?.cards ?? [];
+  return [...held, ...(game.presidentHand?.cards ?? []).flatMap((card) => (card ? [card] : []))];
 }

@@ -111,6 +111,7 @@ public record GameProjection(
                                    HiddenCards<MotiveCard> motiveCards,
                                    HiddenCards<MutinyCard> mutinyCards,
                                    HiddenCards<SuperCrisisCard> superCrisisCards,
+                                   HiddenCards<QuorumCard> quorumCards,
                                    boolean miracleToken,
                                    boolean infiltrating,
                                    Boolean human,

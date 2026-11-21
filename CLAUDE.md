@@ -60,9 +60,10 @@ Next steps, in order:
    secret windows around die rolls and attacks (see "Interrupt Cards" and "Combat"), and the Crisis step resolves every
    Crisis Card and activates the Cylon ships by its icon (see "Crisis Cards"), and the fleet jumps through the Sleeper Agent
    phase to the Kobol end game (see "Jump and Kobol"), and the Skill Cards with an "Action:" or a "Movement:" and
-   "Investigative Committee" are played (see "Actions and Skill Cards", `skill-cards-plan.md`), all but "Popular
-   Influence". Still open, as new events that plug in: the other kinds of actions (character sheets, Title Cards,
-   Quorum and Mutiny Cards), Cylon reveal, Quorum and Super Crisis cards, and the
+   "Investigative Committee" are played (see "Actions and Skill Cards", `skill-cards-plan.md`), and the Quorum Cards
+   with the President's title action (see "Quorum Cards"). Still open, as new events that plug in: the other kinds of
+   actions (character sheets, the Admiral's and the CAG's Title Cards, Mutiny Cards), Cylon reveal, Super Crisis
+   cards, and the
    interrupts that aren't skill cards (character abilities such as Helo's reroll, and revealing a Motive Card in the
    middle of resolving something, rule 6.2.2.1), which can reuse the interrupt windows.
 5. ~~Create a working frontend with the events that exist by then.~~ Done (`backend-plan.md`, `frontend-plan.md`):
@@ -433,8 +434,9 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
 ### Actions and Skill Cards
 
 `event/action/` knows what a player can do now, for the Action step and everything else that gives an action. Every
-"Action:" and "Movement:" Skill Card is built (`skill-cards-plan.md`) but "Popular Influence", which waits for playable
-Quorum Cards: `SkillCardPlays.canPlay` keeps it `false` and `SkillCardEventsTest.NOT_BUILT_YET` lists it.
+"Action:" and "Movement:" Skill Card is built (`skill-cards-plan.md`), "Popular Influence" with the Quorum Cards
+(`quorum-cards-plan.md`): its player gives one drawn Quorum Card to the President and holds the other
+(`PlayerPile.QUORUM`) to play it, through a decision on that card's event, or discard it.
 
 - `Actions.canTakeAction` is "his location's action (`LocationEvent.canAct`) or a card's" (`canTakeCardAction`: a
   playable "Action:" Skill Card, a Quorum Card, the President's Title Card), and `offerAction(game, n)` builds the

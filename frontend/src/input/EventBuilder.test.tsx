@@ -13,6 +13,7 @@ const game = {
       character: 'WILLIAM_ADAMA',
       location: 'RESEARCH_LAB',
       skillCards: { count: 2, colors: {}, cards: [{ value: 2, type: 'EXECUTIVE_ORDER' }, { value: 1, type: 'LAUNCH_SCOUT' }] },
+      quorumCards: { count: 1, revealed: null, cards: ['EULOGY'] },
     },
     { number: 2, character: 'LAURA_ROSLIN', location: 'PRESIDENTS_OFFICE', skillCards: { count: 0, colors: {}, cards: [] } },
   ],
@@ -66,10 +67,16 @@ describe('the event builder', () => {
     expect(kinds).not.toContain('EstablishDogsvilleEvent');
   });
 
-  it('offers no Quorum Card to a player who is not President', () => {
+  it("offers no Quorum Card of the President's hand to a player who is not President", () => {
     renderBuilder('ActionEvent', 1);
 
     expect(eventKinds()).not.toContain('EnactProductionQuotasEvent');
+  });
+
+  it('offers the Quorum Card a player holds himself', () => {
+    renderBuilder('ActionEvent', 1);
+
+    expect(eventKinds()).toContain('EulogyEvent');
   });
 
   it('asks an action first for the one of the player\'s location', () => {
