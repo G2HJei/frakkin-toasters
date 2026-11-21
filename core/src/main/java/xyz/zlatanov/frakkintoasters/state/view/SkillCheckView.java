@@ -32,6 +32,20 @@ public interface SkillCheckView {
 
     List<List<PlayedCard>> playedBeforeConflicts();
 
+    /**
+     * "Investigative Committee": the cards are played into this check face up, except the Destiny cards. It was played
+     * before the check, and those cards stay with it until it ends.
+     */
+    default boolean investigated() {
+        return playedBeforeRevealed() && playedBeforeSkillCheck().stream()
+                .anyMatch(card -> card.type() == SkillCardType.INVESTIGATIVE_COMMITTEE);
+    }
+
+    /**
+     * The cards the player put into an investigated check, which everyone sees.
+     */
+    List<SkillCard> shownCards(int playerNumber);
+
     List<SkillCardType> resolvedAbilities();
 
     int cardValue(SkillCard card);

@@ -1,4 +1,4 @@
-format version 10
+format version 11
 enum Area = SPACE, RESERVES, SPACE_OR_RESERVES
 enum BasestarBridgeAbility = CAG_PLACES_CIVILIAN_SHIP, JUMP_OR_PURSUIT, BASESTAR_OR_RAIDERS, GALACTICA_DAMAGE
 enum BasestarDamage = STRUCTURAL_DAMAGE, DISABLED_WEAPONS, DISABLED_HANGAR_BAY, CRITICAL_HIT
@@ -375,6 +375,7 @@ record SkillCheckFact.CardRemoved(card: SkillCard, playerNumber: int?)
 record SkillCheckFact.CardsDrawn(pile: SkillCheckPile, cards: List<SkillCard>)
 record SkillCheckFact.CardsPlaced(pile: SkillCheckPile, cards: List<SkillCard>, onTop: boolean)
 record SkillCheckFact.CardsPlayedBefore(playerNumber: int, cards: List<SkillCard>)
+record SkillCheckFact.CardsShown(playerNumber: int, cards: List<SkillCard>)
 record SkillCheckFact.EmergencyDeclared()
 record SkillCheckFact.FailResultPrevented()
 record SkillCheckFact.PassResultReplaced()

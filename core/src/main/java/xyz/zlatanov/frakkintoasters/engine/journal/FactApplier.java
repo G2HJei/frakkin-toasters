@@ -186,6 +186,7 @@ public final class FactApplier {
             case SkillCheckFact.CardsPlayedBefore f ->
                     game.activeSkillCheck().playedBefore(f.playerNumber(), f.cards());
             case SkillCheckFact.PlayedBeforeRevealed ignored -> game.activeSkillCheck().revealPlayedBefore();
+            case SkillCheckFact.CardsShown f -> game.activeSkillCheck().show(f.playerNumber(), f.cards());
             case SkillCheckFact.CardsPlaced f -> {
                 val pile = game.activeSkillCheck().pile(f.pile());
                 if (f.onTop()) {

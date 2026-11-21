@@ -61,6 +61,11 @@ public class SkillCheckOps extends GameOps {
         record(new PlayedBeforeRevealed());
     }
 
+    // "Investigative Committee": everyone learns which cards the player put into the check.
+    public void show(int playerNumber, List<SkillCard> cards) {
+        record(new CardsShown(playerNumber, cards));
+    }
+
     public List<SkillCard> playFromDestinyDeck(int count) {
         return playFromDestinyDeck(count, false);
     }

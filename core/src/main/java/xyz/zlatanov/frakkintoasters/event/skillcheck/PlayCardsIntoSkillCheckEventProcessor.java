@@ -20,6 +20,10 @@ public class PlayCardsIntoSkillCheckEventProcessor extends EventProcessor<PlayCa
     @Override
     public Followup process() {
         ops.skillCheck().playCards(player.number(), event.skillCards());
+        if (game.activeSkillCheck().investigated() && !event.skillCards().isEmpty()) {
+            // The cards go into the pile like any other, and everyone sees them (the Destiny cards are dealt face down).
+            ops.skillCheck().show(player.number(), event.skillCards());
+        }
         return Followup.NONE;
     }
 }

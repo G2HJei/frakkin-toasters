@@ -1,5 +1,8 @@
 package xyz.zlatanov.frakkintoasters.engine;
 
+import xyz.zlatanov.frakkintoasters.projection.Viewer.PlayerViewer;
+import xyz.zlatanov.frakkintoasters.projection.GameProjection.ShownCards;
+import xyz.zlatanov.frakkintoasters.projection.GameProjection;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.engine.EngineStatus.Finished;
@@ -197,6 +200,39 @@ class LocationSkillCheckTest {
         // Her turn went on to its end, and Laura Roslin's begins.
         assertEquals(2, engine.view().turn().currentPlayerNumber());
         assertWaitingFor(new AwaitingDecision(new PlayerDecisionEvent<>(2, DrawSkillCardsEvent.class, DRAW_EXACTLY_5)));
+    }
+
+    // An "Investigative Committee" played before the check: everyone sees who put which cards into it, while the
+    // Destiny cards stay face down.
+    @Test
+    void investigativeCommittee() {
+        val cards = Map.of(
+                1, List.of(new SkillCard(3, EXECUTIVE_ORDER)),
+                2, List.of(new SkillCard(2, EXECUTIVE_ORDER)),
+                3, List.of(new SkillCard(3, LAUNCH_SCOUT)));
+        val committee = new SkillCard(3, INVESTIGATIVE_COMMITTEE);
+        start(all(
+                setUp(),
+                give(cards),
+                single(new GiveSkillCardEvent(2, committee)),
+                single(new PlayerDecisionEvent<>(1, ActionEvent.class)),
+                CYLONS_WIN));
+
+        play(engine -> engine.submit(1, new AdmiralsQuartersEvent(1, 3)));
+        passPoliticalProwess();
+        for (val player : List.of(2, 3, 1)) {
+            val before = player == 2
+                    ? new PlayCardsBeforeSkillCheckEvent(2, committee)
+                    : new PlayCardsBeforeSkillCheckEvent(player);
+            play(engine -> engine.submit(player, before));
+        }
+        playInto(cards);
+
+        val seenByPlayer3 = GameProjection.of(engine.view(), engine.pendingInput(), new PlayerViewer(3)).skillCheck();
+        assertEquals(List.of(new ShownCards(1, cards.get(1)), new ShownCards(2, cards.get(2)), new ShownCards(3, cards.get(3))),
+                seenByPlayer3.shownCards());
+        finishTheCheck(8);
+        assertSkillCheckEnded();
     }
 
     /* the skill check, step by step */

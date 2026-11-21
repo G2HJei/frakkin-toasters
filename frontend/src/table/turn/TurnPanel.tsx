@@ -192,8 +192,8 @@ function OutOfTheGame() {
 }
 
 /**
- * The skill check: its card, the difficulty, who played before it, the face-down pile (counted; a sandbox shows it on
- * hover), the piles once revealed, the strength and the result.
+ * The skill check: its card, the difficulty, who played before it, the cards an "Investigative Committee" shows face
+ * up, the face-down pile (counted; a sandbox shows it on hover), the piles once revealed, the strength and the result.
  */
 function SkillCheck() {
   const table = useTable();
@@ -230,6 +230,11 @@ function SkillCheck() {
       {(check.playedBefore ?? []).map((played) => (
         <Row key={played.player} label={`Before the check: ${table.playerName(played.player)}`}>
           <Cards id={`before-${played.player}`} title={`Played before the check by ${table.playerName(played.player)}`} hand={played.cards} />
+        </Row>
+      ))}
+      {(check.shownCards ?? []).map((shown) => (
+        <Row key={`shown-${shown.player}`} label={`Face up: ${table.playerName(shown.player)}`}>
+          <CardList cards={shown.cards ?? []} />
         </Row>
       ))}
       <Row label="Face down">

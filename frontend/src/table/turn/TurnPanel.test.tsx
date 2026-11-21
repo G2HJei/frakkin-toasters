@@ -82,6 +82,23 @@ describe('the turn', () => {
     expect(panel.querySelector('section.turn .block-text')?.textContent).toBe('Crippled Raider');
   });
 
+  it('shows the cards an Investigative Committee put face up, with who played them', () => {
+    const skillCheck = {
+      type: 'ADMIRALS_QUARTERS',
+      targetPlayer: 2,
+      difficulty: 7,
+      shownCards: [{ player: 2, cards: [{ value: 2, type: 'EXECUTIVE_ORDER' }] }],
+      cards: { count: 3, colors: { LEADERSHIP: 1, TACTICS: 2 }, cards: null },
+      totalStrength: null,
+    };
+    const panel = renderPanel({ step: 'ACTION', currentPlayer: 1, actingPlayer: 1 }, { skillCheck });
+    const check = panel.querySelector('section.turn [aria-label="skill check"]')!;
+    const rows = [...check.querySelectorAll('.row')];
+
+    expect(rows.map((row) => row.querySelector('.row-name')?.textContent)).toEqual(['Face up: Laura Roslin', 'Face down']);
+    expect(rows[0].querySelectorAll('.card-tile')).toHaveLength(1);
+  });
+
   it("shows a location's skill check with its location", () => {
     const skillCheck = { type: 'ADMIRALS_QUARTERS', targetPlayer: 2, difficulty: 7, cards: { count: 0, colors: null, cards: null }, totalStrength: 8, result: 'PASS' };
     const panel = renderPanel({ step: 'ACTION', currentPlayer: 1, actingPlayer: 1 }, { skillCheck });

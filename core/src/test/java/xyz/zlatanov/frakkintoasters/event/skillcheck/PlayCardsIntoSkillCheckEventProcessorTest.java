@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event.skillcheck;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -78,6 +79,31 @@ class PlayCardsIntoSkillCheckEventProcessorTest extends EventTestHarness<PlayCar
         execute(new PlayCardsIntoSkillCheckEvent(1, List.of(contribution)));
 
         assertTrue(game.activeSkillCheck().cards().cards().contains(contribution));
+    }
+
+    // "Investigative Committee": everyone learns the cards and who played them.
+    @Test
+    void anInvestigatedCheckShowsTheCards() {
+        val check = game.activeSkillCheck();
+        check.playedBefore(2, List.of(new SkillCard(3, INVESTIGATIVE_COMMITTEE)));
+        check.revealPlayedBefore();
+        val card = new SkillCard(1, CALCULATIONS);
+        player(1).gainSkillCards(card);
+
+        execute(new PlayCardsIntoSkillCheckEvent(1, List.of(card)));
+
+        assertEquals(List.of(card), check.shownCards(1));
+        assertTrue(check.cards().cards().contains(card)); // in the pile like any other
+    }
+
+    @Test
+    void otherwiseTheCardsStayHidden() {
+        val card = new SkillCard(1, CALCULATIONS);
+        player(1).gainSkillCards(card);
+
+        execute(new PlayCardsIntoSkillCheckEvent(1, List.of(card)));
+
+        assertEquals(List.of(), game.activeSkillCheck().shownCards(1));
     }
 
     @Test

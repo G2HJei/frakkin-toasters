@@ -28,6 +28,13 @@ public sealed interface SkillCheckFact extends Fact {
     record PlayedBeforeRevealed() implements SkillCheckFact {
     }
 
+    // "Investigative Committee": the cards a player put into the check, face up for everyone.
+    record CardsShown(int playerNumber, List<SkillCard> cards) implements SkillCheckFact {
+        public CardsShown {
+            cards = List.copyOf(cards);
+        }
+    }
+
     record CardsPlaced(SkillCheckPile pile, List<SkillCard> cards, boolean onTop) implements SkillCheckFact {
         public CardsPlaced {
             cards = List.copyOf(cards);

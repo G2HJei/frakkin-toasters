@@ -100,7 +100,9 @@ public final class ScriptedScenario {
         val played = game.player(1).skillCards().cards().getFirst();
         ops.skillCheck().playBeforeSkillCheck(1, java.util.List.of(played));
         ops.skillCheck().revealPlayedBefore();
-        ops.skillCheck().playCards(2, game.player(2).skillCards().cards().get(0), game.player(2).skillCards().cards().get(1));
+        val shown = List.of(game.player(2).skillCards().cards().get(0), game.player(2).skillCards().cards().get(1));
+        ops.skillCheck().playCards(2, shown);
+        ops.skillCheck().show(2, shown);
         ops.skillCheck().playFromDestinyDeck(2);
         ops.skillCheck().playFromDestinyDeck(1, true);
         ops.skillCheck().shuffleAndDivideCards();

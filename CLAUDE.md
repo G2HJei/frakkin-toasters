@@ -193,6 +193,11 @@ the state at that moment what follows.
   shuffle count, and Trust Instincts sends the cards it adds through the same loop. `ResolveSkillCheckAbilityEvent`
   records `AbilityResolved`, once per check. Iron Will, Install Upgrades, All Hands on Deck and Establish Network act
   through that record.
+- "Investigative Committee" is played before the check. `SkillCheckView.investigated()` is true once the revealed
+  cards played before it hold one (they stay with the check until it ends). `PlayCardsIntoSkillCheckEventProcessor`
+  then records `SkillCheckFact.CardsShown(playerNumber, cards)` after the cards go into the pile like any other, so
+  everyone learns who played what (`SkillCheckProjection.shownCards`, the turn panel's "Face up" rows). The Destiny
+  cards are dealt face down before anyone plays.
 - `EndSkillCheckEvent` runs after everything the result queued: it discards the cards of the check, the ones played
   before it too, and records `SkillCheckEnded`, which clears `GameView.activeSkillCheck()`.
 - `DetermineSkillCheckResultEventProcessor.difficulty(game)` is the difficulty so far: Declare Emergency, Jury Rigged,

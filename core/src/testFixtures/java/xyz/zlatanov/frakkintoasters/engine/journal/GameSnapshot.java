@@ -123,6 +123,7 @@ public record GameSnapshot(Map<String, Object> values) {
         result.put("target", check.targetPlayerNumber());
         result.put("playedBefore", new TreeMap<>(playedBefore(check)));
         result.put("playedBeforeRevealed", check.playedBeforeRevealed());
+        result.put("shownCards", new TreeMap<>(shownCards(check)));
         for (val pile : SkillCheckPile.values()) {
             result.put("pile." + pile, deck(check.pile(pile)));
         }
@@ -132,6 +133,17 @@ public record GameSnapshot(Map<String, Object> values) {
         result.put("result", check.result());
         result.put("passResultReplaced", check.passResultReplaced());
         result.put("failResultPrevented", check.failResultPrevented());
+        return result;
+    }
+
+    private static Map<Integer, Object> shownCards(SkillCheck check) {
+        val result = new HashMap<Integer, Object>();
+        for (int player = 1; player <= 8; player++) {
+            val cards = check.shownCards(player);
+            if (!cards.isEmpty()) {
+                result.put(player, new ArrayList<>(cards));
+            }
+        }
         return result;
     }
 

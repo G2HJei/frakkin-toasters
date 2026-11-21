@@ -199,6 +199,7 @@ public record GameProjection(
                                        int difficulty,
                                        List<PlayedBefore> playedBefore,
                                        boolean playedBeforeRevealed,
+                                       List<ShownCards> shownCards,
                                        SkillHand cards,
                                        List<SkillCard> matchingPile,
                                        List<SkillCard> nonMatchingPile,
@@ -211,6 +212,10 @@ public record GameProjection(
     }
 
     public record PlayedBefore(int player, SkillHand cards) {
+    }
+
+    // "Investigative Committee": the cards a player put into the check, face up for everyone.
+    public record ShownCards(int player, List<SkillCard> cards) {
     }
 
     /**

@@ -117,6 +117,7 @@ class LiveUpdateProjectionTest {
             new Sample(new GameFact.ReturnToCrisisStepChanged(true), Rule.PUBLIC),
             new Sample(new GameFact.NukeDiscarded(), Rule.PUBLIC),
             new Sample(new GameFact.NukeGained(), Rule.PUBLIC),
+            new Sample(new SkillCheckFact.CardsShown(1, List.of(new SkillCard(3, EXECUTIVE_ORDER))), Rule.PUBLIC),
             new Sample(new GameFact.CylonShipsHeld(), Rule.PUBLIC),
             new Sample(new GameFact.LossReductionAdded(Resource.FOOD), Rule.PUBLIC),
             new Sample(new GameFact.LossReduced(Resource.FOOD), Rule.PUBLIC),

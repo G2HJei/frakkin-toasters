@@ -367,6 +367,16 @@ class FactApplierTest {
     }
 
     @Test
+    void cardsShownAreKeptByTheCheck() {
+        game.startSkillCheck(SkillCheckType.ADMIRALS_QUARTERS);
+        val cards = List.of(new SkillCard(3, EXECUTIVE_ORDER));
+
+        apply(new SkillCheckFact.CardsShown(2, cards));
+
+        assertEquals(cards, game.activeSkillCheck().shownCards(2));
+    }
+
+    @Test
     void cylonShipsHeldForTheRestOfTheTurn() {
         apply(new CylonShipsHeld());
         assertTrue(game.turn().cylonShipsHeld());

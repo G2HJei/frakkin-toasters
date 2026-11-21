@@ -29,6 +29,7 @@ public class SkillCheck implements SkillCheckView {
     private       Integer                       targetPlayerNumber;
     private final Map<Integer, List<SkillCard>> playedBeforeSkillCheck = new LinkedHashMap<>();
     private       boolean                       playedBeforeRevealed   = false;
+    private final Map<Integer, List<SkillCard>> shownCards             = new LinkedHashMap<>();
     private final Deck<SkillCard>               cards                  = new Deck<>();
     private final Deck<SkillCard>               matchingPile           = new Deck<>();
     private final Deck<SkillCard>               nonMatchingPile        = new Deck<>();
@@ -84,6 +85,16 @@ public class SkillCheck implements SkillCheckView {
     @Mutates
     public void revealPlayedBefore() {
         playedBeforeRevealed = true;
+    }
+
+    @Mutates
+    public void show(int playerNumber, List<SkillCard> cards) {
+        shownCards.computeIfAbsent(playerNumber, ignored -> new ArrayList<>()).addAll(cards);
+    }
+
+    @Override
+    public List<SkillCard> shownCards(int playerNumber) {
+        return List.copyOf(shownCards.getOrDefault(playerNumber, List.of()));
     }
 
     @Override

@@ -295,12 +295,20 @@ final class GameProjector {
                         skillHand(cards, check.playedBeforeRevealed() || sees(player.number()))));
             }
         }
+        val shownCards = new ArrayList<ShownCards>();
+        for (val player : game.players()) {
+            val cards = check.shownCards(player.number());
+            if (!cards.isEmpty()) {
+                shownCards.add(new ShownCards(player.number(), cards));
+            }
+        }
         return new SkillCheckProjection(
                 check.type(),
                 check.targetPlayerNumber(),
                 DetermineSkillCheckResultEventProcessor.difficulty(game),
                 playedBefore,
                 check.playedBeforeRevealed(),
+                shownCards,
                 skillHand(check.cards().cards(), seesEverything()),
                 check.matchingPile().cards(),
                 check.nonMatchingPile().cards(),
