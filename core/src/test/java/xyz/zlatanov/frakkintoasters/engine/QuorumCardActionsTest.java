@@ -14,6 +14,7 @@ import xyz.zlatanov.frakkintoasters.event.action.GrantEvent.GrantedBy;
 import xyz.zlatanov.frakkintoasters.event.action.QuorumCardEvent;
 import xyz.zlatanov.frakkintoasters.event.action.quorum.ArrestOrderEvent;
 import xyz.zlatanov.frakkintoasters.event.action.quorum.AssignArbitratorEvent;
+import xyz.zlatanov.frakkintoasters.event.action.quorum.AssignMissionSpecialistEvent;
 import xyz.zlatanov.frakkintoasters.event.action.quorum.EnactProductionQuotasEvent;
 import xyz.zlatanov.frakkintoasters.event.action.quorum.EstablishDogsvilleEvent;
 import xyz.zlatanov.frakkintoasters.event.action.quorum.FoodRationingEvent;
@@ -21,6 +22,7 @@ import xyz.zlatanov.frakkintoasters.event.action.quorum.ResignationEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.ExecutiveOrderEvent;
 import xyz.zlatanov.frakkintoasters.event.action.title.PresidentTitleActionEvent;
 import xyz.zlatanov.frakkintoasters.event.endgame.CylonsWinEvent;
+import xyz.zlatanov.frakkintoasters.event.jump.DrawDestinationCardsEvent;
 import xyz.zlatanov.frakkintoasters.event.location.colonialone.QuorumChamberEvent;
 import xyz.zlatanov.frakkintoasters.event.location.galactica.AdmiralsQuartersEvent;
 import xyz.zlatanov.frakkintoasters.event.officials.MakePresidentEvent;
@@ -198,6 +200,21 @@ class QuorumCardActionsTest {
         assertEquals(-3, engine.view().activeSkillCheck().difficultyAdjustment());
         assertEquals(List.of(), engine.view().quorumCardsInPlay());
         assertTrue(game().decks().quorum().discardedCards().contains(ASSIGN_ARBITRATOR));
+    }
+
+    // At the next jump the Mission Specialist, not the Admiral, chooses from 3 Destination Cards.
+    @Test
+    void theMissionSpecialistChoosesTheDestination() {
+        start(all(setUp(WILLIAM_ADAMA), single(new GiveQuorumCardToPresidentEvent(ASSIGN_MISSION_SPECIALIST)),
+                single(new ActionStepEvent()), single(new DrawDestinationCardsEvent()), CYLONS_WIN));
+
+        act(1);
+        play(engine -> engine.submit(1, new AssignMissionSpecialistEvent(1, 3)));
+
+        val choice = (AwaitingChoice) engine.pendingInput().orElseThrow();
+        assertEquals(3, choice.player());
+        assertEquals(3, choice.options().size());
+        assertEquals(List.of(), engine.view().quorumCardsInPlay());
     }
 
     // The first player's character becomes President.

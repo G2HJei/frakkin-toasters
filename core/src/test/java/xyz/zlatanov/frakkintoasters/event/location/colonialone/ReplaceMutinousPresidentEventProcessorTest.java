@@ -5,7 +5,9 @@ import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.event.officials.MakePresidentEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
+import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
 
+import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.CYLON_SEND_TO_BRIG;
 import static xyz.zlatanov.frakkintoasters.state.card.MutinyCard.WEAPONS_ARMED;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
@@ -28,6 +30,38 @@ class ReplaceMutinousPresidentEventProcessorTest extends EventTestHarness<Replac
         execute(new ReplaceMutinousPresidentEvent(1));
 
         assertFollowup(new PlayerDecisionEvent<>(1, MakePresidentEvent.class));
+    }
+
+    // While the Vice President isn't President, nobody else can be chosen: there is no choice.
+    @Test
+    void theVicePresidentBecomesPresident() {
+        player(2).mutinyCards().addOnTop(WEAPONS_ARMED);
+        ops.titles().putInPlay(QuorumCard.ASSIGN_VICE_PRESIDENT, 3);
+
+        execute(new ReplaceMutinousPresidentEvent(1));
+
+        assertFollowup(new MakePresidentEvent(SAUL_TIGH));
+    }
+
+    @Test
+    void aVicePresidentWhoIsPresidentChangesNothing() {
+        player(2).mutinyCards().addOnTop(WEAPONS_ARMED);
+        ops.titles().putInPlay(QuorumCard.ASSIGN_VICE_PRESIDENT, 2);
+
+        execute(new ReplaceMutinousPresidentEvent(1));
+
+        assertFollowup(new PlayerDecisionEvent<>(1, MakePresidentEvent.class));
+    }
+
+    // "Accept Prophecy" lets the President keep the title: he is asked first.
+    @Test
+    void thePresidentMayDefendThePresidencyWithAcceptProphecy() {
+        player(2).mutinyCards().addOnTop(WEAPONS_ARMED);
+        ops.titles().putInPlay(QuorumCard.ACCEPT_PROPHECY, null);
+
+        execute(new ReplaceMutinousPresidentEvent(1));
+
+        assertFollowup(one(new DefendPresidencyEvent(2, true, 1), new DefendPresidencyEvent(2, false, 1)));
     }
 
     @Test

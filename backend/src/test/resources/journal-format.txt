@@ -1,4 +1,4 @@
-format version 17
+format version 18
 enum Area = SPACE, RESERVES, SPACE_OR_RESERVES
 enum BasestarBridgeAbility = CAG_PLACES_CIVILIAN_SHIP, JUMP_OR_PURSUIT, BASESTAR_OR_RAIDERS, GALACTICA_DAMAGE
 enum BasestarDamage = STRUCTURAL_DAMAGE, DISABLED_WEAPONS, DISABLED_HANGAR_BAY, CRITICAL_HIT
@@ -121,7 +121,7 @@ record ChangeResourceEvent(resource: Resource, amount: int)
 record ChoiceMade(scopeId: int, chooser: int, option: Followup)
 record ChooseCrisisSectionEvent(playerNumber: int, card: CrisisCard, section: Section)
 record ChooseCrisisTargetEvent(playerNumber: int, card: CrisisCard, targetPlayerNumber: int?)
-record ChooseDestinationEvent(playerNumber: int, chosen: DestinationCard, other: DestinationCard)
+record ChooseDestinationEvent(playerNumber: int, chosen: DestinationCard, others: List<DestinationCard>)
 record ChooseExtraLoyaltyCardEvent(playerNumber: int, targetPlayerNumber: int)
 record ChooseGalacticaDamageEvent(playerNumber: int, resolved: GalacticaDamage, returned: GalacticaDamage)
 record CivilianSelfDefenseEvent(playerNumber: int, civilianShipId: int, target: ShipType)
@@ -158,6 +158,7 @@ record DeckFact.CardsRemovedFromGame(deck: DeckId, cards: List<card of deck or p
 record DeckFact.DeckShuffled(deck: DeckId, drawOrder: List<card of deck or pile>)
 record DeclareEmergencyEvent(playerNumber: int, declareEmergencyCard: SkillCard)
 record DecreaseJumpPreparationEvent()
+record DefendPresidencyEvent(playerNumber: int, discardAcceptProphecy: boolean, administrationPlayerNumber: int)
 record DefendingAPrisonerFailEvent()
 record DefendingAPrisonerFailResultEvent()
 record DerelictBasestarEvent()

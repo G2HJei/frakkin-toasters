@@ -127,7 +127,7 @@ class JumpAndKobolTest {
     }
 
     private static Followup destination(DestinationCard chosen, DestinationCard other) {
-        return single(new ChooseDestinationEvent(ADMIRAL, chosen, other));
+        return single(new ChooseDestinationEvent(ADMIRAL, chosen, java.util.List.of(other)));
     }
 
     private static AwaitingChoice destinationChoice(DestinationCard first, DestinationCard second) {

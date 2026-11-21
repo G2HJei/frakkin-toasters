@@ -212,8 +212,10 @@ the state at that moment what follows.
   `CardsLookedAt` only the President sees) after its holder put cards in, which are then the top of the pile.
 - The game board skill checks are the "Admiral's Quarters", the "Brig" and the "Airlock" (rule 10.3.3). The Daybreak
   "Administration" has no skill check: it draws a Mutiny Card, and `ReplaceMutinousPresidentEvent` then lets the
-  player choose a new President if the President holds one. `SkillCheckView.targetPlayerNumber()` is the character the
-  location check is about, the player himself at the "Brig".
+  player choose a new President if the President holds one. With "Accept Prophecy" in play the President is first
+  asked whether to discard it and keep the title (`DefendPresidencyEvent`), and while a Vice President isn't President
+  he takes the title without a choice. `SkillCheckView.targetPlayerNumber()` is the character the location check is
+  about, the player himself at the "Brig".
 
 ### Skill Check Results
 
@@ -538,7 +540,8 @@ and from `IncreaseJumpPreparationEvent` (the track has no "Auto Jump" space, the
 - `JumpingTheFleetEventProcessor` queues a decision per assault raptor in space (`one(ReturnAssaultRaptorEvent,
   NoOpEvent)`: its pilot, or the current player when unmanned, may keep it there), `ReturnVipersToReservesEvent(true)`,
   `MoveCylonShipsToFleetBoardEvent` and `DrawDestinationCardsEvent`. After 8 distance it queues `EndGameEvent` instead.
-- The Admiral's `ChooseDestinationEvent` names both cards, the other goes to the bottom. `ResolveDestinationCardEvent`
+- The Admiral, or the Mission Specialist with 3 cards instead of 2 (his card then leaves play), picks a
+  `ChooseDestinationEvent`, which names the chosen card and the others, which go to the bottom. `ResolveDestinationCardEvent`
   records `DestinationReached` (`GameView.destinations()` and `distanceTraveled()`), queues the card's effects
   (`DestinationCardFollowups`, the card text in its comments), `ObjectiveInstructionsEvent(distanceBefore)` and
   `ResetJumpPreparationEvent`. "Lion's Head Nebula" advances the track after the reset, "Misjump" draws its new card at

@@ -247,7 +247,7 @@ class LiveUpdateProjectionTest {
     @Test
     void anEventShowsItsFieldsOnlyWhenTheyArePublic() {
         val section = new ChooseCrisisSectionEvent(2, CrisisCard.DETENTE, ChooseCrisisSectionEvent.Section.TOP);
-        val destination = new ChooseDestinationEvent(2, DestinationCard.DEEP_SPACE, DestinationCard.values()[0]);
+        val destination = new ChooseDestinationEvent(2, DestinationCard.DEEP_SPACE, List.of(DestinationCard.values()[0]));
         val journal = List.<JournalEntry>of(
                 new ScopeOpened(1, 0, section, 2),
                 new ScopeClosed(1, Followup.NONE),

@@ -64,7 +64,7 @@ public final class Disclosure {
             entry("ChooseCrisisSectionEvent.card", true),
             entry("ChooseCrisisTargetEvent.card", true),
             entry("ChooseDestinationEvent.chosen", true),
-            entry("ChooseDestinationEvent.other", false), // it goes to the bottom of the deck, only the Admiral saw it
+            entry("ChooseDestinationEvent.others", false), // they go to the bottom of the deck, only the chooser saw them
             entry("ChooseGalacticaDamageEvent.resolved", true),
             entry("ChooseGalacticaDamageEvent.returned", false),
             entry("CombatVeteranEvent.card", true),

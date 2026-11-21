@@ -1,21 +1,42 @@
 package xyz.zlatanov.frakkintoasters.event.jump;
 
-import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
+import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
+import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
+import static xyz.zlatanov.frakkintoasters.state.card.QuorumCard.ASSIGN_MISSION_SPECIALIST;
 
 public class DrawDestinationCardsEventProcessor extends EventProcessor<DrawDestinationCardsEvent> {
 
+    private static final int ADMIRAL_CARDS            = 2;
+    private static final int MISSION_SPECIALIST_CARDS = 3;
+
+    // The Admiral draws 2 cards, or the Mission Specialist 3 instead, whose card is then used up.
     @Override
     public Followup process() {
-        val admiral = game.playerNumber(game.admiral());
-        val cards = ops.galactica().drawDestinationCards(2);
-        // The cards are in no pile until the Admiral chooses, and only he sees them: the other one stays secret.
-        ops.player(admiral).see(DeckId.DESTINATION, cards);
-        return one(new ChooseDestinationEvent(admiral, cards.get(0), cards.get(1)),
-                new ChooseDestinationEvent(admiral, cards.get(1), cards.get(0)));
+        val specialist = game.quorumCardHolder(ASSIGN_MISSION_SPECIALIST);
+        val chooser = specialist.orElseGet(() -> game.playerNumber(game.admiral()));
+        if (specialist.isPresent()) {
+            ops.titles().discardFromPlay(ASSIGN_MISSION_SPECIALIST);
+        }
+        val cards = ops.galactica().drawDestinationCards(specialist.isPresent() ? MISSION_SPECIALIST_CARDS : ADMIRAL_CARDS);
+        // The cards are in no pile until the choice, and only the chooser sees them: the others stay secret.
+        ops.player(chooser).see(DeckId.DESTINATION, cards);
+        return one(cards.stream()
+                .map(chosen -> new ChooseDestinationEvent(chooser, chosen, others(cards, chosen)))
+                .toArray(Event[]::new));
+    }
+
+    private static List<DestinationCard> others(List<DestinationCard> cards, DestinationCard chosen) {
+        val others = new ArrayList<>(cards);
+        others.remove(chosen);
+        return others;
     }
 }
