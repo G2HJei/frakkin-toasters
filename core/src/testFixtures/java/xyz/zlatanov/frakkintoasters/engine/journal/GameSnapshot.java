@@ -95,6 +95,7 @@ public record GameSnapshot(Map<String, Object> values) {
         s.put("galactica.characters", new TreeMap<>(characters(board)));
         s.put("galactica.damagedLocations", sorted(board.damagedLocations()));
         s.put("galactica.reserves", board.reserves().stream().map(GameSnapshot::describe).sorted().toList());
+        s.put("galactica.supply", board.supply().stream().map(GameSnapshot::describe).sorted().toList());
         s.put("galactica.damagedShips", board.damagedShips().stream().map(GameSnapshot::describe).sorted().toList());
         s.put("galactica.ships", shipsIn(board.shipsInSpace()));
         s.put("galactica.boardingParty", new LinkedHashMap<>(board.boardingPartyTrack()));

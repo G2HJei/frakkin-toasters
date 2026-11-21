@@ -21,8 +21,7 @@ class SkillCardEventsTest {
 
     // the cards that later phases of skill-cards-plan.md build
     private static final Set<SkillCardType> NOT_BUILT_YET = EnumSet.of(
-            POPULAR_INFLUENCE, NEGOTIATION, LAUNCH_SCOUT, SCOUTING_FOR_FUEL, UNORTHODOX_PLAN, REPAIR, RAPTOR_SPECIALIST,
-            TEST_THE_LIMITS);
+            POPULAR_INFLUENCE, NEGOTIATION, UNORTHODOX_PLAN, REPAIR);
 
     @Test
     void eachActionOrMovementCardHasOneEvent() {

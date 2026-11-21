@@ -39,6 +39,11 @@ public interface GalacticaBoardView extends BattlestarBoardView, SpaceLocationsB
      */
     Set<Viper> damagedShips();
 
+    /**
+     * The ships the humans haven't built yet: the assault raptors a "Raptor Specialist" can build (rule 11.3.2.1).
+     */
+    Set<Ship> supply();
+
     Map<Centurion, BoardingParty> boardingPartyTrack();
 
     Optional<HumanFighterView> pilotedFighter(Character character);

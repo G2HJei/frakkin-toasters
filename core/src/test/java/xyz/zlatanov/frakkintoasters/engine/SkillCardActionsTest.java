@@ -12,6 +12,7 @@ import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.BuildNukeEvent;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ScopeOpened;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.CardsSeen;
 import xyz.zlatanov.frakkintoasters.event.AttackCylonShipEvent;
 import xyz.zlatanov.frakkintoasters.event.action.GrantEvent;
 import xyz.zlatanov.frakkintoasters.event.action.GrantedViperActivationEvent;
@@ -22,7 +23,10 @@ import xyz.zlatanov.frakkintoasters.event.action.skillcard.CombatVeteranEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.ConsolidatePowerEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.CriticalSituationEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.ExecutiveOrderEvent;
+import xyz.zlatanov.frakkintoasters.event.action.skillcard.LaunchScoutEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.MaximumFirepowerEvent;
+import xyz.zlatanov.frakkintoasters.event.action.skillcard.RaptorSpecialistEvent;
+import xyz.zlatanov.frakkintoasters.event.deck.LookAtTopCardEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.PreventivePolicyEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.StateOfEmergencyEvent;
 import xyz.zlatanov.frakkintoasters.event.board.LoseResourceEvent;
@@ -32,6 +36,7 @@ import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.DrawSkillCardsEvent;
 import xyz.zlatanov.frakkintoasters.event.player.LaunchViperEvent;
 import xyz.zlatanov.frakkintoasters.event.player.MoveEvent;
+import xyz.zlatanov.frakkintoasters.event.player.PlaceCrisisCardOnBottomEvent;
 import xyz.zlatanov.frakkintoasters.event.player.SelectCharacterEvent;
 import xyz.zlatanov.frakkintoasters.event.player.SendToSickbayEvent;
 import xyz.zlatanov.frakkintoasters.event.turn.ActionStepEvent;
@@ -40,7 +45,10 @@ import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Randomness;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
+import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
+import xyz.zlatanov.frakkintoasters.state.ship.AssaultRaptor;
 import xyz.zlatanov.frakkintoasters.state.ship.Raider;
+import xyz.zlatanov.frakkintoasters.state.ship.Raptor;
 import xyz.zlatanov.frakkintoasters.state.ship.Viper;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
@@ -58,6 +66,8 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.event.ViperActivation.attack;
 import static xyz.zlatanov.frakkintoasters.event.ViperActivation.launch;
 import static xyz.zlatanov.frakkintoasters.event.ViperActivation.move;
+import static xyz.zlatanov.frakkintoasters.event.action.skillcard.RaptorSpecialistEvent.Choice.BUILD_ASSAULT_RAPTOR;
+import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.CRISIS;
 import static xyz.zlatanov.frakkintoasters.event.action.GrantEvent.Grant.ACTION;
 import static xyz.zlatanov.frakkintoasters.event.action.GrantEvent.Grant.MOVE;
 import static xyz.zlatanov.frakkintoasters.state.Team.CYLONS;
@@ -86,6 +96,8 @@ class SkillCardActionsTest {
     private static final SkillCard STATE_OF_EMERGENCY_6 = new SkillCard(6, STATE_OF_EMERGENCY);
     private static final SkillCard COMBAT_VETERAN_3     = new SkillCard(3, COMBAT_VETERAN);
     private static final SkillCard MAXIMUM_FIREPOWER_3  = new SkillCard(3, MAXIMUM_FIREPOWER);
+    private static final SkillCard RAPTOR_SPECIALIST_3  = new SkillCard(3, RAPTOR_SPECIALIST);
+    private static final SkillCard LAUNCH_SCOUT_1       = new SkillCard(1, LAUNCH_SCOUT);
 
     // The choices of the target of an "Executive Order", player 2.
     private static final Followup MOVE_THEN_ACT = all(new GrantEvent(2, MOVE, GrantedBy.EXECUTIVE_ORDER),
@@ -302,6 +314,40 @@ class SkillCardActionsTest {
         assertEquals(1, engine.journal().entries().stream()
                 .filter(entry -> entry instanceof ScopeOpened opened && opened.event() instanceof AttackCylonShipEvent)
                 .count());
+    }
+
+    @Test
+    void raptorSpecialistBuildsAnAssaultRaptor() {
+        start(all(setUp(WILLIAM_ADAMA), single(new GiveSkillCardEvent(1, RAPTOR_SPECIALIST_3)), single(new ActionStepEvent()),
+                CYLONS_WIN));
+
+        act(1);
+        play(engine -> engine.submit(1, new RaptorSpecialistEvent(1, RAPTOR_SPECIALIST_3, BUILD_ASSAULT_RAPTOR)));
+
+        assertEquals(new Finished(CYLONS), engine.status(1));
+        assertEquals(2, engine.view().boards().galactica().reserves().stream().filter(AssaultRaptor.class::isInstance).count());
+        assertEquals(2, engine.view().boards().galactica().supply().size());
+    }
+
+    // The die decides: on 3 or more the player looks at a card and puts it back, otherwise a raptor is destroyed.
+    @Test
+    void launchScoutLooksAtACardOrLosesARaptor() {
+        start(all(setUp(WILLIAM_ADAMA), single(new GiveSkillCardEvent(1, LAUNCH_SCOUT_1)), single(new ActionStepEvent()),
+                CYLONS_WIN));
+
+        act(1);
+        play(engine -> engine.submit(1, new LaunchScoutEvent(1, LAUNCH_SCOUT_1)));
+
+        if (engine.view().turn().dieRoll().result() >= 3) {
+            choose(1, single(new LookAtTopCardEvent(1, CRISIS)));
+            val top = engine.journal().facts().stream()
+                    .filter(CardsSeen.class::isInstance).map(CardsSeen.class::cast).toList().getLast();
+            choose(1, single(new PlaceCrisisCardOnBottomEvent(1, (CrisisCard) top.cards().getFirst())));
+            assertEquals(top.cards().getFirst(), ((Game) engine.view()).decks().crisis().cards().getLast());
+        } else {
+            assertEquals(3, engine.view().boards().galactica().reserves().stream().filter(Raptor.class::isInstance).count());
+        }
+        assertEquals(new Finished(CYLONS), engine.status(1));
     }
 
     // The engine accepts a card only where a decision of its timing is asked.

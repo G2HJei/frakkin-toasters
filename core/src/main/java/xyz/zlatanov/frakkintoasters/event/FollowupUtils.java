@@ -2,6 +2,8 @@ package xyz.zlatanov.frakkintoasters.event;
 
 import lombok.NoArgsConstructor;
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.event.ship.DamageGalacticaEvent;
+import xyz.zlatanov.frakkintoasters.event.ship.DamagePegasusEvent;
 import xyz.zlatanov.frakkintoasters.event.board.GainResourceEvent;
 import xyz.zlatanov.frakkintoasters.event.board.LoseResourceEvent;
 import xyz.zlatanov.frakkintoasters.event.interrupt.OpenInterruptWindowEvent;
@@ -79,6 +81,13 @@ public class FollowupUtils {
 
     public static Followup rollDie(InterruptWindow before, InterruptWindow after, Event result) {
         return all(new OpenInterruptWindowEvent(before), new RollDieEvent(), new OpenInterruptWindowEvent(after), result);
+    }
+
+    /**
+     * @return Galactica's damage, or the current player draws a Pegasus damage token instead (rule 11.7.2)
+     */
+    public static Followup damageGalactica() {
+        return one(new DamageGalacticaEvent(), new DamagePegasusEvent());
     }
 
     public static Event discard(int playerNumber, int count) {

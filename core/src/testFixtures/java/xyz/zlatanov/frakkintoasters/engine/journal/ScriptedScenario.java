@@ -128,6 +128,7 @@ public final class ScriptedScenario {
         ops.player(1).pilot(viperIds.get(0));
         ops.ship(viperIds.get(0)).moveTo(GALACTICA_SPACE_10_OCLOCK);
         ops.ship(viperIds.get(0)).damage();
+        ops.galactica().buildAssaultRaptor();
         val launched = ops.galactica().launchHumanFighter(ShipType.VIPER, GALACTICA_SPACE_12_OCLOCK, null);
         ops.ship(launched).destroy();
         ops.player(2).pilot(viperIds.get(1));

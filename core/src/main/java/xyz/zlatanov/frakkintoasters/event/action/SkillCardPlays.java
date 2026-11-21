@@ -37,9 +37,11 @@ public final class SkillCardPlays {
             case FULL_THROTTLE -> FullThrottleEventProcessor.canPlay(game, player);
             case COMBAT_VETERAN -> CombatVeteranEventProcessor.canPlay(game);
             case LAUNCH_RESERVES -> LaunchReservesEventProcessor.canPlay(game);
+            case LAUNCH_SCOUT, SCOUTING_FOR_FUEL -> LaunchScoutEventProcessor.canRiskARaptor(game);
+            case RAPTOR_SPECIALIST -> RaptorSpecialistEventProcessor.canPlay(game);
+            case TEST_THE_LIMITS -> TestTheLimitsEventProcessor.canPlay(game);
             // not built yet
-            case POPULAR_INFLUENCE, NEGOTIATION, LAUNCH_SCOUT, SCOUTING_FOR_FUEL, UNORTHODOX_PLAN, REPAIR,
-                 RAPTOR_SPECIALIST, TEST_THE_LIMITS -> false;
+            case POPULAR_INFLUENCE, NEGOTIATION, UNORTHODOX_PLAN, REPAIR -> false;
             // played in a skill check, before it, or in an interrupt window, never as an action or a movement
             case INVESTIGATIVE_COMMITTEE, SUPPORT_THE_PEOPLE, RED_TAPE, POLITICAL_PROWESS, FORCE_THEIR_HAND,
                  DECLARE_EMERGENCY, MAJOR_VICTORY, AT_ANY_COST, IRON_WILL, ALL_HANDS_ON_DECK, RESTORE_ORDER,

@@ -160,6 +160,17 @@ public class GalacticaOps extends BattlestarOps {
         return unmanned.id();
     }
 
+    /**
+     * Builds an assault raptor: one from the supply goes to the "Reserves" (rule 11.3.2.1).
+     */
+    public void buildAssaultRaptor() {
+        val assaultRaptor = galacticaBoard().supply().stream()
+                .filter(AssaultRaptor.class::isInstance)
+                .findFirst()
+                .orElseThrow(FrakCallTheAdmiralException::new);
+        record(new ShipMoved(assaultRaptor.id(), HUMAN_SUPPLY, RESERVES, null));
+    }
+
     public void placeCivilianShip(Location location) {
         CivilianShip civ = game.decks().civilianShips().top(1).getFirst();
         record(new ShipMoved(civ.id(), CIVILIAN_DECK, GALACTICA_SPACE, location));

@@ -37,6 +37,11 @@ final class ShipZones {
                 galactica.removeFromReserves(ship);
                 return ship;
             }
+            case HUMAN_SUPPLY: {
+                val ship = find(galactica.supply(), id);
+                galactica.removeFromSupply(ship);
+                return ship;
+            }
             case DAMAGED: {
                 val ship = find(galactica.damagedShips(), id);
                 galactica.removeFromDamagedShips(ship);
@@ -75,6 +80,7 @@ final class ShipZones {
             case CENTURION_SUPPLY -> game.cylonShips().returnedCenturion((Centurion) piece);
             case CIVILIAN_DECK -> game.decks().civilianShips().addOnTop((CivilianShip) piece);
             case RESERVES -> galactica.addToReserves((Ship) piece);
+            case HUMAN_SUPPLY -> galactica.addToSupply((Ship) piece);
             case DAMAGED -> galactica.addToDamagedShips((Viper) piece);
             case GALACTICA_SPACE -> galactica.place(location, (Ship) piece);
             case CYLON_FLEET_SPACE -> game.boards().cylonFleet().place(location, (Ship) piece);

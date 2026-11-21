@@ -36,6 +36,8 @@ public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard, Gal
     private final EnumSet<Location>                 damagedLocations     = EnumSet.noneOf(Location.class);
     private final EnumSet<Location>                 locations            = Stream.of(GALACTICA.locations(), GALACTICA_SPACE.locations(), COLONIAL_ONE.locations(), CYLON_LOCATIONS.locations().stream().filter(l -> l != BASESTAR_BRIDGE).toList()).flatMap(Collection::stream).collect(toCollection(() -> EnumSet.noneOf(Location.class)));
     private final TreeSet<Ship>                     reserves             = Stream.of(new Viper(1), new Viper(2), new Viper(3), new Viper(4), new Viper(5), new Viper(6), new Raptor(11), new Raptor(12), new Raptor(13), new Raptor(14), new AssaultRaptor(21)).collect(toCollection(() -> new TreeSet<>(Ship.BY_ID)));
+    // 4 assault raptors in all (A2.4.4): the humans start with 1 (rule 11.3.2), and build the others (rule 11.3.2.1).
+    private final TreeSet<Ship>                     supply               = Stream.of(new AssaultRaptor(22), new AssaultRaptor(23), new AssaultRaptor(24)).collect(toCollection(() -> new TreeSet<>(Ship.BY_ID)));
     private final TreeSet<Viper>                    damagedShips         = Stream.<Viper>of(new ViperMarkVII(71), new ViperMarkVII(72), new ViperMarkVII(73), new ViperMarkVII(74)).collect(toCollection(() -> new TreeSet<>(Ship.BY_ID)));
     private final TreeMap<Ship, Location>           shipsInSpace         = new TreeMap<>(Ship.BY_ID);
     private final TreeMap<Centurion, BoardingParty> boardingPartyTrack   = new TreeMap<>(comparingInt(Centurion::id));
@@ -91,6 +93,11 @@ public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard, Gal
 
     public Set<Viper> damagedShips() {
         return new TreeSet<>(damagedShips);
+    }
+
+    @Override
+    public Set<Ship> supply() {
+        return new TreeSet<>(supply);
     }
 
     @Override
@@ -172,6 +179,18 @@ public class GalacticaBoard implements BattlestarBoard, SpaceLocationsBoard, Gal
     @Mutates
     public GalacticaBoard addToReserves(List<Ship> ships) {
         reserves.addAll(ships);
+        return this;
+    }
+
+    @Mutates
+    public GalacticaBoard addToSupply(Ship ship) {
+        supply.add(ship);
+        return this;
+    }
+
+    @Mutates
+    public GalacticaBoard removeFromSupply(Ship ship) {
+        supply.remove(ship);
         return this;
     }
 

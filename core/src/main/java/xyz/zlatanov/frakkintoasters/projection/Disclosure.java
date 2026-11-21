@@ -85,6 +85,7 @@ public final class Disclosure {
             entry("FullThrottleEvent.card", true),
             entry("GasCloudPlaceEvent.cards", false),
             entry("LaunchReservesEvent.card", true),
+            entry("LaunchScoutEvent.card", true),
             entry("MaximumFirepowerEvent.card", true),
             entry("MoveEvent.discardCard", true),
             entry("PlaceCrisisCardOnBottomEvent.card", false),
@@ -98,12 +99,15 @@ public final class Disclosure {
             entry("PoliticalProwessEvent.politicalProwessCard", true),
             entry("PreventivePolicyEvent.card", true),
             entry("QuickThinkingEvent.cardToRemove", true),
+            entry("RaptorSpecialistEvent.card", true),
             entry("ResolveCapricaCrisisCardEvent.crisisCardToPlay", true),
             entry("ResolveCapricaCrisisCardEvent.crisisCardToPutAtBottom", false),
             entry("ResolveCrisisCardEvent.card", true),
             entry("ResolveCrisisRollEvent.card", true),
             entry("ResolveDestinationCardEvent.card", true),
+            entry("ScoutForFuelEvent.card", true),
             entry("StateOfEmergencyEvent.card", true),
+            entry("TestTheLimitsEvent.card", true),
             entry("TiebreakCardsBeforeSkillCheckEvent.keptCards", true), // the cards were revealed
             entry("TiebreakInterruptCardsEvent.keptCards", true), // the window's cards show when it closes
             // the setups of a sandbox, whose one viewer sees everything
