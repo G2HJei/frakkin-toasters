@@ -16,6 +16,7 @@ public enum EventConstraint {
     DISCARD_EXACTLY_5,
     DISCARD_DOWN_TO_HAND_LIMIT,
     MUST_LAUNCH_IN_VIPER,
+    ANYWHERE_EVEN_IF_DAMAGED, // "Unorthodox Plan": a location's action from elsewhere, even when it is damaged
     DESTINATION_GALACTICA;
 
     public static EventConstraint drawExactly(int count) {

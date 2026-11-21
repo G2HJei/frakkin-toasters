@@ -110,7 +110,8 @@ public final class Disclosure {
             entry("StateOfEmergencyEvent.card", true),
             entry("TestTheLimitsEvent.card", true),
             entry("TiebreakCardsBeforeSkillCheckEvent.keptCards", true), // the cards were revealed
-            entry("TiebreakInterruptCardsEvent.keptCards", true), // the window's cards show when it closes
+            entry("TiebreakInterruptCardsEvent.keptCards", true),
+            entry("UnorthodoxPlanEvent.card", true), // the window's cards show when it closes
             // the setups of a sandbox, whose one viewer sees everything
             entry("GiveSkillCardToPlayerEvent.card", true),
             entry("PutCrisisCardOnTopEvent.card", true),

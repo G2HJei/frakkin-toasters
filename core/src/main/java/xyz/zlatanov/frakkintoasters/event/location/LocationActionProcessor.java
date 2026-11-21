@@ -2,6 +2,7 @@ package xyz.zlatanov.frakkintoasters.event.location;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
+import xyz.zlatanov.frakkintoasters.event.AnywhereLocationEvent;
 import xyz.zlatanov.frakkintoasters.event.LocationEvent;
 
 /**
@@ -13,6 +14,10 @@ public abstract class LocationActionProcessor<T extends LocationEvent> extends E
     @Override
     protected final boolean isValid() {
         val location = event.location();
+        if (event instanceof AnywhereLocationEvent anywhereEvent && anywhereEvent.anywhere()) {
+            // "Unorthodox Plan": from anywhere, even when the location is damaged.
+            return LocationEvent.canActIgnoringDamage(game, player, location) && isValidAction();
+        }
         val atLocation = game.locate(player.character()).filter(location::equals).isPresent();
         return atLocation && LocationEvent.canAct(game, player, location) && isValidAction();
     }

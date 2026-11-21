@@ -10,6 +10,7 @@ export function isServerFilled(component: Component): boolean {
   return (
     component.name === 'playerNumber' ||
     component.name === 'mustLaunchInViper' ||
+    component.name === 'anywhere' ||
     (component.type.t === 'enum' && component.type.name === 'EventConstraint')
   );
 }

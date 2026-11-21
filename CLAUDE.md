@@ -292,8 +292,8 @@ replacing whatever the client sent, so a client can't drop one.
 An event that supports a constraint implements `ConstrainedEvent` and has its own record component for it (e.g.
 `DrawSkillCardsEvent.drawLimit`, `null` when there is none, or `LaunchViperEvent.mustLaunchInViper`). Its processor
 checks the constraint in `isValid()` and throws `FrakCallTheAdmiralException` for any constraint it doesn't support.
-`DrawSkillCardsEvent`, `DiscardSkillCardsEvent`, `DiscardQuorumCardsEvent`, `LeaveBrigEvent` and `LaunchViperEvent`
-implement it.
+`DrawSkillCardsEvent`, `DiscardSkillCardsEvent`, `DiscardQuorumCardsEvent`, `LeaveBrigEvent`, `LaunchViperEvent` and
+the four `AnywhereLocationEvent`s (`ANYWHERE_EVEN_IF_DAMAGED`) implement it.
 
 ### Validation
 
@@ -304,8 +304,8 @@ through the same check, and failing it there is a bug. So a rule that only binds
 instead, e.g. `FollowupUtils.chooseCharacterForSickbay` (rule 9.3.2).
 
 - Location action processors extend `LocationActionProcessor`. Its final `isValid()` checks that the player is at
-  `event.location()` and that `LocationEvent.canAct` allows the action, then calls `isValidAction()` for the details
-  of the event. `LocationEvent.canAct` is an exhaustive switch over `Location`, so a new location doesn't compile until
+  `event.location()` and that `LocationEvent.canAct` allows the action (for an "Unorthodox Plan" only
+  `canActIgnoringDamage`, see "Actions and Skill Cards"), then calls `isValidAction()` for the details of the event. `LocationEvent.canAct` is an exhaustive switch over `Location`, so a new location doesn't compile until
   it's mapped. A damaged location has no action (rule 11.7.2.2), and a location with preconditions asks the static
   `canAct` of its processor, e.g. FTL Control out of the red zone.
 - A rule that another processor or a followup needs too is a public static check on its processor, e.g.
@@ -464,6 +464,12 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
   the "Reserves"). `BattlestarOps.repairLocation` records `LocationRepaired` and puts the location's damage token back
   on its pile, shuffled (rule 11.7.2.2). Not every location has a token (`DamageTokens.of`), and the sandbox's
   `DamageLocationEvent` pulls the token out of its pile (`CardsPulled`), as a draw would, so a repair returns one copy.
+- "Unorthodox Plan" takes the action of "Command", "Armory", "Weapons Control" or "Communications" from anywhere, even
+  damaged. It queues the location's decision with `ANYWHERE_EVEN_IF_DAMAGED`. Those four events are
+  `AnywhereLocationEvent`s with an `anywhere` component, which only that constraint sets: the engine replaces a
+  submitted event's constraints with the decision's, so the Action step's own decision clears it.
+  `LocationActionProcessor` then checks `LocationEvent.canActIgnoringDamage` (the location's own rules) instead of the
+  location and the damage.
 
 ### End of Game and Mutiny
 

@@ -36,6 +36,14 @@ public interface LocationEvent extends ActionEvent {
         if (game.boards().galactica().isDamaged(location) || game.boards().pegasus().isDamaged(location)) {
             return false;
         }
+        return canActIgnoringDamage(game, player, location);
+    }
+
+    /**
+     * @return whether the player can take the action of the location by its own rules, damaged or not, e.g. through an
+     * "Unorthodox Plan"
+     */
+    static boolean canActIgnoringDamage(GameView game, PlayerView player, Location location) {
         return switch (location) {
             case ADMIRALS_QUARTERS -> AdmiralsQuartersEventProcessor.canAct(game);
             case ARMORY -> ArmoryEventProcessor.canAct(game);

@@ -49,7 +49,7 @@ public final class WireSchema {
     private static final JsonNodeFactory NODES = JsonNodeFactory.instance;
 
     private static final Pattern SHIP  = Pattern.compile("(?i).*(shipId|fighterId|raiderId|basestarId|viperIds?|centurionId|"
-            + "basestarShipId|raiderShipId|civilianShipId\\d?|civilianShipIt|shipIds|cylonShipId|escortCivilianShipId|"
+            + "basestarShipId|raiderShipId|civilianShipId\\d?|shipIds|cylonShipId|escortCivilianShipId|"
             + "knownCivilianShips)");
     private static final Set<String> PLAYERS = Set.of("playerNumber", "targetPlayerNumber", "targetPlayer",
             "recipientPlayerNumber", "excludedPlayerNumber", "targetHumanPlayer", "ownerPlayerNumber", "otherPlayerNumber",

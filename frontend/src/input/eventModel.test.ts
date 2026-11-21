@@ -58,5 +58,7 @@ describe('the event model', () => {
     const launch = recordNamed('LaunchViperEvent')!;
 
     expect(launch.components.filter(isServerFilled).map((component) => component.name)).toEqual(['playerNumber', 'mustLaunchInViper']);
+    // "Unorthodox Plan" sets it through a constraint
+    expect(recordNamed('CommandEvent')!.components.filter(isServerFilled).map((component) => component.name)).toEqual(['playerNumber', 'anywhere']);
   });
 });

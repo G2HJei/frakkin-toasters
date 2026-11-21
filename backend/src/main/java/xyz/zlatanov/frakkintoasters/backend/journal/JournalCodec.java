@@ -17,7 +17,7 @@ public final class JournalCodec {
      * The version of the JSON this codec writes. A game written by another version can't be opened. The format lock test
      * fails when a type changes without a new version.
      */
-    public static final int FORMAT_VERSION = 8;
+    public static final int FORMAT_VERSION = 9;
 
     private static final JsonMapper JSON = JsonMapper.builder().build();
 

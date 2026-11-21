@@ -27,6 +27,11 @@ import xyz.zlatanov.frakkintoasters.event.action.skillcard.LaunchScoutEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.MaximumFirepowerEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.RaptorSpecialistEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.RepairEvent;
+import xyz.zlatanov.frakkintoasters.event.action.skillcard.UnorthodoxPlanEvent;
+import xyz.zlatanov.frakkintoasters.event.MoveCivilianShipEvent;
+import xyz.zlatanov.frakkintoasters.event.location.galactica.CommandEvent;
+import xyz.zlatanov.frakkintoasters.event.location.galactica.CommunicationsEvent;
+import xyz.zlatanov.frakkintoasters.event.location.galactica.WeaponsControlEvent;
 import xyz.zlatanov.frakkintoasters.event.sandbox.DamageLocationEvent;
 import xyz.zlatanov.frakkintoasters.event.sandbox.MoveCharacterEvent;
 import xyz.zlatanov.frakkintoasters.event.deck.LookAtTopCardEvent;
@@ -50,6 +55,7 @@ import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.ship.AssaultRaptor;
+import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
 import xyz.zlatanov.frakkintoasters.state.ship.Raider;
 import xyz.zlatanov.frakkintoasters.state.ship.Raptor;
 import xyz.zlatanov.frakkintoasters.state.ship.Viper;
@@ -70,6 +76,7 @@ import static xyz.zlatanov.frakkintoasters.event.ViperActivation.attack;
 import static xyz.zlatanov.frakkintoasters.event.ViperActivation.launch;
 import static xyz.zlatanov.frakkintoasters.event.ViperActivation.move;
 import static xyz.zlatanov.frakkintoasters.event.action.skillcard.RaptorSpecialistEvent.Choice.BUILD_ASSAULT_RAPTOR;
+import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.ANYWHERE_EVEN_IF_DAMAGED;
 import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.CRISIS;
 import static xyz.zlatanov.frakkintoasters.event.action.GrantEvent.Grant.ACTION;
 import static xyz.zlatanov.frakkintoasters.event.action.GrantEvent.Grant.MOVE;
@@ -102,6 +109,7 @@ class SkillCardActionsTest {
     private static final SkillCard RAPTOR_SPECIALIST_3  = new SkillCard(3, RAPTOR_SPECIALIST);
     private static final SkillCard LAUNCH_SCOUT_1       = new SkillCard(1, LAUNCH_SCOUT);
     private static final SkillCard REPAIR_1             = new SkillCard(1, REPAIR);
+    private static final SkillCard UNORTHODOX_PLAN_3    = new SkillCard(3, UNORTHODOX_PLAN);
 
     // The choices of the target of an "Executive Order", player 2.
     private static final Followup MOVE_THEN_ACT = all(new GrantEvent(2, MOVE, GrantedBy.EXECUTIVE_ORDER),
@@ -366,6 +374,55 @@ class SkillCardActionsTest {
 
         assertEquals(new Finished(CYLONS), engine.status(1));
         assertFalse(engine.view().boards().galactica().isDamaged(COMMAND));
+    }
+
+    // From the "Admiral's Quarters", while "Weapons Control" is damaged: the decision carries the constraint, and the
+    // engine sets it on the answer.
+    @Test
+    void unorthodoxPlanFiresGalacticaFromElsewhere() {
+        start(all(setUp(WILLIAM_ADAMA),
+                all(new GiveSkillCardEvent(1, UNORTHODOX_PLAN_3), new DamageLocationEvent(WEAPONS_CONTROL),
+                        new PlaceRaiderEvent(GALACTICA_SPACE_8_OCLOCK)),
+                single(new ActionStepEvent()), CYLONS_WIN));
+
+        act(1);
+        play(engine -> engine.submit(1, new UnorthodoxPlanEvent(1, UNORTHODOX_PLAN_3, WEAPONS_CONTROL)));
+        assertWaitingFor(new AwaitingDecision(new PlayerDecisionEvent<>(1, WeaponsControlEvent.class, ANYWHERE_EVEN_IF_DAMAGED)));
+        val raider = engine.view().boards().galactica().shipsIn(GALACTICA_SPACE_8_OCLOCK, Raider.class).getFirst().id();
+        play(engine -> engine.submit(1, new WeaponsControlEvent(1, raider)));
+
+        assertEquals(new Finished(CYLONS), engine.status(1));
+        assertEquals(1, engine.journal().entries().stream()
+                .filter(entry -> entry instanceof ScopeOpened opened && opened.event() instanceof AttackCylonShipEvent)
+                .count());
+    }
+
+    // The engine replaces the constraints a client sends with the decision's: none in the Action step.
+    @Test
+    void aClientCannotTakeALocationsActionFromElsewhere() {
+        start(all(setUp(WILLIAM_ADAMA), single(new GiveSkillCardEvent(1, BUILD_NUKE_6)), single(new ActionStepEvent()),
+                CYLONS_WIN));
+
+        act(1);
+
+        assertThrows(InvalidActionException.class, () -> engine.submit(1, new CommandEvent(1, true)));
+    }
+
+    @Test
+    void communicationsMovesACivilianShip() {
+        start(all(setUp(WILLIAM_ADAMA), all(new SetUpGalacticaEvent(), new MoveCharacterEvent(WILLIAM_ADAMA, COMMUNICATIONS)),
+                single(new ActionStepEvent()), CYLONS_WIN));
+        val ships = engine.view().boards().galactica().shipsIn(GALACTICA_SPACE_2_OCLOCK, CivilianShip.class).stream()
+                .map(CivilianShip::id).toList();
+
+        act(1);
+        play(engine -> engine.submit(1, new CommunicationsEvent(1, ships.get(0), ships.get(1))));
+        choose(1, single(new MoveCivilianShipEvent(ships.get(0), GALACTICA_SPACE_4_OCLOCK)));
+        pass(1);
+
+        assertEquals(new Finished(CYLONS), engine.status(1));
+        assertEquals(List.of(ships.get(0)), engine.view().boards().galactica().shipsIn(GALACTICA_SPACE_4_OCLOCK, CivilianShip.class)
+                .stream().map(CivilianShip::id).toList());
     }
 
     // The engine accepts a card only where a decision of its timing is asked.
