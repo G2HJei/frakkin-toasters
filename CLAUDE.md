@@ -446,6 +446,20 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
   ACTION))` (the first only when he can move), which he chooses because the grants name him. "State of Emergency"
   loses 1 food, then grants `MOVE_OR_ACTION` to every player clockwise from its player, Cylons included.
 - The "Hangar Deck"'s "1 more action" is an `ACTION` grant, offered once the pilot is in space.
+- Repeated viper activations ("Maximum Firepower", "Full Throttle"'s attack, "Combat Veteran", "Launch Reserves") go
+  through `ViperActivationRoundEvent(playerNumber, viperId, activationsLeft, attacksOnly)`, queued with the viper the
+  card decided. It offers `ActivateViperEventProcessor.activations` of that viper as concrete
+  `GrantedViperActivationEvent` options, each followed by the next round, and a `NoOpEvent` to stop, so a client
+  answering by index can't switch vipers or add an activation. A `GrantedViperActivationEvent` is never a decision's
+  answer, and takes the player's own viper or an unmanned one (rule 11.1). After a launch from the "Reserves" the
+  viper is the one `GalacticaOps.launchHumanFighter` takes: the lowest id of its type.
+- "Launch Scout" and "Scout for Fuel" need a raptor in the "Reserves" (rule 13.5) and roll through
+  `FollowupUtils.rollDie` with a result event in `action/skillcard/`. A scout looks at a card through
+  `LookAtTopCardEvent(playerNumber, deck)` (`event/deck/`, `CardsSeen`, then top or bottom). "Test the Limits" plays
+  only before the blue spaces of the jump track (`MINUS_3`, `MINUS_1`, as printed) and damages through
+  `FollowupUtils.damageGalactica()`, the choice of rule 11.7.2 that a Galactica attack offers too.
+- "Raptor Specialist" builds an assault raptor from `GalacticaBoardView.supply()` (ship zone `HUMAN_SUPPLY`: ids 22 to
+  24, 4 assault raptors in all, A2.4.4) for a raptor from the "Reserves", or returns a destroyed raptor.
 
 ### End of Game and Mutiny
 
@@ -558,7 +572,8 @@ and its result.
   Victory" window. "Structural Damage" adds 2.
 - `ActivateViperEvent(playerNumber, ViperActivation)`: one option of rule 11.1.1. A pilot activates his own viper,
   anyone else an unmanned one. `ProtectTheFleetEvent` takes the same `ViperActivation`, for an unmanned viper, and both
-  use `ActivateViperEventProcessor.isValidActivation` and `activate`. A pilot's action (`Actions.offerAction`, also
+  use `ActivateViperEventProcessor.isValidActivation` and `activate`, and `activations` lists every legal one of a
+  fighter in space. A pilot's action (`Actions.offerAction`, also
   for the "Hangar Deck"'s extra action) offers the activation as a decision, and "Command" only when
   `canActivateUnmanned`.
 - Every effect that places or launches a Cylon ship on the main game board goes through `AbstractOps.takeFromSupply`
