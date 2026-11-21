@@ -223,6 +223,8 @@ const FACT_TEMPLATES: Record<string, string> = {
   'TitleFact.PresidentAssigned': '{character} is the President',
   'TitleFact.AdmiralAssigned': '{character} is the Admiral',
   'TitleFact.CagAssigned': '{character} is the CAG',
+  'TitleFact.QuorumCardPutInPlay': '{card} stays in play with {holderPlayerNumber}',
+  'TitleFact.QuorumCardLeftPlay': '{card} leaves play',
   'SkillCheckFact.SkillCheckStarted': 'Skill check: {type}',
   'SkillCheckFact.TotalStrengthDetermined': 'The skill check totals {totalStrength}',
   'SkillCheckFact.ResultDetermined': 'The skill check: {result}',

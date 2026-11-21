@@ -17,6 +17,7 @@ import xyz.zlatanov.frakkintoasters.state.Team;
 import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
 import xyz.zlatanov.frakkintoasters.state.card.MutinyCard;
 import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
+import xyz.zlatanov.frakkintoasters.state.card.QuorumCardInPlay;
 import xyz.zlatanov.frakkintoasters.state.crisis.SuperCrisisCard;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow.BeforeDieRoll;
@@ -116,6 +117,13 @@ class GameProjectionTest extends TestHarness {
         assertEquals(new HiddenCards<>(1, List.of(), List.of(QuorumCard.values()[0])), projection(HOLDER).presidentHand());
         assertEquals(new HiddenCards<QuorumCard>(1, List.of(), null), projection(OTHER).presidentHand());
         assertEquals(new HiddenCards<QuorumCard>(1, List.of(), null), projection(OBSERVER).presidentHand());
+    }
+
+    @Test
+    void theQuorumCardsInPlayShowToEveryone() {
+        ops.titles().putInPlay(QuorumCard.PROBATION, 2);
+
+        assertEquals(List.of(new QuorumCardInPlay(QuorumCard.PROBATION, 2)), projection(OBSERVER).quorumCardsInPlay());
     }
 
     @Test

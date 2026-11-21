@@ -38,9 +38,12 @@ public final class QuorumCardPlays {
             case UNSAVORY_CONNECTIONS -> true;
             case CONSULT_THE_ORACLE -> ConsultTheOracleEventProcessor.canPlay(game);
             case RESIGNATION -> ResignationEventProcessor.canPlay(game, player);
-            // the cards that later phases of quorum-cards-plan.md build
-            case ACCEPT_PROPHECY, ASSIGN_ARBITRATOR, ASSIGN_MISSION_SPECIALIST, ASSIGN_VICE_PRESIDENT,
-                 ASSIGN_CHIEF_OF_STAFF, PROBATION -> false;
+            case ACCEPT_PROPHECY -> AcceptProphecyEventProcessor.canPlay(game);
+            case ASSIGN_ARBITRATOR -> AssignArbitratorEventProcessor.canPlay(game, player);
+            case ASSIGN_CHIEF_OF_STAFF -> AssignChiefOfStaffEventProcessor.canPlay(game, player);
+            case ASSIGN_MISSION_SPECIALIST -> AssignMissionSpecialistEventProcessor.canPlay(game, player);
+            case ASSIGN_VICE_PRESIDENT -> AssignVicePresidentEventProcessor.canPlay(game, player);
+            case PROBATION -> ProbationEventProcessor.canPlay(game);
         };
     }
 

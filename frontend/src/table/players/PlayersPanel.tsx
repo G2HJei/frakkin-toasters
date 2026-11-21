@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { cardArt, characterArt, skillCardArt, titleArt, tokenArt, type ArtRef, type CardEnum, type TitleName, type TokenName } from '../../art/images';
 import { ArtImg, CardBack, CardTile, previewHandlers } from '../../art/Art';
 import { constantLabel, skillCardLabel } from '../../labels/describe';
-import type { HiddenCards, PlayerProjection, SkillHand } from '../../wire/types';
+import type { HiddenCards, PlayerProjection, QuorumCardInPlay, SkillHand } from '../../wire/types';
 import { faceDown, useRevealHandlers, type RevealSection } from '../reveal';
 import { useTable } from '../tableContext';
 
@@ -77,9 +77,31 @@ function PlayerMat({ player }: { player: PlayerProjection }) {
           <Pile label="Super Crisis" cards={player.superCrisisCards} enumName="SuperCrisisCard" deck="SUPER_CRISIS" owner={player.number} />
           {president && <Pile label="Quorum" cards={game?.presidentHand ?? null} enumName="QuorumCard" deck="QUORUM" owner={player.number} />}
         </div>
+        <InPlay cards={quorumCardsInPlay(game?.quorumCardsInPlay ?? [], player.number, president)} />
         <Learned player={player} />
       </div>
     </article>
+  );
+}
+
+// The Quorum Cards in play in front of the player, face up: the ones given to him, and the ones without a holder
+// ("Accept Prophecy") beside the President's hand.
+function quorumCardsInPlay(cards: QuorumCardInPlay[], playerNumber: number, president: boolean): string[] {
+  return cards
+    .filter((card) => card.holderPlayerNumber === playerNumber || (card.holderPlayerNumber === null && president))
+    .flatMap((card) => (card.card ? [card.card] : []));
+}
+
+function InPlay({ cards }: { cards: string[] }) {
+  if (cards.length === 0) {
+    return null;
+  }
+  return (
+    <div className="in-play" aria-label="Quorum Cards in play">
+      {cards.map((card) => (
+        <CardTile key={card} art={cardArt('QuorumCard', card)} label={constantLabel('QuorumCard', card)} />
+      ))}
+    </div>
   );
 }
 

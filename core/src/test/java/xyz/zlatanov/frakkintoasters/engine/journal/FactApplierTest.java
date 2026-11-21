@@ -14,6 +14,7 @@ import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.PlayerPile;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
+import xyz.zlatanov.frakkintoasters.state.card.QuorumCardInPlay;
 import xyz.zlatanov.frakkintoasters.state.card.SeenLoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage;
@@ -352,6 +353,15 @@ class FactApplierTest {
         apply(new NukeDiscarded());
 
         assertEquals(1, game.nukes());
+    }
+
+    @Test
+    void aQuorumCardPutInPlayAndLeavingPlay() {
+        apply(new QuorumCardPutInPlay(QuorumCard.PROBATION, 2));
+        apply(new QuorumCardPutInPlay(QuorumCard.ACCEPT_PROPHECY, null));
+        apply(new QuorumCardLeftPlay(QuorumCard.PROBATION));
+
+        assertEquals(List.of(new QuorumCardInPlay(QuorumCard.ACCEPT_PROPHECY, null)), game.quorumCardsInPlay());
     }
 
     @Test

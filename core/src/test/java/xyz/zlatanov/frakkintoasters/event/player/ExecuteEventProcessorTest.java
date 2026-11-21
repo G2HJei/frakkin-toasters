@@ -9,6 +9,8 @@ import xyz.zlatanov.frakkintoasters.event.loyalty.GiveLoyaltyCardsEvent;
 import xyz.zlatanov.frakkintoasters.event.loyalty.PassMutineerCardEvent;
 import xyz.zlatanov.frakkintoasters.event.officials.GiveTitlesToNextInLineEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
+import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
+import xyz.zlatanov.frakkintoasters.state.card.QuorumCardInPlay;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
@@ -72,6 +74,34 @@ class ExecuteEventProcessorTest extends EventTestHarness<ExecuteEvent> {
         assertEquals(List.of(NOT_CYLON), loyaltyDeck.discardedCards());
         assertFalse(game.turn().endedEarly());
         assertFollowupSelection();
+    }
+
+    // The Quorum Cards given to his character go too, the others stay in play.
+    @Test
+    void shouldDiscardTheQuorumCardsGivenToTheCharacter() {
+        player(2).loyaltyCards().addOnTop(NOT_CYLON);
+        ops.titles().putInPlay(QuorumCard.ASSIGN_ARBITRATOR, 2);
+        ops.titles().putInPlay(QuorumCard.PROBATION, 3);
+
+        execute(new ExecuteEvent(2));
+
+        assertEquals(List.of(new QuorumCardInPlay(QuorumCard.PROBATION, 3)), game.quorumCardsInPlay());
+        assertEquals(List.of(QuorumCard.ASSIGN_ARBITRATOR), quorumDeck.discardedCards());
+        assertFollowupSelection();
+    }
+
+    // An Infiltrating Cylon Leader discards them as he stops Infiltrating (rule 6.2.3.5).
+    @Test
+    void shouldDiscardTheQuorumCardsGivenToAnInfiltratingCylonLeader() {
+        setUpGame(4);
+        player(1).character(HELENA_CAIN);
+        player(4).character(SHARON_ATHENA_AGATHON);
+        ops.player(4).infiltrateGalactica(HANGAR_DECK);
+        ops.titles().putInPlay(QuorumCard.ASSIGN_MISSION_SPECIALIST, 4);
+
+        execute(new ExecuteEvent(4));
+
+        assertEquals(List.of(), game.quorumCardsInPlay());
     }
 
     // "Eulogy" asks whether an execution cost the fleet morale.

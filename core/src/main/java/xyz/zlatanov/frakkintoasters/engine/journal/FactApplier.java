@@ -4,6 +4,7 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.*;
 import xyz.zlatanov.frakkintoasters.state.DieRoll;
 import xyz.zlatanov.frakkintoasters.state.Game;
+import xyz.zlatanov.frakkintoasters.state.card.QuorumCardInPlay;
 import xyz.zlatanov.frakkintoasters.state.card.SeenLoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
@@ -219,6 +220,8 @@ public final class FactApplier {
             case TitleFact.CagAssigned f -> game.cag(f.character());
             case TitleFact.PresidentQuorumCardGained f -> game.presidentHand().addOnTop(f.card());
             case TitleFact.PresidentQuorumCardsLost f -> remove(game.presidentHand(), f.cards());
+            case TitleFact.QuorumCardPutInPlay f -> game.putInPlay(new QuorumCardInPlay(f.card(), f.holderPlayerNumber()));
+            case TitleFact.QuorumCardLeftPlay f -> game.removeFromPlay(f.card());
         }
     }
 

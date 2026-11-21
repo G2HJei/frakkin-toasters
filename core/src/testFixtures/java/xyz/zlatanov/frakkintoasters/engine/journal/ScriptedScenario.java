@@ -5,6 +5,7 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.Fact;
 import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
 import xyz.zlatanov.frakkintoasters.operation.GameOps;
+import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
 import xyz.zlatanov.frakkintoasters.state.Die;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Randomness;
@@ -59,6 +60,8 @@ public final class ScriptedScenario {
         val playedQuorumCard = game.presidentHand().cards().getFirst();
         ops.titles().play(playedQuorumCard);
         ops.titles().removeQuorumCardFromGame(playedQuorumCard);
+        ops.titles().putInPlay(QuorumCard.PROBATION, 1);
+        ops.titles().discardFromPlay(QuorumCard.PROBATION);
         ops.loyaltyDeck().createNotACylon().create(2, 1, false);
         ops.player(1).drawLoyaltyCards(1);
         ops.skillCheck().createDestinyDeck();

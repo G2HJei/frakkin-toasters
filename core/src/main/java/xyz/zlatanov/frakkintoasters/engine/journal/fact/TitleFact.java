@@ -27,4 +27,12 @@ public sealed interface TitleFact extends Fact {
 
     record CagAssigned(Character character) implements TitleFact {
     }
+
+    // A played Quorum Card stays in play, given to a player or, for "Accept Prophecy", to nobody.
+    record QuorumCardPutInPlay(QuorumCard card, Integer holderPlayerNumber) implements TitleFact {
+    }
+
+    // A Quorum Card leaves play. CardsDiscarded follows.
+    record QuorumCardLeftPlay(QuorumCard card) implements TitleFact {
+    }
 }

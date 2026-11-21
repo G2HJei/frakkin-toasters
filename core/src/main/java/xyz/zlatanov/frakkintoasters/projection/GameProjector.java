@@ -86,6 +86,7 @@ final class GameProjector {
                         game.cylonShips().available(ShipType.HEAVY_RAIDER), game.cylonShips().availableCenturions()),
                 decks(),
                 presidentHand(),
+                game.quorumCardsInPlay(), // face up in front of their holders
                 skillCheck(),
                 game.nukes(),
                 game.crisisCardsInPlay(),

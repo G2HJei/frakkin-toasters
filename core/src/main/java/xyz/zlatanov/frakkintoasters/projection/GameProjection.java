@@ -13,6 +13,7 @@ import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
 import xyz.zlatanov.frakkintoasters.state.card.MutinyCard;
 import xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard;
 import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
+import xyz.zlatanov.frakkintoasters.state.card.QuorumCardInPlay;
 import xyz.zlatanov.frakkintoasters.state.card.SeenLoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
@@ -56,6 +57,7 @@ public record GameProjection(
         CylonSupply cylonSupply,
         List<DeckProjection> decks,
         HiddenCards<QuorumCard> presidentHand,
+        List<QuorumCardInPlay> quorumCardsInPlay,
         SkillCheckProjection skillCheck,
         int nukes,
         List<SkillCheckType> crisisCardsInPlay,

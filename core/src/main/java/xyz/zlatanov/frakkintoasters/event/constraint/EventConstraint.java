@@ -8,6 +8,7 @@ public enum EventConstraint {
     DRAW_EXACTLY_3,
     DRAW_EXACTLY_4,
     DRAW_EXACTLY_5,
+    DRAW_EXACTLY_1_OF_ANY_COLOR, // "Accept Prophecy": 1 Skill Card from any deck
     DRAW_EXACTLY_2_OF_ANY_COLOR, // "2 Skill Cards (they may be from outside his skill set)"
     DISCARD_EXACTLY_1,
     DISCARD_EXACTLY_2,

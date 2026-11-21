@@ -1525,6 +1525,14 @@ details > summary {
   gap: 12px;
 }
 
+/* the Quorum Cards in play, face up in front of their holder */
+.table-page .mat .in-play {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
 .table-page .mat .pile {
   display: flex;
   flex-direction: column;

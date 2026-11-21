@@ -1,6 +1,6 @@
 # Quorum Cards plan
 
-Status (2026-11-21): phases 1 to 4 are done.
+Status (2026-11-21): phases 1 to 5 are done.
 
 Implements the 23 Quorum Card types, and everything around them that `unimplemented-components.md` lists as missing:
 

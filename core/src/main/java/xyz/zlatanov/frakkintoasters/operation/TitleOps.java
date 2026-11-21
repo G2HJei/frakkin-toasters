@@ -7,6 +7,7 @@ import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsRemovedFro
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.TitleFact.*;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
+import xyz.zlatanov.frakkintoasters.state.card.QuorumCardInPlay;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 
 import java.util.List;
@@ -63,6 +64,27 @@ public class TitleOps extends GameOps {
 
     public void discardPlayedQuorumCard(QuorumCard card) {
         record(new CardsDiscarded(QUORUM, List.of(card)));
+    }
+
+    public void putInPlay(QuorumCard card, Integer holderPlayerNumber) {
+        record(new QuorumCardPutInPlay(card, holderPlayerNumber));
+    }
+
+    public void discardFromPlay(QuorumCard card) {
+        record(new QuorumCardLeftPlay(card));
+        record(new CardsDiscarded(QUORUM, List.of(card)));
+    }
+
+    /**
+     * Discards the Quorum Cards given to the player, e.g. when he is executed (rule 7.1) or stops Infiltrating (rule
+     * 6.2.3.5).
+     */
+    public void discardQuorumCardsGivenTo(int playerNumber) {
+        game.quorumCardsInPlay().stream()
+                .filter(inPlay -> inPlay.holderPlayerNumber() != null && inPlay.holderPlayerNumber() == playerNumber)
+                .map(QuorumCardInPlay::card)
+                .toList()
+                .forEach(this::discardFromPlay);
     }
 
     public void removeQuorumCardFromGame(QuorumCard card) {

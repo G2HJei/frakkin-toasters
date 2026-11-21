@@ -511,7 +511,8 @@ Quorum Cards: `SkillCardPlays.canPlay` keeps it `false` and `SkillCardEventsTest
 `ExecuteEvent(playerNumber)` follows rule 7.1. Its player carries out the steps, so he is the player of the event.
 `ExecuteEventProcessor.canBeExecuted` allows humans only: a revealed Cylon ignores it (rule 6.1.2.1).
 
-- The player discards his Skill and Mutiny Cards and his miracle token.
+- The player discards his Skill and Mutiny Cards, his miracle token, and the Quorum Cards given to him
+  (`TitleOps.discardQuorumCardsGivenTo`, also for an Infiltrating Cylon Leader, rule 6.2.3.5).
 - A human: lose 1 morale (`MoraleLostToExecution` when the loss happens, `GameView.moraleLostToExecution()`, which
   "Eulogy" asks for), the character leaves the game (`CharacterRemoved`, into `GameView.removedComponents()`), the
   Loyalty Cards are discarded but the Mutineer card stays, and the player chooses a new character. Once the game is
@@ -675,10 +676,10 @@ the frontend owns the wording.
 - `GameProjection.of(view, pendingInput, viewer)` is the game. What lies open on the table is public. A hidden card is a
   count, with the colors of Skill Cards (their backs show them), and a field holding cards is `null` for a viewer who
   may not see them (`SkillHand`, `HiddenCards<T>`). `GameProjector`'s javadoc lists the rules: hands, Loyalty and other
-  player cards, the President's Quorum hand, looked-at Loyalty Cards and civilian ship cargo, face down discard piles
-  (`Disclosure.FACEDOWN_DISCARDS`), cards played before a skill check, an open interrupt window's cards (the others
-  count them in the hand), the pending input (backend decision 6), and everything once the game has ended. The Mutineer
-  card is faceup once held ("immediately reveal this card").
+  player cards, the President's Quorum hand (the Quorum Cards in play are public), looked-at Loyalty Cards and civilian
+  ship cargo, face down discard piles (`Disclosure.FACEDOWN_DISCARDS`), cards played before a skill check, an open
+  interrupt window's cards (the others count them in the hand), the pending input (backend decision 6), and everything
+  once the game has ended. The Mutineer card is faceup once held ("immediately reveal this card").
 - `LiveUpdateProjection.of(journal, from, viewer)` is what happened: the scopes (`ScopeLog`: actor, event type, its
   fields when public, the facts) and the choices (`ChoiceLog`). `LiveUpdateProjector` has an exhaustive switch over every
   fact, so a new fact doesn't compile until it has a rule. A fact the viewer may not see becomes `Hidden` (count,

@@ -56,7 +56,7 @@ public final class WireSchema {
     private static final Set<String> PLAYERS = Set.of("playerNumber", "targetPlayerNumber", "targetPlayer",
             "recipientPlayerNumber", "excludedPlayerNumber", "targetHumanPlayer", "ownerPlayerNumber", "otherPlayerNumber",
             "chooser", "actor", "player", "currentPlayer", "actingPlayer", "winnerPlayerNumbers", "winners",
-            "waitingForPlayerNumber", "targetPlayers");
+            "waitingForPlayerNumber", "targetPlayers", "holderPlayerNumber");
     private static final Set<String> SCOPES = Set.of("scopeId", "parentId");
     private static final Set<String> COUNTS = Set.of("count", "amount", "value", "modifier", "distanceBefore", "number",
             "turn", "turns", "size", "discardSize", "basestars", "raiders", "heavyRaiders", "centurions", "civilianShips",

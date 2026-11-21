@@ -7,6 +7,7 @@ import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
 import xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard;
 import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
+import xyz.zlatanov.frakkintoasters.state.card.QuorumCardInPlay;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.deck.Deck;
 import xyz.zlatanov.frakkintoasters.state.deck.DecksHolder;
@@ -53,6 +54,9 @@ public class Game implements GameView {
     private Character            president;
     @Builder.Default
     private Deck<QuorumCard>     presidentHand     = new Deck<>(false);
+    @Builder.Default
+    @Getter(AccessLevel.NONE)
+    private List<QuorumCardInPlay> quorumCardsInPlay = new ArrayList<>();
     @Setter(onMethod_ = @Mutates)
     private Character            admiral;
     @Setter(onMethod_ = @Mutates)
@@ -146,6 +150,22 @@ public class Game implements GameView {
     @Mutates
     public void gainNuke() {
         nukes++;
+    }
+
+    @Override
+    public List<QuorumCardInPlay> quorumCardsInPlay() {
+        return List.copyOf(quorumCardsInPlay);
+    }
+
+    @Mutates
+    public void putInPlay(QuorumCardInPlay card) {
+        quorumCardsInPlay.add(card);
+    }
+
+    @Mutates
+    public void removeFromPlay(QuorumCard card) {
+        assert quorumCardsInPlay.stream().anyMatch(inPlay -> inPlay.card() == card);
+        quorumCardsInPlay.removeIf(inPlay -> inPlay.card() == card);
     }
 
     @Mutates

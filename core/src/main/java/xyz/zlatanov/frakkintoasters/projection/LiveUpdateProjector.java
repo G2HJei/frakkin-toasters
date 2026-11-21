@@ -256,6 +256,9 @@ final class LiveUpdateProjector {
             case TitleFact.PresidentAssigned f -> shown(f);
             case TitleFact.AdmiralAssigned f -> shown(f);
             case TitleFact.CagAssigned f -> shown(f);
+            // the cards in play lie face up
+            case TitleFact.QuorumCardPutInPlay f -> shown(f);
+            case TitleFact.QuorumCardLeftPlay f -> shown(f);
         };
     }
 

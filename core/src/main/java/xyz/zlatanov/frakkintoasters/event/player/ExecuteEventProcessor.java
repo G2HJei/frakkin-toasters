@@ -62,12 +62,14 @@ public class ExecuteEventProcessor extends EventProcessor<ExecuteEvent> {
     }
 
     // "He discards his hand of Skill and Mutiny Cards and his miracle token(s) (Quorum Cards in his hand are
-    // unaffected)."
+    // unaffected)." The Quorum Cards given to his character go too, e.g. "Assign Mission Specialist". For an
+    // Infiltrating Cylon Leader they go as the Infiltration ends (rule 6.2.3.5).
     private void discardCards() {
         val playerOps = ops.player(player.number());
         playerOps.discard(player.skillCards().cards().toArray(SkillCard[]::new));
         playerOps.discard(player.mutinyCards().cards().toArray(MutinyCard[]::new));
         playerOps.loseMiracleToken();
+        ops.titles().discardQuorumCardsGivenTo(player.number());
     }
 
     // "If a player is a Cylon Leader, he has no Loyalty Cards to reveal": he returns to the "Resurrection Ship". Cylon

@@ -37,7 +37,8 @@ public class DrawSkillCardsEventProcessor extends EventProcessor<DrawSkillCardsE
 
     // "Draws 2 Skill Cards (they may be from outside his skill set)", e.g. "Consult the Hybrid".
     private boolean fromAnyDeck() {
-        return event.drawLimit() == EventConstraint.DRAW_EXACTLY_2_OF_ANY_COLOR;
+        return event.drawLimit() == EventConstraint.DRAW_EXACTLY_1_OF_ANY_COLOR
+                || event.drawLimit() == EventConstraint.DRAW_EXACTLY_2_OF_ANY_COLOR;
     }
 
     // The player draws fewer only when no other card he could draw is left in the decks (rule 8.2.2.5). The cards he
@@ -134,7 +135,7 @@ public class DrawSkillCardsEventProcessor extends EventProcessor<DrawSkillCardsE
 
     private static int count(EventConstraint drawLimit) {
         return switch (drawLimit) {
-            case DRAW_EXACTLY_1 -> 1;
+            case DRAW_EXACTLY_1, DRAW_EXACTLY_1_OF_ANY_COLOR -> 1;
             case DRAW_EXACTLY_2, DRAW_EXACTLY_2_OF_ANY_COLOR -> 2;
             case DRAW_EXACTLY_3 -> 3;
             case DRAW_EXACTLY_4 -> 4;

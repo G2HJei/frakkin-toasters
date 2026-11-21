@@ -7,6 +7,7 @@ import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
 import xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard;
 import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
+import xyz.zlatanov.frakkintoasters.state.card.QuorumCardInPlay;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 
@@ -55,6 +56,26 @@ public interface GameView {
     Character president();
 
     DeckView<QuorumCard> presidentHand();
+
+    /**
+     * @return the Quorum Cards that stay in play: the roles with their holders, and "Accept Prophecy"
+     */
+    List<QuorumCardInPlay> quorumCardsInPlay();
+
+    default boolean inPlay(QuorumCard card) {
+        return quorumCardsInPlay().stream().anyMatch(inPlay -> inPlay.card() == card);
+    }
+
+    /**
+     * @return the player the card in play was given to, empty when it isn't in play or has no holder
+     */
+    default Optional<Integer> quorumCardHolder(QuorumCard card) {
+        return quorumCardsInPlay().stream()
+                .filter(inPlay -> inPlay.card() == card)
+                .map(QuorumCardInPlay::holderPlayerNumber)
+                .filter(java.util.Objects::nonNull)
+                .findFirst();
+    }
 
     Character admiral();
 

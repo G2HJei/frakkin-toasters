@@ -173,6 +173,8 @@ class LiveUpdateProjectionTest {
             new Sample(new TitleFact.PresidentAssigned(WILLIAM_ADAMA), Rule.PUBLIC),
             new Sample(new TitleFact.AdmiralAssigned(WILLIAM_ADAMA), Rule.PUBLIC),
             new Sample(new TitleFact.CagAssigned(WILLIAM_ADAMA), Rule.PUBLIC),
+            new Sample(new TitleFact.QuorumCardPutInPlay(QuorumCard.PROBATION, 2), Rule.PUBLIC),
+            new Sample(new TitleFact.QuorumCardLeftPlay(QuorumCard.PROBATION), Rule.PUBLIC),
             new Sample(new TitleFact.PresidentQuorumCardGained(QuorumCard.values()[0]), Rule.PRESIDENT),
             new Sample(new TitleFact.PresidentQuorumCardsLost(List.of(QuorumCard.values()[0])), Rule.PRESIDENT));
 

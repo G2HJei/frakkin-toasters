@@ -43,6 +43,23 @@ function renderPanel() {
 }
 
 describe('the players', () => {
+  it('lays the Quorum Cards in play in front of their holders, and the ones without a holder by the President', () => {
+    const inPlay = {
+      ...game,
+      quorumCardsInPlay: [{ card: 'PROBATION', holderPlayerNumber: 1 }, { card: 'ACCEPT_PROPHECY', holderPlayerNumber: null }],
+    } as unknown as GameProjection;
+    const container = render(
+      <Table.Provider value={tableContext(inPlay, false, null)}>
+        <PlayersPanel />
+      </Table.Provider>,
+    ).container;
+    const inPlayOf = (playerNumber: number) =>
+      Array.from(container.querySelectorAll(`[data-player="${playerNumber}"] [aria-label="Quorum Cards in play"] img`)).map((img) => img.getAttribute('alt'));
+
+    expect(inPlayOf(1)).toEqual([expect.stringMatching(/probation/i)]);
+    expect(inPlayOf(2)).toEqual([expect.stringMatching(/accept prophecy/i)]);
+  });
+
   it('shows a hand the viewer may see face up, by the cards\' images', () => {
     const panel = renderPanel();
     const own = panel.querySelector('[data-player="1"]');
