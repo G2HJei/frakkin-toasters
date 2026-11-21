@@ -1,46 +1,9 @@
-# Unimplemented Components
+# Choices
 
-A review of `core` on `master` at `1f5c88c` (2026-11-20) listed which game components had no events yet. Three plans
-built them (phases 1 to 17, done 2026-11-21; the plans are deleted). This file is the record of that work: what is
-built, the choices made where the cards and the rulebook are silent, and what lies beyond the rules. Only the Kobol
-objective is in scope.
+Where the cards and the rulebook are silent or unclear, the build makes a choice. These are choices, not rulings: a
+different answer changes only the code named. Only the Kobol objective is in scope.
 
-`CLAUDE.md` describes how each part works.
-
-## Overview
-
-| Component | Built |
-|---|---|
-| Crisis Cards (136) | every card resolves, and activates the Cylon ships by its icon |
-| Super Crisis Cards (11) | every card plays at "Caprica" and resolves; "Bomb on Colonial One" destroys Colonial One |
-| Destination Cards (21) | every card resolves |
-| Location actions | every location; Command, Armory, Weapons Control and Communications from anywhere through "Unorthodox Plan" |
-| Skill Cards (51 types) | every type, the interrupt cards in their windows |
-| Quorum Cards (23 types, 29 cards) | every card plays, the cards in play act |
-| Mutiny Cards (22) | every card plays, the "Brig" rules, one card a turn from discarding Treachery |
-| Title Card actions | the President's Quorum Card, the Admiral's nuke, the CAG's two |
-| "You Are a Cylon" Loyalty Cards (7) | the voluntary reveal and its 7 powers, the reveal by an execution |
-| Final Five Loyalty Cards (5) | every card resolves, on another player's look and on an execution |
-| Personal Goal Loyalty Cards (8) | the reveal action, the end-game penalty |
-| Motive Cards (13) | revealed at any pause during the game, and at the end |
-| Cylon Leaders | Infiltrating, the return to the "Resurrection Ship" as an action, the sheet actions instead of the location's |
-| Character abilities (99) | every ability of the 33 sheets |
-| Pegasus | its damage on every Galactica hit, its destruction (rule 11.7.2.4) |
-| Setup | 3 to 7 players, a Cylon Leader in 4 to 7 player games and always at 7 (rule A3.7.2.2) |
-
-The bugs the review listed are fixed: the "Caprica" Super Crisis play, Pegasus' destruction, Baltar's and Boomer's
-Loyalty Cards. The revealed Personal Goals were never charged at the end. An audit of the rulebook after phase 16 found
-and fixed more (phase 16c): the 7 player setup, the interrupt tiebreak and the Destiny discards a browser couldn't
-answer, the start in "Sickbay" (rule 7.4), the Treachery Mutiny Card on every chosen discard, "Disabled Hangar" on
-every launch, the Cylon Fleet board out of ships (rule 11.4.1.2), the raiders' area order (rule 11.5), and the
-Mutineer's new character drawing a Mutiny Card (rule 5.2.1).
-
-## Choices
-
-These are choices, not rulings: the cards and the rulebook don't settle them. A different answer changes only the code
-named.
-
-### Skill and Quorum Cards
+## Skill and Quorum Cards
 
 - A card is offered and accepted only when its effect can happen, e.g. "Build Nuke" below 3 nukes, "Repair" with
   something damaged.
@@ -62,7 +25,7 @@ named.
 - "Popular Influence" played by someone who isn't President: "you" means its player, and "Resignation" can only be
   discarded.
 
-### Titles and Mutiny Cards
+## Titles and Mutiny Cards
 
 - The nuke follows rule 11.6.1 (a space area; the token is discarded), not the Admiral Title Card's older text. A 7
   with no basestar in the area still destroys up to 3 raiders.
@@ -74,7 +37,7 @@ named.
   Galactica. "Presidential Pardon" and "Attorney" keep to locations that aren't hazardous.
 - The Mutiny Card for discarding Treachery is once a turn per player.
 
-### Cylons and Loyalty Cards
+## Cylons and Loyalty Cards
 
 - The reveal does rule 6.1.1's step 1 (the discards) before the card's power, because "Draw Treachery Cards" makes its
   player discard down to 3 first; steps 2 to 7 follow the power. The titles pass before the Loyalty Cards and the
@@ -94,7 +57,7 @@ named.
   negative half (rule 6.1.2.1), and still draws the 2 Treachery. "Footage Transmitted" draws no Super Crisis Card when
   none is left.
 
-### Ships, boards and setup
+## Ships, boards and setup
 
 - The Skill decks follow the strengths Appendix A2.3.8 lists (each color 35 cards, Treachery 26, 201 in all,
   `AllCardsProviderTest`). The set symbols tell the Exodus 0 cards (three copies, "Red Tape" in Politics) from the
@@ -122,7 +85,7 @@ named.
   where the order can't change the outcome.
 - "Psychological Warfare" rebuilds the Destiny deck from as many Treachery cards as are left, up to 6.
 
-### Character abilities
+## Character abilities
 
 - An ability that answers something is offered only to a player who can use it, so a game without its character
   pauses where it did. The negative abilities don't bind a Super Crisis Card's check either.
@@ -154,11 +117,8 @@ named.
 - A cost ("Terminal Illness", "Conflicted Loyalties", "Reluctant") is paid before the action, which then runs; the log
   shows the event twice.
 
-## Beyond the rules
 
-Every rule and component of a Kobol game is built. What is left would make the browser easier to use, not the game
-more complete: legal-move hints (a list in `core` of the legal answers to a decision) and more inputs on the board
-(viper activation, targets of a choice lighting up). Every decision can already be answered through the `EventBuilder`.
+## Out of scope
 
-Out of scope as a whole: New Caprica, the Ionian Nebula and Earth. Some clauses of in-scope cards are too: D'Anna
+New Caprica, the Ionian Nebula and Earth as a whole (see `CLAUDE.md`). Some clauses of in-scope cards are too: D'Anna
 Biers' "Hub Destroyed", the Detention notes on Felix Gaeta's "Coup" and Kat's "Stim Junkie", and rule 9.8.2.1.

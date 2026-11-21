@@ -54,8 +54,8 @@ Next steps, in order:
 4. ~~Create the game engine to drive the events and turns.~~ Done: `GameEngine` runs, restores and rolls back a game
    (see "Engine") and plays its turns (see "Turn Loop"), and every component of the Kobol game is built: every Crisis,
    Super Crisis, Destination, Skill, Quorum, Mutiny, Loyalty and Motive Card, every location and Title Card action,
-   Pegasus' destruction and the 99 character abilities (`unimplemented-components.md` records the choices made where
-   the cards and rules are silent, and the few questions left open).
+   Pegasus' destruction and the 99 character abilities (`choices.md` records the choices made where the cards and
+   rules are silent).
 5. ~~Create a working frontend with the events that exist by then.~~ Done:
    the backend, the sandbox, the wire schema, the table with the board, the lobby and rooms (see "Backend" and
    "Frontend"). Still open: legal-move hints (a list in `core` of the legal answers to a decision) and more inputs on
@@ -1234,7 +1234,7 @@ when possible.
 - `SuperCrisisCardTest` has a revealed Cylon play Super Crisis Cards at "Caprica" through `submit` and `choose`, dealt
   with `GiveSuperCrisisCardToPlayerEvent`, and `SuperCrisisCardResolutionTest` runs every section and result of every
   card through the real processors, like `CrisisCardResolutionTest`
-- The other engine tests play one row of `unimplemented-components.md` each through `submit` and `choose`, restoring
+- The other engine tests play one component each through `submit` and `choose`, restoring
   at every pause: `TitleCardActionsTest` (the nuke, the CAG's two actions), `CylonRevealTest` (a power, the discards
   before it, a reveal on another player's turn, the execution's choice), `CylonLeaderTest` (the return to the
   "Resurrection Ship"), `FinalFiveTest`, `PegasusDestructionTest` and `SevenPlayerSetupTest` (a 7 player start with
