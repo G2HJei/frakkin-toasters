@@ -5,6 +5,7 @@ import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.JumpPreparationIncreased;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.JumpPreparationReset;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.LocationDamaged;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.ResourceDecreased;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedOnTop;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsPulled;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.CardsGained;
@@ -12,6 +13,7 @@ import xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.CharacterMove
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.PlayerPile;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
+import xyz.zlatanov.frakkintoasters.state.board.Resource;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 import xyz.zlatanov.frakkintoasters.state.ship.CylonShip;
@@ -51,6 +53,11 @@ public class SandboxOps extends AbstractOps {
     /**
      * Gives the player a Skill Card out of its color's draw pile.
      */
+    // A setup, not a loss, so no "Preventative Policy" applies.
+    public void decreaseResource(Resource resource, int amount) {
+        record(new ResourceDecreased(resource, amount));
+    }
+
     public void giveSkillCard(int playerNumber, SkillCard card) {
         record(new CardsPulled(DeckId.of(card.type().color()), List.of(card)));
         record(new CardsGained(playerNumber, PlayerPile.SKILL, List.of(card)));

@@ -102,7 +102,8 @@ whole root package, so nothing in `backend` may be named `XxxEventProcessor`.
   never depends on `..operation..`, and nothing else in `core` depends on it (`ArchitectureTest`). See "Projections"
 - `state/` - game state model: `Game` (top level), `Turn` (turn number, `GameStep`, current and acting player, the
   Crisis Cards of the turn and whether it returns to the Crisis step, the `DieRoll`, the open interrupt window and its
-  cards, the Skill Cards played for their abilities, read through `GameView.turn()`; `number` counts player turns, not rounds), `Player` (`turns()` counts the player's own turns), `Team` (the winner in
+  cards, the Skill Cards played for their abilities and the "Preventative Policy" loss reductions, read through
+  `GameView.turn()`; `number` counts player turns, not rounds), `Player` (`turns()` counts the player's own turns), `Team` (the winner in
   `GameView.outcome()`), `Die` (d8), `DieRoll` (a roll with the cards played on it), `Randomness`,
   `RemovedComponents`, `PlayerPile`, and the `@Mutates` marker
 - `state/interrupt/` - `InterruptWindow` (the windows, as sealed records with the cards each takes) and
@@ -386,7 +387,9 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
   and characters in the "Brig" no Crisis step. Movement and Action are a `OneOf` with a `NoOpEvent`. The Action step
   offers what `Actions.offerAction` finds (see "Actions and Skill Cards"): an `ActionEvent` decision when the player can
   take his location's action or play an "Action:" card, and for a pilot an `ActivateViperEvent` decision too. A
-  character with neither (e.g. in "Sickbay" without a card, see `LocationEvent.canAct`) gets no Action choice.
+  character with neither (e.g. in "Sickbay" without a card, see `LocationEvent.canAct`) gets no Action choice. The
+  Movement step offers what `Actions.offerMovement` finds: a `MoveEvent` decision when he can move (not from the
+  "Brig"), and a `MovementAbilityEvent` decision when he can play a "Movement:" card, in the "Brig" too (rule 10.4.1).
 - `DiscardStepEvent` asks every player over the hand limit, clockwise from the current player, with
   `DISCARD_DOWN_TO_HAND_LIMIT`: Skill Cards over `handLimit()`, and the President's Quorum Cards.
 - The Crisis step draws a card, keeps it with the turn and queues `ResolveCrisisCardEvent` (see "Crisis Cards"). The
@@ -418,7 +421,8 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
   event fails for a pilot, who is in space. `ActivateViperEvent` isn't an `ActionEvent`, because a non-pilot's one
   activates an unmanned viper.
 - A Skill Card played for its ability is a `SkillCardEvent` (`playerNumber`, `card`), one record per card in
-  `action/skillcard/`, which implements the interface of its timing: `ActionEvent` for "Action:". The engine's
+  `action/skillcard/`, which implements the interface of its timing: `ActionEvent` for "Action:",
+  `MovementAbilityEvent` for "Movement:" (used instead of moving, once a turn, rule 8.3.5). The engine's
   `isInstance` check then accepts it only where that timing is asked. `SkillCardType.isAction()` and
   `isMovementAbility()` list the cards, and `SkillCardEventsTest` checks that each has one event.
 - Its processor extends `SkillCardEventProcessor`, whose final `isValid()` checks the card's `type()`, the hand and
@@ -428,6 +432,12 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
 - A card is offered and accepted only when its effect can happen, as a location's action is. `SkillCardPlays.canPlay`
   is an exhaustive switch over `SkillCardType` that asks each card processor's static `canPlay`, so a new type doesn't
   compile until it's mapped.
+- "Critical Situation" offers `Actions.offerAction` after the card left the hand. It and "Executive Order" share a
+  limit of 1 a turn, read from `playedSkillCards()` (`CriticalSituationEventProcessor.criticalSituationOrExecutiveOrderPlayed`).
+- "Preventative Policy" records `LossReductionAdded`. Every loss goes through `AbstractOps.loseResource` (the
+  `GalacticaOps` losses, the FUEL and FOOD damage tokens, destroyed civilian ships), which uses the reduction up on the
+  next loss of that resource (`LossReduced`). The sandbox's `ChangeResourceEvent` uses `SandboxOps.decreaseResource`,
+  which isn't a loss.
 - `GrantEvent(playerNumber, grant, grantedBy)` gives a player an action later, e.g. the "Hangar Deck"'s "1 more
   action" once the pilot is in space. It is queued, never submitted, makes the player the acting player when it runs,
   and offers through `Actions`.

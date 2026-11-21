@@ -89,6 +89,8 @@ public final class ScriptedScenario {
         ops.returnToCrisisStep(true);
         ops.discardNuke();
         ops.gainNuke();
+        ops.reduceNextLoss(xyz.zlatanov.frakkintoasters.state.board.Resource.FOOD);
+        ops.galactica().decreaseResource(xyz.zlatanov.frakkintoasters.state.board.Resource.FOOD, 1); // reduced to nothing
         ops.player(2).lookAtLoyaltyCard(1);
 
         // a skill check, in an event scope, then a choice the event queued

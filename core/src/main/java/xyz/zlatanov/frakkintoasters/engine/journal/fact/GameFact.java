@@ -2,6 +2,7 @@ package xyz.zlatanov.frakkintoasters.engine.journal.fact;
 
 import xyz.zlatanov.frakkintoasters.state.GameStep;
 import xyz.zlatanov.frakkintoasters.state.Team;
+import xyz.zlatanov.frakkintoasters.state.board.Resource;
 import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
 import xyz.zlatanov.frakkintoasters.state.card.ObjectiveCard;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
@@ -55,6 +56,14 @@ public sealed interface GameFact extends Fact {
     }
 
     record NukeGained() implements GameFact {
+    }
+
+    // "Preventative Policy": the next loss of the resource this turn is 1 smaller.
+    record LossReductionAdded(Resource resource) implements GameFact {
+    }
+
+    // A loss of the resource was reduced, which used the reduction up.
+    record LossReduced(Resource resource) implements GameFact {
     }
 
     // A Skill Card played from the hand for its ability, e.g. its "Action:". The turn keeps it for the cards limited per turn.

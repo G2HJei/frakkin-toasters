@@ -3,6 +3,7 @@ package xyz.zlatanov.frakkintoasters.event.action;
 import lombok.NoArgsConstructor;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.BuildNukeEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.ConsolidatePowerEventProcessor;
+import xyz.zlatanov.frakkintoasters.event.action.skillcard.CriticalSituationEventProcessor;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 import xyz.zlatanov.frakkintoasters.state.view.GameView;
@@ -31,9 +32,11 @@ public final class SkillCardPlays {
         return switch (type) {
             case CONSOLIDATE_POWER -> ConsolidatePowerEventProcessor.canPlay(game);
             case BUILD_NUKE -> BuildNukeEventProcessor.canPlay(game);
+            case CRITICAL_SITUATION -> CriticalSituationEventProcessor.canPlay(game, player);
+            case PREVENTIVE_POLICY -> true;
             // not built yet
-            case PREVENTIVE_POLICY, POPULAR_INFLUENCE, NEGOTIATION, EXECUTIVE_ORDER, STATE_OF_EMERGENCY, LAUNCH_SCOUT,
-                 CRITICAL_SITUATION, SCOUTING_FOR_FUEL, UNORTHODOX_PLAN, MAXIMUM_FIREPOWER, FULL_THROTTLE, COMBAT_VETERAN,
+            case POPULAR_INFLUENCE, NEGOTIATION, EXECUTIVE_ORDER, STATE_OF_EMERGENCY, LAUNCH_SCOUT,
+                 SCOUTING_FOR_FUEL, UNORTHODOX_PLAN, MAXIMUM_FIREPOWER, FULL_THROTTLE, COMBAT_VETERAN,
                  LAUNCH_RESERVES, REPAIR, RAPTOR_SPECIALIST, TEST_THE_LIMITS -> false;
             // played in a skill check, before it, or in an interrupt window, never as an action or a movement
             case INVESTIGATIVE_COMMITTEE, SUPPORT_THE_PEOPLE, RED_TAPE, POLITICAL_PROWESS, FORCE_THEIR_HAND,
@@ -49,20 +52,18 @@ public final class SkillCardPlays {
      * @return whether the player holds an "Action:" card he can play now
      */
     public static boolean canPlayAction(GameView game, PlayerView player) {
-        return playable(game, player).anyMatch(SkillCardType::isAction);
+        return held(player).filter(SkillCardType::isAction).anyMatch(type -> canPlay(game, player, type));
     }
 
     /**
      * @return whether the player holds a "Movement:" card he can play now
      */
     public static boolean canPlayMovementAbility(GameView game, PlayerView player) {
-        return playable(game, player).anyMatch(SkillCardType::isMovementAbility);
+        return held(player).filter(SkillCardType::isMovementAbility).anyMatch(type -> canPlay(game, player, type));
     }
 
-    private static Stream<SkillCardType> playable(GameView game, PlayerView player) {
-        return player.skillCards().cards().stream()
-                .map(SkillCard::type)
-                .distinct()
-                .filter(type -> canPlay(game, player, type));
+    // Filtered by timing before canPlay: "Critical Situation" asks whether an "Action:" card can be played.
+    private static Stream<SkillCardType> held(PlayerView player) {
+        return player.skillCards().cards().stream().map(SkillCard::type).distinct();
     }
 }

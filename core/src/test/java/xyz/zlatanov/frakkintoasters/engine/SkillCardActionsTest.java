@@ -11,15 +11,21 @@ import xyz.zlatanov.frakkintoasters.event.ActivateViperEvent;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.BuildNukeEvent;
+import xyz.zlatanov.frakkintoasters.event.action.MovementAbilityEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.ConsolidatePowerEvent;
+import xyz.zlatanov.frakkintoasters.event.action.skillcard.CriticalSituationEvent;
+import xyz.zlatanov.frakkintoasters.event.action.skillcard.PreventivePolicyEvent;
+import xyz.zlatanov.frakkintoasters.event.board.LoseResourceEvent;
 import xyz.zlatanov.frakkintoasters.event.endgame.CylonsWinEvent;
 import xyz.zlatanov.frakkintoasters.event.location.galactica.HangarDeckEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.DrawSkillCardsEvent;
 import xyz.zlatanov.frakkintoasters.event.player.LaunchViperEvent;
+import xyz.zlatanov.frakkintoasters.event.player.MoveEvent;
 import xyz.zlatanov.frakkintoasters.event.player.SelectCharacterEvent;
 import xyz.zlatanov.frakkintoasters.event.player.SendToSickbayEvent;
 import xyz.zlatanov.frakkintoasters.event.turn.ActionStepEvent;
+import xyz.zlatanov.frakkintoasters.event.turn.MovementStepEvent;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Randomness;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
@@ -40,6 +46,7 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.Team.CYLONS;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_4_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.SICKBAY;
+import static xyz.zlatanov.frakkintoasters.state.board.Resource.FOOD;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.VIPER;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.PILOTING;
@@ -57,6 +64,8 @@ class SkillCardActionsTest {
 
     private static final SkillCard CONSOLIDATE_POWER_1 = new SkillCard(1, CONSOLIDATE_POWER);
     private static final SkillCard BUILD_NUKE_6        = new SkillCard(6, BUILD_NUKE);
+    private static final SkillCard CRITICAL_SITUATION_3 = new SkillCard(3, CRITICAL_SITUATION);
+    private static final SkillCard PREVENTIVE_POLICY_3  = new SkillCard(3, PREVENTIVE_POLICY);
 
     private GameEngine engine;
 
@@ -115,6 +124,39 @@ class SkillCardActionsTest {
         assertTrue(engine.view().boards().galactica().pilotedFighter(KARA_STARBUCK_THRACE).isPresent());
     }
 
+    // A "Movement:" card instead of moving: the player takes an action in his Movement step.
+    @Test
+    void criticalSituationTakesAnActionInsteadOfMoving() {
+        start(all(setUp(WILLIAM_ADAMA),
+                all(new GiveSkillCardEvent(1, CRITICAL_SITUATION_3), new GiveSkillCardEvent(1, BUILD_NUKE_6)),
+                single(new MovementStepEvent()), CYLONS_WIN));
+
+        assertWaitingFor(new AwaitingChoice(1, Set.of(
+                single(new PlayerDecisionEvent<>(1, MoveEvent.class)),
+                single(new PlayerDecisionEvent<>(1, MovementAbilityEvent.class)),
+                single(new NoOpEvent(1)))));
+        choose(1, single(new PlayerDecisionEvent<>(1, MovementAbilityEvent.class)));
+        play(engine -> engine.submit(1, new CriticalSituationEvent(1, CRITICAL_SITUATION_3)));
+        act(1);
+        play(engine -> engine.submit(1, new BuildNukeEvent(1, BUILD_NUKE_6)));
+
+        assertEquals(new Finished(CYLONS), engine.status(1));
+        assertEquals(3, engine.view().nukes());
+        assertEquals(List.of(CRITICAL_SITUATION, BUILD_NUKE), engine.view().turn().playedSkillCards());
+    }
+
+    @Test
+    void preventivePolicyReducesTheNextLoss() {
+        start(all(setUp(WILLIAM_ADAMA), single(new GiveSkillCardEvent(1, PREVENTIVE_POLICY_3)),
+                single(new MovementStepEvent()), single(new LoseResourceEvent(FOOD, 2)), CYLONS_WIN));
+
+        choose(1, single(new PlayerDecisionEvent<>(1, MovementAbilityEvent.class)));
+        play(engine -> engine.submit(1, new PreventivePolicyEvent(1, PREVENTIVE_POLICY_3, FOOD)));
+
+        assertEquals(new Finished(CYLONS), engine.status(1));
+        assertEquals(7, engine.view().boards().galactica().food());
+    }
+
     // The engine accepts a card only where a decision of its timing is asked.
     @Test
     void aCardAnswersOnlyADecisionOfItsTiming() {
@@ -150,11 +192,12 @@ class SkillCardActionsTest {
 
     // The player chooses to take an action.
     private void act(int player) {
+        choose(player, single(new PlayerDecisionEvent<>(player, ActionEvent.class)));
+    }
+
+    private void choose(int player, Followup option) {
         val choice = (AwaitingChoice) engine.pendingInput().orElseThrow();
-        val option = choice.options().stream()
-                .filter(followup -> followup.equals(single(new PlayerDecisionEvent<>(player, ActionEvent.class))))
-                .findFirst()
-                .orElseThrow();
+        assertTrue(choice.options().contains(option), choice.options().toString());
         play(engine -> engine.choose(player, option));
     }
 

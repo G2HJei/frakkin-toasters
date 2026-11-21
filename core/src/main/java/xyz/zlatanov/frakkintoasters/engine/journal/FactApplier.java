@@ -105,6 +105,8 @@ public final class FactApplier {
             case GameFact.NukeDiscarded ignored -> game.discardNuke();
             case GameFact.NukeGained ignored -> game.gainNuke();
             case GameFact.SkillCardPlayed f -> game.turn().playSkillCard(f.card().type());
+            case GameFact.LossReductionAdded f -> game.turn().addLossReduction(f.resource());
+            case GameFact.LossReduced f -> game.turn().useLossReduction(f.resource());
             case GameFact.GameEnded f -> game.end(f.winner(), f.winnerPlayerNumbers());
             case GameFact.DestinationReached f -> game.reachDestination(f.card());
         }

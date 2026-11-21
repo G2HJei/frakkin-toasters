@@ -6,13 +6,16 @@ import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedOnTop
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsDiscarded;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsDrawn;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.DeckShuffled;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.ResourceDecreased;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.Fact;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.GameFact.LossReduced;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.ShipFact.ShipMoved;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.board.CylonFleetBoard;
 import xyz.zlatanov.frakkintoasters.state.board.GalacticaBoard;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.board.LocationsArea;
+import xyz.zlatanov.frakkintoasters.state.board.Resource;
 import xyz.zlatanov.frakkintoasters.state.card.MutinyCard;
 import xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage;
 import xyz.zlatanov.frakkintoasters.state.damage.GalacticaDamage;
@@ -135,6 +138,20 @@ public abstract class AbstractOps {
                 .findFirst();
         fromFleetBoard.ifPresent(ship -> record(new ShipMoved(ship.id(), ShipZone.CYLON_FLEET_SPACE, GALACTICA_SPACE, location)));
         return fromFleetBoard.map(Ship::id);
+    }
+
+    /**
+     * Loses the resource, as every loss does (rule 13.2). "Preventative Policy" makes the next loss of a resource this
+     * turn 1 smaller.
+     */
+    protected void loseResource(Resource resource, int amount) {
+        if (amount > 0 && game.turn().lossReductions().contains(resource)) {
+            record(new LossReduced(resource));
+            amount--;
+        }
+        if (amount > 0) {
+            record(new ResourceDecreased(resource, amount));
+        }
     }
 
     protected GalacticaBoard galacticaBoard() {

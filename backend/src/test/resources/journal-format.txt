@@ -1,4 +1,4 @@
-format version 3
+format version 4
 enum Area = SPACE, RESERVES, SPACE_OR_RESERVES
 enum BasestarBridgeAbility = CAG_PLACES_CIVILIAN_SHIP, JUMP_OR_PURSUIT, BASESTAR_OR_RAIDERS, GALACTICA_DAMAGE
 enum BasestarDamage = STRUCTURAL_DAMAGE, DISABLED_WEAPONS, DISABLED_HANGAR_BAY, CRITICAL_HIT
@@ -45,6 +45,7 @@ interface InterruptFact
 interface InterruptWindow
 interface JournalEntry
 interface LocationEvent
+interface MovementAbilityEvent
 interface PlayerEvent
 interface PlayerFact
 interface SandboxEvent
@@ -121,6 +122,7 @@ record CrashLandingFailEvent()
 record CreateDestinyDeckEvent()
 record CreateLoyaltyDeckEvent()
 record CrisisStepEvent(again: boolean)
+record CriticalSituationEvent(playerNumber: int, card: SkillCard)
 record CylonFleetEvent(playerNumber: int, typeToActivate: ShipType)
 record CylonGenocidePassEvent()
 record CylonsWinEvent()
@@ -196,6 +198,8 @@ record GameFact.DieRollStarted()
 record GameFact.DieRolled(value: int)
 record GameFact.GameEnded(winner: Team, winnerPlayerNumbers: List<int?>)
 record GameFact.GameStarted(playerCount: int, objective: ObjectiveCard)
+record GameFact.LossReduced(resource: Resource)
+record GameFact.LossReductionAdded(resource: Resource)
 record GameFact.NukeDiscarded()
 record GameFact.NukeGained()
 record GameFact.ReturnToCrisisStepChanged(returns: boolean)
@@ -299,6 +303,7 @@ record PoliticalProwessEvent(playerNumber: int, politicalProwessCard: SkillCard,
 record PrepareForJumpStepEvent()
 record PresidentsOfficeEvent(playerNumber: int)
 record PressRoomEvent(playerNumber: int, targetPlayer: int)
+record PreventivePolicyEvent(playerNumber: int, card: SkillCard, resource: Resource)
 record ProtectTheFleetEvent(playerNumber: int, activation: ViperActivation)
 record PutCrisisCardOnTopEvent(card: CrisisCard)
 record PutDestinationCardOnTopEvent(card: DestinationCard)

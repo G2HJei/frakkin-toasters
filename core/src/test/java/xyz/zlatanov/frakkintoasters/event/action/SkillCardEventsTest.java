@@ -21,9 +21,8 @@ class SkillCardEventsTest {
 
     // the cards that later phases of skill-cards-plan.md build
     private static final Set<SkillCardType> NOT_BUILT_YET = EnumSet.of(
-            PREVENTIVE_POLICY, POPULAR_INFLUENCE, NEGOTIATION, EXECUTIVE_ORDER, STATE_OF_EMERGENCY, LAUNCH_SCOUT,
-            CRITICAL_SITUATION, SCOUTING_FOR_FUEL, UNORTHODOX_PLAN, MAXIMUM_FIREPOWER, FULL_THROTTLE, COMBAT_VETERAN,
-            LAUNCH_RESERVES, REPAIR, RAPTOR_SPECIALIST, TEST_THE_LIMITS);
+            POPULAR_INFLUENCE, NEGOTIATION, EXECUTIVE_ORDER, STATE_OF_EMERGENCY, LAUNCH_SCOUT, SCOUTING_FOR_FUEL,
+            UNORTHODOX_PLAN, MAXIMUM_FIREPOWER, FULL_THROTTLE, COMBAT_VETERAN, LAUNCH_RESERVES, REPAIR, RAPTOR_SPECIALIST, TEST_THE_LIMITS);
 
     @Test
     void eachActionOrMovementCardHasOneEvent() {
@@ -38,9 +37,11 @@ class SkillCardEventsTest {
     }
 
     @Test
-    void anActionCardIsAnActionEvent() {
+    void theInterfacesAreTheTiming() {
         for (val event : cardEvents()) {
             assertEquals(typeOf(event).isAction(), ActionEvent.class.isAssignableFrom(event), event.getSimpleName());
+            assertEquals(typeOf(event).isMovementAbility(), MovementAbilityEvent.class.isAssignableFrom(event),
+                    event.getSimpleName());
         }
     }
 

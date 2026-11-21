@@ -20,7 +20,7 @@ public class ChangeResourceEventProcessor extends EventProcessor<ChangeResourceE
         if (event.amount() > 0) {
             ops.galactica().increaseResource(event.resource(), event.amount());
         } else {
-            ops.galactica().decreaseResource(event.resource(), -event.amount());
+            ops.sandbox().decreaseResource(event.resource(), -event.amount());
         }
         return Followup.NONE;
     }

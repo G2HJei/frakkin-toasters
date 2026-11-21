@@ -2,6 +2,7 @@ package xyz.zlatanov.frakkintoasters.state.view;
 
 import xyz.zlatanov.frakkintoasters.state.GameStep;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
+import xyz.zlatanov.frakkintoasters.state.board.Resource;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow;
 import xyz.zlatanov.frakkintoasters.state.interrupt.PlayedInterruptCard;
@@ -10,6 +11,7 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public interface TurnView {
 
@@ -78,4 +80,9 @@ public interface TurnView {
      * Order".
      */
     List<SkillCardType> playedSkillCards();
+
+    /**
+     * "Preventative Policy": the resources whose next loss this turn is 1 smaller.
+     */
+    Set<Resource> lossReductions();
 }

@@ -53,11 +53,11 @@ public class GalacticaOps extends BattlestarOps {
 
     public void resolveDamage(GalacticaDamage galacticaDamage) {
         if (GalacticaDamage.FUEL == galacticaDamage) {
-            record(new ResourceDecreased(Resource.FUEL, 1));
+            loseResource(Resource.FUEL, 1);
             record(new CardsAddedOnTop(GALACTICA_DAMAGE, List.of(GalacticaDamage.FUEL)));
             shuffle(GALACTICA_DAMAGE);
         } else if (GalacticaDamage.FOOD == galacticaDamage) {
-            record(new ResourceDecreased(Resource.FOOD, 1));
+            loseResource(Resource.FOOD, 1);
             record(new CardsAddedOnTop(GALACTICA_DAMAGE, List.of(GalacticaDamage.FOOD)));
             shuffle(GALACTICA_DAMAGE);
         } else {
@@ -84,15 +84,15 @@ public class GalacticaOps extends BattlestarOps {
     }
 
     public void decreasePopulation(int populationLost) {
-        record(new ResourceDecreased(POPULATION, populationLost));
+        loseResource(POPULATION, populationLost);
     }
 
     public void decreaseMorale(int moraleLost) {
-        record(new ResourceDecreased(MORALE, moraleLost));
+        loseResource(MORALE, moraleLost);
     }
 
     public void decreaseResource(Resource resource, int amount) {
-        record(new ResourceDecreased(resource, amount));
+        loseResource(resource, amount);
     }
 
     public void increaseResource(Resource resource, int amount) {

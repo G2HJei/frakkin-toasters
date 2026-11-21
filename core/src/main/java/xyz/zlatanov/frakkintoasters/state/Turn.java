@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
+import xyz.zlatanov.frakkintoasters.state.board.Resource;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow;
@@ -42,6 +43,8 @@ public class Turn implements TurnView {
     private final Map<Location, Integer>    raidersToMiss          = new EnumMap<>(Location.class);
     @Getter(NONE)
     private final List<SkillCardType>       playedSkillCards       = new ArrayList<>();
+    @Getter(NONE)
+    private final Set<Resource>             lossReductions         = EnumSet.noneOf(Resource.class);
 
     @Mutates
     public void start(int number) {
@@ -52,6 +55,7 @@ public class Turn implements TurnView {
         resolvedInterruptCards.clear();
         raidersToMiss.clear();
         playedSkillCards.clear();
+        lossReductions.clear();
     }
 
     @Override
@@ -62,6 +66,23 @@ public class Turn implements TurnView {
     @Mutates
     public void playSkillCard(SkillCardType type) {
         playedSkillCards.add(type);
+    }
+
+    @Override
+    public Set<Resource> lossReductions() {
+        return lossReductions.isEmpty() ? Set.of() : EnumSet.copyOf(lossReductions);
+    }
+
+    @Mutates
+    public void addLossReduction(Resource resource) {
+        lossReductions.add(resource);
+    }
+
+    @Mutates
+    public void useLossReduction(Resource resource) {
+        if (!lossReductions.remove(resource)) {
+            throw new FrakCallTheAdmiralException("No loss reduction for " + resource);
+        }
     }
 
     @Mutates

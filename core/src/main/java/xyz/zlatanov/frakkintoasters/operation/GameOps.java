@@ -8,6 +8,7 @@ import xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.OwnTurnStarte
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.GameStep;
 import xyz.zlatanov.frakkintoasters.state.Team;
+import xyz.zlatanov.frakkintoasters.state.board.Resource;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
@@ -159,6 +160,13 @@ public class GameOps extends AbstractOps {
 
     public void gainNuke() {
         record(new NukeGained());
+    }
+
+    /**
+     * "Preventative Policy": the next loss of the resource this turn is 1 smaller.
+     */
+    public void reduceNextLoss(Resource resource) {
+        record(new LossReductionAdded(resource));
     }
 
     /**

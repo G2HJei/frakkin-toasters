@@ -3,7 +3,6 @@ package xyz.zlatanov.frakkintoasters.operation;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.PlayerFact.CivilianShipForgotten;
-import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.ResourceDecreased;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.DeckFact.CardsAddedOnTop;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.ShipFact.BasestarDamageAttached;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.ShipFact.BasestarDamageCleared;
@@ -178,9 +177,7 @@ public class ShipOps extends GameOps {
     }
 
     private void decrease(xyz.zlatanov.frakkintoasters.state.board.Resource resource, int amount) {
-        if (amount > 0) {
-            record(new ResourceDecreased(resource, amount));
-        }
+        loseResource(resource, amount);
     }
 
     public void land(Location destination) {

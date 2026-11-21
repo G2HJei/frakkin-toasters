@@ -32,6 +32,7 @@ import xyz.zlatanov.frakkintoasters.state.track.Pursuit;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.state.GameStep.MOVEMENT;
@@ -111,8 +112,8 @@ class FactApplierTest {
         apply(new LocationDamaged(ARMORY));
         apply(new LocationDamaged(PEGASUS_CIC));
 
-        assertEquals(java.util.Set.of(ARMORY), game.boards().galactica().damagedLocations());
-        assertEquals(java.util.Set.of(PEGASUS_CIC), game.boards().pegasus().damagedLocations());
+        assertEquals(Set.of(ARMORY), game.boards().galactica().damagedLocations());
+        assertEquals(Set.of(PEGASUS_CIC), game.boards().pegasus().damagedLocations());
     }
 
     @Test
@@ -354,6 +355,19 @@ class FactApplierTest {
     }
 
     @Test
+    void aLossReductionLastsUntilItIsUsedOrTheTurnEnds() {
+        apply(new LossReductionAdded(FOOD));
+        apply(new LossReductionAdded(MORALE));
+        assertEquals(Set.of(FOOD, MORALE), game.turn().lossReductions());
+
+        apply(new LossReduced(FOOD));
+        assertEquals(Set.of(MORALE), game.turn().lossReductions());
+
+        apply(new TurnStarted(2));
+        assertEquals(Set.of(), game.turn().lossReductions());
+    }
+
+    @Test
     void gameEndedSetsTheOutcome() {
         assertEquals(Optional.empty(), game.outcome());
 
@@ -482,7 +496,7 @@ class FactApplierTest {
     void civilianShipRevealedRemembersTheShipForThePlayer() {
         apply(new CivilianShipRevealed(2, 2005));
 
-        assertEquals(java.util.Set.of(2005), game.player(2).revealedCivilianShipIds());
+        assertEquals(Set.of(2005), game.player(2).revealedCivilianShipIds());
     }
 
     @Test
@@ -492,8 +506,8 @@ class FactApplierTest {
 
         apply(new PlayerFact.CivilianShipForgotten(2, 2005));
 
-        assertEquals(java.util.Set.of(), game.player(2).revealedCivilianShipIds());
-        assertEquals(java.util.Set.of(2005), game.player(3).revealedCivilianShipIds());
+        assertEquals(Set.of(), game.player(2).revealedCivilianShipIds());
+        assertEquals(Set.of(2005), game.player(3).revealedCivilianShipIds());
     }
 
     @Test
