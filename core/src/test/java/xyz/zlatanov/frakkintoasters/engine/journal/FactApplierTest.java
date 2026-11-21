@@ -367,6 +367,15 @@ class FactApplierTest {
     }
 
     @Test
+    void cylonShipsHeldForTheRestOfTheTurn() {
+        apply(new CylonShipsHeld());
+        assertTrue(game.turn().cylonShipsHeld());
+
+        apply(new TurnStarted(2));
+        assertFalse(game.turn().cylonShipsHeld());
+    }
+
+    @Test
     void aLossReductionLastsUntilItIsUsedOrTheTurnEnds() {
         apply(new LossReductionAdded(FOOD));
         apply(new LossReductionAdded(MORALE));

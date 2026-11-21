@@ -163,6 +163,13 @@ public class GameOps extends AbstractOps {
     }
 
     /**
+     * "Negotiation": no Cylon ship launches or activates for the rest of the turn.
+     */
+    public void holdCylonShips() {
+        record(new CylonShipsHeld());
+    }
+
+    /**
      * "Preventative Policy": the next loss of the resource this turn is 1 smaller.
      */
     public void reduceNextLoss(Resource resource) {

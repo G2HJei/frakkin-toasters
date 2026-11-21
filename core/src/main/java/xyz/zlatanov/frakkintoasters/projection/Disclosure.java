@@ -87,6 +87,7 @@ public final class Disclosure {
             entry("LaunchReservesEvent.card", true),
             entry("LaunchScoutEvent.card", true),
             entry("MaximumFirepowerEvent.card", true),
+            entry("NegotiationEvent.card", true),
             entry("MoveEvent.discardCard", true),
             entry("PlaceCrisisCardOnBottomEvent.card", false),
             entry("PlaceCrisisCardOnTopEvent.card", false),

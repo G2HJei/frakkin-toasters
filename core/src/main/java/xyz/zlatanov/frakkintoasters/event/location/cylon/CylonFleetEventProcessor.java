@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event.location.cylon;
 
+import xyz.zlatanov.frakkintoasters.state.view.GameView;
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.crisis.ActivateHeavyRaidersAndCenturionsEvent;
@@ -12,6 +13,10 @@ import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.HEAVY_RAIDER;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.RAIDER;
 
 public class CylonFleetEventProcessor extends LocationActionProcessor<CylonFleetEvent> {
+
+    public static boolean canAct(GameView game) {
+        return !game.turn().cylonShipsHeld();
+    }
 
     @Override
     protected boolean isValidAction() {

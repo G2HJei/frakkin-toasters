@@ -85,4 +85,9 @@ public interface TurnView {
      * "Preventative Policy": the resources whose next loss this turn is 1 smaller.
      */
     Set<Resource> lossReductions();
+
+    /**
+     * "Negotiation": no Cylon ship launches or activates for the rest of the turn.
+     */
+    boolean cylonShipsHeld();
 }

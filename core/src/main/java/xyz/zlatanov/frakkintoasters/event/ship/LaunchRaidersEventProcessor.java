@@ -17,6 +17,9 @@ public class LaunchRaidersEventProcessor extends EventProcessor<LaunchRaidersEve
 
     @Override
     public Followup process() {
+        if (game.turn().cylonShipsHeld()) {
+            return NONE; // "Negotiation": no Cylon ship launches or activates for the rest of the turn
+        }
         val basestars = galacticaBoard.shipsInSpace(BasestarView.class);
         if (basestars.isEmpty()) {
             return placeBasestarOnCylonFleetBoard();

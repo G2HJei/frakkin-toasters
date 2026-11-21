@@ -25,6 +25,9 @@ import xyz.zlatanov.frakkintoasters.event.action.skillcard.CriticalSituationEven
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.ExecutiveOrderEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.LaunchScoutEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.MaximumFirepowerEvent;
+import xyz.zlatanov.frakkintoasters.event.action.skillcard.NegotiationEvent;
+import xyz.zlatanov.frakkintoasters.event.crisis.ActivateRaidersEvent;
+import xyz.zlatanov.frakkintoasters.event.ship.LaunchRaidersEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.RaptorSpecialistEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.RepairEvent;
 import xyz.zlatanov.frakkintoasters.event.action.skillcard.UnorthodoxPlanEvent;
@@ -55,6 +58,7 @@ import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.ship.AssaultRaptor;
+import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
 import xyz.zlatanov.frakkintoasters.state.ship.Raider;
 import xyz.zlatanov.frakkintoasters.state.ship.Raptor;
@@ -86,6 +90,7 @@ import static xyz.zlatanov.frakkintoasters.state.board.Resource.FOOD;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.VIPER;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.PILOTING;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.POLITICS;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.TREACHERY;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 
@@ -110,6 +115,7 @@ class SkillCardActionsTest {
     private static final SkillCard LAUNCH_SCOUT_1       = new SkillCard(1, LAUNCH_SCOUT);
     private static final SkillCard REPAIR_1             = new SkillCard(1, REPAIR);
     private static final SkillCard UNORTHODOX_PLAN_3    = new SkillCard(3, UNORTHODOX_PLAN);
+    private static final SkillCard NEGOTIATION_5        = new SkillCard(5, NEGOTIATION);
 
     // The choices of the target of an "Executive Order", player 2.
     private static final Followup MOVE_THEN_ACT = all(new GrantEvent(2, MOVE, GrantedBy.EXECUTIVE_ORDER),
@@ -423,6 +429,23 @@ class SkillCardActionsTest {
         assertEquals(new Finished(CYLONS), engine.status(1));
         assertEquals(List.of(ships.get(0)), engine.view().boards().galactica().shipsIn(GALACTICA_SPACE_4_OCLOCK, CivilianShip.class)
                 .stream().map(CivilianShip::id).toList());
+    }
+
+    // The basestar is placed, not launched, and then nothing launches or activates.
+    @Test
+    void negotiationHoldsTheCylonShips() {
+        start(all(setUp(WILLIAM_ADAMA), all(new GiveSkillCardEvent(1, NEGOTIATION_5), new SetUpGalacticaEvent()),
+                single(new ActionStepEvent()), all(new ActivateRaidersEvent(), new LaunchRaidersEvent()), CYLONS_WIN));
+
+        act(1);
+        play(engine -> engine.submit(1, new NegotiationEvent(1, NEGOTIATION_5)));
+
+        assertEquals(new Finished(CYLONS), engine.status(1));
+        val galactica = engine.view().boards().galactica();
+        assertEquals(2, galactica.shipsIn(GALACTICA_SPACE_8_OCLOCK, Basestar.class).size());
+        assertEquals(3, galactica.shipsInSpace(Raider.class).size());
+        assertEquals(List.of(POLITICS), engine.view().player(1).skillCards().cards().stream()
+                .map(card -> card.type().color()).toList());
     }
 
     // The engine accepts a card only where a decision of its timing is asked.

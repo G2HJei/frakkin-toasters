@@ -14,6 +14,9 @@ public class ActivateCylonBasestarEventProcessor extends EventProcessor<Activate
 
     @Override
     public Followup process() {
+        if (game.turn().cylonShipsHeld()) {
+            return NONE; // "Negotiation": no Cylon ship launches or activates for the rest of the turn
+        }
         val basestar = galacticaBoard.shipInSpace(event.basestarShipId(), BasestarView.class);
         if (basestar.damage().contains(DISABLED_WEAPONS)) {
             return NONE; // "Disabled Weapons": "the basestar may not attack Galactica"

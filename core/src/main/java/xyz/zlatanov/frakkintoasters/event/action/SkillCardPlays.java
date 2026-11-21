@@ -31,7 +31,7 @@ public final class SkillCardPlays {
             case CONSOLIDATE_POWER -> ConsolidatePowerEventProcessor.canPlay(game);
             case BUILD_NUKE -> BuildNukeEventProcessor.canPlay(game);
             case CRITICAL_SITUATION -> CriticalSituationEventProcessor.canPlay(game, player);
-            case PREVENTIVE_POLICY, STATE_OF_EMERGENCY -> true;
+            case PREVENTIVE_POLICY, STATE_OF_EMERGENCY, NEGOTIATION -> true;
             case EXECUTIVE_ORDER -> ExecutiveOrderEventProcessor.canPlay(game, player);
             case MAXIMUM_FIREPOWER -> MaximumFirepowerEventProcessor.canPlay(game, player);
             case FULL_THROTTLE -> FullThrottleEventProcessor.canPlay(game, player);
@@ -43,7 +43,7 @@ public final class SkillCardPlays {
             case REPAIR -> RepairEventProcessor.canPlay(game, player);
             case UNORTHODOX_PLAN -> UnorthodoxPlanEventProcessor.canPlay(game, player);
             // not built yet
-            case POPULAR_INFLUENCE, NEGOTIATION -> false;
+            case POPULAR_INFLUENCE -> false;
             // played in a skill check, before it, or in an interrupt window, never as an action or a movement
             case INVESTIGATIVE_COMMITTEE, SUPPORT_THE_PEOPLE, RED_TAPE, POLITICAL_PROWESS, FORCE_THEIR_HAND,
                  DECLARE_EMERGENCY, MAJOR_VICTORY, AT_ANY_COST, IRON_WILL, ALL_HANDS_ON_DECK, RESTORE_ORDER,

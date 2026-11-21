@@ -79,4 +79,14 @@ class LaunchRaidersEventProcessorTest extends EventTestHarness<LaunchRaidersEven
         assertShipCount(GALACTICA_SPACE_8_OCLOCK, Raider.class, 3);
     }
 
+    // "Negotiation": no Cylon ship launches or activates for the rest of the turn.
+    @Test
+    void nothingWhileTheShipsAreHeld() {
+        basestarAt(GALACTICA_SPACE_8_OCLOCK);
+        ops.holdCylonShips();
+
+        execute(new LaunchRaidersEvent());
+
+        assertShipCount(GALACTICA_SPACE_8_OCLOCK, Raider.class, 0);
+    }
 }

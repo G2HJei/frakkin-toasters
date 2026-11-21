@@ -114,4 +114,15 @@ class ActivateHeavyRaidersAndCenturionsEventProcessorTest extends EventTestHarne
     void boardGalactica(Centurion centurion) {
         galacticaBoard.boardGalactica(centurion);
     }
+
+    // "Negotiation": no Cylon ship launches or activates for the rest of the turn.
+    @Test
+    void nothingWhileTheShipsAreHeld() {
+        basestarAt(GALACTICA_SPACE_8_OCLOCK);
+        ops.holdCylonShips();
+
+        execute(new ActivateHeavyRaidersAndCenturionsEvent());
+
+        assertShipCount(GALACTICA_SPACE_8_OCLOCK, HeavyRaider.class, 0);
+    }
 }

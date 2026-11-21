@@ -12,6 +12,7 @@ import xyz.zlatanov.frakkintoasters.state.view.BasestarView;
 import java.util.List;
 import java.util.Map;
 
+import static xyz.zlatanov.frakkintoasters.event.Followup.NONE;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.HEAVY_RAIDER;
 import static xyz.zlatanov.frakkintoasters.state.view.GalacticaBoardView.VIPER_LAUNCH_SPACES;
@@ -26,6 +27,9 @@ public class ActivateHeavyRaidersAndCenturionsEventProcessor extends EventProces
 
     @Override
     public Followup process() {
+        if (game.turn().cylonShipsHeld()) {
+            return NONE; // "Negotiation": no Cylon ship launches or activates for the rest of the turn
+        }
         val heavyRaiders = galacticaBoard.shipsInSpace(HeavyRaider.class);
         val basestars = galacticaBoard.shipsInSpace(BasestarView.class);
         val noCenturionsInPlay = galacticaBoard.boardingPartyTrack().isEmpty();

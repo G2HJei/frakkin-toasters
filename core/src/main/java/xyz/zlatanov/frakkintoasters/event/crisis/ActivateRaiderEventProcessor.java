@@ -15,6 +15,7 @@ import xyz.zlatanov.frakkintoasters.state.view.HumanFighterView;
 import java.util.Comparator;
 import java.util.List;
 
+import static xyz.zlatanov.frakkintoasters.event.Followup.NONE;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.GALACTICA_SPACE;
@@ -25,6 +26,9 @@ public class ActivateRaiderEventProcessor extends EventProcessor<ActivateRaiderE
 
     @Override
     public Followup process() {
+        if (game.turn().cylonShipsHeld()) {
+            return NONE; // "Negotiation": no Cylon ship launches or activates for the rest of the turn
+        }
         val raider = galacticaBoard.shipInSpace(event.raiderShipId(), Raider.class);
         val location = galacticaBoard.locate(raider);
 

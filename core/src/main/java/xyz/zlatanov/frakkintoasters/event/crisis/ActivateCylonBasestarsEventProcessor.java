@@ -10,6 +10,7 @@ import xyz.zlatanov.frakkintoasters.state.view.BasestarView;
 
 import java.util.Comparator;
 
+import static xyz.zlatanov.frakkintoasters.event.Followup.NONE;
 import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.GALACTICA_SPACE;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.BASESTAR;
 
@@ -17,6 +18,9 @@ public class ActivateCylonBasestarsEventProcessor extends EventProcessor<Activat
 
     @Override
     public Followup process() {
+        if (game.turn().cylonShipsHeld()) {
+            return NONE; // "Negotiation": no Cylon ship launches or activates for the rest of the turn
+        }
         val galactica = galacticaBoard;
         val basestars = galactica.shipsInSpace(BasestarView.class);
 

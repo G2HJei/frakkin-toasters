@@ -1,4 +1,4 @@
-format version 9
+format version 10
 enum Area = SPACE, RESERVES, SPACE_OR_RESERVES
 enum BasestarBridgeAbility = CAG_PLACES_CIVILIAN_SHIP, JUMP_OR_PURSUIT, BASESTAR_OR_RAIDERS, GALACTICA_DAMAGE
 enum BasestarDamage = STRUCTURAL_DAMAGE, DISABLED_WEAPONS, DISABLED_HANGAR_BAY, CRITICAL_HIT
@@ -198,6 +198,7 @@ record GameFact.CrisisCardKeptInPlay(type: SkillCheckType)
 record GameFact.CrisisCardPlayed(card: CrisisCard)
 record GameFact.CrisisCardsCleared(cards: List<CrisisCard>)
 record GameFact.CurrentPlayerChanged(playerNumber: int)
+record GameFact.CylonShipsHeld()
 record GameFact.DestinationReached(card: DestinationCard)
 record GameFact.DieRollCardPlayed(card: SkillCardType, modifier: int)
 record GameFact.DieRollStarted()
@@ -263,6 +264,7 @@ record MoveEvent(playerNumber: int, destination: Location, discardCard: SkillCar
 record MoveFromBrigEvent(targetPlayerNumber: int, destination: Location)
 record MovementStepEvent()
 record MysteriousMessagePassEvent()
+record NegotiationEvent(playerNumber: int, card: SkillCard)
 record NoOpEvent(playerNumber: int)
 record None()
 record ObjectiveInstructionsEvent(distanceBefore: int)

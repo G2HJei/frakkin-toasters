@@ -44,6 +44,7 @@ public record GameSnapshot(Map<String, Object> values) {
         s.put("raidersToMiss", new TreeMap<>(game.turn().raidersToMiss()));
         s.put("playedSkillCards", new ArrayList<>(game.turn().playedSkillCards()));
         s.put("lossReductions", new TreeSet<>(game.turn().lossReductions()));
+        s.put("cylonShipsHeld", game.turn().cylonShipsHeld());
         s.put("president", game.president());
         s.put("admiral", game.admiral());
         s.put("cag", game.cag());

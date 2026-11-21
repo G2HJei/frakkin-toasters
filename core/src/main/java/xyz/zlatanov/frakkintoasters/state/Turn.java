@@ -32,6 +32,7 @@ public class Turn implements TurnView {
     private final List<CrisisCard>          crisisCards            = new ArrayList<>();
     private       boolean                   endedEarly             = false;
     private       boolean                   returnsToCrisisStep    = false;
+    private       boolean                   cylonShipsHeld         = false;
     private       DieRoll                   dieRoll;
     @Getter(NONE) //todo review excessive @Getter annotations
     private       InterruptWindow           interruptWindow;
@@ -56,6 +57,12 @@ public class Turn implements TurnView {
         raidersToMiss.clear();
         playedSkillCards.clear();
         lossReductions.clear();
+        cylonShipsHeld = false;
+    }
+
+    @Mutates
+    public void holdCylonShips() {
+        cylonShipsHeld = true;
     }
 
     @Override

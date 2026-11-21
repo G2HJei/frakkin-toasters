@@ -66,6 +66,10 @@ public sealed interface GameFact extends Fact {
     record LossReduced(Resource resource) implements GameFact {
     }
 
+    // "Negotiation": no Cylon ship launches or activates for the rest of the turn.
+    record CylonShipsHeld() implements GameFact {
+    }
+
     // A Skill Card played from the hand for its ability, e.g. its "Action:". The turn keeps it for the cards limited per turn.
     record SkillCardPlayed(int playerNumber, SkillCard card) implements GameFact {
     }

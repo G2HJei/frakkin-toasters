@@ -101,7 +101,8 @@ whole root package, so nothing in `backend` may be named `XxxEventProcessor`.
   never depends on `..operation..`, and nothing else in `core` depends on it (`ArchitectureTest`). See "Projections"
 - `state/` - game state model: `Game` (top level), `Turn` (turn number, `GameStep`, current and acting player, the
   Crisis Cards of the turn and whether it returns to the Crisis step, the `DieRoll`, the open interrupt window and its
-  cards, the Skill Cards played for their abilities and the "Preventative Policy" loss reductions, read through
+  cards, the Skill Cards played for their abilities, the "Preventative Policy" loss reductions and the "Negotiation"
+  hold, read through
   `GameView.turn()`; `number` counts player turns, not rounds), `Player` (`turns()` counts the player's own turns), `Team` (the winner in
   `GameView.outcome()`), `Die` (d8), `DieRoll` (a roll with the cards played on it), `Randomness`,
   `RemovedComponents`, `PlayerPile`, and the `@Mutates` marker
@@ -470,6 +471,11 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
   submitted event's constraints with the decision's, so the Action step's own decision clears it.
   `LocationActionProcessor` then checks `LocationEvent.canActIgnoringDamage` (the location's own rules) instead of the
   location and the damage.
+- "Negotiation" places a basestar (`PlaceShipsEvent`: placing isn't launching), draws a Politics card and records
+  `CylonShipsHeld` (`TurnView.cylonShipsHeld()`, until the next `TurnStarted`). Every processor that launches or
+  activates Cylon ships (`ActivateRaidersEvent`, `ActivateRaiderEvent`, `LaunchRaidersEvent`,
+  `ActivateHeavyRaidersAndCenturionsEvent`, `ActivateCylonBasestarsEvent`, `ActivateCylonBasestarEvent`) does nothing
+  while they are held, so a Crisis Card's activation stops too, and the "Cylon Fleet" location has no action then.
 
 ### End of Game and Mutiny
 

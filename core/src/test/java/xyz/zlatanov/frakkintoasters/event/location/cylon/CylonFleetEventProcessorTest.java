@@ -80,4 +80,14 @@ class CylonFleetEventProcessorTest extends EventTestHarness<CylonFleetEvent> {
             assertShipCount(location, HeavyRaider.class, 1);
         }
     }
+
+    // "Negotiation": no Cylon ship launches or activates for the rest of the turn.
+    // Its activations would do nothing, so the location has no action.
+    @Test
+    void noActionWhileTheShipsAreHeld() {
+        basestarAt(GALACTICA_SPACE_2_OCLOCK);
+        ops.holdCylonShips();
+
+        assertInvalid(new CylonFleetEvent(1, null));
+    }
 }

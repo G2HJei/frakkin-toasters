@@ -60,4 +60,13 @@ class ActivateCylonBasestarsEventProcessorTest extends EventTestHarness<Activate
 
         assertFollowup(new ActivateCylonBasestarEvent(basestar1.id()));
     }
+
+    // "Negotiation": no Cylon ship launches or activates for the rest of the turn.
+    @Test
+    void nothingWhileTheShipsAreHeld() {
+        place(GALACTICA_SPACE_8_OCLOCK, basestar1);
+        ops.holdCylonShips();
+
+        execute(new ActivateCylonBasestarsEvent());
+    }
 }
