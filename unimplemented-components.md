@@ -1,6 +1,8 @@
 # Unimplemented Components
 
-A review of `core` on `master` at `1f5c88c` (2026-11-20): which game components have no events yet. Only the Kobol
+A review of `core` on `master` at `1f5c88c` (2026-11-20): which game components have no events yet. Updated on
+2026-11-21 for `skill-cards-plan.md`, which built the Skill Cards, the Action and Movement steps' offers and the
+Communications move. Only the Kobol
 objective is in scope; rules that only apply with New Caprica, the Ionian Nebula or Earth are left out.
 
 Card effects are short paraphrases of the images in `materials-sorted/`, not the printed text: read the card before
@@ -13,8 +15,8 @@ the review inferred but didn't check against the rules or the physical cards.
 |---|---|---|
 | Crisis Cards (136) | every card resolves | – |
 | Destination Cards (21) | every card resolves | – |
-| Location actions | every location has its action | Communications' ship move and the Quorum Chamber's play are broken (see Bugs) |
-| Skill Cards (51 types) | 32 types | 19: 18 "Action:"/"Movement:" cards and "Investigative Committee" |
+| Location actions | every location has its action; Command, Armory, Weapons Control and Communications from anywhere through "Unorthodox Plan" | the Quorum Chamber's play is broken (see Bugs) |
+| Skill Cards (51 types) | 50 types | "Popular Influence", which needs playable Quorum Cards (see Skill Cards) |
 | Quorum Cards (23 types; the deck should hold 29) | drawn, discarded down to the limit | none can be played |
 | Mutiny Cards (22) | drawn, discarded, the Brig rules | none can be played |
 | Super Crisis Cards (11) | drawn at the "Resurrection Ship"; the results of the 8 skill check cards | no way to play one; 3 cards have no effects; the Human Prisoner fail |
@@ -26,89 +28,81 @@ the review inferred but didn't check against the rules or the physical cards.
 | Character abilities (99) | 4, and 1 partly | 94 |
 | Title Card actions (4) | – | all four |
 | Pegasus destruction (rule 11.7.2.4) | – | missing |
-| Repairing a location | – | missing, there is no fact for it |
+| Repairing a location | `LocationRepaired`, through "Repair" | – |
 
 None of the missing components is out of scope as a whole. Only some clauses are: D'Anna Biers' "Hub Destroyed", the
 Detention notes on Felix Gaeta's "Coup" and Kat's "Stim Junkie", and rule 9.8.2.1 (Quorum Cards on New Caprica).
 
 ## Bugs reachable today
 
-1. **Communications.** `CommunicationsEventProcessor` offers, per civilian ship, a `one(NoOpEvent,
-   MoveCivilianShipEvent, MoveCivilianShipEvent)`. `MoveCivilianShipEvent` has no processor (and a `//todo`, and its
-   field is misspelled `civilianShipIt`), so picking a move throws in `ProcessorRegistry.create` and the input is
-   rolled back. Only "do nothing" works.
-2. **Quorum Chamber.** `QuorumChamberEventProcessor` draws 1 Quorum Card and then returns `one(DrawQuorumCardEvent,
+1. **Quorum Chamber.** `QuorumChamberEventProcessor` draws 1 Quorum Card and then returns `one(DrawQuorumCardEvent,
    PlayerDecisionEvent<PlayQuorumCardEvent>)`. `PlayQuorumCardEvent` is an empty record without a processor, so once
    the President picks "play", every answer is rolled back and the game can't go on. The card also makes the second
    draw or the play optional ("you may then"); the code forces one of them (its own `// todo` says so).
    `QuorumChamberEventProcessorTest` asserts the current followup.
-3. **Caprica.** `CapricaPlaySuperCrisisCardEvent` is a `LocationEvent` without a processor. A client can submit it for
+2. **Caprica.** `CapricaPlaySuperCrisisCardEvent` is a `LocationEvent` without a processor. A client can submit it for
    the Action step's `ActionEvent` decision: it fails with `FrakCallTheAdmiralException` instead of being rejected
    with `InvalidActionException`.
-4. **Pegasus.** `AttackGalacticaResultEventProcessor` always offers `one(DamageGalacticaEvent, DamagePegasusEvent)`, and
+3. **Pegasus.** `AttackGalacticaResultEventProcessor` always offers `one(DamageGalacticaEvent, DamagePegasusEvent)`, and
    `PegasusOps.damage()` draws a token and damages its location. Nothing destroys Pegasus once its four locations are
    damaged (rule 11.7.2.4: everyone aboard goes to "Sickbay" and the board leaves the game), and nothing stops offering
    it. Unverified: a fifth Pegasus hit probably fails on the empty damage deck.
-5. **Baltar's extra Loyalty Card.** `SleeperAgentPhaseEventProcessor.loyaltyCards` deals 2 cards to everyone in
+4. **Baltar's extra Loyalty Card.** `SleeperAgentPhaseEventProcessor.loyaltyCards` deals 2 cards to everyone in
    `CHARACTERS_WITH_EXTRA_CARDS`, Gaius Baltar included. Rule A3.8.5 gives Baltar the second card only at the start of
    the game; only Boomer gets 2 in the Sleeper Agent phase (rule 6.1.2.2).
-6. **Boomer's "Sleeper Agent".** After her 2 cards in the Sleeper Agent phase she moves to the "Brig". The phase
+5. **Boomer's "Sleeper Agent".** After her 2 cards in the Sleeper Agent phase she moves to the "Brig". The phase
    queues no `SendToBrigEvent` (the execution case in `FinishExecutionEventProcessor` does it).
-7. **The Quorum deck has 23 cards.** `DecksHolder` builds it with `genericDeck(QuorumCard.class)`, one card per
+6. **The Quorum deck has 23 cards.** `DecksHolder` builds it with `genericDeck(QuorumCard.class)`, one card per
    constant. Rule A2.3.13 says 29, and A4.6.1 lists "Arrest Order (x2)". Unverified guess at the duplicates, from the
    appendix's counts: "Inspirational Speech" x4, "Food Rationing" x2, "Arrest Order" x2, "Authorization of Brutal
    Force" x2. Check the physical deck. The Mutiny deck has the right 22.
-8. **The Quorum hand limit.** `DiscardStepEventProcessor` (and `DiscardQuorumCardsEventProcessor`) compares the
+7. **The Quorum hand limit.** `DiscardStepEventProcessor` (and `DiscardQuorumCardsEventProcessor`) compares the
    President's Quorum hand with `player.handLimit()`, which is 8 for Chief Galen Tyrol. The Quorum limit is always 10
    (rule 4.4.1.1).
-9. **Latent: revealed Personal Goals.** `EndGameEventProcessor` charges every Personal Goal in
+8. **Latent: revealed Personal Goals.** `EndGameEventProcessor` charges every Personal Goal in
    `loyaltyCards().cards()`, revealed or not. It bites once Personal Goals can be revealed.
 
-## The blocker: the Action and Movement steps
+## The Action and Movement steps
 
-`ActionStepEventProcessor` offers a `PlayerDecisionEvent<ActionEvent>` only when `LocationEvent.canAct` allows the
-location's action, and a pilot only an `ActivateViperEvent`. `MovementStepEventProcessor` offers only a `MoveEvent`.
-The only `ActionEvent` implementations are location events. So:
+`Actions` (`event/action/`) builds what the Action step, the Movement step and the grants offer (see "Actions and
+Skill Cards" in `CLAUDE.md`): the action of the player's location, the "Action:" of a Skill Card he holds, a pilot's
+viper, and in the Movement step a move or a "Movement:" card, in the "Brig" too. Revealed Cylons get only their
+location's action. What is still missing plugs in there:
 
-- no "Action:" ability of a Skill Card, a character sheet, a Title Card, a Quorum Card, a Mutiny Card or a Loyalty
-  Card can be used, whatever events exist;
-- a player in "Sickbay", at a damaged location, or piloting, gets no other action even once they exist;
-- no "Movement:" ability can be used instead of moving (rules 8.3.5 and 10.4.1, one per turn).
+- the "Action:" abilities of character sheets, Title Cards, Quorum and Mutiny Cards and Loyalty Cards, and the Cylon
+  reveal (rule 6.1.1);
+- a Cylon Leader's sheet actions instead of his location's (rule 6.2.1.2), and his return to the "Resurrection Ship"
+  (rule 6.2.3.5);
+- the "Movement:" abilities of character sheets.
 
-The Action step has to offer every kind of action together (its own comment already says so), and the Movement step
-movement powers as an alternative to moving. Revealed Cylons may only use their location's action (rule 6.1.3.3),
-Cylon Leaders may use their sheet's actions instead (rule 6.2.1.2). Because the engine accepts any event for which
-`decision.action().isInstance(event)` holds, a new card event that implements `ActionEvent` is accepted wherever the
-decision is offered, so each processor must reject what its card doesn't allow (revealed Cylons, rule 6.1.2.3).
+The engine accepts any event for which `decision.action().isInstance(event)` holds, so a new `ActionEvent` is accepted
+wherever the Action step offers its decision: its processor must reject what its card doesn't allow (revealed Cylons,
+rule 6.1.2.3), and `Actions.canTakeAction` must know when it can be taken, so the decision always has an answer.
 
-`GameOps.actingPlayer` and `resetActingPlayer` exist, but nothing calls them yet ("Executive Order", "State of
-Emergency").
+`GameOps.actingPlayer` is called by `GrantEvent` ("Executive Order", "State of Emergency", the "Hangar Deck"'s extra
+action).
 
 ## Skill Cards
 
-The 19 types that no event or op references. "Kind" is when the card is played.
+`skill-cards-plan.md` built every "Action:" and "Movement:" card and "Investigative Committee", except one:
 
-| Card | Kind | Effect | Reuse, or what's missing |
+| Card | Kind | Effect | What's missing |
 |---|---|---|---|
-| Consolidate Power | Action | Draw 2 Skill Cards of any colors, also outside the skill set | `PlayerDecisionEvent<DrawSkillCardsEvent>` with `DRAW_EXACTLY_2_OF_ANY_COLOR` (as `ConsultTheHybridPassEventProcessor` does) |
-| Investigative Committee | Before a skill check | The cards players put into the check are played face up (not the Destiny cards) | Half built: in `SkillCardType.BEFORE_SKILL_CHECK_CARDS`, so it can be played and is spent, but nothing reads it. Needs a projection rule in `GameProjector`/`LiveUpdateProjector` that shows the placed cards while it is among the cards played before the check |
-| Preventive Policy (printed "Preventative") | Movement | Name a resource; its next loss this turn is 1 smaller | A turn-scoped marker (a fact on `Turn`, cleared by `TurnStarted`) read by every resource loss in `GalacticaOps` |
-| Popular Influence | Action | Draw 2 Quorum Cards, give 1 to the President, then play or discard the other | Drawing a Quorum Card to someone other than the President, giving one, and playing Quorum Cards at all |
-| Negotiation | Action | Place a basestar in front of Galactica and draw 1 Politics card; no Cylon ship launches or activates for the rest of the turn | `PlaceShipsEvent`, `DrawSkillCardsOfColorEvent`. Missing: a turn flag checked by the raider, basestar, heavy raider and launch events and the Activate Cylon Ships step |
-| Executive Order | Action | Another player either moves and takes 1 action, or takes 2 actions without moving | `MoveEvent` and the `ActionEvent` decision for the target, under `GameOps.actingPlayer`. Missing: the event, a once-per-turn limit shared with Critical Situation, a target who pilots |
-| State of Emergency | Action | Lose 1 food; then each player in turn may move or take 1 action | `LoseResourceEvent`, `FollowupUtils.playersFrom`, move/action decisions under `actingPlayer`. Unverified: whether revealed Cylons take part |
-| Launch Scout | Action | Risk a raptor on a roll: on a high result look at the top Crisis or Destination Card and keep it on top or put it on the bottom, otherwise lose the raptor | `FollowupUtils.rollDie`, `DestroyRaptorEvent`, the look-and-place of the `HumanFleetLookAtTop...` processors. Missing: the event and its result event |
-| Critical Situation | Movement | Take 1 action instead of moving | The `ActionEvent` decision; the limit shared with Executive Order |
-| Scout for Fuel (`SCOUTING_FOR_FUEL`) | Action | Risk a raptor: a high roll gains 1 fuel, otherwise the raptor is destroyed | `rollDie`, `GainResourceEvent`, `DestroyRaptorEvent`. The Crisis Card of the same name is separate and done |
-| Unorthodox Plan | Action | Use the action of Command, Armory, Weapons Control or Communications, even when damaged | The four location processors, but `LocationActionProcessor.isValid` is final and requires being there, undamaged. Needs a bypass |
-| Maximum Firepower | Action, piloting | The player's viper attacks up to 4 times | `ViperActivation.attack`, `AttackCylonShipEvent` |
-| Full Throttle | Movement or Action, piloting | Move the viper to any space area, then it may attack a Cylon ship there | `AttackCylonShipEvent`. `ActivateViperEventProcessor` caps a move at 1 area (2 for a Mark VII), so it needs its own check |
-| Combat Veteran | Action | Activate one unmanned viper up to 3 times | `ActivateViperEventProcessor.isValidActivation`/`activate`, the `CommandEventProcessor` pattern. Missing: keeping the same viper across the 3, including after a launch |
-| Launch Reserves | Action | Put up to 2 unmanned vipers from the Reserves into an area with a piloted viper, then activate them | `GalacticaOps.launchHumanFighter`. `LaunchViperEventProcessor.canLaunchFromReserves` only allows the launch areas |
-| Repair | Action | Repair the player's location, or at the "Hangar Deck" up to 2 damaged vipers | `ShipOps.repair` for vipers. A location can't be repaired at all: needs a `LocationRepaired` fact, a `FactApplier` case, a `@Mutates` board method and an op |
-| Build Nuke | Action | The Admiral gains a nuke token (3 at most) | Only `NukeDiscarded` exists: needs a gain fact and op |
-| Raptor Specialist | Action | Trade a raptor in the Reserves for an assault raptor, or return a destroyed raptor | `DestroyRaptorEvent`, `ShipOps.repair`. The board builds a single assault raptor (id 21), so there is nothing to gain. Unverified: the number of assault raptors |
-| Test the Limits | Action | Unless the jump track is on a blue space, advance it 1 and roll: low results damage Galactica | `IncreaseJumpPreparationEvent`, `rollDie`, `DamageGalacticaEvent`. Unverified: which `JumpPreparation` values are "blue" |
+| Popular Influence | Action | Draw 2 Quorum Cards, give 1 to the President, then play or discard the other | Playing Quorum Cards (see "Quorum Cards"), and drawing Quorum Cards that aren't the President's. `SkillCardPlays.canPlay` keeps it `false`, so it is never offered |
+
+The plan's open questions were settled the way it proposed. These are choices, not rulings: the cards and the
+rulebook don't settle them.
+
+- A card is offered and accepted only when its effect can happen, e.g. "Build Nuke" below 3 nukes, "Repair" with
+  something damaged.
+- "Consolidate Power" may draw Treachery, as "Consult the Hybrid" does.
+- A launch from the "Reserves" is the first of "Combat Veteran"'s 3 activations. "Launch Reserves" activates each
+  viper once.
+- "Unorthodox Plan" works from anywhere.
+- "Negotiation" stops whole launches and activations, not placements.
+- "Preventative Policy" reduces the next loss of the resource, whatever causes it: civilian ships, damage tokens and
+  the FTL Control population loss included.
+- An "Executive Order" target may be in the "Brig" (two actions) or in a viper.
 
 ## Quorum Cards
 
@@ -425,21 +419,19 @@ The 94 missing abilities, by where they plug in:
 
 What several of the components above need:
 
-- an Action step that offers every kind of action, and movement powers in the Movement step;
+- the other kinds of actions and movement powers in `Actions` (see "The Action and Movement steps");
 - the voluntary Cylon reveal;
 - playing Super Crisis, Quorum and Mutiny Cards;
-- repairing a location (a fact, `FactApplier`, a `@Mutates` board method, an op);
-- launching a nuke, gaining a nuke;
+- launching a nuke (gaining one is `GameOps.gainNuke`);
 - a fact for a card that leaves the game;
 - moving Skill Cards between players;
 - in-play Quorum Cards with a holder, and giving a card to a player;
-- more than one assault raptor, and gaining one;
 - destroying one heavy raider, or a chosen centurion;
 - `PlaceShipsEvent` in a chosen area, `LaunchRaidersEvent` with a count;
 - a destination choice that isn't fixed to the Admiral and 2 cards;
 - `MakeCagEvent`, and checks in `MakeAdmiralEvent`;
 - several miracle tokens per player (rule 4.3.1.1);
-- a once-per-turn limit across cards (Executive Order and Critical Situation, the Mutiny Card from Treachery).
+- a once-per-turn limit for the Mutiny Card from Treachery (`TurnView.playedSkillCards()` does it for Skill Cards).
 
 ## Other todos
 
@@ -452,12 +444,13 @@ What several of the components above need:
 
 ## Suggested order
 
-1. Fix the Communications and Quorum Chamber bugs; they can stop a live game.
-2. The Action and Movement steps: offer every kind of action and movement power. Without this, about a hundred
-   components stay unreachable whatever events exist.
+1. Fix the Quorum Chamber bug; it can stop a live game.
+2. The other kinds of actions and movement powers, in `Actions`. Without them, the character sheets, Title Cards,
+   Quorum and Mutiny Cards stay unreachable whatever events exist.
 3. The Cylon reveal: the reveal powers, the Super Crisis Card it hands out, the abilities it triggers.
 4. Playing a Super Crisis Card at "Caprica", with the three unmapped cards and the Human Prisoner fail.
-5. Quorum and Mutiny Cards, with the building blocks above; the Title Card actions and the nuke launch.
+5. Quorum and Mutiny Cards, with the building blocks above, and then "Popular Influence"; the Title Card actions and
+   the nuke launch.
 6. Final Five, Personal Goals, Motive Cards during the game, the Cylon Leaders' return action.
 7. Character abilities, by hook: the actions, then the triggers (reusing the interrupt windows), the penalties and the
    rule changes.

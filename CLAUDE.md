@@ -59,8 +59,10 @@ Next steps, in order:
    action in scope (see "Skill Check Sequence" and "Execution"), and the six interrupt Skill Cards are played in
    secret windows around die rolls and attacks (see "Interrupt Cards" and "Combat"), and the Crisis step resolves every
    Crisis Card and activates the Cylon ships by its icon (see "Crisis Cards"), and the fleet jumps through the Sleeper Agent
-   phase to the Kobol end game (see "Jump and Kobol"). Still open, as new events that plug in: Executive
-   Order and the other `Action:` and `Movement:` skill cards, Cylon reveal, Quorum and Super Crisis cards, and the
+   phase to the Kobol end game (see "Jump and Kobol"), and the Skill Cards with an "Action:" or a "Movement:" and
+   "Investigative Committee" are played (see "Actions and Skill Cards", `skill-cards-plan.md`), all but "Popular
+   Influence". Still open, as new events that plug in: the other kinds of actions (character sheets, Title Cards,
+   Quorum and Mutiny Cards), Cylon reveal, Quorum and Super Crisis cards, and the
    interrupts that aren't skill cards (character abilities such as Helo's reroll, and revealing a Motive Card in the
    middle of resolving something, rule 6.2.2.1), which can reuse the interrupt windows.
 5. ~~Create a working frontend with the events that exist by then.~~ Done (`backend-plan.md`, `frontend-plan.md`):
@@ -418,7 +420,9 @@ The setup and the turns are ordinary events in `event/turn/`, so the engine know
 
 ### Actions and Skill Cards
 
-`event/action/` knows what a player can do now, for the Action step and everything else that gives an action.
+`event/action/` knows what a player can do now, for the Action step and everything else that gives an action. Every
+"Action:" and "Movement:" Skill Card is built (`skill-cards-plan.md`) but "Popular Influence", which waits for playable
+Quorum Cards: `SkillCardPlays.canPlay` keeps it `false` and `SkillCardEventsTest.NOT_BUILT_YET` lists it.
 
 - `Actions.canTakeAction` is "his location's action (`LocationEvent.canAct`) or a playable "Action:" card", and
   `offerAction(game, n)` builds the choice: `one(decision<ActionEvent>, NoOpEvent)`, for a pilot

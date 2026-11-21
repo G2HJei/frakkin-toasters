@@ -1,5 +1,7 @@
 # Skill Cards plan
 
+Status (2026-11-21): phases 1 to 9 and 11 are done. Phase 10, "Popular Influence", waits for playable Quorum Cards.
+
 Implements the 19 Skill Card types that nothing plays yet: the 18 cards with an "Action:" or "Movement:" ability, and
 "Investigative Committee". It closes the Skill Card part of roadmap step 4 ("Executive Order and the other `Action:`
 and `Movement:` skill cards") and the first half of "The blocker" in `unimplemented-components.md`: the Action step
