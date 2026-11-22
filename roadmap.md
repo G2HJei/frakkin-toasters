@@ -102,9 +102,12 @@ Goal: a player can play a whole turn without opening the event builder. Split in
 
 **C1. Inputs on the board and the hand** (uses B)
 
-- **Hand tray** under the board: your Skill Cards as large cards, the ones playable now lit, the others dimmed, with a
-  click to play (the card's event built from hints, asking for its choices in a small dialog next to the card, not in
-  the side panel). Same tray for Quorum, Mutiny and Loyalty cards.
+- **Play from the player mat**: the mat already shows the player's piles full size in a popover (Skill, Quorum, Mutiny
+  and Loyalty cards). When it is the player's turn to act, the cards playable now are highlighted there, and a click
+  plays one (the card's event built from the hints, asking for its choices in a small dialog next to the card, not in
+  the side panel). No separate hand tray.
+- **Sorted hands**: a player's Skill Cards are always sorted by color, in the order of `SkillCardColor` (Politics,
+  Leadership, Tactics, Piloting, Engineering, Treachery), then by value, highest first.
 - **Targets light up**: when the game asks for a player, location, viper, raider, basestar, civilian ship or card
   target, the legal ones glow on the board and click to answer (the "Act"/move model extended). Hover shows what the
   answer does when the label can say it.
@@ -120,8 +123,8 @@ Goal: a player can play a whole turn without opening the event builder. Split in
 
 **C2. Turn flow and awareness**
 
-- A **turn banner**: whose turn, which step, a step track you can read at a glance, "your move" shown on the board edge
-  as well as the tab title and favicon (exists).
+- **"Your move" on the board edge**: the turn panel already shows whose turn and which step, and the tab title and
+  favicon already say it is your move; add the same cue on the board's edge.
 - **Pause explanation**: when the game waits for someone, say what for in a sentence ("Kat is deciding whether to play
   a card on the roll"), not only "Waiting for X". Interrupt windows are the worst case: say which window, how many have
   answered.
@@ -130,8 +133,8 @@ Goal: a player can play a whole turn without opening the event builder. Split in
   the board.
 - **Resource and track deltas**: a floating "-1 morale" where the dial is, when it changes; the same for the jump
   track, distance and the nukes.
-- **Animations, small and skippable**: ship moves, die roll, card draw to the hand, a damaged location flashing. A
-  setting turns them off.
+- **Animations, small**: ship moves, die roll, card draw to the hand, a damaged location flashing. They always play:
+  no setting to turn them off yet.
 
 **C3. Reference without leaving the table**
 
@@ -140,26 +143,8 @@ Goal: a player can play a whole turn without opening the event builder. Split in
   the article (open question 1). The PDF in `materials-sorted/` ships with the app: the project is for private play
   (open question 2).
 - **Cheat sheets**: the turn sequence, the Attack Table, the skill check order, the Crisis step icons.
-- **Explain a rejection**: `InvalidActionException` messages are shown raw today; map the common ones to a sentence
-  and a highlight of the part of the input at fault.
 
-**C4. Layout, devices, accessibility**
-
-- A phone / tablet layout: the board stays zoomable, the panels become bottom sheets, the hand tray the primary input.
-  Today under 1100px the panels stack under the board; that is a fallback, not a design.
-- Board zoom and pan, and a "fit to my turn" button (focus the locations the pending input involves).
-- Keyboard play for the common inputs (move, act, pass, confirm, cycle options), focus order, `aria-live` for the
-  asked-player change, readable contrast on the red/blue zone cues (a colorblind palette option).
-- A settings page for: animations, density, card hover size, sounds, notification choices.
-
-**C5. Polish pass with real players**
-
-- Instrument the table minimally (client-side, no personal data: which inputs fall back to the builder, which
-  rejections happen, how long a decision takes) so the next UX round starts from the clunky parts, not from guesses.
-  Anything that records a user's play needs a privacy line in G's notice first.
-
-*Exit:* a four-player game from setup to an ending without a single use of the generic builder; the same on a phone
-for the one-handed inputs.
+*Exit:* a four-player game from setup to an ending without a single use of the generic builder.
 
 ### D. Sessions that survive real people (backend + frontend)
 
@@ -234,8 +219,8 @@ author.
 
 ```text
 A fuzzer ──► B legal hints ──► C table UX ──► D sessions ──► E replays
-   │                │               │              │
-   └── fixes engine └──── upgrades A └──── feeds F's analytics └── needs C's results screen
+   │                │                              │
+   └── fixes engine └──── upgrades A               └── needs C's results screen
 F (CI, ops, compliance) runs alongside from C on; its staging is the gate for inviting players.
 ```
 
