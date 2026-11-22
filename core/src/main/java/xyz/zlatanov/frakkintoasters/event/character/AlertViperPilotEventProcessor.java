@@ -81,6 +81,11 @@ public class AlertViperPilotEventProcessor extends EventProcessor<AlertViperPilo
         int apollo = player.number();
         ops.player(apollo).useAbility(CharacterAbility.ALERT_VIPER_PILOT);
         ops.player(apollo).pilot(event.viperId());
+        if (game.activeSkillCheck() != null) {
+            // e.g. "Protect the Fleet" launched it: he boards, but takes no action until the check is resolved, as an
+            // action could start another skill check inside this one (F-f8b0c5).
+            return NONE;
+        }
         val action = new GrantEvent(apollo, ACTION, ALERT_VIPER_PILOT);
         // The grant lets him act when it is another player's turn, and the turn goes on as it was afterwards.
         return game.turn().actingPlayerNumber() == apollo

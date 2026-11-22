@@ -1,5 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event.location.galactica;
 
+import static xyz.zlatanov.frakkintoasters.state.board.Location.BASESTAR_BRIDGE;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.SHARON_ATHENA_AGATHON;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_6_OCLOCK;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -93,5 +95,17 @@ class HangarDeckEventProcessorTest extends EventTestHarness<HangarDeckEvent> {
 
         assertFalse(HangarDeckEventProcessor.canAct(game, player(1)));
         assertInvalid(new HangarDeckEvent(1));
+    }
+
+    // "Resolute" lets a Cylon Leader who isn't Infiltrating take it from the "Basestar Bridge", but he can't launch
+    // himself (F-ad8366).
+    @Test
+    void notForACylonPlayer() {
+        player(2).character(SHARON_ATHENA_AGATHON);
+        moveTo(BASESTAR_BRIDGE, SHARON_ATHENA_AGATHON);
+        ops.allowRemoteAction(2, HANGAR_DECK);
+
+        assertFalse(HangarDeckEventProcessor.canAct(game, player(2)));
+        assertInvalid(new HangarDeckEvent(2));
     }
 }

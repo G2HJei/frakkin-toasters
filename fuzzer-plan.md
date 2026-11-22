@@ -1,8 +1,8 @@
 # Fuzzer plan (roadmap milestone A)
 
 Status (2026-11-22): phases 1 to 5 are done, and the fix loop ran to 10,000 seeds per player count (50,000 games):
-43 findings fixed, 0 open; 275 games end in F-e700fd (NO_END, every human in the "Brig") and 2 in non-fatal
-DEAD_OPTIONs, all three under "Questions" in `fuzzer-report.md`. The exit waits on F-e700fd's answer. The first run (`-Pgames=20`, with the probes) is in `fuzzer-report.md`:
+47 findings fixed, none open. The NO_END games (F-e700fd, every human in the "Brig") are a valid state, not a bug
+(answered under "Questions" in `fuzzer-report.md`). The first run (`-Pgames=20`, with the probes) is in `fuzzer-report.md`:
 100 games, 38 failed, 23 open findings. Where phase 1 differs from the plan:
 
 - `PlayInterruptCardEvent`, `UseRollAbilityEvent` and `ChooseCrisisTargetEvent` have no source of their own: the

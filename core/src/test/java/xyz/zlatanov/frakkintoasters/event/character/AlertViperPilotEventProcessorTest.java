@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event.character;
 
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType.ADMIRALS_QUARTERS;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
@@ -63,5 +64,20 @@ class AlertViperPilotEventProcessorTest extends EventTestHarness<AlertViperPilot
 
         assertEquals(NONE, AlertViperPilotEventProcessor.offer(game, List.of(viper.id())));
         assertInvalid(new AlertViperPilotEvent(1, viper.id()));
+    }
+
+    // In a skill check ("Protect the Fleet" launched it), he boards but takes no action: it could start another skill
+    // check inside this one (F-f8b0c5).
+    @Test
+    void noActionInASkillCheck() {
+        player(1).character(LAURA_ROSLIN);
+        player(2).character(LEE_APOLLO_ADAMA);
+        moveTo(COMMAND, LEE_APOLLO_ADAMA);
+        val viper = viperAt(GALACTICA_SPACE_6_OCLOCK);
+        game.startSkillCheck(ADMIRALS_QUARTERS);
+
+        execute(new AlertViperPilotEvent(2, viper.id()));
+
+        assertTrue(galacticaBoard.pilotedFighter(LEE_APOLLO_ADAMA).isPresent());
     }
 }

@@ -1,5 +1,7 @@
 package xyz.zlatanov.frakkintoasters.fuzz;
 
+import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.NOT_CYLON_SELFISH;
+import xyz.zlatanov.frakkintoasters.event.loyalty.RevealPersonalGoalEvent;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
 import static xyz.zlatanov.frakkintoasters.state.card.MutinyCard.IMPEACHMENT;
 import xyz.zlatanov.frakkintoasters.event.action.mutiny.ImpeachmentEvent;
@@ -164,5 +166,21 @@ class CandidatesTest extends TestHarness {
 
     private Asked asked(Class<? extends xyz.zlatanov.frakkintoasters.event.Event> action) {
         return new Asked(game, new PlayerDecisionEvent<>(1, action), new Random(1), findings::add);
+    }
+
+    // "Selfish" discards cards worth 20 strength, here the whole hand of 10 (F-316031).
+    @Test
+    void aListOfSkillCardsReachesAStrength() {
+        player(1).character(KARA_STARBUCK_THRACE);
+        player(1).loyaltyCards().addOnTop(NOT_CYLON_SELFISH);
+        for (int i = 0; i < 10; i++) {
+            player(1).skillCards().addOnTop(new SkillCard(2, CONSOLIDATE_POWER));
+        }
+
+        val answer = (RevealPersonalGoalEvent) AnswerFinder.find(game,
+                new PlayerDecisionEvent<>(1, RevealPersonalGoalEvent.class), new Random(1), findings::add).orElseThrow();
+
+        assertEquals(10, answer.discards().size());
+        assertEquals(List.of(), findings);
     }
 }

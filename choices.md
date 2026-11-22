@@ -96,6 +96,8 @@ different answer changes only the code named. Only the Kobol objective is in sco
 - "Resolute" takes any undamaged location with an action, Cylon locations included; "Organized" 3 different ones, no
   Cylon location, never the "Brig". "Treatment" gives its 2 cards as fixed pairs, of colors in the target's skill set.
 - "Blind Jump": the Admiral draws 1 Destination Card and the Mission Specialist keeps his card.
+- "Alert Viper Pilot" during a skill check (a viper "Protect the Fleet" launched): Lee "Apollo" Adama boards it but
+  takes no action, which could start another skill check before this one is resolved.
 - "Moral Dilemma"'s 2 cards come after what the Mutiny Card brings, the "Brig" and the Mutiny Card discards
   (`DrawMutinyCardEventProcessor.afterDrawing`, the "Press Room"): a "Bait" among them draws another Mutiny Card, which
   then finds them done.

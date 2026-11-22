@@ -29,6 +29,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.RecordComponent;
 import java.lang.reflect.Type;
+import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -203,6 +204,11 @@ final class Domains {
             val hand = asked.player().skillCards().cards();
             // up to 8: "Impeachment" discards 5
             result.addAll(Combinations.subsets(hand, 1, Math.min(8, hand.size()), 48, random));
+            // and the strongest cards first, for a discard worth a strength ("Selfish": 20)
+            val strongest = hand.stream().sorted(Comparator.comparingInt(SkillCard::value).reversed()).toList();
+            for (int size = 1; size <= strongest.size(); size++) {
+                result.add(strongest.subList(0, size));
+            }
             return result;
         }
         if (element == Integer.class) {

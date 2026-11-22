@@ -65,8 +65,8 @@ Next steps, in order:
 6. Prove the game is completable (`roadmap.md` milestone A, `fuzzer-plan.md`): random games played to an ending.
    Phases 1 to 5 are done: `./gradlew :core:fuzz` plays the games and writes `fuzzer-report.md`, a finding exports
    as a regression journal with its failing input, and hostile inputs probe the checks. The fix loop ran to 10,000
-   seeds per player count: no open finding, and the exit waits on the report's "Questions" (F-e700fd, a stall with
-   every human in the "Brig").
+   seeds per player count with no open finding. Its NO_END games are a valid stall, every human in the "Brig" (the
+   report's "Questions").
 
 ## Project Structure
 

@@ -26,7 +26,9 @@ public class HangarDeckEventProcessor extends LocationActionProcessor<HangarDeck
         val inBrig = game.locate(player.character()).filter(BRIG::equals).isPresent();
         // Nor for a pilot, who is in space, e.g. a second "Hangar Deck" through "Resolute": he flies one ship.
         val piloting = galactica.pilotedFighter(player.character()).isPresent();
+        // A Cylon player flies none of the humans' ships (the reveal sends his viper back to the "Reserves").
         return player.character().canPilot()
+                && player.isHuman()
                 && !inBrig
                 && !piloting
                 && (fighterInReserves || unmannedFighterInSpace);

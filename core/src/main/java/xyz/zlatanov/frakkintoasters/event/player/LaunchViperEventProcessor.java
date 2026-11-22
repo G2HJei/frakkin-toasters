@@ -60,8 +60,9 @@ public class LaunchViperEventProcessor extends EventProcessor<LaunchViperEvent> 
     // The player pilots the viper himself. If all vipers are in play, he may take an unmanned one from a space area
     // instead (rule 11.2).
     private boolean validPilotedLaunch() {
-        // A character flies one ship at a time.
-        val ownPilot = event.pilot() == player.character() && player.character().canPilot()
+        // A character flies one ship at a time, and a Cylon player none of the humans': a Cylon Leader who isn't
+        // Infiltrating may take the "Hangar Deck"'s action through "Resolute", but not launch himself (F-ad8366).
+        val ownPilot = event.pilot() == player.character() && player.character().canPilot() && player.isHuman()
                 && galacticaBoard.pilotedFighter(player.character()).isEmpty();
         val viperAvailable = event.unmannedViperId() == null
                 ? canLaunchFromReserves(game, event.shipType(), event.location())

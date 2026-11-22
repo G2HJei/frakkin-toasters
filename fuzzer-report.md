@@ -7,47 +7,43 @@ every run; "Fixes" and "Questions" are written by hand.
 
 ## Last run
 
-2026-11-22 13:39, `569cf7e` (41 changed files), seeds 1-10000, 3-7 players, 3m 15s.
+2026-11-22 16:05, `13b4c28` (12 changed files), seeds 1-10000, 3-7 players, 3m 14s.
 
 | Players | Games | Finished | Failed | Humans won | Cylons won | Rounds (median / max) |
 |---|---|---|---|---|---|---|
-| 3 | 10000 | 9752 | 248 | 0 | 9752 | 9 / 50 |
-| 4 | 10000 | 9976 | 24 | 0 | 9976 | 8 / 50 |
-| 5 | 10000 | 9997 | 3 | 2 | 9995 | 5 / 49 |
-| 6 | 10000 | 10000 | 0 | 1 | 9999 | 4 / 33 |
-| 7 | 10000 | 10000 | 0 | 1 | 9999 | 3 / 36 |
-| All | 50000 | 49725 | 275 | 4 | 49721 | 5 / 50 |
+| 3 | 10000 | 9734 | 266 | 3 | 9731 | 9 / 50 |
+| 4 | 10000 | 9978 | 22 | 0 | 9978 | 8 / 50 |
+| 5 | 10000 | 9998 | 2 | 3 | 9995 | 5 / 46 |
+| 6 | 10000 | 10000 | 0 | 0 | 10000 | 4 / 38 |
+| 7 | 10000 | 10000 | 0 | 2 | 9998 | 3 / 31 |
+| All | 50000 | 49710 | 290 | 8 | 49702 | 5 / 50 |
 
 ### Endings
 
 | Ending | 3 | 4 | 5 | 6 | 7 |
 |---|---|---|---|---|---|
-| Fuel at 0 | 1208 | 1196 | 1271 | 1280 | 1303 |
-| Food at 0 | 569 | 464 | 475 | 456 | 439 |
-| Morale at 0 | 4204 | 4020 | 4087 | 4043 | 4058 |
-| Population at 0 | 2332 | 2729 | 2768 | 2782 | 2786 |
-| 6 damaged Galactica locations | 310 | 301 | 285 | 287 | 284 |
-| Centurions at the end of the Boarding Party track | 924 | 1048 | 927 | 931 | 913 |
+| Fuel at 0 | 1176 | 1201 | 1258 | 1325 | 1360 |
+| Food at 0 | 602 | 497 | 506 | 469 | 466 |
+| Morale at 0 | 4206 | 4100 | 4018 | 4037 | 4046 |
+| Population at 0 | 2381 | 2749 | 2770 | 2700 | 2704 |
+| 6 damaged Galactica locations | 283 | 279 | 282 | 275 | 299 |
+| Centurions at the end of the Boarding Party track | 909 | 948 | 958 | 971 | 905 |
 | No character left to choose | 0 | 0 | 0 | 0 | 0 |
-| Kobol, the humans win | 0 | 0 | 2 | 1 | 1 |
-| Kobol, a resource at 0 after the Personal Goals | 205 | 218 | 182 | 220 | 216 |
+| Kobol, the humans win | 3 | 0 | 3 | 0 | 2 |
+| Kobol, a resource at 0 after the Personal Goals | 174 | 204 | 203 | 223 | 218 |
 
 ### Findings
 
 | ID | Kind | What | Games | Example | Status |
 |---|---|---|---|---|---|
-| F-e700fd | NO_END | No ending after 50 rounds | 275 | 3p seed 58 | question |
-| F-ad8366 | DEAD_OPTION | An option leads to `MoveEvent`, which has no legal answer | 1 | 5p seed 2648 | question |
-| F-316031 | DEAD_OPTION | An option leads to `ActionEvent`, which has no legal answer | 1 | 5p seed 9314 | question |
+| F-e700fd | NO_END | No ending after 50 rounds | 290 | 3p seed 128 | question |
 
-- **F-e700fd**: `./gradlew :core:fuzz -Pplayers=3 -Pseed=58`, trace `core/build/fuzz/F-e700fd-3p-58.txt`. Turn 153, `RECEIVE_SKILLS`, player 2 asked for `DrawSkillCardsEvent [DRAW_EXACTLY_5]`.
-- **F-ad8366**: `./gradlew :core:fuzz -Pplayers=5 -Pseed=2648`, trace `core/build/fuzz/F-ad8366-5p-2648.txt`. Turn 16, `MOVEMENT`, player 3 chooses among 2 options.
-- **F-316031**: `./gradlew :core:fuzz -Pplayers=5 -Pseed=9314`, trace `core/build/fuzz/F-316031-5p-9314.txt`. Turn 37, `ACTION`, player 3 chooses among 3 options.
+- **F-e700fd**: `./gradlew :core:fuzz -Pplayers=3 -Pseed=128`, trace `core/build/fuzz/F-e700fd-3p-128.txt`. Turn 153, `RECEIVE_SKILLS`, player 3 asked for `DrawSkillCardsEvent [DRAW_EXACTLY_5]`.
 
 ### Watch
 
-- 3 players: the humans never won in 10000 games.
 - 4 players: the humans never won in 10000 games.
+- 6 players: the humans never won in 10000 games.
 - No "No character left to choose" ending in 50000 games.
 
 <details><summary>Event types that never ran (1)</summary>
@@ -60,6 +56,8 @@ every run; "Fixes" and "Questions" are written by hand.
 
 | Run | Commit | Games | Failed | Open findings |
 |---|---|---|---|---|
+| 2026-11-22 16:05 | `13b4c28` | 50000 | 290 | 0 |
+| 2026-11-22 15:59 | `13b4c28` | 50000 | 293 | 2 |
 | 2026-11-22 13:39 | `569cf7e` | 50000 | 275 | 0 |
 | 2026-11-22 13:08 | `d17eb9a` | 500 | 2 | 0 |
 | 2026-11-22 13:06 | `d17eb9a` | 500 | 2 | 0 |
@@ -298,23 +296,40 @@ every run; "Fixes" and "Questions" are written by hand.
 - Tests: `OfferPilotLaunchEventProcessorTest`, `CrisisCardFollowupsTest`. No journal: the offers are queued in it.
 - Files: `OfferPilotLaunchEvent`, `OfferPilotLaunchEventProcessor`, `CrisisCardFollowups`.
 
+### F-ad8366 - DEAD_OPTION - fixed 2026-11-22
+
+- Cause: Sharon "Athena" Agathon, a Cylon Leader who wasn't Infiltrating, used "Resolute" on the "Basestar Bridge"
+  to take the "Hangar Deck"'s action and launched herself in a viper. Shot down, she went to "Sickbay", a human
+  location from which a Cylon player can only move to a Cylon location by discarding a card, and she had none: her
+  Movement step offered a move without an answer.
+- Fix: a Cylon player flies none of the humans' ships (the Cylon reveal sends his viper back to the "Reserves"): the
+  "Hangar Deck" has no action for him and a piloted launch needs a human.
+- Tests: `HangarDeckEventProcessorTest.notForACylonPlayer`, `LaunchViperEventProcessorTest.notACylonPlayer`. No
+  journal: its state is already broken where it starts.
+- Files: `HangarDeckEventProcessor`, `LaunchViperEventProcessor`.
+
+### F-316031 - DEAD_OPTION - fuzzer, fixed 2026-11-22
+
+- Cause: Lee "Apollo" Adama could reveal "Selfish" (a hand worth 20 strength), but its discard needed 10 cards, and
+  the fuzzer drew lists of at most 8, at random.
+- Fix: `Domains` also tries the hand's strongest cards first, every prefix of them.
+- Tests: `CandidatesTest.aListOfSkillCardsReachesAStrength`, journal `fuzz-5p-9314.json` (`answers`).
+- Files: `Domains`.
+
+### F-f8b0c5, F-cb7417 - CRASH - fixed 2026-11-22
+
+- Cause: in a "Brig" check, "Protect the Fleet" launched an unmanned assault raptor; "Alert Viper Pilot" let Lee
+  "Apollo" Adama board it and take an action, an "Executive Order" whose actions started more "Brig" checks inside
+  the first. The engine holds one active check, so the inner one's end cleared it, and the outer check's abilities
+  loop found none (a `NullPointerException`).
+- Fix: during a skill check "Alert Viper Pilot" boards the viper but grants no action (`choices.md`).
+- Tests: `AlertViperPilotEventProcessorTest.noActionInASkillCheck`. No journal: the inner checks are in it.
+- Files: `AlertViperPilotEventProcessor`, `choices.md`.
+
 ## Questions
 
-- **F-e700fd** (NO_END, 255 of 50,000 games at 10,000 per player count, most of them with 3 players): the
-  humans spend the game in the "Brig", and the characters in the "Brig" don't perform the Crisis step (rules 8.5 and
-  9.2), so hardly any Crisis Card is drawn and the game passes the 50 rounds. Of the 22 NO_END games at 1,000 per player
-  count, 16 ended with every human in the "Brig" and the other 6 had one human out who had been there most of the
-  game (3p seed 170: 9 Crisis Cards in turns 30 to 153). The engine follows the rules: the "Brig"'s action is offered
-  (12 tries in 3p seed 14), a difficulty 7 check that the revealed Cylon plays against, and random play rarely gets
-  out. Options: (a) a smarter agent in the "Brig" (against decision 2, uniform random play); (b) a non-fatal kind for
-  a stalled game, e.g. every human in the "Brig" for 10 rounds, so it is counted but doesn't fail the exit; (c) keep it
-  fatal and raise the cap. Recommendation: (b), as the rules allow the stall and only a player's choice ends it.
-- **F-ad8366** (DEAD_OPTION, 1 game, 5p seed 2648, turn 16): Sharon "Athena" Agathon, a Cylon Leader, was offered a
-  `MoveEvent` in her Movement step without a legal move: `Actions.canMove` (not in the "Brig", not held by "Heretic")
-  and `MoveEventProcessor.isEligibleLocation` disagree for her, probably about which locations a Cylon Leader may
-  enter while (not) Infiltrating. Not fixed yet: export `-DfuzzJournal=5:2648:F-ad8366`, read where she stands, and
-  give `Actions.canMove` the check the move makes (a destination exists).
-- **F-316031** (DEAD_OPTION, 1 game, 5p seed 9314, turn 37): after "State of Emergency", Lee "Apollo" Adama's
-  `MOVE_OR_ACTION` grant offered an `ActionEvent` that no answer satisfied: one of the static gates behind
-  `Actions.canTakeAction` says yes where its processor says no. Not fixed yet: export `-DfuzzJournal=5:9314:F-316031`
-  and find the gate (a held card or ability whose `canPlay` misses a rule of its `isValid`).
+- **F-e700fd** (NO_END, 275 of 50,000 games at 10,000 per player count, most of them with 3 players). Answered
+  2026-11-22: not a bug. Every human in the "Brig" is a valid state: the characters there don't perform the Crisis
+  step (rules 8.5 and 9.2), so hardly any Crisis Card is drawn, and random play rarely passes the "Brig"'s check to
+  leave. Of the 22 NO_END games at 1,000 per player count, 16 ended with every human in the "Brig" and the other 6 had
+  one human out who had been there most of the game.

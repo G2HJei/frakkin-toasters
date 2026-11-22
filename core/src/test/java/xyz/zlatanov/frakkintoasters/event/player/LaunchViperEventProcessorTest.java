@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event.player;
 
+import static xyz.zlatanov.frakkintoasters.state.character.Character.SHARON_ATHENA_AGATHON;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_6_OCLOCK;
 import lombok.val;
@@ -160,5 +161,13 @@ class LaunchViperEventProcessorTest extends EventTestHarness<LaunchViperEvent> {
         viperAt(GALACTICA_SPACE_2_OCLOCK).pilot(LEE_ADAMA);
 
         assertInvalid(new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_6_OCLOCK, LEE_ADAMA, null));
+    }
+
+    // A Cylon Leader who isn't Infiltrating is a Cylon player, who flies none of the humans' ships (F-ad8366).
+    @Test
+    void notACylonPlayer() {
+        player(3).character(SHARON_ATHENA_AGATHON);
+
+        assertInvalid(new LaunchViperEvent(3, VIPER, GALACTICA_SPACE_6_OCLOCK, SHARON_ATHENA_AGATHON, null));
     }
 }
