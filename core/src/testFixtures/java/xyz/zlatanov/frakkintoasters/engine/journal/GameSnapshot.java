@@ -52,6 +52,10 @@ public record GameSnapshot(Map<String, Object> values) {
         s.put("borrowedTitles", game.turn().borrowedTitles());
         s.put("remoteActions", game.players().stream()
                 .map(p -> p.number() + "=" + game.turn().remoteActionLocation(p.number()).orElse(null)).toList());
+        s.put("startLocation", game.turn().startLocation());
+        s.put("sentToBrigAtEndOfTurn", new TreeSet<>(game.turn().sentToBrigAtEndOfTurn()));
+        s.put("actionCostPaid", game.players().stream()
+                .map(p -> p.number() + "=" + game.turn().actionCostPaid(p.number())).toList());
         s.put("president", game.president());
         s.put("admiral", game.admiral());
         s.put("cag", game.cag());
@@ -135,6 +139,7 @@ public record GameSnapshot(Map<String, Object> values) {
         result.put("playedBy", check.playedBy());
         result.put("playedBefore", new TreeMap<>(playedBefore(check)));
         result.put("playedBeforeRevealed", check.playedBeforeRevealed());
+        result.put("cardsDivided", check.cardsDivided());
         result.put("shownCards", new TreeMap<>(shownCards(check)));
         for (val pile : SkillCheckPile.values()) {
             result.put("pile." + pile, deck(check.pile(pile)));

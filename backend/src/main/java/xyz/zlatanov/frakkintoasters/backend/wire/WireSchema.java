@@ -10,6 +10,7 @@ import xyz.zlatanov.frakkintoasters.backend.journal.TypeWalker;
 import xyz.zlatanov.frakkintoasters.backend.journal.ValueCodec;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.Fact;
 import xyz.zlatanov.frakkintoasters.event.AnytimeEvent;
+import xyz.zlatanov.frakkintoasters.event.ComponentRole;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.LocationEvent;
 import xyz.zlatanov.frakkintoasters.event.action.MutinyCardEvent;
@@ -31,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.regex.Pattern;
 
 import static xyz.zlatanov.frakkintoasters.backend.journal.ValueCodec.raw;
 import static xyz.zlatanov.frakkintoasters.backend.journal.ValueCodec.typeArgument;
@@ -47,27 +47,12 @@ import static xyz.zlatanov.frakkintoasters.backend.journal.ValueCodec.typeArgume
  *     <li>an enum: its constants</li>
  *     <li>the socket messages, told apart by {@code type}</li>
  * </ul>
- * An int component gets a {@code role} from its name: a {@code player}, a {@code ship}, a journal {@code scope}, or a
- * {@code count}.
+ * An int component gets a {@code role} from its name ({@link ComponentRole}): a {@code player}, a {@code ship}, a journal
+ * {@code scope}, or a {@code count}.
  */
 public final class WireSchema {
 
     private static final JsonNodeFactory NODES = JsonNodeFactory.instance;
-
-    private static final Pattern SHIP  = Pattern.compile("(?i).*(shipId|fighterId|raiderId|basestarId|viperIds?|centurionId|"
-            + "basestarShipId|raiderShipId|civilianShipId\\d?|shipIds|cylonShipId|escortCivilianShipId|"
-            + "knownCivilianShips)");
-    private static final Set<String> PLAYERS = Set.of("playerNumber", "targetPlayerNumber", "targetPlayer",
-            "recipientPlayerNumber", "excludedPlayerNumber", "targetHumanPlayer", "ownerPlayerNumber", "otherPlayerNumber",
-            "chooser", "actor", "player", "currentPlayer", "actingPlayer", "winnerPlayerNumbers", "winners",
-            "waitingForPlayerNumber", "targetPlayers", "holderPlayerNumber", "administrationPlayerNumber",
-            "drawerPlayerNumber", "lookerPlayerNumber", "discarderPlayerNumber");
-    private static final Set<String> SCOPES = Set.of("scopeId", "parentId");
-    private static final Set<String> COUNTS = Set.of("count", "amount", "value", "modifier", "distanceBefore", "number",
-            "turn", "turns", "size", "discardSize", "basestars", "raiders", "heavyRaiders", "centurions", "civilianShips",
-            "totalStrength", "difficulty", "fuel", "food", "morale", "population", "nukes", "distanceTraveled",
-            "playerCount", "calculationsModifier", "handLimit", "option", "fuelCost", "moraleCost", "populationCost",
-            "result", "formatVersion", "activationsLeft", "delta", "adjustment", "raidersPerBasestar", "miracleTokens");
 
     private WireSchema() {
     }
@@ -76,19 +61,7 @@ public final class WireSchema {
      * @return the role of an int component by its name, {@code null} when the name can't be placed
      */
     public static String role(String name) {
-        if (PLAYERS.contains(name)) {
-            return "player";
-        }
-        if (SCOPES.contains(name)) {
-            return "scope";
-        }
-        if (name.equals("id") || SHIP.matcher(name).matches()) {
-            return "ship";
-        }
-        if (COUNTS.contains(name)) {
-            return "count";
-        }
-        return null;
+        return ComponentRole.of(name).map(role -> role.name().toLowerCase()).orElse(null);
     }
 
     public static ObjectNode json() {

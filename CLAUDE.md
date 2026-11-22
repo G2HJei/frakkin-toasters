@@ -60,6 +60,9 @@ Next steps, in order:
    the backend, the sandbox, the wire schema, the table with the board, the lobby and rooms (see "Backend" and
    "Frontend"). Still open: legal-move hints (a list in `core` of the legal answers to a decision) and more inputs on
    the board (viper activation, targets of a choice lighting up).
+6. Prove the game is completable (`roadmap.md` milestone A, `fuzzer-plan.md`): random games played to an ending.
+   Phase 1 is done: one game plays (`fuzz/` in the test fixtures). Next: the run and the report, the regression
+   journals, the hostile inputs, then the fix loop.
 
 ## Project Structure
 
@@ -959,8 +962,8 @@ REST (the lobby lists poll), Zustand for the game.
 - The wire schema: `./gradlew :backend:exportSchema` writes `frontend/src/wire/schema.json` (`backend/wire/WireSchema`:
   every record with its components and type references, unions, enums, the socket messages, the `location` of a
   location's action, the `quorumCard` or `mutinyCard` a card's event plays (the `EventBuilder` offers only the cards
-  the asked player holds), and a `role` for each int: `player`, `ship`, `scope` or `count`). `npm run gen` turns it into
-  `src/wire/types.ts`. `WireSchemaTest` fails when the checked-in schema is stale, and `tsc` when the UI uses a field
+  the asked player holds), and a `role` for each int by its name (`ComponentRole` in `core`): `player`, `ship`, `scope`
+  or `count`). `npm run gen` turns it into `src/wire/types.ts`. `WireSchemaTest` fails when the checked-in schema is stale, and `tsc` when the UI uses a field
   that went away. `GET /api/schema` serves the same JSON.
 - `src/api/` (`http.ts` sends the `XSRF-TOKEN` cookie as `X-XSRF-TOKEN`, `queries.ts` the hooks), `src/live/`
   (`GameSocket` reconnects with backoff, `gameStore` holds the game, its token, the log and the last rejection),
@@ -1183,8 +1186,17 @@ when possible.
 - `FakeDeck<T>` - test double for `Deck<T>` with `nextCard(T...)` to control draws, and `clear()` to empty the draw
   pile
 - `core` has test fixtures (`src/testFixtures`, plugin `java-test-fixtures`) for what `backend` tests use too: the
-  test-only events with their processors and `TestOps`, `GameSnapshot`, `ScriptedScenario`, `ScriptedTurns` and
-  `TestEngines` (starts an engine with any first event). `ArchitectureTest` leaves them out, like the tests
+  test-only events with their processors and `TestOps`, `GameSnapshot`, `ScriptedScenario`, `ScriptedTurns`,
+  `TestEngines` (starts an engine with any first event) and the random playouts (`fuzz/`, see "Random playouts").
+  `ArchitectureTest` leaves them out, like the tests
+- Random playouts (`fuzz/`, `fuzzer-plan.md`): `Playout.play(players, seed)` plays a seeded game with random legal
+  answers until it ends, a finding stops it or it runs past a cap, and restores it on the way (the twins have to stay
+  equal). `AnswerFinder` builds candidate answers to a decision (`Candidates`: a source of its own for a shaped answer,
+  otherwise the `Domains` of the record's components, which take the ints' `ComponentRole`) and keeps the first one
+  `prepare` accepts. Choices look ahead at the decision an option leads to. A `Finding` (`CRASH`, `INPUT_CRASH`,
+  `NO_ANSWER`, `DEAD_OPTION`, `RESTORE`, `NO_END`, `BAD_ENDING`, `FUZZER`) has an ID from a signature without line
+  numbers, and `Endings.classify` reads the rule's ending from the final state. `AnswerFinderTest`, `CandidatesTest`,
+  `EndingsTest` and `PlayoutTest` cover it without failing on what the engine does wrong
 - `GameSnapshot` (`engine/journal/`) - turns a `Game` into comparable plain values. Replay tests compare a live game
   with its replayed twin. `ScriptedScenario.play(journal)` records every kind of fact, which `GameReplayerTest`
   checks. One of its scopes has no event, so only `GameReplayer` rebuilds it, not `GameEngine.restore`

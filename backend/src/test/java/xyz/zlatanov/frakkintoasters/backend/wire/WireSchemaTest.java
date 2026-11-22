@@ -41,7 +41,7 @@ class WireSchemaTest {
             }
         });
 
-        assertEquals(List.of(), missing, "Teach WireSchema.role these names");
+        assertEquals(List.of(), missing, "Teach ComponentRole these names");
     }
 
     @Test
