@@ -10,14 +10,21 @@ import static xyz.zlatanov.frakkintoasters.state.character.CharacterType.CYLON_L
 
 public class MakeAdmiralEventProcessor extends EventProcessor<MakeAdmiralEvent> {
 
+    // A character of the game who may hold the title at all. Whether he can take it now is judged when it runs: it is
+    // queued after what may change him, e.g. "Assume Command"'s discard of a "Bait" drew a second Mutiny Card and sent
+    // him to the "Brig", and then he doesn't take the title.
     @Override
     protected boolean isValid() {
-        return canBecomeAdmiral(game, event.character());
+        return event.character() != null
+                && event.character().type() != CYLON_LEADER
+                && game.players().stream().anyMatch(p -> p.character() == event.character());
     }
 
     @Override
     public Followup process() {
-        ops.titles().assignAdmiral(event.character());
+        if (canBecomeAdmiral(game, event.character())) {
+            ops.titles().assignAdmiral(event.character());
+        }
         return Followup.NONE;
     }
 

@@ -1,6 +1,7 @@
 package xyz.zlatanov.frakkintoasters.fuzz;
 
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.engine.answer.LegalAnswers;
 import xyz.zlatanov.frakkintoasters.engine.GameEngine;
 import xyz.zlatanov.frakkintoasters.engine.PendingInput.AwaitingChoice;
 import xyz.zlatanov.frakkintoasters.engine.PendingInput.AwaitingDecision;
@@ -112,14 +113,14 @@ public record Repro(Journal journal, long seed, int player, Followup option, Eve
         if (option != null) {
             // an option that is no longer offered can't lead to a dead end
             if (pending instanceof AwaitingChoice choice && choice.options().contains(option)) {
-                requireAnswer(engine, Playout.firstDecision(option));
+                requireAnswer(engine, LegalAnswers.decisionOf(option));
             }
             return;
         }
         switch (pending) {
             case AwaitingDecision decision -> requireAnswer(engine, decision.decision());
             case AwaitingChoice choice -> {
-                val live = choice.options().stream().anyMatch(o -> hasAnswer(engine, Playout.firstDecision(o)));
+                val live = choice.options().stream().anyMatch(o -> hasAnswer(engine, LegalAnswers.decisionOf(o)));
                 if (!live) {
                     throw new AssertionError("Every option of " + choice + " leads to a decision without an answer");
                 }

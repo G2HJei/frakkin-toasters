@@ -12,6 +12,7 @@ import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
 import xyz.zlatanov.frakkintoasters.event.interrupt.PlayInterruptCardEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.MoveEvent;
+import xyz.zlatanov.frakkintoasters.engine.answer.LegalAnswers;
 import xyz.zlatanov.frakkintoasters.projection.GameProjection.*;
 import xyz.zlatanov.frakkintoasters.state.Team;
 import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
@@ -33,7 +34,9 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.ADMIRALS_QUARTERS;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_6_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.RESEARCH_LAB;
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.*;
@@ -204,19 +207,34 @@ class GameProjectionTest extends TestHarness {
     void thePendingInputGoesToThePlayerWhoAnswersIt() {
         val decision = new AwaitingDecision(new PlayerDecisionEvent<>(1, MoveEvent.class));
 
-        assertEquals(new Decide(1, MoveEvent.class, List.of()), projection(HOLDER, decision).input());
+        val moves = LegalAnswers.of(game, decision.decision());
+        assertEquals(new Decide(1, MoveEvent.class, List.of(), moves), projection(HOLDER, decision).input());
         assertEquals(new WaitingFor(1), projection(OTHER, decision).input());
         assertEquals(new WaitingFor(1), projection(OBSERVER, decision).input());
 
+        // the second option asks for the move: its answers come with it
         val options = new LinkedHashSet<Followup>(List.of(single(new NoOpEvent(1)), single(new PlayerDecisionEvent<>(1, MoveEvent.class))));
-        assertEquals(new Choose(1, List.copyOf(options)), projection(HOLDER, new AwaitingChoice(1, options)).input());
+        assertEquals(new Choose(1, List.copyOf(options), List.of(new OptionAnswers(1, moves))),
+                projection(HOLDER, new AwaitingChoice(1, options)).input());
+    }
+
+    @Test
+    void theAnswersOfADecisionAreTheGamesOwn() {
+        moveTo(ADMIRALS_QUARTERS, LAURA_ROSLIN);
+        val decision = new AwaitingDecision(new PlayerDecisionEvent<>(1, MoveEvent.class));
+
+        val answers = ((Decide) projection(HOLDER, decision).input()).answers();
+
+        assertTrue(answers.events().contains(new MoveEvent(1, RESEARCH_LAB, null)));
+        assertFalse(answers.isEmpty());
     }
 
     @Test
     void nobodyElseLearnsWhoAnswersASecretInput() {
         val secret = new AwaitingDecision(new PlayerDecisionEvent<>(1, PlayInterruptCardEvent.class));
 
-        assertEquals(new Decide(1, PlayInterruptCardEvent.class, List.of()), projection(HOLDER, secret).input());
+        assertEquals(new Decide(1, PlayInterruptCardEvent.class, List.of(), LegalAnswers.of(game, secret.decision())),
+                projection(HOLDER, secret).input());
         assertEquals(new Waiting(), projection(OTHER, secret).input());
         assertEquals(new Waiting(), projection(OBSERVER, secret).input());
     }
@@ -261,7 +279,9 @@ class GameProjectionTest extends TestHarness {
         assertEquals(List.of(QuorumCard.values()[0]), sandbox.presidentHand().cards());
         assertEquals(new Cargo(1, 0, 2), civilianShip(Viewer.sandbox()).cargo());
         assertEquals(List.of(played), sandbox.turn().windowCards());
-        assertEquals(new Decide(3, PlayInterruptCardEvent.class, List.of()), sandbox.input()); // a secret input in full
+        // a secret input in full
+        assertEquals(new Decide(3, PlayInterruptCardEvent.class, List.of(), LegalAnswers.of(game, secret.decision())),
+                sandbox.input());
         assertEquals(game.decks().deck(DeckId.CRISIS).cards(), sandbox.decks().stream()
                 .filter(deck -> deck.deck() == DeckId.CRISIS).findFirst().orElseThrow().drawPile());
     }

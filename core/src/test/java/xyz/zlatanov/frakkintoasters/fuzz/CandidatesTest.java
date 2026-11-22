@@ -31,6 +31,7 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.LAURA_ROSLI
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.CONSOLIDATE_POWER;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.EXECUTIVE_ORDER;
 
+// The fuzzer's answers to decisions whose answers have a shape, found through the game's legal answers.
 class CandidatesTest extends TestHarness {
 
     private final List<Finding> findings = new ArrayList<>();
@@ -123,49 +124,6 @@ class CandidatesTest extends TestHarness {
         player(1).character(LAURA_ROSLIN);
         president(LAURA_ROSLIN);
         presidentHand.addOnTop(AUTHORIZATION_OF_BRUTAL_FORCE);
-    }
-
-    @Test
-    void aTiebreakKeepsOneCardOfEachGroup() {
-        val picks = Combinations.oneOfEach(List.of(List.of("a", "b"), List.of("c", "d", "e")));
-
-        assertEquals(6, picks.size());
-        assertTrue(picks.stream().allMatch(pick -> pick.size() == 2
-                && List.of("a", "b").contains(pick.get(0)) && List.of("c", "d", "e").contains(pick.get(1))));
-    }
-
-    @Test
-    void calculationsIsTriedWithOneMoreAndOneLess() {
-        val modifier = Arrays.stream(PlayInterruptCardEvent.class.getRecordComponents())
-                .filter(component -> component.getName().equals("calculationsModifier"))
-                .findFirst()
-                .orElseThrow();
-
-        assertEquals(Arrays.asList(null, -1, 1),
-                Domains.of(asked(PlayInterruptCardEvent.class), PlayInterruptCardEvent.class, modifier, null));
-    }
-
-    @Test
-    void aComponentWithoutValuesIsAFinding() {
-        val selection = DrawSkillCardsEvent.class.getRecordComponents()[1];
-
-        Domains.of(asked(DrawSkillCardsEvent.class), DrawSkillCardsEvent.class, selection, null);
-
-        assertEquals(1, findings.size());
-        assertEquals(Finding.Kind.FUZZER, findings.getFirst().kind());
-        assertEquals("no domain for DrawSkillCardsEvent.selection", findings.getFirst().signature());
-    }
-
-    @Test
-    void subsetsAreEveryPickWhenThereAreFew() {
-        val picks = Combinations.subsets(List.of(1, 2, 3, 4), 2, 100, new Random(1));
-
-        assertEquals(6, picks.size());
-        assertEquals(6, picks.stream().distinct().count());
-    }
-
-    private Asked asked(Class<? extends xyz.zlatanov.frakkintoasters.event.Event> action) {
-        return new Asked(game, new PlayerDecisionEvent<>(1, action), new Random(1), findings::add);
     }
 
     // "Selfish" discards cards worth 20 strength, here the whole hand of 10 (F-316031).

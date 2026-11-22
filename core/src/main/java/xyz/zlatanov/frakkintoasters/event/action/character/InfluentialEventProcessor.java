@@ -36,7 +36,7 @@ public class InfluentialEventProcessor extends CharacterActionEventProcessor<Inf
     /**
      * @return the cards she reorders, the first on top
      */
-    static List<QuorumCard> top(GameView game) {
+    public static List<QuorumCard> top(GameView game) {
         List<QuorumCard> cards = game.decks().<QuorumCard>deck(DeckId.QUORUM).cards();
         return List.copyOf(cards.subList(0, Math.min(CARDS, cards.size())));
     }

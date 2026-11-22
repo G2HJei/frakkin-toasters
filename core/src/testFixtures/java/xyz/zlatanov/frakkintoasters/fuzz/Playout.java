@@ -6,6 +6,7 @@ import xyz.zlatanov.frakkintoasters.engine.PendingInput;
 import xyz.zlatanov.frakkintoasters.engine.ProcessorRegistry;
 import xyz.zlatanov.frakkintoasters.engine.ScriptedTurns.Input;
 import xyz.zlatanov.frakkintoasters.engine.TestEngines;
+import xyz.zlatanov.frakkintoasters.engine.answer.LegalAnswers;
 import xyz.zlatanov.frakkintoasters.engine.journal.Journal;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry;
 import xyz.zlatanov.frakkintoasters.event.Event;
@@ -49,37 +50,49 @@ public final class Playout {
      * @param twins         how many times a game is restored on the way
      * @param anytimeChance 1 in how many pauses a player reveals a Motive Card he can
      * @param probeChance   1 in how many decisions first get an input from the wide domains, 0 for none
+     * @param mutationChance 1 in how many answers are checked against their mutations (one component set to each of
+     *                       its wide values), 0 for none
      * @param fullTrace     keep every input, not only the last ones
      * @param repro         keep the journal and the failing input of each finding, for a regression journal
      * @param firstEvent    the game's first event, {@code null} for a real start
      */
     public record Options(int roundCap, int turnInputCap, int twins, int anytimeChance, int probeChance,
-                          boolean fullTrace, boolean repro, Event firstEvent) {
+                          int mutationChance, boolean fullTrace, boolean repro, Event firstEvent) {
 
         public static final int ROUND_CAP = 50;
 
         public static Options defaults() {
-            return new Options(ROUND_CAP, 5_000, 3, 20, 20, false, false, null);
+            return new Options(ROUND_CAP, 5_000, 3, 20, 20, 10, false, false, null);
         }
 
         public Options withRoundCap(int rounds) {
-            return new Options(rounds, turnInputCap, twins, anytimeChance, probeChance, fullTrace, repro, firstEvent);
+            return new Options(rounds, turnInputCap, twins, anytimeChance, probeChance, mutationChance, fullTrace, repro,
+                    firstEvent);
         }
 
         public Options withProbeChance(int chance) {
-            return new Options(roundCap, turnInputCap, twins, anytimeChance, chance, fullTrace, repro, firstEvent);
+            return new Options(roundCap, turnInputCap, twins, anytimeChance, chance, mutationChance, fullTrace, repro,
+                    firstEvent);
+        }
+
+        public Options withMutationChance(int chance) {
+            return new Options(roundCap, turnInputCap, twins, anytimeChance, probeChance, chance, fullTrace, repro,
+                    firstEvent);
         }
 
         public Options withFullTrace() {
-            return new Options(roundCap, turnInputCap, twins, anytimeChance, probeChance, true, repro, firstEvent);
+            return new Options(roundCap, turnInputCap, twins, anytimeChance, probeChance, mutationChance, true, repro,
+                    firstEvent);
         }
 
         public Options withRepro() {
-            return new Options(roundCap, turnInputCap, twins, anytimeChance, probeChance, fullTrace, true, firstEvent);
+            return new Options(roundCap, turnInputCap, twins, anytimeChance, probeChance, mutationChance, fullTrace, true,
+                    firstEvent);
         }
 
         public Options withFirstEvent(Event event) {
-            return new Options(roundCap, turnInputCap, twins, anytimeChance, probeChance, fullTrace, repro, event);
+            return new Options(roundCap, turnInputCap, twins, anytimeChance, probeChance, mutationChance, fullTrace, repro,
+                    event);
         }
     }
 
@@ -191,7 +204,7 @@ public final class Playout {
         options.sort(Comparator.comparing(Followup::toString)); // a set's order may differ between runs
         while (!options.isEmpty()) {
             val option = options.get(random.nextInt(options.size()));
-            val decision = firstDecision(option);
+            val decision = LegalAnswers.decisionOf(option);
             if (decision == null) {
                 return new Input(choice.player(), null, option);
             }
@@ -215,15 +228,27 @@ public final class Playout {
     }
 
     private Input answer(PlayerDecisionEvent<?> decision) {
-        if (options.probeChance() > 0 && random.nextInt(options.probeChance()) == 0 && probe(decision)) {
-            lookedAhead = null;
-            return null;
+        LegalAnswers answers = null;
+        if (options.probeChance() > 0 && random.nextInt(options.probeChance()) == 0) {
+            answers = AnswerFinder.answers(engine.view(), decision, this::note);
+            if (probe(decision, answers)) {
+                lookedAhead = null;
+                return null;
+            }
         }
         if (decision.equals(lookedAhead)) {
             lookedAhead = null;
             return new Input(decision.playerNumber(), lookedAheadAnswer, null);
         }
-        val answer = AnswerFinder.find(engine.view(), decision, random, this::note);
+        if (answers == null) {
+            answers = AnswerFinder.answers(engine.view(), decision, this::note);
+        }
+        val answer = AnswerFinder.find(engine.view(), decision, answers, random, this::note);
+        if (answer.isPresent() && options.mutationChance() > 0 && random.nextInt(options.mutationChance()) == 0) {
+            val waiting = waiting();
+            Mutations.check(engine.view(), decision, answers, answer.get(), random, finding -> note(finding,
+                    () -> pause(waiting, repro(waiting, decision.playerNumber(), null, finding.event(), Expectation.RUNS))));
+        }
         if (answer.isEmpty()) {
             stop(Finding.of(Kind.NO_ANSWER, "decision " + describe(decision),
                             "No legal answer to `" + describe(decision) + "`").withDetail(decision.toString()),
@@ -234,11 +259,10 @@ public final class Playout {
     }
 
     // An input from the wide domains of a random class that may answer: the game has to reject it and stay as it was,
-    // or take it and go on. True when it took the place of the answer: the game took it, or it ended the game.
-    private boolean probe(PlayerDecisionEvent<?> decision) {
-        val classes = AnswerClasses.of(decision.action()).stream()
-                .sorted(Comparator.comparing(answerClass -> answerClass.type().getName()))
-                .toList();
+    // or take it and go on, and then the legal answers have to cover it. True when it took the place of the answer:
+    // the game took it, or it ended the game.
+    private boolean probe(PlayerDecisionEvent<?> decision, LegalAnswers answers) {
+        val classes = LegalAnswers.answerTypes(decision.action());
         if (classes.isEmpty()) {
             return false;
         }
@@ -262,19 +286,20 @@ public final class Playout {
         if (result.taken()) {
             inputCount++;
             turnInputs++;
+            if (!covers(answers, decision, event)) {
+                note(Mutations.missing(event, null), () -> pause(waiting,
+                        repro(waiting, decision.playerNumber(), null, event, Expectation.RUNS)));
+            }
         }
         return result.taken();
     }
 
-    /**
-     * @return the decision an option asks first, {@code null} when it asks none at once
-     */
-    static PlayerDecisionEvent<?> firstDecision(Followup followup) {
-        return switch (followup) {
-            case Followup.Single(PlayerDecisionEvent<?> decision) -> decision;
-            case Followup.AllOf allOf when !allOf.followups().isEmpty() -> firstDecision(allOf.followups().getFirst());
-            default -> null;
-        };
+    private static boolean covers(LegalAnswers answers, PlayerDecisionEvent<?> decision, Event event) {
+        try {
+            return answers.covers(AnswerFinder.constrained(decision, event));
+        } catch (RuntimeException thrown) {
+            return true; // the game took it, so its constraints fit: a crash here is the check's own
+        }
     }
 
     private static String describe(PlayerDecisionEvent<?> decision) {

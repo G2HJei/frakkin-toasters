@@ -30,6 +30,18 @@ class AttackCylonShipResultEventProcessorTest extends EventTestHarness<AttackCyl
         assertShipCount(GALACTICA_SPACE_4_OCLOCK, raidersLeft);
     }
 
+    // The roll's "Hotshot" discard drew a second Mutiny Card and sent the pilot to the "Brig", his viper with him
+    // (F-3bdf77).
+    @Test
+    void shouldMissWhenTheFighterLeftSpaceBeforeTheResult() {
+        val raider = raiderAt(GALACTICA_SPACE_4_OCLOCK);
+        rolled(8);
+
+        execute(new AttackCylonShipResultEvent(viper().id(), raider.id()));
+
+        assertShipCount(GALACTICA_SPACE_4_OCLOCK, 1);
+    }
+
     @ParameterizedTest
     @CsvSource({"6, 1", "7, 0"})
     void shouldDestroyAHeavyRaiderOn7OrHigher(int roll, int heavyRaidersLeft) {

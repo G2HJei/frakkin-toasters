@@ -1,8 +1,7 @@
-package xyz.zlatanov.frakkintoasters.fuzz;
+package xyz.zlatanov.frakkintoasters.engine.answer;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.engine.EventCatalog;
-import xyz.zlatanov.frakkintoasters.engine.GameEngine;
 import xyz.zlatanov.frakkintoasters.engine.ProcessorRegistry;
 import xyz.zlatanov.frakkintoasters.event.AnytimeEvent;
 import xyz.zlatanov.frakkintoasters.event.Event;
@@ -31,34 +30,24 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.RecordComponent;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * The event classes that can answer a decision, and for each the cheap check that says it can't be legal now, so the
+ * The event classes that may answer a decision, and for each the cheap check that says it can't be legal now, so the
  * search skips it. The check is the one the game asks before it offers the card, the ability or the location.
  */
 final class AnswerClasses {
 
     private static final Map<Class<?>, List<AnswerClass>> BY_ACTION = new ConcurrentHashMap<>();
-    private static final String                           MAIN      = codeSource(GameEngine.class);
 
     /**
      * @param skillCardType the card a Skill Card's event plays, {@code null} for any other event
      */
     record AnswerClass(Class<? extends Event> type, Gate gate, SkillCardType skillCardType) {
-
-        boolean mayAnswer(Asked asked) {
-            try {
-                return gate.open(asked);
-            } catch (Throwable thrown) {
-                // The game asks the same check before it offers this, so a crash here is the game's.
-                asked.findings().accept(Finding.of(Finding.Kind.INPUT_CRASH, thrown, type.getSimpleName()));
-                return true;
-            }
-        }
     }
 
     @FunctionalInterface
@@ -67,21 +56,6 @@ final class AnswerClasses {
     }
 
     private AnswerClasses() {
-    }
-
-    /**
-     * @return the simple names of the events a game can run: the records of the rules with a processor, not the
-     * sandbox's setup events
-     */
-    static List<String> productionEventTypes() {
-        return EventCatalog.types().stream()
-                .filter(Class::isRecord)
-                .filter(ProcessorRegistry::hasProcessor)
-                .filter(type -> !SandboxEvent.class.isAssignableFrom(type))
-                .filter(type -> MAIN.equals(codeSource(type)))
-                .map(Class::getSimpleName)
-                .sorted()
-                .toList();
     }
 
     static List<AnswerClass> of(Class<?> action) {
@@ -98,7 +72,7 @@ final class AnswerClasses {
                 .filter(type -> !SandboxEvent.class.isAssignableFrom(type))
                 .filter(type -> !AnytimeEvent.class.isAssignableFrom(type))
                 .filter(type -> type != PlayerDecisionEvent.class)
-                .filter(type -> MAIN.equals(codeSource(type)))
+                .sorted(Comparator.comparing(Class::getName))
                 .map(AnswerClasses::answerClass)
                 .toList();
     }
@@ -157,7 +131,7 @@ final class AnswerClasses {
         }
     }
 
-    private static Object defaultValue(Class<?> type) {
+    static Object defaultValue(Class<?> type) {
         if (type == int.class) {
             return 0;
         }
@@ -168,10 +142,5 @@ final class AnswerClasses {
             return false;
         }
         return null;
-    }
-
-    private static String codeSource(Class<?> type) {
-        val source = type.getProtectionDomain().getCodeSource();
-        return source == null ? "" : source.getLocation().toString();
     }
 }

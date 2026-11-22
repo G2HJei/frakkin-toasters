@@ -1375,6 +1375,17 @@
             "name" : "Followup"
           }
         }
+      }, {
+        "name" : "answers",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "OptionAnswers"
+          }
+        }
       } ]
     },
     "ChooseADifferentPathEvent" : {
@@ -2431,6 +2442,13 @@
             "t" : "enum",
             "name" : "EventConstraint"
           }
+        }
+      }, {
+        "name" : "answers",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "LegalAnswers"
         }
       } ]
     },
@@ -5845,6 +5863,34 @@
         }
       } ]
     },
+    "LegalAnswers" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "events",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "Event"
+          }
+        }
+      }, {
+        "name" : "shapes",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "ShapedAnswer"
+          }
+        }
+      } ]
+    },
     "LiveUpdateProjection" : {
       "kind" : "record",
       "tagged" : false,
@@ -6752,6 +6798,26 @@
         }
       } ]
     },
+    "OptionAnswers" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "option",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "answers",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "LegalAnswers"
+        }
+      } ]
+    },
     "OrganizedEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -7003,6 +7069,11 @@
       "tagged" : true,
       "interfaces" : [ "Event" ],
       "components" : [ ]
+    },
+    "Pick" : {
+      "kind" : "union",
+      "discriminator" : "kind",
+      "members" : [ "QuorumCardPick", "ShipPick", "SkillCardPick" ]
     },
     "PlaceCenturionsEvent" : {
       "kind" : "record",
@@ -8469,6 +8540,49 @@
         }
       } ]
     },
+    "QuorumCardPick" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Pick" ],
+      "components" : [ {
+        "name" : "component",
+        "type" : {
+          "t" : "string",
+          "nullable" : true
+        }
+      }, {
+        "name" : "cards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "QuorumCard"
+          }
+        }
+      }, {
+        "name" : "min",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "max",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "ordered",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      } ]
+    },
     "QuorumChamberEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -9746,6 +9860,26 @@
         }
       } ]
     },
+    "ShapedAnswer" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "example",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "Event"
+        }
+      }, {
+        "name" : "pick",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "Pick"
+        }
+      } ]
+    },
     "ShipFact" : {
       "kind" : "union",
       "discriminator" : "kind",
@@ -9835,6 +9969,43 @@
           "nullable" : true,
           "t" : "enum",
           "name" : "Location"
+        }
+      } ]
+    },
+    "ShipPick" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Pick" ],
+      "components" : [ {
+        "name" : "component",
+        "type" : {
+          "t" : "string",
+          "nullable" : true
+        }
+      }, {
+        "name" : "shipIds",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "t" : "int",
+            "nullable" : false,
+            "role" : "ship"
+          }
+        }
+      }, {
+        "name" : "min",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "max",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
         }
       } ]
     },
@@ -10008,6 +10179,56 @@
       "kind" : "union",
       "discriminator" : "kind",
       "members" : [ "BuildNukeEvent", "CombatVeteranEvent", "ConsolidatePowerEvent", "CriticalSituationEvent", "ExecutiveOrderEvent", "FullThrottleEvent", "LaunchReservesEvent", "LaunchScoutEvent", "MaximumFirepowerEvent", "NegotiationEvent", "PopularInfluenceEvent", "PreventivePolicyEvent", "RaptorSpecialistEvent", "RepairEvent", "ScoutForFuelEvent", "StateOfEmergencyEvent", "TestTheLimitsEvent", "UnorthodoxPlanEvent" ]
+    },
+    "SkillCardPick" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "Pick" ],
+      "components" : [ {
+        "name" : "component",
+        "type" : {
+          "t" : "string",
+          "nullable" : true
+        }
+      }, {
+        "name" : "cards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "SkillCard"
+          }
+        }
+      }, {
+        "name" : "min",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "max",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "ordered",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      }, {
+        "name" : "minStrength",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      } ]
     },
     "SkillCardType" : {
       "kind" : "enum",

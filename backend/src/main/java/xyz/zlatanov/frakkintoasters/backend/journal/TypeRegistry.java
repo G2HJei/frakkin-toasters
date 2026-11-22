@@ -2,6 +2,7 @@ package xyz.zlatanov.frakkintoasters.backend.journal;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.engine.EventCatalog;
+import xyz.zlatanov.frakkintoasters.engine.answer.Pick;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.Fact;
 import xyz.zlatanov.frakkintoasters.event.Followup;
@@ -51,11 +52,11 @@ public final class TypeRegistry {
     }
 
     /**
-     * The types a client gets: those of the journal, and the sealed types of the projections.
+     * The types a client gets: those of the journal, and the sealed types of the projections and their legal answers.
      */
     public static TypeRegistry wire() {
         val registry = journal();
-        for (val sealed : List.of(Viewer.class, InputProjection.class, LogEntry.class, FactProjection.class)) {
+        for (val sealed : List.of(Viewer.class, InputProjection.class, LogEntry.class, FactProjection.class, Pick.class)) {
             registry.register(sealed);
             registry.registerSealed(sealed);
         }

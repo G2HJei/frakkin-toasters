@@ -1,6 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event.player;
 
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.event.action.Actions;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
@@ -33,8 +34,8 @@ public class MoveEventProcessor extends EventProcessor<MoveEvent> {
 
     @Override
     public boolean isValid() {
-        if (destination == null || game.locate(player.character()).isEmpty()) {
-            return false; // e.g. a "Stranded" Karl "Helo" Agathon
+        if (destination == null || !Actions.canMove(game, player)) {
+            return false; // e.g. a "Stranded" Karl "Helo" Agathon, a character in the "Brig", "Heretic"
         }
         val isEligibleLocation = isEligibleLocation();
         val shouldDiscardCard = !Objects.equals(startingArea(), targetArea());
@@ -42,9 +43,7 @@ public class MoveEventProcessor extends EventProcessor<MoveEvent> {
         if (isDiscardingCard && !holdsSkillCards(List.of(discardCard))) {
             return false;
         }
-        return isEligibleLocation &&
-                shouldDiscardCard == isDiscardingCard
-                && !CharacterMoves.hereticHeld(game, player);
+        return isEligibleLocation && shouldDiscardCard == isDiscardingCard;
     }
 
     @Override

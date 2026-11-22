@@ -2,54 +2,98 @@ package xyz.zlatanov.frakkintoasters.fuzz;
 
 import lombok.val;
 import xyz.zlatanov.frakkintoasters.engine.ProcessorRegistry;
+import xyz.zlatanov.frakkintoasters.engine.answer.LegalAnswers;
+import xyz.zlatanov.frakkintoasters.engine.answer.ShapedAnswer;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
 import xyz.zlatanov.frakkintoasters.event.constraint.ConstrainedEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
-import xyz.zlatanov.frakkintoasters.fuzz.AnswerClasses.AnswerClass;
 import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
 import xyz.zlatanov.frakkintoasters.state.view.GameView;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.Consumer;
+import java.util.stream.IntStream;
 
 /**
- * Finds a random legal answer to a decision. It builds candidates of every class that can answer, and the processors
- * judge them: {@code prepare} only reads. The pick is uniform over the classes that have a legal answer, because the
- * classes are tried in random order and the first legal candidate is the answer.
+ * Finds a random legal answer to a decision, from the game's own {@link LegalAnswers}. The pick is uniform over the
+ * event classes that can answer, then over the answers of that class; a shape is filled at random and judged again,
+ * since a rule that reads the picked cards may reject a filling, and its example is the answer when none fits.
  */
 public final class AnswerFinder {
+
+    private static final int FILLINGS = 8;
 
     private AnswerFinder() {
     }
 
     /**
-     * @return a legal answer, as {@code submit} would take it, or empty when even every candidate of every class fails
+     * @return a legal answer, as {@code submit} would take it, or empty when the decision has no legal answer
      */
     public static Optional<Event> find(GameView game, PlayerDecisionEvent<?> decision, Random random,
                                        Consumer<Finding> findings) {
-        val asked = new Asked(game, decision, random, findings);
-        val classes = new ArrayList<>(AnswerClasses.of(decision.action()));
-        Collections.shuffle(classes, random);
-        for (val answerClass : classes) {
-            if (answerClass.mayAnswer(asked)) {
-                val answer = firstLegal(asked, answerClass, Candidates.NORMAL);
-                if (answer.isPresent()) {
-                    return answer;
+        return find(game, decision, answers(game, decision, findings), random, findings);
+    }
+
+    public static Optional<Event> find(GameView game, PlayerDecisionEvent<?> decision, LegalAnswers answers,
+                                       Random random, Consumer<Finding> findings) {
+        val byClass = new TreeMap<String, List<Object>>(); // a class's events and shapes, in name order
+        answers.events().forEach(event -> byClass.computeIfAbsent(event.getClass().getName(), key -> new ArrayList<>())
+                .add(event));
+        answers.shapes().forEach(shape -> byClass.computeIfAbsent(shape.example().getClass().getName(),
+                key -> new ArrayList<>()).add(shape));
+        if (byClass.isEmpty()) {
+            return Optional.empty();
+        }
+        val ofClass = new ArrayList<>(byClass.values()).get(random.nextInt(byClass.size()));
+        val choice = ofClass.get(random.nextInt(ofClass.size()));
+        if (choice instanceof Event event) {
+            return Optional.of(event);
+        }
+        val shape = (ShapedAnswer) choice;
+        for (int i = 0; i < FILLINGS; i++) {
+            val filled = fill(shape, random);
+            if (filled != null) {
+                val legal = legal(game, decision, filled, findings);
+                if (legal.isPresent()) {
+                    return legal;
                 }
             }
         }
-        // Before saying there is none: every candidate of every class, whatever the game's checks say.
-        for (val answerClass : classes) {
-            val answer = firstLegal(asked, answerClass, Candidates.EXHAUSTIVE);
-            if (answer.isPresent()) {
-                return answer;
-            }
+        return Optional.of(shape.example());
+    }
+
+    /**
+     * @return the legal answers, with what their search couldn't judge reported as findings
+     */
+    public static LegalAnswers answers(GameView game, PlayerDecisionEvent<?> decision, Consumer<Finding> findings) {
+        try {
+            return LegalAnswers.of(game, decision, new LegalAnswers.Listener() {
+                @Override
+                public void crashed(Class<?> type, Event candidate, RuntimeException thrown) {
+                    val finding = Finding.of(Finding.Kind.INPUT_CRASH, thrown, type.getSimpleName());
+                    findings.accept(candidate == null ? finding : finding.withEvent(candidate));
+                }
+
+                @Override
+                public void unsupported(Class<?> type, String component, String why) {
+                    val name = type.getSimpleName() + (component.isEmpty() ? "" : "." + component);
+                    findings.accept(Finding.of(Finding.Kind.FUZZER, "no answers for " + name,
+                            "The legal answers leave out `" + name + "`: " + why));
+                }
+            });
+        } catch (Throwable thrown) {
+            findings.accept(Finding.of(Finding.Kind.FUZZER, thrown, "LegalAnswers"));
+            return LegalAnswers.NONE;
         }
-        return Optional.empty();
     }
 
     /**
@@ -60,9 +104,7 @@ public final class AnswerFinder {
         val name = candidate.getClass().getSimpleName();
         final Event event;
         try {
-            event = candidate instanceof ConstrainedEvent constrained
-                    ? constrained.withConstraints(decision.eventConstraints())
-                    : candidate;
+            event = constrained(decision, candidate);
         } catch (Throwable thrown) {
             findings.accept(Finding.of(Finding.Kind.INPUT_CRASH, thrown, name).withEvent(candidate));
             return Optional.empty();
@@ -83,20 +125,36 @@ public final class AnswerFinder {
         }
     }
 
-    private static Optional<Event> firstLegal(Asked asked, AnswerClass answerClass, Candidates.Budget budget) {
-        final java.util.List<? extends Event> candidates;
-        try {
-            candidates = Candidates.of(asked, answerClass, budget);
-        } catch (Throwable thrown) {
-            asked.findings().accept(Finding.of(Finding.Kind.FUZZER, thrown, answerClass.type().getSimpleName()));
-            return Optional.empty();
+    static Event constrained(PlayerDecisionEvent<?> decision, Event candidate) {
+        return candidate instanceof ConstrainedEvent constrained
+                ? constrained.withConstraints(decision.eventConstraints())
+                : candidate;
+    }
+
+    // A random filling of the pick: a size between its bounds, random elements by position, in a random order if it
+    // counts.
+    static Event fill(ShapedAnswer shape, Random random) {
+        val pick = shape.pick();
+        val type = shape.example().getClass();
+        val index = Records.indexOf(type, pick.component());
+        val component = type.getRecordComponents()[index];
+        val elements = pick.elements();
+        if (elements.isEmpty()) {
+            return null;
         }
-        for (val candidate : candidates) {
-            val answer = legal(asked.game(), asked.decision(), candidate, asked.findings());
-            if (answer.isPresent()) {
-                return answer;
-            }
+        if (!Collection.class.isAssignableFrom(component.getType())) {
+            return Records.with(shape.example(), index, elements.get(random.nextInt(elements.size())));
         }
-        return Optional.empty();
+        val max = Math.min(pick.max(), elements.size());
+        val size = pick.min() + random.nextInt(Math.max(1, max - pick.min() + 1));
+        val positions = new ArrayList<>(IntStream.range(0, elements.size()).boxed().toList());
+        Collections.shuffle(positions, random);
+        val chosen = positions.subList(0, Math.min(size, positions.size()));
+        if (!pick.ordered()) {
+            Collections.sort(chosen);
+        }
+        List<Object> picked = chosen.stream().map(position -> (Object) elements.get(position)).toList();
+        Object value = component.getType() == Set.class ? new LinkedHashSet<>(picked) : picked;
+        return Records.with(shape.example(), index, value);
     }
 }

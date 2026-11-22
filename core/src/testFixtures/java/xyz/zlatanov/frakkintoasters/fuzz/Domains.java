@@ -45,9 +45,8 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
- * The values a record component of a candidate answer is tried with, by its type and name: the player who is asked,
- * the cards he holds, the ships on the boards, every constant of an enum. Null is tried for every reference, because a
- * client may send it and the processor has to reject it.
+ * The values a client could send for a record component, wider than the game's own answers: any card of the decks,
+ * players and ships that aren't there, nulls. The probes and the mutations try them.
  */
 final class Domains {
 
@@ -65,82 +64,6 @@ final class Domains {
     private Domains() {
     }
 
-    /**
-     * @param skillCardType the card the event plays, which narrows a {@code card} component to it
-     */
-    static List<Object> of(Asked asked, Class<?> record, RecordComponent component, SkillCardType skillCardType) {
-        val type = component.getType();
-        val name = component.getName();
-        if (type == int.class || type == Integer.class) {
-            return withNull(type, ints(asked, record, name));
-        }
-        if (type == boolean.class) {
-            return List.of(false, true);
-        }
-        if (type == Boolean.class) {
-            return Arrays.asList(null, false, true);
-        }
-        if (type == SkillCard.class) {
-            return withNull(type, skillCards(asked, name, skillCardType));
-        }
-        if (type == ViperActivation.class) {
-            return withNull(type, viperActivations(asked));
-        }
-        if (type == EventConstraint.class) {
-            return Arrays.asList((Object) null); // submit replaces it with the decision's
-        }
-        if (type.isEnum()) {
-            return withNull(type, constants(asked, record, name, type));
-        }
-        if (type == List.class || type == Set.class || type == Collection.class) {
-            val lists = lists(asked, component);
-            if (lists == null) {
-                return gap(asked, record, component);
-            }
-            return type == Set.class
-                    ? lists.stream().map(list -> (Object) new LinkedHashSet<>((List<?>) list)).toList()
-                    : lists;
-        }
-        return gap(asked, record, component);
-    }
-
-    private static List<Object> ints(Asked asked, Class<?> record, String name) {
-        val role = ComponentRole.of(name);
-        if (role.isEmpty()) {
-            asked.findings().accept(Finding.of(Finding.Kind.FUZZER, "no role for " + record.getSimpleName() + "." + name,
-                    "No role for the int `" + record.getSimpleName() + "." + name + "`"));
-            return IntStream.rangeClosed(0, asked.game().players().size()).boxed().map(i -> (Object) i).toList();
-        }
-        return switch (role.get()) {
-            case PLAYER -> name.equals("playerNumber")
-                    ? List.of(asked.playerNumber())
-                    : IntStream.rangeClosed(1, asked.game().players().size()).boxed().map(i -> (Object) i).toList();
-            case SHIP -> (name.toLowerCase().contains("centurion") ? centurionIds(asked) : shipIds(asked)).stream()
-                    .map(id -> (Object) id).toList();
-            case COUNT -> switch (name) {
-                case "result" -> IntStream.rangeClosed(1, 8).boxed().map(i -> (Object) i).toList(); // a die's faces
-                case "calculationsModifier" -> List.of(-1, 1);
-                default -> IntStream.rangeClosed(-1, 8).boxed().map(i -> (Object) i).toList();
-            };
-            case SCOPE -> List.of(0);
-        };
-    }
-
-    private static List<Object> skillCards(Asked asked, String name, SkillCardType skillCardType) {
-        val hand = asked.player().skillCards().cards();
-        if (skillCardType != null && name.equals("card")) {
-            return hand.stream().filter(card -> card.type() == skillCardType).distinct().map(card -> (Object) card).toList();
-        }
-        val cards = new LinkedHashSet<Object>(hand);
-        // Some abilities take a card of the check: "Quick Thinking", "Dogfight".
-        val check = asked.game().activeSkillCheck();
-        if (check != null) {
-            cards.addAll(check.dividedCards());
-            cards.addAll(check.cards().cards());
-        }
-        return List.copyOf(cards);
-    }
-
     // The moves, attacks and escorts of each fighter in space, and every launch.
     private static List<Object> viperActivations(Asked asked) {
         val game = asked.game();
@@ -154,82 +77,6 @@ final class Domains {
             }
         }
         return result;
-    }
-
-    private static List<Object> constants(Asked asked, Class<?> record, String name, Class<?> type) {
-        val player = asked.player();
-        val game = asked.game();
-        if (type == QuorumCard.class) {
-            val cards = new LinkedHashSet<Object>(game.presidentHand().cards());
-            cards.addAll(player.quorumCards().cards());
-            return List.copyOf(cards);
-        }
-        if (type == MutinyCard.class) {
-            return distinct(player.mutinyCards().cards());
-        }
-        if (type == LoyaltyCard.class) {
-            return distinct(player.loyaltyCards().cards());
-        }
-        if (type == SuperCrisisCard.class) {
-            return distinct(player.superCrisisCards().cards());
-        }
-        if (type == MotiveCard.class) {
-            return distinct(player.motiveCards().cards());
-        }
-        if (type == CrisisCard.class) {
-            return distinct(game.turn().crisisCards());
-        }
-        if (type == Character.class && name.equals("pilot")) {
-            return player.character() == null ? List.of() : List.of(player.character());
-        }
-        if (type == CharacterAbility.class) {
-            if (record == UseRollAbilityEvent.class) {
-                return List.copyOf(RollAbilities.ABILITIES);
-            }
-            return player.character() == null ? List.of() : List.copyOf(CharacterAbility.of(player.character()));
-        }
-        return List.of(type.getEnumConstants());
-    }
-
-    // Lists of the elements a component holds: cards of the hand, ships of one place, constants of an enum.
-    private static List<Object> lists(Asked asked, RecordComponent component) {
-        val element = elementType(component.getGenericType());
-        if (element == null) {
-            return null;
-        }
-        val random = asked.random();
-        val result = new ArrayList<Object>();
-        result.add(List.of());
-        if (element == SkillCard.class) {
-            val hand = asked.player().skillCards().cards();
-            // up to 8: "Impeachment" discards 5
-            result.addAll(Combinations.subsets(hand, 1, Math.min(8, hand.size()), 48, random));
-            // and the strongest cards first, for a discard worth a strength ("Selfish": 20)
-            val strongest = hand.stream().sorted(Comparator.comparingInt(SkillCard::value).reversed()).toList();
-            for (int size = 1; size <= strongest.size(); size++) {
-                result.add(strongest.subList(0, size));
-            }
-            return result;
-        }
-        if (element == Integer.class) {
-            if (ComponentRole.of(component.getName()).filter(ComponentRole.SHIP::equals).isEmpty()) {
-                return null;
-            }
-            for (val group : shipGroups(asked).values()) {
-                result.addAll(Combinations.subsets(group, 1, Math.min(3, group.size()), 8, random));
-            }
-            return result;
-        }
-        if (element == EventConstraint.class) {
-            return result;
-        }
-        if (element.isEnum()) {
-            val constants = constants(asked, null, component.getName(), element);
-            result.addAll(Combinations.subsets(constants, 1, 1, 64, random));
-            result.addAll(Combinations.arrangements(constants, 2, 48, random));
-            return result;
-        }
-        return null;
     }
 
     private static Class<?> elementType(Type type) {
@@ -274,10 +121,6 @@ final class Domains {
 
     private static List<Integer> ids(Collection<? extends Ship> ships) {
         return new ArrayList<>(ships.stream().map(Ship::id).sorted().toList());
-    }
-
-    private static List<Object> distinct(List<?> values) {
-        return values.stream().distinct().map(value -> (Object) value).toList();
     }
 
     private static List<Object> withNull(Class<?> type, List<Object> values) {
@@ -421,12 +264,5 @@ final class Domains {
             }
         }
         return result;
-    }
-
-    private static List<Object> gap(Asked asked, Class<?> record, RecordComponent component) {
-        val name = record.getSimpleName() + "." + component.getName();
-        asked.findings().accept(Finding.of(Finding.Kind.FUZZER, "no domain for " + name,
-                "No candidate values for `" + name + "` (" + component.getGenericType().getTypeName() + ")"));
-        return Arrays.asList((Object) null);
     }
 }

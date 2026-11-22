@@ -46,6 +46,13 @@ class MoveEventProcessorTest extends EventTestHarness<MoveEvent> {
         assertInvalid(new MoveEvent(1, RESEARCH_LAB, null));
     }
 
+    // The Movement step doesn't ask him, so only a client could send it.
+    @Test
+    void shouldNotMoveOutOfTheBrig() {
+        moveTo(BRIG, KARA_STARBUCK_THRACE);
+        assertInvalid(new MoveEvent(1, RESEARCH_LAB, null));
+    }
+
     @Test
     void shouldMoveWithinSameShip() {
         moveTo(ADMIRALS_QUARTERS, KARA_STARBUCK_THRACE);

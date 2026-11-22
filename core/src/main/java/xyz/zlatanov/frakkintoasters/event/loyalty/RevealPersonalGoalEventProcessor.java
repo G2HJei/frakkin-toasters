@@ -26,7 +26,7 @@ import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.NOT_CYLON_SELF
 
 public class RevealPersonalGoalEventProcessor extends EventProcessor<RevealPersonalGoalEvent> {
 
-    static final int SELFISH_STRENGTH   = 20;
+    public static final int SELFISH_STRENGTH = 20;
     static final int SACRIFICED_VIPERS  = 6;
     static final int RAIDERS_TO_FIGHT   = 10;
     static final int TITLES_FOR_POWER   = 2;

@@ -28,13 +28,18 @@ public class AttackCylonShipResultEventProcessor extends EventProcessor<AttackCy
     private static final int LOWEST_ROLL_TO_DAMAGE_WITH_A_VIPER    = 8;
     private static final int STRUCTURAL_DAMAGE_BONUS               = 2;
 
+    // It is queued before the roll, so what the roll's cards and abilities did may have taken the fighter or its
+    // target away, e.g. "Hotshot"'s discard drew a second Mutiny Card and sent the pilot to the "Brig".
     @Override
     protected boolean isValid() {
-        return canAttack(game, event.humanFighterId(), event.cylonShipId());
+        return true;
     }
 
     @Override
     public Followup process() {
+        if (!canAttack(game, event.humanFighterId(), event.cylonShipId())) {
+            return NONE; // the attack is gone with its fighter or its target
+        }
         val dieRoll = game.turn().dieRoll();
         val target = galacticaBoard.shipInSpace(event.cylonShipId(), Ship.class);
         if (dieRoll.cards().contains(BEST_OF_THE_BEST)) {

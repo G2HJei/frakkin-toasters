@@ -8,7 +8,7 @@ import { GameSocket } from '../live/GameSocket';
 import { chooseMessage, injectMessage, submitMessage, undoMessage, useGameStore } from '../live/gameStore';
 import { SandboxToolbar } from '../sandbox/SandboxToolbar';
 import { BoardSvg } from '../table/board/BoardSvg';
-import { actLocation, actOption, leavesArea, moveEvent, moveTargets } from '../input/boardMoves';
+import { actLocation, actOption, moveDiscards, moveEvent, moveTargets } from '../input/boardMoves';
 import { skillCardArt } from '../art/images';
 import { ArtImg, ArtPreview } from '../art/Art';
 import { constantLabel, skillCardLabel } from '../labels/describe';
@@ -118,13 +118,12 @@ function LiveTable({ gameId, name, seed, userNames }: { gameId: string; name: st
                 <section className="panel cf move-prompt" aria-label="discard to move">
                   <h2>Moving to {constantLabel('Location', pendingMove)}: discard a Skill Card</h2>
                   <div className="picker">
-                    {context.hand(asked).map((card, index) => (
+                    {(moveDiscards(game, pendingMove) ?? []).map((card, index) => (
                       <button key={index} type="button" className="tile card-pick" onClick={() => { send(submitMessage(token, moveEvent(asked, pendingMove, card))); setPendingMove(null); }}>
                         {skillCardArt(card) && <ArtImg art={skillCardArt(card)!} />}
                         <span>{skillCardLabel(card)}</span>
                       </button>
                     ))}
-                    <button type="button" onClick={() => { send(submitMessage(token, moveEvent(asked, pendingMove, null))); setPendingMove(null); }}>No discard</button>
                     <button type="button" className="link" onClick={() => setPendingMove(null)}>Cancel</button>
                   </div>
                 </section>
@@ -136,8 +135,8 @@ function LiveTable({ gameId, name, seed, userNames }: { gameId: string; name: st
               <BoardSvg
                 targets={targets}
                 onLocation={(location) => {
-                  const from = game.players?.find((player) => player.number === asked)?.location;
-                  if (asked !== null && leavesArea(from, location)) {
+                  // a move to another ship discards a card, which the answers name
+                  if (asked !== null && moveDiscards(game, location) !== null) {
                     setPendingMove(location);
                   } else if (asked !== null) {
                     send(submitMessage(token, moveEvent(asked, location, null)));

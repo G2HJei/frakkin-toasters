@@ -168,7 +168,7 @@ public final class FuzzReport {
         out.append(watch.isEmpty() ? "Nothing to watch.\n" : watch.stream().map(line -> "- " + line + "\n")
                 .collect(Collectors.joining()));
 
-        val neverRan = new TreeSet<>(AnswerClasses.productionEventTypes());
+        val neverRan = new TreeSet<>(ProductionEvents.types());
         neverRan.removeAll(results.eventTypes());
         out.append("\n<details><summary>Event types that never ran (").append(neverRan.size())
                 .append(")</summary>\n\n")

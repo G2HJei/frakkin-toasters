@@ -70,7 +70,11 @@ Everything else is built on the engine being sound, so find out now. Done 2026-1
 
 ### B. Legal-move hints (core + wire, the hinge)
 
-The "Still open" item of the frontend plan, and the prerequisite for most of C.
+The "Still open" item of the frontend plan, and the prerequisite for most of C. Done 2026-11-22 (`legal-answers-plan.md`):
+`LegalAnswers` in `core` lists the concrete and the shaped answers of every decision, judged by the processors
+themselves; the asked viewer's `input` carries them, also for a choice's options; the board's moves and "Act" button
+read them; and the fuzzer answers from them, 10,000 seeds per player count with no answer missing and no decision
+without one.
 
 - **B1. `LegalAnswers` in `core`**: for a pending `PlayerDecisionEvent<T>`, enumerate the concrete answers where the set
   is small and finite, and describe the shape of the answer where it is not. Group by kind of decision:

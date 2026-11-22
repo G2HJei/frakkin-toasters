@@ -4,6 +4,8 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.engine.PendingInput;
 import xyz.zlatanov.frakkintoasters.engine.PendingInput.AwaitingChoice;
 import xyz.zlatanov.frakkintoasters.engine.PendingInput.AwaitingDecision;
+import xyz.zlatanov.frakkintoasters.engine.answer.LegalAnswers;
+import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.DetermineSkillCheckResultEventProcessor;
 import xyz.zlatanov.frakkintoasters.projection.GameProjection.*;
@@ -50,7 +52,8 @@ import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.*;
  *     <li>the cards played before a skill check: the count and the colors per player, until they are revealed. The pile
  *     the cards are played into: the count and the colors</li>
  *     <li>the cards in an open interrupt window: the player who played them. The others count them in his hand</li>
- *     <li>the pending input: the player who answers it. The others learn who is asked, but not while it is secret</li>
+ *     <li>the pending input: the player who answers it, with its legal answers. The others learn who is asked, but
+ *     not while it is secret</li>
  *     <li>everything, once the game has ended, and to the user of a sandbox, who sees the draw piles in order too</li>
  * </ul>
  */
@@ -337,10 +340,22 @@ final class GameProjector {
             }
             return switch (input) {
                 case AwaitingDecision(var decision) -> new Decide(decision.playerNumber(),
-                        eventClass(decision.action()), decision.eventConstraints());
-                case AwaitingChoice(int player, var options) -> new Choose(player, List.copyOf(options));
+                        eventClass(decision.action()), decision.eventConstraints(), LegalAnswers.of(game, decision));
+                case AwaitingChoice(int player, var options) -> choose(player, List.copyOf(options));
             };
         }).orElse(null);
+    }
+
+    // The answers come with each option that asks the chooser for a decision at once.
+    private Choose choose(int player, List<Followup> options) {
+        val answers = new ArrayList<OptionAnswers>();
+        for (int option = 0; option < options.size(); option++) {
+            val decision = LegalAnswers.decisionOf(options.get(option));
+            if (decision != null && decision.playerNumber() == player) {
+                answers.add(new OptionAnswers(option, LegalAnswers.of(game, decision)));
+            }
+        }
+        return new Choose(player, options, answers);
     }
 
     private boolean answers(PendingInput input) {

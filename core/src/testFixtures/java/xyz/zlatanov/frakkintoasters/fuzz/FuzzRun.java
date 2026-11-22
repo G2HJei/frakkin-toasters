@@ -94,7 +94,7 @@ public final class FuzzRun {
     public static void main(String[] args) {
         val arguments = Arguments.parse(args);
         // ClasspathScanner opens a zip file system per jar, which two threads can't do at once: scan before the pool.
-        AnswerClasses.productionEventTypes();
+        ProductionEvents.types();
         ProcessorRegistry.hasProcessor(Event.class);
         if (arguments.seed() != null) {
             single(arguments);

@@ -1,6 +1,7 @@
 package xyz.zlatanov.frakkintoasters.projection;
 
 import xyz.zlatanov.frakkintoasters.engine.PendingInput;
+import xyz.zlatanov.frakkintoasters.engine.answer.LegalAnswers;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint;
@@ -238,15 +239,26 @@ public record GameProjection(
 
     /**
      * The viewer has to answer with an event of the action's type.
+     *
+     * @param answers the answers the game takes ({@code legal-answers-plan.md})
      */
-    public record Decide(int player, Class<? extends Event> action, List<EventConstraint> constraints)
-            implements InputProjection {
+    public record Decide(int player, Class<? extends Event> action, List<EventConstraint> constraints,
+                         LegalAnswers answers) implements InputProjection {
     }
 
     /**
      * The viewer has to pick one of the options, by its index.
+     *
+     * @param answers the answers of the decision each option that asks one asks first, e.g. the action of the Action
+     *                step, so the table can show what the option leads to before it is picked
      */
-    public record Choose(int player, List<Followup> options) implements InputProjection {
+    public record Choose(int player, List<Followup> options, List<OptionAnswers> answers) implements InputProjection {
+    }
+
+    /**
+     * @param option the index of the option in {@link Choose#options()}
+     */
+    public record OptionAnswers(int option, LegalAnswers answers) {
     }
 
     public record WaitingFor(int player) implements InputProjection {

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.BRIG;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 
@@ -28,12 +29,15 @@ class MakeAdmiralEventProcessorTest extends EventTestHarness<MakeAdmiralEvent> {
         assertInvalid(new MakeAdmiralEvent(CAVIL));
     }
 
-    // The Admiral loses the title in the "Brig" (rule 4.4.2.3).
+    // The Admiral loses the title in the "Brig" (rule 4.4.2.3), so a character sent there after the event was queued
+    // doesn't take it (F-c3d2d0).
     @Test
     void notACharacterInTheBrig() {
         moveTo(BRIG, SAUL_TIGH);
 
-        assertInvalid(new MakeAdmiralEvent(SAUL_TIGH));
+        execute(new MakeAdmiralEvent(SAUL_TIGH));
+
+        assertNull(admiral());
     }
 
     @Test

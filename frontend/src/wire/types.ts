@@ -487,6 +487,7 @@ export interface Choose {
   kind: 'Choose';
   player: number;
   options: Array<Followup> | null;
+  answers: Array<OptionAnswers> | null;
 }
 
 export interface ChooseADifferentPathEvent {
@@ -818,6 +819,7 @@ export interface Decide {
   player: number;
   action: string | null;
   constraints: Array<EventConstraint> | null;
+  answers: LegalAnswers | null;
 }
 
 export type DeckFact = DeckFact_CardsAddedOnTop | DeckFact_CardsAddedToBottom | DeckFact_CardsDiscarded | DeckFact_CardsDrawn | DeckFact_CardsPulled | DeckFact_CardsRemovedFromGame | DeckFact_DeckShuffled;
@@ -1903,6 +1905,11 @@ export interface LeaveBrigEvent {
   destinationLimit: EventConstraint | null;
 }
 
+export interface LegalAnswers {
+  events: Array<Event> | null;
+  shapes: Array<ShapedAnswer> | null;
+}
+
 export interface LiveUpdateProjection {
   entries: Array<LogEntry> | null;
 }
@@ -2209,6 +2216,11 @@ export interface OpenInterruptWindowEvent {
   window: InterruptWindow | null;
 }
 
+export interface OptionAnswers {
+  option: number;
+  answers: LegalAnswers | null;
+}
+
 export interface OrganizedEvent {
   kind: 'OrganizedEvent';
   playerNumber: number;
@@ -2283,6 +2295,8 @@ export interface PegasusProjection {
 export interface PersonalVicesEvent {
   kind: 'PersonalVicesEvent';
 }
+
+export type Pick = QuorumCardPick | ShipPick | SkillCardPick;
 
 export interface PlaceCenturionsEvent {
   kind: 'PlaceCenturionsEvent';
@@ -2704,6 +2718,15 @@ export interface QuorumCardInPlay {
   holderPlayerNumber: number | null;
 }
 
+export interface QuorumCardPick {
+  kind: 'QuorumCardPick';
+  component: string | null;
+  cards: Array<QuorumCard> | null;
+  min: number;
+  max: number;
+  ordered: boolean;
+}
+
 export interface QuorumChamberEvent {
   kind: 'QuorumChamberEvent';
   playerNumber: number;
@@ -3123,6 +3146,11 @@ export interface SetTheAgendaLookEvent {
   playerNumber: number;
 }
 
+export interface ShapedAnswer {
+  example: Event | null;
+  pick: Pick | null;
+}
+
 export type ShipFact = ShipFact_BasestarDamageAttached | ShipFact_BasestarDamageCleared | ShipFact_PilotChanged | ShipFact_ShipMoved;
 
 export interface ShipFact_BasestarDamageAttached {
@@ -3148,6 +3176,14 @@ export interface ShipFact_ShipMoved {
   from: ShipZone | null;
   to: ShipZone | null;
   location: Location | null;
+}
+
+export interface ShipPick {
+  kind: 'ShipPick';
+  component: string | null;
+  shipIds: Array<number> | null;
+  min: number;
+  max: number;
 }
 
 export interface ShipProjection {
@@ -3203,6 +3239,16 @@ export type SkillCardColor = 'POLITICS' | 'LEADERSHIP' | 'TACTICS' | 'PILOTING' 
 export const SkillCardColor_VALUES: readonly SkillCardColor[] = ['POLITICS', 'LEADERSHIP', 'TACTICS', 'PILOTING', 'ENGINEERING', 'TREACHERY'];
 
 export type SkillCardEvent = BuildNukeEvent | CombatVeteranEvent | ConsolidatePowerEvent | CriticalSituationEvent | ExecutiveOrderEvent | FullThrottleEvent | LaunchReservesEvent | LaunchScoutEvent | MaximumFirepowerEvent | NegotiationEvent | PopularInfluenceEvent | PreventivePolicyEvent | RaptorSpecialistEvent | RepairEvent | ScoutForFuelEvent | StateOfEmergencyEvent | TestTheLimitsEvent | UnorthodoxPlanEvent;
+
+export interface SkillCardPick {
+  kind: 'SkillCardPick';
+  component: string | null;
+  cards: Array<SkillCard> | null;
+  min: number;
+  max: number;
+  ordered: boolean;
+  minStrength: number;
+}
 
 export type SkillCardType = 'CONSOLIDATE_POWER' | 'INVESTIGATIVE_COMMITTEE' | 'SUPPORT_THE_PEOPLE' | 'PREVENTIVE_POLICY' | 'RED_TAPE' | 'POLITICAL_PROWESS' | 'FORCE_THEIR_HAND' | 'POPULAR_INFLUENCE' | 'NEGOTIATION' | 'EXECUTIVE_ORDER' | 'DECLARE_EMERGENCY' | 'MAJOR_VICTORY' | 'AT_ANY_COST' | 'IRON_WILL' | 'STATE_OF_EMERGENCY' | 'ALL_HANDS_ON_DECK' | 'RESTORE_ORDER' | 'CHANGE_OF_PLANS' | 'LAUNCH_SCOUT' | 'STRATEGIC_PLANNING' | 'GUTS_AND_INITIATIVE' | 'CRITICAL_SITUATION' | 'TRUST_INSTINCTS' | 'SCOUTING_FOR_FUEL' | 'QUICK_THINKING' | 'UNORTHODOX_PLAN' | 'A_SECOND_CHANCE' | 'EVASIVE_MANOEUVRES' | 'MAXIMUM_FIREPOWER' | 'FULL_THROTTLE' | 'RUN_INTERFERENCE' | 'PROTECT_THE_FLEET' | 'BEST_OF_THE_BEST' | 'DOGFIGHT' | 'COMBAT_VETERAN' | 'LAUNCH_RESERVES' | 'REPAIR' | 'SCIENTIFIC_RESEARCH' | 'JURY_RIGGED' | 'CALCULATIONS' | 'ESTABLISH_NETWORK' | 'BUILD_NUKE' | 'INSTALL_UPGRADES' | 'RAPTOR_SPECIALIST' | 'TEST_THE_LIMITS' | 'DRADIS_CONTACT' | 'BAIT' | 'A_BETTER_MACHINE' | 'PERSONAL_VICES' | 'VIOLENT_OUTBURSTS' | 'EXPLOIT_A_WEAKNESS';
 export const SkillCardType_VALUES: readonly SkillCardType[] = ['CONSOLIDATE_POWER', 'INVESTIGATIVE_COMMITTEE', 'SUPPORT_THE_PEOPLE', 'PREVENTIVE_POLICY', 'RED_TAPE', 'POLITICAL_PROWESS', 'FORCE_THEIR_HAND', 'POPULAR_INFLUENCE', 'NEGOTIATION', 'EXECUTIVE_ORDER', 'DECLARE_EMERGENCY', 'MAJOR_VICTORY', 'AT_ANY_COST', 'IRON_WILL', 'STATE_OF_EMERGENCY', 'ALL_HANDS_ON_DECK', 'RESTORE_ORDER', 'CHANGE_OF_PLANS', 'LAUNCH_SCOUT', 'STRATEGIC_PLANNING', 'GUTS_AND_INITIATIVE', 'CRITICAL_SITUATION', 'TRUST_INSTINCTS', 'SCOUTING_FOR_FUEL', 'QUICK_THINKING', 'UNORTHODOX_PLAN', 'A_SECOND_CHANCE', 'EVASIVE_MANOEUVRES', 'MAXIMUM_FIREPOWER', 'FULL_THROTTLE', 'RUN_INTERFERENCE', 'PROTECT_THE_FLEET', 'BEST_OF_THE_BEST', 'DOGFIGHT', 'COMBAT_VETERAN', 'LAUNCH_RESERVES', 'REPAIR', 'SCIENTIFIC_RESEARCH', 'JURY_RIGGED', 'CALCULATIONS', 'ESTABLISH_NETWORK', 'BUILD_NUKE', 'INSTALL_UPGRADES', 'RAPTOR_SPECIALIST', 'TEST_THE_LIMITS', 'DRADIS_CONTACT', 'BAIT', 'A_BETTER_MACHINE', 'PERSONAL_VICES', 'VIOLENT_OUTBURSTS', 'EXPLOIT_A_WEAKNESS'];

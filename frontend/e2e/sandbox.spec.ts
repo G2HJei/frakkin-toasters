@@ -15,7 +15,8 @@ test('a seeded sandbox is played through a turn, undone, exported and imported',
   let page = await openGame(lobby, (from) => from.getByRole('button', { name: 'Start the sandbox' }).click());
   // the first tab goes back to the lobby
   await expect(lobby.getByRole('link', { name: 'New sandbox' })).toBeVisible();
-  await expect(input(page).getByRole('heading')).toHaveText('Player 1 decides');
+  // the seed seats the first player, before anyone has a character
+  await expect(input(page).getByRole('heading')).toHaveText(/^Player [1-4] decides$/);
 
   // the characters, one per seat, answered by the sandbox's one user
   for (const character of ['WILLIAM_ADAMA', 'LAURA_ROSLIN', 'KARA_STARBUCK_THRACE', 'SAUL_TIGH']) {
@@ -43,6 +44,8 @@ test('a seeded sandbox is played through a turn, undone, exported and imported',
   await input(page).getByRole('button', { name: 'Take an action' }).click();
   await input(page).getByLabel('skill card color').selectOption('ENGINEERING');
   await send(page);
+  // "Secret Destiny": Starbuck lets the revealed card resolve
+  await input(page).getByRole('button', { name: /Crisis: Riots No Jump/ }).click();
   await input(page).getByRole('button', { name: /Top of Riots No Jump/ }).click();
 
   await expectTurn(page, 'Turn 2 · Laura Roslin', 'Receive Skills');

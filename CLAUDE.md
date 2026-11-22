@@ -60,12 +60,15 @@ Next steps, in order:
    rules are silent).
 5. ~~Create a working frontend with the events that exist by then.~~ Done:
    the backend, the sandbox, the wire schema, the table with the board, the lobby and rooms (see "Backend" and
-   "Frontend"). Still open: legal-move hints (a list in `core` of the legal answers to a decision) and more inputs on
-   the board (viper activation, targets of a choice lighting up).
+   "Frontend"). Still open: more inputs on the board (viper activation, targets of a choice lighting up), milestone C
+   of `roadmap.md`.
 6. ~~Prove the game is completable (`roadmap.md` milestone A): random games played to an ending.~~ Done:
    `./gradlew :core:fuzz` plays the games and writes `fuzzer-report.md`, a finding exports as a regression journal
    with its failing input, and hostile inputs probe the checks. 10,000 seeds per player count ran with no finding left
    but NO_END games that are a valid stall: every human in the "Brig", where nobody draws a Crisis Card.
+7. ~~Legal-move hints (`roadmap.md` milestone B, `legal-answers-plan.md`).~~ Done: `LegalAnswers` in `core` (see
+   "Legal answers"), in the asked viewer's `input` (see "Projections"), read by the board's moves and "Act" button,
+   and the fuzzer answers from them (see "Random playouts"). Next: milestone C of `roadmap.md`, the table's inputs.
 
 ## Project Structure
 
@@ -98,6 +101,8 @@ whole root package, so nothing in `backend` may be named `XxxEventProcessor`.
   `EventCatalog` (every event type, records and interfaces), both scanned once from the classpath by
   `ClasspathScanner`, `PendingInput` and `EngineStatus` (what the game waits for), `ScopeActor` (who a journal scope is
   logged under)
+- `engine/answer/` - `LegalAnswers` (the legal answers to a decision, see "Legal answers"), `ShapedAnswer`, `Pick`,
+  and the search: `AnswerClasses`, `Domains`, `Shapes`, `AnswerSearch`
 - `engine/journal/` - `Journal`, `JournalEntry`, `FactRecorder`, `FactApplier`, `ShipZones`, `GameReplayer`, and `fact/`
   with the `Fact` records
 - `projection/` - what a `Viewer` (a player or an observer) may see: `GameProjection.of(view, pendingInput, viewer)`
@@ -386,7 +391,8 @@ instead, e.g. `FollowupUtils.chooseCharacterForSickbay` (rule 9.3.2).
   lists throw on `contains(null)` too).
 - A followup is built before the events ahead of it run, so a queued event may find its character changed: an event
   that names him tolerates it, e.g. `SendToBrigEvent` leaves a character already in the "Brig" or a revealed Cylon
-  where he is. A rule that binds a player's choice goes in the event he answers with, e.g.
+  where he is, `MakeAdmiralEvent` gives no title to one sent to the "Brig" meanwhile, and `AttackCylonShipResultEvent`
+  misses once its fighter or target is gone (queued before the roll, whose cards and abilities can move them). A rule that binds a player's choice goes in the event he answers with, e.g.
   `ChooseCharacterForBrigEvent` (rule 9.2.3, `ChooseCharacterForBrigEventProcessor.offer`). An offer that depends on
   what the effects before it did is an event that builds it when it runs, e.g. `OfferPlayOrPassEvent`,
   `OfferUnmannedViperActivationEvent` (the CAG's activation after "Review Camera Footage" damaged the "Reserves",
@@ -451,6 +457,39 @@ constructor takes any first event, and `GameEngineTest` uses the test-only `Scri
   change a resource, set the jump preparation track, damage a location, assign a title. Their processors use the
   rules' ops where one fits, and `SandboxOps` (`GameOps.sandbox()`) for the rest. `DeckFact.CardsPulled` takes a
   stacked or given card out of its draw pile, so no copy appears.
+
+### Legal answers
+
+`LegalAnswers.of(game, decision)` (`engine/answer/`) lists the answers a pending decision takes, for the player it
+asks. It adds no rule: every candidate comes from the game as it is and its processor's `prepare` judges it, as it
+judges a client's input (`legal-answers-plan.md`).
+
+- `LegalAnswers(events, shapes)`: an event is an answer `submit` takes as it is, with the decision's constraints on it.
+  A `ShapedAnswer(example, pick)` has a part to pick: the example is legal, and the `Pick` (`SkillCardPick`,
+  `QuorumCardPick`, `ShipPick`) names the component, the elements to pick from by position, `min` and `max`, and
+  whether the order counts. A move's discard is a pick of one card. `covers(event)` says whether an event is one of
+  them (a list compares as a multiset), `forOption(game, option)` gives the answers of the decision an option of a
+  choice asks first (`decisionOf`), and `answerTypes(action)` the classes that may answer.
+- `AnswerClasses`: the records that may answer an action (not a sandbox or an anytime event), each skipped when the
+  check the game asks before it offers one says no (`SkillCardPlays.canPlay`, `QuorumCardPlays`, `MutinyCardPlays`,
+  `CharacterActions`, `CharacterMovements`, `LocationEvent.canAct`, `canActIgnoringDamage` with
+  `ANYWHERE_EVEN_IF_DAMAGED`).
+- `Domains`: the values of a scalar component, by type and name: the asked player for `playerNumber`, every player
+  for another one, the ships of the kind the name says (`civilianShipId`, `raiderId`, `basestarId`, `cylonShipId`,
+  `viperId`/`fighterId`, `centurionId`; any ship for `shipId`), the cards of the pile an enum comes from (his hand,
+  the President's hand while he is President, the turn's Crisis Cards), every constant of any other enum, the
+  activations of every fighter in space, and null for every reference. A skill check's cards count once they are
+  divided, face up.
+- `Shapes`: where a list's elements come from (the hand, the President's hand, the top Quorum Cards for
+  "Influential", the ships of one place and kind), or the few list values to try as they are (the color selections of
+  a draw, up to the constraint's count; enum lists of up to 2; the tiebreak of the cards before a check). The search
+  judges a witness per size (the first and the last elements), so a source puts its elements in the order that makes
+  the first ones legal: the strongest first for "Selfish" (`minStrength` 20), a Reckless card last before a check.
+  Size 0 is a concrete answer, each run of legal sizes a shape, and a shape that another holds is dropped. A record
+  with a list and no source is reported, and `LegalAnswersTest` lists the two that only a choice offers.
+- A candidate whose check throws is left out, not a crash of the table; `LegalAnswers.Listener` gets it, and the
+  classes the search has no values for. `LegalAnswersTest` checks a decision of each kind (every answer is taken, a
+  known one is there and an illegal one is not), `LegalAnswersEngineTest` the scripted turns and an interrupt window.
 
 ### Turn Loop
 
@@ -915,8 +954,9 @@ the frontend owns the wording.
   may not see them (`SkillHand`, `HiddenCards<T>`). `GameProjector`'s javadoc lists the rules: hands, Loyalty and other
   player cards, the President's Quorum hand (the Quorum Cards in play are public), looked-at Loyalty Cards and civilian
   ship cargo, face down discard piles (`Disclosure.FACEDOWN_DISCARDS`), cards played before a skill check, an open
-  interrupt window's cards (the others count them in the hand), the pending input (backend decision 6), and everything
-  once the game has ended. The Mutineer card is faceup once held ("immediately reveal this card").
+  interrupt window's cards (the others count them in the hand), the pending input (backend decision 6) with its legal
+  answers (`Decide.answers`, and `Choose.answers`: an `OptionAnswers` per option that asks the chooser a decision at
+  once, e.g. the action of the Action step), and everything once the game has ended. The Mutineer card is faceup once held ("immediately reveal this card").
 - `LiveUpdateProjection.of(journal, from, viewer)` is what happened: the scopes (`ScopeLog`: actor, event type, its
   fields when public, the facts) and the choices (`ChoiceLog`). `LiveUpdateProjector` has an exhaustive switch over every
   fact, so a new fact doesn't compile until it has a rule. A fact the viewer may not see becomes `Hidden` (count,
@@ -1040,9 +1080,10 @@ REST (the lobby lists poll), Zustand for the game.
   card, a standee its character sheet with its player's mat beside it (`PlayerMatOf`, the preview's `extra`), and a
   pile of civilian ships shows what each costs
   when destroyed to whoever knows it (a sandbox, the players who looked at it). Inputs on the board
-  are in `src/input/boardMoves.ts`: a move by clicking a location (asking for a discard when it leaves its ship) and the
-  "Act" button on the asked player's location. Each builds the same event, or picks the same option, as the builder; a
-  test checks it. The builder stays for everything else.
+  are in `src/input/boardMoves.ts`, from the input's legal answers: a move by clicking one of its destinations (asking
+  for one of the pick's cards where the answers pick a discard, `moveDiscards`) and the "Act" button on the asked
+  player's location when its action is among the answers of the action option. Each builds the same event, or picks
+  the same option, as the builder; a test checks it. The builder stays for everything else.
 - Hover (`src/table/reveal.tsx`): a pile shows what it holds in one fixed popover (`RevealLayer`), its cards as large as
   their images (no preview of their own) in rows of up to 860px, and scrolls when they don't fit the window. The
   preview of a single image (`ArtPreview`) shows it as large as it is too, scaled down only by a smaller window; a card
@@ -1057,7 +1098,8 @@ REST (the lobby lists poll), Zustand for the game.
   click, while the browser allows it, and points it at the game when the request answers. A sandbox's "Restart with
   this seed" stays in its tab.
 - e2e (`frontend/e2e/`): each spec follows a game into its tab (`tabs.ts`). `sandbox.spec.ts` plays a seeded sandbox through a turn (reading the stacked Crisis Card
-  from the Crisis deck's hover), undoes, exports and imports;
+  from the Crisis deck's hover, Starbuck's "Secret Destiny" letting it resolve; the seed seats the first player),
+  undoes, exports and imports;
   `lobby.spec.ts` has five users host, join, observe, leave and start a game, checks that nobody sees another
   player's cards and that an observer gets no input, and races two users for the last seat.
 - Commands: `npm run dev` (Vite on 5173, proxying `/api`, `/ws`, `/oauth2` to 8080; the `dev` profile allows its
@@ -1223,19 +1265,22 @@ when possible.
   `ArchitectureTest` leaves them out, like the tests
 - Random playouts (`fuzz/`): `Playout.play(players, seed)` plays a seeded game with random legal
   answers until it ends, a finding stops it or it runs past a cap, and restores it on the way (the twins have to stay
-  equal). `AnswerFinder` builds candidate answers to a decision (`Candidates`: a source of its own for a shaped answer,
-  otherwise the `Domains` of the record's components, which take the ints' `ComponentRole`) and keeps the first one
-  `prepare` accepts. Choices look ahead at the decision an option leads to. At 1 in 20 decisions a `Probe` first
-  submits a candidate from the wide domains (`Domains.wide`: any card of the decks, players 0 to n + 1, unknown ship
-  ids, nulls), which the engine has to reject leaving the game as it was (`Twins`), or take. A `Finding` (`CRASH`,
-  `INPUT_CRASH`, `NO_ANSWER`, `DEAD_OPTION`, `RESTORE`, `NO_END`, `BAD_ENDING`, `REJECTED_BUT_CHANGED`, `FUZZER`) has
+  equal). `AnswerFinder` answers from the game's `LegalAnswers` (see "Legal answers"): a random class among them, then
+  a random answer of it, a shape filled at random and judged again (its example when no filling fits). Empty answers
+  are a `NO_ANSWER`, or a `DEAD_OPTION` for a choice, which looks ahead at the decision an option leads to. At 1 in 20
+  decisions a `Probe` first submits a hostile candidate (`Candidates.hostile`, from the wide domains of `Domains.wide`:
+  any card of the decks, players 0 to n + 1, unknown ship ids, nulls), which the engine has to reject leaving the game
+  as it was (`Twins`), or take, and then the answers have to cover it. At 1 in 10 answers `Mutations` sets one
+  component to each of its wide values: an input the game takes that the answers don't cover is a `HINT_MISSING`. A
+  `Finding` (`CRASH`, `INPUT_CRASH`, `NO_ANSWER`, `DEAD_OPTION`, `HINT_MISSING`, `RESTORE`, `NO_END`, `BAD_ENDING`,
+  `REJECTED_BUT_CHANGED`, `FUZZER`) has
   an ID from a signature without line numbers, and its `Pause` (where, the pending input, the inputs before it, and
   with `Options.withRepro` the `Repro`: the journal there and the input that failed). `Endings.classify` reads the
   rule's ending from the final state. `FuzzRun` (`./gradlew :core:fuzz`, `-Pgames`, `-Pplayers`, `-Pseed`, ...) plays
   the seeds on a thread pool and `FuzzReport` rewrites the block of `fuzzer-report.md` between its markers (statuses
   from the hand-written "Fixes" and "Questions"), with a trace per finding in `core/build/fuzz`. `AnswerFinderTest`,
   `CandidatesTest`, `EndingsTest`, `PlayoutTest`, `ProbeTest` and `FuzzReportTest` cover it without failing on what
-  the engine does wrong, except `ProbeTest`'s known `MoveEvent` bug, which its fix flips
+  the engine does wrong
 - `GameSnapshot` (`engine/journal/`) - turns a `Game` into comparable plain values. Replay tests compare a live game
   with its replayed twin. `ScriptedScenario.play(journal)` records every kind of fact, which `GameReplayerTest`
   checks. One of its scopes has no event, so only `GameReplayer` rebuilds it, not `GameEngine.restore`

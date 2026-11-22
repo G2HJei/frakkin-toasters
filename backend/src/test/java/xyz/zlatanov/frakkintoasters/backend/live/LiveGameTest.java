@@ -134,6 +134,9 @@ class LiveGameTest {
         val holder = clients.get(1);
         assertEquals("Decide", holder.game().get("input").get("kind").stringValue());
         assertEquals("Waiting", clients.get(0).game().get("input").get("kind").stringValue());
+        // the holder's answers come with his input, the play and the pass; nobody else's input holds any
+        assertEquals(2, holder.game().get("input").get("answers").get("events").size());
+        assertNull(clients.get(0).game().get("input").get("answers"));
 
         holder.submit(codec.writeEvent(PlayInterruptCardEvent.play(2, planning)));
 

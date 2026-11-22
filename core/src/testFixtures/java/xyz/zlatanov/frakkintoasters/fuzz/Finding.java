@@ -32,6 +32,7 @@ public record Finding(Kind kind, String signature, String summary, String detail
         INPUT_CRASH(false), // checking an input threw instead of rejecting it
         NO_ANSWER(true), // the asked player can't answer
         DEAD_OPTION(false), // an option of a choice leads to a decision without an answer
+        HINT_MISSING(false), // the game takes an input that its legal answers don't cover
         RESTORE(true), // a restore threw, or gave another game
         NO_END(true), // the round cap, or the inputs cap within a turn
         BAD_ENDING(true), // a finished game that no ending explains
