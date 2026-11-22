@@ -33,9 +33,8 @@ public final class FuzzReport {
     private static final String            HEADER   = """
             # Fuzzer report
 
-            Random games played by `./gradlew :core:fuzz` (see `fuzzer-plan.md`). The block between the markers is \
-            rewritten by
-            every run; "Fixes" and "Questions" are written by hand.
+            Random games played by `./gradlew :core:fuzz`. The block between the markers is rewritten by every run;
+            "Fixes" and "Questions" are written by hand.
 
             """;
     private static final String            SECTIONS = """

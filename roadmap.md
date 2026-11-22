@@ -47,8 +47,9 @@ What stands between this and "a group of friends can play a whole game online":
 
 ### A. Prove the game is completable (core, small, first)
 
-Everything else is built on the engine being sound, so find out now. Plan: `fuzzer-plan.md`; findings and fixes:
-`fuzzer-report.md`.
+Everything else is built on the engine being sound, so find out now. Done 2026-11-22: `./gradlew :core:fuzz` played
+10,000 seeds per player count with no finding left but a valid stall (every human in the "Brig"); each run writes
+`fuzzer-report.md` anew.
 
 - **Random-playout fuzzer** (test fixture, runs in `core`): start a seeded game with 3 to 7 players, answer every
   `Waiting` with a random legal answer, restore at random pauses and compare `GameSnapshot`s, until `Finished`. Needs

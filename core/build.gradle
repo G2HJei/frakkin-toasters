@@ -21,7 +21,7 @@ test {
     useJUnitPlatform()
 }
 
-// Random games played to an ending (fuzzer-plan.md): ./gradlew :core:fuzz -Pgames=100 -Pplayers=3-7 writes
+// Random games played to an ending: ./gradlew :core:fuzz -Pgames=100 -Pplayers=3-7 writes
 // fuzzer-report.md, and -Pplayers=4 -Pseed=117 plays one game with a full trace in build/fuzz.
 tasks.register('fuzz', JavaExec) {
     group = 'verification'

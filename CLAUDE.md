@@ -62,11 +62,10 @@ Next steps, in order:
    the backend, the sandbox, the wire schema, the table with the board, the lobby and rooms (see "Backend" and
    "Frontend"). Still open: legal-move hints (a list in `core` of the legal answers to a decision) and more inputs on
    the board (viper activation, targets of a choice lighting up).
-6. Prove the game is completable (`roadmap.md` milestone A, `fuzzer-plan.md`): random games played to an ending.
-   Phases 1 to 5 are done: `./gradlew :core:fuzz` plays the games and writes `fuzzer-report.md`, a finding exports
-   as a regression journal with its failing input, and hostile inputs probe the checks. The fix loop ran to 10,000
-   seeds per player count with no open finding. Its NO_END games are a valid stall, every human in the "Brig" (the
-   report's "Questions").
+6. ~~Prove the game is completable (`roadmap.md` milestone A): random games played to an ending.~~ Done:
+   `./gradlew :core:fuzz` plays the games and writes `fuzzer-report.md`, a finding exports as a regression journal
+   with its failing input, and hostile inputs probe the checks. 10,000 seeds per player count ran with no finding left
+   but NO_END games that are a valid stall: every human in the "Brig", where nobody draws a Crisis Card.
 
 ## Project Structure
 
@@ -1222,7 +1221,7 @@ when possible.
   test-only events with their processors and `TestOps`, `GameSnapshot`, `ScriptedScenario`, `ScriptedTurns`,
   `TestEngines` (starts an engine with any first event) and the random playouts (`fuzz/`, see "Random playouts").
   `ArchitectureTest` leaves them out, like the tests
-- Random playouts (`fuzz/`, `fuzzer-plan.md`): `Playout.play(players, seed)` plays a seeded game with random legal
+- Random playouts (`fuzz/`): `Playout.play(players, seed)` plays a seeded game with random legal
   answers until it ends, a finding stops it or it runs past a cap, and restores it on the way (the twins have to stay
   equal). `AnswerFinder` builds candidate answers to a decision (`Candidates`: a source of its own for a shaped answer,
   otherwise the `Domains` of the record's components, which take the ints' `ComponentRole`) and keeps the first one
