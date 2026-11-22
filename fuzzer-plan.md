@@ -66,34 +66,39 @@ it for the regression journals. No class there ends in `EventProcessor` (the reg
   `CharacterActions.canUse`, `CharacterMovements.canUse`, `LocationEvent.canAct`). Before it reports NO_ANSWER it tries
   again exhaustively (up to 20,000 candidates a class).
 - **Candidate sources**: hand-written ones where the answer has a shape, a reflective one for every other record.
-  - Hand-written (the rules come from the processors' `isValid`):
-    - `DrawSkillCardsEvent`: every multiset of the constraint's count over the 6 colors in random order, then 1 fewer
-      down to 0 (every site passes a count).
-    - `DiscardSkillCardsEvent`: sub-multisets of the live hand of the size the constraint gives (exactly k, down to
-      the hand limit, down to 1 or 3). `DiscardQuorumCardsEvent`: the President's hand less 10.
-    - `PlayCardsBeforeSkillCheckEvent` and `PlayCardsIntoSkillCheckEvent`: none, then sub-multisets of the hand (into:
-      sizes `PlayCardsIntoSkillCheckEventProcessor.canContribute` allows).
-    - `TiebreakCardsBeforeSkillCheckEvent`: one card of each group of `SkillCheckView.playedBeforeConflicts()`.
-    - `GlimpseTheFaceOfGodPlaceEvent` and `SetTheAgendaChoiceEvent`: ordered lists of 2 cards (fewer when the hand
-      has fewer); `ReorderTopQuorumCardsEvent`: permutations of the top 5 Quorum Cards; `HumanDelusionEvent`: non-empty
-      sub-multisets.
-    - `PlayInterruptCardEvent`: the pass, each hand card of the window (`Calculations` with +1 and -1);
-      `UseRollAbilityEvent`: the pass, `HOTSHOT` with a hand card, `LONGSHOT` with 1 to 8, the others bare.
-    - `ChooseCrisisTargetEvent`: the last Crisis Card of the turn and `legalTargets`.
-    - Any `ViperActivation` component: `ActivateViperEventProcessor.activations(view, fighter, false)` for every
-      fighter in space, every launch (`VIPER`, `VIPER_MARK_VII`, `ASSAULT_RAPTOR` × `VIPER_LAUNCH_SPACES`), and null.
-  - Reflective, per record component, by type and name (`ComponentRole`, see decision 4):
-    - `playerNumber` of a `PlayerEvent`: the asked player. Other player ints: 1 to n.
-    - Ship ints and lists: the ids of the ships on the boards (lists: subsets of up to 3).
-    - `SkillCard`: the asked player's hand, plus the active check's revealed cards. `List<SkillCard>`: sub-multisets of
-      the hand.
-    - Card enums: the pile they come from (the player's Loyalty, Super Crisis, Motive and Mutiny Cards, the
-      President's Quorum hand, the turn's Crisis Cards). `Character`: every value. Other enums: every value.
-    - `List` of an enum: subsets of 1 and 2; `boolean`: both; count ints: -1 to 8; `EventConstraint`: null (the
-      engine overwrites it).
-    - Null for every reference component, because clients may send null and `isValid` has to reject it, not throw.
-    - A type it has no domain for is a `FUZZER` finding naming the component, so a gap shows up in the report.
-  - The product of the domains is tried in full when it has at most 512 tuples, otherwise as 64 random ones.
+    - Hand-written (the rules come from the processors' `isValid`):
+        - `DrawSkillCardsEvent`: every multiset of the constraint's count over the 6 colors in random order, then 1
+          fewer
+          down to 0 (every site passes a count).
+        - `DiscardSkillCardsEvent`: sub-multisets of the live hand of the size the constraint gives (exactly k, down to
+          the hand limit, down to 1 or 3). `DiscardQuorumCardsEvent`: the President's hand less 10.
+        - `PlayCardsBeforeSkillCheckEvent` and `PlayCardsIntoSkillCheckEvent`: none, then sub-multisets of the hand
+          (into:
+          sizes `PlayCardsIntoSkillCheckEventProcessor.canContribute` allows).
+        - `TiebreakCardsBeforeSkillCheckEvent`: one card of each group of `SkillCheckView.playedBeforeConflicts()`.
+        - `GlimpseTheFaceOfGodPlaceEvent` and `SetTheAgendaChoiceEvent`: ordered lists of 2 cards (fewer when the hand
+          has fewer); `ReorderTopQuorumCardsEvent`: permutations of the top 5 Quorum Cards; `HumanDelusionEvent`:
+          non-empty
+          sub-multisets.
+        - `PlayInterruptCardEvent`: the pass, each hand card of the window (`Calculations` with +1 and -1);
+          `UseRollAbilityEvent`: the pass, `HOTSHOT` with a hand card, `LONGSHOT` with 1 to 8, the others bare.
+        - `ChooseCrisisTargetEvent`: the last Crisis Card of the turn and `legalTargets`.
+        - Any `ViperActivation` component: `ActivateViperEventProcessor.activations(view, fighter, false)` for every
+          fighter in space, every launch (`VIPER`, `VIPER_MARK_VII`, `ASSAULT_RAPTOR` × `VIPER_LAUNCH_SPACES`), and
+          null.
+    - Reflective, per record component, by type and name (`ComponentRole`, see decision 4):
+        - `playerNumber` of a `PlayerEvent`: the asked player. Other player ints: 1 to n.
+        - Ship ints and lists: the ids of the ships on the boards (lists: subsets of up to 3).
+        - `SkillCard`: the asked player's hand, plus the active check's revealed cards. `List<SkillCard>`: sub-multisets
+          of
+          the hand.
+        - Card enums: the pile they come from (the player's Loyalty, Super Crisis, Motive and Mutiny Cards, the
+          President's Quorum hand, the turn's Crisis Cards). `Character`: every value. Other enums: every value.
+        - `List` of an enum: subsets of 1 and 2; `boolean`: both; count ints: -1 to 8; `EventConstraint`: null (the
+          engine overwrites it).
+        - Null for every reference component, because clients may send null and `isValid` has to reject it, not throw.
+        - A type it has no domain for is a `FUZZER` finding naming the component, so a gap shows up in the report.
+    - The product of the domains is tried in full when it has at most 512 tuples, otherwise as 64 random ones.
 - **`Playout`**: the agent sorts everything it iterates (options by `toString()`, classes by name, ships by id), so a
   seed replays the same game, also in a new JVM. It wraps `submit`, `choose` and `restore` in `catch (Throwable)`: an
   `Error` such as an `AssertionError` gets past the engine's rollback (`GameEngine.advance` catches `RuntimeException`
@@ -109,17 +114,17 @@ it for the regression journals. No class there ends in `EventProcessor` (the reg
 
 ### Findings
 
-| Kind | Fatal | Meaning |
-|---|---|---|
-| `CRASH` | yes | An accepted input rolled back (`FrakCallTheAdmiralException`) or threw an `Error` |
-| `INPUT_CRASH` | no | Checking an input threw something other than `InvalidActionException` (e.g. a null field) |
-| `NO_ANSWER` | yes | The asked player can't answer: a decision without a legal answer, or a choice whose options all lead to one |
-| `DEAD_OPTION` | no | An option of a choice leads to a decision without an answer, other options are live |
-| `RESTORE` | yes | `restore` threw, or the twin differs |
-| `NO_END` | yes | The round cap, or the inputs cap within a turn |
-| `BAD_ENDING` | yes | A finished game that no ending explains |
-| `REJECTED_BUT_CHANGED` | yes | A rejected input changed the game (phase 4) |
-| `FUZZER` | no | The fuzzer itself: no domain for a component, or `prepare` accepted what `submit` rejected |
+| Kind                   | Fatal | Meaning                                                                                                     |
+|------------------------|-------|-------------------------------------------------------------------------------------------------------------|
+| `CRASH`                | yes   | An accepted input rolled back (`FrakCallTheAdmiralException`) or threw an `Error`                           |
+| `INPUT_CRASH`          | no    | Checking an input threw something other than `InvalidActionException` (e.g. a null field)                   |
+| `NO_ANSWER`            | yes   | The asked player can't answer: a decision without a legal answer, or a choice whose options all lead to one |
+| `DEAD_OPTION`          | no    | An option of a choice leads to a decision without an answer, other options are live                         |
+| `RESTORE`              | yes   | `restore` threw, or the twin differs                                                                        |
+| `NO_END`               | yes   | The round cap, or the inputs cap within a turn                                                              |
+| `BAD_ENDING`           | yes   | A finished game that no ending explains                                                                     |
+| `REJECTED_BUT_CHANGED` | yes   | A rejected input changed the game (phase 4)                                                                 |
+| `FUZZER`               | no    | The fuzzer itself: no domain for a component, or `prepare` accepted what `submit` rejected                  |
 
 A fatal finding ends the game; the others are noted once per game and play goes on. A finding's ID is `F-` and 6 hex
 digits of its signature: the kind, the root exception class, the first frame in `..event..` or `..engine..` (class and
@@ -138,8 +143,11 @@ it stays the same when lines move.
 3. **Choices look ahead.** `playOrPassDecisions` asks every player whether to play "Political Prowess", "Change of
    Plans" or "Declare Emergency", holder or not. Picking a decision option that has no answer would end almost every
    game in NO_ANSWER. The agent checks each decision option first (`choose` changes nothing until it is called) and
-   reports a dead one as DEAD_OPTION. That one is a design question, not an obvious bug (asking everyone may hide who
-   holds the card), see "Open questions".
+   reports a dead one as DEAD_OPTION. The fix for that one (open question 1, answered): the engine keeps asking every
+   player, so the table doesn't learn who holds the card, but a player without it is offered only the pass. That
+   choice has a single option, so it is built as a `OneOf` directly: `one(...)` turns one option into the event itself,
+   which would run without asking. The others see only who is asked (`GameProjector`'s `WaitingFor`), not the options,
+   so a choice with only the pass looks like any other.
 4. **`WireSchema.role` moves into `core`** as `event/ComponentRole` (player, ship, scope, count by component name),
    and `WireSchema` calls it. The fuzzer needs the same names, and so does B1. `WireSchemaTest.everyIntHasARole` keeps
    guarding it.
@@ -156,11 +164,13 @@ it stays the same when lines move.
 8. **A fixed engine bug leaves two tests.** A regression journal with the input that failed (the existing
    `RegressionJournals` pattern, which needs the backend's `JournalCodec`), and a test next to the fix in `core`
    (processor or engine test, as for any rule). The journal is the bug as found, the core test the rule as fixed. A
-   seed isn't a regression test: any change to the engine sends the same seed down another path.
+   seed isn't a regression test: any change to the engine sends the same seed down another path. A fuzz journal can't
+   be exported again after its fix (the seed no longer fails), so when `FORMAT_VERSION` changes and a fuzz journal no
+   longer loads, it is deleted and its core test stays (open question 2, answered).
 9. **Threads.** Games share nothing but the scanned registries. `ClasspathScanner` opens a zip file system per jar,
    which two threads can't do at once, so `FuzzRun` touches `EventCatalog.types()` and `ProcessorRegistry` before it
    starts the pool. Results are sorted by player count and seed, so the report doesn't depend on the threads.
-10. **The 8-file rule** (fix loop): the count is every path in `git status --porcelain --untracked-files=all` except
+10. **The 32-file rule** (fix loop): the count is every path in `git status --porcelain --untracked-files=all` except
     `fuzzer-report.md`, so tests, journals, `choices.md` and `CLAUDE.md` count. It is counted after a fix is complete
     and green, never in the middle of one, so the tree is never left broken at a pause.
 
@@ -171,14 +181,15 @@ it stays the same when lines move.
 - `fuzz/`: `Playout`, `PlayoutResult`, `AnswerFinder`, the candidate sources, `Finding` with its kind and ID,
   `Endings`, and the restore twins.
 - Tests (in `build`):
-  - `AnswerFinderTest`: at every pause of `ScriptedTurns`, the finder finds an answer, and the answer it finds is
-    accepted by `submit` on a restored copy.
-  - The hand-written sources against hand-made states: a discard down to the hand limit, a draw with a color left
-    empty, a tiebreak, a Calculations ±1.
-  - `EndingsTest`: each ending from a hand-made final state, and a finished game that none explains.
-  - `PlayoutTest`: 2 rounds from `ScriptedTurns.start()` (its stacked Crisis Cards), twice with the same seed: the same
-    inputs both times, the twins match, and no `FUZZER` finding. Engine findings don't fail it, so an open finding
-    never turns `build` red during the fix loop.
+    - `AnswerFinderTest`: at every pause of `ScriptedTurns`, the finder finds an answer, and the answer it finds is
+      accepted by `submit` on a restored copy.
+    - The hand-written sources against hand-made states: a discard down to the hand limit, a draw with a color left
+      empty, a tiebreak, a Calculations ±1.
+    - `EndingsTest`: each ending from a hand-made final state, and a finished game that none explains.
+    - `PlayoutTest`: 2 rounds from `ScriptedTurns.start()` (its stacked Crisis Cards), twice with the same seed: the
+      same
+      inputs both times, the twins match, and no `FUZZER` finding. Engine findings don't fail it, so an open finding
+      never turns `build` red during the fix loop.
 
 ## Phase 2 - The run and the report
 
@@ -199,7 +210,8 @@ it stays the same when lines move.
 - `RegressionJournals` reads an optional `input` (`player`, and an `event` or a Followup `option`, through
   `JournalCodec`) and `expect`: `runs` (applying the input throws nothing but `InvalidActionException`) or `answers`
   (the finder finds an answer at the pause, or for the option's decision, or the option is no longer offered).
-  `RegressionJournalsTest` adds a dynamic test per file with an `input`.
+  `RegressionJournalsTest` adds a dynamic test per file with an `input`. `CLAUDE.md`'s "Regression journals" bullet
+  says that a fuzz journal a format change makes unloadable is deleted, and its core test stays (decision 8).
 - `FuzzJournalExportTest` (backend tests, runs only with `-DfuzzJournal=4:117`, like `-DwriteExampleJournal`): plays
   the seed with `Playout`, takes the journal at the pause before the finding and the input that failed, and writes
   `backend/src/test/resources/journals/fuzz-4p-117.json`. `backend/build.gradle` passes `fuzzJournal` through.
@@ -213,9 +225,9 @@ gets (`CLAUDE.md` "Validation"), and the narrow domains above never send a card 
 
 - At 1 in 20 decision pauses, `Playout` first submits a candidate from wide domains: any card of the decks, players 0
   to n + 1, unknown ship ids, nulls.
-  - Rejected: the snapshot and the pending input have to be as before, otherwise REJECTED_BUT_CHANGED.
-  - Accepted and fine: play goes on with it.
-  - Threw anything else: INPUT_CRASH or CRASH.
+    - Rejected: the snapshot and the pending input have to be as before, otherwise REJECTED_BUT_CHANGED.
+    - Accepted and fine: play goes on with it.
+    - Threw anything else: INPUT_CRASH or CRASH.
 - Tests: a probe against the `MoveEvent` discard of a card not in the hand is caught (it is a known bug, see
   "Expected first findings"; the test asserts the finding, and the fix loop flips it).
 
@@ -229,7 +241,7 @@ gets (`CLAUDE.md` "Validation"), and the narrow domains above never send a card 
 
 ## The fix loop
 
-Run, fix, record, and pause for a commit once more than 8 files changed:
+Run, fix, record, and pause for a commit once more than 32 files changed:
 
 1. `./gradlew :core:fuzz -Pgames=20` (3-7 players) refreshes the report. The batch grows when no open finding is left
    at its size: 20, 100, 1,000, then 10,000 per player count (the exit; it runs in the background).
@@ -237,21 +249,21 @@ Run, fix, record, and pause for a commit once more than 8 files changed:
    `./gradlew :core:fuzz -Pplayers=N -Pseed=S` in a fresh JVM. If it doesn't reproduce, the engine iterates a hash
    somewhere: that becomes the finding.
 3. Triage:
-   - **Engine bug**: export the journal (`./gradlew :backend:test --tests '*FuzzJournalExportTest' -DfuzzJournal=N:S`),
-     see `RegressionJournalsTest` fail, fix it at the root the way `CLAUDE.md` says (a check that rejects instead of
-     throwing, a decision offered only when it has an answer, facts through the ops), add the core test next to the
-     fix, and correct any `CLAUDE.md` line it makes wrong.
-   - **Fuzzer bug** (a missing domain, a NO_ANSWER the exhaustive search should have found): fix the fuzzer, with a
-     test in `fuzz/`.
-   - **A rules or design call** the rulebook and `choices.md` don't settle, or a fix that would by itself change more
-     than 8 files: write it under "Questions" with the options and a recommendation, and go to the next finding.
+    - **Engine bug**: export the journal (`./gradlew :backend:test --tests '*FuzzJournalExportTest' -DfuzzJournal=N:S`),
+      see `RegressionJournalsTest` fail, fix it at the root the way `CLAUDE.md` says (a check that rejects instead of
+      throwing, a decision offered only when it has an answer, facts through the ops), add the core test next to the
+      fix, and correct any `CLAUDE.md` line it makes wrong.
+    - **Fuzzer bug** (a missing domain, a NO_ANSWER the exhaustive search should have found): fix the fuzzer, with a
+      test in `fuzz/`.
+    - **A rules or design call** the rulebook and `choices.md` don't settle, or a fix that would by itself change more
+      than 8 files: write it under "Questions" with the options and a recommendation, and go to the next finding.
 4. `./gradlew :core:test` and `./gradlew :backend:test --tests '*RegressionJournalsTest'` green, the seed run no longer
    hits the finding, and an entry under "Fixes" (a ruling also goes into `choices.md`).
 5. Count: `git status --porcelain --untracked-files=all | grep -v ' fuzzer-report.md$' | wc -l`.
-   - 8 or fewer: back to 2 (to 1 after every few fixes, so the report shows what changed).
-   - More than 8: **pause.** Start Docker Desktop and run `./gradlew build`, rerun the batch so the report is current,
-     and stop with: the fixes of this batch (IDs, one line each), the files, the tests, the open findings and the
-     questions, and `needs input:` to review and commit. Go on only when the user says so, on a clean tree.
+    - 32 or fewer: back to 2 (to 1 after every few fixes, so the report shows what changed).
+    - More than 32: **pause.** Start Docker Desktop and run `./gradlew build`, rerun the batch so the report is current,
+      and stop with: the fixes of this batch (IDs, one line each), the files, the tests, the open findings and the
+      questions, and `needs input:` to review and commit. Go on only when the user says so, on a clean tree.
 
 ## The report
 
@@ -264,6 +276,7 @@ Random games played by `./gradlew :core:fuzz` (see `fuzzer-plan.md`). The block 
 every run; "Fixes" and "Questions" are written by hand.
 
 <!-- fuzz:begin -->
+
 ## Last run
 
 2026-11-24 10:12, `108f934` (3 changed files), seeds 1-100, 3-7 players, 6m 10s.
@@ -301,6 +314,7 @@ every run; "Fixes" and "Questions" are written by hand.
 | Run | Commit | Games | Failed | Open findings |
 |---|---|---|---|---|
 | 2026-11-24 10:12 | `108f934` | 500 | 12 | 5 |
+
 <!-- fuzz:end -->
 
 ## Fixes
@@ -334,18 +348,16 @@ through the fix loop like any other.
   Fleet space unboxes a null distance (`DISTANCE_LOOKUP_TABLE` has only Galactica's space) (INPUT_CRASH).
 - `isValid` throws on a null card in `ChangeOfPlans`, `DeclareEmergency`, `PoliticalProwess`, `DiscardQuorumCards` and
   `TiebreakCardsBeforeSkillCheck` (INPUT_CRASH).
-- `playOrPassDecisions` asks every player (DEAD_OPTION, a question).
+- `playOrPassDecisions` offers the play to every player, holder or not (DEAD_OPTION; the fix is in decision 3).
 - `SkillCheck.playedBeforeConflicts` groups with a `HashMap` keyed by an enum, so the tiebreak options come in an
   order that can change between JVM runs (the journal is unaffected, the order a player sees isn't stable).
 
 ## Open questions
 
-1. **Play or pass for everyone** (decision 3). Ask only the holders, which tells the table who holds the card, or keep
-   asking everyone and offer the decision only to a holder (the option list itself then tells). Comes up in the first
-   run.
-2. **Regression journals and `FORMAT_VERSION`**. A fuzz journal can't be exported again after its fix (the seed no
-   longer fails), so a format change means an upgrader or deleting the journal and keeping the core test. Ties to the
-   roadmap's open question 3.
+1. **Play or pass for everyone** (decision 3). Answered 2026-11-22: ask everyone, and offer a player who doesn't hold
+   the card only the pass.
+2. **Regression journals and `FORMAT_VERSION`** (decision 8). Answered 2026-11-22: when a format change makes a fuzz
+   journal unloadable, delete the journal and keep the core test that covers the bug.
 3. **Caps**: 50 rounds and 5,000 inputs a turn are guesses; the first runs' "Rounds" column says whether they fit.
 
 ## Not in this plan
