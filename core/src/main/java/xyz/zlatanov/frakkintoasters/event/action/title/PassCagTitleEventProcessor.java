@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event.action.title;
 
+import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.officials.MakeCagEvent;
@@ -33,8 +34,10 @@ public class PassCagTitleEventProcessor extends EventProcessor<PassCagTitleEvent
 
     @Override
     public Followup process() {
-        return allOf(activate(ops, event.playerNumber(), event.activation()),
-                single(new MakeCagEvent(game.player(event.targetPlayerNumber()).character())));
+        // activate() moves the viper now. What follows it ("Alert Viper Pilot"'s action, an attack's roll) comes after
+        // the title passed, or he could pass it again in between.
+        val cag = single(new MakeCagEvent(game.player(event.targetPlayerNumber()).character()));
+        return allOf(cag, activate(ops, event.playerNumber(), event.activation()));
     }
 
     static boolean isCag(GameView game, PlayerView player) {

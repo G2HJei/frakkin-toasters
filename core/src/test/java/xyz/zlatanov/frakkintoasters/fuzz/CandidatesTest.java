@@ -1,5 +1,8 @@
 package xyz.zlatanov.frakkintoasters.fuzz;
 
+import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
+import static xyz.zlatanov.frakkintoasters.state.card.MutinyCard.IMPEACHMENT;
+import xyz.zlatanov.frakkintoasters.event.action.mutiny.ImpeachmentEvent;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.TestHarness;
@@ -93,6 +96,24 @@ class CandidatesTest extends TestHarness {
                 .orElseThrow();
 
         assertEquals(List.of(centurion.id()), answer.shipIds());
+        assertEquals(List.of(), findings);
+    }
+
+    // "Impeachment" discards 5 Skill Cards (F-4dc6dd).
+    @Test
+    void aListOfSkillCardsTakesFive() {
+        player(1).character(KARA_STARBUCK_THRACE);
+        player(2).character(LAURA_ROSLIN);
+        president(LAURA_ROSLIN);
+        player(1).mutinyCards().addOnTop(IMPEACHMENT);
+        for (int value = 1; value <= 6; value++) {
+            player(1).skillCards().addOnTop(new SkillCard(value % 3, value % 2 == 0 ? EXECUTIVE_ORDER : CONSOLIDATE_POWER));
+        }
+
+        val answer = (ImpeachmentEvent) AnswerFinder.find(game, new PlayerDecisionEvent<>(1, ImpeachmentEvent.class),
+                new Random(1), findings::add).orElseThrow();
+
+        assertEquals(5, answer.discards().size());
         assertEquals(List.of(), findings);
     }
 

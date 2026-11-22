@@ -1,7 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event.character;
 
 import lombok.val;
-import xyz.zlatanov.frakkintoasters.event.action.character.RemoteActions;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
@@ -20,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.allOf;
 import static xyz.zlatanov.frakkintoasters.event.Followup.NONE;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
@@ -88,11 +86,8 @@ public class DutifulEventProcessor extends EventProcessor<DutifulEvent> {
     @Override
     public Followup process() {
         ops.player(player.number()).useAbility(DUTIFUL);
-        val discard = single(new DiscardSkillCardsEvent(player.number(), List.of(event.card())));
-        // From elsewhere, e.g. after an "Unorthodox Plan", he acts there again as a remote action.
-        val atLocation = game.locate(player.character()).filter(event.location()::equals).isPresent();
-        return atLocation
-                ? allOf(discard, single(new PlayerDecisionEvent<>(player.number(), locationAction(event.location()).orElseThrow())))
-                : allOf(discard, RemoteActions.actAt(ops, player.number(), event.location()));
+        // What the discard brings may stop him, so the action is offered once it is done (F-70a615).
+        return all(new DiscardSkillCardsEvent(player.number(), List.of(event.card())),
+                new DutifulAgainEvent(player.number(), event.location()));
     }
 }

@@ -1,4 +1,4 @@
-format version 38
+format version 39
 enum Area = SPACE, RESERVES, SPACE_OR_RESERVES
 enum BasestarBridgeAbility = CAG_PLACES_CIVILIAN_SHIP, JUMP_OR_PURSUIT, BASESTAR_OR_RAIDERS, GALACTICA_DAMAGE
 enum BasestarDamage = STRUCTURAL_DAMAGE, DISABLED_WEAPONS, DISABLED_HANGAR_BAY, CRITICAL_HIT
@@ -253,6 +253,7 @@ record DrawMutinyCardEvent(playerNumber: int)
 record DrawQuorumCardEvent()
 record DrawSkillCardsEvent(playerNumber: int, selection: Map<SkillCardColor, int?>, drawLimit: EventConstraint)
 record DrawSkillCardsOfColorEvent(playerNumber: int, color: SkillCardColor, count: int)
+record DutifulAgainEvent(playerNumber: int, location: Location)
 record DutifulEvent(playerNumber: int, location: Location, card: SkillCard)
 record EmotionallyFragileEvent(playerNumber: int)
 record EnactProductionQuotasEvent(playerNumber: int)
@@ -421,6 +422,7 @@ record OfferDutifulEvent(playerNumber: int, location: Location)
 record OfferForwardThinkerEvent(playerNumber: int)
 record OfferMementoEvent(playerNumber: int)
 record OfferPlayOrPassEvent(playerNumber: int, card: SkillCardType)
+record OfferUnmannedViperActivationEvent(playerNumber: int)
 record OneOf(options: Set<Followup>)
 record OpenInterruptWindowEvent(window: InterruptWindow)
 record OrganizedEvent(playerNumber: int)

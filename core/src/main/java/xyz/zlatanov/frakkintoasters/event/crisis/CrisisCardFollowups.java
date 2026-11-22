@@ -409,12 +409,9 @@ public class CrisisCardFollowups {
                 && game.locate(player.character()).filter(l -> GALACTICA.locations().contains(l) && l != BRIG).isPresent();
     }
 
-    // "The CAG may then activate 1 unmanned viper." A pilot activates his own viper, so a CAG who is piloting has none to
-    // activate here.
+    // "The CAG may then activate 1 unmanned viper."
     private Followup activateUnmannedViper(int playerNumber) {
-        val piloting = game.boards().galactica().pilotedFighter(game.player(playerNumber).character()).isPresent();
-        return piloting || !ActivateViperEventProcessor.canActivateUnmanned(game) ? NONE
-                : optional(playerNumber, new PlayerDecisionEvent<>(playerNumber, ActivateViperEvent.class));
+        return single(new OfferUnmannedViperActivationEvent(playerNumber));
     }
 
     private Followup admiralBecomesPresident() {

@@ -201,7 +201,8 @@ final class Domains {
         result.add(List.of());
         if (element == SkillCard.class) {
             val hand = asked.player().skillCards().cards();
-            result.addAll(Combinations.subsets(hand, 1, Math.min(4, hand.size()), 48, random));
+            // up to 8: "Impeachment" discards 5
+            result.addAll(Combinations.subsets(hand, 1, Math.min(8, hand.size()), 48, random));
             return result;
         }
         if (element == Integer.class) {

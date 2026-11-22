@@ -24,8 +24,11 @@ public class SkillCheckOps extends GameOps {
 
     public SkillCheckOps createDestinyDeck() {
         for (val color : SkillCardColor.values()) {
-            List<SkillCard> cards = draw(DeckId.of(color), 2);
-            record(new CardsAddedOnTop(DeckId.DESTINY, cards));
+            // A color with no cards left in its deck and discard pile can't be drawn (rule 8.2.2.5).
+            List<SkillCard> cards = draw(DeckId.of(color), Math.min(2, game.decks().skillCardsLeft(color)));
+            if (!cards.isEmpty()) {
+                record(new CardsAddedOnTop(DeckId.DESTINY, cards));
+            }
         }
         shuffle(DeckId.DESTINY);
         return this;
@@ -80,14 +83,21 @@ public class SkillCheckOps extends GameOps {
     }
 
     public List<SkillCard> playFromDestinyDeck(int count, boolean faceUp) {
-        List<SkillCard> cards = draw(DeckId.DESTINY, count);
+        val cards = new ArrayList<SkillCard>();
+        // The deck is built anew as soon as it is empty, also between the two cards of one play.
+        for (int i = 0; i < count; i++) {
+            cards.add(draw(DeckId.DESTINY));
+            if (game.decks().destiny().isEmpty()) {
+                createDestinyDeck();
+                if (game.decks().destiny().isEmpty()) {
+                    break; // every Skill Card is in a hand or in play
+                }
+            }
+        }
         if (faceUp) {
             cards.forEach(this::addOnTopOfPile);
         } else {
             record(new CardsPlaced(CARDS, cards, true));
-        }
-        if (game.decks().destiny().isEmpty()) {
-            createDestinyDeck();
         }
         return cards;
     }

@@ -7,54 +7,51 @@ every run; "Fixes" and "Questions" are written by hand.
 
 ## Last run
 
-2026-11-22 12:43, `5534026` (71 changed files), seeds 1-20, 3-7 players, 1s.
+2026-11-22 13:08, `d17eb9a` (35 changed files), seeds 1-100, 3-7 players, 4s.
 
 | Players | Games | Finished | Failed | Humans won | Cylons won | Rounds (median / max) |
 |---|---|---|---|---|---|---|
-| 3 | 20 | 19 | 1 | 0 | 19 | 8 / 45 |
-| 4 | 20 | 20 | 0 | 0 | 20 | 7 / 24 |
-| 5 | 20 | 20 | 0 | 0 | 20 | 6 / 19 |
-| 6 | 20 | 20 | 0 | 0 | 20 | 4 / 17 |
-| 7 | 20 | 20 | 0 | 0 | 20 | 3 / 6 |
-| All | 100 | 99 | 1 | 0 | 99 | 6 / 45 |
+| 3 | 100 | 98 | 2 | 0 | 98 | 9 / 49 |
+| 4 | 100 | 100 | 0 | 0 | 100 | 7 / 50 |
+| 5 | 100 | 100 | 0 | 0 | 100 | 5 / 27 |
+| 6 | 100 | 100 | 0 | 0 | 100 | 4 / 28 |
+| 7 | 100 | 100 | 0 | 0 | 100 | 3 / 14 |
+| All | 500 | 498 | 2 | 0 | 498 | 5 / 50 |
 
 ### Endings
 
 | Ending | 3 | 4 | 5 | 6 | 7 |
 |---|---|---|---|---|---|
-| Fuel at 0 | 2 | 1 | 3 | 4 | 4 |
-| Food at 0 | 2 | 0 | 1 | 1 | 2 |
-| Morale at 0 | 10 | 7 | 7 | 5 | 6 |
-| Population at 0 | 1 | 8 | 6 | 9 | 6 |
-| 6 damaged Galactica locations | 0 | 1 | 1 | 0 | 0 |
-| Centurions at the end of the Boarding Party track | 3 | 3 | 2 | 0 | 2 |
+| Fuel at 0 | 11 | 13 | 11 | 11 | 8 |
+| Food at 0 | 4 | 4 | 3 | 2 | 5 |
+| Morale at 0 | 38 | 44 | 44 | 39 | 48 |
+| Population at 0 | 32 | 25 | 28 | 33 | 27 |
+| 6 damaged Galactica locations | 3 | 4 | 0 | 1 | 2 |
+| Centurions at the end of the Boarding Party track | 7 | 7 | 9 | 10 | 9 |
 | No character left to choose | 0 | 0 | 0 | 0 | 0 |
 | Kobol, the humans win | 0 | 0 | 0 | 0 | 0 |
-| Kobol, a resource at 0 after the Personal Goals | 1 | 0 | 0 | 1 | 0 |
+| Kobol, a resource at 0 after the Personal Goals | 3 | 3 | 5 | 4 | 1 |
 
 ### Findings
 
 | ID | Kind | What | Games | Example | Status |
 |---|---|---|---|---|---|
-| F-e700fd | NO_END | No ending after 50 rounds | 1 | 3p seed 14 | question |
+| F-e700fd | NO_END | No ending after 50 rounds | 2 | 3p seed 58 | question |
 
-- **F-e700fd**: `./gradlew :core:fuzz -Pplayers=3 -Pseed=14`, trace `core/build/fuzz/F-e700fd-3p-14.txt`. Turn 153, `RECEIVE_SKILLS`, player 1 asked for `DrawSkillCardsEvent [DRAW_EXACTLY_4]`.
+- **F-e700fd**: `./gradlew :core:fuzz -Pplayers=3 -Pseed=58`, trace `core/build/fuzz/F-e700fd-3p-58.txt`. Turn 153, `RECEIVE_SKILLS`, player 2 asked for `DrawSkillCardsEvent [DRAW_EXACTLY_5]`.
 
 ### Watch
 
-- 3 players: the humans never won in 20 games.
-- 4 players: the humans never won in 20 games.
-- 4 players: no Kobol ending in 20 games.
-- 5 players: the humans never won in 20 games.
-- 5 players: no Kobol ending in 20 games.
-- 6 players: the humans never won in 20 games.
-- 7 players: the humans never won in 20 games.
-- 7 players: no Kobol ending in 20 games.
-- No "No character left to choose" ending in 100 games.
+- 3 players: the humans never won in 100 games.
+- 4 players: the humans never won in 100 games.
+- 5 players: the humans never won in 100 games.
+- 6 players: the humans never won in 100 games.
+- 7 players: the humans never won in 100 games.
+- No "No character left to choose" ending in 500 games.
 
-<details><summary>Event types that never ran (27)</summary>
+<details><summary>Event types that never ran (8)</summary>
 
-`AdaptableEvent`, `AnalyzeEnemyFighterPassEvent`, `AssumeCommandEvent`, `BroadcastEvent`, `CivilianSelfDefenseEvent`, `CivilianSelfDefenseResultEvent`, `CylonGenocidePassEvent`, `CylonHatredEvent`, `DefendPresidencyEvent`, `DestroyHeavyRaiderEvent`, `DiscardQuorumCardsEvent`, `EndGameEvent`, `EulogyEvent`, `ImpeachmentEvent`, `IntolerantEvent`, `LaunchReservesEvent`, `MaintenanceEngineerEvent`, `MajorVictoryResultEvent`, `MaximumFirepowerEvent`, `MysteriousMessagePassEvent`, `OfferAlertViperPilotEvent`, `ResignationEvent`, `ResolveFinalFiveCardsEvent`, `SacrificeEvent`, `SetATrapPassEvent`, `StandoffWithPegasusPassEvent`, `UseArbitratorEvent`
+`BroadcastEvent`, `DefendPresidencyEvent`, `DiscardQuorumCardsEvent`, `EndGameEvent`, `IntolerantEvent`, `MysteriousMessagePassEvent`, `ResolveFinalFiveCardsEvent`, `UseArbitratorEvent`
 
 </details>
 
@@ -62,6 +59,10 @@ every run; "Fixes" and "Questions" are written by hand.
 
 | Run | Commit | Games | Failed | Open findings |
 |---|---|---|---|---|
+| 2026-11-22 13:08 | `d17eb9a` | 500 | 2 | 0 |
+| 2026-11-22 13:06 | `d17eb9a` | 500 | 2 | 0 |
+| 2026-11-22 13:04 | `d17eb9a` | 500 | 3 | 1 |
+| 2026-11-22 12:45 | `d17eb9a` | 500 | 5 | 4 |
 | 2026-11-22 12:43 | `5534026` | 100 | 1 | 0 |
 | 2026-11-22 12:38 | `5534026` | 100 | 2 | 2 |
 | 2026-11-22 12:31 | `5534026` | 100 | 4 | 2 |
@@ -188,6 +189,50 @@ every run; "Fixes" and "Questions" are written by hand.
   from any areas, or a centurion, which no list held.
 - Fix: `Domains.shipGroups` adds a group per ship type in space and the Boarding Party track.
 - Tests: `CandidatesTest.aListOfShipsTakesThemFromAnyArea` and `aListOfShipsTakesACenturion`.
+- Files: `Domains`.
+
+### F-9f4ada - CRASH - fixed 2026-11-22
+
+- Cause: `SkillCheckOps.playFromDestinyDeck` drew both cards of a play at once from a Destiny deck that held one, and
+  `createDestinyDeck` drew 2 of each color even when a color had fewer left.
+- Fix: the play draws one card at a time and builds the deck anew as soon as it is empty, and the new deck takes what
+  each color has left (rule 8.2.2.5).
+- Tests: `PlayFromDestinyDeckEventProcessorTest.shouldBuildTheDeckAnewBetweenTheTwoCards`,
+  `CreateDestinyDeckEventProcessorTest.leavesOutAColorWithNoCardsLeft`, journal `fuzz-7p-49.json`.
+- Files: `SkillCheckOps`.
+
+### F-b9a6d6 - CRASH - fixed 2026-11-22
+
+- Cause: the CAG's "activate, then give" queued the activation's followups before the `MakeCagEvent`, so "Alert
+  Viper Pilot"'s extra action came while he still held the title, and he passed it again; the first `MakeCagEvent`
+  then named a character who already was CAG.
+- Fix: the title passes before what the activation brings resolves (`choices.md`).
+- Tests: `PassCagTitleEventProcessorTest.theCagActivatesAViperThenPassesTheTitle`. No journal: the stale event is
+  queued in it.
+- Files: `PassCagTitleEventProcessor`, `choices.md`.
+
+### F-78b08a - DEAD_OPTION - fixed 2026-11-22
+
+- Cause: "Review Camera Footage" checked whether the CAG could activate an unmanned viper when the card resolved,
+  before its own "damage 2 vipers in the Reserves" ran, so he could be offered an activation without a viper left.
+- Fix: `OfferUnmannedViperActivationEvent` builds the CAG's offer when it runs ("Training a Rookie" uses it too). New
+  event: `FORMAT_VERSION` 39, and the fuzz journals' `formatVersion` went up with it (their entries are unchanged).
+- Tests: `OfferUnmannedViperActivationEventProcessorTest`. No journal: the offer is queued in it.
+- Files: `OfferUnmannedViperActivationEvent`, `OfferUnmannedViperActivationEventProcessor`, `CrisisCardFollowups`.
+
+### F-70a615 - NO_ANSWER - fixed 2026-11-22
+
+- Cause: "Dutiful" queued its discard and the location's decision together. A "Bait" discarded for it drew Louis
+  Hoshi a second Mutiny Card, which sent him to the "Brig", where the decision had no answer.
+- Fix: `DutifulAgainEvent` offers the action after the discard, only while he can still take it.
+- Tests: `DutifulAgainEventProcessorTest`, `DutifulEventProcessorTest`. No journal: the decision is queued in it.
+- Files: `DutifulEventProcessor`, `DutifulAgainEvent`, `DutifulAgainEventProcessor`.
+
+### F-4dc6dd - NO_ANSWER - fuzzer, fixed 2026-11-22
+
+- Cause: the fuzzer's lists of Skill Cards had at most 4 cards, and "Impeachment" discards 5.
+- Fix: `Domains` draws lists of up to 8 cards of the hand.
+- Tests: `CandidatesTest.aListOfSkillCardsTakesFive`, journal `fuzz-3p-26.json` (`answers`).
 - Files: `Domains`.
 
 ## Questions

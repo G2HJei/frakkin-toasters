@@ -44,4 +44,17 @@ class PlayFromDestinyDeckEventProcessorTest extends EventTestHarness<PlayFromDes
         assertEquals(12, destinyDeck.cards().size());
         assertTrue(destinyDeck.wasShuffled());
     }
+
+    // One card left: it is played, the deck is built anew, and the second comes from the new deck (F-9f4ada).
+    @Test
+    void shouldBuildTheDeckAnewBetweenTheTwoCards() {
+        val last = new SkillCard(1, AT_ANY_COST);
+        destinyDeck.clear().addOnTop(last);
+
+        execute(new PlayFromDestinyDeckEvent());
+
+        assertEquals(2, game.activeSkillCheck().cards().size());
+        assertEquals(last, game.activeSkillCheck().cards().cards().getFirst());
+        assertEquals(11, destinyDeck.cards().size());
+    }
 }

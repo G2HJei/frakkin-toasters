@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event.deck;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
@@ -36,4 +37,14 @@ class CreateDestinyDeckEventProcessorTest extends EventTestHarness<CreateDestiny
         assertEquals(expectedDistribution, actualDistribution);
     }
 
+    // A color with no cards left can't be drawn (rule 8.2.2.5, F-9f4ada).
+    @Test
+    void leavesOutAColorWithNoCardsLeft() {
+        politicsDeck.clear();
+
+        execute(new CreateDestinyDeckEvent());
+
+        assertEquals(10, destinyDeck.cards().size());
+        assertTrue(destinyDeck.cards().stream().noneMatch(card -> card.type().color() == POLITICS));
+    }
 }

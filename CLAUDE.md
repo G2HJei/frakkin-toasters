@@ -387,7 +387,10 @@ instead, e.g. `FollowupUtils.chooseCharacterForSickbay` (rule 9.3.2).
 - A followup is built before the events ahead of it run, so a queued event may find its character changed: an event
   that names him tolerates it, e.g. `SendToBrigEvent` leaves a character already in the "Brig" or a revealed Cylon
   where he is. A rule that binds a player's choice goes in the event he answers with, e.g.
-  `ChooseCharacterForBrigEvent` (rule 9.2.3, `ChooseCharacterForBrigEventProcessor.offer`).
+  `ChooseCharacterForBrigEvent` (rule 9.2.3, `ChooseCharacterForBrigEventProcessor.offer`). An offer that depends on
+  what the effects before it did is an event that builds it when it runs, e.g. `OfferPlayOrPassEvent`,
+  `OfferUnmannedViperActivationEvent` (the CAG's activation after "Review Camera Footage" damaged the "Reserves") and
+  `DutifulAgainEvent`.
 
 ### Engine
 
@@ -831,7 +834,8 @@ and its result.
   picks: 1-2 damage it twice, 3-6 destroy it, 7 destroy it and 3 raiders. A destroyed basestar opens the "Major
   Victory" window.
 - The CAG's Title Card actions: `PassCagTitleEvent(playerNumber, activation, targetPlayerNumber)` activates an
-  unmanned viper, then gives the title to another human who can hold it, and `CagPilotActionEvent(playerNumber,
+  unmanned viper, then gives the title to another human who can hold it (before what the activation brings resolves,
+  e.g. "Alert Viper Pilot"'s action), and `CagPilotActionEvent(playerNumber,
   activation)`, once a turn (`TurnLimit.CAG_PILOT_ACTION`) while piloting, activates an unmanned viper, then grants
   another action (`GrantEvent(ACTION, CAG_TITLE)`). Both check the activation like `ProtectTheFleetEvent`.
 - `DestroyCenturionEvent` destroys a centurion on the Boarding Party track and opens the "Major Victory" window (the
@@ -966,7 +970,9 @@ stores its journal in Postgres and pushes to every viewer what he may see. It ad
   '*FuzzJournalExportTest' -DfuzzJournal=4:117` (`fuzz-4p-117.json`): the journal at the pause before the finding, the
   `input` that failed there (`player`, an `option` and/or an `event`) and what it has to do once fixed (`expect`:
   `runs`, `answers` or `restores`, see `Repro` in `fuzz/`), which `RegressionJournalsTest` checks per file. A fuzz
-  journal that a `FORMAT_VERSION` change makes unloadable is deleted; the core test of its fix stays. A journal
+  journal that a `FORMAT_VERSION` change makes unloadable is deleted; the core test of its fix stays. A change that
+  only adds types leaves the journals' entries as they are: their `formatVersion` goes up with it, and
+  `RegressionJournalsTest` shows they still load. A journal
   can't check a fix that changes what an earlier event queued (a decision offered without an answer, a stale queued
   event): the journal records the followup, so a restore queues it again whatever the fix. Such a fix has its core
   test only.
@@ -1164,7 +1170,8 @@ character pauses where it did.
     "Necessary Steps" (`NecessaryStepsEventProcessor.drawFor` in `DrawMutinyCardEvent` and the "Press Room";
     `DrawMutinyCardEventProcessor.afterDrawing` then applies the "Brig" rules), "Dutiful" (`OfferDutifulEvent` after
     "Command", "Communications" and "Weapons Control", wherever he activated them from, a remote action again from
-    elsewhere, never inside "Organized"), "Alert Viper Pilot" (after an unmanned launch from the "Reserves", and when
+    elsewhere, never inside "Organized"; `DutifulAgainEvent` offers the action once the discard is done, which may
+    have sent him to the "Brig"), "Alert Viper Pilot" (after an unmanned launch from the "Reserves", and when
     "Launch Reserves" places its vipers, before it activates them, `GrantEvent(ACTION, ALERT_VIPER_PILOT)`), "Forward Thinker"
     (`OfferForwardThinkerEvent` after an "Executive Order", a decision on any `LocationEvent`), "Maintenance Engineer"
     (after "Repair", `GrantEvent(ACTION, MAINTENANCE_ENGINEER)`), "Raptor Pilot" (`RaptorPilotEvent` instead of "Launch

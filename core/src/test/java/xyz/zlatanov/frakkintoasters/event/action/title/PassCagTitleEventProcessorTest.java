@@ -35,11 +35,13 @@ class PassCagTitleEventProcessorTest extends EventTestHarness<PassCagTitleEvent>
         cag(KARA_STARBUCK_THRACE);
     }
 
+    // The title passes before what the activation brings, so "Alert Viper Pilot"'s action can't pass it again
+    // (F-b9a6d6).
     @Test
     void theCagActivatesAViperThenPassesTheTitle() {
         execute(new PassCagTitleEvent(1, LAUNCH, 2));
 
-        assertFollowup(all(new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_4_OCLOCK), new MakeCagEvent(WILLIAM_ADAMA)));
+        assertFollowup(all(new MakeCagEvent(WILLIAM_ADAMA), new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_4_OCLOCK)));
     }
 
     @Test

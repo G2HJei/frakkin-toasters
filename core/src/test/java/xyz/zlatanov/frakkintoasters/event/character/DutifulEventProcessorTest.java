@@ -45,8 +45,7 @@ class DutifulEventProcessorTest extends EventTestHarness<DutifulEvent> {
         execute(new DutifulEvent(1, COMMUNICATIONS, CARD));
 
         assertTrue(game.turn().hasUsed(1, DUTIFUL));
-        assertFollowup(all(new DiscardSkillCardsEvent(1, List.of(CARD)),
-                new PlayerDecisionEvent<>(1, CommunicationsEvent.class)));
+        assertFollowup(all(new DiscardSkillCardsEvent(1, List.of(CARD)), new DutifulAgainEvent(1, COMMUNICATIONS)));
         assertEquals(NONE, DutifulEventProcessor.after(game, player(1), COMMUNICATIONS)); // once a turn
     }
 
@@ -91,9 +90,7 @@ class DutifulEventProcessorTest extends EventTestHarness<DutifulEvent> {
 
         execute(new DutifulEvent(1, COMMUNICATIONS, CARD));
 
-        assertEquals(Optional.of(COMMUNICATIONS), game.turn().remoteActionLocation(1));
-        assertFollowup(allOf(single(new DiscardSkillCardsEvent(1, List.of(CARD))),
-                all(new PlayerDecisionEvent<>(1, LocationEvent.class), new EndRemoteActionEvent(1))));
+        assertFollowup(all(new DiscardSkillCardsEvent(1, List.of(CARD)), new DutifulAgainEvent(1, COMMUNICATIONS)));
     }
 
     // Not inside "Organized", which never takes the same location twice.

@@ -29,7 +29,9 @@ different answer changes only the code named. Only the Kobol objective is in sco
 
 - The nuke follows rule 11.6.1 (a space area; the token is discarded), not the Admiral Title Card's older text. A 7
   with no basestar in the area still destroys up to 3 raiders.
-- The CAG's first action needs an unmanned viper to activate: the card says "activate, then give".
+- The CAG's first action needs an unmanned viper to activate: the card says "activate, then give". The title passes
+  before what the activation brings resolves (the launch, an attack's roll, "Alert Viper Pilot"'s action), so that
+  action can't pass it again.
 - "Weapons Armed" prints no fate; it is discarded like the others. It needs an assault raptor left to build, as the
   components limit. "Unauthorized Usage" discards the nukes (errata A2.3.3.2), so nothing limits "Build Nuke"
   afterwards, and the card's player picks the basestar the nuke hits.
