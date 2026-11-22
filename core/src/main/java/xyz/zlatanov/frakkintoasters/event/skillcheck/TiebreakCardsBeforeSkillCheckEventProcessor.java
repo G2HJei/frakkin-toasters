@@ -5,6 +5,7 @@ import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 
 import java.util.Collection;
+import java.util.Objects;
 
 public class TiebreakCardsBeforeSkillCheckEventProcessor extends EventProcessor<TiebreakCardsBeforeSkillCheckEvent> {
 
@@ -12,6 +13,9 @@ public class TiebreakCardsBeforeSkillCheckEventProcessor extends EventProcessor<
     protected boolean isValid() {
         val conflictGroups = game.activeSkillCheck().playedBeforeConflicts();
         val keptCards = event.keptCards();
+        if (keptCards == null || keptCards.stream().anyMatch(Objects::isNull)) {
+            return false;
+        }
         val onlyConflictingCardsKept = keptCards.stream()
                 .allMatch(kept -> conflictGroups.stream().anyMatch(group -> group.contains(kept)));
         val oneCardKeptPerConflictGroup = conflictGroups.stream()

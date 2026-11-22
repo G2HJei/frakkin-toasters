@@ -7,7 +7,7 @@ public class Discard1MutinyCardEventProcessor extends EventProcessor<Discard1Mut
 
     @Override
     protected boolean isValid() {
-        return player.mutinyCards().cards().contains(event.cardToDiscard());
+        return event.cardToDiscard() != null && player.mutinyCards().cards().contains(event.cardToDiscard());
     }
 
     @Override

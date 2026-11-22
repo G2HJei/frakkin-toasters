@@ -15,7 +15,7 @@ import xyz.zlatanov.frakkintoasters.event.player.PlaceCivilianShipEvent;
 import xyz.zlatanov.frakkintoasters.event.player.SendToSickbayEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.MakeSkillCheckEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.PlayCardsBeforeSkillCheckEvent;
-import xyz.zlatanov.frakkintoasters.event.skillcheck.PoliticalProwessEvent;
+import xyz.zlatanov.frakkintoasters.event.skillcheck.OfferPlayOrPassEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.RevealCardsBeforeSkillCheckEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.ability.*;
 import xyz.zlatanov.frakkintoasters.state.board.Resource;
@@ -35,6 +35,7 @@ import java.util.stream.IntStream;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.POLITICAL_PROWESS;
 import static lombok.AccessLevel.PRIVATE;
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.discardExactly;
@@ -141,7 +142,7 @@ public class FollowupUtils {
             followups.add(intuition);
         }
         if (game.activeSkillCheck().type().triggeredByLocation()) {
-            followups.addAll(playOrPassDecisions(game, PoliticalProwessEvent.class));
+            followups.addAll(playOrPassDecisions(game, POLITICAL_PROWESS));
         }
         followups.add(single(new MakeSkillCheckEvent()));
         return all(followups.toArray(Followup[]::new));
@@ -178,12 +179,13 @@ public class FollowupUtils {
     }
 
     /**
-     * Each player chooses to either play the event (e.g. a "Declare Emergency" card) or do nothing.
+     * Each player chooses to either play the card (e.g. "Declare Emergency") or do nothing, as the skill check stands
+     * when he is asked: {@link OfferPlayOrPassEvent}.
      */
-    public static List<Followup> playOrPassDecisions(GameView game, Class<? extends PlayerEvent> eventClass) {
+    public static List<Followup> playOrPassDecisions(GameView game, SkillCardType card) {
         return game.players().stream()
                 .map(PlayerView::number)
-                .map(n -> one(new PlayerDecisionEvent<>(n, eventClass), new NoOpEvent(n)))
+                .<Followup>map(n -> single(new OfferPlayOrPassEvent(n, card)))
                 .toList();
     }
 

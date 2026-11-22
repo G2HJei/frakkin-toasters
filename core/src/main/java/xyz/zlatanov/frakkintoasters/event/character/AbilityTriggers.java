@@ -8,11 +8,8 @@ import xyz.zlatanov.frakkintoasters.state.character.CharacterAbility;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.view.GameView;
 
-import java.util.ArrayList;
-
 import static lombok.AccessLevel.PRIVATE;
 import static xyz.zlatanov.frakkintoasters.event.Followup.NONE;
-import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 
 /**
  * The abilities that answer something "immediately after" it happened, wherever it happened, e.g. "Memento" after any
@@ -26,10 +23,13 @@ public final class AbilityTriggers {
         if (game.outcome().isPresent()) {
             return NONE;
         }
-        val offers = new ArrayList<Event>();
-        game.turn().triggeredAbilities()
-                .forEach((player, abilities) -> abilities.forEach(ability -> offers.add(offer(player, ability))));
-        return all(offers.toArray(Event[]::new));
+        // One offer at a time: it runs next and clears its trigger, and the check after it queues the next one. Queuing
+        // them all would queue the ones left again after the first.
+        return game.turn().triggeredAbilities().entrySet().stream()
+                .flatMap(entry -> entry.getValue().stream().map(ability -> offer(entry.getKey(), ability)))
+                .findFirst()
+                .<Followup>map(Followup::single)
+                .orElse(NONE);
     }
 
     private static Event offer(int playerNumber, CharacterAbility ability) {

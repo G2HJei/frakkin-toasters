@@ -49,7 +49,8 @@ public class PressRoomEventProcessor extends LocationActionProcessor<PressRoomEv
         val keepOne = game.player(targetPlayer).mutinyCards().size() > 1
                 ? single(new PlayerDecisionEvent<>(targetPlayer, DiscardDownTo1MutinyCardEvent.class))
                 : NONE;
-        return allOf(CharacterPenalties.mutinyCardDrawn(game, game.player(targetPlayer)), keepOne); // "Moral Dilemma"
+        // "Moral Dilemma" after the discard, as in DrawMutinyCardEventProcessor.afterDrawing.
+        return allOf(keepOne, CharacterPenalties.mutinyCardDrawn(game, game.player(targetPlayer)));
     }
 
     private Followup mayDiscardAMutinyCard() {

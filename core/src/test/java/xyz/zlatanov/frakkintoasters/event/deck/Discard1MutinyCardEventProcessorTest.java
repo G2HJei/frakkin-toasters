@@ -25,4 +25,12 @@ class Discard1MutinyCardEventProcessorTest extends EventTestHarness<Discard1Muti
         player(1).mutinyCards().addOnTop(PANIC);
         assertInvalid(new Discard1MutinyCardEvent(1, WEAPONS_ARMED));
     }
+
+    // A client may send no card (F-369710).
+    @Test
+    void rejectsNoCard() {
+        player(1).mutinyCards().addOnTop(PANIC);
+
+        assertInvalid(new Discard1MutinyCardEvent(1, null));
+    }
 }

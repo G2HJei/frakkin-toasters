@@ -37,7 +37,7 @@ public class TotalSkillCheckStrengthEventProcessor extends EventProcessor<TotalS
         val followups = new ArrayList<Followup>();
         // reducing the difficulty is pointless when the strength already reaches it
         if (totalStrength < DetermineSkillCheckResultEventProcessor.difficulty(game)) {
-            followups.addAll(playOrPassDecisions(game, DeclareEmergencyEvent.class));
+            followups.addAll(playOrPassDecisions(game, DECLARE_EMERGENCY));
         }
         followups.add(single(new DetermineSkillCheckResultEvent()));
         return all(followups.toArray(Followup[]::new));

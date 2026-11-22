@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event.skillcheck;
 
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.DECLARE_EMERGENCY;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
@@ -131,9 +132,9 @@ class TotalSkillCheckStrengthEventProcessorTest extends EventTestHarness<TotalSk
 
     private static Followup declareEmergencyThenDetermineResult() {
         return all(
-                one(new PlayerDecisionEvent<>(1, DeclareEmergencyEvent.class), new NoOpEvent(1)),
-                one(new PlayerDecisionEvent<>(2, DeclareEmergencyEvent.class), new NoOpEvent(2)),
-                one(new PlayerDecisionEvent<>(3, DeclareEmergencyEvent.class), new NoOpEvent(3)),
+                single(new OfferPlayOrPassEvent(1, DECLARE_EMERGENCY)),
+                single(new OfferPlayOrPassEvent(2, DECLARE_EMERGENCY)),
+                single(new OfferPlayOrPassEvent(3, DECLARE_EMERGENCY)),
                 single(new DetermineSkillCheckResultEvent()));
     }
 

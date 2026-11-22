@@ -222,4 +222,20 @@ class MoveEventProcessorTest extends EventTestHarness<MoveEvent> {
 
         assertInvalid(new MoveEvent(2, CAPRICA, null));
     }
+
+    // The card has to be in his hand (F-2928df).
+    @Test
+    void shouldNotDiscardACardHeDoesNotHold() {
+        moveTo(ADMIRALS_QUARTERS, KARA_STARBUCK_THRACE);
+
+        assertInvalid(new MoveEvent(1, PRESIDENTS_OFFICE, skillCard));
+    }
+
+    // A fighter flies around Galactica only (F-86ead5).
+    @Test
+    void shouldNotFlyToTheCylonFleetBoard() {
+        viperAt(GALACTICA_SPACE_2_OCLOCK).pilot(KARA_STARBUCK_THRACE);
+
+        assertInvalid(new MoveEvent(1, CYLON_FLEET_SPACE_1, null));
+    }
 }

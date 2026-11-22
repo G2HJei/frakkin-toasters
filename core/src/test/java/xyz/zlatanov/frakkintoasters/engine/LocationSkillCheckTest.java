@@ -1,5 +1,7 @@
 package xyz.zlatanov.frakkintoasters.engine;
 
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
+import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
 import xyz.zlatanov.frakkintoasters.projection.Viewer.PlayerViewer;
 import xyz.zlatanov.frakkintoasters.projection.GameProjection.ShownCards;
 import xyz.zlatanov.frakkintoasters.projection.GameProjection;
@@ -248,10 +250,17 @@ class LocationSkillCheckTest {
     private void passPoliticalProwess() {
         for (int player = 1; player <= 3; player++) {
             val p = player;
-            assertWaitingFor(new AwaitingChoice(p, Set.of(
-                    single(new PlayerDecisionEvent<>(p, PoliticalProwessEvent.class)), single(new NoOpEvent(p)))));
+            assertWaitingFor(new AwaitingChoice(p, playOrPass(p, POLITICAL_PROWESS, PoliticalProwessEvent.class)));
             play(engine -> engine.choose(p, single(new NoOpEvent(p))));
         }
+    }
+
+    // Everyone is asked, and a player who holds the card may play it: the others are offered only the pass.
+    private Set<Followup> playOrPass(int player, SkillCardType card, Class<? extends PlayerEvent> event) {
+        val holds = engine.view().player(player).skillCards().cards().stream().anyMatch(c -> c.type() == card);
+        return holds
+                ? Set.of(single(new PlayerDecisionEvent<>(player, event)), single(new NoOpEvent(player)))
+                : Set.of(single(new NoOpEvent(player)));
     }
 
     // From the player to the left of the current player, ending with the current player.
@@ -285,8 +294,7 @@ class LocationSkillCheckTest {
         assertEquals(PASS, engine.view().activeSkillCheck().result());
         for (int player = 1; player <= 3; player++) {
             val p = player;
-            assertWaitingFor(new AwaitingChoice(p, Set.of(
-                    single(new PlayerDecisionEvent<>(p, ChangeOfPlansEvent.class)), single(new NoOpEvent(p)))));
+            assertWaitingFor(new AwaitingChoice(p, playOrPass(p, CHANGE_OF_PLANS, ChangeOfPlansEvent.class)));
             play(engine -> engine.choose(p, single(new NoOpEvent(p))));
         }
     }

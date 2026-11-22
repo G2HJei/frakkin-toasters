@@ -87,7 +87,7 @@ public class DetermineSkillCheckResultEventProcessor extends EventProcessor<Dete
             followups.add(single(new IronWillEvent()));
         }
         if (result == PASS) {
-            followups.addAll(playOrPassDecisions(game, ChangeOfPlansEvent.class));
+            followups.addAll(playOrPassDecisions(game, CHANGE_OF_PLANS));
         }
         // after the Change of Plans decisions, which may replace the pass result
         followups.add(single(new ResolveSkillCheckResultEvent()));

@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event.skillcheck;
 
+import java.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
@@ -108,5 +109,22 @@ class TiebreakCardsBeforeSkillCheckEventProcessorTest extends EventTestHarness<T
 
     private void assertPlayedBefore(int playerNumber, SkillCard... expected) {
         assertEquals(List.of(expected), game.activeSkillCheck().playedBeforeSkillCheck(playerNumber));
+    }
+
+    // A client may send no list, or a list with no card in it (F-f39319).
+    @Test
+    void rejectsNoList() {
+        playedBefore(1, investigativeCommittee);
+        playedBefore(2, investigativeCommittee);
+
+        assertInvalid(new TiebreakCardsBeforeSkillCheckEvent((List<PlayedCard>) null));
+    }
+
+    @Test
+    void rejectsNoCard() {
+        playedBefore(1, investigativeCommittee);
+        playedBefore(2, investigativeCommittee);
+
+        assertInvalid(new TiebreakCardsBeforeSkillCheckEvent(Arrays.asList((PlayedCard) null)));
     }
 }

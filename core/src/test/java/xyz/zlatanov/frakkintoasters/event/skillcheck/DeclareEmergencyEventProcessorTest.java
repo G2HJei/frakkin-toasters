@@ -69,4 +69,10 @@ class DeclareEmergencyEventProcessorTest extends EventTestHarness<DeclareEmergen
 
         assertInvalid(new DeclareEmergencyEvent(1, changeOfPlans));
     }
+
+    // A client may send no card (F-ea9336).
+    @Test
+    void rejectsNoCard() {
+        assertInvalid(new DeclareEmergencyEvent(1, null));
+    }
 }

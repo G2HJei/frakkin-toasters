@@ -16,10 +16,11 @@ public class SendToBrigEventProcessor extends EventProcessor<SendToBrigEvent> {
 
     @Override
     protected boolean isValid() {
-        return isPlayer(event.targetPlayerNumber()) && canBeSentToBrig(game, event.targetPlayerNumber());
+        return isPlayer(event.targetPlayerNumber());
     }
 
-    // A character already in the "Brig" or a revealed Cylon can't be sent there (rule 9.2.3).
+    // A character already in the "Brig" or a revealed Cylon can't be sent there (rule 9.2.3). A player who chooses one
+    // chooses among the others (ChooseCharacterForBrigEvent).
     public static boolean canBeSentToBrig(GameView game, int playerNumber) {
         val target = game.player(playerNumber);
         return target.isHuman() && !game.boards().galactica().charactersIn(BRIG).contains(target.character());
@@ -27,6 +28,11 @@ public class SendToBrigEventProcessor extends EventProcessor<SendToBrigEvent> {
 
     @Override
     public Followup process() {
+        // An effect queued before he got there names him all the same, e.g. a skill check's fail after a Mutiny Card
+        // that one of its discards drew sent him there. A revealed Cylon ignores it (rule 6.1.2.1).
+        if (!canBeSentToBrig(game, event.targetPlayerNumber())) {
+            return Followup.NONE;
+        }
         val character = game.player(event.targetPlayerNumber()).character();
         if (game.locate(character).isEmpty()) {
             // A character who isn't on the board can't be moved, e.g. a "Stranded" Karl "Helo" Agathon.

@@ -27,4 +27,12 @@ class DiscardDownTo1MutinyCardEventProcessorTest extends EventTestHarness<Discar
         player(1).mutinyCards().addOnTop(PANIC, ASSUME_COMMAND);
         assertInvalid(new DiscardDownTo1MutinyCardEvent(1, FEED_THE_PEOPLE));
     }
+
+    // A client may send no card (F-1c6b6e).
+    @Test
+    void rejectsNoCard() {
+        player(1).mutinyCards().addOnTop(PANIC, ASSUME_COMMAND);
+
+        assertInvalid(new DiscardDownTo1MutinyCardEvent(1, null));
+    }
 }

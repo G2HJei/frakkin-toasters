@@ -6,6 +6,7 @@ import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.DrawSkillCardsEvent;
+import xyz.zlatanov.frakkintoasters.state.view.GameView;
 import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
@@ -18,11 +19,15 @@ public class ChangeOfPlansEventProcessor extends EventProcessor<ChangeOfPlansEve
     @Override
     protected boolean isValid() {
         val card = event.changeOfPlansCard();
-        val skillCheck = game.activeSkillCheck();
-        return card.type() == CHANGE_OF_PLANS
+        return card != null
+                && card.type() == CHANGE_OF_PLANS
                 && player.skillCards().cards().contains(card)
-                && skillCheck.result() == PASS
-                && !skillCheck.passResultReplaced();
+                && canPlay(game);
+    }
+
+    public static boolean canPlay(GameView game) {
+        val skillCheck = game.activeSkillCheck();
+        return skillCheck != null && skillCheck.result() == PASS && !skillCheck.passResultReplaced();
     }
 
     @Override

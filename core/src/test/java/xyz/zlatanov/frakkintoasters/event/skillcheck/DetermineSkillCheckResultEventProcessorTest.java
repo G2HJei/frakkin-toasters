@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event.skillcheck;
 
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.CHANGE_OF_PLANS;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
@@ -218,7 +219,7 @@ class DetermineSkillCheckResultEventProcessorTest extends EventTestHarness<Deter
     }
 
     private static Followup changeOfPlans(int playerNumber) {
-        return one(new PlayerDecisionEvent<>(playerNumber, ChangeOfPlansEvent.class), new NoOpEvent(playerNumber));
+        return single(new OfferPlayOrPassEvent(playerNumber, CHANGE_OF_PLANS));
     }
 
     private static Followup resolve() {

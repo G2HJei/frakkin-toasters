@@ -1,5 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event;
 
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.POLITICAL_PROWESS;
+import xyz.zlatanov.frakkintoasters.event.skillcheck.OfferPlayOrPassEvent;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.TestHarness;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
@@ -21,16 +23,17 @@ class FollowupUtilsTest extends TestHarness {
         assertEquals(single(new MakeSkillCheckEvent()), FollowupUtils.beforeSkillCheckFollowups(game));
     }
 
-    // "Political Prowess": "Play before making a skill check triggered by a location."
+    // "Political Prowess": "Play before making a skill check triggered by a location." Each player is asked as the
+    // check stands when it is his turn to answer.
     @Test
     void anyPlayerMayPlayPoliticalProwessBeforeALocationSkillCheck() {
         game.startSkillCheck(ADMIRALS_QUARTERS);
         assertEquals(
                 all(
-                        one(new PlayerDecisionEvent<>(1, PoliticalProwessEvent.class), new NoOpEvent(1)),
-                        one(new PlayerDecisionEvent<>(2, PoliticalProwessEvent.class), new NoOpEvent(2)),
-                        one(new PlayerDecisionEvent<>(3, PoliticalProwessEvent.class), new NoOpEvent(3)),
-                        single(new MakeSkillCheckEvent())),
+                        new OfferPlayOrPassEvent(1, POLITICAL_PROWESS),
+                        new OfferPlayOrPassEvent(2, POLITICAL_PROWESS),
+                        new OfferPlayOrPassEvent(3, POLITICAL_PROWESS),
+                        new MakeSkillCheckEvent()),
                 FollowupUtils.beforeSkillCheckFollowups(game));
     }
 

@@ -98,9 +98,8 @@ public class SkillCheckResultFollowups {
                     single(new PlayerDecisionEvent<>(currentPlayer(), LookAtLoyaltyCardEvent.class));
             case MANDATORY_TESTING -> single(new LookAtLoyaltyCardEvent(president(), currentPlayer()));
             // brig
-            case GUILT_BY_COLLUSION ->
-                    optional(currentPlayer(), new PlayerDecisionEvent<>(currentPlayer(), SendToBrigEvent.class));
-            case FAMILIAR_FACE -> optional(admiral(), new PlayerDecisionEvent<>(admiral(), SendToBrigEvent.class));
+            case GUILT_BY_COLLUSION -> mayChooseCharacterForBrig(currentPlayer());
+            case FAMILIAR_FACE -> mayChooseCharacterForBrig(admiral());
             case REBUILD_TRUST -> each(this::inBrig, p -> optional(p,
                     new PlayerDecisionEvent<>(p, LeaveBrigEvent.class, DESTINATION_GALACTICA)));
             // cards
@@ -187,7 +186,7 @@ public class SkillCheckResultFollowups {
             case AIRLOCK_LEAK -> all(new DamageBattlestarEvent(), sendTo(SICKBAY, currentPlayer()));
             case CENTURION_ASSAULT -> all(new DestroyRaptorEvent(), sendTo(SICKBAY, currentPlayer()));
             case SET_A_TRAP -> all(new PlaceCenturionsEvent(1), sendTo(SICKBAY, currentPlayer()));
-            case A_TRAITOR_ACCUSED -> single(new PlayerDecisionEvent<>(currentPlayer(), SendToBrigEvent.class));
+            case A_TRAITOR_ACCUSED -> ChooseCharacterForBrigEventProcessor.offer(game, currentPlayer());
             case WITCH_HUNT -> allOf(single(lose(MORALE, 1)), chooseCharacterForSickbay(game));
             case SECURITY_BREACH -> allOf(single(lose(MORALE, 1)), sendCharactersIn(SICKBAY, COMMAND));
             case MISSING_G4_EXPLOSIVES -> allOf(single(lose(FOOD, 1)), sendCharactersIn(Location.BRIG, ARMORY));
@@ -355,6 +354,11 @@ public class SkillCheckResultFollowups {
             case BRIG -> new SendToBrigEvent(playerNumber);
             default -> throw new FrakCallTheAdmiralException();
         };
+    }
+
+    private Followup mayChooseCharacterForBrig(int chooser) {
+        val decision = ChooseCharacterForBrigEventProcessor.offer(game, chooser);
+        return decision == NONE ? NONE : one(decision, single(new NoOpEvent(chooser)));
     }
 
     private Followup sendCharactersIn(Location destination, Location... locations) {

@@ -117,6 +117,11 @@ public class Player implements PlayerView {
 
     @Override
     public boolean isHuman() {
+        if (character == null) {
+            // Between an execution and the choice of a new character he plays no character, so no effect on the
+            // humans reaches him, e.g. the discards of a Final Five card another execution reveals meanwhile.
+            return false;
+        }
         val isCylonLeader = character.type() == CYLON_LEADER;
         return isCylonLeader && isInfiltrating ||
                 !isCylonLeader && !isRevealedCylon();

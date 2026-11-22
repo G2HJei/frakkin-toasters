@@ -1,5 +1,8 @@
 package xyz.zlatanov.frakkintoasters.event;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import xyz.zlatanov.frakkintoasters.state.ship.AssaultRaptor;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.BRENDAN_HOTDOG_COSTANZA;
 import lombok.val;
 import org.junit.jupiter.api.Test;
@@ -80,5 +83,20 @@ class DamageHumanFighterEventProcessorTest extends EventTestHarness<DamageHumanF
         assertEquals(SICKBAY, locate(BRENDAN_HOTDOG_COSTANZA));
         assertFalse(galacticaBoard.damagedShips().contains(viper));
         assertTrue(game.removedComponents().items().contains(viper));
+    }
+
+    // An assault raptor counts as a viper and is destroyed, in the "Reserves" too (rule 11.3.2.3, F-d897ee).
+    @Test
+    void shouldDestroyAnAssaultRaptorInTheReserves() {
+        val assaultRaptor = galacticaBoard.reserves().stream()
+                .filter(AssaultRaptor.class::isInstance)
+                .findFirst()
+                .orElseThrow();
+
+        execute(new DamageHumanFighterEvent(assaultRaptor.id()));
+
+        assertFalse(galacticaBoard.reserves().contains(assaultRaptor));
+        assertFalse(galacticaBoard.damagedShips().contains(assaultRaptor));
+        assertTrue(game.removedComponents().contains(assaultRaptor));
     }
 }

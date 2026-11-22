@@ -3,6 +3,7 @@ package xyz.zlatanov.frakkintoasters.fuzz;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.TestHarness;
+import xyz.zlatanov.frakkintoasters.event.action.quorum.AuthorizationOfBrutalForceEvent;
 import xyz.zlatanov.frakkintoasters.event.interrupt.PlayInterruptCardEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.DiscardSkillCardsEvent;
@@ -14,10 +15,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DISCARD_DOWN_TO_HAND_LIMIT;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DRAW_EXACTLY_2_OF_ANY_COLOR;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
+import static xyz.zlatanov.frakkintoasters.state.card.QuorumCard.AUTHORIZATION_OF_BRUTAL_FORCE;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.LAURA_ROSLIN;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.CONSOLIDATE_POWER;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.EXECUTIVE_ORDER;
@@ -60,6 +64,42 @@ class CandidatesTest extends TestHarness {
             assertFalse(answer.selection().containsKey(SkillCardColor.POLITICS));
         }
         assertEquals(List.of(), findings);
+    }
+
+    // "Authorization of Brutal Force" takes 3 raiders from any areas.
+    @Test
+    void aListOfShipsTakesThemFromAnyArea() {
+        holdAuthorizationOfBrutalForce();
+        val raiders = Set.of(raiderAt(GALACTICA_SPACE_2_OCLOCK).id(), raiderAt(GALACTICA_SPACE_8_OCLOCK).id(),
+                raiderAt(GALACTICA_SPACE_12_OCLOCK).id());
+
+        val answer = (AuthorizationOfBrutalForceEvent) AnswerFinder.find(game,
+                new PlayerDecisionEvent<>(1, AuthorizationOfBrutalForceEvent.class), new Random(1), findings::add)
+                .orElseThrow();
+
+        assertEquals(raiders, Set.copyOf(answer.shipIds()));
+        assertEquals(List.of(), findings);
+    }
+
+    // Or a centurion of the Boarding Party track.
+    @Test
+    void aListOfShipsTakesACenturion() {
+        holdAuthorizationOfBrutalForce();
+        val centurion = centurion();
+        galacticaBoard.boardGalactica(centurion);
+
+        val answer = (AuthorizationOfBrutalForceEvent) AnswerFinder.find(game,
+                new PlayerDecisionEvent<>(1, AuthorizationOfBrutalForceEvent.class), new Random(1), findings::add)
+                .orElseThrow();
+
+        assertEquals(List.of(centurion.id()), answer.shipIds());
+        assertEquals(List.of(), findings);
+    }
+
+    private void holdAuthorizationOfBrutalForce() {
+        player(1).character(LAURA_ROSLIN);
+        president(LAURA_ROSLIN);
+        presidentHand.addOnTop(AUTHORIZATION_OF_BRUTAL_FORCE);
     }
 
     @Test

@@ -57,18 +57,24 @@ class SendToBrigEventProcessorTest extends EventTestHarness<SendToBrigEvent> {
         assertNull(viper.pilot());
     }
 
+    // An effect queued before he got there names him all the same (F-4985f5).
     @Test
-    void shouldRejectCharacterAlreadyInBrig() {
+    void shouldLeaveACharacterAlreadyInTheBrigThere() {
         moveTo(BRIG, LEE_APOLLO_ADAMA);
 
-        assertInvalid(new SendToBrigEvent(2));
+        execute(new SendToBrigEvent(2));
+
+        assertEquals(BRIG, locate(LEE_APOLLO_ADAMA));
     }
 
+    // A revealed Cylon ignores it (rule 6.1.2.1).
     @Test
-    void shouldRejectRevealedCylon() {
+    void shouldLeaveARevealedCylonWhereHeIs() {
         revealCylon();
 
-        assertInvalid(new SendToBrigEvent(1));
+        execute(new SendToBrigEvent(1));
+
+        assertEquals(HANGAR_DECK, locate(KARA_STARBUCK_THRACE));
     }
 
     @Test

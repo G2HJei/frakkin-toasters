@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event.skillcheck.ability;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
@@ -22,5 +23,18 @@ class ABetterMachineEventProcessorTest extends EventTestHarness<ABetterMachineEv
         execute(new ABetterMachineEvent());
 
         assertTrue(destinyDeck.cards().containsAll(Set.of(treachery1, treachery2)));
+    }
+
+    // Only the Treachery cards left: the others are in the hands (rule 8.2.2.5, F-17bf33).
+    @Test
+    void shufflesInOnlyTheTreacheryCardsLeft() {
+        val bait = new SkillCard(0, BAIT);
+        treacheryDeck.clear().addOnTop(bait);
+        val destinyCards = destinyDeck.size();
+
+        execute(new ABetterMachineEvent());
+
+        assertEquals(destinyCards + 1, destinyDeck.size());
+        assertTrue(destinyDeck.cards().contains(bait));
     }
 }

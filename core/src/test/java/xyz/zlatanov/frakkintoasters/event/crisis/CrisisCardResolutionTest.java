@@ -16,7 +16,8 @@ import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.DiscardSkillCardsEvent;
 import xyz.zlatanov.frakkintoasters.event.player.PlaceCivilianShipEvent;
 import xyz.zlatanov.frakkintoasters.event.player.SelectCharacterEvent;
-import xyz.zlatanov.frakkintoasters.event.player.SendToBrigEvent;
+import xyz.zlatanov.frakkintoasters.event.player.ChooseCharacterForBrigEvent;
+import xyz.zlatanov.frakkintoasters.event.player.ChooseCharacterForBrigEventProcessor;
 import xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard;
 import xyz.zlatanov.frakkintoasters.state.damage.GalacticaDamage;
 import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
@@ -31,7 +32,6 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.event.crisis.ChooseCrisisSectionEvent.Section.BOTTOM;
 import static xyz.zlatanov.frakkintoasters.event.crisis.ChooseCrisisSectionEvent.Section.TOP;
-import static xyz.zlatanov.frakkintoasters.event.player.SendToBrigEventProcessor.canBeSentToBrig;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.NOT_CYLON;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
@@ -400,9 +400,9 @@ class CrisisCardResolutionTest extends TestHarness {
             return new PlaceCivilianShipEvent(player, free);
         } else if (action == ChooseCrisisTargetEvent.class) {
             return new ChooseCrisisTargetEvent(player, card, ChooseCrisisTargetEventProcessor.legalTargets(game, card).getLast()); // the last: not the current player, who would then hold 2 Mutiny Cards
-        } else if (action == SendToBrigEvent.class) {
-            return new SendToBrigEvent(game.players().stream()
-                    .filter(p -> canBeSentToBrig(game, p.number()))
+        } else if (action == ChooseCharacterForBrigEvent.class) {
+            return new ChooseCharacterForBrigEvent(player, game.players().stream()
+                    .filter(p -> ChooseCharacterForBrigEventProcessor.canBeChosen(game, p.number()))
                     .findFirst()
                     .orElseThrow()
                     .number());

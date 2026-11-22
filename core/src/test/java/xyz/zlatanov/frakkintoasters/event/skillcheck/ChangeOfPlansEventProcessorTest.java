@@ -96,4 +96,10 @@ class ChangeOfPlansEventProcessorTest extends EventTestHarness<ChangeOfPlansEven
 
         assertInvalid(new ChangeOfPlansEvent(3, declareEmergency));
     }
+
+    // A client may send no card (F-d95b59).
+    @Test
+    void rejectsNoCard() {
+        assertInvalid(new ChangeOfPlansEvent(1, null));
+    }
 }

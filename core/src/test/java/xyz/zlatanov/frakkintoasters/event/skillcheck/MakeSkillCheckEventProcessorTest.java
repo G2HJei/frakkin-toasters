@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event.skillcheck;
 
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.CHANGE_OF_PLANS;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.event.FollowupUtils;
@@ -28,9 +29,9 @@ class MakeSkillCheckEventProcessorTest extends EventTestHarness<MakeSkillCheckEv
         execute(new MakeSkillCheckEvent());
 
         assertFollowup(all(
-                one(new PlayerDecisionEvent<>(1, ChangeOfPlansEvent.class), new NoOpEvent(1)),
-                one(new PlayerDecisionEvent<>(2, ChangeOfPlansEvent.class), new NoOpEvent(2)),
-                one(new PlayerDecisionEvent<>(3, ChangeOfPlansEvent.class), new NoOpEvent(3)),
+                single(new OfferPlayOrPassEvent(1, CHANGE_OF_PLANS)),
+                single(new OfferPlayOrPassEvent(2, CHANGE_OF_PLANS)),
+                single(new OfferPlayOrPassEvent(3, CHANGE_OF_PLANS)),
                 single(new ResolveSkillCheckResultEvent()),
                 single(new EndSkillCheckEvent())));
     }

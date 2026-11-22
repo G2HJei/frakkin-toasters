@@ -13,4 +13,14 @@ class BaitEventProcessorTest extends EventTestHarness<BaitEvent> {
         execute(new BaitEvent());
         assertShipCount(GALACTICA_SPACE_2_OCLOCK, CivilianShip.class, 1);
     }
+
+    // No civilian ship is left to place (F-896a90).
+    @Test
+    void nothingWhenNoCivilianShipIsLeft() {
+        civilianShips.clear();
+
+        execute(new BaitEvent());
+
+        assertShipCount(GALACTICA_SPACE_2_OCLOCK, CivilianShip.class, 0);
+    }
 }

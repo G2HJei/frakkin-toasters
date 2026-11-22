@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.BRIG;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.COMMAND;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.PRESIDENTS_OFFICE;
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.MUTINEER;
 import static xyz.zlatanov.frakkintoasters.state.card.MutinyCard.*;
@@ -157,5 +158,20 @@ class DrawMutinyCardEventProcessorTest extends EventTestHarness<DrawMutinyCardEv
         execute(new DrawMutinyCardEvent(1));
 
         assertFollowup(new PlayerDecisionEvent<>(1, DiscardSkillCardsEvent.class, DISCARD_EXACTLY_2));
+    }
+
+    // The "Brig" and the discard before "Moral Dilemma": a "Bait" it discards draws another Mutiny Card, which has
+    // to see them done (F-4985f5).
+    @Test
+    void leeAdamaGoesToTheBrigBeforeHeDiscardsForTheSecondCard() {
+        player(1).character(LEE_ADAMA).mutinyCards().addOnTop(FEED_THE_PEOPLE);
+        moveTo(COMMAND, LEE_ADAMA);
+        player(1).skillCards().addOnTop(new SkillCard(1, CONSOLIDATE_POWER));
+        mutinyDeck.nextCard(PANIC);
+
+        execute(new DrawMutinyCardEvent(1));
+
+        assertFollowup(all(all(single(new SendToBrigEvent(1)), DISCARD_1),
+                single(new PlayerDecisionEvent<>(1, DiscardSkillCardsEvent.class, DISCARD_EXACTLY_2))));
     }
 }

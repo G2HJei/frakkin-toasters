@@ -266,8 +266,11 @@ public class SkillCheckOps extends GameOps {
         val selection = computeColorSelection(skillCardColor);
         selection.forEach(
                 (color, count) -> {
-                    List<SkillCard> cards = draw(DeckId.of(color), count);
-                    record(new CardsAddedOnTop(DeckId.DESTINY, cards));
+                    // A color with no cards left in its deck and discard pile can't be drawn (rule 8.2.2.5).
+                    List<SkillCard> cards = draw(DeckId.of(color), Math.min(count, game.decks().skillCardsLeft(color)));
+                    if (!cards.isEmpty()) {
+                        record(new CardsAddedOnTop(DeckId.DESTINY, cards));
+                    }
                 });
         shuffle(DeckId.DESTINY);
     }

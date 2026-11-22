@@ -81,4 +81,14 @@ class DrawAndResolveRecklessCardsEventProcessorTest extends EventTestHarness<Dra
         assertTrue(game.activeSkillCheck().nonMatchingPile().isEmpty());
         assertFollowup(all(new BaitEvent(), new DradisContactEvent()));
     }
+
+    // Every Treachery card is in a hand: there is nothing to draw (rule 8.2.2.5, F-5eb977).
+    @Test
+    void nothingWhenNoTreacheryCardIsLeft() {
+        treacheryDeck.clear();
+
+        execute(new DrawAndResolveRecklessCardsEvent());
+
+        assertEquals(List.of(), treacheryDeck.discardedCards());
+    }
 }

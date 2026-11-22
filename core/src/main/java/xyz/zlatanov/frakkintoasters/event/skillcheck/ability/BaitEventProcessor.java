@@ -9,7 +9,9 @@ public class BaitEventProcessor extends EventProcessor<BaitEvent> {
 
     @Override
     public Followup process() {
-        ops.galactica().placeCivilianShip(GALACTICA_SPACE_2_OCLOCK);
+        if (game.decks().civilianShipsLeft() > 0) {
+            ops.galactica().placeCivilianShip(GALACTICA_SPACE_2_OCLOCK);
+        }
         return Followup.NONE;
     }
 }

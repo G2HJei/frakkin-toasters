@@ -19,6 +19,7 @@ import xyz.zlatanov.frakkintoasters.event.deck.ShuffleTreacheryIntoDestinyDeckEv
 import xyz.zlatanov.frakkintoasters.event.officials.DetermineNextPresidentEvent;
 import xyz.zlatanov.frakkintoasters.event.officials.MakePresidentEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
+import xyz.zlatanov.frakkintoasters.event.player.ChooseCharacterForBrigEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.player.DrawMutinyCardEvent;
 import xyz.zlatanov.frakkintoasters.event.player.ExecuteEvent;
 import xyz.zlatanov.frakkintoasters.event.player.LaunchViperEvent;
@@ -372,8 +373,7 @@ public class CrisisCardFollowups {
 
     // "must choose a character to send to the "Brig"": any character that can go there (rule 9.2.3).
     private Followup chooseCharacterForBrig(int chooser) {
-        val anyone = game.players().stream().anyMatch(player -> canBeSentToBrig(game, player.number()));
-        return anyone ? single(new PlayerDecisionEvent<>(chooser, SendToBrigEvent.class)) : NONE;
+        return ChooseCharacterForBrigEventProcessor.offer(game, chooser);
     }
 
     // "The President may choose 1 player to move from the "Brig" to "Command.""

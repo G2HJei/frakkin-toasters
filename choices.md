@@ -94,6 +94,9 @@ different answer changes only the code named. Only the Kobol objective is in sco
 - "Resolute" takes any undamaged location with an action, Cylon locations included; "Organized" 3 different ones, no
   Cylon location, never the "Brig". "Treatment" gives its 2 cards as fixed pairs, of colors in the target's skill set.
 - "Blind Jump": the Admiral draws 1 Destination Card and the Mission Specialist keeps his card.
+- "Moral Dilemma"'s 2 cards come after what the Mutiny Card brings, the "Brig" and the Mutiny Card discards
+  (`DrawMutinyCardEventProcessor.afterDrawing`, the "Press Room"): a "Bait" among them draws another Mutiny Card, which
+  then finds them done.
 - "Human Delusion"'s cards count for the strength, but their abilities don't resolve. "Logic-Bound" isn't optional.
   "Vanity", "Impulsive", "Misguided" and "Headstrong" don't bind a Super Crisis Card's check (rule 6.1.2.5).
 - "Moral Compass" and "Choose a Different Path" act on the choice of a section, not on the targets a card asks for.

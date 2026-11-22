@@ -15,11 +15,10 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.RESEARCH_LAB;
 
 class ProbeTest {
 
-    // A known bug (fuzzer-plan.md, "Expected first findings"): the move doesn't check that the card it discards is in
-    // the hand, so it takes one William Adama doesn't hold, and the deck's assert fails. Once MoveEventProcessor checks
-    // the hand, the probe is rejected: then this test flips to assert no finding.
+    // Once a known bug (F-2928df): the move didn't check that the card it discards is in the hand, so it took one
+    // William Adama doesn't hold, and the deck's assert failed. Now the probe is rejected and changes nothing.
     @Test
-    void aDiscardOfACardNotInTheHandIsCaught() {
+    void aDiscardOfACardNotInTheHandIsRejected() {
         val engine = atAdamasMove();
         val player = askedPlayer(engine);
         val hand = engine.view().player(player).skillCards().cards();
@@ -32,8 +31,7 @@ class ProbeTest {
         val result = Probe.submit(engine, player, new MoveEvent(player, PRESS_ROOM, notHeld));
 
         assertFalse(result.taken());
-        assertNotNull(result.finding());
-        assertEquals(Kind.CRASH, result.finding().kind());
+        assertNull(result.finding());
     }
 
     @Test

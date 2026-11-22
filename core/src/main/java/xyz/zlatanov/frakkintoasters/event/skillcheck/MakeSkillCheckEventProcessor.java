@@ -6,6 +6,7 @@ import xyz.zlatanov.frakkintoasters.event.Followup;
 
 import java.util.ArrayList;
 
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.CHANGE_OF_PLANS;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.playCardsBeforeSkillCheck;
@@ -29,7 +30,7 @@ public class MakeSkillCheckEventProcessor extends EventProcessor<MakeSkillCheckE
         // still be replaced by "Change of Plans".
         val followups = new ArrayList<Followup>();
         if (result == PASS) {
-            followups.addAll(playOrPassDecisions(game, ChangeOfPlansEvent.class));
+            followups.addAll(playOrPassDecisions(game, CHANGE_OF_PLANS));
         }
         followups.add(single(new ResolveSkillCheckResultEvent()));
         followups.add(single(new EndSkillCheckEvent()));

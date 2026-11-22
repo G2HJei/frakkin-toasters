@@ -39,7 +39,9 @@ public class DrawMutinyCardEventProcessor extends EventProcessor<DrawMutinyCardE
      * and the discards down to what he may keep
      */
     public static Followup afterDrawing(GameView game, PlayerView player) {
-        return allOf(CharacterPenalties.mutinyCardDrawn(game, player), keepWhatHeMay(game, player)); // "Moral Dilemma" first
+        // The "Brig" and the Mutiny Card discards before "Moral Dilemma": a "Bait" it discards draws another Mutiny
+        // Card, which has to see them done.
+        return allOf(keepWhatHeMay(game, player), CharacterPenalties.mutinyCardDrawn(game, player));
     }
 
     private static Followup keepWhatHeMay(GameView game, PlayerView player) {

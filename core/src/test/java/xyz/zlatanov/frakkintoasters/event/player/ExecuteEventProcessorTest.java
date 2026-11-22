@@ -258,4 +258,19 @@ class ExecuteEventProcessorTest extends EventTestHarness<ExecuteEvent> {
         assertFalse(game.moraleLostToExecution());
         assertFollowupSelection();
     }
+
+    // A player whose executed character isn't replaced yet plays no character, and isn't asked to discard (F-481788).
+    @Test
+    void aPlayerWithoutACharacterDoesNotDiscardForAFinalFiveCard() {
+        player(2).loyaltyCards().addOnTop(NOT_CYLON, FINAL_FIVE_THEY_ARE_EXECUTED);
+        player(1).gainSkillCards(new SkillCard(1, LAUNCH_SCOUT));
+        ops.player(3).removeCharacter();
+
+        execute(new ExecuteEvent(2));
+
+        assertFollowup(all(
+                new PlayerDecisionEvent<>(1, DiscardSkillCardsEvent.class, DISCARD_EXACTLY_2),
+                new PlayerDecisionEvent<>(2, SelectCharacterEvent.class),
+                new FinishExecutionEvent(2, KARA_STARBUCK_THRACE)));
+    }
 }

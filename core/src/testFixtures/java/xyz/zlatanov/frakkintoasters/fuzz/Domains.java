@@ -244,13 +244,17 @@ final class Domains {
                 .toList();
     }
 
-    // The ships by where they are, because a card that takes several ships takes them from one space area or pile.
+    // The ships by where they are, because a card that takes several ships takes them from one space area or pile, and
+    // by their type in space, for one that takes them from any area ("Authorization of Brutal Force").
     private static Map<String, List<Integer>> shipGroups(Asked asked) {
         val boards = asked.game().boards();
         val galactica = boards.galactica();
         val groups = new TreeMap<String, List<Integer>>();
-        galactica.shipsInSpace().forEach((ship, location) ->
-                groups.computeIfAbsent(location.name(), key -> new ArrayList<>()).add(ship.id()));
+        galactica.shipsInSpace().forEach((ship, location) -> {
+            groups.computeIfAbsent(location.name(), key -> new ArrayList<>()).add(ship.id());
+            groups.computeIfAbsent("TYPE_" + ship.getClass().getSimpleName(), key -> new ArrayList<>()).add(ship.id());
+        });
+        groups.put("BOARDING_PARTY", new ArrayList<>(centurionIds(asked)));
         boards.cylonFleet().shipsInSpace().forEach((ship, location) ->
                 groups.computeIfAbsent("FLEET_" + location.name(), key -> new ArrayList<>()).add(ship.id()));
         groups.put("RESERVES", ids(galactica.reserves()));

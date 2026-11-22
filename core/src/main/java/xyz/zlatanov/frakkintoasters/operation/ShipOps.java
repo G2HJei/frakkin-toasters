@@ -113,7 +113,8 @@ public class ShipOps extends GameOps {
         if (humanFighter.isEmpty()) {
             return false;
         }
-        record(new ShipMoved(shipId, RESERVES, DAMAGED, null));
+        // A damaged assault raptor is destroyed, in the "Reserves" too (rule 11.3.2.3).
+        record(new ShipMoved(shipId, RESERVES, humanFighter.get() instanceof Viper ? DAMAGED : REMOVED, null));
         return true;
     }
 

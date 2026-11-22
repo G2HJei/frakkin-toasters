@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.state;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
@@ -110,4 +111,9 @@ class PlayerTest {
         assertFalse(cavil.isHuman());
     }
 
+    // Between an execution and the choice of a new character.
+    @Test
+    void aPlayerWithoutACharacterIsNotHuman() {
+        assertFalse(new Player(3).isHuman());
+    }
 }

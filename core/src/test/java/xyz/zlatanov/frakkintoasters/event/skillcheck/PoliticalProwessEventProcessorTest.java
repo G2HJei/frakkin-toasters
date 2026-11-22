@@ -93,4 +93,10 @@ class PoliticalProwessEventProcessorTest extends EventTestHarness<PoliticalProwe
 
         assertInvalid(new PoliticalProwessEvent(1, consolidatePower, true));
     }
+
+    // A client may send no card (F-db09a4).
+    @Test
+    void rejectsNoCard() {
+        assertInvalid(new PoliticalProwessEvent(1, null, true));
+    }
 }

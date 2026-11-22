@@ -39,6 +39,9 @@ public class MoveEventProcessor extends EventProcessor<MoveEvent> {
         val isEligibleLocation = isEligibleLocation();
         val shouldDiscardCard = !Objects.equals(startingArea(), targetArea());
         val isDiscardingCard = discardCard != null;
+        if (isDiscardingCard && !holdsSkillCards(List.of(discardCard))) {
+            return false;
+        }
         return isEligibleLocation &&
                 shouldDiscardCard == isDiscardingCard
                 && !CharacterMoves.hereticHeld(game, player);
@@ -96,6 +99,9 @@ public class MoveEventProcessor extends EventProcessor<MoveEvent> {
         val isStayingInSpace = destination.isSpaceLocation();
         if (isPiloting && isStayingInSpace) {
             val distance = DISTANCE_LOOKUP_TABLE.get(currentLocation).get(destination);
+            if (distance == null) {
+                return false; // a fighter flies only around Galactica, not to the Cylon Fleet board
+            }
             val fighter = galacticaBoard.pilotedFighter(player.character()).orElseThrow();
             val maxDistance = 1 + (fighter instanceof ViperMarkVII ? 1 : 0);
             return distance <= maxDistance;

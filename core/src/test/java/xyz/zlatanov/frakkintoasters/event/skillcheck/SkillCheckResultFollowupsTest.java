@@ -108,7 +108,7 @@ class SkillCheckResultFollowupsTest extends TestHarness {
 
     @Test
     void shouldLetTheAdmiralOptionallySendToBrig() {
-        assertEquals(one(new PlayerDecisionEvent<>(ADMIRAL, SendToBrigEvent.class), new NoOpEvent(ADMIRAL)),
+        assertEquals(one(new PlayerDecisionEvent<>(ADMIRAL, ChooseCharacterForBrigEvent.class), new NoOpEvent(ADMIRAL)),
                 followup(FAMILIAR_FACE, PASS));
     }
 
@@ -224,6 +224,17 @@ class SkillCheckResultFollowupsTest extends TestHarness {
         assertEquals(single(new LoseResourceEvent(MORALE, 1)), followup(LOSS_OF_A_FRIEND, FAIL));
         assertEquals(single(new LoseResourceEvent(MORALE, 1)), followup(UNEXPECTED_REUNION, FAIL));
         assertEquals(single(new NoOpEvent(OTHER)), followup(CYLON_ACCUSATION, FAIL)); // not to the "Brig"
+    }
+
+    // Nobody to choose: every character is in the "Brig".
+    @Test
+    void shouldNotAskForACharacterNobodyCouldBe() {
+        game.turn().currentPlayerNumber(OTHER);
+        moveTo(Location.BRIG, WILLIAM_ADAMA);
+        moveTo(Location.BRIG, LAURA_ROSLIN);
+        moveTo(Location.BRIG, KARA_STARBUCK_THRACE);
+
+        assertEquals(NONE, followup(A_TRAITOR_ACCUSED, FAIL));
     }
 
     @Test

@@ -1,4 +1,4 @@
-format version 37
+format version 38
 enum Area = SPACE, RESERVES, SPACE_OR_RESERVES
 enum BasestarBridgeAbility = CAG_PLACES_CIVILIAN_SHIP, JUMP_OR_PURSUIT, BASESTAR_OR_RAIDERS, GALACTICA_DAMAGE
 enum BasestarDamage = STRUCTURAL_DAMAGE, DISABLED_WEAPONS, DISABLED_HANGAR_BAY, CRITICAL_HIT
@@ -149,6 +149,7 @@ record ChangeOfPlansEvent(playerNumber: int, changeOfPlansCard: SkillCard)
 record ChangeResourceEvent(resource: Resource, amount: int)
 record ChoiceMade(scopeId: int, chooser: int, option: Followup)
 record ChooseADifferentPathEvent(playerNumber: int, card: CrisisCard)
+record ChooseCharacterForBrigEvent(playerNumber: int, targetPlayerNumber: int)
 record ChooseCrisisSectionEvent(playerNumber: int, card: CrisisCard, section: Section)
 record ChooseCrisisTargetEvent(playerNumber: int, card: CrisisCard, targetPlayerNumber: int?)
 record ChooseDestinationEvent(playerNumber: int, chosen: DestinationCard, others: List<DestinationCard>)
@@ -419,6 +420,7 @@ record OfferCommandAuthorityEvent()
 record OfferDutifulEvent(playerNumber: int, location: Location)
 record OfferForwardThinkerEvent(playerNumber: int)
 record OfferMementoEvent(playerNumber: int)
+record OfferPlayOrPassEvent(playerNumber: int, card: SkillCardType)
 record OneOf(options: Set<Followup>)
 record OpenInterruptWindowEvent(window: InterruptWindow)
 record OrganizedEvent(playerNumber: int)

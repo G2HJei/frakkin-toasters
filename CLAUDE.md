@@ -187,9 +187,14 @@ the state at that moment what follows.
 - A location action or a Crisis Card (`ResolveCrisisCardEventProcessor`, `ChooseCrisisSectionEventProcessor`) calls
   `ops.skillCheck().start(type)` and returns
   `FollowupUtils.beforeSkillCheckFollowups(game)`: "Mysterious Intuition" for a Crisis Card's check when Boomer can
-  use it, a "Political Prowess" decision per player for a location check, then `MakeSkillCheckEvent`. That skips the
+  use it, a "Political Prowess" offer per player for a location check, then `MakeSkillCheckEvent`. That skips the
   check when one of them decided it, and otherwise asks for the
   cards played before the check, from the player to the left of the current player (`eachPlayerFromTheLeft`).
+- "Political Prowess", "Change of Plans" and "Declare Emergency" are offered to every player in turn
+  (`FollowupUtils.playOrPassDecisions`), each through an `OfferPlayOrPassEvent(n, card)` that builds his choice when it
+  runs, so a card another player played first counts: the play or the pass while he holds the card and the check allows
+  it (`OfferPlayOrPassEventProcessor.canPlay`), otherwise the pass alone. That one option is a `OneOf` built directly, so
+  he is still asked and the table doesn't learn who holds the card.
 - `RevealCardsBeforeSkillCheckEvent` (and a tiebreak), `ResolveCardsBeforeSkillCheckEvent` (Support the People, the
   Chief of Staff, "Fast Learner", the Destiny cards, the cards played into the check, then "Blind Devotion"),
   `ShuffleAndDivideCardsEvent` ("Quick Fix" and "Human Delusion" once the cards are revealed, the abilities unless
@@ -377,7 +382,12 @@ instead, e.g. `FollowupUtils.chooseCharacterForSickbay` (rule 9.3.2).
 - A Skill Card color with no cards in its deck and discard pile can't be drawn (rule 8.2.2.5,
   `DecksHolderView.skillCardsLeft`). `DrawSkillCardsEvent` may draw fewer than its `DRAW_EXACTLY_n` only when no other
   card fits, and fixed-color draws take what is left.
-- Clients may send null fields, so a check that would throw on one rejects it instead.
+- Clients may send null fields, so a check that would throw on one rejects it instead (the state's `List.copyOf`
+  lists throw on `contains(null)` too).
+- A followup is built before the events ahead of it run, so a queued event may find its character changed: an event
+  that names him tolerates it, e.g. `SendToBrigEvent` leaves a character already in the "Brig" or a revealed Cylon
+  where he is. A rule that binds a player's choice goes in the event he answers with, e.g.
+  `ChooseCharacterForBrigEvent` (rule 9.2.3, `ChooseCharacterForBrigEventProcessor.offer`).
 
 ### Engine
 
@@ -661,6 +671,8 @@ on its event.
   different ones, without its power, then follows `FinishCylonRevealEvent(n, false)`: no Super Crisis Card. An
   Infiltrating Cylon Leader's Infiltration ends (`PlayerOps.endInfiltration`). See "Cylons and Loyalty Cards".
 - The executed current player's turn ends early (see "Turn Loop").
+- Until he has chosen his new character the player plays none: `isHuman()` is false, so no effect on the humans
+  reaches him, e.g. the discards of a Final Five card that another execution reveals in between.
 
 ### Cylons and Loyalty Cards
 
@@ -954,7 +966,10 @@ stores its journal in Postgres and pushes to every viewer what he may see. It ad
   '*FuzzJournalExportTest' -DfuzzJournal=4:117` (`fuzz-4p-117.json`): the journal at the pause before the finding, the
   `input` that failed there (`player`, an `option` and/or an `event`) and what it has to do once fixed (`expect`:
   `runs`, `answers` or `restores`, see `Repro` in `fuzz/`), which `RegressionJournalsTest` checks per file. A fuzz
-  journal that a `FORMAT_VERSION` change makes unloadable is deleted; the core test of its fix stays.
+  journal that a `FORMAT_VERSION` change makes unloadable is deleted; the core test of its fix stays. A journal
+  can't check a fix that changes what an earlier event queued (a decision offered without an answer, a stale queued
+  event): the journal records the followup, so a restore queues it again whatever the fix. Such a fix has its core
+  test only.
 - Flyway migrations in `src/main/resources/db/migration`. The tests (`BackendTest`) run against a Testcontainers
   Postgres with the `dev` profile; `LiveGameTest` drives real web socket clients and restarts the server mid-game, and
   `SandboxLiveTest` plays, undoes, exports and imports a sandbox.
@@ -1137,7 +1152,8 @@ character pauses where it did.
 - The other triggers, queued only in games with their character, each offered only when it can be used:
   - Right after any event that caused it: an op notes the trigger (`PlayerFact.AbilityTriggered`,
     `TurnView.triggeredAbilities()`), and the engine's `AbilityTriggers.check` (after `WinChecks`) queues its offer,
-    which clears it (`AbilityTriggerCleared`). `AbstractOps.loseResource` notes "Memento" on a population loss
+    which clears it (`AbilityTriggerCleared`). It queues one offer at a time: the check after that offer queues the
+    next trigger, so no offer is queued twice. `AbstractOps.loseResource` notes "Memento" on a population loss
     (`OfferMementoEvent` offers `MementoEvent`: 3 Piloting cards drawn, one discarded) and "Emotionally Fragile" when
     morale ends at 2 or less (`EmotionallyFragileEvent` queues `ExecuteEvent(n, withoutMoraleLoss = true)`).
   - "For Love": the discards a player is made to do go through `ForcedDiscards` (`DiscardKind`: chosen, random, the
