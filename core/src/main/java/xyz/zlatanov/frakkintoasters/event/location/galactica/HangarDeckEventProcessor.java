@@ -24,8 +24,11 @@ public class HangarDeckEventProcessor extends LocationActionProcessor<HangarDeck
         val unmannedFighterInSpace = galactica.shipsInSpace(HumanFighterView.class).stream().anyMatch(s -> s.pilot() == null);
         // Not from the "Brig", e.g. through "Resolute" (errata A2.1.1.1): the launch would take the prisoner out of it.
         val inBrig = game.locate(player.character()).filter(BRIG::equals).isPresent();
+        // Nor for a pilot, who is in space, e.g. a second "Hangar Deck" through "Resolute": he flies one ship.
+        val piloting = galactica.pilotedFighter(player.character()).isPresent();
         return player.character().canPilot()
                 && !inBrig
+                && !piloting
                 && (fighterInReserves || unmannedFighterInSpace);
     }
 

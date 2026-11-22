@@ -1,4 +1,4 @@
-format version 39
+format version 40
 enum Area = SPACE, RESERVES, SPACE_OR_RESERVES
 enum BasestarBridgeAbility = CAG_PLACES_CIVILIAN_SHIP, JUMP_OR_PURSUIT, BASESTAR_OR_RAIDERS, GALACTICA_DAMAGE
 enum BasestarDamage = STRUCTURAL_DAMAGE, DISABLED_WEAPONS, DISABLED_HANGAR_BAY, CRITICAL_HIT
@@ -421,6 +421,7 @@ record OfferCommandAuthorityEvent()
 record OfferDutifulEvent(playerNumber: int, location: Location)
 record OfferForwardThinkerEvent(playerNumber: int)
 record OfferMementoEvent(playerNumber: int)
+record OfferPilotLaunchEvent(playerNumber: int)
 record OfferPlayOrPassEvent(playerNumber: int, card: SkillCardType)
 record OfferUnmannedViperActivationEvent(playerNumber: int)
 record OneOf(options: Set<Followup>)
@@ -527,6 +528,7 @@ record ResolveConsequencesEvent()
 record ResolveCrisisCardEvent(card: CrisisCard)
 record ResolveCrisisRollEvent(card: CrisisCard, section: Section)
 record ResolveCrisisSectionEvent(card: CrisisCard, section: Section)
+record ResolveCrisisSectionThenEvent(card: CrisisCard, section: Section)
 record ResolveDestinationCardEvent(card: DestinationCard)
 record ResolveFinalFiveCardEvent(holderPlayerNumber: int, card: LoyaltyCard, lookerPlayerNumber: int)
 record ResolveFinalFiveCardsEvent(holderPlayerNumber: int, cards: List<LoyaltyCard>, lookerPlayerNumber: int)

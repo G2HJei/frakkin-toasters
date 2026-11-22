@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event.location.galactica;
 
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_6_OCLOCK;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
@@ -78,6 +79,16 @@ class HangarDeckEventProcessorTest extends EventTestHarness<HangarDeckEvent> {
     @Test
     void shouldNotBeUsedFromTheBrig() {
         moveTo(BRIG, KARA_STARBUCK_THRACE);
+        ops.allowRemoteAction(1, HANGAR_DECK); // as "Resolute" would
+
+        assertFalse(HangarDeckEventProcessor.canAct(game, player(1)));
+        assertInvalid(new HangarDeckEvent(1));
+    }
+
+    // A pilot is in space and flies one ship, e.g. at a second "Hangar Deck" through "Resolute" (F-704290).
+    @Test
+    void notForAPilot() {
+        viperAt(GALACTICA_SPACE_6_OCLOCK).pilot(KARA_STARBUCK_THRACE);
         ops.allowRemoteAction(1, HANGAR_DECK); // as "Resolute" would
 
         assertFalse(HangarDeckEventProcessor.canAct(game, player(1)));

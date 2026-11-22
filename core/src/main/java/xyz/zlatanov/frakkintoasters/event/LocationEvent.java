@@ -1,6 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event;
 
 import xyz.zlatanov.frakkintoasters.event.location.cylon.CylonFleetEventProcessor;
+import xyz.zlatanov.frakkintoasters.event.location.cylon.ResurrectionShipEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.location.colonialone.PressRoomEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.location.colonialone.QuorumChamberEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.location.galactica.*;
@@ -67,8 +68,9 @@ public interface LocationEvent extends ActionEvent {
             case ENGINE_ROOM -> EngineRoomEventProcessor.canAct(player);
             case AIRLOCK -> AirlockEventProcessor.canAct(game);
             case CYLON_FLEET -> CylonFleetEventProcessor.canAct(game);
+            case RESURRECTION_SHIP -> ResurrectionShipEventProcessor.canAct(game);
             case COMMAND, COMMUNICATIONS, PRESIDENTS_OFFICE, MAIN_BATTERIES, CAPRICA, HUMAN_FLEET,
-                 RESURRECTION_SHIP, BASESTAR_BRIDGE, BRIG, ADMINISTRATION -> true;
+                 BASESTAR_BRIDGE, BRIG, ADMINISTRATION -> true;
             // No action.
             case SICKBAY -> false;
             case GALACTICA_SPACE_12_OCLOCK, GALACTICA_SPACE_2_OCLOCK, GALACTICA_SPACE_4_OCLOCK, GALACTICA_SPACE_6_OCLOCK,

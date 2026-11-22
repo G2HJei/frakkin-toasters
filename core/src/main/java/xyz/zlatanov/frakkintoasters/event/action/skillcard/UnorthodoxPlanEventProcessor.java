@@ -1,5 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event.action.skillcard;
 
+import xyz.zlatanov.frakkintoasters.event.character.ActionCosts;
+import lombok.val;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.LocationEvent;
 import xyz.zlatanov.frakkintoasters.event.action.SkillCardEventProcessor;
@@ -34,6 +36,12 @@ public class UnorthodoxPlanEventProcessor extends SkillCardEventProcessor<Unorth
     // ship for "Communications". The player doesn't have to be there: the card doesn't ask it.
     private static boolean canTakeActionOf(GameView game, PlayerView player, Location location) {
         if (location == null || !LOCATIONS.contains(location) || !LocationEvent.canActIgnoringDamage(game, player, location)) {
+            return false;
+        }
+        // The location's cost ("Terminal Illness") is paid from what is left once this card and "Reluctant"'s are gone
+        // (F-130933).
+        val reluctant = game.turn().actionCostPaid(player.number()) ? 0 : ActionCosts.skillCardCost(player, UNORTHODOX_PLAN);
+        if (player.skillCards().size() - 1 - reluctant < ActionCosts.locationCost(player, location)) {
             return false;
         }
         return switch (location) {

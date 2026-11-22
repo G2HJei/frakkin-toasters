@@ -1,5 +1,6 @@
 package xyz.zlatanov.frakkintoasters.event.location.cylon;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
@@ -24,5 +25,14 @@ class ResurrectionShipEventProcessorTest extends EventTestHarness<ResurrectionSh
         superCrisisDeck.nextCard(THE_FARM);
         execute(new ResurrectionShipEvent(1));
         assertEquals(List.of(THE_FARM), player(1).superCrisisCards().cards());
+    }
+
+    // Every Super Crisis Card is in a hand: there is none to draw (F-b894d2).
+    @Test
+    void notWithoutASuperCrisisCardLeft() {
+        superCrisisDeck.clear();
+
+        assertFalse(ResurrectionShipEventProcessor.canAct(game));
+        assertInvalid(new ResurrectionShipEvent(1));
     }
 }

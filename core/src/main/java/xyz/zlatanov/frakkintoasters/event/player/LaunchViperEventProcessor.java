@@ -60,7 +60,9 @@ public class LaunchViperEventProcessor extends EventProcessor<LaunchViperEvent> 
     // The player pilots the viper himself. If all vipers are in play, he may take an unmanned one from a space area
     // instead (rule 11.2).
     private boolean validPilotedLaunch() {
-        val ownPilot = event.pilot() == player.character() && player.character().canPilot();
+        // A character flies one ship at a time.
+        val ownPilot = event.pilot() == player.character() && player.character().canPilot()
+                && galacticaBoard.pilotedFighter(player.character()).isEmpty();
         val viperAvailable = event.unmannedViperId() == null
                 ? canLaunchFromReserves(game, event.shipType(), event.location())
                 : isLaunch(event.shipType(), event.location())

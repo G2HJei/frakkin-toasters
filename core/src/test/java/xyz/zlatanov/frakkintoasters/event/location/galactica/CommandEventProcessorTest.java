@@ -1,5 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event.location.galactica;
 
+import static xyz.zlatanov.frakkintoasters.event.Followup.single;
+import xyz.zlatanov.frakkintoasters.event.crisis.OfferUnmannedViperActivationEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
@@ -30,7 +32,7 @@ class CommandEventProcessorTest extends EventTestHarness<CommandEvent> {
         assertFollowup(
                 all(
                         one(new PlayerDecisionEvent<>(1, ActivateViperEvent.class), new NoOpEvent(1)),
-                        one(new PlayerDecisionEvent<>(1, ActivateViperEvent.class), new NoOpEvent(1))));
+                        single(new OfferUnmannedViperActivationEvent(1))));
     }
 
     // "Unorthodox Plan": from elsewhere, even when the location is damaged.
@@ -44,7 +46,7 @@ class CommandEventProcessorTest extends EventTestHarness<CommandEvent> {
         assertFollowup(
                 all(
                         one(new PlayerDecisionEvent<>(1, ActivateViperEvent.class), new NoOpEvent(1)),
-                        one(new PlayerDecisionEvent<>(1, ActivateViperEvent.class), new NoOpEvent(1))));
+                        single(new OfferUnmannedViperActivationEvent(1))));
     }
 
     @Test

@@ -64,8 +64,9 @@ Next steps, in order:
    the board (viper activation, targets of a choice lighting up).
 6. Prove the game is completable (`roadmap.md` milestone A, `fuzzer-plan.md`): random games played to an ending.
    Phases 1 to 5 are done: `./gradlew :core:fuzz` plays the games and writes `fuzzer-report.md`, a finding exports
-   as a regression journal with its failing input, and hostile inputs probe the checks. In progress: the fix loop,
-   until 10,000 seeds per player count finish without a fatal finding (the report's "Fixes" and "Questions").
+   as a regression journal with its failing input, and hostile inputs probe the checks. The fix loop ran to 10,000
+   seeds per player count: no open finding, and the exit waits on the report's "Questions" (F-e700fd, a stall with
+   every human in the "Brig").
 
 ## Project Structure
 
@@ -389,8 +390,10 @@ instead, e.g. `FollowupUtils.chooseCharacterForSickbay` (rule 9.3.2).
   where he is. A rule that binds a player's choice goes in the event he answers with, e.g.
   `ChooseCharacterForBrigEvent` (rule 9.2.3, `ChooseCharacterForBrigEventProcessor.offer`). An offer that depends on
   what the effects before it did is an event that builds it when it runs, e.g. `OfferPlayOrPassEvent`,
-  `OfferUnmannedViperActivationEvent` (the CAG's activation after "Review Camera Footage" damaged the "Reserves") and
-  `DutifulAgainEvent`.
+  `OfferUnmannedViperActivationEvent` (the CAG's activation after "Review Camera Footage" damaged the "Reserves",
+  "Command"'s second), `OfferPilotLaunchEvent` ("Return to Duty"), `DutifulAgainEvent` and
+  `ResolveCrisisSectionThenEvent` (the second part of a Crisis Card's
+  section, from `CrisisCardFollowups.secondPart`).
 
 ### Engine
 

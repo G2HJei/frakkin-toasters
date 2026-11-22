@@ -136,6 +136,7 @@ public final class Disclosure {
             entry("ResolveSuperCrisisCardEvent.card", true),
             entry("ResolveCrisisSectionEvent.card", true),
             entry("ResolveCrisisRollEvent.card", true),
+            entry("ResolveCrisisSectionThenEvent.card", true),
             entry("ResolveDestinationCardEvent.card", true),
             entry("SecretDestinyEvent.card", true),
             entry("ScoutForFuelEvent.card", true),

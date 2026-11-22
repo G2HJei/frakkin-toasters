@@ -73,7 +73,20 @@ class DeceitfulEventProcessorTest extends EventTestHarness<DeceitfulEvent> {
         assertEquals(new DeceitfulEvent(1, HAND, 0), discards.discardAll(1));
         assertEquals(new DiscardAllSkillCardsEvent(1), discards.discardAll(1));
         assertEquals(discard(1, 2), DeceitfulDiscards.of(game, false).discard(1, 2));
-        // only Romo Lampkin
-        assertInvalid(new DeceitfulEvent(2, CHOSEN, 2));
+
+        // only Romo Lampkin discards one fewer
+        execute(new DeceitfulEvent(2, CHOSEN, 2));
+        assertFollowup(discard(2, 2));
+    }
+
+    // Romo Lampkin was executed before his discard came, e.g. by the same "A Guilty Verdict": the player discards in
+    // full (F-040758).
+    @Test
+    void inFullOnceRomoLampkinIsGone() {
+        ops.player(1).removeCharacter();
+
+        execute(new DeceitfulEvent(1, CHOSEN, 3));
+
+        assertFollowup(discard(1, 3));
     }
 }

@@ -1,5 +1,7 @@
 package xyz.zlatanov.frakkintoasters.event.player;
 
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_6_OCLOCK;
 import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -150,5 +152,13 @@ class LaunchViperEventProcessorTest extends EventTestHarness<LaunchViperEvent> {
             galacticaBoard.place(GALACTICA_SPACE_10_OCLOCK, humanFighter);
             launchAllHumanFighters();
         }
+    }
+
+    // A character flies one ship at a time (F-704290).
+    @Test
+    void notAPilotWhoIsFlyingAlready() {
+        viperAt(GALACTICA_SPACE_2_OCLOCK).pilot(LEE_ADAMA);
+
+        assertInvalid(new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_6_OCLOCK, LEE_ADAMA, null));
     }
 }

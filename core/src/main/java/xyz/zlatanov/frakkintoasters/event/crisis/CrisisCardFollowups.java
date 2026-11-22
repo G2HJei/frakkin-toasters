@@ -160,7 +160,7 @@ public class CrisisCardFollowups {
             case ABANDON_GALACTICA, BUILD_CYLON_DETECTOR -> single(new DiscardNukeTokenEvent());
             case AN_AMBITIOUS_OPERATION -> allOf(single(lose(FUEL, 1)), chooseTarget(card));
             case DANGEROUS_PLOTS -> all(new DrawMutinyCardEvent(admiral()), new DrawMutinyCardEvent(president()));
-            case DISHONEST_TACTICS -> allOf(single(lose(MORALE, 1)), presidentMovesSomeoneFromTheBrig());
+            case DISHONEST_TACTICS -> allOf(single(lose(MORALE, 1)), then(card, TOP));
             case REQUISITION_FOR_DEMETRIUS -> allOf(single(lose(FOOD, 1)), rollDie(new ResolveCrisisRollEvent(card, TOP)));
             case STARVATION_IN_DOGSVILLE -> rollDie(new ResolveCrisisRollEvent(card, TOP));
             // Exodus
@@ -170,11 +170,11 @@ public class CrisisCardFollowups {
             case REQUESTED_RESIGNATION -> all(discard(president(), 2), discard(admiral(), 2));
             case MEDAL_OF_DISTINCTION -> allOf(single(gain(MORALE, 1)), placeCivilianShips(game, 2),
                     single(new ActivateRaidersEvent()));
-            case TRUTH_AND_RECONCILIATION -> allOf(single(lose(MORALE, 1)), chooseCharacterForBrig(president()));
+            case TRUTH_AND_RECONCILIATION -> allOf(single(lose(MORALE, 1)), then(card, TOP));
             case UNWELCOME_FACES ->
-                    allOf(single(discardAll(admiral())), chooseCharacterForBrig(admiral()));
+                    allOf(single(discardAll(admiral())), then(card, TOP));
             // Galactica
-            case DECLARE_MARTIAL_LAW -> allOf(single(lose(MORALE, 1)), admiralBecomesPresident());
+            case DECLARE_MARTIAL_LAW -> allOf(single(lose(MORALE, 1)), then(card, TOP));
             // Pegasus
             case A_GUILTY_VERDICT -> allOf(onCurrentPlayer(new ExecuteEvent(currentPlayer())), single(discard(admiral(), 3)));
             case ASSASSINATION_PLOT -> allOf(all(discard(admiral(), 3), treachery(admiral(), 3)),
@@ -266,6 +266,33 @@ public class CrisisCardFollowups {
     /**
      * @return what a die roll of a section does, the roll being its result after all modifiers
      */
+    /**
+     * @return whether the section has a part that {@link ResolveCrisisSectionThenEvent} resolves after the first
+     */
+    public static boolean hasSecondPart(CrisisCard card, Section section) {
+        return section == TOP && switch (card) {
+            case DISHONEST_TACTICS, TRUTH_AND_RECONCILIATION, UNWELCOME_FACES, DECLARE_MARTIAL_LAW -> true;
+            default -> false;
+        };
+    }
+
+    /**
+     * @return the second part of a section, as the game is once the first is done
+     */
+    public Followup secondPart(CrisisCard card, Section section) {
+        return switch (card) {
+            case DISHONEST_TACTICS -> presidentMovesSomeoneFromTheBrig();
+            case TRUTH_AND_RECONCILIATION -> chooseCharacterForBrig(president());
+            case UNWELCOME_FACES -> chooseCharacterForBrig(admiral());
+            case DECLARE_MARTIAL_LAW -> admiralBecomesPresident();
+            default -> throw new FrakCallTheAdmiralException("No second part in the " + section + " of " + card);
+        };
+    }
+
+    private static Followup then(CrisisCard card, Section section) {
+        return single(new ResolveCrisisSectionThenEvent(card, section));
+    }
+
     public Followup rollResult(CrisisCard card, Section section, int roll) {
         return switch (card) {
             case AN_AMBITIOUS_OPERATION -> roll <= 4 ? single(lose(FUEL, 1)) : NONE;
@@ -396,14 +423,14 @@ public class CrisisCardFollowups {
         if (game.boards().galactica().reserves().stream().noneMatch(HumanFighterView.class::isInstance)) {
             return NONE;
         }
+        // Each is asked as the "Reserves" are then (F-a3729e).
         return all(playersFrom(game, currentPlayer()).stream()
-                .filter(this::canLaunchHimself)
-                .map(player -> optional(player.number(),
-                        new PlayerDecisionEvent<>(player.number(), LaunchViperEvent.class, MUST_LAUNCH_IN_VIPER)))
-                .toArray(Followup[]::new));
+                .filter(player -> canLaunchHimself(game, player))
+                .map(player -> new OfferPilotLaunchEvent(player.number()))
+                .toArray(Event[]::new));
     }
 
-    private boolean canLaunchHimself(PlayerView player) {
+    static boolean canLaunchHimself(GameView game, PlayerView player) {
         // A character piloting a viper is in a space area, not on Galactica.
         return player.isHuman() && player.character().canPilot()
                 && game.locate(player.character()).filter(l -> GALACTICA.locations().contains(l) && l != BRIG).isPresent();

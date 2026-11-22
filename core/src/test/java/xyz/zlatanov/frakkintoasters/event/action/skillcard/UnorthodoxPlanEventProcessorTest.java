@@ -1,5 +1,8 @@
 package xyz.zlatanov.frakkintoasters.event.action.skillcard;
 
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.CONSOLIDATE_POWER;
+import static xyz.zlatanov.frakkintoasters.state.character.Character.LAURA_ROSLIN;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
@@ -62,5 +65,18 @@ class UnorthodoxPlanEventProcessorTest extends EventTestHarness<UnorthodoxPlanEv
     @Test
     void theLocationIsNamed() {
         assertInvalid(new UnorthodoxPlanEvent(1, UNORTHODOX_PLAN_3, null));
+    }
+
+    // "Terminal Illness" costs Laura Roslin 2 cards before the action, from what is left once the card is played
+    // (F-130933).
+    @Test
+    void notWithoutTheCardsTheLocationCosts() {
+        player(2).character(LAURA_ROSLIN);
+        moveTo(PRESIDENTS_OFFICE, LAURA_ROSLIN);
+        player(2).gainSkillCards(UNORTHODOX_PLAN_3, new SkillCard(1, CONSOLIDATE_POWER));
+        raiderAt(GALACTICA_SPACE_2_OCLOCK);
+
+        assertFalse(UnorthodoxPlanEventProcessor.canPlay(game, player(2)));
+        assertInvalid(new UnorthodoxPlanEvent(2, UNORTHODOX_PLAN_3, WEAPONS_CONTROL));
     }
 }

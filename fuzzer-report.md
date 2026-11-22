@@ -7,51 +7,52 @@ every run; "Fixes" and "Questions" are written by hand.
 
 ## Last run
 
-2026-11-22 13:08, `d17eb9a` (35 changed files), seeds 1-100, 3-7 players, 4s.
+2026-11-22 13:39, `569cf7e` (41 changed files), seeds 1-10000, 3-7 players, 3m 15s.
 
 | Players | Games | Finished | Failed | Humans won | Cylons won | Rounds (median / max) |
 |---|---|---|---|---|---|---|
-| 3 | 100 | 98 | 2 | 0 | 98 | 9 / 49 |
-| 4 | 100 | 100 | 0 | 0 | 100 | 7 / 50 |
-| 5 | 100 | 100 | 0 | 0 | 100 | 5 / 27 |
-| 6 | 100 | 100 | 0 | 0 | 100 | 4 / 28 |
-| 7 | 100 | 100 | 0 | 0 | 100 | 3 / 14 |
-| All | 500 | 498 | 2 | 0 | 498 | 5 / 50 |
+| 3 | 10000 | 9752 | 248 | 0 | 9752 | 9 / 50 |
+| 4 | 10000 | 9976 | 24 | 0 | 9976 | 8 / 50 |
+| 5 | 10000 | 9997 | 3 | 2 | 9995 | 5 / 49 |
+| 6 | 10000 | 10000 | 0 | 1 | 9999 | 4 / 33 |
+| 7 | 10000 | 10000 | 0 | 1 | 9999 | 3 / 36 |
+| All | 50000 | 49725 | 275 | 4 | 49721 | 5 / 50 |
 
 ### Endings
 
 | Ending | 3 | 4 | 5 | 6 | 7 |
 |---|---|---|---|---|---|
-| Fuel at 0 | 11 | 13 | 11 | 11 | 8 |
-| Food at 0 | 4 | 4 | 3 | 2 | 5 |
-| Morale at 0 | 38 | 44 | 44 | 39 | 48 |
-| Population at 0 | 32 | 25 | 28 | 33 | 27 |
-| 6 damaged Galactica locations | 3 | 4 | 0 | 1 | 2 |
-| Centurions at the end of the Boarding Party track | 7 | 7 | 9 | 10 | 9 |
+| Fuel at 0 | 1208 | 1196 | 1271 | 1280 | 1303 |
+| Food at 0 | 569 | 464 | 475 | 456 | 439 |
+| Morale at 0 | 4204 | 4020 | 4087 | 4043 | 4058 |
+| Population at 0 | 2332 | 2729 | 2768 | 2782 | 2786 |
+| 6 damaged Galactica locations | 310 | 301 | 285 | 287 | 284 |
+| Centurions at the end of the Boarding Party track | 924 | 1048 | 927 | 931 | 913 |
 | No character left to choose | 0 | 0 | 0 | 0 | 0 |
-| Kobol, the humans win | 0 | 0 | 0 | 0 | 0 |
-| Kobol, a resource at 0 after the Personal Goals | 3 | 3 | 5 | 4 | 1 |
+| Kobol, the humans win | 0 | 0 | 2 | 1 | 1 |
+| Kobol, a resource at 0 after the Personal Goals | 205 | 218 | 182 | 220 | 216 |
 
 ### Findings
 
 | ID | Kind | What | Games | Example | Status |
 |---|---|---|---|---|---|
-| F-e700fd | NO_END | No ending after 50 rounds | 2 | 3p seed 58 | question |
+| F-e700fd | NO_END | No ending after 50 rounds | 275 | 3p seed 58 | question |
+| F-ad8366 | DEAD_OPTION | An option leads to `MoveEvent`, which has no legal answer | 1 | 5p seed 2648 | question |
+| F-316031 | DEAD_OPTION | An option leads to `ActionEvent`, which has no legal answer | 1 | 5p seed 9314 | question |
 
 - **F-e700fd**: `./gradlew :core:fuzz -Pplayers=3 -Pseed=58`, trace `core/build/fuzz/F-e700fd-3p-58.txt`. Turn 153, `RECEIVE_SKILLS`, player 2 asked for `DrawSkillCardsEvent [DRAW_EXACTLY_5]`.
+- **F-ad8366**: `./gradlew :core:fuzz -Pplayers=5 -Pseed=2648`, trace `core/build/fuzz/F-ad8366-5p-2648.txt`. Turn 16, `MOVEMENT`, player 3 chooses among 2 options.
+- **F-316031**: `./gradlew :core:fuzz -Pplayers=5 -Pseed=9314`, trace `core/build/fuzz/F-316031-5p-9314.txt`. Turn 37, `ACTION`, player 3 chooses among 3 options.
 
 ### Watch
 
-- 3 players: the humans never won in 100 games.
-- 4 players: the humans never won in 100 games.
-- 5 players: the humans never won in 100 games.
-- 6 players: the humans never won in 100 games.
-- 7 players: the humans never won in 100 games.
-- No "No character left to choose" ending in 500 games.
+- 3 players: the humans never won in 10000 games.
+- 4 players: the humans never won in 10000 games.
+- No "No character left to choose" ending in 50000 games.
 
-<details><summary>Event types that never ran (8)</summary>
+<details><summary>Event types that never ran (1)</summary>
 
-`BroadcastEvent`, `DefendPresidencyEvent`, `DiscardQuorumCardsEvent`, `EndGameEvent`, `IntolerantEvent`, `MysteriousMessagePassEvent`, `ResolveFinalFiveCardsEvent`, `UseArbitratorEvent`
+`DiscardQuorumCardsEvent`
 
 </details>
 
@@ -59,6 +60,7 @@ every run; "Fixes" and "Questions" are written by hand.
 
 | Run | Commit | Games | Failed | Open findings |
 |---|---|---|---|---|
+| 2026-11-22 13:39 | `569cf7e` | 50000 | 275 | 0 |
 | 2026-11-22 13:08 | `d17eb9a` | 500 | 2 | 0 |
 | 2026-11-22 13:06 | `d17eb9a` | 500 | 2 | 0 |
 | 2026-11-22 13:04 | `d17eb9a` | 500 | 3 | 1 |
@@ -217,8 +219,13 @@ every run; "Fixes" and "Questions" are written by hand.
   before its own "damage 2 vipers in the Reserves" ran, so he could be offered an activation without a viper left.
 - Fix: `OfferUnmannedViperActivationEvent` builds the CAG's offer when it runs ("Training a Rookie" uses it too). New
   event: `FORMAT_VERSION` 39, and the fuzz journals' `formatVersion` went up with it (their entries are unchanged).
-- Tests: `OfferUnmannedViperActivationEventProcessorTest`. No journal: the offer is queued in it.
-- Files: `OfferUnmannedViperActivationEvent`, `OfferUnmannedViperActivationEventProcessor`, `CrisisCardFollowups`.
+- Second path (10,000 games): "Command" queued both of its activations at once, on the comment's word that an
+  activation leaves a viper to activate; but "Alert Viper Pilot" boards the viper an unmanned launch put in space.
+  The second activation is an `OfferUnmannedViperActivationEvent` now.
+- Tests: `OfferUnmannedViperActivationEventProcessorTest`, `CommandEventProcessorTest`. No journal: the offer is
+  queued in it.
+- Files: `OfferUnmannedViperActivationEvent`, `OfferUnmannedViperActivationEventProcessor`, `CrisisCardFollowups`,
+  `CommandEventProcessor`.
 
 ### F-70a615 - NO_ANSWER - fixed 2026-11-22
 
@@ -235,12 +242,79 @@ every run; "Fixes" and "Questions" are written by hand.
 - Tests: `CandidatesTest.aListOfSkillCardsTakesFive`, journal `fuzz-3p-26.json` (`answers`).
 - Files: `Domains`.
 
+### F-7c5468, F-ae17df, F-8fabbb - CRASH, NO_ANSWER - fixed 2026-11-22
+
+- Cause: four sections of Crisis Cards build their second part with the first: "Declare Martial Law" (-1 morale,
+  then the Admiral becomes President), "Truth and Reconciliation" (-1 morale, then a character to the "Brig"),
+  "Unwelcome Faces" (the Admiral discards his hand, then he sends a character to the "Brig") and "Dishonest Tactics"
+  (-1 morale, then the President may move someone from the "Brig"). The morale loss executed "Emotionally Fragile"
+  Dee, the Admiral, before the title came (F-7c5468, 16 games); a "Bait" in the Admiral's discard sent the last
+  character who could go to the "Brig" there (F-ae17df); an execution replaced the prisoner an option named
+  (F-8fabbb).
+- Fix: `ResolveCrisisSectionThenEvent(card, section)` asks `CrisisCardFollowups.secondPart` for it once the first part
+  is done. New event: `FORMAT_VERSION` 40.
+- Tests: `ResolveCrisisSectionThenEventProcessorTest`. No journal: the second parts are queued in them.
+- Files: `ResolveCrisisSectionThenEvent`, `ResolveCrisisSectionThenEventProcessor`, `CrisisCardFollowups`,
+  `Disclosure`.
+
+### F-704290 - CRASH - fixed 2026-11-22
+
+- Cause: "Resolute" let Sharon "Athena" Agathon take the "Hangar Deck"'s action from wherever she was, and the
+  deck's "1 more action" took it again while she was flying the viper it launched: she launched a second one and
+  piloted two, so a later move found her on two boards.
+- Fix: the "Hangar Deck" has no action for a pilot, and a character who flies a ship can't launch himself again.
+- Tests: `HangarDeckEventProcessorTest.notForAPilot`, `LaunchViperEventProcessorTest.notAPilotWhoIsFlyingAlready`.
+  No journal: its game is already broken where it starts.
+- Files: `HangarDeckEventProcessor`, `LaunchViperEventProcessor`.
+
+### F-040758 - CRASH - fixed 2026-11-22
+
+- Cause: "A Guilty Verdict" executed Romo Lampkin, the Admiral, and then the Admiral's discard, built as a
+  `DeceitfulEvent` for him, came to his new character, who has no "Deceitful".
+- Fix: a `DeceitfulEvent` for a player who no longer has the ability is the discard in full.
+- Tests: `DeceitfulEventProcessorTest.inFullOnceRomoLampkinIsGone` and `oncePerCard`.
+- Files: `DeceitfulEventProcessor`.
+
+### F-b894d2 - CRASH - fixed 2026-11-22
+
+- Cause: the "Resurrection Ship" drew a Super Crisis Card when none was left in the deck or its discard pile.
+- Fix: the location has no action then (`ResurrectionShipEventProcessor.canAct`).
+- Tests: `ResurrectionShipEventProcessorTest.notWithoutASuperCrisisCardLeft`.
+- Files: `ResurrectionShipEventProcessor`, `LocationEvent`.
+
+### F-130933 - NO_ANSWER - fixed 2026-11-22
+
+- Cause: "Unorthodox Plan" checked "Terminal Illness"'s 2 cards against a hand that still held the card itself, so
+  Laura Roslin could play it with one other card and then not pay for the location.
+- Fix: the location's cost is counted without the card and without "Reluctant"'s card.
+- Tests: `UnorthodoxPlanEventProcessorTest.notWithoutTheCardsTheLocationCosts`.
+- Files: `UnorthodoxPlanEventProcessor`.
+
+### F-a3729e - DEAD_OPTION - fixed 2026-11-22
+
+- Cause: "Return to Duty" offered every pilot on Galactica a launch at once; one launched the last viper of the
+  "Reserves", and the next one's offer had no answer.
+- Fix: `OfferPilotLaunchEvent` asks each in turn as the "Reserves" are then (in `FORMAT_VERSION` 40).
+- Tests: `OfferPilotLaunchEventProcessorTest`, `CrisisCardFollowupsTest`. No journal: the offers are queued in it.
+- Files: `OfferPilotLaunchEvent`, `OfferPilotLaunchEventProcessor`, `CrisisCardFollowups`.
+
 ## Questions
 
-- **F-e700fd** (NO_END, 3p seed 14): every character was in the "Brig" by turn 25, and the characters in the "Brig"
-  don't perform the Crisis step (rules 8.5 and 9.2), so in 128 more turns only 2 Crisis Cards were drawn and the game
-  passed the 50 rounds. The engine follows the rules: the players are offered the "Brig"'s action (12 tries in this
-  game, a difficulty 7 check that the revealed Cylon plays against), and random play rarely gets out. Options: (a) a
-  smarter agent in the "Brig" (against decision 2, uniform random play); (b) a non-fatal kind for a stalled game, e.g.
-  every human in the "Brig" for 10 rounds, so it is counted but doesn't fail the exit; (c) keep it fatal and raise the
-  cap. Recommendation: (b), as the rules allow the stall and only a player's choice ends it.
+- **F-e700fd** (NO_END, 255 of 50,000 games at 10,000 per player count, most of them with 3 players): the
+  humans spend the game in the "Brig", and the characters in the "Brig" don't perform the Crisis step (rules 8.5 and
+  9.2), so hardly any Crisis Card is drawn and the game passes the 50 rounds. Of the 22 NO_END games at 1,000 per player
+  count, 16 ended with every human in the "Brig" and the other 6 had one human out who had been there most of the
+  game (3p seed 170: 9 Crisis Cards in turns 30 to 153). The engine follows the rules: the "Brig"'s action is offered
+  (12 tries in 3p seed 14), a difficulty 7 check that the revealed Cylon plays against, and random play rarely gets
+  out. Options: (a) a smarter agent in the "Brig" (against decision 2, uniform random play); (b) a non-fatal kind for
+  a stalled game, e.g. every human in the "Brig" for 10 rounds, so it is counted but doesn't fail the exit; (c) keep it
+  fatal and raise the cap. Recommendation: (b), as the rules allow the stall and only a player's choice ends it.
+- **F-ad8366** (DEAD_OPTION, 1 game, 5p seed 2648, turn 16): Sharon "Athena" Agathon, a Cylon Leader, was offered a
+  `MoveEvent` in her Movement step without a legal move: `Actions.canMove` (not in the "Brig", not held by "Heretic")
+  and `MoveEventProcessor.isEligibleLocation` disagree for her, probably about which locations a Cylon Leader may
+  enter while (not) Infiltrating. Not fixed yet: export `-DfuzzJournal=5:2648:F-ad8366`, read where she stands, and
+  give `Actions.canMove` the check the move makes (a destination exists).
+- **F-316031** (DEAD_OPTION, 1 game, 5p seed 9314, turn 37): after "State of Emergency", Lee "Apollo" Adama's
+  `MOVE_OR_ACTION` grant offered an `ActionEvent` that no answer satisfied: one of the static gates behind
+  `Actions.canTakeAction` says yes where its processor says no. Not fixed yet: export `-DfuzzJournal=5:9314:F-316031`
+  and find the gate (a held card or ability whose `canPlay` misses a rule of its `isValid`).

@@ -154,9 +154,9 @@ class CrisisCardFollowupsTest extends TestHarness {
         moveTo(Location.HANGAR_DECK, KARA_STARBUCK_THRACE);
         moveTo(Location.COMMAND, LOUANNE_KAT_KATRAINE);
 
+        // Each is asked as the "Reserves" are when it is his turn (F-a3729e).
         assertEquals(all(
-                all(Followup.one(launchHimself(CURRENT), new NoOpEvent(CURRENT)),
-                        Followup.one(launchHimself(CAG), new NoOpEvent(CAG))),
+                all(new OfferPilotLaunchEvent(CURRENT), new OfferPilotLaunchEvent(CAG)),
                 single(new LaunchRaidersEvent())), followup(RETURN_TO_DUTY, TOP));
     }
 
