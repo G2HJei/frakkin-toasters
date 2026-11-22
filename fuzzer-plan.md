@@ -1,6 +1,6 @@
 # Fuzzer plan (roadmap milestone A)
 
-Status (2026-11-22): phases 1 to 4 are done; the first run (`-Pgames=20`, with the probes) is in `fuzzer-report.md`:
+Status (2026-11-22): phases 1 to 5 are done, the fix loop is under way; the first run (`-Pgames=20`, with the probes) is in `fuzzer-report.md`:
 100 games, 38 failed, 23 open findings. Where phase 1 differs from the plan:
 
 - `PlayInterruptCardEvent`, `UseRollAbilityEvent` and `ChooseCrisisTargetEvent` have no source of their own: the

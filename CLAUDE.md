@@ -31,6 +31,8 @@ code. That includes:
 ./gradlew :core:test     # Run tests in the core module
 ./gradlew :core:test --tests "xyz.zlatanov.frakkintoasters.event.player.MoveEventProcessorTest"  # Run a single test class
 ./gradlew :backend:test  # Run tests in the backend module (Testcontainers: Docker has to run)
+./gradlew :core:fuzz -Pgames=100 -Pplayers=3-7  # Random games played to an ending, writes fuzzer-report.md
+./gradlew :core:fuzz -Pplayers=4 -Pseed=117     # One game, with a full trace in core/build/fuzz
 docker compose up -d     # Postgres for local runs, on port 5433
 ./gradlew :backend:bootRun --args='--spring.profiles.active=dev'  # builds the frontend and serves the whole app on 8080
 ```
@@ -61,9 +63,9 @@ Next steps, in order:
    "Frontend"). Still open: legal-move hints (a list in `core` of the legal answers to a decision) and more inputs on
    the board (viper activation, targets of a choice lighting up).
 6. Prove the game is completable (`roadmap.md` milestone A, `fuzzer-plan.md`): random games played to an ending.
-   Phases 1 to 4 are done: `./gradlew :core:fuzz` plays the games and writes `fuzzer-report.md`, a finding exports
-   as a regression journal with its failing input, and hostile inputs probe the checks. Next: the docs (phase 5),
-   then the fix loop.
+   Phases 1 to 5 are done: `./gradlew :core:fuzz` plays the games and writes `fuzzer-report.md`, a finding exports
+   as a regression journal with its failing input, and hostile inputs probe the checks. In progress: the fix loop,
+   until 10,000 seeds per player count finish without a fatal finding (the report's "Fixes" and "Questions").
 
 ## Project Structure
 

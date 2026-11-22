@@ -7,7 +7,7 @@ every run; "Fixes" and "Questions" are written by hand.
 
 ## Last run
 
-2026-11-22 09:43, `b758639` (23 changed files), seeds 1-20, 3-7 players, 1s.
+2026-11-22 12:08, `f043d8c` (0 changed files), seeds 1-20, 3-7 players, 1s.
 
 | Players | Games | Finished | Failed | Humans won | Cylons won | Rounds (median / max) |
 |---|---|---|---|---|---|---|
@@ -106,6 +106,7 @@ every run; "Fixes" and "Questions" are written by hand.
 
 | Run | Commit | Games | Failed | Open findings |
 |---|---|---|---|---|
+| 2026-11-22 12:08 | `f043d8c` | 100 | 38 | 23 |
 | 2026-11-22 09:43 | `b758639` | 100 | 38 | 23 |
 | 2026-11-22 09:37 | `b758639` | 100 | 38 | 15 |
 | 2026-11-22 09:37 | `b758639` | 100 | 38 | 16 |
