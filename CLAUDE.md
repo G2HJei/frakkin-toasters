@@ -61,8 +61,9 @@ Next steps, in order:
    "Frontend"). Still open: legal-move hints (a list in `core` of the legal answers to a decision) and more inputs on
    the board (viper activation, targets of a choice lighting up).
 6. Prove the game is completable (`roadmap.md` milestone A, `fuzzer-plan.md`): random games played to an ending.
-   Phase 1 is done: one game plays (`fuzz/` in the test fixtures). Next: the run and the report, the regression
-   journals, the hostile inputs, then the fix loop.
+   Phases 1 to 4 are done: `./gradlew :core:fuzz` plays the games and writes `fuzzer-report.md`, a finding exports
+   as a regression journal with its failing input, and hostile inputs probe the checks. Next: the docs (phase 5),
+   then the fix loop.
 
 ## Project Structure
 
@@ -947,7 +948,11 @@ stores its journal in Postgres and pushes to every viewer what he may see. It ad
   `playerCount`, `entries`) and `POST /api/sandbox/import` stores one as a new sandbox once the engine restores it.
 - Regression journals: `src/test/resources/journals/*.json` are sandbox exports, and `RegressionJournalsTest` checks
   that each restores. A bug found in the sandbox becomes a test: export the journal, drop it there, load it with
-  `RegressionJournals.engine(name)` and assert.
+  `RegressionJournals.engine(name)` and assert. A fuzzer finding becomes one with `./gradlew :backend:test --tests
+  '*FuzzJournalExportTest' -DfuzzJournal=4:117` (`fuzz-4p-117.json`): the journal at the pause before the finding, the
+  `input` that failed there (`player`, an `option` and/or an `event`) and what it has to do once fixed (`expect`:
+  `runs`, `answers` or `restores`, see `Repro` in `fuzz/`), which `RegressionJournalsTest` checks per file. A fuzz
+  journal that a `FORMAT_VERSION` change makes unloadable is deleted; the core test of its fix stays.
 - Flyway migrations in `src/main/resources/db/migration`. The tests (`BackendTest`) run against a Testcontainers
   Postgres with the `dev` profile; `LiveGameTest` drives real web socket clients and restarts the server mid-game, and
   `SandboxLiveTest` plays, undoes, exports and imports a sandbox.
@@ -1193,10 +1198,17 @@ when possible.
   answers until it ends, a finding stops it or it runs past a cap, and restores it on the way (the twins have to stay
   equal). `AnswerFinder` builds candidate answers to a decision (`Candidates`: a source of its own for a shaped answer,
   otherwise the `Domains` of the record's components, which take the ints' `ComponentRole`) and keeps the first one
-  `prepare` accepts. Choices look ahead at the decision an option leads to. A `Finding` (`CRASH`, `INPUT_CRASH`,
-  `NO_ANSWER`, `DEAD_OPTION`, `RESTORE`, `NO_END`, `BAD_ENDING`, `FUZZER`) has an ID from a signature without line
-  numbers, and `Endings.classify` reads the rule's ending from the final state. `AnswerFinderTest`, `CandidatesTest`,
-  `EndingsTest` and `PlayoutTest` cover it without failing on what the engine does wrong
+  `prepare` accepts. Choices look ahead at the decision an option leads to. At 1 in 20 decisions a `Probe` first
+  submits a candidate from the wide domains (`Domains.wide`: any card of the decks, players 0 to n + 1, unknown ship
+  ids, nulls), which the engine has to reject leaving the game as it was (`Twins`), or take. A `Finding` (`CRASH`,
+  `INPUT_CRASH`, `NO_ANSWER`, `DEAD_OPTION`, `RESTORE`, `NO_END`, `BAD_ENDING`, `REJECTED_BUT_CHANGED`, `FUZZER`) has
+  an ID from a signature without line numbers, and its `Pause` (where, the pending input, the inputs before it, and
+  with `Options.withRepro` the `Repro`: the journal there and the input that failed). `Endings.classify` reads the
+  rule's ending from the final state. `FuzzRun` (`./gradlew :core:fuzz`, `-Pgames`, `-Pplayers`, `-Pseed`, ...) plays
+  the seeds on a thread pool and `FuzzReport` rewrites the block of `fuzzer-report.md` between its markers (statuses
+  from the hand-written "Fixes" and "Questions"), with a trace per finding in `core/build/fuzz`. `AnswerFinderTest`,
+  `CandidatesTest`, `EndingsTest`, `PlayoutTest`, `ProbeTest` and `FuzzReportTest` cover it without failing on what
+  the engine does wrong, except `ProbeTest`'s known `MoveEvent` bug, which its fix flips
 - `GameSnapshot` (`engine/journal/`) - turns a `Game` into comparable plain values. Replay tests compare a live game
   with its replayed twin. `ScriptedScenario.play(journal)` records every kind of fact, which `GameReplayerTest`
   checks. One of its scopes has no event, so only `GameReplayer` rebuilds it, not `GameEngine.restore`

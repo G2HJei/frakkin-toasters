@@ -69,6 +69,21 @@ final class AnswerClasses {
     private AnswerClasses() {
     }
 
+    /**
+     * @return the simple names of the events a game can run: the records of the rules with a processor, not the
+     * sandbox's setup events
+     */
+    static List<String> productionEventTypes() {
+        return EventCatalog.types().stream()
+                .filter(Class::isRecord)
+                .filter(ProcessorRegistry::hasProcessor)
+                .filter(type -> !SandboxEvent.class.isAssignableFrom(type))
+                .filter(type -> MAIN.equals(codeSource(type)))
+                .map(Class::getSimpleName)
+                .sorted()
+                .toList();
+    }
+
     static List<AnswerClass> of(Class<?> action) {
         return BY_ACTION.computeIfAbsent(action, AnswerClasses::find);
     }

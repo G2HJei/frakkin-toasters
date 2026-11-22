@@ -1,33 +1,36 @@
 package xyz.zlatanov.frakkintoasters.fuzz;
 
 import lombok.val;
-import xyz.zlatanov.frakkintoasters.engine.EngineStatus;
 import xyz.zlatanov.frakkintoasters.engine.GameEngine;
 import xyz.zlatanov.frakkintoasters.engine.PendingInput;
 import xyz.zlatanov.frakkintoasters.engine.ProcessorRegistry;
 import xyz.zlatanov.frakkintoasters.engine.ScriptedTurns.Input;
 import xyz.zlatanov.frakkintoasters.engine.TestEngines;
-import xyz.zlatanov.frakkintoasters.engine.journal.GameSnapshot;
+import xyz.zlatanov.frakkintoasters.engine.journal.Journal;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
+import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
 import xyz.zlatanov.frakkintoasters.event.loyalty.RevealMotiveCardEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.fuzz.Finding.Kind;
-import xyz.zlatanov.frakkintoasters.state.Game;
+import xyz.zlatanov.frakkintoasters.fuzz.Finding.Pause;
+import xyz.zlatanov.frakkintoasters.fuzz.Repro.Expectation;
+import xyz.zlatanov.frakkintoasters.state.GameStep;
 import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.TreeSet;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 /**
@@ -39,31 +42,49 @@ public final class Playout {
     private static final int LAST_INPUTS = 200;
 
     /**
+     * The trace and the repros change nothing in the game: a seed plays the same game with or without them.
+     *
      * @param roundCap      the rounds a game may take
      * @param turnInputCap  the inputs one player turn may take (the setup is turn 0)
      * @param twins         how many times a game is restored on the way
      * @param anytimeChance 1 in how many pauses a player reveals a Motive Card he can
+     * @param probeChance   1 in how many decisions first get an input from the wide domains, 0 for none
      * @param fullTrace     keep every input, not only the last ones
+     * @param repro         keep the journal and the failing input of each finding, for a regression journal
      * @param firstEvent    the game's first event, {@code null} for a real start
      */
-    public record Options(int roundCap, int turnInputCap, int twins, int anytimeChance, boolean fullTrace,
-                          Event firstEvent) {
+    public record Options(int roundCap, int turnInputCap, int twins, int anytimeChance, int probeChance,
+                          boolean fullTrace, boolean repro, Event firstEvent) {
+
+        public static final int ROUND_CAP = 50;
 
         public static Options defaults() {
-            return new Options(50, 5_000, 3, 20, false, null);
+            return new Options(ROUND_CAP, 5_000, 3, 20, 20, false, false, null);
         }
 
         public Options withRoundCap(int rounds) {
-            return new Options(rounds, turnInputCap, twins, anytimeChance, fullTrace, firstEvent);
+            return new Options(rounds, turnInputCap, twins, anytimeChance, probeChance, fullTrace, repro, firstEvent);
+        }
+
+        public Options withProbeChance(int chance) {
+            return new Options(roundCap, turnInputCap, twins, anytimeChance, chance, fullTrace, repro, firstEvent);
         }
 
         public Options withFullTrace() {
-            return new Options(roundCap, turnInputCap, twins, anytimeChance, true, firstEvent);
+            return new Options(roundCap, turnInputCap, twins, anytimeChance, probeChance, true, repro, firstEvent);
+        }
+
+        public Options withRepro() {
+            return new Options(roundCap, turnInputCap, twins, anytimeChance, probeChance, fullTrace, true, firstEvent);
         }
 
         public Options withFirstEvent(Event event) {
-            return new Options(roundCap, turnInputCap, twins, anytimeChance, fullTrace, event);
+            return new Options(roundCap, turnInputCap, twins, anytimeChance, probeChance, fullTrace, repro, event);
         }
+    }
+
+    // The game as it waited for an input: enough to say where a finding came from after the input broke the engine.
+    private record Waiting(int turn, GameStep step, Optional<PendingInput> pending, int journalSize) {
     }
 
     private final int                  players;
@@ -82,6 +103,8 @@ public final class Playout {
     // The answer found when a choice looked ahead at its decision, for when that decision is asked.
     private PlayerDecisionEvent<?> lookedAhead;
     private Event                  lookedAheadAnswer;
+    // The option whose decision is being looked at, so a candidate that crashes there can be given again.
+    private Followup               lookingAt;
 
     private Playout(int players, long seed, Options options) {
         this.players = players;
@@ -111,7 +134,7 @@ public final class Playout {
                     ? GameEngine.start(players, seed)
                     : TestEngines.start(players, seed, options.firstEvent());
         } catch (Throwable thrown) {
-            stop(Finding.of(Kind.CRASH, thrown, "StartGameEvent"));
+            stop(Finding.of(Kind.CRASH, thrown, "StartGameEvent"), () -> null);
             return result();
         }
         while (stoppedBy == null) {
@@ -141,13 +164,15 @@ public final class Playout {
             turnInputs = 0;
         }
         if (turn / players > options.roundCap()) {
-            stop(Finding.of(Kind.NO_END, "round cap", "No ending after " + options.roundCap() + " rounds"));
+            stop(Finding.of(Kind.NO_END, "round cap", "No ending after " + options.roundCap() + " rounds"),
+                    () -> pauseNow(repro(0, null, null, null)));
             return true;
         }
         if (turnInputs > options.turnInputCap()) {
             val step = view.turn().step();
             stop(Finding.of(Kind.NO_END, "stuck in " + step,
-                    "More than " + options.turnInputCap() + " inputs in one turn, in `" + step + "`"));
+                            "More than " + options.turnInputCap() + " inputs in one turn, in `" + step + "`"),
+                    () -> pauseNow(repro(0, null, null, null)));
             return true;
         }
         return false;
@@ -170,22 +195,30 @@ public final class Playout {
             if (decision == null) {
                 return new Input(choice.player(), null, option);
             }
+            lookingAt = option;
             val answer = AnswerFinder.find(engine.view(), decision, random, this::note);
+            lookingAt = null;
             if (answer.isPresent()) {
                 lookedAhead = decision;
                 lookedAheadAnswer = answer.get();
                 return new Input(choice.player(), null, option);
             }
             note(Finding.of(Kind.DEAD_OPTION, "decision " + describe(decision),
-                    "An option leads to `" + describe(decision) + "`, which has no legal answer"));
+                            "An option leads to `" + describe(decision) + "`, which has no legal answer"),
+                    () -> pauseNow(repro(choice.player(), option, null, Expectation.ANSWERS)));
             options.remove(option);
         }
         stop(Finding.of(Kind.NO_ANSWER, "every option dead",
-                "Every option of a choice leads to a decision without a legal answer").withDetail(choice.toString()));
+                        "Every option of a choice leads to a decision without a legal answer").withDetail(choice.toString()),
+                () -> pauseNow(repro(choice.player(), null, null, Expectation.ANSWERS)));
         return null;
     }
 
     private Input answer(PlayerDecisionEvent<?> decision) {
+        if (options.probeChance() > 0 && random.nextInt(options.probeChance()) == 0 && probe(decision)) {
+            lookedAhead = null;
+            return null;
+        }
         if (decision.equals(lookedAhead)) {
             lookedAhead = null;
             return new Input(decision.playerNumber(), lookedAheadAnswer, null);
@@ -193,13 +226,50 @@ public final class Playout {
         val answer = AnswerFinder.find(engine.view(), decision, random, this::note);
         if (answer.isEmpty()) {
             stop(Finding.of(Kind.NO_ANSWER, "decision " + describe(decision),
-                    "No legal answer to `" + describe(decision) + "`").withDetail(decision.toString()));
+                            "No legal answer to `" + describe(decision) + "`").withDetail(decision.toString()),
+                    () -> pauseNow(repro(decision.playerNumber(), null, null, Expectation.ANSWERS)));
             return null;
         }
         return new Input(decision.playerNumber(), answer.get(), null);
     }
 
-    private static PlayerDecisionEvent<?> firstDecision(Followup followup) {
+    // An input from the wide domains of a random class that may answer: the game has to reject it and stay as it was,
+    // or take it and go on. True when it took the place of the answer: the game took it, or it ended the game.
+    private boolean probe(PlayerDecisionEvent<?> decision) {
+        val classes = AnswerClasses.of(decision.action()).stream()
+                .sorted(Comparator.comparing(answerClass -> answerClass.type().getName()))
+                .toList();
+        if (classes.isEmpty()) {
+            return false;
+        }
+        val asked = new Asked(engine.view(), decision, random, this::note);
+        val event = Candidates.hostile(asked, classes.get(random.nextInt(classes.size())));
+        if (event == null) {
+            return false;
+        }
+        val waiting = waiting();
+        trace("t" + waiting.turn() + " " + waiting.step() + " p" + decision.playerNumber() + ": probe " + event);
+        val result = Probe.submit(engine, decision.playerNumber(), event);
+        if (result.finding() != null) {
+            Supplier<Pause> pause = () -> pause(waiting,
+                    repro(waiting, decision.playerNumber(), null, event, Expectation.RUNS));
+            if (result.finding().fatal()) {
+                stop(result.finding(), pause);
+                return true;
+            }
+            note(result.finding(), pause);
+        }
+        if (result.taken()) {
+            inputCount++;
+            turnInputs++;
+        }
+        return result.taken();
+    }
+
+    /**
+     * @return the decision an option asks first, {@code null} when it asks none at once
+     */
+    static PlayerDecisionEvent<?> firstDecision(Followup followup) {
         return switch (followup) {
             case Followup.Single(PlayerDecisionEvent<?> decision) -> decision;
             case Followup.AllOf allOf when !allOf.followups().isEmpty() -> firstDecision(allOf.followups().getFirst());
@@ -216,7 +286,7 @@ public final class Playout {
     private boolean revealMotiveCard() {
         val view = engine.view();
         val order = new ArrayList<>(IntStream.rangeClosed(1, players).boxed().toList());
-        java.util.Collections.shuffle(order, random);
+        Collections.shuffle(order, random);
         for (val playerNumber : order) {
             for (val card : view.player(playerNumber).motiveCards().cards().stream().distinct().toList()) {
                 val event = new RevealMotiveCardEvent(playerNumber, card);
@@ -236,42 +306,56 @@ public final class Playout {
         } catch (InvalidActionException rejected) {
             return false;
         } catch (Throwable thrown) {
-            note(Finding.of(Kind.INPUT_CRASH, thrown, event.getClass().getSimpleName()));
+            note(Finding.of(Kind.INPUT_CRASH, thrown, event.getClass().getSimpleName()).withEvent(event));
             return false;
         }
     }
 
     // The input goes to the engine, and at a twin's pause also to a game restored from the journal.
     private void give(Input input) {
-        val twin = twinsAt.contains(inputCount) ? restore() : Optional.<GameEngine>empty();
+        val twin = twinDue() ? restore() : Optional.<GameEngine>empty();
         if (stoppedBy != null) {
             return;
         }
-        val view = engine.view();
-        trace("t" + view.turn().number() + " " + view.turn().step() + " p" + input.player() + ": "
+        val waiting = waiting();
+        trace("t" + waiting.turn() + " " + waiting.step() + " p" + input.player() + ": "
                 + (input.submit() != null ? "submit " + input.submit() : "choose " + input.choose()));
         val failure = tryApply(engine, input);
         if (failure != null) {
-            stop(failed(input, failure));
+            val finding = failed(input, failure);
+            stop(finding, () -> pause(waiting, finding.kind() == Kind.CRASH
+                    ? repro(waiting, input.player(), input.choose(), input.submit(), Expectation.RUNS)
+                    : null));
             return;
         }
         inputCount++;
         turnInputs++;
         if (twin.isPresent()) {
             val twinFailure = tryApply(twin.get(), input);
+            Supplier<Pause> before = () -> pause(waiting,
+                    repro(waiting, input.player(), input.choose(), input.submit(), Expectation.RESTORES));
             if (twinFailure != null) {
                 stop(Finding.of(Kind.RESTORE, "twin failed", "A restored game failed an input the original took")
-                        .withDetail(Finding.of(Kind.RESTORE, twinFailure, inputName(input)).detail()));
+                        .withDetail(Finding.of(Kind.RESTORE, twinFailure, inputName(input)).detail()), before);
                 return;
             }
-            val differences = differences(engine, twin.get());
+            val differences = Twins.differences(engine, twin.get());
             if (!differences.isEmpty()) {
                 stop(Finding.of(Kind.RESTORE, "twin differs", "A restored game differs after the same input")
-                        .withDetail(String.join("\n", differences)));
+                        .withDetail(String.join("\n", differences)), before);
                 return;
             }
             engine = twin.get();
         }
+    }
+
+    // The first input at or after a twin's place gets one, so an input that isn't the agent's doesn't skip it.
+    private boolean twinDue() {
+        if (twinsAt.isEmpty() || inputCount < twinsAt.first()) {
+            return false;
+        }
+        twinsAt.pollFirst();
+        return true;
     }
 
     // What the input threw, null when it was taken.
@@ -292,7 +376,7 @@ public final class Playout {
                     .withDetail(String.valueOf(rejected.getMessage()));
         }
         // A rollback, or an Error that got past it and left the engine half-applied: either way the game ends here.
-        return Finding.of(Kind.CRASH, thrown, name);
+        return Finding.of(Kind.CRASH, thrown, name).withEvent(input.submit());
     }
 
     private static String inputName(Input input) {
@@ -307,11 +391,12 @@ public final class Playout {
         };
     }
 
+    // A journal that doesn't restore is a regression test by itself.
     private Optional<GameEngine> restore() {
         try {
             return Optional.of(GameEngine.restore(engine.journal(), seed));
         } catch (Throwable thrown) {
-            stop(Finding.of(Kind.RESTORE, thrown, "restore"));
+            stop(Finding.of(Kind.RESTORE, thrown, "restore"), () -> pauseNow(repro(0, null, null, null)));
             return Optional.empty();
         }
     }
@@ -320,50 +405,95 @@ public final class Playout {
     private void finish() {
         if (Endings.classify(engine.view()).isEmpty()) {
             stop(Finding.of(Kind.BAD_ENDING, "no ending for " + engine.view().outcome().orElse(null),
-                    "The " + engine.view().outcome().orElse(null) + " won, and no ending explains it"));
+                            "The " + engine.view().outcome().orElse(null) + " won, and no ending explains it"),
+                    () -> pauseNow(repro(0, null, null, null)));
             return;
         }
         val restored = restore();
         if (restored.isPresent()) {
-            val differences = differences(engine, restored.get());
+            val differences = Twins.differences(engine, restored.get());
             if (!differences.isEmpty()) {
                 stop(Finding.of(Kind.RESTORE, "finished game differs", "The finished game restores differently")
-                        .withDetail(String.join("\n", differences)));
+                        .withDetail(String.join("\n", differences)), () -> pauseNow(repro(0, null, null, null)));
             }
         }
     }
 
-    private List<String> differences(GameEngine original, GameEngine twin) {
-        val result = new ArrayList<String>();
-        val a = GameSnapshot.of((Game) original.view()).values();
-        val b = GameSnapshot.of((Game) twin.view()).values();
-        val keys = new TreeSet<>(a.keySet());
-        keys.addAll(b.keySet());
-        for (val key : keys) {
-            if (!Objects.equals(a.get(key), b.get(key))) {
-                result.add(key + ": " + a.get(key) + " <> " + b.get(key));
-            }
-        }
-        for (int player = 1; player <= players; player++) {
-            EngineStatus mine = original.status(player);
-            EngineStatus theirs = twin.status(player);
-            if (!mine.equals(theirs)) {
-                result.add("status " + player + ": " + mine + " <> " + theirs);
-            }
-        }
-        if (!original.pendingInput().equals(twin.pendingInput())) {
-            result.add("pending: " + original.pendingInput() + " <> " + twin.pendingInput());
-        }
-        return result;
-    }
-
+    // A finding of the answer finder: the candidate it names is the input to give again, after the option whose
+    // decision was being looked at.
     private void note(Finding finding) {
-        findings.putIfAbsent(finding.id(), finding);
+        note(finding, () -> {
+            val event = finding.event();
+            if (finding.kind() != Kind.INPUT_CRASH || event == null) {
+                return pauseNow(repro(0, null, null, null));
+            }
+            val player = event instanceof PlayerEvent playerEvent ? playerEvent.playerNumber() : askedPlayer();
+            return pauseNow(repro(player, lookingAt, event, Expectation.RUNS));
+        });
     }
 
-    private void stop(Finding finding) {
+    // The pause is worked out once per finding and game: it copies the inputs, and the journal for a repro.
+    private void note(Finding finding, Supplier<Pause> pause) {
+        if (!findings.containsKey(finding.id())) {
+            findings.put(finding.id(), finding.at(pauseOrNone(pause)));
+        }
+    }
+
+    private void stop(Finding finding, Supplier<Pause> pause) {
         stoppedBy = finding;
-        findings.putIfAbsent(finding.id(), finding);
+        note(finding, pause);
+    }
+
+    private static Pause pauseOrNone(Supplier<Pause> pause) {
+        try {
+            return pause.get();
+        } catch (Throwable thrown) {
+            return new Pause("unknown (" + thrown + ")", "", List.of(), null);
+        }
+    }
+
+    private Waiting waiting() {
+        val view = engine.view();
+        return new Waiting(view.turn().number(), view.turn().step(), engine.pendingInput(), engine.journal().size());
+    }
+
+    private Pause pauseNow(Repro repro) {
+        return pause(waiting(), repro);
+    }
+
+    private Pause pause(Waiting waiting, Repro repro) {
+        return new Pause(where(waiting.turn(), waiting.step(), waiting.pending()),
+                waiting.pending().map(Object::toString).orElse("none, the game has ended"), List.copyOf(inputs), repro);
+    }
+
+    static String where(int turn, GameStep step, Optional<PendingInput> pending) {
+        val asked = pending.map(input -> switch (input) {
+            case PendingInput.AwaitingDecision decision -> "player " + decision.decision().playerNumber()
+                    + " asked for `" + describe(decision.decision()) + "`";
+            case PendingInput.AwaitingChoice choice -> "player " + choice.player() + " chooses among "
+                    + choice.options().size() + " options";
+        }).orElse("the game has ended");
+        return "Turn " + turn + ", `" + step + "`, " + asked;
+    }
+
+    private int askedPlayer() {
+        return engine.pendingInput().map(input -> switch (input) {
+            case PendingInput.AwaitingDecision decision -> decision.decision().playerNumber();
+            case PendingInput.AwaitingChoice choice -> choice.player();
+        }).orElse(0);
+    }
+
+    private Repro repro(int player, Followup option, Event event, Expectation expect) {
+        return options.repro() ? repro(waiting(), player, option, event, expect) : null;
+    }
+
+    // The journal as it was at the pause: a failed input may have left more of it behind.
+    private Repro repro(Waiting waiting, int player, Followup option, Event event, Expectation expect) {
+        if (!options.repro()) {
+            return null;
+        }
+        val journal = new Journal(engine.journal().entries().subList(0, waiting.journalSize()));
+        return new Repro(journal, seed, player, option, event, expect);
     }
 
     private void trace(String line) {

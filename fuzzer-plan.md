@@ -1,6 +1,7 @@
 # Fuzzer plan (roadmap milestone A)
 
-Status (2026-11-22): phase 1 is done. Where it differs from the plan:
+Status (2026-11-22): phases 1 to 4 are done; the first run (`-Pgames=20`, with the probes) is in `fuzzer-report.md`:
+100 games, 38 failed, 23 open findings. Where phase 1 differs from the plan:
 
 - `PlayInterruptCardEvent`, `UseRollAbilityEvent` and `ChooseCrisisTargetEvent` have no source of their own: the
   reflective one covers them with narrowed domains (`calculationsModifier` ±1, `result` 1 to 8, `UseRollAbilityEvent`'s
@@ -11,6 +12,34 @@ Status (2026-11-22): phase 1 is done. Where it differs from the plan:
 - A queued event the engine refuses ("The queued X is invalid") is named by that event, not by the input before it.
 - The twins come at an input drawn from [1, 54), [54, 270) and [270, 1134).
 - `CandidatesTest` tests the tiebreak on `Combinations.oneOfEach` and "Calculations" on its domain, not on game states.
+
+Where phases 2 to 4 differ:
+
+- The fuzz JVM and the backend's test JVM run with `-XX:-OmitStackTraceInFastThrow`: the first run showed a hot
+  `NullPointerException` losing its stack, so the same bug got a second ID (frame `?`).
+- A trace is written for each finding's example game only (the lowest player count, then seed), from the pause where
+  the game first showed it, and a batch run deletes the old traces first. A single-seed run also writes
+  `<n>p-<seed>.txt`, the whole game. A run keeps the other games slim (`RunResults`), so 10,000 seeds fit in memory.
+- The report's "Rounds" are of the finished games; "Open findings" in the history counts `open` and `regressed`. "Watch"
+  lists per player count a team that never won and no Kobol ending, and over the run every other ending that never
+  happened. `:core:fuzz` never fails on a finding; the report says what is open.
+- The twins come at the first input at or past their place, so an accepted probe doesn't skip one.
+- `Repro` (in `fuzz/`) holds the journal, the seed, the input and the expectation, and its `check()` is what
+  `RegressionJournalsTest` runs; `RegressionJournals.repro` and `write` read and write it. The input may hold an
+  `option` and an `event`: a candidate that crashed while a choice looked ahead at its decision is given after that
+  option. A third expectation, `restores`, is for a twin that differed: after the input, the journal restores to the
+  same game (it compares a restored game with a restore of it, so a difference only a game played live from the start
+  has isn't caught). A rejected input that changed the game fails `runs` too, which covers REJECTED_BUT_CHANGED.
+- `FuzzJournalExportTest` takes the stopping finding, else the game's first, or the one named by
+  `-DfuzzJournal=4:117:F-1c2d3e`, and fails unless the written journal reproduces it. Checked on `F-d897ee` (4p seed 1)
+  and on a probe's `F-2928df` (3p seed 5): `RegressionJournalsTest` failed on each, and both journals were deleted
+  again, as nothing is fixed yet.
+- A probe takes one class of the decision at random (no gate) and one candidate of it. Its `playerNumber` stays the
+  asked player's, because the engine rejects any other before a processor sees it. Rejected probes are in the trace as
+  `probe` lines. A probe's CRASH is told from an INPUT_CRASH by whether the engine took the input (a rollback replaces
+  the journal, an `Error` leaves its scope behind), and a check that threw and changed the game is REJECTED_BUT_CHANGED.
+- `PlayoutTest`'s two rounds run without probes, so an engine bug they hit can't end the game early; a test of its own
+  checks that a seed probes the same way twice.
 
 Implements milestone A of `roadmap.md`, "Prove the game is completable": a random-playout fuzzer that plays seeded
 games with 3 to 7 players to an ending, answering every pause with a random legal answer, and a loop that runs it,
@@ -359,6 +388,7 @@ through the fix loop like any other.
 2. **Regression journals and `FORMAT_VERSION`** (decision 8). Answered 2026-11-22: when a format change makes a fuzz
    journal unloadable, delete the journal and keep the core test that covers the bug.
 3. **Caps**: 50 rounds and 5,000 inputs a turn are guesses; the first runs' "Rounds" column says whether they fit.
+   The first run (100 games): 44 rounds at most, and no NO_END.
 
 ## Not in this plan
 

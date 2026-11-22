@@ -2,11 +2,13 @@ package xyz.zlatanov.frakkintoasters.fuzz;
 
 import lombok.SneakyThrows;
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.event.Event;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.HexFormat;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -17,8 +19,10 @@ import java.util.stream.Collectors;
  * @param signature what tells this bug from another: the kind, the exception and where it was thrown, the event
  * @param summary   one line for the report
  * @param detail    the message and the stack, for the trace
+ * @param event     the event that was checked or run, when the finding is about one a client could send
+ * @param pause     where the game first showed it, {@code null} until the playout notes it
  */
-public record Finding(Kind kind, String signature, String summary, String detail) {
+public record Finding(Kind kind, String signature, String summary, String detail, Event event, Pause pause) {
 
     private static final String  PROJECT = "xyz.zlatanov.frakkintoasters.";
     private static final Pattern QUEUED  = Pattern.compile("The queued (\\w+)");
@@ -41,8 +45,19 @@ public record Finding(Kind kind, String signature, String summary, String detail
         }
     }
 
+    /**
+     * The pause a game first showed a finding at.
+     *
+     * @param where   the turn, the step and what was asked, for the report
+     * @param pending the pending input in full
+     * @param inputs  the inputs given before it, the last ones unless the whole trace was asked for
+     * @param repro   the journal at the pause and the input that failed, when the playout keeps them
+     */
+    public record Pause(String where, String pending, List<String> inputs, Repro repro) {
+    }
+
     public static Finding of(Kind kind, String signature, String summary) {
-        return new Finding(kind, signature, summary, "");
+        return new Finding(kind, signature, summary, "", null, null);
     }
 
     /**
@@ -54,13 +69,13 @@ public record Finding(Kind kind, String signature, String summary, String detail
             // The input only led to it: the event the game queued and then refused is the bug.
             val name = queued.group(1);
             return new Finding(kind, "queued " + name + " invalid",
-                    "The queued `" + name + "` is invalid (after `" + event + "`)", describe(thrown));
+                    "The queued `" + name + "` is invalid (after `" + event + "`)", describe(thrown), null, null);
         }
         val root = rootCause(thrown);
         val frame = frame(root);
         val signature = root.getClass().getSimpleName() + " in " + frame + " on " + event;
         val summary = "`" + root.getClass().getSimpleName() + "` in `" + frame + "` on `" + event + "`";
-        return new Finding(kind, signature, summary, describe(thrown));
+        return new Finding(kind, signature, summary, describe(thrown), null, null);
     }
 
     public String id() {
@@ -72,7 +87,21 @@ public record Finding(Kind kind, String signature, String summary, String detail
     }
 
     public Finding withDetail(String moreDetail) {
-        return new Finding(kind, signature, summary, detail.isEmpty() ? moreDetail : detail + "\n" + moreDetail);
+        return new Finding(kind, signature, summary, detail.isEmpty() ? moreDetail : detail + "\n" + moreDetail, event,
+                pause);
+    }
+
+    public Finding withEvent(Event checked) {
+        return new Finding(kind, signature, summary, detail, checked, pause);
+    }
+
+    public Finding at(Pause where) {
+        return new Finding(kind, signature, summary, detail, event, where);
+    }
+
+    // What a run keeps of a game that isn't the example of the finding: the inputs and the journal take memory.
+    Finding withoutPause() {
+        return new Finding(kind, signature, summary, detail, null, null);
     }
 
     static Throwable rootCause(Throwable thrown) {

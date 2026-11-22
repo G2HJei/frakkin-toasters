@@ -20,3 +20,26 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+// Random games played to an ending (fuzzer-plan.md): ./gradlew :core:fuzz -Pgames=100 -Pplayers=3-7 writes
+// fuzzer-report.md, and -Pplayers=4 -Pseed=117 plays one game with a full trace in build/fuzz.
+tasks.register('fuzz', JavaExec) {
+    group = 'verification'
+    description = 'Plays random games and writes fuzzer-report.md'
+    classpath = sourceSets.testFixtures.runtimeClasspath
+    mainClass = 'xyz.zlatanov.frakkintoasters.fuzz.FuzzRun'
+    // A JavaExec runs without -ea, and without the asserts a bad input corrupts a deck silently.
+    enableAssertions = true
+    // A hot NullPointerException loses its stack, and with it the frame that tells one finding from another.
+    jvmArgs '-XX:-OmitStackTraceInFastThrow'
+    workingDir = rootProject.projectDir
+    args '--report', rootProject.file('fuzzer-report.md').absolutePath,
+            '--traces', layout.buildDirectory.dir('fuzz').get().asFile.absolutePath
+    [games: '--games', players: '--players', firstSeed: '--first-seed', seed: '--seed', threads: '--threads',
+     rounds: '--rounds'].each { property, option ->
+        def value = providers.gradleProperty(property)
+        if (value.present) {
+            args option, value.get()
+        }
+    }
+}

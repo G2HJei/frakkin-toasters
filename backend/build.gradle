@@ -47,6 +47,12 @@ test {
     if (System.getProperty('updateFormatLock') != null) {
         systemProperty 'updateFormatLock', System.getProperty('updateFormatLock')
     }
+    // FuzzJournalExportTest: -DfuzzJournal=4:117 writes the finding of that game as a regression journal.
+    if (System.getProperty('fuzzJournal') != null) {
+        systemProperty 'fuzzJournal', System.getProperty('fuzzJournal')
+    }
+    // As in :core:fuzz, so a played seed has the findings the run reported.
+    jvmArgs '-XX:-OmitStackTraceInFastThrow'
 }
 
 // One jar, the executable one.

@@ -22,15 +22,22 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 import xyz.zlatanov.frakkintoasters.state.view.GalacticaBoardView;
 import xyz.zlatanov.frakkintoasters.state.view.HumanFighterView;
 
+import xyz.zlatanov.frakkintoasters.state.util.AllCardsProvider;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.RecordComponent;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.IntStream;
@@ -43,8 +50,16 @@ import java.util.stream.Stream;
  */
 final class Domains {
 
-    private static final List<ShipType> FIGHTERS = List.of(ShipType.VIPER, ShipType.VIPER_MARK_VII,
+    private static final List<ShipType> FIGHTERS        = List.of(ShipType.VIPER, ShipType.VIPER_MARK_VII,
             ShipType.ASSAULT_RAPTOR);
+    private static final List<Object>   ALL_SKILL_CARDS = Stream.of(AllCardsProvider.politicsCards(),
+                    AllCardsProvider.leadershipCards(), AllCardsProvider.tacticsCards(), AllCardsProvider.pilotingCards(),
+                    AllCardsProvider.engineeringCards(), AllCardsProvider.treacheryCards())
+            .flatMap(deck -> deck.cards().stream())
+            .distinct()
+            .map(card -> (Object) card)
+            .toList();
+    private static final List<Integer>  UNKNOWN_SHIPS   = List.of(-1, 0, 999);
 
     private Domains() {
     }
@@ -259,6 +274,142 @@ final class Domains {
             return values;
         }
         return Stream.concat(Stream.of((Object) null), values.stream()).toList();
+    }
+
+    /**
+     * Values a client could send that the agent never would: any card of the decks, players and ships that aren't
+     * there, nulls. A type without values gets null alone; the normal domains report it.
+     */
+    static List<Object> wide(Asked asked, RecordComponent component) {
+        return wide(asked, component.getName(), component.getType(), component.getGenericType(), 0);
+    }
+
+    private static List<Object> wide(Asked asked, String name, Class<?> type, Type generic, int depth) {
+        if (type == int.class || type == Integer.class) {
+            return withNull(type, wideInts(asked, name));
+        }
+        if (type == long.class || type == Long.class) {
+            return withNull(type, List.of(-1L, 0L, 1L, 999L));
+        }
+        if (type == boolean.class) {
+            return List.of(false, true);
+        }
+        if (type == Boolean.class) {
+            return Arrays.asList(null, false, true);
+        }
+        if (type == SkillCard.class) {
+            return withNull(type, ALL_SKILL_CARDS);
+        }
+        if (type.isEnum()) {
+            return withNull(type, List.of(type.getEnumConstants()));
+        }
+        if (type == List.class || type == Set.class || type == Collection.class) {
+            val element = elementType(generic);
+            if (element == null) {
+                return Arrays.asList((Object) null);
+            }
+            val lists = wideLists(wide(asked, name, element, element, depth + 1), asked.random());
+            return withNull(type, type == Set.class
+                    ? lists.stream().map(list -> (Object) new LinkedHashSet<>((List<?>) list)).toList()
+                    : lists);
+        }
+        if (type == Map.class) {
+            return withNull(type, wideMaps(generic, asked.random()));
+        }
+        if (type.isRecord() && depth == 0) {
+            val records = new ArrayList<>(type == ViperActivation.class ? viperActivations(asked) : List.of());
+            records.addAll(wideRecords(asked, type));
+            return withNull(type, records);
+        }
+        return Arrays.asList((Object) null);
+    }
+
+    private static List<Object> wideInts(Asked asked, String name) {
+        val players = asked.game().players().size();
+        val role = ComponentRole.of(name);
+        if (role.isEmpty()) {
+            return IntStream.rangeClosed(-1, players + 1).boxed().map(i -> (Object) i).toList();
+        }
+        return switch (role.get()) {
+            // the engine itself rejects an event that names another player than the one who submits it
+            case PLAYER -> name.equals("playerNumber")
+                    ? List.of(asked.playerNumber())
+                    : IntStream.rangeClosed(0, players + 1).boxed().map(i -> (Object) i).toList();
+            case SHIP -> Stream.of(shipIds(asked), centurionIds(asked), UNKNOWN_SHIPS)
+                    .flatMap(List::stream)
+                    .distinct()
+                    .sorted()
+                    .map(id -> (Object) id)
+                    .toList();
+            case COUNT -> Stream.concat(IntStream.rangeClosed(-2, 10).boxed(), Stream.of(99)).map(i -> (Object) i).toList();
+            case SCOPE -> List.of(-1, 0, 1, 999);
+        };
+    }
+
+    // None, single ones, pairs, a pair of the same value, and a null element, which a list read from JSON can hold.
+    private static List<Object> wideLists(List<Object> elements, Random random) {
+        val values = elements.stream().filter(Objects::nonNull).toList();
+        val result = new ArrayList<Object>();
+        result.add(List.of());
+        result.add(Arrays.asList((Object) null));
+        if (values.isEmpty()) {
+            return result;
+        }
+        for (int i = 0; i < 6; i++) {
+            result.add(List.of(values.get(random.nextInt(values.size()))));
+            result.add(List.of(values.get(random.nextInt(values.size())), values.get(random.nextInt(values.size()))));
+        }
+        val twice = values.get(random.nextInt(values.size()));
+        result.add(List.of(twice, twice));
+        return result;
+    }
+
+    // Maps of an enum to counts, the shape of a draw's colors, in the enum's order.
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static List<Object> wideMaps(Type generic, Random random) {
+        if (!(generic instanceof ParameterizedType parameterized)
+                || !(parameterized.getActualTypeArguments()[0] instanceof Class<?> key) || !key.isEnum()) {
+            return List.of();
+        }
+        val keys = key.getEnumConstants();
+        val result = new ArrayList<Object>();
+        result.add(new EnumMap(key));
+        for (int i = 0; i < 6; i++) {
+            val map = new EnumMap(key);
+            for (int entries = 0; entries <= i % 2; entries++) {
+                map.put(keys[random.nextInt(keys.length)], random.nextInt(13) - 2);
+            }
+            result.add(map);
+        }
+        return result;
+    }
+
+    // Records of the wide values of their components, e.g. a viper activation of a ship that isn't there.
+    private static List<Object> wideRecords(Asked asked, Class<?> type) {
+        val components = type.getRecordComponents();
+        val domains = Arrays.stream(components)
+                .map(component -> wide(asked, component.getName(), component.getType(), component.getGenericType(), 1))
+                .toList();
+        final Constructor<?> constructor;
+        try {
+            constructor = type.getDeclaredConstructor(Arrays.stream(components)
+                    .map(RecordComponent::getType)
+                    .toArray(Class<?>[]::new));
+        } catch (NoSuchMethodException e) {
+            return List.of();
+        }
+        val result = new ArrayList<Object>();
+        for (int i = 0; i < 8; i++) {
+            val args = domains.stream().map(domain -> domain.get(asked.random().nextInt(domain.size()))).toArray();
+            try {
+                result.add(constructor.newInstance(args));
+            } catch (InvocationTargetException refused) {
+                // a compact constructor that refuses the values: the codec could not build it either
+            } catch (ReflectiveOperationException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+        return result;
     }
 
     private static List<Object> gap(Asked asked, Class<?> record, RecordComponent component) {

@@ -64,7 +64,7 @@ public final class AnswerFinder {
                     ? constrained.withConstraints(decision.eventConstraints())
                     : candidate;
         } catch (Throwable thrown) {
-            findings.accept(Finding.of(Finding.Kind.INPUT_CRASH, thrown, name));
+            findings.accept(Finding.of(Finding.Kind.INPUT_CRASH, thrown, name).withEvent(candidate));
             return Optional.empty();
         }
         if (!decision.action().isInstance(event)
@@ -78,7 +78,7 @@ public final class AnswerFinder {
             return Optional.empty();
         } catch (Throwable thrown) {
             // A client may send this, and the game should reject it, not throw.
-            findings.accept(Finding.of(Finding.Kind.INPUT_CRASH, thrown, name));
+            findings.accept(Finding.of(Finding.Kind.INPUT_CRASH, thrown, name).withEvent(candidate));
             return Optional.empty();
         }
     }

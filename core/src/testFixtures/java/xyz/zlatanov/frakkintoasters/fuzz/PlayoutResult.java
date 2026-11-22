@@ -30,4 +30,15 @@ public record PlayoutResult(int players,
     public boolean finished() {
         return stoppedBy == null && winner.isPresent();
     }
+
+    public boolean failed() {
+        return stoppedBy != null;
+    }
+
+    // What a run of thousands of games keeps of each: no inputs, no event types, no pauses.
+    PlayoutResult slim() {
+        return new PlayoutResult(players, seed, winner, ending, rounds, inputCount,
+                stoppedBy == null ? null : stoppedBy.withoutPause(),
+                findings.stream().map(Finding::withoutPause).toList(), List.of(), Set.of());
+    }
 }

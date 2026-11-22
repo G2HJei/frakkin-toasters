@@ -246,6 +246,25 @@ final class Candidates {
         return result;
     }
 
+    /**
+     * @return one event of the class built from the wide domains, an input a client could send but the agent never
+     * would; {@code null} when the record refuses every set of values it is tried with
+     */
+    static Event hostile(Asked asked, AnswerClass answerClass) {
+        val type = answerClass.type();
+        val components = type.getRecordComponents();
+        val domains = Arrays.stream(components).map(component -> Domains.wide(asked, component)).toList();
+        val constructor = constructor(type, components);
+        for (int attempt = 0; attempt < 16; attempt++) {
+            val args = domains.stream().map(domain -> domain.get(asked.random().nextInt(domain.size()))).toArray();
+            val event = construct(constructor, args);
+            if (event != null) {
+                return event;
+            }
+        }
+        return null;
+    }
+
     // Every tuple of the components' values when there are few, otherwise random ones.
     private static List<Event> reflective(Asked asked, AnswerClass answerClass, Budget budget) {
         val type = answerClass.type();
