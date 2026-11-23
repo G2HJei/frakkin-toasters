@@ -39,7 +39,7 @@ test('a seeded sandbox is played through a turn, undone, exported and imported',
   await page.getByRole('button', { name: 'Inject' }).click();
   // the sandbox shows the Crisis deck's draw pile on hover, top first
   await page.locator('[data-reveal="deck-CRISIS"]').hover();
-  await expect(page.locator('.reveal-pop ol.pile li').first()).toHaveText('Riots No Jump');
+  await expect(page.locator('.reveal-pop ol.pile li img').first()).toHaveAttribute('alt', 'Riots No Jump');
   // the Action step opens the action: the Research Lab's colors
   await expect(input(page).getByRole('button', { name: 'Take an action' })).toHaveAttribute('aria-expanded', 'true');
   await answer(page, 'Engineering');

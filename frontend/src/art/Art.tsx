@@ -62,7 +62,6 @@ export function ArtPreview() {
             <img key={url} src={url} alt="" />
           ))}
         </div>
-        <span className="art-preview-label">{art.label}</span>
       </div>
       {extra && <div className="art-preview-extra">{extra}</div>}
     </div>

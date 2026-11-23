@@ -172,7 +172,6 @@ function Cards({decks: all, query}: { decks: Deck[]; query: string }) {
                             {found.map((card) => (
                                 <li key={card.key}>
                                     <ArtImg art={card}/>
-                                    <span>{card.label}</span>
                                 </li>
                             ))}
                         </ol>
@@ -202,7 +201,6 @@ function Characters({focus, query}: { focus: string | null; query: string }) {
                     <li key={character} ref={character === focus ? focused : undefined}
                         className={character === focus ? 'focus' : undefined}>
                         <ArtImg art={art}/>
-                        <span>{constantLabel('Character', character)}</span>
                     </li>
                 ))}
             </ol>

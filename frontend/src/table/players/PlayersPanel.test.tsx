@@ -103,7 +103,7 @@ describe('the players', () => {
 
     expect(panel.querySelectorAll('.tile:not(.back)')).toHaveLength(0);
     fireEvent.mouseEnter(panel.querySelector('[data-reveal="hand-2"]')!);
-    expect([...document.querySelectorAll('.reveal-pop ol.pile li')].map((card) => card.textContent)).toEqual(['Red Tape 0', 'Red Tape 0', 'Executive Order 1']);
+    expect([...document.querySelectorAll('.reveal-pop ol.pile li img')].map((card) => card.getAttribute('alt'))).toEqual(['Red Tape 0', 'Red Tape 0', 'Executive Order 1']);
     useReveal.getState().hide();
   });
 

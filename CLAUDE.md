@@ -1141,7 +1141,8 @@ REST (the lobby lists poll), Zustand for the game.
 - Hover (`src/table/reveal.tsx`): a pile shows what it holds in one fixed popover (`RevealLayer`), its cards as large as
   their images (no preview of their own) in rows of up to 860px, and scrolls when they don't fit the window. The
   preview of a single image (`ArtPreview`) shows it as large as it is too, scaled down only by a smaller window; a card
-  back has none, so it never covers its pile's popover. A face-up discard
+  back has none, so it never covers its pile's popover. Neither, nor the reference's grids, puts a name under an image
+  (it stays the image's `alt`); a pile keeps a label that says more, e.g. who played the card. A face-up discard
   pile shows to everyone. A sandbox looks like a live table, every hand and deck face down, and shows on hover what the
   players can't see (`hidden` sections: hands, Loyalty and other player cards, draw piles, face-down discards, a skill
   check's cards).

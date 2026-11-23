@@ -143,7 +143,7 @@ export function RevealLayer() {
               {section.cards.map((card, index) => (
                 <li key={index}>
                   {card.icon ?? (card.art && <ArtImg art={card.art} preview={false} />)}
-                  <span>{card.label}</span>
+                  {!namedByImage(card) && <span>{card.label}</span>}
                 </li>
               ))}
             </ol>
@@ -152,6 +152,11 @@ export function RevealLayer() {
       </div>
     </div>
   );
+}
+
+// an image needs no name under it; a label that says more stays, e.g. who played the card
+function namedByImage(card: RevealCard): boolean {
+  return !card.icon && card.art !== null && card.label === card.art.label;
 }
 
 /** A multiset difference: the cards of a pile that aren't among the revealed ones. */

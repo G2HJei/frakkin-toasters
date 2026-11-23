@@ -41,6 +41,6 @@ describe('the reference', () => {
     expect(rows[0].textContent).toBe('ViperRaider3–8Destroyed');
 
     act(() => useReference.getState().show('characters', 'LAURA_ROSLIN'));
-    expect(document.querySelector('.reference-grid li.focus')?.textContent).toBe('Laura Roslin');
+    expect(document.querySelector('.reference-grid li.focus img')?.getAttribute('alt')).toBe('Laura Roslin');
   });
 });

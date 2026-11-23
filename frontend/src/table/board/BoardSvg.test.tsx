@@ -337,7 +337,10 @@ describe('the board', () => {
     const board = renderBoard();
 
     fireEvent.mouseEnter(board.querySelector('[data-reveal="discard-CRISIS"]')!);
-    expect([...document.querySelectorAll('.reveal-pop ol.pile li')].map((card) => card.textContent)).toEqual(['Water Sabotaged', 'Riots Jump']);
+    const cards = [...document.querySelectorAll('.reveal-pop ol.pile li')];
+    expect(cards.map((card) => card.querySelector('img')?.getAttribute('alt'))).toEqual(['Water Sabotaged', 'Riots Jump']);
+    // no name under the images
+    expect(cards.map((card) => card.textContent)).toEqual(['', '']);
     // the cards are large enough to read, so they have no preview of their own
     fireEvent.mouseEnter(document.querySelector('.reveal-pop ol.pile.cards li .art')!);
     expect(usePreview.getState().art).toBeNull();
@@ -357,7 +360,7 @@ describe('the board', () => {
     const board = renderBoard(undefined, sandbox, true);
 
     fireEvent.mouseEnter(board.querySelector('[data-reveal="deck-CRISIS"]')!);
-    expect(document.querySelector('.reveal-pop ol.pile li')?.textContent).toBe('Riots No Jump');
+    expect(document.querySelector('.reveal-pop ol.pile li img')?.getAttribute('alt')).toBe('Riots No Jump');
     expect(document.querySelector('.reveal-pop .sandbox-only')).not.toBeNull();
   });
 
