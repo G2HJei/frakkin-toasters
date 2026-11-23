@@ -200,6 +200,14 @@ function Entry({ entry, words }: { entry: LogEntry; words: LabelContext }) {
   const facts = [...split.story.filter((fact) => partsText(factParts(fact, words)) !== line), ...split.rest];
   return (
     <li className="scope" onClick={flash}>
+      {/* the server answered for him: it was his only answer */}
+      {entry.automatic && (
+        <span className="auto-icon" role="img" aria-label="automatic" title="The only answer, taken automatically">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M13 3 5 14h6l-1 7 8-11h-6z" />
+          </svg>
+        </span>
+      )}
       {named ? (
         <span className="event">
           <span className="actor">{actor}</span>
@@ -216,12 +224,6 @@ function Entry({ entry, words }: { entry: LogEntry; words: LabelContext }) {
       {source && (
         <span className="source-tag">
           <Words parts={[source]} />
-        </span>
-      )}
-      {/* the server answered for him: it was his only answer */}
-      {entry.automatic && (
-        <span className="auto-tag" title="The only answer, taken automatically">
-          automatic
         </span>
       )}
       <ArtStrip refs={unique([...recordArt(details), ...(entry.facts ?? []).flatMap(factArt)])} />

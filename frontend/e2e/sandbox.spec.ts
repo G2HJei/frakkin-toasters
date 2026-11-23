@@ -30,7 +30,7 @@ test('a seeded sandbox is played through a turn, undone, exported and imported',
   // turn 1: Adama draws, moves to the Research Lab, stacks a Crisis Card, draws there, and resolves the stacked card
   // his skill set leaves one draw, which the game takes for him and logs as taken
   await expectTurn(page, 'Turn 1 · William Adama', 'Movement');
-  await expect(page.getByRole('region', { name: 'log' }).locator('.scope', { has: page.locator('.auto-tag') }).last()).toContainText('William Adama draws');
+  await expect(page.getByRole('region', { name: 'log' }).locator('.scope', { has: page.locator('.auto-icon') }).last()).toContainText('William Adama draws');
   // the Movement step opens the move: its destinations are the answers
   await answer(page, 'Research Lab');
   await page.getByRole('region', { name: 'sandbox' }).locator('summary', { hasText: 'Setup' }).click();

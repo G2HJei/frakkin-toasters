@@ -191,10 +191,12 @@ describe('the log', () => {
     const taken = { ...scope(2), automatic: true } as LogEntry;
     const body = renderLog([scope(1), taken]);
 
-    const tags = body.querySelectorAll('.auto-tag');
-    expect(tags).toHaveLength(1);
-    expect(tags[0].closest('li')).toBe(body.querySelectorAll('.entries > li')[1]);
-    expect(tags[0].textContent).toBe('automatic');
+    const icons = body.querySelectorAll('.auto-icon');
+    expect(icons).toHaveLength(1);
+    // in front of the line it marks
+    expect(icons[0]).toBe(body.querySelectorAll('.entries > li')[1].firstElementChild);
+    expect(icons[0].getAttribute('aria-label')).toBe('automatic');
+    expect(icons[0].getAttribute('title')).toBe('The only answer, taken automatically');
   });
 
   it('words what happened to a ship', () => {
