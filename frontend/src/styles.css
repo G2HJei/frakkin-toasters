@@ -1318,26 +1318,71 @@ details > summary {
   font-size: 0.9em;
 }
 
-/* over the bottom of the log while the user reads further up */
+/* a cut-corner arrow over the bottom right of the log while the user reads further up, clear of its scrollbar */
 .table-page .log-to-bottom {
+  --c: 7px;
+  --edge: var(--steel-500);
+  --fill: #1a2129;
   position: absolute;
-  bottom: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  font: 600 11px/1 var(--display);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #151b25;
-  background: linear-gradient(#eef1f4, #b8c0c9);
+  right: 32px;
+  bottom: 18px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
   border: 0;
   border-radius: 0;
-  padding: 7px 18px;
-  clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0 50%);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  color: var(--steel-100);
 }
 
-.table-page .log-to-bottom:hover {
-  background: linear-gradient(#ffffff, #cfd6dd);
+.table-page .log-to-bottom svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: square;
+}
+
+.table-page .log-to-bottom:hover,
+.table-page .log-to-bottom:focus-visible {
+  --edge: var(--dradis-glow);
+  --fill: #16263a;
+  color: var(--dradis-glow);
+  outline: none;
+}
+
+/* new entries came below: amber, and the arrow nudges down */
+.table-page .log-to-bottom.unseen {
+  --edge: var(--amber);
+  --fill: #3b2d10;
+  color: var(--amber);
+  animation: log-unseen-glow 1.2s ease-in-out infinite alternate;
+}
+
+.table-page .log-to-bottom.unseen svg {
+  animation: log-unseen-nudge 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes log-unseen-glow {
+  to {
+    filter: brightness(1.45);
+  }
+}
+
+@keyframes log-unseen-nudge {
+  to {
+    transform: translateY(2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .table-page .log-to-bottom.unseen,
+  .table-page .log-to-bottom.unseen svg {
+    animation: none;
+  }
 }
 
 .table-side.left > .log {

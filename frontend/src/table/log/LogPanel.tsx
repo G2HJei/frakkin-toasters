@@ -121,13 +121,13 @@ function onlyHeader(entry: LogEntry): boolean {
  * The story of the game: grouped by turn, every turn open, and by step within a turn. Each scope is one line, its actor,
  * its event and what it names, with its facts under it, the ones that change the table first. Card and character names
  * show their image on hover. A click on an entry lights what it touched on the board. The log follows the newest entry
- * until the user scrolls up, and "Go to bottom" follows again.
+ * until the user scrolls up, and the arrow at its bottom right follows again, lit while new entries came below.
  */
 export function LogPanel() {
   const table = useTable();
   const log = useGameStore((state) => state.log);
   const groups = useMemo(() => groupByTurn(log), [log]);
-  const { scrollRef, contentRef, following, onScroll, toBottom } = useFollowBottom(log);
+  const { scrollRef, contentRef, following, unseen, onScroll, toBottom } = useFollowBottom(log);
   const words: LabelContext = { ...table, artOf: partArt };
   return (
     <section className="panel cf log" aria-label="log">
@@ -155,8 +155,16 @@ export function LogPanel() {
         </div>
       </div>
       {!following && (
-        <button type="button" className="log-to-bottom" onClick={toBottom}>
-          Go to bottom
+        <button
+          type="button"
+          className={unseen ? 'log-to-bottom cf unseen' : 'log-to-bottom cf'}
+          aria-label="Go to bottom"
+          title={unseen ? 'New entries below' : 'Go to bottom'}
+          onClick={toBottom}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 4v12M6 10l6 6 6-6M5 20h14" />
+          </svg>
         </button>
       )}
     </section>

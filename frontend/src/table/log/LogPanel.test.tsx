@@ -103,6 +103,37 @@ describe('the log', () => {
     expect(body.scrollTop).toBe(600);
   });
 
+  it('keeps following when the end moves before the event of its own scroll arrives', () => {
+    const body = renderLog([scope(1), scope(2)]);
+    addEntry(scope(3), 600);
+
+    // an image of the new entry loads before the browser reports the scroll to the end
+    layout.scrollHeight = 650;
+    fireEvent.scroll(body);
+
+    expect(screen.queryByRole('button', { name: 'Go to bottom' })).toBeNull();
+
+    addEntry(scope(4), 700);
+
+    expect(body.scrollTop).toBe(600);
+  });
+
+  it('lights the arrow once new entries come below, until the user is at the end again', () => {
+    const body = renderLog([scope(1), scope(2)]);
+    scrollTo(body, 120);
+
+    expect(screen.getByRole('button', { name: 'Go to bottom' })).not.toHaveClass('unseen');
+
+    addEntry(scope(3), 600);
+
+    expect(screen.getByRole('button', { name: 'Go to bottom' })).toHaveClass('unseen');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Go to bottom' }));
+    scrollTo(body, 120);
+
+    expect(screen.getByRole('button', { name: 'Go to bottom' })).not.toHaveClass('unseen');
+  });
+
   it('follows again once the user scrolls back down to the end', () => {
     const body = renderLog([scope(1), scope(2)]);
     scrollTo(body, 0);
