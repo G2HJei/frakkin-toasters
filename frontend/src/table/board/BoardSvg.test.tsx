@@ -102,8 +102,21 @@ describe('the board', () => {
     expect(board.querySelector('[data-location="RESEARCH_LAB"] [data-character="WILLIAM_ADAMA"] [data-art="Character/player-token/WILLIAM_ADAMA"]')).not.toBeNull();
     expect(board.querySelector('[data-location="AIRLOCK"] [data-character="LAURA_ROSLIN"]')).not.toBeNull();
     expect(board.querySelectorAll('[data-character="WILLIAM_ADAMA"]')).toHaveLength(1);
-    // the current player's standee stands out
-    expect(board.querySelector('[data-character="WILLIAM_ADAMA"]')?.classList).toContain('current');
+    // the acting player's standee stands out
+    expect(board.querySelector('[data-character="WILLIAM_ADAMA"]')?.classList).toContain('acting');
+  });
+
+  it("rings the acting player's standee, not the current player's or a revealed Cylon's", () => {
+    const acting = {
+      ...game,
+      turn: { ...game.turn, actingPlayer: 2 },
+      players: [{ number: 1, character: 'WILLIAM_ADAMA' }, { number: 2, character: 'LAURA_ROSLIN', revealedCylon: true }],
+    } as unknown as GameProjection;
+    const board = renderBoard(undefined, acting);
+
+    expect(board.querySelector('[data-character="LAURA_ROSLIN"]')?.classList).toContain('acting');
+    expect(board.querySelector('[data-character="WILLIAM_ADAMA"]')?.classList).not.toContain('acting');
+    expect(board.querySelectorAll('.character.current, .character.cylon')).toHaveLength(0);
   });
 
   it("draws each ship in its space area, with its pilot's token, and the reserves and the Cylon supply in their slots", () => {

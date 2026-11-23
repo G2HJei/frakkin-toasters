@@ -48,10 +48,11 @@ function PlayerMat({ player }: { player: PlayerProjection }) {
   const portrait = characterArt(player.character);
   const user = table.userName(player.number);
   const current = turn?.currentPlayer === player.number;
+  const acting = turn?.actingPlayer === player.number;
   const { offer, onTarget } = useAnswering();
   const key = `player:${player.number}`;
   const lit = offer.targets.has(key);
-  const classes = ['player', 'mat', 'cf', current ? 'current' : '', player.revealedCylon ? 'cylon' : '', lit ? 'target' : '', offer.picked.has(key) ? 'picked' : '']
+  const classes = ['player', 'mat', 'cf', acting ? 'acting' : '', player.revealedCylon ? 'cylon' : '', lit ? 'target' : '', offer.picked.has(key) ? 'picked' : '']
     .join(' ')
     .trim();
   return (
@@ -93,8 +94,7 @@ function PlayerMat({ player }: { player: PlayerProjection }) {
           {player.revealedCylon && <Badge className="cylon" art={null} label="Cylon" />}
           {/* a Cylon Leader who isn't infiltrating */}
           {player.human === false && !player.revealedCylon && <Badge className="cylon" art={null} label="Not human" />}
-          {current && <TokenBadge token="CURRENT_PLAYER" label="Current" />}
-          {turn?.actingPlayer === player.number && turn.actingPlayer !== turn.currentPlayer && <Badge className="token" art={null} label="Acting" />}
+          {acting && !current && <Badge className="token" art={null} label="Acting" />}
           {player.miracleTokens > 0 && <TokenBadge token="MIRACLE" label={player.miracleTokens > 1 ? `${player.miracleTokens} miracles` : 'Miracle'} />}
         </p>
       </div>

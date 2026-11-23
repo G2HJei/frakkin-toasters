@@ -115,13 +115,27 @@ describe('the players', () => {
     expect(side?.firstElementChild?.matches('.portrait')).toBe(true);
     expect(side?.firstElementChild?.firstElementChild?.matches('button.avatar-button')).toBe(true);
     expect(side?.firstElementChild?.querySelector('img.avatar')).not.toBeNull();
-    expect(side?.querySelector('.badges')?.textContent).toBe('AdmiralCurrent');
+    expect(side?.querySelector('.badges')?.textContent).toBe('Admiral');
     const admiral = side!.querySelector('.badge.title')!;
     expect(admiral.querySelector('img')?.getAttribute('alt')).toBe('Admiral');
     fireEvent.mouseEnter(admiral);
     expect(usePreview.getState().art?.label).toBe('Admiral');
     fireEvent.mouseLeave(admiral);
     expect(usePreview.getState().art).toBeNull();
+  });
+
+  it("marks the acting player's mat and rings his portrait, not the current player's", () => {
+    const panel = render(
+      <Table.Provider value={tableContext({ ...game, turn: { currentPlayer: 1, actingPlayer: 2 } } as GameProjection, false, null)}>
+        <PlayersPanel />
+      </Table.Provider>,
+    ).container;
+
+    expect(panel.querySelector('[data-player="2"]')?.classList).toContain('acting');
+    expect(panel.querySelector('[data-player="2"] .badges')?.textContent).toContain('Acting');
+    expect(panel.querySelector('[data-player="1"]')?.classList).not.toContain('acting');
+    expect(panel.querySelector('[data-player="1"]')?.classList).not.toContain('current');
+    expect(panel.querySelector('[data-player="1"] .badges')?.textContent).toBe('Admiral');
   });
 
   it('strips the right of a portrait with the colors the sheet draws, but a revealed Cylon\'s, a Cylon Leader\'s always', () => {

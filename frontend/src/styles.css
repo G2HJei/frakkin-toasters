@@ -1060,13 +1060,8 @@ details > summary {
   fill: none;
 }
 
-.board-svg .character.current .token-ring {
-  stroke: #ffd24d;
-  stroke-width: 6;
-  filter: drop-shadow(0 0 12px rgba(255, 200, 70, 0.9));
-}
-
-.board-svg .character.cylon .token-ring {
+/* the acting player: the current player, unless another acts during his turn */
+.board-svg .character.acting .token-ring {
   stroke: #e0352b;
   stroke-width: 6;
   filter: drop-shadow(0 0 10px rgba(224, 53, 43, 0.8));
@@ -1531,7 +1526,8 @@ details > summary {
   padding: 12px;
 }
 
-.table-page .mat.current {
+/* the acting player: the current player, unless another acts during his turn */
+.table-page .mat.acting {
   --edge: var(--alert);
   --bw: 2px;
   --fill: linear-gradient(90deg, rgba(200, 50, 43, 0.22), transparent 45%), var(--gunmetal);
@@ -1586,12 +1582,8 @@ details > summary {
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
 }
 
-.table-page .mat.current .avatar {
-  box-shadow: 0 0 0 2px #ffd24d, 0 0 14px 3px rgba(255, 200, 70, 0.6);
-}
-
-.table-page .mat.cylon .avatar {
-  box-shadow: 0 0 0 2px #e0352b;
+.table-page .mat.acting .avatar {
+  box-shadow: 0 0 0 2px #e0352b, 0 0 14px 3px rgba(224, 53, 43, 0.6);
 }
 
 .table-page .mat-body {

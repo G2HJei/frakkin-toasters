@@ -76,8 +76,7 @@ export function BoardSvg() {
   const galactica = game.galactica;
   const locations = [...(galactica?.locations ?? []), ...(game.pegasus?.locations ?? []), ...(game.cylonFleet?.locations ?? [])];
   const ships = [...(galactica?.ships ?? []), ...(game.cylonFleet?.ships ?? [])];
-  const currentCharacter = game.players?.find((player) => player.number === game.turn?.currentPlayer)?.character ?? null;
-  const cylons = new Set((game.players ?? []).filter((player) => player.revealedCylon).map((player) => player.character));
+  const actingCharacter = game.players?.find((player) => player.number === game.turn?.actingPlayer)?.character ?? null;
 
   return (
     <svg ref={svg} className="board-svg" viewBox={`0 0 ${BOARD_WIDTH} ${BOARD_HEIGHT}`} role="img" aria-label="the board">
@@ -131,7 +130,7 @@ export function BoardSvg() {
             )}
             {/* under the standees, which show their own cards */}
             {card && <rect className="location-hotspot" x={place.x} y={place.y} width={place.width} height={place.height} {...previewHandlers(card)} />}
-            <Standees place={place} title={TITLES[name]} characters={(location.characters ?? []) as Character[]} current={currentCharacter} cylons={cylons} nameOf={table.playerName} game={game} />
+            <Standees place={place} title={TITLES[name]} characters={(location.characters ?? []) as Character[]} acting={actingCharacter} nameOf={table.playerName} game={game} />
             {!space && location.damaged && <DamagedLabel place={place} title={TITLES[name]} />}
             {act && (
               <g
@@ -517,13 +516,13 @@ function DamagedLabel({ place, title }: { place: Place; title: Box | undefined }
 
 // The standees stand on the printed name of their location, a little taller than its panel, so they reach up into the
 // picture, side by side while they fit and overlapping when they don't. In a space area, where nothing is printed,
-// they stand at the bottom. Hovering one shows the character sheet with the player's mat beside it.
-function Standees({ place, title, characters, current, cylons, nameOf, game }: {
+// they stand at the bottom. Hovering one shows the character sheet with the player's mat beside it. The acting
+// player's standee has a red ring.
+function Standees({ place, title, characters, acting, nameOf, game }: {
   place: Place;
   title: Box | undefined;
   characters: Character[];
-  current: Character | null;
-  cylons: Set<Character | null>;
+  acting: Character | null;
   nameOf(playerNumber: number): string;
   game: GameProjection;
 }) {
@@ -547,7 +546,7 @@ function Standees({ place, title, characters, current, cylons, nameOf, game }: {
         const x = left + index * step;
         const key = player ? `player:${player.number}` : '';
         const lit = player ? offer.targets.get(key) : undefined;
-        const classes = ['character', character === current ? 'current' : '', cylons.has(character) ? 'cylon' : '', lit ? 'target' : '', offer.picked.has(key) ? 'picked' : '', flashed.has(key) ? 'flash' : '']
+        const classes = ['character', character === acting ? 'acting' : '', lit ? 'target' : '', offer.picked.has(key) ? 'picked' : '', flashed.has(key) ? 'flash' : '']
           .join(' ')
           .trim();
         return (
