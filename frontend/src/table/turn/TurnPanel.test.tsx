@@ -21,16 +21,37 @@ function renderPanel(turn: { step: string; currentPlayer: number; actingPlayer: 
 }
 
 describe('the turn', () => {
-  it('names the current character after the turn\'s number', () => {
+  // each line with its text and whether it names the character acting now (red) or not (amber)
+  function turnLines(panel: HTMLElement) {
+    return [...panel.querySelectorAll('h2 .turn-line')].map((line) => [line.textContent, line.classList.contains('acting')]);
+  }
+
+  it("names the current character after the turn's number, in red while he acts", () => {
     const panel = renderPanel({ step: 'CRISIS', currentPlayer: 1, actingPlayer: 1 });
 
-    expect(panel.querySelector('h2')?.textContent).toBe('Turn 4 · William Adama');
+    expect(turnLines(panel)).toEqual([['Turn 4William Adama', true]]);
   });
 
-  it('names the acting character after the current one when it is another', () => {
+  it('names the acting character in red beside the current one, in amber, when it is another', () => {
     const panel = renderPanel({ step: 'ACTION', currentPlayer: 1, actingPlayer: 2 });
 
-    expect(panel.querySelector('h2')?.textContent).toBe('Turn 4 · William Adama · acting Laura Roslin');
+    expect(turnLines(panel)).toEqual([
+      ['Turn 4William Adama', false],
+      ['ActingLaura Roslin', true],
+    ]);
+  });
+
+  it('names an alternate character without his version', () => {
+    const alternates = [
+      { number: 1, character: 'TOM_ZAREK_ALT' },
+      { number: 2, character: 'KARL_HELO_AGATHON_ALT' },
+    ];
+    const panel = renderPanel({ step: 'ACTION', currentPlayer: 1, actingPlayer: 2 }, { players: alternates });
+
+    expect(turnLines(panel)).toEqual([
+      ['Turn 4Tom Zarek', false],
+      ['ActingKarl "Helo" Agathon', true],
+    ]);
   });
 
   it('shows the steps as icons, the step the turn is at named beside its icon', () => {

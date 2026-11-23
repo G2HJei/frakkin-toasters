@@ -15,7 +15,7 @@ const STEPS: TurnStep[] = ['RECEIVE_SKILLS', 'MOVEMENT', 'ACTION', 'CRISIS', 'AC
 
 /**
  * The game, named after the logo on the panel's tab, with the connection beside it while it isn't open, and the turn
- * once one has started: the turn's number with the current character and the acting one when it's another, the steps
+ * once one has started: the turn's number with the current character, and the acting one beside it when it's another, the steps
  * as icons (the step the turn is at named beside its icon), the turn's Crisis Cards, the skill check, the die, an open
  * interrupt window, and what left the game.
  */
@@ -26,6 +26,9 @@ export function TurnPanel({ name, connection }: { name: string; connection: Conn
     return null;
   }
   const turn = game.turn;
+  const otherActs = !!turn && turn.actingPlayer !== turn.currentPlayer;
+  // the turn line names the character without the version of his sheet
+  const turnName = (playerNumber: number) => table.playerName(playerNumber).replace(/ \(alternate\)$/, '');
   const die = dieArt(turn?.dieRoll?.value);
   const { changes, version } = useChanges();
   return (
@@ -40,12 +43,16 @@ export function TurnPanel({ name, connection }: { name: string; connection: Conn
       </div>
       {turn && (
         <>
-          <h2 className="turn-line">
-            <span className="turn-no">Turn {turn.number}</span> · <span title="current player">{table.playerName(turn.currentPlayer)}</span>
-            {turn.actingPlayer !== turn.currentPlayer && (
-              <span className="acting" title="acting player">
-                {' · '}
-                <small>acting</small> {table.playerName(turn.actingPlayer)}
+          {/* red names the character acting now: the current one, or the other one beside him, who is then amber */}
+          <h2 className="turn-lines">
+            <span className={`turn-line ${otherActs ? '' : 'acting'}`.trim()} title={otherActs ? 'current player' : 'current and acting player'}>
+              <span>Turn {turn.number}</span>
+              <strong>{turnName(turn.currentPlayer)}</strong>
+            </span>
+            {otherActs && (
+              <span className="turn-line acting" title="acting player">
+                <span>Acting</span>
+                <strong>{turnName(turn.actingPlayer)}</strong>
               </span>
             )}
           </h2>

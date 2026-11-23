@@ -1107,7 +1107,7 @@ REST (the lobby lists poll), Zustand for the game.
   step", "Crisis: Riots"), led by the card or ability the topic comes from when its words don't name it
   (`unnamedSource`: "Forward Thinker: Lee Adama may activate his location", "Executive Order: Move or Action"); a
   secret input says only that someone may play an interrupt card. The asked viewer's board
-  gets a red edge and a "Your move" banner with the same line.
+  gets a red edge.
 - Reference (`table/reference/ReferenceDrawer.tsx`, the turn panel's "Reference" or the R key outside a field, which
   closes it too, a mat's portrait for its sheet):
   every card by deck with a search, the character sheets, the rulebook's sections and cheat sheets (the turn, a skill
@@ -1126,7 +1126,9 @@ REST (the lobby lists poll), Zustand for the game.
   `images.test.ts` checks that every constant has its image and every image names a constant.
 - The table (`TablePage`): no bar over it, the board in the middle, as high as the screen (`.table-main` is a size
   container, the board's width follows its height), and a column on each side that scrolls on its own. On the left the
-  game and the turn (`TurnPanel`, its tab names the game, with the connection beside it while it isn't open, and the
+  game and the turn (`TurnPanel`, its tab names the game, with the connection beside it while it isn't open, the turn's
+  number and the current character in a banner, red while he acts, otherwise amber with a red one of the acting
+  character beside it, and the
   skill check under the turn's Crisis Card), the decision (`InputPanel`) and its prompts, and under them the log, which takes the height they leave (at least 260px) and scrolls inside its body. Neither has a title. The log (`table/log/LogPanel.tsx`) keeps every turn open, groups it by step (`StepChanged`), shows each scope as one line (a bolt icon in front of an only answer the server took, "automatic" on hover, then its actor, its event, what it names, and a tag with the card or ability it comes from when its words don't name it) with all its facts under it, the ones that change the table first (`splitFacts`; a ship destroyed, damaged or launched counts, `ShipMoved` worded by where it went), leaves out the scopes that only mark a turn or a step, and lights what a clicked entry names on the board for a moment (`table/flash.ts`, `entryTargets`, `useFlash`). It follows the newest entry until the user scrolls up (`useFollowBottom`: only a scroll up leaves the end, since a scroll event arrives a frame late), and the arrow at its bottom right follows again, amber while new entries came below. What changed with the last game message plays once (`table/changes.ts`, `changesBetween` of `gameStore.previous` and the game, keyed by the version): a floating delta at a resource, the jump track and the distance, and at the Admiral's nukes, a newly damaged location pulsing red, a ship gliding from its old place (FLIP on `data-ship`), the die tumbling, new cards sliding into a hand. A snapshot (a reconnect, an undo: `expectSnapshot`) leaves no previous game, so it animates nothing. On the
   right the sandbox's tools in a sandbox, above the players' mats (`PlayersPanel`, the nukes beside the Admiral; right
   of the portrait a strip with a cell per card of the sheet's skill set, in its colors, split along the diagonal for
