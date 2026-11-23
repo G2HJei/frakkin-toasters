@@ -1319,7 +1319,347 @@
     },
     "Character" : {
       "kind" : "enum",
-      "values" : [ "AARON_DORAL", "ANASTASIA_DEE_DUALLA", "BRENDAN_HOTDOG_COSTANZA", "CALLANDRA_CALLY_TYROL", "CAPRICA_SIX", "CAVIL", "CHIEF_GALEN_TYROL", "DANNA_BIERS", "ELLEN_TIGH", "FELIX_GAETA", "GAIUS_BALTAR", "GAIUS_BALTAR_ALT", "HELENA_CAIN", "KARL_HELO_AGATHON", "KARL_HELO_AGATHON_ALT", "KARA_STARBUCK_THRACE", "LAURA_ROSLIN", "LEE_ADAMA", "LEE_APOLLO_ADAMA", "LEOBEN_CONOY", "LOUANNE_KAT_KATRAINE", "LOUIS_HOSHI", "ROMO_LAMPKIN", "SAMUEL_T_ANDERS", "SAUL_TIGH", "SHARON_ATHENA_AGATHON", "SHARON_BOOMER_VALERII", "SHERMAN_DOC_COTTLE", "SIMON_ONEIL", "TOM_ZAREK", "TOM_ZAREK_ALT", "TORY_FOSTER", "WILLIAM_ADAMA" ]
+      "values" : [ "AARON_DORAL", "ANASTASIA_DEE_DUALLA", "BRENDAN_HOTDOG_COSTANZA", "CALLANDRA_CALLY_TYROL", "CAPRICA_SIX", "CAVIL", "CHIEF_GALEN_TYROL", "DANNA_BIERS", "ELLEN_TIGH", "FELIX_GAETA", "GAIUS_BALTAR", "GAIUS_BALTAR_ALT", "HELENA_CAIN", "KARL_HELO_AGATHON", "KARL_HELO_AGATHON_ALT", "KARA_STARBUCK_THRACE", "LAURA_ROSLIN", "LEE_ADAMA", "LEE_APOLLO_ADAMA", "LEOBEN_CONOY", "LOUANNE_KAT_KATRAINE", "LOUIS_HOSHI", "ROMO_LAMPKIN", "SAMUEL_T_ANDERS", "SAUL_TIGH", "SHARON_ATHENA_AGATHON", "SHARON_BOOMER_VALERII", "SHERMAN_DOC_COTTLE", "SIMON_ONEIL", "TOM_ZAREK", "TOM_ZAREK_ALT", "TORY_FOSTER", "WILLIAM_ADAMA" ],
+      "types" : {
+        "AARON_DORAL" : "CYLON_LEADER",
+        "ANASTASIA_DEE_DUALLA" : "SUPPORT",
+        "BRENDAN_HOTDOG_COSTANZA" : "PILOT",
+        "CALLANDRA_CALLY_TYROL" : "SUPPORT",
+        "CAPRICA_SIX" : "CYLON_LEADER",
+        "CAVIL" : "CYLON_LEADER",
+        "CHIEF_GALEN_TYROL" : "SUPPORT",
+        "DANNA_BIERS" : "CYLON_LEADER",
+        "ELLEN_TIGH" : "POLITICAL_LEADER",
+        "FELIX_GAETA" : "MILITARY_LEADER",
+        "GAIUS_BALTAR" : "POLITICAL_LEADER",
+        "GAIUS_BALTAR_ALT" : "SUPPORT",
+        "HELENA_CAIN" : "MILITARY_LEADER",
+        "KARL_HELO_AGATHON" : "MILITARY_LEADER",
+        "KARL_HELO_AGATHON_ALT" : "PILOT",
+        "KARA_STARBUCK_THRACE" : "PILOT",
+        "LAURA_ROSLIN" : "POLITICAL_LEADER",
+        "LEE_ADAMA" : "POLITICAL_LEADER",
+        "LEE_APOLLO_ADAMA" : "PILOT",
+        "LEOBEN_CONOY" : "CYLON_LEADER",
+        "LOUANNE_KAT_KATRAINE" : "PILOT",
+        "LOUIS_HOSHI" : "MILITARY_LEADER",
+        "ROMO_LAMPKIN" : "POLITICAL_LEADER",
+        "SAMUEL_T_ANDERS" : "PILOT",
+        "SAUL_TIGH" : "MILITARY_LEADER",
+        "SHARON_ATHENA_AGATHON" : "CYLON_LEADER",
+        "SHARON_BOOMER_VALERII" : "PILOT",
+        "SHERMAN_DOC_COTTLE" : "SUPPORT",
+        "SIMON_ONEIL" : "CYLON_LEADER",
+        "TOM_ZAREK" : "POLITICAL_LEADER",
+        "TOM_ZAREK_ALT" : "MILITARY_LEADER",
+        "TORY_FOSTER" : "POLITICAL_LEADER",
+        "WILLIAM_ADAMA" : "MILITARY_LEADER"
+      },
+      "skillSets" : {
+        "AARON_DORAL" : [ {
+          "count" : 1,
+          "colors" : [ "TREACHERY" ]
+        }, {
+          "count" : 1,
+          "colors" : [ "POLITICS", "TACTICS" ]
+        } ],
+        "ANASTASIA_DEE_DUALLA" : [ {
+          "count" : 1,
+          "colors" : [ "LEADERSHIP" ]
+        }, {
+          "count" : 3,
+          "colors" : [ "TACTICS" ]
+        }, {
+          "count" : 1,
+          "colors" : [ "ENGINEERING" ]
+        } ],
+        "BRENDAN_HOTDOG_COSTANZA" : [ {
+          "count" : 1,
+          "colors" : [ "LEADERSHIP" ]
+        }, {
+          "count" : 1,
+          "colors" : [ "TACTICS" ]
+        }, {
+          "count" : 2,
+          "colors" : [ "PILOTING" ]
+        }, {
+          "count" : 1,
+          "colors" : [ "ENGINEERING" ]
+        } ],
+        "CALLANDRA_CALLY_TYROL" : [ {
+          "count" : 1,
+          "colors" : [ "POLITICS" ]
+        }, {
+          "count" : 1,
+          "colors" : [ "LEADERSHIP" ]
+        }, {
+          "count" : 1,
+          "colors" : [ "TACTICS" ]
+        }, {
+          "count" : 2,
+          "colors" : [ "ENGINEERING" ]
+        } ],
+        "CAPRICA_SIX" : [ {
+          "count" : 1,
+          "colors" : [ "LEADERSHIP" ]
+        }, {
+          "count" : 1,
+          "colors" : [ "TREACHERY", "ENGINEERING" ]
+        } ],
+        "CAVIL" : [ {
+          "count" : 1,
+          "colors" : [ "TACTICS" ]
+        }, {
+          "count" : 1,
+          "colors" : [ "TREACHERY", "ENGINEERING" ]
+        } ],
+        "CHIEF_GALEN_TYROL" : [ {
+          "count" : 1,
+          "colors" : [ "POLITICS" ]
+        }, {
+          "count" : 2,
+          "colors" : [ "LEADERSHIP" ]
+        }, {
+          "count" : 2,
+          "colors" : [ "ENGINEERING" ]
+        } ],
+        "DANNA_BIERS" : [ {
+          "count" : 1,
+          "colors" : [ "POLITICS", "LEADERSHIP" ]
+        }, {
+          "count" : 1,
+          "colors" : [ "TREACHERY", "ENGINEERING" ]
+        } ],
+        "ELLEN_TIGH" : [ {
+          "count" : 2,
+          "colors" : [ "POLITICS" ]
+        }, {
+          "count" : 2,
+          "colors" : [ "LEADERSHIP" ]
+        }, {
+          "count" : 1,
+          "colors" : [ "TREACHERY" ]
+        } ],
+        "FELIX_GAETA" : [ {
+          "count" : 2,
+          "colors" : [ "TACTICS" ]
+        }, {
+          "count" : 1,
+          "colors" : [ "ENGINEERING" ]
+        }, {
+          "count" : 2,
+          "colors" : [ "LEADERSHIP", "POLITICS" ]
+        } ],
+        "GAIUS_BALTAR" : [ {
+          "count" : 2,
+          "colors" : [ "POLITICS" ]
+        }, {
+          "count" : 1,
+          "colors" : [ "LEADERSHIP" ]
+        }, {
+          "count" : 1,
+          "colors" : [ "ENGINEERING" ]
+        } ],
+        "GAIUS_BALTAR_ALT" : [ {
+          "count" : 2,
+          "colors" : [ "POLITICS" ]
+        }, {
+          "count" : 2,
+          "colors" : [ "LEADERSHIP" ]
+        }, {
+          "count" : 1,
+          "colors" : [ "ENGINEERING" ]
+        } ],
+        "HELENA_CAIN" : [ {
+          "count" : 2,
+          "colors" : [ "LEADERSHIP" ]
+        }, {
+          "count" : 2,
+          "colors" : [ "TACTICS" ]
+        }, {
+          "count" : 1,
+          "colors" : [ "TACTICS", "LEADERSHIP" ]
+        } ],
+        "KARL_HELO_AGATHON" : [ {
+          "count" : 2,
+          "colors" : [ "LEADERSHIP" ]
+        }, {
+          "count" : 2,
+          "colors" : [ "TACTICS" ]
+        }, {
+          "count" : 1,
+          "colors" : [ "PILOTING" ]
+        } ],
+        "KARL_HELO_AGATHON_ALT" : [ {
+          "count" : 2,
+          "colors" : [ "LEADERSHIP" ]
+        }, {
+          "count" : 2,
+          "colors" : [ "TACTICS" ]
+        }, {
+          "count" : 1,
+          "colors" : [ "PILOTING" ]
+        } ],
+        "KARA_STARBUCK_THRACE" : [ {
+          "count" : 2,
+          "colors" : [ "TACTICS" ]
+        }, {
+          "count" : 2,
+          "colors" : [ "PILOTING" ]
+        }, {
+          "count" : 1,
+          "colors" : [ "LEADERSHIP", "ENGINEERING" ]
+        } ],
+        "LAURA_ROSLIN" : [ {
+          "count" : 3,
+          "colors" : [ "POLITICS" ]
+        }, {
+          "count" : 2,
+          "colors" : [ "LEADERSHIP" ]
+        } ],
+        "LEE_ADAMA" : [ {
+          "count" : 1,
+          "colors" : [ "TACTICS" ]
+        }, {
+          "count" : 2,
+          "colors" : [ "PILOTING" ]
+        }, {
+          "count" : 2,
+          "colors" : [ "LEADERSHIP", "POLITICS" ]
+        } ],
+        "LEE_APOLLO_ADAMA" : [ {
+          "count" : 1,
+          "colors" : [ "TACTICS" ]
+        }, {
+          "count" : 2,
+          "colors" : [ "PILOTING" ]
+        }, {
+          "count" : 2,
+          "colors" : [ "LEADERSHIP", "POLITICS" ]
+        } ],
+        "LEOBEN_CONOY" : [ {
+          "count" : 1,
+          "colors" : [ "POLITICS" ]
+        }, {
+          "count" : 1,
+          "colors" : [ "TREACHERY", "ENGINEERING" ]
+        } ],
+        "LOUANNE_KAT_KATRAINE" : [ {
+          "count" : 1,
+          "colors" : [ "LEADERSHIP" ]
+        }, {
+          "count" : 2,
+          "colors" : [ "TACTICS" ]
+        }, {
+          "count" : 2,
+          "colors" : [ "PILOTING" ]
+        } ],
+        "LOUIS_HOSHI" : [ {
+          "count" : 2,
+          "colors" : [ "LEADERSHIP" ]
+        }, {
+          "count" : 2,
+          "colors" : [ "TACTICS" ]
+        }, {
+          "count" : 1,
+          "colors" : [ "ENGINEERING" ]
+        } ],
+        "ROMO_LAMPKIN" : [ {
+          "count" : 3,
+          "colors" : [ "POLITICS" ]
+        }, {
+          "count" : 2,
+          "colors" : [ "TACTICS" ]
+        } ],
+        "SAMUEL_T_ANDERS" : [ {
+          "count" : 2,
+          "colors" : [ "LEADERSHIP" ]
+        }, {
+          "count" : 2,
+          "colors" : [ "TACTICS" ]
+        }, {
+          "count" : 1,
+          "colors" : [ "TACTICS", "PILOTING" ]
+        } ],
+        "SAUL_TIGH" : [ {
+          "count" : 2,
+          "colors" : [ "LEADERSHIP" ]
+        }, {
+          "count" : 3,
+          "colors" : [ "TACTICS" ]
+        } ],
+        "SHARON_ATHENA_AGATHON" : [ {
+          "count" : 1,
+          "colors" : [ "PILOTING" ]
+        }, {
+          "count" : 1,
+          "colors" : [ "LEADERSHIP", "ENGINEERING" ]
+        } ],
+        "SHARON_BOOMER_VALERII" : [ {
+          "count" : 2,
+          "colors" : [ "TACTICS" ]
+        }, {
+          "count" : 2,
+          "colors" : [ "PILOTING" ]
+        }, {
+          "count" : 1,
+          "colors" : [ "ENGINEERING" ]
+        } ],
+        "SHERMAN_DOC_COTTLE" : [ {
+          "count" : 1,
+          "colors" : [ "POLITICS" ]
+        }, {
+          "count" : 2,
+          "colors" : [ "TACTICS" ]
+        }, {
+          "count" : 2,
+          "colors" : [ "ENGINEERING" ]
+        } ],
+        "SIMON_ONEIL" : [ {
+          "count" : 1,
+          "colors" : [ "ENGINEERING" ]
+        }, {
+          "count" : 1,
+          "colors" : [ "TREACHERY", "TACTICS" ]
+        } ],
+        "TOM_ZAREK" : [ {
+          "count" : 2,
+          "colors" : [ "POLITICS" ]
+        }, {
+          "count" : 2,
+          "colors" : [ "LEADERSHIP" ]
+        }, {
+          "count" : 1,
+          "colors" : [ "TACTICS" ]
+        } ],
+        "TOM_ZAREK_ALT" : [ {
+          "count" : 2,
+          "colors" : [ "POLITICS" ]
+        }, {
+          "count" : 2,
+          "colors" : [ "LEADERSHIP" ]
+        }, {
+          "count" : 1,
+          "colors" : [ "TACTICS" ]
+        } ],
+        "TORY_FOSTER" : [ {
+          "count" : 3,
+          "colors" : [ "POLITICS" ]
+        }, {
+          "count" : 1,
+          "colors" : [ "LEADERSHIP" ]
+        }, {
+          "count" : 1,
+          "colors" : [ "TACTICS" ]
+        } ],
+        "WILLIAM_ADAMA" : [ {
+          "count" : 3,
+          "colors" : [ "LEADERSHIP" ]
+        }, {
+          "count" : 2,
+          "colors" : [ "TACTICS" ]
+        } ]
+      }
     },
     "CharacterAbility" : {
       "kind" : "enum",

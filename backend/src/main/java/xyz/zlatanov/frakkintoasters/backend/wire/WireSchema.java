@@ -20,6 +20,7 @@ import xyz.zlatanov.frakkintoasters.event.action.MutinyCardEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.action.QuorumCardEvent;
 import xyz.zlatanov.frakkintoasters.event.action.QuorumCardEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.sandbox.SandboxEvent;
+import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.character.CharacterAbility;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 
@@ -49,8 +50,8 @@ import static xyz.zlatanov.frakkintoasters.backend.journal.ValueCodec.typeArgume
  *     plays, and the {@code source} of an event that exists for a card or an ability ({@code Source})</li>
  *     <li>an interface: the records that implement it, a union told apart by {@code kind}</li>
  *     <li>an enum: its constants, for {@code SkillCardType} the color of each, for {@code CharacterAbility} the
- *     character of each, and the {@code sources} of constants that stand for a card or an ability, e.g. what granted
- *     a {@code GrantEvent}</li>
+ *     character of each, for {@code Character} the type and skill set of each, and the {@code sources} of constants
+ *     that stand for a card or an ability, e.g. what granted a {@code GrantEvent}</li>
  *     <li>the socket messages, told apart by {@code type}</li>
  *     <li>the Attack Table as the game applies it ({@code AttackTable})</li>
  * </ul>
@@ -150,6 +151,20 @@ public final class WireSchema {
                 // the character sheet an ability is printed on
                 val characters = node.putObject("characters");
                 Arrays.stream(CharacterAbility.values()).forEach(ability -> characters.put(ability.name(), ability.character().name()));
+            }
+            if (type == Character.class) {
+                // the type and the skill set a character sheet prints, in its order, for the strip beside a mat's
+                // portrait
+                val characterTypes = node.putObject("types");
+                Arrays.stream(Character.values()).forEach(character -> characterTypes.put(character.name(), character.type().name()));
+                val skillSets = node.putObject("skillSets");
+                for (val character : Character.values()) {
+                    val options = skillSets.putArray(character.name());
+                    for (val option : character.skillSet()) {
+                        val colors = options.addObject().put("count", option.count()).putArray("colors");
+                        option.colors().forEach(color -> colors.add(color.name()));
+                    }
+                }
             }
             val sources = sources(type, names);
             if (!sources.isEmpty()) {

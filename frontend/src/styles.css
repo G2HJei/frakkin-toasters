@@ -1443,6 +1443,26 @@ details > summary {
   background: #141c29;
 }
 
+/* the colors of the Skill Cards the sheet draws, on the right of the portrait and as high as it: a cell per card */
+.table-page .mat .portrait {
+  display: flex;
+  gap: 4px;
+}
+
+.table-page .mat .skill-strip {
+  flex: none;
+  width: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.table-page .mat .skill-cell {
+  flex: 1;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+}
+
 .table-page .mat.current .avatar {
   box-shadow: 0 0 0 2px #ffd24d, 0 0 14px 3px rgba(255, 200, 70, 0.6);
 }

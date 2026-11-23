@@ -112,7 +112,8 @@ describe('the players', () => {
     const side = panel.querySelector('[data-player="1"] .mat-side');
 
     // the portrait first, a button that opens the character sheet in the reference
-    expect(side?.firstElementChild?.matches('button.avatar-button')).toBe(true);
+    expect(side?.firstElementChild?.matches('.portrait')).toBe(true);
+    expect(side?.firstElementChild?.firstElementChild?.matches('button.avatar-button')).toBe(true);
     expect(side?.firstElementChild?.querySelector('img.avatar')).not.toBeNull();
     expect(side?.querySelector('.badges')?.textContent).toBe('AdmiralCurrent');
     const admiral = side!.querySelector('.badge.title')!;
@@ -121,6 +122,36 @@ describe('the players', () => {
     expect(usePreview.getState().art?.label).toBe('Admiral');
     fireEvent.mouseLeave(admiral);
     expect(usePreview.getState().art).toBeNull();
+  });
+
+  it('strips the right of a portrait with the colors the sheet draws, but a revealed Cylon\'s, a Cylon Leader\'s always', () => {
+    const cylons = {
+      ...game,
+      players: [
+        game.players![0],
+        { ...game.players![1], revealedCylon: true },
+        { ...game.players![1], number: 3, character: 'CAVIL', human: false },
+        { ...game.players![1], number: 4, character: 'SHARON_ATHENA_AGATHON', infiltrating: true },
+        { ...game.players![1], number: 5, character: 'LEOBEN_CONOY', human: false, revealedCylon: true },
+      ],
+    } as unknown as GameProjection;
+    const panel = render(
+      <Table.Provider value={tableContext(cylons, false, null)}>
+        <PlayersPanel />
+      </Table.Provider>,
+    ).container;
+    const strip = (playerNumber: number) => panel.querySelector(`[data-player="${playerNumber}"] .portrait .skill-strip`);
+    const cells = (playerNumber: number) => [...(strip(playerNumber)?.querySelectorAll('.skill-cell') ?? [])].map((cell) => cell.getAttribute('data-colors'));
+
+    // after the portrait, a cell per card in the order the sheet prints them
+    expect(strip(1)?.previousElementSibling?.matches('button.avatar-button')).toBe(true);
+    expect(strip(1)?.getAttribute('aria-label')).toBe('Skills: 3 Leadership, 2 Tactics');
+    expect(cells(1)).toEqual(['LEADERSHIP', 'LEADERSHIP', 'LEADERSHIP', 'TACTICS', 'TACTICS']);
+    expect(strip(2)).toBeNull();
+    expect(cells(3)).toEqual(['TACTICS', 'TREACHERY ENGINEERING']);
+    expect(strip(3)?.getAttribute('aria-label')).toBe('Skills: 1 Tactics, 1 Treachery or Engineering');
+    expect(cells(4)).toEqual(['PILOTING', 'LEADERSHIP ENGINEERING']);
+    expect(cells(5)).toEqual(['POLITICS', 'TREACHERY ENGINEERING']);
   });
 
   it('lays the nukes beside the Admiral, and nowhere once they are used', () => {

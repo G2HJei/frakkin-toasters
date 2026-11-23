@@ -1045,7 +1045,8 @@ REST (the lobby lists poll), Zustand for the game.
   location's action, the `quorumCard` or `mutinyCard` a card's event plays (the `EventBuilder` offers only the cards
   the asked player holds), the `source` of an event (`@Source`) and the `sources` of an enum's constants (`GrantedBy`),
   the `colors` of `SkillCardType` (a hand lies by color, `table/skillCards.ts`), the `characters` of `CharacterAbility`
-  (the sheet that prints each, its art), the `attackTable` (`AttackTable` in `core`, read from the attack results' thresholds, for the cheat sheet), and a `role`
+  (the sheet that prints each, its art), the `types` and `skillSets` of `Character` (the skill set as its sheet prints
+  it, for the strip beside a mat's portrait), the `attackTable` (`AttackTable` in `core`, read from the attack results' thresholds, for the cheat sheet), and a `role`
   for each int by its name (`ComponentRole` in `core`): `player`, `ship`, `scope` or `count`). `npm run gen` turns it into `src/wire/types.ts`. `WireSchemaTest` fails when the checked-in schema is stale, and `tsc` when the UI uses a field
   that went away. `GET /api/schema` serves the same JSON.
 - `src/api/` (`http.ts` sends the `XSRF-TOKEN` cookie as `X-XSRF-TOKEN`, `queries.ts` the hooks), `src/live/`
@@ -1104,7 +1105,9 @@ REST (the lobby lists poll), Zustand for the game.
   container, the board's width follows its height), and a column on each side that scrolls on its own. On the left the
   game and the turn (`TurnPanel`, its tab names the game, with the connection beside it while it isn't open, and the
   skill check under the turn's Crisis Card), the decision (`InputPanel`) and its prompts, and under them the log, which takes the height they leave (at least 260px) and scrolls inside its body. Neither has a title. The log (`table/log/LogPanel.tsx`) keeps every turn open, groups it by step (`StepChanged`), shows each scope as one line (its actor, its event, what it names, and a tag with the card or ability it comes from when its words don't name it) with the facts that change the table under it (`splitFacts`; a ship destroyed, damaged or launched counts, `ShipMoved` worded by where it went) and the rest folded ("All facts" opens them, and the scopes that only mark a turn or a step), filters to the viewer's own entries with "Mine" (`table/flash.ts`, `isAbout`), and lights what a clicked entry names on the board for a moment (`entryTargets`, `useFlash`). It follows the newest entry until the user scrolls up (`useFollowBottom`), and "Go to bottom" follows again. What changed with the last game message plays once (`table/changes.ts`, `changesBetween` of `gameStore.previous` and the game, keyed by the version): a floating delta at a resource, the jump track and the distance, and at the Admiral's nukes, a newly damaged location pulsing red, a ship gliding from its old place (FLIP on `data-ship`), the die tumbling, new cards sliding into a hand. A snapshot (a reconnect, an undo: `expectSnapshot`) leaves no previous game, so it animates nothing. On the
-  right the sandbox's tools in a sandbox, above the players' mats (`PlayersPanel`, the nukes beside the Admiral). Under 1100px the board goes across the width
+  right the sandbox's tools in a sandbox, above the players' mats (`PlayersPanel`, the nukes beside the Admiral; right
+  of the portrait a strip with a cell per card of the sheet's skill set, in its colors, split along the diagonal for
+  "either", for everyone but a revealed Cylon, who draws 2 of any colors). Under 1100px the board goes across the width
   and the panels under it. The styles are the "table" section of `styles.css`: the board's palette, cut corners
   (`.cf`, `--chamfer`) and the printed-label look. A player is named by his character everywhere (`playerName`), "Player n"
   before he has one; the user in the seat shows only on his mat (`userName`, from the room's seats).

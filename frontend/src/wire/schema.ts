@@ -51,8 +51,17 @@ export interface EnumType {
   colors?: Record<string, string>;
   // CharacterAbility only: the character whose sheet prints each ability
   characters?: Record<string, string>;
+  // Character only: the type of each character, and the skill set his sheet prints, in its order
+  types?: Record<string, string>;
+  skillSets?: Record<string, SkillSetOption[]>;
   // what a constant stands for, e.g. the card a GrantedBy names
   sources?: Record<string, SourceRef>;
+}
+
+/** A line of a skill set: draw `count` Skill Cards, each of any of the colors. */
+export interface SkillSetOption {
+  count: number;
+  colors: string[];
 }
 
 export type SchemaType = RecordType | UnionType | EnumType;
@@ -102,6 +111,18 @@ export function concreteEvents(action: string): string[] {
 export function abilityCharacter(ability: string | null | undefined): string | null {
   const characterAbility = schema.types.CharacterAbility;
   return ability && characterAbility?.kind === 'enum' ? (characterAbility.characters?.[ability] ?? null) : null;
+}
+
+/** The type of a character, e.g. CYLON_LEADER for CAVIL. */
+export function characterType(character: string | null | undefined): string | null {
+  const characters = schema.types.Character;
+  return character && characters?.kind === 'enum' ? (characters.types?.[character] ?? null) : null;
+}
+
+/** The skill set a character's sheet prints, e.g. 3 LEADERSHIP and 2 TACTICS for WILLIAM_ADAMA. */
+export function characterSkillSet(character: string | null | undefined): SkillSetOption[] {
+  const characters = schema.types.Character;
+  return character && characters?.kind === 'enum' ? (characters.skillSets?.[character] ?? []) : [];
 }
 
 /** The color of a Skill Card type, e.g. POLITICS for RED_TAPE. */

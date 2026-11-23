@@ -10,9 +10,11 @@ import { signed, useChanges } from '../changes';
 import { useReference } from '../reference/ReferenceDrawer';
 import { anchorOf, useAnswering } from '../../input/boardAnswers';
 import { targetKey, type Target } from '../../input/answers';
+import { characterSkillSet, characterType } from '../../wire/schema';
 
 /**
- * Every player's mat: his portrait with the titles and tokens in front of him under it (the nukes with the Admiral),
+ * Every player's mat: his portrait with his skill set's colors beside it and the titles and tokens in front of him
+ * under it (the nukes with the Admiral),
  * his character and the user in the seat, where he is, and his cards: face up for the viewer they belong to,
  * otherwise their backs. A sandbox shows the backs too, like a live game, and what they hide on hover.
  */
@@ -59,22 +61,26 @@ function PlayerMat({ player }: { player: PlayerProjection }) {
       onClick={lit ? (event) => onTarget({ type: 'player', playerNumber: player.number }, anchorOf(event)) : undefined}
     >
       <div className="mat-side">
-        {portrait ? (
-          // the character sheet in the reference, a click away
-          <button
-            type="button"
-            className="avatar-button"
-            aria-label={`${constantLabel('Character', player.character)}: character sheet`}
-            onClick={(event) => {
-              event.stopPropagation();
-              useReference.getState().show('characters', player.character);
-            }}
-          >
-            <ArtImg art={portrait} className="avatar" />
-          </button>
-        ) : (
-          <span className="avatar empty" />
-        )}
+        <div className="portrait">
+          {portrait ? (
+            // the character sheet in the reference, a click away
+            <button
+              type="button"
+              className="avatar-button"
+              aria-label={`${constantLabel('Character', player.character)}: character sheet`}
+              onClick={(event) => {
+                event.stopPropagation();
+                useReference.getState().show('characters', player.character);
+              }}
+            >
+              <ArtImg art={portrait} className="avatar" />
+            </button>
+          ) : (
+            <span className="avatar empty" />
+          )}
+          {/* a revealed Cylon draws 2 cards of any colors instead (rule 8.2.2.3), a Cylon Leader his skill set, infiltrating or not (rule 8.2.2.4) */}
+          {(!player.revealedCylon || characterType(player.character) === 'CYLON_LEADER') && <SkillStrip character={player.character} />}
+        </div>
         <p className="badges">
           {president && <TitleBadge title="PRESIDENT" />}
           {holds(titles?.admiral) && <TitleBadge title="ADMIRAL" />}
@@ -116,6 +122,30 @@ function PlayerMat({ player }: { player: PlayerProjection }) {
       </div>
     </article>
   );
+}
+
+/** The colors of the Skill Cards his sheet draws, a cell per card, and a cell split in two colors draws either. */
+function SkillStrip({ character }: { character: string | null | undefined }) {
+  const skillSet = characterSkillSet(character);
+  if (skillSet.length === 0) {
+    return null;
+  }
+  const label = `Skills: ${skillSet.map((option) => `${option.count} ${option.colors.map((color) => constantLabel('SkillCardColor', color)).join(' or ')}`).join(', ')}`;
+  return (
+    <span className="skill-strip" role="img" aria-label={label} title={label}>
+      {skillSet.flatMap((option, line) =>
+        Array.from({ length: option.count }, (_, card) => (
+          <span key={`${line}-${card}`} className="skill-cell" data-colors={option.colors.join(' ')} style={{ background: cellBackground(option.colors) }} />
+        )),
+      )}
+    </span>
+  );
+}
+
+// Two colors split the cell along its diagonal: a corner keyword runs the 50% line through the other two corners.
+function cellBackground(colors: string[]): string {
+  const [first, second] = colors.map((color) => `var(--${color.toLowerCase()})`);
+  return second ? `linear-gradient(to bottom right, ${first} 50%, ${second} 50%)` : first;
 }
 
 // The Quorum Cards in play in front of the player, face up: the ones given to him, and the ones without a holder

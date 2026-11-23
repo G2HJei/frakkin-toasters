@@ -4,7 +4,8 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -12,12 +13,13 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.*;
 
 public record SkillSetOption(int count, Set<SkillCardColor> colors) {
 
+    // The options and their colors in the order the character sheet prints them, which the table's mats show.
     public static Set<SkillSetOption> skillSet(String skillSet) {
-        val skillSetOptions = new HashSet<SkillSetOption>();
+        val skillSetOptions = new LinkedHashSet<SkillSetOption>();
         for (var option : skillSet.split(",")) {
             skillSetOptions.add(parse(option.trim()));
         }
-        return skillSetOptions;
+        return Collections.unmodifiableSet(skillSetOptions);
     }
 
     private static SkillSetOption parse(String option) {
@@ -33,7 +35,7 @@ public record SkillSetOption(int count, Set<SkillCardColor> colors) {
                     case "Tr" -> TREACHERY;
                     default -> throw new IllegalArgumentException();
                 })
-                .collect(Collectors.toSet());
-        return new SkillSetOption(count, skillTypes);
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        return new SkillSetOption(count, Collections.unmodifiableSet(skillTypes));
     }
 }
