@@ -1878,6 +1878,18 @@ details > summary {
   color: var(--steel-300, var(--muted));
 }
 
+.answer-group .pool {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.answer-group .pool-name {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: var(--steel-300, var(--muted));
+}
+
 .chips {
   display: flex;
   flex-wrap: wrap;

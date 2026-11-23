@@ -283,6 +283,23 @@ describe('the answers', () => {
     expect(onMove).toHaveBeenCalledWith(expect.objectContaining({ event: events[7] }), events[7]);
   });
 
+  it('group the characters to choose by their pool, in the order of the setup', () => {
+    const select = (character: string) => ({ kind: 'SelectCharacterEvent', playerNumber: 1, selectedCharacter: character });
+    const events = ['KARA_STARBUCK_THRACE', 'CAVIL', 'CHIEF_GALEN_TYROL', 'LAURA_ROSLIN', 'SAUL_TIGH', 'WILLIAM_ADAMA'].map(select);
+    const { onMove, container } = renderPanel(game({ kind: 'Decide', player: 1, action: 'SelectCharacterEvent', constraints: [], answers: { events, shapes: [] } }));
+
+    const pools = [...container.querySelectorAll('.pool')].map((pool) => [pool.getAttribute('aria-label'), [...pool.querySelectorAll('button.chip')].map((chip) => chip.getAttribute('aria-label'))]);
+    expect(pools).toEqual([
+      ['Military Leader', ['Saul Tigh', 'William Adama']],
+      ['Political Leader', ['Laura Roslin']],
+      ['Support', ['Chief Galen Tyrol']],
+      ['Cylon Leader', ['Cavil']],
+      ['Pilot', ['Kara "Starbuck" Thrace']],
+    ]);
+    fireEvent.click(within(screen.getByRole('group', { name: 'Cylon Leader' })).getByRole('button', { name: 'Cavil' }));
+    expect(onMove).toHaveBeenCalledWith(expect.objectContaining({ event: events[1] }), events[1]);
+  });
+
   it('show only what the picks on the board left, with a way back', () => {
     const move = (destination: string) => ({ kind: 'MoveEvent', playerNumber: 1, destination, discardCard: null });
     renderPanel(game({ kind: 'Decide', player: 1, action: 'MoveEvent', constraints: [], answers: { events: [move('ARMORY'), move('ADMIRALS_QUARTERS')], shapes: [] } }));

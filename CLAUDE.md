@@ -1087,7 +1087,8 @@ REST (the lobby lists poll), Zustand for the game.
   intent is pending). An update with an `automatic` scope of its player drops it: the server took that only answer
   itself. `AnswerPanel` shows them: a choice's options in order, an option's decision as a section of
   its answers (the first one open), the answers grouped by kind (`groupMoves`; a group's moves differ in
-  `varyingComponents`, worded by `moveLabels.ts`), a draw as a card per color that a click takes one more of, back to
+  `varyingComponents`, worded by `moveLabels.ts`; characters to choose lie by pool: military leader, political leader,
+  support, Cylon Leader, pilot), a draw as a card per color that a click takes one more of, back to
   what every answer draws once it has the most an answer leaves it beside the other colors (what every answer draws
   is picked from the start, e.g. a skill set's one-color options in the Receive Skills step, and a color every answer
   draws as many of comes first, fixed, so a two-color option's colors are left to pick, held to their shared count; a
