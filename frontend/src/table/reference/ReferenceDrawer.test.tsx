@@ -15,9 +15,17 @@ describe('the reference', () => {
     expect(search(cards, '  ')).toBe(cards);
   });
 
-  it('lists every deck and narrows it to the search', () => {
+  it('opens at the cheat sheets', () => {
     render(<ReferenceDrawer />);
     act(() => useReference.getState().show());
+
+    expect(screen.getByRole('tab', { name: 'Cheat sheets' })).toHaveAttribute('aria-selected', 'true');
+    expect(document.querySelector('.cheat-sheet')).not.toBeNull();
+  });
+
+  it('lists every deck and narrows it to the search', () => {
+    render(<ReferenceDrawer />);
+    act(() => useReference.getState().show('cards'));
 
     expect(screen.getByRole('heading', { name: /^Crisis Cards/ })).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText('search'), { target: { value: 'Riots No Jump' } });

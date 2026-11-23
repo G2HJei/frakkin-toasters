@@ -677,12 +677,12 @@ details > summary {
   opacity: 0.7;
 }
 
-/* next to the pointer (nearPointer.ts), over the pile popover */
+/* next to the pointer (nearPointer.ts), over everything: the pile popover, the answers popover and the reference */
 .art-preview {
   position: fixed;
   left: 0;
   top: 0;
-  z-index: 60;
+  z-index: 80;
   display: flex;
   align-items: flex-start;
   gap: 0.6rem;
@@ -2332,7 +2332,7 @@ button.playable.picked .art {
   z-index: 70;
   display: flex;
   flex-direction: column;
-  width: min(720px, 100vw);
+  width: min(800px, 100vw);
   background: rgba(9, 14, 24, 0.98);
   border-left: 2px solid var(--dradis, var(--accent));
   box-shadow: -12px 0 30px rgba(0, 0, 0, 0.6);
@@ -2368,10 +2368,16 @@ button.playable.picked .art {
   margin-bottom: 10px;
 }
 
+/* a tab's sections apart, each titled in the board's amber */
+.reference-body section + section {
+  margin-top: 26px;
+}
+
 .reference h3 {
-  margin: 14px 0 6px;
-  font: 600 15px var(--display, inherit);
+  margin: 14px 0 8px;
+  font: 600 17px var(--display, inherit);
   letter-spacing: 0.04em;
+  color: var(--amber, var(--accent));
 }
 
 .reference h3 small {
