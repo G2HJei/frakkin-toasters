@@ -1,11 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { ArtStrip } from '../../art/Art';
 import { factArt, optionArt, recordArt, unique } from '../../art/refs';
 import { partArt, Words } from '../../art/Words';
 import { constantLabel, eventParts, factParts, optionLabel, partsText, typeLabel, unnamedSource, type LabelContext } from '../../labels/describe';
 import { useGameStore } from '../../live/gameStore';
 import type { FactProjection, LogEntry } from '../../wire/types';
-import { entryTargets, isAbout, useFlash } from '../flash';
+import { entryTargets, useFlash } from '../flash';
 import { useTable } from '../tableContext';
 import { useFollowBottom } from './useFollowBottom';
 
@@ -119,35 +119,18 @@ function onlyHeader(entry: LogEntry): boolean {
 
 /**
  * The story of the game: grouped by turn, every turn open, and by step within a turn. Each scope is one line, its actor,
- * its event and what it names, with the facts that change the table under it and the rest folded ("All facts" opens
- * them). Card and character names show their image on hover. "Mine" keeps the entries the viewer acts in or that name
- * him. A click on an entry lights what it touched on the board. The log follows the newest entry until the user
- * scrolls up, and "Go to bottom" follows again.
+ * its event and what it names, with its facts under it, the ones that change the table first. Card and character names
+ * show their image on hover. A click on an entry lights what it touched on the board. The log follows the newest entry
+ * until the user scrolls up, and "Go to bottom" follows again.
  */
 export function LogPanel() {
   const table = useTable();
   const log = useGameStore((state) => state.log);
-  const [mine, setMine] = useState(false);
-  const [all, setAll] = useState(false);
-  const viewer = table.game?.viewer;
-  // the player the viewer is: his own seat, or in a sandbox the one being played
-  const me = viewer?.kind === 'PlayerViewer' ? viewer.playerNumber : table.sandbox ? table.askedPlayer : null;
-  const shown = useMemo(() => (mine && me !== null ? log.filter((entry) => isAbout(entry, me, table.game)) : log), [log, mine, me, table.game]);
-  const groups = useMemo(() => groupByTurn(shown), [shown]);
+  const groups = useMemo(() => groupByTurn(log), [log]);
   const { scrollRef, contentRef, following, onScroll, toBottom } = useFollowBottom(log);
   const words: LabelContext = { ...table, artOf: partArt };
   return (
     <section className="panel cf log" aria-label="log">
-      <div className="log-tools" role="toolbar" aria-label="log filters">
-        {me !== null && (
-          <button type="button" className={mine ? 'toggle on' : 'toggle'} aria-pressed={mine} onClick={() => setMine(!mine)}>
-            Mine
-          </button>
-        )}
-        <button type="button" className={all ? 'toggle on' : 'toggle'} aria-pressed={all} onClick={() => setAll(!all)}>
-          All facts
-        </button>
-      </div>
       {/* the body scrolls, so the log can take whatever height its column leaves it */}
       <div className="log-body" ref={scrollRef} onScroll={onScroll}>
         <div ref={contentRef}>
@@ -160,9 +143,9 @@ export function LogPanel() {
                   {step.step && <h4 className="step-name">{constantLabel('GameStep', step.step)}</h4>}
                   <ol className="entries">
                     {step.entries
-                      .filter((entry) => all || !onlyHeader(entry))
+                      .filter((entry) => !onlyHeader(entry))
                       .map((entry, position) => (
-                        <Entry key={position} entry={entry} all={all} words={words} />
+                        <Entry key={position} entry={entry} words={words} />
                       ))}
                   </ol>
                 </div>
@@ -180,7 +163,7 @@ export function LogPanel() {
   );
 }
 
-function Entry({ entry, all, words }: { entry: LogEntry; all: boolean; words: LabelContext }) {
+function Entry({ entry, words }: { entry: LogEntry; words: LabelContext }) {
   const table = useTable();
   const flash = () => useFlash.getState().flash(entryTargets(entry, table.game));
   if (entry.kind === 'ChoiceLog') {
@@ -206,8 +189,7 @@ function Entry({ entry, all, words }: { entry: LogEntry; all: boolean; words: La
   const source = unnamedSource(entry.event ?? '', details, parts, words);
   const split = splitFacts(entry.facts ?? []);
   // a fact that says what the line says, e.g. the move of a character who moved
-  const story = split.story.filter((fact) => partsText(factParts(fact, words)) !== line);
-  const rest = split.rest;
+  const facts = [...split.story.filter((fact) => partsText(factParts(fact, words)) !== line), ...split.rest];
   return (
     <li className="scope" onClick={flash}>
       {named ? (
@@ -229,28 +211,14 @@ function Entry({ entry, all, words }: { entry: LogEntry; all: boolean; words: La
         </span>
       )}
       <ArtStrip refs={unique([...recordArt(details), ...(entry.facts ?? []).flatMap(factArt)])} />
-      {(story.length > 0 || (all && rest.length > 0)) && (
+      {facts.length > 0 && (
         <ul className="facts">
-          {(all ? [...story, ...rest] : story).map((fact, index) => (
+          {facts.map((fact, index) => (
             <li key={index}>
               <Words parts={factParts(fact, words)} />
             </li>
           ))}
         </ul>
-      )}
-      {!all && rest.length > 0 && (
-        <details className="more-facts" onClick={(event) => event.stopPropagation()}>
-          <summary>
-            {rest.length} more fact{rest.length === 1 ? '' : 's'}
-          </summary>
-          <ul className="facts">
-            {rest.map((fact, index) => (
-              <li key={index}>
-                <Words parts={factParts(fact, words)} />
-              </li>
-            ))}
-          </ul>
-        </details>
       )}
     </li>
   );

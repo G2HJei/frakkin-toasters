@@ -1,6 +1,5 @@
 // What a log entry touched, lit on the board for a moment when the entry is clicked: the locations, ships and players
-// (a character stands for his player) its event, its facts or its choice name. The same names tell the log's "Mine"
-// filter which entries are about a player.
+// (a character stands for his player) its event, its facts or its choice name.
 import { create } from 'zustand';
 import { walkRecord } from '../wire/walk';
 import type { Followup, GameProjection, LogEntry } from '../wire/types';
@@ -73,10 +72,4 @@ function optionEvents(option: Followup | null | undefined): Record<string, unkno
     default:
       return [];
   }
-}
-
-/** Whether an entry is about the player: he acts or chooses in it, or it names him. */
-export function isAbout(entry: LogEntry, playerNumber: number, game: GameProjection | null): boolean {
-  const actor = entry.kind === 'ScopeLog' ? entry.actor : entry.chooser;
-  return actor === playerNumber || entryTargets(entry, game).includes(`player:${playerNumber}`);
 }

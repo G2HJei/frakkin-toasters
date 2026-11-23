@@ -118,7 +118,7 @@ describe('the log', () => {
     expect(body.scrollTop).toBe(500);
   });
 
-  it('groups a turn by its steps, and folds the mechanical facts under the line', () => {
+  it('groups a turn by its steps, and lists every fact, the story first', () => {
     const step = (scopeId: number, name: string) => ({ ...scope(scopeId), facts: [{ kind: 'Shown', fact: { kind: 'GameFact.StepChanged', step: name } }] }) as LogEntry;
     const move = {
       ...scope(7),
@@ -139,21 +139,18 @@ describe('the log', () => {
     expect([...body.querySelectorAll('.step-name')].map((name) => name.textContent)).toEqual(['Movement', 'Action']);
     // the turn's and the steps' own scopes say nothing their headers don't
     expect(body.querySelectorAll('.entries > li')).toHaveLength(1);
-    expect(body.querySelector('.more-facts summary')?.textContent).toBe('1 more fact');
+    // the move's own fact says what its line says, the turn limit is listed unfolded
+    expect([...body.querySelectorAll('.facts li')]).toHaveLength(1);
+    expect(screen.queryByRole('toolbar')).toBeNull();
     // the destination's card shows on hover
     expect(body.querySelector('.event .named')?.textContent).toBe('Armory');
-
-    fireEvent.click(screen.getByRole('button', { name: 'All facts' }));
-    expect(body.querySelector('.more-facts')).toBeNull();
-    expect(body.querySelectorAll('.entries > li')).toHaveLength(4);
   });
 
-  it('keeps the entries about the viewer with "Mine", and lights what an entry touched on a click', () => {
+  it('shows every entry, and lights what an entry touched on a click', () => {
     const other = { ...scope(2), actor: 2 } as LogEntry;
     const body = renderLog([scope(1), other]);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Mine' }));
-    expect(body.querySelectorAll('.entries > li')).toHaveLength(1);
+    expect(body.querySelectorAll('.entries > li')).toHaveLength(2);
 
     fireEvent.click(body.querySelector('.entries > li')!);
     expect([...useFlash.getState().keys]).toEqual([]);

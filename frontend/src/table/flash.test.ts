@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { entryTargets, isAbout } from './flash';
+import { entryTargets } from './flash';
 import type { GameProjection, LogEntry } from '../wire/types';
 
 const game = { players: [{ number: 1, character: 'WILLIAM_ADAMA' }, { number: 2, character: 'LAURA_ROSLIN' }] } as unknown as GameProjection;
@@ -24,13 +24,5 @@ describe('what a log entry touched', () => {
     const choice = { kind: 'ChoiceLog', scopeId: 5, chooser: 2, option: { kind: 'Single', event: { kind: 'SendToSickbayEvent', targetPlayerNumber: 1 } } } as unknown as LogEntry;
 
     expect(entryTargets(choice, game)).toEqual(['player:1']);
-  });
-
-  it('is about a player who acts in it, chooses it or is named', () => {
-    const roslin = { kind: 'ScopeLog', scopeId: 6, parentId: 0, actor: 2, event: 'NoOpEvent', details: null, facts: [shown({ kind: 'TitleFact.AdmiralAssigned', character: 'WILLIAM_ADAMA' })] } as unknown as LogEntry;
-
-    expect(isAbout(roslin, 2, game)).toBe(true);
-    expect(isAbout(roslin, 1, game)).toBe(true);
-    expect(isAbout({ ...roslin, facts: [] } as LogEntry, 1, game)).toBe(false);
   });
 });
