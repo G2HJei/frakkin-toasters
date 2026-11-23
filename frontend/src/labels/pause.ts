@@ -1,6 +1,6 @@
 // What the game waits for, in words: who is asked, and what about. The topic is the event that queued the input, as the
 // log shows it (`Topic` in the projection); a secret input says only that someone may play a card.
-import { constantLabel, eventParts, partsText, typeLabel, unnamedSource, type LabelContext, type Part } from './describe';
+import { constantLabel, eventParts, partsText, typeLabel, unnamedSource, windowLabel, type LabelContext, type Part } from './describe';
 import type { InputProjection, Topic } from '../wire/types';
 
 // what a topic is about, where the event's own words would read oddly as a reason to wait
@@ -45,7 +45,7 @@ function ownWords(event: string, details: Record<string, unknown> | null, contex
   }
   if (event === 'OpenInterruptWindowEvent' && details) {
     const window = details.window as { kind?: string } | null;
-    return [{ text: `An interrupt window: ${typeLabel(window?.kind ?? '')}` }];
+    return [{ text: `Interrupt cards may be played ${windowLabel(window?.kind)}` }];
   }
   if (TOPICS[event]) {
     return [{ text: TOPICS[event] }];

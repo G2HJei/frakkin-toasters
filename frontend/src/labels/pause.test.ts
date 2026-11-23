@@ -37,14 +37,14 @@ describe('a pause', () => {
     const offer = topic('OfferForwardThinkerEvent', { kind: 'OfferForwardThinkerEvent', playerNumber: 1 });
     const withArt: LabelContext = { ...context, artOf: (value, type) => ({ key: `${type.name}/${String(value)}`, url: '', label: '', shape: 'card' }) };
 
-    expect(topicLabel(offer, context)).toBe('Forward Thinker: William Adama may activate his location');
+    expect(topicLabel(offer, context)).toBe("Forward Thinker: William Adama may take a location's action");
     expect(topicParts(offer, withArt)?.[0].art?.key).toBe('CharacterAbility/FORWARD_THINKER');
   });
 
   it('names what granted an action', () => {
     const grant = topic('GrantEvent', { kind: 'GrantEvent', playerNumber: 2, grant: 'MOVE_OR_ACTION', grantedBy: 'EXECUTIVE_ORDER' });
 
-    expect(topicLabel(grant, context)).toBe('Executive Order: Move or Action');
+    expect(topicLabel(grant, context)).toBe('Executive Order: Laura Roslin may move or take an action');
   });
 
   it('leaves out an ability the topic names already', () => {

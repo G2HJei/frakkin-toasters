@@ -2,7 +2,7 @@ import {useState} from 'react';
 import {ArtImg, ArtStrip, CardBack} from '../art/Art';
 import {type ArtRef, enumArt, shipArt, skillCardArt} from '../art/images';
 import {recordArt, unique} from '../art/refs';
-import {constantLabel, eventParts, skillCardLabel, typeLabel, valueLabel} from '../labels/describe';
+import {constantLabel, optionEventParts, skillCardLabel, typeLabel, valueLabel} from '../labels/describe';
 import {partArt, Words} from '../art/Words';
 import {useTable} from '../table/tableContext';
 import {sortedPositions} from '../table/skillCards';
@@ -160,7 +160,7 @@ function ChoiceAnswers({moves: left, narrowed, onMove}: {
                             onClick={() => onMove(move)}>
                         <ArtStrip refs={art}/>
                         {/* a card it names shows on hover */}
-                        <span>{move.event ? <Words parts={eventParts(move.event, {
+                        <span>{move.event ? <Words parts={optionEventParts(move.event, {
                             ...table,
                             artOf: partArt
                         })}/> : moveSentence(move, table)}</span>

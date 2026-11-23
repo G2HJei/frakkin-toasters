@@ -101,7 +101,7 @@ describe('the turn', () => {
     expect(cards.nextElementSibling?.contains(check)).toBe(true);
     expect(check.querySelector('.block-text')?.textContent).toBe('Difficulty 10');
     expect(check.querySelector('.card-tile')).toBeNull();
-    expect([...check.querySelectorAll('.row-name')].map((row) => row.textContent)).toEqual(['Before the check: Laura Roslin', 'Face down']);
+    expect([...check.querySelectorAll('.row-name')].map((row) => row.textContent)).toEqual(['Played before by Laura Roslin', 'Face down']);
     expect(panel.querySelector('.meter-bar')).toBeNull();
   });
 
@@ -135,7 +135,7 @@ describe('the turn', () => {
     const check = panel.querySelector('section.turn [aria-label="skill check"]')!;
     const rows = [...check.querySelectorAll('.row')];
 
-    expect(rows.map((row) => row.querySelector('.row-name')?.textContent)).toEqual(['Face up: Laura Roslin', 'Face down']);
+    expect(rows.map((row) => row.querySelector('.row-name')?.textContent)).toEqual(['Face up from Laura Roslin', 'Face down']);
     expect(rows[0].querySelectorAll('.card-tile')).toHaveLength(1);
   });
 
@@ -167,7 +167,7 @@ describe('the turn', () => {
   // the "Before the check" row: its face-up cards and its backs
   function beforeTheCheck(panel: HTMLElement) {
     const row = panel.querySelector('section.turn [aria-label="skill check"] .row')!;
-    expect(row.querySelector('.row-name')?.textContent).toBe('Before the check: Laura Roslin');
+    expect(row.querySelector('.row-name')?.textContent).toBe('Played before by Laura Roslin');
     return { faceUp: row.querySelectorAll('.card-tile').length, backs: row.querySelectorAll('.card-back').length };
   }
 
@@ -198,7 +198,7 @@ describe('the turn', () => {
 
     expect(turnCards(panel)).toEqual(["Admiral's Quarters"]);
     expect(check.querySelector('.card-tile')).toBeNull();
-    expect([...check.querySelectorAll('.block-text > *')].map((line) => line.textContent)).toEqual(['about Laura Roslin', 'Difficulty 7', 'Strength 8 · Pass']);
+    expect([...check.querySelectorAll('.block-text > *')].map((line) => line.textContent)).toEqual(['Targets Laura Roslin', 'Difficulty 7', 'Strength 8 · passes']);
   });
 
   it("shows a Super Crisis Card's skill check beside the card at full size", () => {

@@ -30,7 +30,10 @@ test('a seeded sandbox is played through a turn, undone, exported and imported',
   // turn 1: Adama draws, moves to the Research Lab, stacks a Crisis Card, draws there, and resolves the stacked card
   // his skill set leaves one draw, which the game takes for him and logs as taken
   await expectTurn(page, 'Turn 1 · William Adama', 'Movement');
-  await expect(page.getByRole('region', { name: 'log' }).locator('.scope', { has: page.locator('.auto-icon') }).last()).toContainText('William Adama draws');
+  // the line under its player's name
+  const automatic = page.getByRole('region', { name: 'log' }).locator('.scope', { has: page.locator('.auto-icon') }).last();
+  await expect(automatic).toContainText('draws');
+  await expect(automatic.locator('xpath=ancestor::li[contains(@class, "run")]').locator('.run-head')).toHaveText('William Adama');
   // the Movement step opens the move: its destinations are the answers
   await answer(page, 'Research Lab');
   await page.getByRole('region', { name: 'sandbox' }).locator('summary', { hasText: 'Setup' }).click();
@@ -44,8 +47,8 @@ test('a seeded sandbox is played through a turn, undone, exported and imported',
   await expect(input(page).getByRole('button', { name: 'Take an action' })).toHaveAttribute('aria-expanded', 'true');
   await answer(page, 'Engineering');
   // "Secret Destiny": Starbuck lets the revealed card resolve
-  await input(page).getByRole('button', { name: /Crisis: Riots No Jump/ }).click();
-  await input(page).getByRole('button', { name: /Top of Riots No Jump/ }).click();
+  await input(page).getByRole('button', { name: /Let Riots No Jump resolve/ }).click();
+  await input(page).getByRole('button', { name: /top option of Riots No Jump/ }).click();
 
   await expectTurn(page, 'Turn 2 · Laura Roslin', 'Movement');
   await expect(resource(page, 'Food')).toHaveText('7');
@@ -55,7 +58,7 @@ test('a seeded sandbox is played through a turn, undone, exported and imported',
   await page.getByRole('button', { name: 'Undo' }).click();
   await expectTurn(page, 'Turn 1 · William Adama', 'Crisis');
   await expect(resource(page, 'Food')).toHaveText('8');
-  await input(page).getByRole('button', { name: /Top of Riots No Jump/ }).click();
+  await input(page).getByRole('button', { name: /top option of Riots No Jump/ }).click();
   await expectTurn(page, 'Turn 2 · Laura Roslin', 'Movement');
   await expect(resource(page, 'Food')).toHaveText('7');
 
@@ -100,7 +103,8 @@ async function draw(page: Page, counts: Record<string, number>) {
 // the turn's line (its number, the current character and the acting one when it's another) and the step it is at
 async function expectTurn(page: Page, line: string, step: string) {
   const turn = page.getByRole('region', { name: 'turn' });
-  await expect(turn.getByRole('heading')).toHaveText(line);
+  // the heading sets the turn and the character apart by their styles alone
+  await expect(turn.getByRole('heading')).toHaveText(line.replace(' · ', ''));
   await expect(turn.locator('.steps [aria-current="step"]')).toHaveText(step);
 }
 

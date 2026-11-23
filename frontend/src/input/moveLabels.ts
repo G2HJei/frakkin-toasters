@@ -1,6 +1,6 @@
 // The words of a move: a group's title (the action, the card, the location), what tells its moves apart, and what a
 // shape asks to pick. Names only, never a card's printed text.
-import { constantLabel, eventLabel, optionLabel, typeLabel, valueLabel, type LabelContext } from '../labels/describe';
+import { constantLabel, optionEventParts, optionLabel, partsText, typeLabel, valueLabel, type LabelContext } from '../labels/describe';
 import { humanizeType } from '../labels/humanize';
 import { recordNamed, type TypeRef } from '../wire/schema';
 import type { Pick } from '../wire/types';
@@ -112,7 +112,7 @@ function partThing(type: TypeRef): string | null {
   return null;
 }
 
-/** The whole move as a sentence, for a title on hover. */
+/** The whole move as its button says it, for a title on hover. */
 export function moveSentence(move: Move, context: LabelContext): string {
-  return move.event ? eventLabel(move.event, context) : optionLabel(move.followup, context);
+  return move.event ? partsText(optionEventParts(move.event, context)) : optionLabel(move.followup, context);
 }

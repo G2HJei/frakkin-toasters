@@ -27,7 +27,7 @@ describe('the input', () => {
 
     expect(container.querySelectorAll('[data-art="CrisisCard/RIOTS_NO_JUMP"]')).toHaveLength(1);
     expect(container.querySelector('.choice-subject [data-art="CrisisCard/RIOTS_NO_JUMP"]')).not.toBeNull();
-    fireEvent.click(screen.getAllByRole('button', { name: /Bottom of Riots No Jump/ })[0]);
+    fireEvent.click(screen.getAllByRole('button', { name: 'Choose the bottom option of Riots No Jump' })[0]);
     expect(onMove).toHaveBeenCalledWith(expect.objectContaining({ option: 1, submits: false }), section('BOTTOM').event);
   });
 
@@ -39,7 +39,7 @@ describe('the input', () => {
       </Table.Provider>,
     );
 
-    fireEvent.click(within(container.querySelector('details.advanced') as HTMLElement).getByRole('button', { name: /Bottom of Riots No Jump/ }));
+    fireEvent.click(within(container.querySelector('details.advanced') as HTMLElement).getByRole('button', { name: /bottom option of Riots No Jump/ }));
     expect(onChoose).toHaveBeenCalledWith(1);
   });
 });

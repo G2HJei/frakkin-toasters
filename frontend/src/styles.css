@@ -1483,7 +1483,7 @@ details > summary {
 
 /* the card or ability a log entry exists for, when its words don't name it */
 .table-page .log .source-tag {
-  margin-left: 6px;
+  margin-left: 2px;
   padding: 0 5px;
   font-size: 0.85em;
   color: var(--steel-300, var(--muted));
@@ -2333,12 +2333,44 @@ button.playable.picked .art {
   color: var(--dradis-glow);
 }
 
-.table-page .log .entries > li {
+/* a player's lines in a row stand under his token and name once; the game's lines under none */
+.table-page .log .run-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 0 1px;
+}
+
+.table-page .log .run-head .run-token {
+  width: 22px;
+  height: 22px;
+  object-fit: cover;
+  border-radius: 50%;
+  flex: none;
+}
+
+.table-page .log .lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.table-page .log .run:not(.game) .lines {
+  padding-left: 28px;
+}
+
+.table-page .log .lines > li {
+  padding: 1px 2px;
   cursor: pointer;
 }
 
-.table-page .log .entries > li:hover {
+.table-page .log .lines > li:hover {
   background: rgba(143, 208, 255, 0.06);
+}
+
+.table-page .log summary .turn-player {
+  color: var(--amber);
+  letter-spacing: 0.06em;
 }
 
 .named {

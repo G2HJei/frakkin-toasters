@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { cardArt, characterArt, dieArt, shipArt, skillBackArt, skillCardArt, skillCheckArt, skillTypeArt } from '../../art/images';
 import { ArtImg, CardBack, CardTile } from '../../art/Art';
-import { constantLabel, skillCardLabel } from '../../labels/describe';
+import { constantLabel, skillCardLabel, windowLabel } from '../../labels/describe';
 import type { ConnectionState } from '../../live/GameSocket';
 import type { SkillCard, SkillHand } from '../../wire/types';
 import { useRevealHandlers, type RevealSection } from '../reveal';
@@ -28,8 +28,7 @@ export function TurnPanel({ name, connection }: { name: string; connection: Conn
   }
   const turn = game.turn;
   const otherActs = !!turn && turn.actingPlayer !== turn.currentPlayer;
-  // the turn line names the character without the version of his sheet
-  const turnName = (playerNumber: number) => table.playerName(playerNumber).replace(/ \(alternate\)$/, '');
+  const turnName = (playerNumber: number) => table.playerName(playerNumber);
   const die = dieArt(turn?.dieRoll?.value);
   const crisisCards = turn?.crisisCards ?? [];
   // a skill check about none of the turn's Crisis Cards lies beside them with its own card: its location, a Super Crisis Card
@@ -84,7 +83,7 @@ export function TurnPanel({ name, connection }: { name: string; connection: Conn
         <div className="turn-details">
           <SkillCheck />
           {(game.crisisCardsInPlay ?? []).length > 0 && (
-            <Block label="In play">
+            <Block label="Crisis Cards in play">
               <span className="cards">
                 {(game.crisisCardsInPlay ?? []).map((type, index) => (
                   <CardTile key={index} art={skillCheckArt(type)} label={constantLabel('SkillCheckType', type)} size="xs" className="crisis" />
@@ -123,7 +122,7 @@ export function TurnPanel({ name, connection }: { name: string; connection: Conn
           )}
           {turn?.interruptWindow && <InterruptWindow />}
           {turn && (turn.resolvedInterruptCards ?? []).length > 0 && (
-            <Block label="Resolved this turn">
+            <Block label="Interrupt cards played this turn">
               <span className="cards">
                 {(turn.resolvedInterruptCards ?? []).map((type, index) => (
                   <CardTile key={index} art={skillTypeArt(type)} label={constantLabel('SkillCardType', type)} size="xs" />
@@ -177,7 +176,7 @@ function InterruptWindow() {
   ];
   const handlers = useRevealHandlers('interrupt-window', 'Interrupt window', sections);
   return (
-    <Block label={`Interrupt: ${constantLabel('InterruptWindow', turn?.interruptWindow?.kind)}`}>
+    <Block label={`Interrupt cards ${windowLabel(turn?.interruptWindow?.kind)}`}>
       <span className="cards" {...handlers}>
         {cards.length === 0 ? <span className="muted">no cards yet</span> : table.sandbox ? <CardBack count={cards.length} size="xs" /> : cards.map((card, index) => (
           <CardTile key={index} art={skillCardArt(card.card)} label={skillCardLabel(card.card)} caption={table.playerName(card.playerNumber)} size="xs" />
@@ -230,8 +229,8 @@ function SkillCheck() {
       <small>Skill check</small>
       <div className="block-body">
         <span className="block-text">
-          {check.targetPlayer !== null && <span>about {table.playerName(check.targetPlayer)}</span>}
-          {check.emergencyDeclared && <span>emergency declared</span>}
+          {check.targetPlayer !== null && <span>Targets {table.playerName(check.targetPlayer)}</span>}
+          {check.emergencyDeclared && <span>Emergency declared</span>}
           {check.politicsCountPositive && <span>Politics counts positive</span>}
           {check.zeroStrengthColor && <span>{constantLabel('SkillCardColor', check.zeroStrengthColor)} counts 0</span>}
           <span className="check-figure">
@@ -240,15 +239,15 @@ function SkillCheck() {
           {check.totalStrength !== null && (
             <span className={`check-figure check-result ${(check.result ?? '').toLowerCase()}`}>
               Strength <strong>{check.totalStrength}</strong>
-              {check.result ? ` · ${constantLabel('SkillCheckResult', check.result)}` : ''}
-              {check.passResultReplaced ? ' · pass replaced' : ''}
-              {check.failResultPrevented ? ' · fail prevented' : ''}
+              {check.result ? ` · ${RESULTS[check.result] ?? constantLabel('SkillCheckResult', check.result)}` : ''}
+              {check.passResultReplaced ? ' · its pass is replaced' : ''}
+              {check.failResultPrevented ? ' · its fail is prevented' : ''}
             </span>
           )}
         </span>
       </div>
       {(check.playedBefore ?? []).map((played) => (
-        <Row key={played.player} label={`Before the check: ${table.playerName(played.player)}`}>
+        <Row key={played.player} label={`Played before by ${table.playerName(played.player)}`}>
           <Cards
             id={`before-${played.player}`}
             title={`Played before the check by ${table.playerName(played.player)}`}
@@ -258,7 +257,7 @@ function SkillCheck() {
         </Row>
       ))}
       {(check.shownCards ?? []).map((shown) => (
-        <Row key={`shown-${shown.player}`} label={`Face up: ${table.playerName(shown.player)}`}>
+        <Row key={`shown-${shown.player}`} label={`Face up from ${table.playerName(shown.player)}`}>
           <CardList cards={shown.cards ?? []} />
         </Row>
       ))}
@@ -285,6 +284,9 @@ function SkillCheck() {
     </div>
   );
 }
+
+// what the skill check's result is, after its strength
+const RESULTS: Record<string, string> = { PASS: 'passes', PARTIAL_PASS: 'partially passes', FAIL: 'fails' };
 
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (

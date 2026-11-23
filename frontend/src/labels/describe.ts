@@ -1,7 +1,8 @@
-// The wording of the game: a name for every enum constant and type, and templates for events, facts and options. A
-// template names fields in braces; a value is worded by its type in the schema.
+// The wording of the game: a name for every enum constant and type, and the sentences of events, facts and options
+// (`templates.ts`). A template names fields in braces; a value is worded by its type in the schema.
 import { humanizeConstant, humanizeType } from './humanize';
 import { CONSTANT_LABELS, TYPE_LABELS } from './overrides';
+import { CHOSEN_TEMPLATES, EVENT_TEMPLATES, FACT_TEMPLATES, HIDDEN_TEMPLATES, OPTION_TEMPLATES } from './templates';
 import { recordNamed, typeNamed, type SourceRef, type TypeRef } from '../wire/schema';
 import type { FactProjection, Followup } from '../wire/types';
 
@@ -53,48 +54,129 @@ export function skillCardLabel(card: SkillCardLike | null | undefined): string {
   return card ? `${constantLabel('SkillCardType', card.type)} ${card.value}` : '—';
 }
 
+// An interrupt window, as the words after "Interrupt cards may be played".
+const WINDOWS: Record<string, string> = {
+  BeforeDieRoll: 'before the die roll',
+  AfterDieRoll: 'after the die roll',
+  AfterFtlControlRoll: 'after the FTL Control roll',
+  AfterViperAttacked: 'after a viper is attacked',
+  BeforePilotedViperAttack: "before a piloted viper's attack",
+  BeforeRaidersActivate: 'before the raiders activate',
+  AfterBasestarOrCenturionDestroyed: 'after a basestar or a centurion is destroyed',
+};
+
+export function windowLabel(kind: string | null | undefined): string {
+  return kind ? (WINDOWS[kind] ?? humanizeType(kind).toLowerCase()) : '—';
+}
+
+/** "a", "a and b", "a, b and c". */
+export function joinWords(words: string[]): string {
+  return partsText(joinParts(words.map((text) => [{ text }])));
+}
+
+function joinParts(items: Part[][]): Part[] {
+  const parts: Part[] = [];
+  items.forEach((item, index) => {
+    if (index > 0) {
+      parts.push({ text: index === items.length - 1 ? ' and ' : ', ' });
+    }
+    parts.push(...item);
+  });
+  return parts;
+}
+
 /** A value worded by its type in the schema. */
 export function valueLabel(value: unknown, type: TypeRef | undefined, context: LabelContext): string {
+  return partsText(valueParts(value, type, context, {}));
+}
+
+// The cards a deck or a pile holds, by the enum that names them; Skill Cards are records.
+const DECK_CARDS: Record<string, string> = {
+  CRISIS: 'CrisisCard',
+  SUPER_CRISIS: 'SuperCrisisCard',
+  QUORUM: 'QuorumCard',
+  LOYALTY: 'LoyaltyCard',
+  LOYALTY_NOT_CYLON: 'LoyaltyCard',
+  MUTINY: 'MutinyCard',
+  MOTIVE: 'MotiveCard',
+  DESTINATION: 'DestinationCard',
+  GALACTICA_DAMAGE: 'GalacticaDamage',
+  PEGASUS_DAMAGE: 'PegasusDamage',
+  BASESTAR_DAMAGE: 'BasestarDamage',
+};
+
+/** The type of one card of a deck or a pile: a Skill Card, a card enum, or a civilian ship. */
+export function cardType(deck: string | null | undefined, pile?: string | null): TypeRef {
+  const name = DECK_CARDS[deck ?? ''] ?? (pile && pile !== 'SKILL' ? DECK_CARDS[pile] : undefined);
+  if (name) {
+    return { t: 'enum', nullable: false, name };
+  }
+  return deck === 'CIVILIAN_SHIPS' ? { t: 'ref', nullable: false, name: 'CivilianShip' } : { t: 'ref', nullable: false, name: 'SkillCard' };
+}
+
+/** A value in parts, a card or a name with its image. */
+export function valueParts(value: unknown, type: TypeRef | undefined, context: LabelContext, siblings: Record<string, unknown>): Part[] {
   if (value === null || value === undefined) {
-    return '—';
+    return [{ text: '—' }];
   }
   if (!type) {
-    return typeof value === 'object' ? JSON.stringify(value) : String(value);
+    return [{ text: typeof value === 'object' ? JSON.stringify(value) : String(value) }];
   }
   switch (type.t) {
     case 'int':
     case 'long':
       if (type.role === 'player') {
-        return context.playerName(value as number);
+        return [{ text: context.playerName(value as number) }];
       }
       if (type.role === 'ship') {
-        return context.shipName?.(value as number) ?? `ship #${value}`;
+        return [{ text: shipLabel(value as number, context) }];
       }
-      return String(value);
+      return [{ text: String(value) }];
     case 'boolean':
-      return value ? 'yes' : 'no';
+      return [{ text: value ? 'yes' : 'no' }];
     case 'string':
-      return String(value);
+      return [{ text: String(value) }];
     case 'class':
-      return typeLabel(String(value));
+      return [{ text: typeLabel(String(value)) }];
     case 'enum':
-      return constantLabel(type.name ?? '', value as string);
+      return [{ text: constantLabel(type.name ?? '', value as string), art: context.artOf?.(value, type) ?? null }];
     case 'list':
-    case 'set':
-      return (value as unknown[]).map((element) => valueLabel(element, type.of as TypeRef, context)).join(', ') || 'none';
+    case 'set': {
+      const elements = value as unknown[];
+      return elements.length > 0 ? joinParts(elements.map((element) => valueParts(element, type.of as TypeRef, context, siblings))) : [{ text: 'nothing' }];
+    }
     case 'map':
-      return (
-        Object.entries(value as Record<string, unknown>)
-          .map(([key, element]) => `${valueLabel(key, type.key, context)} ×${valueLabel(element, type.value, context)}`)
-          .join(', ') || 'none'
-      );
-    case 'cards':
-      return (value as unknown[]).map((card) => cardLabel(card)).join(', ') || 'none';
+      return mapParts(value as Record<string, unknown>, type, context);
+    case 'cards': {
+      const cards = value as unknown[];
+      const of = cardType(siblings.deck as string | undefined, siblings.pile as string | undefined);
+      return cards.length > 0 ? joinParts(cards.map((card) => cardParts(card, of, context))) : [{ text: 'nothing' }];
+    }
     case 'ref':
-      return recordLabel(value as Record<string, unknown>, type.name ?? '', context);
+      return refParts(value as Record<string, unknown>, type.name ?? '', context);
     default:
-      return JSON.stringify(value);
+      return [{ text: JSON.stringify(value) }];
   }
+}
+
+function shipLabel(id: number, context: LabelContext): string {
+  return context.shipName?.(id) ?? `ship #${id}`;
+}
+
+// The Skill Card colors a draw takes: "1 Leadership and 2 Piloting cards".
+function mapParts(value: Record<string, unknown>, type: TypeRef, context: LabelContext): Part[] {
+  const entries = Object.entries(value).filter(([, count]) => count !== 0);
+  if (type.key?.t === 'enum' && type.key.name === 'SkillCardColor') {
+    const total = entries.reduce((sum, [, count]) => sum + Number(count), 0);
+    if (total === 0) {
+      return [{ text: 'no cards' }];
+    }
+    const counts = entries.map(([color, count]) => [{ text: `${count} ` }, { text: constantLabel('SkillCardColor', color) }]);
+    return [...joinParts(counts), { text: total === 1 ? ' card' : ' cards' }];
+  }
+  return entries.length > 0
+    ? joinParts(entries.map(([key, element]) => [...valueParts(key, type.key, context, {}), { text: ` ×${valueLabel(element, type.value, context)}` }]))
+    : [{ text: 'none' }];
 }
 
 /** A card of a deck or a pile, whatever its kind. */
@@ -106,19 +188,41 @@ export function cardLabel(card: unknown): string {
     return skillCardLabel(card as SkillCardLike);
   }
   if (card && typeof card === 'object' && 'id' in card) {
-    const ship = card as { id: number; fuelCost: number; moraleCost: number; populationCost: number };
-    return `civilian ship #${ship.id}`;
+    return `Civilian ship #${(card as { id: number }).id}`;
   }
   return JSON.stringify(card);
 }
 
+/** A card as a name with its image, by the type of the cards it lies among. */
+export function cardParts(card: unknown, type: TypeRef, context: LabelContext): Part[] {
+  if (typeof card === 'string' && type.t === 'enum') {
+    return [{ text: constantLabel(type.name ?? '', card), art: context.artOf?.(card, type) ?? null }];
+  }
+  if (card && typeof card === 'object' && 'type' in card && 'value' in card) {
+    return [{ text: skillCardLabel(card as SkillCardLike), art: context.artOf?.(card, { t: 'ref', nullable: false, name: 'SkillCard' }) ?? null }];
+  }
+  return [{ text: cardLabel(card) }];
+}
+
+function refParts(value: Record<string, unknown>, name: string, context: LabelContext): Part[] {
+  switch (name) {
+    case 'SkillCard':
+      return cardParts(value, { t: 'ref', nullable: false, name }, context);
+    case 'ViperActivation':
+      return [{ text: activationLabel(value, context, 'third') }];
+    // a card or an ability someone played: "Laura Roslin's Declare Emergency 5"
+    case 'PlayedCard':
+    case 'PlayedInterruptCard':
+    case 'UsedRollAbility': {
+      const own = name === 'UsedRollAbility' ? valueParts(value.ability, { t: 'enum', nullable: false, name: 'CharacterAbility' }, context, {}) : cardParts(value.skillCard ?? value.card, { t: 'ref', nullable: false, name: 'SkillCard' }, context);
+      return [{ text: `${context.playerName(value.playerNumber as number)}'s ` }, ...own];
+    }
+    default:
+      return [{ text: recordLabel(value, name, context) }];
+  }
+}
+
 function recordLabel(value: Record<string, unknown>, name: string, context: LabelContext): string {
-  if (name === 'SkillCard') {
-    return skillCardLabel(value as unknown as SkillCardLike);
-  }
-  if (name === 'ViperActivation') {
-    return activationLabel(value, context);
-  }
   const kind = typeof value.kind === 'string' ? value.kind : name;
   const record = recordNamed(kind);
   if (!record) {
@@ -130,238 +234,256 @@ function recordLabel(value: Record<string, unknown>, name: string, context: Labe
   return parts.length > 0 ? `${typeLabel(kind)} (${parts.join(', ')})` : typeLabel(kind);
 }
 
-// One activation of a viper (rule 11.1.1): a launch, a move, an attack or an escort.
-function activationLabel(activation: Record<string, unknown>, context: LabelContext): string {
-  const ship = (id: unknown) => context.shipName?.(id as number) ?? `ship #${id}`;
+/**
+ * One activation of a viper (rule 11.1.1): a launch, a move, an attack or an escort. On a button it is an order
+ * ("Launch a Viper to …"), in a sentence about its player what he does ("launches a Viper to …").
+ */
+export function activationLabel(activation: Record<string, unknown>, context: LabelContext, form: 'order' | 'third' = 'order'): string {
+  const verb = (order: string, third: string) => (form === 'order' ? order : third);
+  const ship = (id: unknown) => shipLabel(id as number, context);
   if (activation.launchShipType) {
-    return `Launch a ${constantLabel('ShipType', activation.launchShipType as string)} to ${constantLabel('Location', activation.launchLocation as string)}`;
+    return `${verb('Launch', 'launches')} a ${constantLabel('ShipType', activation.launchShipType as string)} to ${constantLabel('Location', activation.launchLocation as string)}`;
   }
   const fighter = ship(activation.humanFighterId);
   if (activation.moveLocation) {
-    return `${fighter} to ${constantLabel('Location', activation.moveLocation as string)}`;
+    return `${verb('Move', 'moves')} ${fighter} to ${constantLabel('Location', activation.moveLocation as string)}`;
   }
   if (activation.attackCylonShipId !== null && activation.attackCylonShipId !== undefined) {
-    return `${fighter} attacks ${ship(activation.attackCylonShipId)}`;
+    return `${verb('Attack', 'attacks')} ${ship(activation.attackCylonShipId)} with ${fighter}`;
   }
   if (activation.escortCivilianShipId !== null && activation.escortCivilianShipId !== undefined) {
-    return `${fighter} escorts ${ship(activation.escortCivilianShipId)}`;
+    return `${verb('Escort', 'escorts')} ${ship(activation.escortCivilianShipId)} with ${fighter}`;
   }
-  return fighter;
+  return `${verb('Activate', 'activates')} ${fighter}`;
 }
 
-/* events */
+/* templates */
 
-const EVENT_TEMPLATES: Record<string, string> = {
-  NoOpEvent: 'Pass',
-  // an option of "Executive Order" reads "Move then Action"
-  GrantEvent: '{grant}',
-  CrisisStepEvent: 'Crisis step',
-  MoveEvent: '{playerNumber} moves to {destination}',
-  SelectCharacterEvent: '{playerNumber} chooses {selectedCharacter}',
-  DrawSkillCardsEvent: '{playerNumber} draws {selection}',
-  DiscardSkillCardsEvent: '{playerNumber} discards {cards}',
-  ChooseCrisisSectionEvent: '{playerNumber} chooses the {section} of {card}',
-  ResolveCrisisCardEvent: 'Crisis: {card}',
-  PlaceCivilianShipEvent: '{playerNumber} places a civilian ship at {location}',
-  ResearchLabEvent: '{playerNumber} draws a {skillCardColor} card at the Research Lab',
-  PutCrisisCardOnTopEvent: 'Setup: {card} on top of the Crisis deck',
-  PutDestinationCardOnTopEvent: 'Setup: {card} on top of the Destination deck',
-  PutSkillCardOnTopEvent: 'Setup: {card} on top of its deck',
-  PutDestinyCardOnTopEvent: 'Setup: {card} on top of the Destiny deck',
-  GiveSkillCardToPlayerEvent: 'Setup: {targetPlayerNumber} gets {card}',
-  GiveQuorumCardToPresidentEvent: 'Setup: the President gets {card}',
-  GiveMutinyCardToPlayerEvent: 'Setup: {targetPlayerNumber} gets {card}',
-  GiveLoyaltyCardToPlayerEvent: 'Setup: {targetPlayerNumber} gets {card}',
-  DiscardPlayedMutinyCardEvent: '{card} goes to the Mutiny discard pile',
-  RemoveMutinyCardFromGameEvent: '{card} leaves the game',
-  SetTheAgendaLookEvent: "{playerNumber} looks at the President's Quorum Cards",
-  SetTheAgendaChoiceEvent: '{playerNumber} puts 2 Quorum Cards at the bottom of the deck',
-  ActivateUnmannedViperEvent: '{playerNumber} activates an unmanned viper',
-  ShuffleCivilianShipIntoDeckEvent: 'Civilian ship {civilianShipId} is shuffled back into the deck',
-  PresidentTitleActionEvent: '{playerNumber} draws a Quorum Card',
-  LaunchNukeEvent: '{playerNumber} launches a nuke at {area}',
-  NukeBasestarEvent: 'The nuke hits basestar {basestarId}',
-  ActivateRaiderAreasEvent: 'The raiders activate one space area at a time',
-  ActivateRaiderAreaEvent: 'The raiders at {area} activate',
-  TiebreakInterruptCardsEvent: 'The current player keeps {keptCards}',
-  PassCagTitleEvent: '{playerNumber} activates a viper and passes the CAG title to {targetPlayerNumber}',
-  CagPilotActionEvent: '{playerNumber} activates an unmanned viper and acts again',
-  RevealCylonEvent: '{playerNumber} reveals {card}',
-  RevealCylonOnExecutionEvent: '{playerNumber} reveals {card}',
-  FinishCylonRevealEvent: '{playerNumber} resurrects on the Resurrection Ship',
-  ReturnToResurrectionShipEvent: '{playerNumber} ends the Infiltration on the Resurrection Ship',
-  RevealMotiveCardEvent: '{playerNumber} reveals {card}',
-  RevealPersonalGoalEvent: '{playerNumber} reveals {card}',
-  LookAtAllLoyaltyCardsEvent: '{playerNumber} looks at the Loyalty Cards of {targetPlayerNumber}',
-  ResolveFinalFiveCardEvent: '{holderPlayerNumber} reveals {card}, seen by {lookerPlayerNumber}',
-  ResolveFinalFiveCardsEvent: 'The Final Five cards of {holderPlayerNumber} resolve',
-  CylonPowerPlaceCenturionEvent: '{playerNumber} places a centurion',
-  CylonPowerDamageGalacticaEvent: '{playerNumber} draws Galactica damage tokens',
-  CylonPowerDecreaseJumpTrackEvent: '{playerNumber} moves the jump track back 2',
-  CylonPowerDrawTreacheryEvent: 'Each human trades a Skill Card for a Treachery card',
-  CylonPowerReduceMoraleEvent: '{playerNumber} reduces morale by 1',
-  CylonPowerSendToBrigEvent: '{playerNumber} sends {targetPlayerNumber} to the Brig',
-  CylonPowerSendToSickbayEvent: '{playerNumber} sends {targetPlayerNumber} to Sickbay',
-  ChooseGalacticaDamageTokensEvent: '{playerNumber} resolves {resolved}',
-  PrimacyEvent: '{playerNumber} uses Primacy',
-  VisionsEvent: '{playerNumber} looks at a Loyalty Card of {targetPlayerNumber} and ends the Infiltration',
-  DontTrustAnyoneEvent: '{playerNumber} draws 2 Super Crisis Cards',
-  CultLeaderEvent: '{playerNumber} trades a miracle token with {targetPlayerNumber}',
-  BroadcastEvent: '{playerNumber} raises {resource} by 2',
-  StarPlayerEvent: '{playerNumber} trades Skill Cards for {color}',
-  TreatmentEvent: '{playerNumber} treats {targetPlayerNumber}',
-  TreatmentGiveEvent: '{playerNumber} gives 2 Skill Cards to {targetPlayerNumber}',
-  DischargeOfAFirearmEvent: '{playerNumber} executes {targetPlayerNumber}',
-  CoupEvent: '{playerNumber} takes the Admiral title',
-  CylonDetectorEvent: '{playerNumber} looks at every Loyalty Card of {targetPlayerNumber}',
-  BlindJumpEvent: '{playerNumber} jumps the fleet blind',
-  SkilledPoliticianEvent: '{playerNumber} draws 4 Quorum Cards',
-  SkilledPoliticianChoiceEvent: '{playerNumber} resolves a Quorum Card',
-  CagAbilityEvent: '{playerNumber} activates unmanned vipers',
-  UnmannedViperRoundEvent: '{playerNumber} may activate another unmanned viper',
-  CrypticMessageEvent: '{playerNumber} swaps Skill Cards with {targetPlayerNumber}',
-  SacrificeEvent: '{playerNumber} goes to Sickbay to destroy ships',
-  OrganizedEvent: '{playerNumber} acts at 3 locations',
-  OrganizedLocationEvent: '{playerNumber} acts at {location}',
-  OrganizedNextEvent: '{playerNumber} chooses the next location',
-  AttorneyEvent: '{playerNumber} frees {targetPlayerNumber} to {destination}',
-  DeclareMartialLawEvent: '{playerNumber} makes the Admiral President',
-  ResoluteEvent: '{playerNumber} acts at {location}',
-  QuarantineEvent: '{playerNumber} looks at every civilian ship',
-  IntimateEvent: '{playerNumber} takes a Skill Card from {targetPlayerNumber}, who draws {deck}',
-  AggressiveTacticsEvent: '{playerNumber} takes two actions',
-  GlimpseTheFaceOfGodEvent: '{playerNumber} takes the top 2 Destiny cards',
-  GlimpseTheFaceOfGodPlaceEvent: '{playerNumber} puts 2 cards on the Destiny deck',
-  HereticDiscardEvent: '{playerNumber} discards {card} to leave the Resurrection Ship',
-  PoliticallyAdroitEvent: '{playerNumber} gives a Skill Card to {targetPlayerNumber}',
-  KleptomaniaBrigEvent: '{playerNumber} goes to the Brig at the end of the turn',
-  EmotionallyFragileEvent: 'Morale is down to 2 or less: {playerNumber} is executed',
-  ReligiousVisionsEvent: '{playerNumber} resolves {crisisCardToPlay} and puts the other card at the bottom',
-  DelusionalIntuitionEvent: '{playerNumber} draws a Skill Card of any type',
-  SecretDestinyEvent: '{playerNumber} discards {card} and draws another Crisis Card',
-  ReconEvent: '{playerNumber} looks at the top Crisis Card',
-  MoralCompassEvent: '{playerNumber} changes the choice on {card} to its {section}',
-  ResolveCrisisSectionEvent: 'The chosen {section} of {card} resolves',
-  ChooseADifferentPathEvent: '{playerNumber} makes the current player discard 5 Skill Cards instead',
-  MysteriousIntuitionEvent: '{playerNumber} decides the skill check',
-  FastLearnerEvent: '{playerNumber} takes the top {color} cards',
-  FastLearnerIntoCheckEvent: '{playerNumber} puts the cards into the skill check',
-  BlindDevotionEvent: '{playerNumber} makes {color} count 0 in the skill check',
-  QuickFixEvent: '{playerNumber} discards {card} from the skill check',
-  HumanDelusionEvent: '{playerNumber} adds cards to the skill check',
-  LogicBoundEvent: '{playerNumber} shows {card} in the skill check',
-  CommandAuthorityEvent: '{playerNumber} takes the cards of the skill check',
-  OfferCommandAuthorityEvent: 'The cards of the skill check may be taken',
-  CylonHatredEvent: '{playerNumber} makes the check 3 easier',
-  FriendsInLowPlacesEvent: '{playerNumber} changes the difficulty by {adjustment}',
-  IntolerantEvent: '{playerNumber} has {targetPlayerNumber} executed instead',
-  ModificationsEvent: '{playerNumber} picks {activation} instead of the icon',
-  DeceitfulEvent: '{playerNumber} discards 1 card fewer',
-  ForcedDiscardEvent: '{discarderPlayerNumber} has to discard',
-  ForLoveEvent: '{playerNumber} draws a Treachery card so {discarderPlayerNumber} discards 1 fewer',
-  OfferMementoEvent: '{playerNumber} may draw Piloting cards',
-  MementoEvent: '{playerNumber} draws 3 Piloting cards and keeps 2',
-  EscortEvent: '{playerNumber} loses viper {viperId} to save civilian ship {civilianShipId}',
-  NecessaryStepsEvent: '{playerNumber} picks the Mutiny Card {drawerPlayerNumber} gets',
-  OfferAdaptableEvent: 'Skill Cards may be drawn after the Quorum Card',
-  AdaptableEvent: '{playerNumber} draws 2 Skill Cards',
-  NoOneGetsLeftBehindEvent: '{playerNumber} trades 1 fuel for 2 population',
-  ManipulativeEvent: '{playerNumber} takes the {title} title for the turn',
-  MaintenanceEngineerEvent: '{playerNumber} takes another action',
-  OfferForwardThinkerEvent: '{playerNumber} may activate his location',
-  ForwardThinkerEvent: '{playerNumber} activates his location',
-  OfferAlertViperPilotEvent: 'A launched viper may be piloted',
-  AlertViperPilotEvent: '{playerNumber} pilots viper {viperId}',
-  RaptorPilotEvent: '{playerNumber} looks at the top 2 cards of {deck}',
-  OfferDutifulEvent: '{playerNumber} may activate {location} again',
-  DutifulEvent: '{playerNumber} discards {card} to activate {location} again',
-  QuarantineChoiceEvent: 'Civilian ship {civilianShipId} is replaced',
-  UnconventionalTacticsEvent: '{playerNumber} trades 1 population for {resource}',
-  AbusePowerEvent: '{playerNumber} draws 4 Mutiny Cards',
-  AbusePowerChoiceEvent: '{playerNumber} plays a Mutiny Card',
-  InfluentialEvent: '{playerNumber} looks at the top Quorum Cards',
-  ReorderTopQuorumCardsEvent: '{playerNumber} puts the Quorum Cards back',
-  MeticulousEvent: '{playerNumber} ends the Infiltration at {location}',
-  EndRemoteActionEvent: 'The action from afar is over',
-  EndInfiltrationEvent: '{playerNumber} goes back to the Resurrection Ship',
-  PopularInfluenceChoiceEvent: '{playerNumber} gives {given} to the President and keeps {other}',
-  DiscardHeldQuorumCardEvent: '{playerNumber} discards {card}',
-  MoveCharacterEvent: 'Setup: {character} goes to {destination}',
-  PlaceShipEvent: 'Setup: a {shipType} at {location}',
-  ChangeResourceEvent: 'Setup: {resource} changes by {amount}',
-  SetJumpPreparationEvent: 'Setup: jump preparation at {position}',
-  DamageLocationEvent: 'Setup: {location} is damaged',
-  AssignTitleEvent: 'Setup: {character} becomes {title}',
-  GiveSuperCrisisCardToPlayerEvent: 'Setup: {targetPlayerNumber} gets {card}',
-  CapricaPlaySuperCrisisCardEvent: '{playerNumber} plays {superCrisisCard} at Caprica',
-  ResolveSuperCrisisCardEvent: 'Super Crisis: {card}',
-  ChooseSuperCrisisSectionEvent: '{playerNumber} chooses the {section} of {card}',
-  DiscardSuperCrisisCardEvent: '{card} goes to the Super Crisis discard pile',
-  HumanPrisonerTakeHandEvent: "{playerNumber} takes {targetPlayerNumber}'s Skill Cards",
-  ReplaceDestinyDeckEvent: 'The Destiny deck is rebuilt from {count} {color} cards',
-  DamageBattlestarEvent: 'Galactica is hit',
-  DamageChosenViperEvent: '{playerNumber} picks ship {humanFighterId} to be damaged',
-  DestroyPegasusEvent: 'Pegasus is destroyed',
-};
+// The locations a sentence names with "the": "moves to the Armory", "to Sickbay".
+const WITH_ARTICLE = new Set([
+  'ADMIRALS_QUARTERS',
+  'ARMORY',
+  'BRIG',
+  'HANGAR_DECK',
+  'RESEARCH_LAB',
+  'QUORUM_CHAMBER',
+  'PRESS_ROOM',
+  'PRESIDENTS_OFFICE',
+  'ADMINISTRATION',
+  'AIRLOCK',
+  'MAIN_BATTERIES',
+  'ENGINE_ROOM',
+  'CYLON_FLEET',
+  'HUMAN_FLEET',
+  'RESURRECTION_SHIP',
+  'BASESTAR_BRIDGE',
+]);
 
-// A template's words, each field a part of its own with the image of what it names.
-function fill(template: string, value: Record<string, unknown>, recordName: string, context: LabelContext): Part[] {
-  const record = recordNamed(recordName);
-  const parts: Part[] = [];
-  let at = 0;
-  for (const match of template.matchAll(/\{(\w+)}/g)) {
-    if (match.index > at) {
-      parts.push({ text: template.substring(at, match.index) });
-    }
-    const component = record?.components.find((candidate) => candidate.name === match[1]);
-    const field = value[match[1]];
-    const art = component && field !== null && field !== undefined && !Array.isArray(field) ? (context.artOf?.(field, component.type) ?? null) : null;
-    parts.push({ text: valueLabel(field, component?.type, context), art });
-    at = match.index + match[0].length;
+const PLACEHOLDER = /\{(\$?\w+)(?:\|(lower)|#([^}]+)|\?([^:}]*):([^}]*)|=([^}]+))?\}/g;
+
+interface Fill {
+  value: Record<string, unknown>;
+  recordName: string;
+  context: LabelContext;
+}
+
+function componentOf(fill: Fill, name: string): { value: unknown; type: TypeRef | undefined } {
+  const record = recordNamed(fill.recordName);
+  if (name === '$card') {
+    const enumName = record?.quorumCard ? 'QuorumCard' : 'MutinyCard';
+    return { value: record?.quorumCard ?? record?.mutinyCard ?? null, type: { t: 'enum', nullable: false, name: enumName } };
   }
-  if (at < template.length) {
-    parts.push({ text: template.substring(at) });
+  return { value: fill.value[name], type: record?.components.find((candidate) => candidate.name === name)?.type };
+}
+
+function present(value: unknown): boolean {
+  return value !== null && value !== undefined && value !== false && !(Array.isArray(value) && value.length === 0);
+}
+
+function countOf(value: unknown): number {
+  return Array.isArray(value) ? value.length : Number(value);
+}
+
+// The words of one placeholder, after the parts so far, which decide "the" or "The" in front of a location.
+function placeholderParts(match: RegExpMatchArray, fill: Fill, before: Part[]): Part[] {
+  const [, name, lower, forms, yes, no, cases] = match;
+  const { value, type } = componentOf(fill, name);
+  if (forms !== undefined) {
+    const [one, many] = forms.includes('/') ? forms.split('/') : [forms, `${forms}s`];
+    return [{ text: countOf(value) === 1 ? one : many }];
+  }
+  if (yes !== undefined) {
+    return [{ text: value ? yes : no }];
+  }
+  if (cases !== undefined) {
+    const words = Object.fromEntries(cases.split('|').map((entry) => entry.split(':') as [string, string]));
+    return [{ text: words[String(value)] ?? words['*'] ?? constantLabel(type?.name ?? '', value as string) }];
+  }
+  const parts = civilianNamed(valueParts(value, type, fill.context, fill.value), /civilian/i.test(name));
+  if (lower) {
+    return parts.map((part) => ({ ...part, text: part.text.toLowerCase() }));
+  }
+  if (type?.t === 'enum' && (type.name === 'Location' || type.name === 'SkillCheckType') && WITH_ARTICLE.has(value as string)) {
+    const text = partsText(before);
+    if (!/\bthe $/i.test(text)) {
+      return [{ text: text.trim() === '' ? 'The ' : 'the ' }, ...parts];
+    }
   }
   return parts;
 }
+
+// "[a|b]": a when every field it names has a value, otherwise b, or nothing.
+function chooseAlternative(segment: string, fill: Fill): string {
+  const alternatives: string[] = [];
+  let depth = 0;
+  let start = 0;
+  for (let at = 0; at < segment.length; at++) {
+    const char = segment[at];
+    if (char === '{') depth++;
+    else if (char === '}') depth--;
+    else if (char === '|' && depth === 0) {
+      alternatives.push(segment.substring(start, at));
+      start = at + 1;
+    }
+  }
+  alternatives.push(segment.substring(start));
+  // only a field whose value it prints has to be there, not one that picks a plural or a word
+  const prints = (match: RegExpMatchArray) => match[3] === undefined && match[4] === undefined && match[6] === undefined;
+  const fits = (alternative: string) => [...alternative.matchAll(PLACEHOLDER)].filter(prints).every((match) => present(componentOf(fill, match[1]).value));
+  if (fits(alternatives[0])) {
+    return alternatives[0];
+  }
+  return alternatives.length > 1 ? alternatives[alternatives.length - 1] : '';
+}
+
+/** A template's words, each field a part of its own with the image of what it names. */
+export function fillTemplate(template: string, value: Record<string, unknown>, recordName: string, context: LabelContext): Part[] {
+  const fill: Fill = { value, recordName, context };
+  // the optional segments first, so their placeholders fill like the others
+  const chosen = template.replace(/\[([^\]]*)]/g, (_, segment: string) => chooseAlternative(segment, fill));
+  const parts: Part[] = [];
+  let at = 0;
+  for (const match of chosen.matchAll(PLACEHOLDER)) {
+    if (match.index > at) {
+      parts.push({ text: chosen.substring(at, match.index) });
+    }
+    parts.push(...placeholderParts(match, fill, parts));
+    at = match.index + match[0].length;
+  }
+  if (at < chosen.length) {
+    parts.push({ text: chosen.substring(at) });
+  }
+  return merged(parts);
+}
+
+// Neighbouring plain words as one part.
+function merged(parts: Part[]): Part[] {
+  const out: Part[] = [];
+  for (const part of parts) {
+    const last = out[out.length - 1];
+    if (last && !last.art && !part.art) {
+      last.text += part.text;
+    } else if (part.text !== '' || part.art) {
+      out.push({ ...part });
+    }
+  }
+  return out;
+}
+
+/** Whether an event is about one player, who the log names above it. */
+export function isPlayerEvent(kind: string | null | undefined): boolean {
+  return !!recordNamed(kind ?? '')?.components.some((component) => component.name === 'playerNumber');
+}
+
+/**
+ * The words without their subject, for a line under the name of the player it is about: "moves to the Armory" under
+ * "William Adama". Null when they don't start with him.
+ */
+export function withoutSubject(parts: Part[], subject: string): Part[] | null {
+  const first = parts[0];
+  if (!first || !first.text.startsWith(subject)) {
+    return null;
+  }
+  const rest = first.text.substring(subject.length);
+  if (rest !== '' && !rest.startsWith(' ') && !rest.startsWith("'")) {
+    return null;
+  }
+  const head = rest.replace(/^ /, '');
+  const after = parts.slice(1).map((part, index) => (index === 0 && head === '' ? { ...part, text: part.text.replace(/^ /, '') } : part));
+  return merged([...(head !== '' ? [{ ...first, text: head, art: null }] : []), ...after]);
+}
+
+/* events */
 
 /** An event with its fields, by its template, or its name and fields. */
 export function eventLabel(event: Record<string, unknown> | null | undefined, context: LabelContext): string {
   return partsText(eventParts(event, context));
 }
 
-/** An event's label in parts, the names it fills in with their images. */
+/** An event's sentence in parts, the names it fills in with their images. */
 export function eventParts(event: Record<string, unknown> | null | undefined, context: LabelContext): Part[] {
   if (!event) {
     return [{ text: '—' }];
   }
   const kind = String(event.kind);
-  const template = EVENT_TEMPLATES[kind];
+  const template = EVENT_TEMPLATES[kind] ?? fallbackTemplate(kind);
+  return template ? fillTemplate(template, event, kind, context) : [{ text: recordLabel(event, kind, context) }];
+}
+
+// A Quorum or a Mutiny Card's event is the card: "Laura Roslin plays Arrest Order".
+function fallbackTemplate(kind: string): string | null {
+  const record = recordNamed(kind);
+  return record?.quorumCard || record?.mutinyCard ? '{playerNumber} plays {$card}' : null;
+}
+
+/**
+ * An event as an answer on a button, an order to the player it names: "Pass", "Move or take an action", "Choose the
+ * top option of Riots". An event about someone else keeps its sentence.
+ */
+export function optionEventParts(event: Record<string, unknown> | null | undefined, context: LabelContext): Part[] {
+  const template = event ? OPTION_TEMPLATES[String(event.kind)] : undefined;
   if (template) {
-    return fill(template, event, kind, context);
+    return fillTemplate(template, event!, String(event!.kind), context);
   }
-  return [{ text: eventFallback(event, kind, context) }];
+  const parts = eventParts(event, context);
+  const player = event?.playerNumber;
+  const rest = typeof player === 'number' ? withoutSubject(parts, context.playerName(player)) : null;
+  if (!rest || rest.length === 0 || rest[0].art) {
+    return parts;
+  }
+  // "may activate Viper #1 again" is the order "Activate Viper #1 again"
+  const [verb, ...words] = rest[0].text.replace(/^may /, '').split(' ');
+  return [{ ...rest[0], text: [capitalized(baseForm(verb)), ...words].join(' ') }, ...rest.slice(1)];
 }
 
-function eventFallback(event: Record<string, unknown>, kind: string, context: LabelContext): string {
-  const quorumCard = recordNamed(kind)?.quorumCard;
-  if (quorumCard) {
-    return playedCardLabel(event, kind, 'QuorumCard', quorumCard, context);
+// "chooses" → "choose", "tries" → "try", "passes" → "pass", "has" → "have"
+function baseForm(verb: string): string {
+  const irregular: Record<string, string> = { has: 'have', is: 'be', does: 'do', goes: 'go', "doesn't": "don't" };
+  if (irregular[verb]) {
+    return irregular[verb];
   }
-  const mutinyCard = recordNamed(kind)?.mutinyCard;
-  return mutinyCard ? playedCardLabel(event, kind, 'MutinyCard', mutinyCard, context) : recordLabel(event, kind, context);
+  if (/[^aeiou]ies$/.test(verb)) {
+    return verb.replace(/ies$/, 'y');
+  }
+  if (/(ch|sh|ss|x|z)es$/.test(verb)) {
+    return verb.replace(/es$/, '');
+  }
+  return verb.endsWith('s') && !verb.endsWith('ss') ? verb.substring(0, verb.length - 1) : verb;
 }
 
-// The record of a Quorum or a Mutiny Card's event is the card: "Player 1 plays Arrest Order (target player number
-// Player 3)".
-function playedCardLabel(event: Record<string, unknown>, kind: string, enumName: string, card: string, context: LabelContext): string {
-  const components = recordNamed(kind)?.components ?? [];
-  const player = components.find((component) => component.name === 'playerNumber');
-  const parts = components
-    .filter((component) => component !== player && event[component.name] !== null && event[component.name] !== undefined)
-    .map((component) => `${humanizeType(component.name).toLowerCase()} ${valueLabel(event[component.name], component.type, context)}`);
-  const played = `${valueLabel(event.playerNumber, player?.type, context)} plays ${constantLabel(enumName, card)}`;
-  return parts.length > 0 ? `${played} (${parts.join(', ')})` : played;
+/** The words of an event that names no player, under the name of the player who picked it; null without any. */
+export function chosenParts(event: Record<string, unknown>, context: LabelContext): Part[] | null {
+  const template = CHOSEN_TEMPLATES[String(event.kind)];
+  return template ? fillTemplate(template, event, String(event.kind), context) : null;
+}
+
+/** The words of an event whose fields are hidden, about the player the log names, or its type. */
+export function hiddenEventParts(kind: string, actor: number | null, context: LabelContext): Part[] {
+  const template = HIDDEN_TEMPLATES[kind];
+  if (template && actor !== null) {
+    return fillTemplate(template, { kind, playerNumber: actor }, kind, context);
+  }
+  return [{ text: typeLabel(kind) }];
 }
 
 /* sources */
@@ -413,7 +535,7 @@ export function unnamedSource(kind: string, event: Record<string, unknown> | nul
 
 /**
  * An option of a choice, as a button says it: "Pass" for a NoOpEvent, the action a decision asks for, the parts of
- * an AllOf joined with "then", otherwise the event's template.
+ * an AllOf one after the other ("Move, then take an action"), otherwise the event's sentence.
  */
 export function optionLabel(option: Followup | null | undefined, context: LabelContext): string {
   if (!option) {
@@ -427,128 +549,253 @@ export function optionLabel(option: Followup | null | undefined, context: LabelC
       if (event?.kind === 'PlayerDecisionEvent') {
         return typeLabel(String(event.action));
       }
-      return eventLabel(event, context);
+      return partsText(optionEventParts(event, context));
     }
     case 'AllOf':
-      return (option.followups ?? []).map((part) => optionLabel(part, context)).join(' then ');
+      return (option.followups ?? []).map((part, index) => (index === 0 ? optionLabel(part, context) : lowerFirst(optionLabel(part, context)))).join(', then ');
     case 'OneOf':
-      return (option.options ?? []).map((part) => optionLabel(part, context)).join(' or ');
+      return (option.options ?? []).map((part, index) => (index === 0 ? optionLabel(part, context) : lowerFirst(optionLabel(part, context)))).join(' or ');
     default:
       return JSON.stringify(option);
   }
 }
 
-/* facts */
+// "Take an action" after "then"; a name, e.g. a character's, stays as it is
+const LOWER_AFTER_THEN = new Set(['Take', 'Move', 'Pass', 'Choose', 'Play', 'Draw', 'Discard', 'Let', 'Put', 'Keep', 'Resolve', 'Activate', 'Launch', 'Attack', 'Escort', 'The', 'A', 'An', 'Nothing']);
 
-const FACT_TEMPLATES: Record<string, string> = {
-  'PlayerFact.CharacterSelected': '{playerNumber} is {character}',
-  'PlayerFact.CharacterMoved': '{character} moves to {to}',
-  'PlayerFact.CardsGained': '{playerNumber} gains {cards}',
-  'PlayerFact.CardsLost': '{playerNumber} loses {cards}',
-  'PlayerFact.CardsSeen': '{playerNumber} looks at {cards}',
-  'PlayerFact.LoyaltyCardSeen': '{playerNumber} looks at a Loyalty Card of {targetPlayerNumber}: {card}',
-  'PlayerFact.LoyaltyCardRevealed': '{playerNumber} reveals {card}',
-  'PlayerFact.FinalFiveCardShown': '{playerNumber} shows {card}',
-  'PlayerFact.AbilityUsed': '{playerNumber} uses {ability}',
-  'PlayerFact.AbilityTriggered': '{ability} of {playerNumber} may answer it',
-  'PlayerFact.AbilityTriggerCleared': '{ability} of {playerNumber} was asked',
-  'GameFact.RemoteActionAllowed': '{playerNumber} may act at {location} from anywhere',
-  'GameFact.RemoteActionEnded': 'The action from afar is over',
-  'BoardFact.ResourceDecreased': '{resource} −{amount}',
-  'BoardFact.ResourceIncreased': '{resource} +{amount}',
-  'BoardFact.LocationDamaged': '{location} is damaged',
-  'BoardFact.PegasusDestroyed': 'Pegasus leaves the game',
-  'BoardFact.JumpPreparationIncreased': 'Jump preparation advances',
-  'BoardFact.JumpPreparationDecreased': 'Jump preparation goes back',
-  'ShipFact.ShipMoved': 'Ship #{shipId}: {from} → {to} {location}',
-  'ShipFact.PilotChanged': 'Ship #{shipId} pilot: {pilot}',
-  'GameFact.DieRolled': 'The die shows {value}',
-  'GameFact.DieRollCardPlayed': '{card} changes the roll by {modifier}',
-  'GameFact.DieRollAbilityUsed': '{ability} acts on the roll',
-  'GameFact.DieRollReplaced': 'The roll is {value} instead of the die',
-  'GameFact.CrisisCardPlayed': 'Crisis Card: {card}',
-  'GameFact.StepChanged': 'Step: {step}',
-  'GameFact.TurnStarted': 'Turn {turn} begins',
-  'GameFact.CurrentPlayerChanged': '{playerNumber} is the current player',
-  'GameFact.DestinationReached': 'The fleet reaches {card}',
-  'GameFact.GameEnded': 'The {winner} win',
-  'GameFact.MoraleLostToExecution': 'The execution cost the fleet morale',
-  'GameFact.TurnLimitUsed': '{playerNumber} used {limit} this turn',
-  'GameFact.StartLocationNoted': 'The turn starts at {location}',
-  'GameFact.SentToBrigAtEndOfTurn': '{playerNumber} goes to the Brig at the end of the turn',
-  'GameFact.ActionCostPaid': 'The cost of the action is paid',
-  'GameFact.TitleBorrowed': 'The {title} title is taken from {previousHolder} for the turn',
-  'TitleFact.PresidentAssigned': '{character} is the President',
-  'TitleFact.AdmiralAssigned': '{character} is the Admiral',
-  'TitleFact.CagAssigned': '{character} is the CAG',
-  'TitleFact.QuorumCardPutInPlay': '{card} stays in play with {holderPlayerNumber}',
-  'TitleFact.QuorumCardLeftPlay': '{card} leaves play',
-  'SkillCheckFact.SkillCheckStarted': 'Skill check: {type}',
-  'SkillCheckFact.PlayedBy': '{playerNumber} played the Super Crisis Card',
-  'SkillCheckFact.TotalStrengthDetermined': 'The skill check totals {totalStrength}',
-  'SkillCheckFact.ResultDetermined': 'The skill check: {result}',
-  'SkillCheckFact.DifficultyAdjusted': 'The difficulty changes by {delta}',
-  'SkillCheckFact.PoliticsCountPositive': 'Politics counts positive in this check',
-  'SkillCheckFact.StrengthZeroed': '{color} counts 0 in this check',
-  'SkillCheckFact.CardsDivided': 'The cards are sorted into their piles',
-  'SkillCheckFact.CardsLookedAt': '{playerNumber} looks at the cards {targetPlayerNumber} played: {cards}',
-  'DeckFact.CardsDiscarded': '{deck} discards {cards}',
-  'DeckFact.CardsRemovedFromGame': '{cards} leave the game',
-  'InterruptFact.InterruptCardResolved': '{card} takes effect',
-  'InterruptFact.RollAbilityResolved': '{ability} takes effect',
-};
+function lowerFirst(text: string): string {
+  return LOWER_AFTER_THEN.has(text.split(' ')[0]) ? text.charAt(0).toLowerCase() + text.substring(1) : text;
+}
+
+/* facts */
 
 export function factLabel(fact: FactProjection | null | undefined, context: LabelContext): string {
   return partsText(factParts(fact, context));
 }
 
-// What happened to a ship, by where it went: destroyed, damaged, launched, landed or moved in space.
-function shipMovedParts(fact: Record<string, unknown>, context: LabelContext): Part[] | null {
-  const ship = context.shipName?.(fact.shipId as number) ?? `Ship #${fact.shipId}`;
-  const from = fact.from as string | null;
-  const to = fact.to as string | null;
-  const inSpace = (zone: string | null) => zone === 'GALACTICA_SPACE' || zone === 'CYLON_FLEET_SPACE' || zone === 'BOARDING_PARTY';
-  const where = (location: unknown) => [{ text: constantLabel('Location', location as string), art: context.artOf?.(location, { t: 'enum', nullable: false, name: 'Location' }) ?? null }];
-  if (inSpace(from) && (to === 'REMOVED' || to === 'CYLON_SUPPLY' || to === 'CENTURION_SUPPLY')) {
-    return [{ text: `${ship} is destroyed` }];
-  }
-  if (to === 'DAMAGED') {
-    return [{ text: `${ship} is damaged` }];
-  }
-  if (to === 'RESERVES' && inSpace(from)) {
-    return [{ text: `${ship} lands` }];
-  }
-  if (to === 'GALACTICA_SPACE' && fact.location) {
-    return [{ text: `${ship} ${from === 'GALACTICA_SPACE' ? 'moves' : 'launches'} to ` }, ...where(fact.location)];
-  }
-  return null;
+const IN_SPACE = new Set(['GALACTICA_SPACE', 'CYLON_FLEET_SPACE', 'BOARDING_PARTY']);
+
+// "ship #2007" for a civilian ship the table doesn't show is "Civilian ship #2007"
+function civilianNamed(parts: Part[], civilian: boolean): Part[] {
+  return civilian ? parts.map((part) => ({ ...part, text: part.text.replace(/^ship #/, 'Civilian ship #') })) : parts;
 }
 
-/** A fact's label in parts, the names it fills in with their images. */
+/** A ship's move in words: the ship, the verb for one ship and for several, and where. */
+export interface ShipMove {
+  ship: string;
+  one: string;
+  many: string;
+  tail: Part[];
+}
+
+// What happened to a ship, by where it went: destroyed, damaged, launched, landed, repaired or moved in space.
+export function shipMove(fact: Record<string, unknown>, context: LabelContext): ShipMove {
+  const from = fact.from as string | null;
+  const to = fact.to as string | null;
+  const civilian = from === 'CIVILIAN_DECK' || to === 'CIVILIAN_DECK';
+  const ship = partsText(civilianNamed([{ text: shipLabel(fact.shipId as number, context) }], civilian));
+  const where = (location: unknown) => fillTemplate(' {location}', { location }, 'ShipFact.ShipMoved', context);
+  const move = (one: string, many: string, tail: Part[] = []): ShipMove => ({ ship, one, many, tail });
+  if ((IN_SPACE.has(from ?? '') || from === 'RESERVES') && (to === 'REMOVED' || to === 'CYLON_SUPPLY' || to === 'CENTURION_SUPPLY')) {
+    return move('is destroyed', 'are destroyed');
+  }
+  switch (to) {
+    case 'DAMAGED':
+      return move('is damaged', 'are damaged');
+    case 'RESERVES':
+      if (IN_SPACE.has(from ?? '')) {
+        return move('lands', 'land');
+      }
+      return from === 'HUMAN_SUPPLY' ? move('joins the Reserves', 'join the Reserves') : move('is repaired', 'are repaired');
+    case 'GALACTICA_SPACE':
+      if (from === 'GALACTICA_SPACE') {
+        return move('moves to', 'move to', where(fact.location));
+      }
+      if (from === 'CIVILIAN_DECK') {
+        return move('appears at', 'appear at', where(fact.location));
+      }
+      if (from === 'CYLON_FLEET_SPACE') {
+        return move('comes from the Cylon Fleet board to', 'come from the Cylon Fleet board to', where(fact.location));
+      }
+      return move('launches to', 'launch to', where(fact.location));
+    case 'CYLON_FLEET_SPACE':
+      return move('goes to', 'go to', [...where(fact.location), { text: ' of the Cylon Fleet board' }]);
+    case 'BOARDING_PARTY':
+      return move('boards Galactica', 'board Galactica');
+    case 'CIVILIAN_DECK':
+      return move('goes back into the deck', 'go back into the deck');
+    case 'HUMAN_SUPPLY':
+    case 'CYLON_SUPPLY':
+    case 'CENTURION_SUPPLY':
+      return move('goes back to the supply', 'go back to the supply');
+    case 'REMOVED':
+      return move('leaves the game', 'leave the game');
+    default:
+      return move('moves', 'move');
+  }
+}
+
+/** Ship moves of one kind as one sentence: "Raider #1016 and Raider #1017 move to Space 6 o'clock". */
+export function shipMovesParts(ships: string[], move: ShipMove): Part[] {
+  return merged([{ text: `${joinWords(ships)} ${ships.length === 1 ? move.one : move.many}` }, ...move.tail]);
+}
+
+// The cards of a hidden fact by their kind: "2 Skill Cards (1 Politics, 1 Tactics)", "a Loyalty Card".
+export function hiddenCardsLabel(count: number, deck: string | null | undefined, pile: string | null | undefined, colors: Record<string, number | undefined> | null | undefined): string {
+  const shown = Object.entries(colors ?? {}).filter(([, n]) => (n ?? 0) > 0);
+  if (shown.length === 1) {
+    return `${count} ${constantLabel('SkillCardColor', shown[0][0])} ${count === 1 ? 'card' : 'cards'}`;
+  }
+  const noun = cardNoun(deck, pile);
+  const amount = count === 1 && noun !== 'card' ? `${/^[AEIOU]/i.test(noun) ? 'an' : 'a'} ${noun}` : `${count} ${count === 1 ? noun : `${noun}s`}`;
+  const split = shown.length > 1 ? ` (${shown.map(([color, n]) => `${n} ${constantLabel('SkillCardColor', color)}`).join(', ')})` : '';
+  return `${amount}${split}`;
+}
+
+function cardNoun(deck: string | null | undefined, pile: string | null | undefined): string {
+  switch (deck ?? pile) {
+    case 'SKILL':
+      return 'Skill Card';
+    case 'LOYALTY':
+    case 'LOYALTY_NOT_CYLON':
+      return 'Loyalty Card';
+    case 'MUTINY':
+      return 'Mutiny Card';
+    case 'QUORUM':
+      return 'Quorum Card';
+    case 'SUPER_CRISIS':
+      return 'Super Crisis Card';
+    case 'MOTIVE':
+      return 'Motive Card';
+    case 'CRISIS':
+      return 'Crisis Card';
+    case 'DESTINATION':
+      return 'Destination Card';
+    case 'DESTINY':
+      return 'Destiny card';
+    case 'CIVILIAN_SHIPS':
+      return 'civilian ship';
+    case 'GALACTICA_DAMAGE':
+    case 'PEGASUS_DAMAGE':
+    case 'BASESTAR_DAMAGE':
+      return 'damage token';
+    case 'POLITICS':
+    case 'LEADERSHIP':
+    case 'TACTICS':
+    case 'PILOTING':
+    case 'ENGINEERING':
+    case 'TREACHERY':
+      return `${constantLabel('DeckId', deck)} card`;
+    default:
+      return 'card';
+  }
+}
+
+// A fact about cards the viewer may not see, in words: who, how many and of what kind.
+function hiddenFactParts(fact: Extract<FactProjection, { kind: 'Hidden' }>, context: LabelContext): Part[] {
+  const who = fact.playerNumber !== null ? context.playerName(fact.playerNumber) : 'Someone';
+  const other = fact.otherPlayerNumber !== null ? context.playerName(fact.otherPlayerNumber) : 'another player';
+  const cards = hiddenCardsLabel(fact.count, fact.deck, fact.pile, fact.colors);
+  const deck = fact.deck ? `the ${constantLabel('DeckId', fact.deck)} deck` : 'the deck';
+  const many = fact.count !== 1;
+  switch (fact.fact) {
+    case 'PlayerFact.CardsGained':
+      return [{ text: `${who} gets ${cards}` }];
+    case 'PlayerFact.CardsLost':
+      return [{ text: `${who} loses ${cards}` }];
+    case 'PlayerFact.CardsSeen':
+      return [{ text: `${who} looks at ${cards}` }];
+    case 'PlayerFact.LoyaltyCardSeen':
+      return [{ text: `${who} looks at a Loyalty Card of ${other}` }];
+    case 'DeckFact.CardsDrawn':
+      return [{ text: `${capitalized(cards)} ${many ? 'are' : 'is'} drawn` }];
+    case 'DeckFact.CardsDiscarded':
+      return [{ text: `${capitalized(cards)} ${many ? 'are' : 'is'} discarded face down` }];
+    case 'DeckFact.CardsAddedOnTop':
+      return [{ text: `${capitalized(cards)} ${many ? 'go' : 'goes'} on top of ${deck}` }];
+    case 'DeckFact.CardsAddedToBottom':
+      return [{ text: `${capitalized(cards)} ${many ? 'go' : 'goes'} to the bottom of ${deck}` }];
+    case 'DeckFact.CardsPulled':
+      return [{ text: `${capitalized(cards)} ${many ? 'are' : 'is'} taken out of ${deck}` }];
+    case 'DeckFact.DeckShuffled':
+      return [{ text: `${capitalized(deck)} is shuffled` }];
+    case 'SkillCheckFact.CardsPlaced':
+      return [{ text: `${capitalized(cards)} ${many ? 'go' : 'goes'} into the skill check face down` }];
+    case 'SkillCheckFact.CardsDrawn':
+      return [{ text: "The skill check's cards are shuffled" }];
+    case 'SkillCheckFact.CardsPlayedBefore':
+      return [{ text: `${who} plays ${cards} before the skill check` }];
+    case 'SkillCheckFact.CardsLookedAt':
+      return [{ text: `${who} looks at the cards ${other} put in` }];
+    case 'TitleFact.PresidentQuorumCardGained':
+      return [{ text: `The President gets ${hiddenCardsLabel(fact.count, 'QUORUM', null, null)}` }];
+    case 'TitleFact.PresidentQuorumCardsLost':
+      return [{ text: `The President loses ${hiddenCardsLabel(fact.count, 'QUORUM', null, null)}` }];
+    case 'InterruptFact.InterruptCardPlayed':
+      return [{ text: `${who} plays an interrupt card` }];
+    case 'InterruptFact.RollAbilityUsed':
+      return [{ text: `${who} uses an ability on the roll` }];
+    default:
+      return [{ text: `${who}: ${typeLabel(fact.fact ?? '')}, ${cards}` }];
+  }
+}
+
+function capitalized(text: string): string {
+  return text.charAt(0).toUpperCase() + text.substring(1);
+}
+
+/** A fact's sentence in parts, the names it fills in with their images. */
 export function factParts(fact: FactProjection | null | undefined, context: LabelContext): Part[] {
   if (!fact) {
     return [{ text: '—' }];
   }
   if (fact.kind === 'Hidden') {
-    const who = fact.playerNumber !== null ? `${context.playerName(fact.playerNumber)}: ` : '';
-    const where = fact.deck ? ` (${constantLabel('DeckId', fact.deck)})` : fact.pile ? ` (${constantLabel('PlayerPile', fact.pile)})` : '';
-    const colors = fact.colors
-      ? ` — ${Object.entries(fact.colors).map(([color, count]) => `${count} ${constantLabel('SkillCardColor', color).toLowerCase()}`).join(', ')}`
-      : '';
-    return [{ text: `${who}${typeLabel(fact.fact ?? '')}: ${fact.count} hidden${where}${colors}` }];
+    return hiddenFactParts(fact, context);
   }
   const shown = fact.fact as unknown as Record<string, unknown> | null;
   if (!shown) {
     return [{ text: '—' }];
   }
   const kind = String(shown.kind);
-  const ship = kind === 'ShipFact.ShipMoved' ? shipMovedParts(shown, context) : null;
-  if (ship) {
-    return ship;
+  if (kind === 'ShipFact.ShipMoved') {
+    const move = shipMove(shown, context);
+    return shipMovesParts([move.ship], move);
+  }
+  const card = interruptCardParts(kind, shown, context);
+  if (card) {
+    return card;
   }
   const template = FACT_TEMPLATES[kind];
-  return template ? fill(template, shown, kind, context) : [{ text: recordLabel(shown, kind, context) }];
+  return template ? fillTemplate(template, shown, kind, context) : [{ text: recordLabel(shown, kind, context) }];
+}
+
+// The interrupt cards and the roll abilities, by who played them.
+function interruptCardParts(kind: string, fact: Record<string, unknown>, context: LabelContext): Part[] | null {
+  const played = (fact.card ?? fact.ability) as Record<string, unknown> | undefined;
+  if (!played) {
+    return null;
+  }
+  const who = context.playerName(played.playerNumber as number);
+  const card = () => cardParts(played.card, { t: 'ref', nullable: false, name: 'SkillCard' }, context);
+  const ability = () => valueParts(played.ability, { t: 'enum', nullable: false, name: 'CharacterAbility' }, context, {});
+  switch (kind) {
+    case 'InterruptFact.InterruptCardPlayed':
+      return [{ text: `${who} plays ` }, ...card()];
+    case 'InterruptFact.InterruptCardReturned':
+      return [...card(), { text: ` goes back to ${who}` }];
+    case 'InterruptFact.InterruptCardResolved':
+      return [{ text: `${who}'s ` }, ...card(), { text: ' takes effect' }];
+    case 'InterruptFact.RollAbilityUsed':
+      return [{ text: `${who} uses ` }, ...ability(), { text: ' on the roll' }];
+    case 'InterruptFact.RollAbilityWithdrawn':
+      return [{ text: `${who}'s ` }, ...ability(), { text: ' waits for the next roll' }];
+    case 'InterruptFact.RollAbilityResolved':
+      return [{ text: `${who}'s ` }, ...ability(), { text: ' takes effect' }];
+    default:
+      return null;
+  }
 }
 
 export const TEMPLATED_EVENTS = Object.keys(EVENT_TEMPLATES);
 export const TEMPLATED_FACTS = Object.keys(FACT_TEMPLATES);
+export { CHOSEN_TEMPLATES, EVENT_TEMPLATES, FACT_TEMPLATES, HIDDEN_TEMPLATES, OPTION_TEMPLATES };

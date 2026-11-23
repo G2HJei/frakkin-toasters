@@ -66,7 +66,7 @@ test('players host, join, observe, leave and start a game, and nobody sees anoth
 
   // after the starting Skill Cards, each player sees his own cards and only the colors of the others'
   const asked = await whoIsAsked(players);
-  await expect(asked.page.getByRole('region', { name: 'input' })).toContainText('Draw Exactly 3');
+  await expect(asked.page.getByRole('region', { name: 'input' })).toContainText('Draw 3 cards');
   for (const [index, seat] of players.entries()) {
     const others = seat.page.locator(`.player:not([data-player="${index + 1}"])`);
     await expect(others.locator('.tile:not(.back)')).toHaveCount(0);

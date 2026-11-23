@@ -273,7 +273,7 @@ describe('the board', () => {
     const board = renderBoard(undefined, { ...game, viewer: { kind: 'Sandbox' }, decks } as unknown as GameProjection, true);
 
     fireEvent.mouseEnter(board.querySelector('[data-reveal="deck-CIVILIAN_SHIPS"]')!);
-    expect(document.querySelector('.reveal-pop ol.pile li')?.textContent).toBe('civilian ship #40: 1 population, 1 morale');
+    expect(document.querySelector('.reveal-pop ol.pile li')?.textContent).toBe('Civilian ship #40: 1 population, 1 morale');
   });
 
   it('tucks the destinations under the objective, the later ones under the earlier, each showing a strip', () => {
@@ -393,7 +393,7 @@ describe('the board', () => {
 
     const armory = board.querySelector('[data-location="ARMORY"]')!;
     expect(armory.getAttribute('role')).toBe('button');
-    expect(armory.querySelector('title')?.textContent).toBe('William Adama moves to Armory');
+    expect(armory.querySelector('title')?.textContent).toBe('Move to the Armory');
     expect(board.querySelector('[data-location="RESEARCH_LAB"]')?.getAttribute('role')).toBeNull();
     fireEvent.click(armory);
     expect(onTarget).toHaveBeenLastCalledWith({ type: 'location', location: 'ARMORY' }, expect.anything());

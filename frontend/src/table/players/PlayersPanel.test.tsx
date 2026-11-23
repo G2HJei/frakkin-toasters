@@ -69,7 +69,7 @@ describe('the players', () => {
     expect([...(own?.querySelectorAll('.tile:not(.back) img') ?? [])].map((image) => image.getAttribute('alt'))).toEqual([
       'Executive Order 2',
       'Launch Scout 1',
-      'Not Cylon',
+      'You Are Not a Cylon',
     ]);
     expect(own?.querySelector('img.avatar')?.getAttribute('alt')).toBe('William Adama');
   });
