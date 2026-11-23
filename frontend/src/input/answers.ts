@@ -288,8 +288,8 @@ export function pickElements(pick: Pick): unknown[] {
   }
 }
 
-// a multiset inclusion
-function within(elements: unknown[], from: unknown[]): boolean {
+/** Whether the elements are among those of `from`, each as often as it holds them (a multiset inclusion). */
+export function within(elements: unknown[], from: unknown[]): boolean {
   const left = from.map(canonical);
   return elements.every((element) => {
     const at = left.indexOf(canonical(element));

@@ -1068,7 +1068,12 @@ REST (the lobby lists poll), Zustand for the game.
   its answers (the first one open), the answers grouped by kind (`groupMoves`; a group's moves differ in
   `varyingComponents`, worded by `moveLabels.ts`), a draw as a count per color held to what an answer allows, a shape
   as a picker (sorted cards, a counter, the strength against `minStrength`, the click order when ordered), the
-  decision's constraints above them. `labels/pause.ts` words what the game waits for: the heading ("Laura Roslin
+  decision's constraints above them. A group whose answers are a product of what they differ in (`input/parts.ts`:
+  more ways than its largest part has values, e.g. the "Engine Room"'s two cards, "Make a Deal"'s target, destination
+  and drawer, a choice of every pair of damage tokens) is picked part by part instead (`PartsWidget`): a row of values
+  per part (a list's elements, or numbered siblings such as `discardCard1`/`discardCard2`, as one pool in any order),
+  each open while an answer still fits the picks, and the answer they name in full sent as the engine listed it; a
+  pair in either order is one answer. `labels/pause.ts` words what the game waits for: the heading ("Laura Roslin
   decides", "Waiting for …") and a line from the decision and the input's `topic` ("Draw Skill Cards · Receive Skills
   step", "Crisis: Riots"); a secret input says only that someone may play an interrupt card. The asked viewer's board
   gets a red edge and a "Your move" banner with the same line.
@@ -1139,8 +1144,9 @@ REST (the lobby lists poll), Zustand for the game.
   `lobby.spec.ts` has five users host, join, observe, leave and start a game, checks that nobody sees another
   player's cards and that an observer gets no input, and races two users for the last seat. `playthrough.spec.ts`
   plays a seeded four-player sandbox (`PLAYTHROUGH_SEED`, 7 by default) to an ending through the answers alone, picked
-  at random from a seeded generator (the options, the answers by kind, the counters, the pickers), and checks at every
-  pause that "Advanced" stayed closed, which opens by itself only for an input without answers. It takes minutes.
+  at random from a seeded generator (the options, the answers by kind, the counters, the parts, the pickers), and
+  checks at every pause that "Advanced" stayed closed, which opens by itself only for an input without answers. It
+  takes minutes.
 - Commands: `npm run dev` (Vite on 5173, proxying `/api`, `/ws`, `/oauth2` to 8080; the `dev` profile allows its
   origin), `npm test` (Vitest), `npm run gen`, `npm run e2e` (Playwright, against the running app with the `dev`
   profile, `E2E_BASE_URL` to point elsewhere).

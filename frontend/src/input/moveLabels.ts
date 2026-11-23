@@ -2,10 +2,11 @@
 // shape asks to pick. Names only, never a card's printed text.
 import { constantLabel, eventLabel, optionLabel, typeLabel, valueLabel, type LabelContext } from '../labels/describe';
 import { humanizeType } from '../labels/humanize';
-import { recordNamed } from '../wire/schema';
+import { recordNamed, type TypeRef } from '../wire/schema';
 import type { Pick } from '../wire/types';
 import { isServerFilled } from './eventModel';
 import type { Move, MoveGroup } from './answers';
+import type { Part } from './parts';
 
 export function groupTitle(group: MoveGroup, context: LabelContext): string {
   const first = group.moves[0];
@@ -82,6 +83,33 @@ export function pickHint(pick: Pick): string {
 export function pickName(pick: Pick): string {
   const name = humanizeType(pick.component ?? '');
   return name.charAt(0).toUpperCase() + name.substring(1);
+}
+
+/** A part as a heading: "Discard card", "Target player", "Civilian ship". */
+export function partName(part: Part): string {
+  const name = humanizeType(part.key.replace(/(Number|Ids?)$/, ''));
+  return name.charAt(0).toUpperCase() + name.substring(1);
+}
+
+/** How many elements a part of several takes: "discard 2 cards", "choose 2 tokens", "choose 0 to 2". */
+export function partHint(part: Part, size: { min: number; max: number }): string {
+  const count = size.min === size.max ? `${size.min}` : `${size.min} to ${size.max}`;
+  const verb = /^discard/i.test(part.key) ? 'discard' : 'choose';
+  const thing = partThing(part.type);
+  return thing ? `${verb} ${count} ${thing}${size.max === 1 ? '' : 's'}` : `${verb} ${count}`;
+}
+
+function partThing(type: TypeRef): string | null {
+  if ((type.t === 'ref' && type.name === 'SkillCard') || (type.t === 'enum' && /Card$/.test(type.name ?? ''))) {
+    return 'card';
+  }
+  if (type.t === 'enum' && /Damage$/.test(type.name ?? '')) {
+    return 'token';
+  }
+  if (type.role === 'ship' || (type.t === 'enum' && type.name === 'ShipType')) {
+    return 'ship';
+  }
+  return null;
 }
 
 /** The whole move as a sentence, for a title on hover. */

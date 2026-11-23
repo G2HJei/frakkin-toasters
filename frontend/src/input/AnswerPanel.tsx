@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import { ArtImg, ArtStrip, CardBack } from '../art/Art';
-import { cardArt, shipArt, skillCardArt, type ArtRef } from '../art/images';
+import { enumArt, shipArt, skillCardArt, type ArtRef } from '../art/images';
 import { recordArt, unique } from '../art/refs';
-import { constantLabel, eventParts, skillCardLabel, typeLabel } from '../labels/describe';
+import { constantLabel, eventParts, skillCardLabel, typeLabel, valueLabel } from '../labels/describe';
 import { partArt, Words } from '../art/Words';
 import { useTable } from '../table/tableContext';
 import { sortedPositions } from '../table/skillCards';
-import { enumValues, recordNamed } from '../wire/schema';
-import type { SkillCard } from '../wire/types';
+import { enumValues, recordNamed, type TypeRef } from '../wire/schema';
+import type { Pick, SkillCard } from '../wire/types';
 import { canonical, decisionAction, fillPick, groupMoves, moves, narrow, pickElements, varyingComponents, type Answer, type Move, type MoveGroup } from './answers';
-import { groupTitle, moveDetail, moveSentence, pickHint, pickName, shownComponents } from './moveLabels';
+import { groupTitle, moveDetail, moveSentence, partHint, partName, pickHint, pickName, shownComponents } from './moveLabels';
+import { allows, distinct, fitting, isProduct, optionGroups, partsOf, settled, shared, sizes, type Part, type PartPicks } from './parts';
 import { useSelection } from './selection';
 
 export interface AnswerPanelProps {
@@ -81,10 +82,24 @@ function ChoiceAnswers({ moves: left, narrowed, onMove }: { moves: Move[]; narro
   const sections = options.filter((option) => left.some((move) => move.option === option && move.submits));
   const [open, setOpen] = useState<number | null>(sections[0] ?? null);
   // every option names the same thing (the card a section is chosen of): the panel shows it once above them
-  const shared = sharedArt(options.map((option) => left.find((move) => move.option === option && !move.submits)?.event ?? null));
+  const common = sharedArt(options.map((option) => left.find((move) => move.option === option && !move.submits)?.event ?? null));
+  const products = productOptions(left);
   return (
     <div className={optionsClass(left, options)}>
       {options.map((option) => {
+        // options that are a product of their parts, e.g. every pair of damage tokens, are picked part by part where
+        // the first of them is
+        const product = products.find((candidate) => candidate.options.has(option));
+        if (product) {
+          return product.first === option ? (
+            <div key={option} className="answer-group" data-kind={product.group.kind ?? undefined}>
+              <div className="group-title">
+                <span>{groupTitle(product.group, table)}</span>
+              </div>
+              <PartsWidget group={product.group} parts={product.parts} onMove={onMove} />
+            </div>
+          ) : null;
+        }
         const own = left.filter((move) => move.option === option);
         const action = decisionAction(own[0]);
         if (own[0]?.submits && action) {
@@ -99,7 +114,7 @@ function ChoiceAnswers({ moves: left, narrowed, onMove }: { moves: Move[]; narro
           );
         }
         const move = own[0];
-        const art = answerArt(move).filter((ref) => !shared.has(ref.key));
+        const art = answerArt(move).filter((ref) => !common.has(ref.key));
         return (
           <button key={option} type="button" className="option" aria-label={moveSentence(move, table)} onClick={() => onMove(move)}>
             <ArtStrip refs={art} />
@@ -110,6 +125,27 @@ function ChoiceAnswers({ moves: left, narrowed, onMove }: { moves: Move[]; narro
       })}
     </div>
   );
+}
+
+interface ProductOptions {
+  // its options without repeats
+  group: MoveGroup;
+  parts: Part[];
+  // every option it stands for, and the first of them, where it shows
+  options: Set<number>;
+  first: number;
+}
+
+function productOptions(left: Move[]): ProductOptions[] {
+  return optionGroups(left).flatMap((group): ProductOptions[] => {
+    const parts = partsOf(group);
+    const shown = distinct(group.moves, parts);
+    if (!isProduct(shown, parts)) {
+      return [];
+    }
+    const options = new Set(group.moves.map((move) => move.option as number));
+    return [{ group: { ...group, moves: shown }, parts, options, first: Math.min(...options) }];
+  });
 }
 
 // Options that each name their own card lie as a grid of cards.
@@ -158,8 +194,12 @@ function answerArt(move: Move | undefined): ArtRef[] {
   return recordArt(shown).filter((ref) => ref.shape !== 'location');
 }
 
-function GroupView({ group, onMove, untitled = false, narrowable = false }: { group: MoveGroup; onMove(move: Move): void; untitled?: boolean; narrowable?: boolean }) {
+function GroupView({ group: listed, onMove, untitled = false, narrowable = false }: { group: MoveGroup; onMove(move: Move): void; untitled?: boolean; narrowable?: boolean }) {
   const table = useTable();
+  // a pair of cards in either order is one answer
+  const parts = partsOf(listed);
+  const group = { ...listed, moves: distinct(listed.moves, parts) };
+  const product = isProduct(group.moves, parts);
   const title = groupTitle(group, table);
   const varying = varyingComponents(group);
   const arts = group.moves.map((move) => answerArt(move));
@@ -208,6 +248,8 @@ function GroupView({ group, onMove, untitled = false, narrowable = false }: { gr
         ))}
       {counts ? (
         <CountsWidget group={group} component={counts} onMove={onMove} />
+      ) : product ? (
+        <PartsWidget group={group} parts={parts} onMove={start} />
       ) : (
         <div className={distinctArt(own) ? 'chips card-grid' : 'chips'}>
           {group.moves.map((move, index) => {
@@ -287,6 +329,116 @@ function CountsWidget({ group, component, onMove }: { group: MoveGroup; componen
 }
 
 /**
+ * A group whose answers are a product of their parts, e.g. two cards of the hand or a target, a destination and a
+ * drawer: a row per part, each value open while an answer still fits the picks, and the answer the picks name in full
+ * sent as the engine listed it. A part that every answer left agrees on shows its value as implied; answers that differ
+ * only in a shape stay to choose from.
+ */
+function PartsWidget({ group, parts, onMove }: { group: MoveGroup; parts: Part[]; onMove(move: Move): void }) {
+  const table = useTable();
+  // the positions picked among each part's values
+  const [positions, setPositions] = useState<Record<string, number[]>>({});
+  const picks: PartPicks = Object.fromEntries(parts.map((part) => [part.key, (positions[part.key] ?? []).map((at) => part.values[at])]));
+  const left = fitting(group.moves, parts, picks);
+  const done = settled(group.moves, parts, picks);
+  const toggle = (part: Part, at: number) => {
+    const own = positions[part.key] ?? [];
+    const next = own.includes(at) ? own.filter((candidate) => candidate !== at) : part.many ? [...own, at] : [at];
+    setPositions({ ...positions, [part.key]: next });
+  };
+  const title = groupTitle(group, table);
+  return (
+    <div className="parts-widget">
+      {parts.map((part) => {
+        const own = positions[part.key] ?? [];
+        const implied = own.length === 0 ? impliedPositions(part, shared(left, part)) : [];
+        const order = isSkillCard(part.type) ? cardOrder(part.values) : part.values.map((_, at) => at);
+        const tiles = order.map((at) => ({ at, ...valueTile(part.values[at], part.type, table) }));
+        // cards lie as tiles, one without an image too
+        const asTiles = tiles.some((tile) => tile.art);
+        const name = partName(part);
+        return (
+          <div key={part.key} className="part" role="group" aria-label={name}>
+            <p className="part-name">
+              {name}
+              {part.many && <small className="detail">{partHint(part, sizes(left.length > 0 ? left : group.moves, part))}</small>}
+            </p>
+            <div className={asTiles ? 'picker' : 'chips'}>
+              {tiles.map(({ at, art, label }) => {
+                const pressed = own.includes(at);
+                return (
+                  <button
+                    key={at}
+                    type="button"
+                    className={[asTiles ? 'tile card-pick' : 'chip', 'part-value', pressed ? 'picked' : '', implied.includes(at) ? 'implied' : ''].filter((name) => name).join(' ')}
+                    aria-pressed={pressed}
+                    aria-label={label}
+                    disabled={!pressed && !allows(group.moves, parts, picks, part, part.values[at])}
+                    onClick={() => toggle(part, at)}
+                  >
+                    {art && <ArtImg art={art} />}
+                    <span>{label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+      {done.length > 1 && (
+        // the picks name these in full: they differ in what a shape picks next
+        <div className="chips part-moves">
+          {done.map((move, index) => {
+            const label = moveDetail(move, varyingComponents({ ...group, moves: done }), table) || title;
+            return (
+              <button key={index} type="button" className="chip" aria-label={label} title={moveSentence(move, table)} onClick={() => onMove(move)}>
+                <span>{label}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+      <div className="actions">
+        <button type="button" className="primary" disabled={done.length !== 1} onClick={() => done.length === 1 && onMove(done[0])}>
+          {title}
+        </button>
+        <button type="button" className="link" disabled={Object.values(positions).every((own) => own.length === 0)} onClick={() => setPositions({})}>
+          Clear
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// the positions of a part's values that a shared value takes: its value, or each of its elements once
+function impliedPositions(part: Part, found: { value: unknown } | null): number[] {
+  if (!found) {
+    return [];
+  }
+  const wanted = part.many ? (found.value as unknown[]) : [found.value];
+  const taken: number[] = [];
+  for (const element of wanted) {
+    const at = part.values.findIndex((value, position) => !taken.includes(position) && canonical(value) === canonical(element));
+    if (at >= 0) {
+      taken.push(at);
+    }
+  }
+  return taken;
+}
+
+// the cards sorted as a hand lies, none first
+function cardOrder(values: unknown[]): number[] {
+  const at = values.map((_, position) => position);
+  const cards = at.filter((position) => values[position] !== null);
+  const sorted = sortedPositions(cards.map((position) => values[position] as SkillCard)).map((index) => cards[index]);
+  return [...at.filter((position) => values[position] === null), ...sorted];
+}
+
+function isSkillCard(type: TypeRef): boolean {
+  return type.t === 'ref' && type.name === 'SkillCard';
+}
+
+/**
  * A shape's part to pick: its cards or ships as tiles to toggle, how many are picked against the pick's bounds, the
  * strength against its minimum, and the order of the clicks when the order counts.
  */
@@ -330,7 +482,7 @@ function PickWidget({ move, onSend }: { move: Move; onSend(event: Answer | null)
         {order.map((position) => {
           const element = elements[position];
           const at = picked.indexOf(position);
-          const { art, label } = elementArt(pick.kind, element, table);
+          const { art, label } = valueTile(element, pickType(pick), table);
           return (
             <button
               key={position}
@@ -359,13 +511,31 @@ function PickWidget({ move, onSend }: { move: Move; onSend(event: Answer | null)
   );
 }
 
-function elementArt(kind: string, element: unknown, table: ReturnType<typeof useTable>): { art: ArtRef | null; label: string } {
-  switch (kind) {
+// the type of a pick's elements
+function pickType(pick: Pick): TypeRef {
+  switch (pick.kind) {
     case 'SkillCardPick':
-      return { art: skillCardArt(element as SkillCard), label: skillCardLabel(element as SkillCard) };
+      return { t: 'ref', name: 'SkillCard', nullable: false };
     case 'QuorumCardPick':
-      return { art: cardArt('QuorumCard', element as string), label: constantLabel('QuorumCard', element as string) };
-    default:
-      return { art: shipArt(table.ship(element as number)?.type), label: table.shipName?.(element as number) ?? `ship #${element}` };
+      return { t: 'enum', name: 'QuorumCard', nullable: false };
+    case 'ShipPick':
+      return { t: 'int', role: 'ship', nullable: false };
   }
+}
+
+/** A value to pick as a tile: a card, a token or a ship with its image, anything else by its name. A location is on the board. */
+function valueTile(value: unknown, type: TypeRef, table: ReturnType<typeof useTable>): { art: ArtRef | null; label: string } {
+  if (value === null || value === undefined) {
+    return { art: null, label: 'none' };
+  }
+  if (isSkillCard(type)) {
+    return { art: skillCardArt(value as SkillCard), label: skillCardLabel(value as SkillCard) };
+  }
+  if (type.t === 'enum' && typeof value === 'string') {
+    return { art: type.name === 'Location' ? null : enumArt(type.name ?? '', value), label: constantLabel(type.name ?? '', value) };
+  }
+  if (type.role === 'ship' && typeof value === 'number') {
+    return { art: shipArt(table.ship(value)?.type), label: valueLabel(value, type, table) };
+  }
+  return { art: null, label: valueLabel(value, type, table) };
 }

@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AnswerPanel } from './AnswerPanel';
 import { useSelection } from './selection';
@@ -91,6 +91,85 @@ describe('the answers', () => {
     expect(screen.getByRole('button', { name: 'Consolidate Power 2' })).toHaveAttribute('aria-pressed', 'false');
     fireEvent.click(send);
     expect(onMove).toHaveBeenCalledWith(expect.objectContaining({ pick: expect.anything() }), { ...example, cards: [card('BAIT', 0), card('REPAIR', 1)] });
+  });
+
+  // every ordered pair of different cards, as the search lists the Engine Room's two discards
+  const engineRoom = (hand: { type: string; value: number }[]) => ({
+    kind: 'Decide',
+    player: 1,
+    action: 'ActionEvent',
+    constraints: [],
+    answers: {
+      events: hand.flatMap((first, at) => hand.filter((_, other) => other !== at).map((second) => ({ kind: 'EngineRoomEvent', playerNumber: 1, discardCard1: first, discardCard2: second }))),
+      shapes: [],
+    },
+  });
+
+  it("pick the Engine Room's two cards from one pool, held to the answers", () => {
+    const hand = [card('REPAIR', 1), card('BAIT', 0), card('EXECUTIVE_ORDER', 2), card('LAUNCH_SCOUT', 3)];
+    const { onMove, container } = renderPanel(game(engineRoom(hand)));
+
+    expect(container.querySelectorAll('button.chip')).toHaveLength(0);
+    const pool = screen.getByRole('group', { name: 'Discard card' });
+    expect([...pool.querySelectorAll('.part-value')].map((tile) => tile.getAttribute('aria-label'))).toEqual(['Executive Order 2', 'Launch Scout 3', 'Repair 1', 'Bait 0']);
+    expect(screen.getByText('discard 2 cards')).toBeInTheDocument();
+    const send = screen.getByRole('button', { name: 'Engine Room' });
+    fireEvent.click(screen.getByRole('button', { name: 'Bait 0' }));
+    expect(send).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', { name: 'Repair 1' }));
+    // a pair: the others are closed
+    expect(screen.getByRole('button', { name: 'Launch Scout 3' })).toBeDisabled();
+    fireEvent.click(send);
+    const listed = { kind: 'EngineRoomEvent', playerNumber: 1, discardCard1: hand[0], discardCard2: hand[1] };
+    expect(onMove).toHaveBeenCalledWith(expect.objectContaining({ event: listed }), listed);
+  });
+
+  it('leave three pairs of the Engine Room as chips, each pair once', () => {
+    const { container } = renderPanel(game(engineRoom([card('REPAIR', 1), card('BAIT', 0), card('EXECUTIVE_ORDER', 2)])));
+
+    expect(container.querySelector('.parts-widget')).toBeNull();
+    expect(container.querySelectorAll('button.chip')).toHaveLength(3);
+  });
+
+  it("pick a choice's damage tokens, the returned ones implied, and choose that option", () => {
+    const tokens = ['FUEL', 'FOOD', 'COMMAND', 'ARMORY'];
+    const options = [];
+    for (let first = 0; first < tokens.length; first++) {
+      for (let second = first + 1; second < tokens.length; second++) {
+        const event = { kind: 'ChooseGalacticaDamageTokensEvent', playerNumber: 1, resolved: [tokens[first], tokens[second]], returned: tokens.filter((_, at) => at !== first && at !== second) };
+        options.push({ kind: 'Single', event });
+      }
+    }
+    const { onMove, container } = renderPanel(game({ kind: 'Choose', player: 1, options, answers: [] }));
+
+    expect(container.querySelectorAll('.parts-widget')).toHaveLength(1);
+    const resolved = screen.getByRole('group', { name: 'Resolved' });
+    const returned = screen.getByRole('group', { name: 'Returned' });
+    fireEvent.click(within(resolved).getByRole('button', { name: 'Food' }));
+    fireEvent.click(within(resolved).getByRole('button', { name: 'Armory' }));
+    expect([...returned.querySelectorAll('.implied')].map((tile) => tile.getAttribute('aria-label'))).toEqual(['Command', 'Fuel']);
+    fireEvent.click(container.querySelector('.parts-widget button.primary')!);
+    // FOOD and ARMORY are the fifth pair
+    expect(onMove).toHaveBeenCalledWith(expect.objectContaining({ option: 4, submits: false }), options[4].event);
+  });
+
+  it('offer none beside the cards of a part, and settle what the others leave no choice about', () => {
+    const ability = (name: string, used: unknown, result: number | null) => ({ kind: 'UseRollAbilityEvent', playerNumber: 1, ability: name, card: used, result });
+    const events = [
+      ability('ECO_OFFICER', null, null),
+      ability('HOTSHOT', card('REPAIR', 1), null),
+      ability('HOTSHOT', card('BAIT', 0), null),
+      ...[1, 2, 3, 4, 5, 6, 7, 8].map((result) => ability('LONGSHOT', null, result)),
+    ];
+    const { onMove, container } = renderPanel(game({ kind: 'Decide', player: 1, action: 'UseRollAbilityEvent', constraints: [], answers: { events, shapes: [] } }));
+
+    const cards = screen.getByRole('group', { name: 'Card' });
+    expect([...cards.querySelectorAll('.part-value')].map((tile) => tile.getAttribute('aria-label'))).toEqual(['none', 'Repair 1', 'Bait 0']);
+    fireEvent.click(within(screen.getByRole('group', { name: 'Ability' })).getByRole('button', { name: /Longshot/ }));
+    expect(within(cards).getByRole('button', { name: 'none' })).toHaveClass('implied');
+    fireEvent.click(within(screen.getByRole('group', { name: 'Result' })).getByRole('button', { name: '5' }));
+    fireEvent.click(container.querySelector('.parts-widget button.primary')!);
+    expect(onMove).toHaveBeenCalledWith(expect.objectContaining({ event: events[7] }), events[7]);
   });
 
   it('show only what the picks on the board left, with a way back', () => {

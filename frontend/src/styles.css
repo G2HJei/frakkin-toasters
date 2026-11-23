@@ -1878,6 +1878,49 @@ button.step {
   height: 96px;
 }
 
+/* an answer picked part by part: a row per part */
+.parts-widget {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.parts-widget .part {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.parts-widget .part-name {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--steel-300, var(--muted));
+}
+
+.parts-widget .part-name .detail {
+  display: inline;
+  margin-left: 6px;
+}
+
+.parts-widget .card-pick .art {
+  height: 96px;
+}
+
+.parts-widget .chip.picked {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+/* what the other picks leave no choice about */
+.parts-widget .implied {
+  outline: 1px dashed var(--amber, var(--accent));
+  outline-offset: 1px;
+}
+
+/* a choice's options picked by parts take the grid's whole width */
+.options > .answer-group {
+  grid-column: 1 / -1;
+}
+
 .pick-widget .order {
   position: absolute;
   top: 2px;

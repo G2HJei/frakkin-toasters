@@ -66,8 +66,8 @@ function generator(seed: number): (n: number) => number {
   };
 }
 
-// One answer: now and then another section of a choice, then an answer at random; a counter is counted up to an answer
-// and a picker filled until it may be sent.
+// One answer: now and then another section of a choice, then an answer at random; a counter is counted up to an answer,
+// an answer of parts built part by part and a picker filled until it may be sent.
 async function answer(page: Page, random: (n: number) => number) {
   const answers = input(page).getByRole('group', { name: 'answers' });
   const heads = answers.locator('button.section-head');
@@ -78,11 +78,19 @@ async function answer(page: Page, random: (n: number) => number) {
       await head.click();
     }
   }
-  const candidates = answers.locator('button.answer, button.chip, .options > button.option:not(.section-head)');
+  // a part's value only picks, it sends nothing
+  const candidates = answers.locator('button.answer, button.chip:not(.part-value), .options > button.option:not(.section-head)');
   const count = await candidates.count();
   const counters = answers.locator('.counts-widget');
   if ((await counters.count()) > 0 && (count === 0 || random(2) === 0)) {
     await countUp(counters.first(), random);
+    return;
+  }
+  const builders = answers.locator('.parts-widget');
+  const builderCount = await builders.count();
+  if (builderCount > 0 && (count === 0 || random(2) === 0)) {
+    await build(builders.nth(random(builderCount)), random);
+    await fillPicker(answers, random);
     return;
   }
   if (count === 0) {
@@ -91,9 +99,39 @@ async function answer(page: Page, random: (n: number) => number) {
     return answer(page, random);
   }
   await candidates.nth(random(count)).click();
+  await fillPicker(answers, random);
+}
+
+// the picker a shape opened
+async function fillPicker(answers: Locator, random: (n: number) => number) {
   const picker = answers.locator('.pick-widget');
   if ((await picker.count()) > 0) {
     await fill(picker, random);
+  }
+}
+
+// an answer of parts: an open value at random until the answer may be sent, or until the answers the picks name differ
+// only in a shape, one of which is picked; a dead end starts over
+async function build(builder: Locator, random: (n: number) => number) {
+  const send = builder.locator('.actions button.primary');
+  for (let step = 0; step < 40 && !(await send.isEnabled()); step++) {
+    const named = builder.locator('.part-moves button.chip');
+    const namedCount = await named.count();
+    if (namedCount > 0) {
+      await named.nth(random(namedCount)).click();
+      return;
+    }
+    const open = builder.locator('button.part-value[aria-pressed="false"]:enabled');
+    const n = await open.count();
+    if (n === 0) {
+      await builder.getByRole('button', { name: 'Clear' }).click();
+      continue;
+    }
+    await open.nth(random(n)).click();
+  }
+  // the picks changed the panel: an answer not sent yet is asked again
+  if (await send.isEnabled()) {
+    await send.click();
   }
 }
 
