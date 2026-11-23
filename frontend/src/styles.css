@@ -1881,8 +1881,18 @@ details > summary {
 }
 
 /* the other picks leave it no room: it stays in its place */
-.count-key:disabled {
+.count-key:disabled:not(.picked) {
   opacity: 0.3;
+}
+
+/* what every answer has, or all the others leave it: picked, and a click changes nothing */
+.count-key.picked:disabled {
+  cursor: default;
+}
+
+/* the keys every answer has as many of come first, apart from the ones to pick */
+.count-key.fixed + .count-key:not(.fixed) {
+  margin-left: 12px;
 }
 
 .count-key.picked .count-name {
@@ -1909,6 +1919,11 @@ details > summary {
 .count-key .pip.on {
   border-color: var(--amber, var(--accent));
   background: var(--amber, var(--accent));
+}
+
+/* what every answer has: there from the start */
+.count-key .pip.given {
+  border-radius: 1px;
 }
 
 .pick-widget {

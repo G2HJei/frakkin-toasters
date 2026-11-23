@@ -281,19 +281,25 @@ function countsComponent(group: MoveGroup, varying: string[]): string | null {
 }
 
 /**
- * A count per key, e.g. the Skill Cards of each color to draw, held to what some answer still allows: a click on a key
- * takes one more, and once it has the most an answer leaves it beside the other counts, it goes back to none. A key no
- * answer has isn't offered, and one the other counts leave no room for is disabled in its place. Sent when the counts
- * are one of the answers.
+ * A count per key, e.g. the Skill Cards of each color to draw, held to what some answer still allows. What every answer
+ * has is picked from the start, e.g. the one-color options of a skill set in the Receive Skills step, and a key every
+ * answer has as many of is fixed and comes first, so what is left to pick are the keys that share a count, e.g. a
+ * "1xL/E" option. A click on a key takes one more, and once it has the most an answer leaves it beside the other
+ * counts, it goes back to what every answer has. A key no answer has isn't offered, and one the other counts leave no
+ * room for is disabled in its place. Sent when the counts are one of the answers.
  */
 function CountsWidget({ group, component, onMove }: { group: MoveGroup; component: string; onMove(move: Move): void }) {
   const record = recordNamed(group.kind ?? '');
   const keyEnum = record?.components.find((candidate) => candidate.name === component)?.type.key?.name ?? '';
   const answers = group.moves.map((move) => (move.event?.[component] ?? {}) as Record<string, number>);
-  const [counts, setCounts] = useState<Record<string, number>>({});
+  const offered = enumValues(keyEnum).filter((key) => answers.some((answer) => (answer[key] ?? 0) > 0));
+  const least = (key: string) => Math.min(...answers.map((answer) => answer[key] ?? 0));
+  const fixed = (key: string) => least(key) === Math.max(...answers.map((answer) => answer[key] ?? 0));
+  const keys = [...offered.filter(fixed), ...offered.filter((key) => !fixed(key))];
+  const given = Object.fromEntries(offered.filter((key) => least(key) > 0).map((key) => [key, least(key)]));
+  const [counts, setCounts] = useState<Record<string, number>>(given);
   const room = (key: string) =>
     Math.max(0, ...answers.filter((answer) => Object.entries(counts).every(([other, count]) => other === key || count <= (answer[other] ?? 0))).map((answer) => answer[key] ?? 0));
-  const keys = enumValues(keyEnum).filter((key) => answers.some((answer) => (answer[key] ?? 0) > 0));
   const exact = group.moves.find((move) => canonical(move.event?.[component] ?? {}) === canonical(counts));
   const total = Object.values(counts).reduce((sum, count) => sum + count, 0);
   const most = Math.max(...answers.map((answer) => Object.values(answer).reduce((sum, count) => sum + count, 0)));
@@ -302,6 +308,8 @@ function CountsWidget({ group, component, onMove }: { group: MoveGroup; componen
     const next = { ...counts };
     if (count < room(key)) {
       next[key] = count + 1;
+    } else if (least(key) > 0) {
+      next[key] = least(key);
     } else {
       delete next[key];
     }
@@ -313,17 +321,24 @@ function CountsWidget({ group, component, onMove }: { group: MoveGroup; componen
         {keys.map((key) => {
           const count = counts[key] ?? 0;
           const limit = room(key);
+          const floor = least(key);
           const name = constantLabel(keyEnum, key);
-          // the other counts leave it no room
-          const closed = count === 0 && limit === 0;
-          const hint = closed ? `${name}: no room beside the others` : count < limit ? `${name}: take ${count + 1}` : `${name}: back to none`;
+          // at what every answer has, and the other counts leave it no more
+          const closed = count <= floor && limit <= floor;
+          const hint = fixed(key)
+            ? `${name}: ${floor} in every answer`
+            : closed
+              ? `${name}: no room ${count > 0 ? 'for more ' : ''}beside the others`
+              : count < limit
+                ? `${name}: take ${count + 1}`
+                : `${name}: back to ${floor > 0 ? floor : 'none'}`;
           return (
             <button
               key={key}
               type="button"
-              className={`tile card-pick count-key ${count > 0 ? 'picked' : ''}`.trim()}
+              className={`tile card-pick count-key ${count > 0 ? 'picked' : ''} ${fixed(key) ? 'fixed' : ''}`.trim()}
               data-key={key}
-              // the next click puts it back to none
+              // the next click puts it back to what every answer has
               data-full={(!closed && count >= limit) || undefined}
               aria-label={name}
               aria-pressed={count > 0}
@@ -333,10 +348,10 @@ function CountsWidget({ group, component, onMove }: { group: MoveGroup; componen
             >
               {keyEnum === 'SkillCardColor' ? <CardBack color={key} count={count} size="sm" label={hint} /> : <b className="count-value">{count}</b>}
               <span className="count-name">{name}</span>
-              {/* how many it holds of the most it can take */}
+              {/* how many it holds of the most it can take, what every answer has apart */}
               <span className="pips" aria-hidden="true">
                 {Array.from({ length: limit }, (_, at) => (
-                  <i key={at} className={at < count ? 'pip on' : 'pip'} />
+                  <i key={at} className={at < floor ? 'pip on given' : at < count ? 'pip on' : 'pip'} />
                 ))}
               </span>
             </button>
@@ -350,7 +365,7 @@ function CountsWidget({ group, component, onMove }: { group: MoveGroup; componen
         <button type="button" className="primary" disabled={!exact} onClick={() => exact && onMove(exact)}>
           {typeLabel(group.kind ?? '')}
         </button>
-        <button type="button" className="link" disabled={total === 0} onClick={() => setCounts({})}>
+        <button type="button" className="link" disabled={canonical(counts) === canonical(given)} onClick={() => setCounts(given)}>
           Clear
         </button>
       </div>

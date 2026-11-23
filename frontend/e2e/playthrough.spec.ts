@@ -50,19 +50,25 @@ function input(page: Page): Locator {
   return page.getByRole('region', { name: 'input' });
 }
 
-// what changes when the game moves on, or refuses an answer
+// what changes when the game moves on, or refuses an answer: the log too, because the next input can look like the
+// last, e.g. the second hit of "A Guilty Verdict" asks again which battlestar
 async function signature(page: Page): Promise<string> {
   return page.evaluate(() => {
     const panel = document.querySelector('[aria-label="input"]');
-    return `${panel?.getAttribute('aria-busy')}|${panel?.innerHTML ?? ''}`;
+    const entries = document.querySelectorAll('[aria-label="log"] li.scope, [aria-label="log"] li.choice').length;
+    return `${panel?.getAttribute('aria-busy')}|${entries}|${panel?.innerHTML ?? ''}`;
   });
 }
 
+// mulberry32, in exact 32-bit integers: a float LCG loses its low bits past 2^53, and then gives the same number for
+// every n that is a small power of 2, e.g. the same one of 8 picker values over and over
 function generator(seed: number): (n: number) => number {
-  let state = seed * 7919 + 17;
+  let state = (seed * 7919 + 17) >>> 0;
   return (n) => {
-    state = (state * 1103515245 + 12345) % 2147483648;
-    return state % n;
+    state = (state + 0x6d2b79f5) >>> 0;
+    let t = Math.imul(state ^ (state >>> 15), state | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return Math.floor((((t ^ (t >>> 14)) >>> 0) / 4294967296) * n);
   };
 }
 
