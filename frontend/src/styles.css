@@ -1873,25 +1873,47 @@ details > summary {
   gap: 4px;
 }
 
-.count-row {
+/* a card per key: a click takes one more, past the most it can take back to none */
+.count-keys {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
-.count-row .count-name {
-  min-width: 6.5rem;
+.count-key {
+  min-width: 64px;
+  cursor: pointer;
 }
 
-.count-row.on .count-name {
+/* the other picks leave it no room: it stays in its place */
+.count-key:disabled {
+  opacity: 0.3;
+}
+
+.count-key.picked .count-name {
   color: var(--amber, var(--accent));
 }
 
-button.step {
-  width: 28px;
-  padding: 2px 0;
-  text-align: center;
-  font-weight: 700;
+.count-key .count-value {
+  font-size: 1.1rem;
+}
+
+.count-key .pips {
+  display: flex;
+  gap: 3px;
+  min-height: 6px;
+}
+
+.count-key .pip {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: 1px solid var(--muted);
+}
+
+.count-key .pip.on {
+  border-color: var(--amber, var(--accent));
+  background: var(--amber, var(--accent));
 }
 
 .pick-widget {

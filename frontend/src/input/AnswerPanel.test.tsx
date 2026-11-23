@@ -49,22 +49,72 @@ describe('the answers', () => {
     expect(onMove).toHaveBeenLastCalledWith(expect.objectContaining({ option: 1, submits: false }), { kind: 'NoOpEvent', playerNumber: 1 });
   });
 
-  it('count a draw per color, held to what an answer allows', () => {
-    const draw = (selection: Record<string, number>) => ({ kind: 'DrawSkillCardsEvent', playerNumber: 1, selection, drawLimit: 'DRAW_EXACTLY_2' });
-    const { onMove } = renderPanel(
-      game({ kind: 'Decide', player: 1, action: 'DrawSkillCardsEvent', constraints: ['DRAW_EXACTLY_2'], answers: { events: [draw({ LEADERSHIP: 2 }), draw({ LEADERSHIP: 1, TACTICS: 1 })], shapes: [] } }),
-    );
+  const drawOf = (limit: string) => (selection: Record<string, number>) => ({ kind: 'DrawSkillCardsEvent', playerNumber: 1, selection, drawLimit: limit });
+  const drawing = (limit: string, selections: Record<string, number>[]) =>
+    game({ kind: 'Decide', player: 1, action: 'DrawSkillCardsEvent', constraints: [limit], answers: { events: selections.map(drawOf(limit)), shapes: [] } });
+  const offered = (container: HTMLElement) => [...container.querySelectorAll('.count-key')].map((key) => key.getAttribute('aria-label'));
+  const open = (container: HTMLElement) => [...container.querySelectorAll('.count-key:enabled')].map((key) => key.getAttribute('aria-label'));
+  const counted = (container: HTMLElement) => Object.fromEntries([...container.querySelectorAll('.count-key')].map((key) => [key.getAttribute('aria-label'), key.querySelectorAll('.pip.on').length]));
+
+  it('count a draw per color, a click taking one more and going back to none past the most an answer allows', () => {
+    const draw = drawOf('DRAW_EXACTLY_2');
+    const { onMove, container } = renderPanel(drawing('DRAW_EXACTLY_2', [{ LEADERSHIP: 2 }, { LEADERSHIP: 1, TACTICS: 1 }]));
     const send = screen.getByRole('button', { name: 'Draw Skill Cards' });
 
+    expect(offered(container)).toEqual(['Leadership', 'Tactics']);
     expect(send).toBeDisabled();
-    fireEvent.click(screen.getByRole('button', { name: 'more Tactics' }));
-    // no answer has 2 Tactics
-    expect(screen.getByRole('button', { name: 'more Tactics' })).toBeDisabled();
-    fireEvent.click(screen.getByRole('button', { name: 'more Leadership' }));
-    expect(screen.getByRole('button', { name: 'more Leadership' })).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', { name: 'Leadership' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Leadership' }));
+    expect(counted(container)).toEqual({ Leadership: 2, Tactics: 0 });
+    // full: Tactics stays in its place, closed
+    expect(open(container)).toEqual(['Leadership']);
     expect(screen.getByText('2 of 2')).toBeInTheDocument();
+    // two is the most: the next click puts them back
+    fireEvent.click(screen.getByRole('button', { name: 'Leadership' }));
+    expect(counted(container)).toEqual({ Leadership: 0, Tactics: 0 });
+    expect(screen.getByRole('button', { name: 'Leadership' })).toHaveAttribute('aria-pressed', 'false');
+    fireEvent.click(screen.getByRole('button', { name: 'Tactics' }));
+    // no answer has 2 Tactics
+    fireEvent.click(screen.getByRole('button', { name: 'Tactics' }));
+    expect(counted(container)).toEqual({ Leadership: 0, Tactics: 0 });
+    fireEvent.click(screen.getByRole('button', { name: 'Tactics' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Leadership' }));
+    expect(counted(container)).toEqual({ Leadership: 1, Tactics: 1 });
     fireEvent.click(send);
     expect(onMove).toHaveBeenCalledWith(expect.objectContaining({ event: draw({ LEADERSHIP: 1, TACTICS: 1 }) }), draw({ LEADERSHIP: 1, TACTICS: 1 }));
+  });
+
+  it("close the colors the draw's picks leave no room for, in their place", () => {
+    // Tactics 2, Piloting 2 and Leadership or Engineering 1
+    const { container } = renderPanel(
+      drawing('DRAW_EXACTLY_5', [
+        { TACTICS: 2, PILOTING: 2, LEADERSHIP: 1 },
+        { TACTICS: 2, PILOTING: 2, ENGINEERING: 1 },
+      ]),
+    );
+
+    expect(open(container)).toEqual(['Leadership', 'Tactics', 'Piloting', 'Engineering']);
+    fireEvent.click(screen.getByRole('button', { name: 'Engineering' }));
+    expect(offered(container)).toEqual(['Leadership', 'Tactics', 'Piloting', 'Engineering']);
+    expect(screen.getByRole('button', { name: 'Leadership' })).toBeDisabled();
+    // back to none: Leadership fits again
+    fireEvent.click(screen.getByRole('button', { name: 'Engineering' }));
+    expect(open(container)).toEqual(['Leadership', 'Tactics', 'Piloting', 'Engineering']);
+  });
+
+  it('close the other colors once a draw of any colors is full, and offer none that no answer has', () => {
+    const any = ['POLITICS', 'LEADERSHIP', 'TACTICS', 'PILOTING', 'ENGINEERING', 'TREACHERY'];
+    const pairs = any.flatMap((first, at) => any.slice(at).map((second) => (first === second ? { [first]: 2 } : { [first]: 1, [second]: 1 })));
+    const { container } = renderPanel(drawing('DRAW_EXACTLY_2_OF_ANY_COLOR', pairs));
+
+    expect(open(container)).toHaveLength(6);
+    fireEvent.click(screen.getByRole('button', { name: 'Politics' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Treachery' }));
+    expect(offered(container)).toHaveLength(6);
+    expect(open(container)).toEqual(['Politics', 'Treachery']);
+    expect(screen.getByRole('button', { name: 'Draw Skill Cards' })).toBeEnabled();
+    fireEvent.click(screen.getByRole('button', { name: 'Clear' }));
+    expect(open(container)).toHaveLength(6);
   });
 
   it("pick a shape's cards, sorted, and send them once there are enough", () => {

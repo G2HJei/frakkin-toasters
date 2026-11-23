@@ -135,11 +135,11 @@ async function build(builder: Locator, random: (n: number) => number) {
   }
 }
 
-// the counts per color: a "+" at random while one is allowed, until the counts are an answer
+// the counts per color: a click at random on a color that takes one more, until the counts are an answer
 async function countUp(counter: Locator, random: (n: number) => number) {
   const send = counter.locator('button.primary');
   for (let step = 0; step < 20 && !(await send.isEnabled()); step++) {
-    const more = counter.locator('button.step[aria-label^="more"]:enabled');
+    const more = counter.locator('.count-key:enabled:not([data-full])');
     const n = await more.count();
     if (n === 0) {
       await counter.getByRole('button', { name: 'Clear' }).click();

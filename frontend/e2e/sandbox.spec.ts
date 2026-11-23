@@ -83,12 +83,12 @@ async function answer(page: Page, name: string) {
   await expect.poll(async () => page.evaluate(() => document.querySelector('[aria-label="input"]')?.innerHTML ?? '')).not.toBe(before);
 }
 
-// a draw counts the cards of each color, then draws
+// a draw counts the cards of each color, a click on its color per card, then draws
 async function draw(page: Page, counts: Record<string, number>) {
   const names: Record<string, string> = { POLITICS: 'Politics', LEADERSHIP: 'Leadership', TACTICS: 'Tactics', PILOTING: 'Piloting', ENGINEERING: 'Engineering' };
   for (const [color, count] of Object.entries(counts)) {
     for (let at = 0; at < count; at++) {
-      await input(page).getByRole('button', { name: `more ${names[color]}` }).click();
+      await input(page).locator('.counts-widget').getByRole('button', { name: names[color], exact: true }).click();
     }
   }
   await answer(page, 'Draw Skill Cards');

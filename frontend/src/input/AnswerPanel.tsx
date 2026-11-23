@@ -281,38 +281,68 @@ function countsComponent(group: MoveGroup, varying: string[]): string | null {
 }
 
 /**
- * A count per key, held to what some answer still allows: a "+" only while an answer has more of it, sent when the
- * counts are one of the answers.
+ * A count per key, e.g. the Skill Cards of each color to draw, held to what some answer still allows: a click on a key
+ * takes one more, and once it has the most an answer leaves it beside the other counts, it goes back to none. A key no
+ * answer has isn't offered, and one the other counts leave no room for is disabled in its place. Sent when the counts
+ * are one of the answers.
  */
 function CountsWidget({ group, component, onMove }: { group: MoveGroup; component: string; onMove(move: Move): void }) {
   const record = recordNamed(group.kind ?? '');
   const keyEnum = record?.components.find((candidate) => candidate.name === component)?.type.key?.name ?? '';
   const answers = group.moves.map((move) => (move.event?.[component] ?? {}) as Record<string, number>);
-  const keys = enumValues(keyEnum).filter((key) => answers.some((answer) => (answer[key] ?? 0) > 0));
   const [counts, setCounts] = useState<Record<string, number>>({});
-  const fits = (next: Record<string, number>) => answers.some((answer) => keys.every((key) => (next[key] ?? 0) <= (answer[key] ?? 0)));
+  const room = (key: string) =>
+    Math.max(0, ...answers.filter((answer) => Object.entries(counts).every(([other, count]) => other === key || count <= (answer[other] ?? 0))).map((answer) => answer[key] ?? 0));
+  const keys = enumValues(keyEnum).filter((key) => answers.some((answer) => (answer[key] ?? 0) > 0));
   const exact = group.moves.find((move) => canonical(move.event?.[component] ?? {}) === canonical(counts));
   const total = Object.values(counts).reduce((sum, count) => sum + count, 0);
   const most = Math.max(...answers.map((answer) => Object.values(answer).reduce((sum, count) => sum + count, 0)));
-  const change = (key: string, by: number) => setCounts({ ...counts, [key]: Math.max(0, (counts[key] ?? 0) + by) });
+  const cycle = (key: string) => {
+    const count = counts[key] ?? 0;
+    const next = { ...counts };
+    if (count < room(key)) {
+      next[key] = count + 1;
+    } else {
+      delete next[key];
+    }
+    setCounts(next);
+  };
   return (
     <div className="counts-widget">
-      {keys.map((key) => {
-        const count = counts[key] ?? 0;
-        const name = constantLabel(keyEnum, key);
-        return (
-          <div key={key} className={`count-row ${count > 0 ? 'on' : ''}`.trim()} data-key={key}>
-            {keyEnum === 'SkillCardColor' ? <CardBack color={key} count={count} size="xs" /> : <span className="tile">{count}</span>}
-            <span className="count-name">{name}</span>
-            <button type="button" className="step" aria-label={`fewer ${name}`} disabled={count === 0} onClick={() => change(key, -1)}>
-              −
+      <div className="count-keys">
+        {keys.map((key) => {
+          const count = counts[key] ?? 0;
+          const limit = room(key);
+          const name = constantLabel(keyEnum, key);
+          // the other counts leave it no room
+          const closed = count === 0 && limit === 0;
+          const hint = closed ? `${name}: no room beside the others` : count < limit ? `${name}: take ${count + 1}` : `${name}: back to none`;
+          return (
+            <button
+              key={key}
+              type="button"
+              className={`tile card-pick count-key ${count > 0 ? 'picked' : ''}`.trim()}
+              data-key={key}
+              // the next click puts it back to none
+              data-full={(!closed && count >= limit) || undefined}
+              aria-label={name}
+              aria-pressed={count > 0}
+              disabled={closed}
+              title={hint}
+              onClick={() => cycle(key)}
+            >
+              {keyEnum === 'SkillCardColor' ? <CardBack color={key} count={count} size="sm" label={hint} /> : <b className="count-value">{count}</b>}
+              <span className="count-name">{name}</span>
+              {/* how many it holds of the most it can take */}
+              <span className="pips" aria-hidden="true">
+                {Array.from({ length: limit }, (_, at) => (
+                  <i key={at} className={at < count ? 'pip on' : 'pip'} />
+                ))}
+              </span>
             </button>
-            <button type="button" className="step" aria-label={`more ${name}`} disabled={!fits({ ...counts, [key]: count + 1 })} onClick={() => change(key, 1)}>
-              +
-            </button>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
       <div className="actions">
         <span className={exact ? 'count-ok' : 'count-off'}>
           {total} of {most}

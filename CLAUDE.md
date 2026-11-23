@@ -1073,7 +1073,9 @@ REST (the lobby lists poll), Zustand for the game.
   whose answers `cover` it), then keeps as `sent` until the game after it (the input panel is `aria-busy` while an
   intent is pending). `AnswerPanel` shows them: a choice's options in order, an option's decision as a section of
   its answers (the first one open), the answers grouped by kind (`groupMoves`; a group's moves differ in
-  `varyingComponents`, worded by `moveLabels.ts`), a draw as a count per color held to what an answer allows, a shape
+  `varyingComponents`, worded by `moveLabels.ts`), a draw as a card per color that a click takes one more of, back to
+  none once it has the most an answer leaves it beside the other colors (a color left no room is disabled in its
+  place, one no answer has isn't shown), a shape
   as a picker (sorted cards, a counter, the strength against `minStrength`, the click order when ordered), the
   decision's constraints above them. A group whose answers are a product of what they differ in (`input/parts.ts`:
   more ways than its largest part has values, e.g. the "Engine Room"'s two cards, "Make a Deal"'s target, destination
