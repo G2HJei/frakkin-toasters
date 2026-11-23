@@ -1150,7 +1150,8 @@ REST (the lobby lists poll), Zustand for the game.
   of their space areas, the Cylon ships first, a ship as large in every area of its board, alone or piled (the bow's
   strip is 8 o'clock, the stern's 2 o'clock; the ships leave the launch tubes free). The resources are printed in a
   row, each amount after its icon and label ("FUEL:"), red in the red zone (`resources.tsx`, the icons in `icons/`),
-  markers sit on the tracks, the decks lie in the rack, which prints no names but rings each Skill Card deck in its
+  markers sit on the tracks (the Boarding Party track isn't printed: `boarding-party.png`, red only at its end, lies
+  over the hull while a centurion is on it, and its centurions stand large and glow red), the decks lie in the rack, which prints no names but rings each Skill Card deck in its
   color, with their counts and their top discard over them, the civilian ships lie at the end of the ship reserves, and
   the destinations tuck under the objective, each showing its distance. The Crisis Cards kept in play lie by the jump
   track. The board leaves out the card being resolved, its skill check and the die (the turn panel shows them), the

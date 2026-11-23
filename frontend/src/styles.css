@@ -960,6 +960,12 @@ details > summary {
   filter: drop-shadow(0 0 3px #fff) drop-shadow(0 4px 6px rgba(0, 0, 0, 0.8));
 }
 
+/* the centurions boarding Galactica glow red on their track, which is red only at its end */
+.board-svg .boarding .centurion {
+  fill: #ff4f43;
+  filter: drop-shadow(0 0 4px #ff3b2f) drop-shadow(0 0 14px rgba(255, 50, 35, 0.85)) drop-shadow(0 6px 5px rgba(0, 0, 0, 0.8));
+}
+
 .board-svg .count polygon {
   fill: rgba(6, 12, 24, 0.9);
   stroke: rgba(143, 208, 255, 0.65);

@@ -165,6 +165,17 @@ describe('the board', () => {
     expect(board.querySelector('[data-track="BoardingParty"] [data-position="POSITION_1"]')?.getAttribute('aria-label')).toBe('1 centurion at Position 1');
   });
 
+  it('lays the Boarding Party track over the hull only while a centurion is on it', () => {
+    const boarded = renderBoard().querySelector('[data-track="BoardingParty"]')!;
+    const track = boarded.querySelector(':scope > image')!;
+    expect(track.getAttribute('href')).toContain('boarding-party');
+    expect(Number(track.getAttribute('x'))).toBe(SLOTS.boardingParty.x);
+    expect(boarded.querySelector('[data-position="POSITION_1"] .centurion')).not.toBeNull();
+
+    const nobody = { ...game, galactica: { ...game.galactica!, boardingParty: [] } } as GameProjection;
+    expect(renderBoard(undefined, nobody).querySelector('[data-track="BoardingParty"]')).toBeNull();
+  });
+
   it('puts each amount after its printed resource, red in the red zone', () => {
     const board = renderBoard();
 

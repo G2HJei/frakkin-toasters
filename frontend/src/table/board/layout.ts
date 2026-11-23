@@ -92,6 +92,8 @@ export const SLOTS = {
   cylonReserves: printedBox(printed.slots.cylonReserves),
   damagedVipers: printedBox(printed.slots.damagedVipers),
   shipReserves: printedBox(printed.slots.shipReserves),
+  // not printed: the Boarding Party track lies over Galactica's hull while a centurion is on it
+  boardingParty: printedBox(printed.slots.boardingParty),
   // no printed slot: the free starfield
   inPlay: box(785, 1262, 110, 155),
 };

@@ -1,6 +1,6 @@
 {
  "image": "board.jpg",
- "note": "pixels of the image; boxes are [x, y, width, height]; location boxes end with their BoardArea; locationTitles are the panels the names are printed in; distanceTraveled is where destinations tuck under the objective (nothing is printed there); launch.* are the printed launch strips; cylonSectors is the centre and slope of the Cylon fleet board's sector lines; resources are where each amount goes after its printed icon and label, in a row: the left end of the text and its baseline",
+ "note": "pixels of the image; boxes are [x, y, width, height]; location boxes end with their BoardArea; locationTitles are the panels the names are printed in; distanceTraveled is where destinations tuck under the objective (nothing is printed there); launch.* are the printed launch strips; boardingParty is not printed: boarding-party.png lies there while a centurion is on the track, and tracks.boarding are the centres of its spaces; cylonSectors is the centre and slope of the Cylon fleet board's sector lines; resources are where each amount goes after its printed icon and label, in a row: the left end of the text and its baseline",
  "width": 2003,
  "height": 2317,
  "locations": {
@@ -467,10 +467,10 @@
    130
   ],
   "boardingParty": [
-   1206,
-   1973,
-   312,
-   147
+   1205,
+   1972,
+   314,
+   149
   ]
  },
  "cells": {},

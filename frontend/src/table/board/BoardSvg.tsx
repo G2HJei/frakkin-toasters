@@ -28,6 +28,7 @@ import type { LabelContext } from '../../labels/describe';
 import { useRevealHandlers, type RevealCard, type RevealSection } from '../reveal';
 import { useTable } from '../tableContext';
 import boardUrl from './board.jpg';
+import boardingPartyUrl from './boarding-party.png';
 import {
   BOARD_HEIGHT,
   BOARD_WIDTH,
@@ -266,27 +267,32 @@ function Tracks({ game }: { game: GameProjection }) {
     }
   }
   const centurion = tokenArt('CENTURION');
+  const panel = SLOTS.boardingParty;
   return (
     <g className="tracks">
       {jump && JUMP_TRACK[jump] && <Marker track="JumpPreparation" position={jump} at={JUMP_TRACK[jump]} size={88} label={constantLabel('JumpPreparation', jump)} />}
       {pursuit && PURSUIT_TRACK[pursuit] && <Marker track="Pursuit" position={pursuit} at={PURSUIT_TRACK[pursuit]} size={78} label={constantLabel('Pursuit', pursuit)} />}
-      <g className="boarding" data-track="BoardingParty">
-        {[...boarding.entries()].map(([position, count]) => {
-          const at = BOARDING_TRACK[position];
-          return at ? (
-            <g key={position} className="centurions" data-position={position} aria-label={`${count} centurion${count > 1 ? 's' : ''} at ${constantLabel('BoardingParty', position)}`}>
-              {centurion ? (
-                Array.from({ length: Math.min(count, 3) }, (_, index) => (
-                  <SvgArt key={index} art={centurion} x={at.x - 22 + index * 6} y={at.y - 34 - index * 8} width={44} height={68} preview={false} className="piece" />
-                ))
-              ) : (
-                <circle cx={at.x} cy={at.y} r={22} />
-              )}
-              {count > 1 && <Count x={at.x + 26} y={at.y - 62} value={`×${count}`} size={24} align="end" />}
-            </g>
-          ) : null;
-        })}
-      </g>
+      {/* the track isn't printed: it lies over the hull only while a centurion is on it */}
+      {boarding.size > 0 && (
+        <g className="boarding" data-track="BoardingParty">
+          <image href={boardingPartyUrl} x={panel.x} y={panel.y} width={panel.width} height={panel.height} />
+          {[...boarding.entries()].map(([position, count]) => {
+            const at = BOARDING_TRACK[position];
+            return at ? (
+              <g key={position} className="centurions" data-position={position} aria-label={`${count} centurion${count > 1 ? 's' : ''} at ${constantLabel('BoardingParty', position)}`}>
+                {centurion ? (
+                  Array.from({ length: Math.min(count, 3) }, (_, index) => (
+                    <SvgArt key={index} art={centurion} x={at.x - 32 + index * 8} y={at.y - 50 - index * 10} width={64} height={99} preview={false} className="centurion" />
+                  ))
+                ) : (
+                  <circle className="centurion" cx={at.x} cy={at.y} r={30} />
+                )}
+                {count > 1 && <Count x={at.x + 36} y={at.y - 86} value={`×${count}`} size={24} align="end" />}
+              </g>
+            ) : null;
+          })}
+        </g>
+      )}
     </g>
   );
 }
