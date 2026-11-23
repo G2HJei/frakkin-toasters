@@ -5,6 +5,7 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ChoiceMade;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.EventInjected;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.FactRecorded;
+import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.OnlyAnswerTaken;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ScopeClosed;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ScopeOpened;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.Fact;
@@ -95,6 +96,18 @@ public class Journal {
             throw new FrakCallTheAdmiralException();
         }
         entries.add(new EventInjected(event));
+    }
+
+    /**
+     * Records that the engine answers the pending decision itself, before the scope of the answer opens.
+     *
+     * @param scopeId the scope of the event that queued the decision
+     */
+    public void recordOnlyAnswer(int scopeId) {
+        if (openScope != ROOT_SCOPE) {
+            throw new FrakCallTheAdmiralException();
+        }
+        entries.add(new OnlyAnswerTaken(scopeId));
     }
 
     /**

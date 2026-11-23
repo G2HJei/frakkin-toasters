@@ -37,7 +37,7 @@ class FakeSocket implements SocketLike {
 }
 
 const game = (step: string) => ({ turn: { step } }) as unknown as GameProjection;
-const scope = (scopeId: number) => ({ kind: 'ScopeLog', scopeId, parentId: 0, actor: 1, event: 'NoOpEvent', details: null, facts: [] }) as LogEntry;
+const scope = (scopeId: number) => ({ kind: 'ScopeLog', scopeId, parentId: 0, actor: 1, event: 'NoOpEvent', details: null, facts: [], automatic: false }) as LogEntry;
 
 describe('the game store, fed by a socket', () => {
   let sockets: FakeSocket[];
@@ -129,6 +129,17 @@ describe('the game store, fed by a socket', () => {
     expect(timers).toHaveLength(0);
     expect(useGameStore.getState().connection).toBe('closed');
     expect(useGameStore.getState().rejected?.message).toContain('format 2');
+  });
+
+  it("drops an intent once the server took its player's only answer itself", () => {
+    const automatic = (actor: number) => ({ ...scope(4), actor, automatic: true }) as LogEntry;
+    useGameStore.getState().setIntent({ player: 1, event: { kind: 'NoOpEvent', playerNumber: 1 }, afterVersion: 1 });
+
+    sockets[0].receive({ type: 'update', update: { entries: [scope(3), automatic(2)] } });
+    expect(useGameStore.getState().intent).not.toBeNull();
+
+    sockets[0].receive({ type: 'update', update: { entries: [automatic(1)] } });
+    expect(useGameStore.getState().intent).toBeNull();
   });
 
   it('stops reconnecting once closed', () => {

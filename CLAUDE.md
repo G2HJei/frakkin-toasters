@@ -458,6 +458,14 @@ constructor takes any first event, and `GameEngineTest` uses the test-only `Scri
   and runs it ahead of the pending input as `inject` does (`runAhead`, recorded as `EventInjected`), so restore and undo
   treat it as one input. It answers nothing: the pending input stays as it was. A finished game, an event that names
   another player or fails `isValid()` is rejected and changes nothing.
+- Only answers: an engine after `takeOnlyAnswers()` (the backend's, `frakkin.take-only-answers`) answers a decision
+  whose `LegalAnswers.only()` is present itself, as the run loop reaches it: one concrete answer, or one shape that
+  takes every element of its pick (by position, so two equal cards are two ways and he is asked). A search that reported
+  a crash or an unsupported class asks. `JournalEntry.OnlyAnswerTaken` comes before the answer's scope, which is logged
+  under the decision's player; `AgendaReplayer` counts it as no input, so undo goes back past it. A choice is always
+  asked: `one(...)` collapses a single option, so a choice of one is built to ask (`OfferPlayOrPassEvent`, so nobody
+  learns that he holds no card). It applies from the next input on: the pause it stands at stays, so a restore
+  changes no journal.
 - `event/sandbox/` holds the `SandboxEvent` marker and the setup events, plain `Event`s with typed fields (one per kind
   of card): put a Crisis, Destination, Skill or Destiny card on top, give a Skill Card, a Mutiny Card, a Super Crisis
   Card or a Loyalty Card (`GiveLoyaltyCardToPlayerEvent`: from the Loyalty or the "You Are Not a Cylon" deck, or a "You
@@ -910,7 +918,8 @@ The journal records exactly what the game ops did, so a game can be rebuilt from
   sealed hierarchy can't span packages without a `module-info`. A new fact has to be handled in `FactApplier`'s
   exhaustive `switch`.
 - `Journal` is an append-only flat list of `ScopeOpened(scopeId, parentId, event, actor)` / `FactRecorded` /
-  `ScopeClosed(scopeId, followup)` / `ChoiceMade(scopeId, chooser, option)`. It isn't part of `Game`: `GameEngine`
+  `ScopeClosed(scopeId, followup)` / `ChoiceMade(scopeId, chooser, option)`, and the engine's `EventInjected` and
+  `OnlyAnswerTaken` (see "Engine"). It isn't part of `Game`: `GameEngine`
   owns it, and outside the engine whoever builds the ops does (`TestHarness`, `GameReplayerTest`). Ops never see it,
   they get a `FactRecorder(game, journal)`.
 - At most one scope is open at a time. A followup runs after its parent's scope has closed, so
@@ -969,7 +978,8 @@ the frontend owns the wording.
   answers (`Decide.answers`, and `Choose.answers`: an `OptionAnswers` per option that asks the chooser a decision at
   once, e.g. the action of the Action step), and everything once the game has ended. The Mutineer card is faceup once held ("immediately reveal this card").
 - `LiveUpdateProjection.of(journal, from, viewer)` is what happened: the scopes (`ScopeLog`: actor, event type, its
-  fields when public, the facts) and the choices (`ChoiceLog`). `LiveUpdateProjector` has an exhaustive switch over every
+  fields when public, the facts, and `automatic` for the only answer the engine took, which only its actor sees: that
+  it was his only one can tell what he holds) and the choices (`ChoiceLog`). `LiveUpdateProjector` has an exhaustive switch over every
   fact, so a new fact doesn't compile until it has a rule. A fact the viewer may not see becomes `Hidden` (count,
   colors). A shuffle never shows its order, a draw only a count. The scope of a `SecretEvent` shows only to its actor.
   Followups never show. It reads the whole journal, e.g. for who was President when a Quorum Card was drawn.
@@ -996,7 +1006,8 @@ stores its journal in Postgres and pushes to every viewer what he may see. It ad
   cache or restored from the rows, the state token (`StateTokens`, the sequence hashed with `frakkin.token-secret`),
   the engine, the new entries and the `game_bundle` summary in one transaction (a failed write evicts the session),
   then the projections (with the engine's `pendingScope()`) to the `ProjectionSink`, under the lock. A viewer for whom nothing visible changed gets nothing.
-  `JournalStore`, `GameBundles` (with `mode` and `seed`: a seeded game restores with its seed).
+  Every engine it starts or restores takes only answers while `frakkin.take-only-answers` is on (the default, see
+  "Engine"). `JournalStore`, `GameBundles` (with `mode` and `seed`: a seeded game restores with its seed).
 - `user/` - logins through Google and Discord (`LoginProviders`, only those with a client id), the `dev` profile's
   login by name (`POST /api/dev/login`, refused together with a real provider), `AppUserAuthentication` in the HTTP
   session, which Spring Session keeps in Postgres so a login survives a restart, `GET`/`PUT /api/me`. CSRF through the
@@ -1031,7 +1042,9 @@ stores its journal in Postgres and pushes to every viewer what he may see. It ad
   test only.
 - Flyway migrations in `src/main/resources/db/migration`. The tests (`BackendTest`) run against a Testcontainers
   Postgres with the `dev` profile; `LiveGameTest` drives real web socket clients and restarts the server mid-game, and
-  `SandboxLiveTest` plays, undoes, exports and imports a sandbox.
+  `SandboxLiveTest` plays, undoes, exports and imports a sandbox. Those two and `GameSessionsTest` play `ScriptedTurns`
+  beside an engine in memory, which asks for every answer, so they turn `frakkin.take-only-answers` off;
+  `OnlyAnswersTest` plays with it on.
 
 ### Frontend
 
@@ -1071,7 +1084,8 @@ REST (the lobby lists poll), Zustand for the game.
   answer is submitted, an option chosen, and an option with an answer of its decision chosen with the answer as the
   `intent`, which `TablePage` submits on the next game only when `intentDue` (a later game, the same player, a decision
   whose answers `cover` it), then keeps as `sent` until the game after it (the input panel is `aria-busy` while an
-  intent is pending). `AnswerPanel` shows them: a choice's options in order, an option's decision as a section of
+  intent is pending). An update with an `automatic` scope of its player drops it: the server took that only answer
+  itself. `AnswerPanel` shows them: a choice's options in order, an option's decision as a section of
   its answers (the first one open), the answers grouped by kind (`groupMoves`; a group's moves differ in
   `varyingComponents`, worded by `moveLabels.ts`), a draw as a card per color that a click takes one more of, back to
   what every answer draws once it has the most an answer leaves it beside the other colors (what every answer draws
@@ -1108,7 +1122,7 @@ REST (the lobby lists poll), Zustand for the game.
 - The table (`TablePage`): no bar over it, the board in the middle, as high as the screen (`.table-main` is a size
   container, the board's width follows its height), and a column on each side that scrolls on its own. On the left the
   game and the turn (`TurnPanel`, its tab names the game, with the connection beside it while it isn't open, and the
-  skill check under the turn's Crisis Card), the decision (`InputPanel`) and its prompts, and under them the log, which takes the height they leave (at least 260px) and scrolls inside its body. Neither has a title. The log (`table/log/LogPanel.tsx`) keeps every turn open, groups it by step (`StepChanged`), shows each scope as one line (its actor, its event, what it names, and a tag with the card or ability it comes from when its words don't name it) with all its facts under it, the ones that change the table first (`splitFacts`; a ship destroyed, damaged or launched counts, `ShipMoved` worded by where it went), leaves out the scopes that only mark a turn or a step, and lights what a clicked entry names on the board for a moment (`table/flash.ts`, `entryTargets`, `useFlash`). It follows the newest entry until the user scrolls up (`useFollowBottom`: only a scroll up leaves the end, since a scroll event arrives a frame late), and the arrow at its bottom right follows again, amber while new entries came below. What changed with the last game message plays once (`table/changes.ts`, `changesBetween` of `gameStore.previous` and the game, keyed by the version): a floating delta at a resource, the jump track and the distance, and at the Admiral's nukes, a newly damaged location pulsing red, a ship gliding from its old place (FLIP on `data-ship`), the die tumbling, new cards sliding into a hand. A snapshot (a reconnect, an undo: `expectSnapshot`) leaves no previous game, so it animates nothing. On the
+  skill check under the turn's Crisis Card), the decision (`InputPanel`) and its prompts, and under them the log, which takes the height they leave (at least 260px) and scrolls inside its body. Neither has a title. The log (`table/log/LogPanel.tsx`) keeps every turn open, groups it by step (`StepChanged`), shows each scope as one line (its actor, its event, what it names, a tag with the card or ability it comes from when its words don't name it, and an "automatic" tag on an only answer the server took) with all its facts under it, the ones that change the table first (`splitFacts`; a ship destroyed, damaged or launched counts, `ShipMoved` worded by where it went), leaves out the scopes that only mark a turn or a step, and lights what a clicked entry names on the board for a moment (`table/flash.ts`, `entryTargets`, `useFlash`). It follows the newest entry until the user scrolls up (`useFollowBottom`: only a scroll up leaves the end, since a scroll event arrives a frame late), and the arrow at its bottom right follows again, amber while new entries came below. What changed with the last game message plays once (`table/changes.ts`, `changesBetween` of `gameStore.previous` and the game, keyed by the version): a floating delta at a resource, the jump track and the distance, and at the Admiral's nukes, a newly damaged location pulsing red, a ship gliding from its old place (FLIP on `data-ship`), the die tumbling, new cards sliding into a hand. A snapshot (a reconnect, an undo: `expectSnapshot`) leaves no previous game, so it animates nothing. On the
   right the sandbox's tools in a sandbox, above the players' mats (`PlayersPanel`, the nukes beside the Admiral; right
   of the portrait a strip with a cell per card of the sheet's skill set, in its colors, split along the diagonal for
   "either", for everyone but a revealed Cylon, who draws 2 of any colors). Under 1100px the board goes across the width

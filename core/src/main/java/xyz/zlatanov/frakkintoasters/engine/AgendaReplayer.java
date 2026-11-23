@@ -6,6 +6,7 @@ import xyz.zlatanov.frakkintoasters.engine.journal.Journal;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ChoiceMade;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.EventInjected;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.FactRecorded;
+import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.OnlyAnswerTaken;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ScopeClosed;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ScopeOpened;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.GameFact.GameEnded;
@@ -30,7 +31,7 @@ public final class AgendaReplayer {
 
     /**
      * @param inputStarts the index of the first entry of each input, in order: the scope of an event that answered a
-     *                    decision, a choice, and an injected event
+     *                    decision, a choice, and an injected event. An answer the engine took itself is none
      */
     public record Replay(Agenda agenda, List<Integer> inputStarts) {
     }
@@ -40,6 +41,8 @@ public final class AgendaReplayer {
     private       int           openScope   = ROOT_SCOPE;
     private       int           lastScope   = ROOT_SCOPE;
     private       boolean       ended;
+    // the engine answers the pending decision: the scope that opens next is that answer
+    private       boolean       onlyAnswer;
 
     /**
      * @return the agenda at the end of the journal
@@ -66,6 +69,7 @@ public final class AgendaReplayer {
                 case ScopeClosed closed -> replayer.close(closed);
                 case ChoiceMade choice -> replayer.select(choice, index);
                 case EventInjected injected -> replayer.inject(injected, index);
+                case OnlyAnswerTaken taken -> replayer.takeOnlyAnswer(taken);
             }
         }
         replayer.requirePaused();
@@ -80,10 +84,11 @@ public final class AgendaReplayer {
         } else {
             val frame = agenda.top().orElseThrow(() -> new IllegalArgumentException("Nothing was pending for " + opened));
             require(frame.parentScope() == opened.parentId() && runs(frame, opened.event()), opened + " doesn't run " + frame);
-            if (frame.followup() instanceof Single(PlayerDecisionEvent<?> ignored)) {
+            if (frame.followup() instanceof Single(PlayerDecisionEvent<?> ignored) && !onlyAnswer) {
                 inputStarts.add(index); // a player answered the decision
             }
             agenda.take();
+            onlyAnswer = false;
         }
         openScope = lastScope = opened.scopeId();
     }
@@ -108,6 +113,7 @@ public final class AgendaReplayer {
 
     private void select(ChoiceMade choice, int index) {
         require(openScope == ROOT_SCOPE, choice + " is made inside scope " + openScope);
+        require(!onlyAnswer, choice + " is made instead of the only answer");
         val frame = agenda.top().orElse(null);
         require(frame != null
                         && frame.followup() instanceof OneOf oneOf
@@ -123,12 +129,25 @@ public final class AgendaReplayer {
         require(openScope == ROOT_SCOPE, injected + " is injected inside scope " + openScope);
         require(!ended, injected + " is injected after the game ended");
         require(lastScope != ROOT_SCOPE, injected + " is injected before the game started");
+        require(!onlyAnswer, injected + " is injected instead of the only answer");
         inputStarts.add(index);
         agenda.push(single(injected.event()), ROOT_SCOPE);
     }
 
+    // The scope of the answer follows: it opens on the decision as a player's answer does.
+    private void takeOnlyAnswer(OnlyAnswerTaken taken) {
+        require(openScope == ROOT_SCOPE && !onlyAnswer, taken + " is taken inside scope " + openScope);
+        val frame = agenda.top().orElse(null);
+        require(frame != null
+                        && frame.followup() instanceof Single(PlayerDecisionEvent<?> ignored)
+                        && frame.parentScope() == taken.scopeId(),
+                taken + " doesn't answer " + frame);
+        onlyAnswer = true;
+    }
+
     private void requirePaused() {
         require(openScope == ROOT_SCOPE, "The journal ends inside scope " + openScope);
+        require(!onlyAnswer, "The journal ends before the only answer ran");
         require(ended || !agenda.isEmpty(), "Nothing is left to run, but the game goes on"); // as in the run loop
         agenda.top()
                 .filter(frame -> frame.followup() instanceof Single(Event event)

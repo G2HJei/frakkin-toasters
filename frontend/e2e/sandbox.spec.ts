@@ -28,9 +28,9 @@ test('a seeded sandbox is played through a turn, undone, exported and imported',
   await draw(page, { LEADERSHIP: 2, TACTICS: 1 });
 
   // turn 1: Adama draws, moves to the Research Lab, stacks a Crisis Card, draws there, and resolves the stacked card
-  await expectTurn(page, 'Turn 1 · William Adama', 'Receive Skills');
-  // his skill set leaves one draw: a single answer
-  await answer(page, 'Draw Skill Cards: Leadership ×3, Tactics ×2');
+  // his skill set leaves one draw, which the game takes for him and logs as taken
+  await expectTurn(page, 'Turn 1 · William Adama', 'Movement');
+  await expect(page.getByRole('region', { name: 'log' }).locator('.scope', { has: page.locator('.auto-tag') }).last()).toContainText('William Adama draws');
   // the Movement step opens the move: its destinations are the answers
   await answer(page, 'Research Lab');
   await page.getByRole('region', { name: 'sandbox' }).locator('summary', { hasText: 'Setup' }).click();
@@ -47,7 +47,7 @@ test('a seeded sandbox is played through a turn, undone, exported and imported',
   await input(page).getByRole('button', { name: /Crisis: Riots No Jump/ }).click();
   await input(page).getByRole('button', { name: /Top of Riots No Jump/ }).click();
 
-  await expectTurn(page, 'Turn 2 · Laura Roslin', 'Receive Skills');
+  await expectTurn(page, 'Turn 2 · Laura Roslin', 'Movement');
   await expect(resource(page, 'Food')).toHaveText('7');
   await expect(resource(page, 'Morale')).toHaveText('9');
 
@@ -56,7 +56,7 @@ test('a seeded sandbox is played through a turn, undone, exported and imported',
   await expectTurn(page, 'Turn 1 · William Adama', 'Crisis');
   await expect(resource(page, 'Food')).toHaveText('8');
   await input(page).getByRole('button', { name: /Top of Riots No Jump/ }).click();
-  await expectTurn(page, 'Turn 2 · Laura Roslin', 'Receive Skills');
+  await expectTurn(page, 'Turn 2 · Laura Roslin', 'Movement');
   await expect(resource(page, 'Food')).toHaveText('7');
 
   // export, then import as a new sandbox: the same game
@@ -66,9 +66,9 @@ test('a seeded sandbox is played through a turn, undone, exported and imported',
   await lobby.goto('/sandbox/new');
   const file = { name: 'sandbox.json', mimeType: 'application/json', buffer: await exported.body() };
   page = await openGame(lobby, (from) => from.getByLabel('journal file').setInputFiles(file));
-  await expectTurn(page, 'Turn 2 · Laura Roslin', 'Receive Skills');
+  await expectTurn(page, 'Turn 2 · Laura Roslin', 'Movement');
   await expect(resource(page, 'Food')).toHaveText('7');
-  await expect(input(page).getByRole('heading')).toHaveText('Laura Roslin decides');
+  await expect(input(page).getByRole('heading')).toHaveText('Laura Roslin chooses');
 });
 
 function input(page: Page) {

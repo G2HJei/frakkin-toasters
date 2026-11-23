@@ -22,6 +22,7 @@ import xyz.zlatanov.frakkintoasters.event.deck.CreateDestinyDeckEvent;
 import xyz.zlatanov.frakkintoasters.event.endgame.CylonsWinEvent;
 import xyz.zlatanov.frakkintoasters.event.interrupt.PlayInterruptCardEvent;
 import xyz.zlatanov.frakkintoasters.event.jump.ChooseDestinationEvent;
+import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.SelectCharacterEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.PlayCardsIntoSkillCheckEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.ShuffleAndDivideCardsEvent;
@@ -281,11 +282,33 @@ class LiveUpdateProjectionTest {
 
         val observed = LiveUpdateProjection.of(journal, OBSERVER).entries();
 
-        assertEquals(new ScopeLog(1, 0, 2, ChooseCrisisSectionEvent.class, section, List.of()), observed.get(0));
-        assertEquals(new ScopeLog(2, 0, 2, ChooseDestinationEvent.class, null, List.of()), observed.get(1));
+        assertEquals(new ScopeLog(1, 0, 2, ChooseCrisisSectionEvent.class, section, List.of(), false), observed.get(0));
+        assertEquals(new ScopeLog(2, 0, 2, ChooseDestinationEvent.class, null, List.of(), false), observed.get(1));
         assertEquals(new ChoiceLog(2, 2, null), observed.get(2)); // a choice shows who chose
         assertEquals(new ChoiceLog(2, 2, single(section)), observed.get(3));
         assertEquals(new ChoiceLog(2, 2, single(destination)), LiveUpdateProjection.of(journal, OTHER).entries().get(2));
+    }
+
+    // That the engine answered for a player shows only to him: that it was his only answer can tell what he holds.
+    @Test
+    void anAnswerTheEngineTookShowsAsSuchOnlyToItsPlayer() {
+        val journal = List.<JournalEntry>of(
+                new ScopeOpened(1, 0, new NoOpEvent(1), 1),
+                new ScopeClosed(1, single(new PlayerDecisionEvent<>(1, NoOpEvent.class))),
+                new JournalEntry.OnlyAnswerTaken(1),
+                new ScopeOpened(2, 1, new NoOpEvent(1), 1),
+                new ScopeClosed(2, Followup.NONE));
+
+        assertEquals(List.of(false, true), automatic(journal, HOLDER));
+        assertEquals(List.of(false, true), automatic(journal, Viewer.sandbox()));
+        assertEquals(List.of(false, false), automatic(journal, OTHER));
+        assertEquals(List.of(false, false), automatic(journal, OBSERVER));
+    }
+
+    private static List<Boolean> automatic(List<JournalEntry> journal, Viewer viewer) {
+        return LiveUpdateProjection.of(journal, viewer).entries().stream()
+                .map(entry -> ((ScopeLog) entry).automatic())
+                .toList();
     }
 
     // Every event component that holds a card is either public or private, so none can leak by default.

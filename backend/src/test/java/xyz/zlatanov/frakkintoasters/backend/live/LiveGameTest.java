@@ -40,7 +40,7 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.STRATEGIC_PLANNING;
 
 // Real web socket clients against the running application: three players and an observer.
-@SpringBootTest(webEnvironment = RANDOM_PORT)
+@SpringBootTest(webEnvironment = RANDOM_PORT, properties = "frakkin.take-only-answers=false")
 @ActiveProfiles("dev")
 @Import(TestcontainersConfiguration.class)
 class LiveGameTest {
@@ -172,6 +172,7 @@ class LiveGameTest {
         try (val restarted = new SpringApplicationBuilder(FrakkinToastersApplication.class)
                 .profiles("dev")
                 .run("--server.port=0",
+                        "--frakkin.take-only-answers=false",
                         "--spring.datasource.url=" + postgres.getJdbcUrl(),
                         "--spring.datasource.username=" + postgres.getUsername(),
                         "--spring.datasource.password=" + postgres.getPassword())) {

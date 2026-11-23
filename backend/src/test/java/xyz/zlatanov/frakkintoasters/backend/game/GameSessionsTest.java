@@ -4,6 +4,7 @@ import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.TestPropertySource;
 import xyz.zlatanov.frakkintoasters.backend.BackendTest;
 import xyz.zlatanov.frakkintoasters.backend.game.CommandResult.Accepted;
 import xyz.zlatanov.frakkintoasters.backend.game.CommandResult.Reason;
@@ -35,6 +36,8 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 
+// The scripted turns answer every pause, so the sessions ask for every answer, as the engine in memory does.
+@TestPropertySource(properties = "frakkin.take-only-answers=false")
 class GameSessionsTest extends BackendTest {
 
     @Autowired

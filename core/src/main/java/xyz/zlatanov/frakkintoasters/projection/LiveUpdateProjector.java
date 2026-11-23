@@ -5,6 +5,7 @@ import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ChoiceMade;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.EventInjected;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.FactRecorded;
+import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.OnlyAnswerTaken;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ScopeClosed;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ScopeOpened;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.*;
@@ -33,7 +34,7 @@ import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.PEGASUS_DAMAGE;
  * of {@link GameProjector}: a player's cards show to him, the others see how many (and the colors of Skill Cards). A
  * shuffle never shows its order, and a draw only a count, because the fact that says where the cards went decides who
  * sees them. An event shows its name and its actor, and its fields when they are public ({@link Disclosure}). The scope
- * of a secret event shows only to its actor. Followups never show. Once the game has ended, everything shows.
+ * of a secret event shows only to its actor, and so does that the engine took an answer itself. Followups never show. Once the game has ended, everything shows.
  */
 final class LiveUpdateProjector {
 
@@ -48,6 +49,8 @@ final class LiveUpdateProjector {
     private final List<LogEntry>       entries = new ArrayList<>();
     private       ScopeOpened          openScope;
     private       boolean              openScopeHidden;
+    private       boolean              openScopeAutomatic;
+    private       boolean              nextScopeAutomatic;
     private       List<FactProjection> facts;
 
     LiveUpdateProjector(List<JournalEntry> journal, Viewer viewer) {
@@ -77,6 +80,8 @@ final class LiveUpdateProjector {
             case ScopeOpened opened -> {
                 openScope = opened;
                 openScopeHidden = opened.event() instanceof SecretEvent && !sees(opened.actor());
+                openScopeAutomatic = nextScopeAutomatic && sees(opened.actor());
+                nextScopeAutomatic = false;
                 facts = new ArrayList<>();
             }
             case FactRecorded(int scopeId, Fact fact) -> {
@@ -84,6 +89,7 @@ final class LiveUpdateProjector {
                     // a fact outside a scope of these entries
                     openScope = new ScopeOpened(scopeId, ROOT_SCOPE, null, ROOT_SCOPE);
                     openScopeHidden = false;
+                    openScopeAutomatic = false;
                     facts = new ArrayList<>();
                 }
                 if (!openScopeHidden) {
@@ -99,6 +105,8 @@ final class LiveUpdateProjector {
             // the scope of the injected event follows, and shows it
             case EventInjected ignored -> {
             }
+            // the scope of the answer follows
+            case OnlyAnswerTaken ignored -> nextScopeAutomatic = true;
             case ChoiceMade(int scopeId, int chooser, var option) ->
                     entries.add(new ChoiceLog(scopeId, chooser,
                             seesEverything || viewer.is(chooser) || Disclosure.isPublic(option) ? option : null));
@@ -110,7 +118,7 @@ final class LiveUpdateProjector {
         return new ScopeLog(openScope.scopeId(), openScope.parentId(), openScope.actor(),
                 event == null ? null : event.getClass(),
                 event != null && (seesEverything || Disclosure.isPublic(event)) ? event : null,
-                List.copyOf(facts));
+                List.copyOf(facts), openScopeAutomatic);
     }
 
     // Who holds which character, and who is President, as the facts go.

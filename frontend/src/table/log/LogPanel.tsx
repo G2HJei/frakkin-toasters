@@ -218,6 +218,12 @@ function Entry({ entry, words }: { entry: LogEntry; words: LabelContext }) {
           <Words parts={[source]} />
         </span>
       )}
+      {/* the server answered for him: it was his only answer */}
+      {entry.automatic && (
+        <span className="auto-tag" title="The only answer, taken automatically">
+          automatic
+        </span>
+      )}
       <ArtStrip refs={unique([...recordArt(details), ...(entry.facts ?? []).flatMap(factArt)])} />
       {facts.length > 0 && (
         <ul className="facts">

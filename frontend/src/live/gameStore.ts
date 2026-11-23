@@ -64,8 +64,10 @@ export const useGameStore = create<GameState>((set) => ({
             rejected: null,
             version: state.version + 1,
           };
-        case 'update':
-          return { log: [...state.log, ...(message.update?.entries ?? [])] };
+        case 'update': {
+          const entries = message.update?.entries ?? [];
+          return { log: [...state.log, ...entries], intent: answeredByTheServer(state.intent, entries) ? null : state.intent };
+        }
         case 'log':
           return { log: [...(message.log?.entries ?? [])] };
         case 'rejected':
@@ -80,6 +82,12 @@ export const useGameStore = create<GameState>((set) => ({
   setIntent: (intent) => set({ intent }),
   reset: () => set({ ...initial }),
 }));
+
+// The server takes the only answer of a decision itself, so an intent for the decision the option asked was answered
+// already: it must not answer a later decision that takes the same event.
+function answeredByTheServer(intent: Intent | null, entries: LogEntry[]): boolean {
+  return intent !== null && entries.some((entry) => entry.kind === 'ScopeLog' && entry.automatic && entry.actor === intent.player);
+}
 
 /* the commands, each with the token of the latest game */
 

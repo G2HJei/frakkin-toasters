@@ -1,5 +1,5 @@
 {
-  "formatVersion" : 40,
+  "formatVersion" : 41,
   "types" : {
     "ABetterMachineEvent" : {
       "kind" : "record",
@@ -6276,7 +6276,7 @@
     "JournalEntry" : {
       "kind" : "union",
       "discriminator" : "kind",
-      "members" : [ "ChoiceMade", "EventInjected", "FactRecorded", "ScopeClosed", "ScopeOpened" ]
+      "members" : [ "ChoiceMade", "EventInjected", "FactRecorded", "OnlyAnswerTaken", "ScopeClosed", "ScopeOpened" ]
     },
     "JumpPreparation" : {
       "kind" : "enum",
@@ -7507,6 +7507,19 @@
             "t" : "ref",
             "name" : "Followup"
           }
+        }
+      } ]
+    },
+    "OnlyAnswerTaken" : {
+      "kind" : "record",
+      "tagged" : true,
+      "interfaces" : [ "JournalEntry" ],
+      "components" : [ {
+        "name" : "scopeId",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "scope"
         }
       } ]
     },
@@ -10360,6 +10373,12 @@
             "t" : "ref",
             "name" : "FactProjection"
           }
+        }
+      }, {
+        "name" : "automatic",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
         }
       } ]
     },

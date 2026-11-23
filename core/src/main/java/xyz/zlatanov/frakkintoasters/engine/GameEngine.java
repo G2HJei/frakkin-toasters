@@ -4,6 +4,7 @@ import lombok.val;
 import xyz.zlatanov.frakkintoasters.EventProcessor;
 import xyz.zlatanov.frakkintoasters.engine.PendingInput.AwaitingChoice;
 import xyz.zlatanov.frakkintoasters.engine.PendingInput.AwaitingDecision;
+import xyz.zlatanov.frakkintoasters.engine.answer.LegalAnswers;
 import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
 import xyz.zlatanov.frakkintoasters.engine.journal.GameReplayer;
 import xyz.zlatanov.frakkintoasters.engine.journal.Journal;
@@ -53,6 +54,7 @@ public class GameEngine {
     private Agenda  agenda;
     // where each input began in the journal, so undo goes back to the pause before the last one
     private Deque<Integer> inputStarts = new ArrayDeque<>();
+    private boolean        takesOnlyAnswers;
 
     GameEngine(int playerCount, Randomness randomness, Event first) {
         this(playerCount, null, randomness, first);
@@ -111,6 +113,20 @@ public class GameEngine {
      */
     public static GameEngine restore(Journal journal, long seed) {
         return new GameEngine(new Journal(journal.entries()), seed);
+    }
+
+    /**
+     * From the next input on, the engine answers a decision that has only one legal answer itself, logged under the
+     * decision's player after an {@link JournalEntry.OnlyAnswerTaken}. Undo goes back past it to the pause before. A
+     * choice is always asked: {@code one(...)} collapses a single option, so a choice of one is built on purpose to ask,
+     * e.g. so nobody learns that a player holds no card to play. The pause the engine stands at stays, so turning it on
+     * after a restore changes no journal.
+     *
+     * @return this engine
+     */
+    public GameEngine takeOnlyAnswers() {
+        takesOnlyAnswers = true;
+        return this;
     }
 
     /**
@@ -203,7 +219,7 @@ public class GameEngine {
 
     /**
      * Goes back to the pause before the last input: a decision answered, an option picked, an event injected or an
-     * {@link AnytimeEvent}. A
+     * {@link AnytimeEvent}, not an answer the engine took itself ({@link #takeOnlyAnswers()}). A
      * choice that led to a decision is undone on its own, and a finished game can be undone too.
      *
      * @throws InvalidActionException if there was no input yet
@@ -305,7 +321,11 @@ public class GameEngine {
             switch (frame.followup()) {
                 case Single(PlayerDecisionEvent<?> decision) -> {
                     requireCarriesConstraints(decision);
-                    return;
+                    val only = takesOnlyAnswers ? onlyAnswer(decision) : Optional.<Event>empty();
+                    if (only.isEmpty()) {
+                        return;
+                    }
+                    takeOnlyAnswer(decision, only.get(), frame.parentScope());
                 }
                 case Single(Event event) -> runQueued(event, frame.parentScope());
                 case OneOf oneOf -> {
@@ -331,6 +351,36 @@ public class GameEngine {
         }
         agenda.take();
         run(processor, event, ScopeActor.ofQueued(game, event), parentScope);
+    }
+
+    // A search that couldn't judge a class may have missed an answer, so the player is asked.
+    private Optional<Event> onlyAnswer(PlayerDecisionEvent<?> decision) {
+        val incomplete = new boolean[1];
+        val answers = LegalAnswers.of(game, decision, new LegalAnswers.Listener() {
+            @Override
+            public void crashed(Class<?> type, Event candidate, RuntimeException thrown) {
+                incomplete[0] = true;
+            }
+
+            @Override
+            public void unsupported(Class<?> type, String component, String why) {
+                incomplete[0] = true;
+            }
+        });
+        return incomplete[0] ? Optional.empty() : answers.only();
+    }
+
+    // As submit() runs an answer, but it isn't an input of its own: AgendaReplayer skips it, so undo goes back past it.
+    private void takeOnlyAnswer(PlayerDecisionEvent<?> decision, Event answer, int parentScope) {
+        val processor = ProcessorRegistry.create(answer);
+        try {
+            processor.prepare(game, answer);
+        } catch (InvalidActionException e) {
+            throw new FrakCallTheAdmiralException("The only answer " + answer + " is invalid", e);
+        }
+        journal.recordOnlyAnswer(parentScope);
+        agenda.take();
+        run(processor, answer, decision.playerNumber(), parentScope);
     }
 
     private void run(EventProcessor<?> processor, Event event, int actor, int parentScope) {

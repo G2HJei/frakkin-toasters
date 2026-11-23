@@ -5,6 +5,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 import tools.jackson.databind.JsonNode;
@@ -71,14 +72,20 @@ public class GameSessions {
     private final RandomnessSource                    randomness;
     private final TransactionTemplate                 transaction;
     private final ObjectProvider<ProjectionSink>      sinks;
+    private final boolean                             takeOnlyAnswers;
     private final Cache<UUID, GameSession>            cache = Caffeine.newBuilder()
             .expireAfterAccess(Duration.ofMinutes(30))
             .build();
     private final ConcurrentHashMap<UUID, ReentrantLock> locks = new ConcurrentHashMap<>();
 
+    /**
+     * @param takeOnlyAnswers every engine answers a decision with a single legal answer itself, see
+     *                        {@link GameEngine#takeOnlyAnswers()}
+     */
     public GameSessions(GameBundles bundles, JournalStore store, JournalCodec codec, StateTokens tokens,
                         RandomnessSource randomness, TransactionTemplate transaction,
-                        ObjectProvider<ProjectionSink> sinks) {
+                        ObjectProvider<ProjectionSink> sinks,
+                        @Value("${frakkin.take-only-answers:true}") boolean takeOnlyAnswers) {
         this.bundles = bundles;
         this.store = store;
         this.codec = codec;
@@ -86,6 +93,7 @@ public class GameSessions {
         this.randomness = randomness;
         this.transaction = transaction;
         this.sinks = sinks;
+        this.takeOnlyAnswers = takeOnlyAnswers;
     }
 
     /**
@@ -100,7 +108,7 @@ public class GameSessions {
      */
     public void start(UUID gameBundleId, GameEngine engine) {
         withLock(gameBundleId, () -> {
-            val session = new GameSession(gameBundleId, engine);
+            val session = new GameSession(gameBundleId, withOptions(engine));
             transaction.executeWithoutResult(ignored -> {
                 store.append(gameBundleId, 1, session.journal().entries());
                 bundles.seed(gameBundleId, engine.seed().orElse(null));
@@ -362,9 +370,14 @@ public class GameSessions {
         }
         val journal = store.load(gameBundleId);
         val engine = bundle.seed() == null ? GameEngine.restore(journal) : GameEngine.restore(journal, bundle.seed());
-        val session = new GameSession(gameBundleId, engine);
+        val session = new GameSession(gameBundleId, withOptions(engine));
         cache.put(gameBundleId, session);
         return session;
+    }
+
+    // From the engine's next input on: the pause it stands at stays, so a restored game is still the stored one.
+    private GameEngine withOptions(GameEngine engine) {
+        return takeOnlyAnswers ? engine.takeOnlyAnswers() : engine;
     }
 
     // The type has to fit the decision before anything else is read, and the player comes from the connection.

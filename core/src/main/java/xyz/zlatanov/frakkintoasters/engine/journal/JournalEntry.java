@@ -33,12 +33,6 @@ public sealed interface JournalEntry {
     }
 
     /**
-     * A player picked an option of a {@link Followup.OneOf}.
-     *
-     * @param scopeId the scope of the event that queued the {@code OneOf}
-     * @param option  the picked option
-     */
-    /**
      * A sandbox setup event ran at once, ahead of the pending input. Its scope follows, with the root as its parent.
      */
     record EventInjected(Event event) implements JournalEntry {
@@ -49,6 +43,21 @@ public sealed interface JournalEntry {
         }
     }
 
+    /**
+     * A player picked an option of a {@link Followup.OneOf}.
+     *
+     * @param scopeId the scope of the event that queued the {@code OneOf}
+     * @param option  the picked option
+     */
     record ChoiceMade(int scopeId, int chooser, Followup option) implements JournalEntry {
+    }
+
+    /**
+     * The engine answered the pending decision itself, with the only legal answer it had. The scope of that answer
+     * follows, logged under the decision's player.
+     *
+     * @param scopeId the scope of the event that queued the decision
+     */
+    record OnlyAnswerTaken(int scopeId) implements JournalEntry {
     }
 }

@@ -6,7 +6,7 @@ import { useGameStore } from '../../live/gameStore';
 import { Table, tableContext } from '../tableContext';
 import type { GameProjection, LogEntry } from '../../wire/types';
 
-const scope = (scopeId: number) => ({ kind: 'ScopeLog', scopeId, parentId: 0, actor: 1, event: 'NoOpEvent', details: null, facts: [] }) as LogEntry;
+const scope = (scopeId: number) => ({ kind: 'ScopeLog', scopeId, parentId: 0, actor: 1, event: 'NoOpEvent', details: null, facts: [], automatic: false }) as LogEntry;
 const turnStarted = (scopeId: number, turn: number) =>
   ({ ...scope(scopeId), facts: [{ kind: 'Shown', fact: { kind: 'GameFact.TurnStarted', turn } }] }) as LogEntry;
 
@@ -185,6 +185,16 @@ describe('the log', () => {
 
     fireEvent.click(body.querySelector('.entries > li')!);
     expect([...useFlash.getState().keys]).toEqual([]);
+  });
+
+  it('marks an answer the server took because it was the only one', () => {
+    const taken = { ...scope(2), automatic: true } as LogEntry;
+    const body = renderLog([scope(1), taken]);
+
+    const tags = body.querySelectorAll('.auto-tag');
+    expect(tags).toHaveLength(1);
+    expect(tags[0].closest('li')).toBe(body.querySelectorAll('.entries > li')[1]);
+    expect(tags[0].textContent).toBe('automatic');
   });
 
   it('words what happened to a ship', () => {

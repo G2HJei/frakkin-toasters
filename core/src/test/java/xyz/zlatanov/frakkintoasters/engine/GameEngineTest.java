@@ -11,6 +11,7 @@ import xyz.zlatanov.frakkintoasters.engine.journal.Journal;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ChoiceMade;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.EventInjected;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.FactRecorded;
+import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.OnlyAnswerTaken;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ScopeClosed;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ScopeOpened;
 import xyz.zlatanov.frakkintoasters.event.ActionEvent;
@@ -23,6 +24,7 @@ import xyz.zlatanov.frakkintoasters.event.endgame.CylonsWinEvent;
 import xyz.zlatanov.frakkintoasters.event.location.galactica.CommandEvent;
 import xyz.zlatanov.frakkintoasters.event.location.galactica.ResearchLabEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
+import xyz.zlatanov.frakkintoasters.event.player.DiscardSkillCardsEvent;
 import xyz.zlatanov.frakkintoasters.event.player.DrawSkillCardsEvent;
 import xyz.zlatanov.frakkintoasters.event.player.LeaveBrigEvent;
 import xyz.zlatanov.frakkintoasters.event.player.PlaceInSetupLocationEvent;
@@ -34,6 +36,7 @@ import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Randomness;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 
 import java.util.Collections;
 import java.util.List;
@@ -48,6 +51,7 @@ import static xyz.zlatanov.frakkintoasters.engine.journal.Journal.ROOT_SCOPE;
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DRAW_EXACTLY_2;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.DRAW_EXACTLY_5;
+import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.discardExactly;
 import static xyz.zlatanov.frakkintoasters.state.Team.CYLONS;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.GALACTICA;
@@ -55,6 +59,8 @@ import static xyz.zlatanov.frakkintoasters.state.board.Resource.FOOD;
 import static xyz.zlatanov.frakkintoasters.state.board.Resource.FUEL;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.*;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.EXECUTIVE_ORDER;
+import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.LAUNCH_SCOUT;
 
 class GameEngineTest {
 
@@ -474,6 +480,103 @@ class GameEngineTest {
         // the character choices come from the start of the game
         assertInstanceOf(StartGameEvent.class, engine.pendingScope().orElseThrow().event());
         assertEquals(engine.pendingScope(), GameEngine.restore(engine.journal(), 42L).pendingScope());
+    }
+
+    /* only answers */
+
+    private static final PlayerDecisionEvent<NoOpEvent> PLAYER_1_PASSES = new PlayerDecisionEvent<>(1, NoOpEvent.class);
+    private static final Followup                       PASS_THEN_SELECT = all(single(PLAYER_1_SELECTS),
+            single(PLAYER_1_PASSES), single(PLAYER_2_SELECTS), CYLONS_WIN);
+
+    // The pass is player 1's only answer: it runs under him, after the mark that the engine gave it.
+    @Test
+    void theEngineTakesTheOnlyAnswerOfADecisionItself() {
+        engine = start(PASS_THEN_SELECT).takeOnlyAnswers();
+
+        engine.submit(1, new SelectCharacterEvent(1, SAUL_TIGH));
+
+        assertWaitingFor(new AwaitingDecision(PLAYER_2_SELECTS));
+        val entries = engine.journal().entries();
+        val taken = entries.indexOf(new OnlyAnswerTaken(1));
+        val answer = (ScopeOpened) entries.get(taken + 1);
+        assertEquals(List.of(1, new NoOpEvent(1), 1), List.of(answer.parentId(), answer.event(), answer.actor()));
+        assertRestoresTheSameGame();
+    }
+
+    @Test
+    void anEngineAsksForAnOnlyAnswerUnlessItTakesThem() {
+        engine = start(PASS_THEN_SELECT);
+
+        engine.submit(1, new SelectCharacterEvent(1, SAUL_TIGH));
+
+        assertWaitingFor(new AwaitingDecision(PLAYER_1_PASSES));
+    }
+
+    // It takes them from the next input on, so a restored game stays at its pause.
+    @Test
+    void thePauseTheEngineStandsAtStaysWhenItStartsTakingOnlyAnswers() {
+        engine = start(all(single(PLAYER_1_PASSES), CYLONS_WIN)).takeOnlyAnswers();
+
+        assertWaitingFor(new AwaitingDecision(PLAYER_1_PASSES));
+        engine.submit(1, new NoOpEvent(1));
+        assertEquals(new Finished(CYLONS), engine.status(1));
+    }
+
+    @Test
+    void undoGoesBackPastAnAnswerTheEngineTook() {
+        engine = start(PASS_THEN_SELECT).takeOnlyAnswers();
+        val beforeTheSelection = engine.journal().entries();
+        engine.submit(1, new SelectCharacterEvent(1, SAUL_TIGH));
+        val restored = GameEngine.restore(engine.journal());
+
+        engine.undo();
+        restored.undo();
+
+        assertEquals(beforeTheSelection, engine.journal().entries());
+        assertEquals(beforeTheSelection, restored.journal().entries());
+        assertWaitingFor(new AwaitingDecision(PLAYER_1_SELECTS));
+    }
+
+    // A choice of one option is built to ask: one(...) would run it without asking.
+    @Test
+    void aChoiceOfOneOptionIsAsked() {
+        val pass = new OneOf(Set.of(single(new NoOpEvent(1))));
+        engine = start(all(single(PLAYER_1_SELECTS), pass, CYLONS_WIN)).takeOnlyAnswers();
+
+        engine.submit(1, new SelectCharacterEvent(1, SAUL_TIGH));
+
+        assertWaitingFor(new AwaitingChoice(1, pass.options()));
+    }
+
+    // Discarding the whole hand has one way, discarding one of two equal cards two: he picks by position.
+    @Test
+    void aPickOfEveryElementIsTakenAndAPickAmongEqualCardsIsAsked() {
+        val scout = new SkillCard(1, LAUNCH_SCOUT);
+        val discardOne = new PlayerDecisionEvent<>(1, DiscardSkillCardsEvent.class, discardExactly(1));
+        engine = start(all(
+                single(PLAYER_1_SELECTS),
+                all(new GiveSkillCardEvent(1, scout), new GiveSkillCardEvent(1, new SkillCard(2, EXECUTIVE_ORDER))),
+                single(new PlayerDecisionEvent<>(1, DiscardSkillCardsEvent.class, discardExactly(2))),
+                all(new GiveSkillCardEvent(1, scout), new GiveSkillCardEvent(1, scout)),
+                single(discardOne),
+                CYLONS_WIN)).takeOnlyAnswers();
+
+        engine.submit(1, new SelectCharacterEvent(1, SAUL_TIGH));
+
+        assertWaitingFor(new AwaitingDecision(discardOne));
+        assertEquals(List.of(scout, scout), engine.view().player(1).skillCards().cards());
+        assertRestoresTheSameGame();
+    }
+
+    @Test
+    void aJournalThatEndsBeforeTheOnlyAnswerRanCantBeRestored() {
+        engine = start(PASS_THEN_SELECT).takeOnlyAnswers();
+        engine.submit(1, new SelectCharacterEvent(1, SAUL_TIGH));
+        val entries = engine.journal().entries();
+
+        val upToTheMark = new Journal(entries.subList(0, entries.indexOf(new OnlyAnswerTaken(1)) + 1));
+
+        assertThrows(IllegalArgumentException.class, () -> GameEngine.restore(upToTheMark));
     }
 
     private static GameEngine start(Followup script) {

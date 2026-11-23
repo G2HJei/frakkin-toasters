@@ -44,7 +44,7 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.STRATEGIC_PLANNING;
 
 // A sandbox over the web socket: one user plays every seat, undoes, exports, imports and sets up scenarios.
-@SpringBootTest(webEnvironment = RANDOM_PORT)
+@SpringBootTest(webEnvironment = RANDOM_PORT, properties = "frakkin.take-only-answers=false")
 @ActiveProfiles("dev")
 @Import(TestcontainersConfiguration.class)
 class SandboxLiveTest {

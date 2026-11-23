@@ -20,4 +20,6 @@ spring:
 frakkin:
   # Hashes the sequence of a game into the token a client echoes. Set it in production.
   token-secret: ${TOKEN_SECRET:local-development-token-secret}
+  # The engine answers a decision that has a single legal answer itself, and the log marks it.
+  take-only-answers: true
 

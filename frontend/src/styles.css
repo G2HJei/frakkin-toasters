@@ -1432,6 +1432,17 @@ details > summary {
   white-space: nowrap;
 }
 
+/* an answer the server took for its player: his only one */
+.table-page .log .auto-tag {
+  margin-left: 6px;
+  padding: 0 5px;
+  font-size: 0.85em;
+  font-style: italic;
+  color: var(--muted);
+  border: 1px dashed rgba(139, 150, 165, 0.5);
+  white-space: nowrap;
+}
+
 /* the players' mats: no panel around them, each mat has the cut corners and the edge */
 
 .players .mats {

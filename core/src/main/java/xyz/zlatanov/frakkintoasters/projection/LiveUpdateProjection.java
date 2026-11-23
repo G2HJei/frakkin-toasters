@@ -41,12 +41,14 @@ public record LiveUpdateProjection(List<LogEntry> entries) {
     /**
      * An event that ran.
      *
-     * @param event   the type of the event
-     * @param details the event with its fields, {@code null} when they aren't public: everyone sees the name and the
-     *                actor, and the facts tell what happened
+     * @param event     the type of the event
+     * @param details   the event with its fields, {@code null} when they aren't public: everyone sees the name and the
+     *                  actor, and the facts tell what happened
+     * @param automatic the engine answered the actor's decision with it, his only answer. Only he sees it: that it was
+     *                  his only one can tell what he holds
      */
     public record ScopeLog(int scopeId, int parentId, int actor, Class<? extends Event> event, Event details,
-                           List<FactProjection> facts) implements LogEntry {
+                           List<FactProjection> facts, boolean automatic) implements LogEntry {
     }
 
     /**

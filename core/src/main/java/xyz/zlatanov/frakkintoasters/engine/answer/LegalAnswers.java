@@ -7,6 +7,7 @@ import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.state.view.GameView;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The legal answers to a decision, for the player it asks. Every candidate comes from the game as it is and is judged
@@ -99,6 +100,28 @@ public record LegalAnswers(List<Event> events, List<ShapedAnswer> shapes) {
 
     public boolean isEmpty() {
         return events.isEmpty() && shapes.isEmpty();
+    }
+
+    /**
+     * @return the answer when there is no other: a single concrete answer, or a single shape that takes every element
+     * of its pick, in any order
+     */
+    public Optional<Event> only() {
+        if (events.size() == 1 && shapes.isEmpty()) {
+            return Optional.of(events.getFirst());
+        }
+        if (events.isEmpty() && shapes.size() == 1 && hasOneFilling(shapes.getFirst().pick())) {
+            // the example of a shape is its smallest size, here every element
+            return Optional.of(shapes.getFirst().example());
+        }
+        return Optional.empty();
+    }
+
+    // By position, as the player picks: two equal cards in his hand are two ways to discard one, so an answer taken for
+    // him tells nobody that they are equal.
+    private static boolean hasOneFilling(Pick pick) {
+        val count = pick.elements().size();
+        return pick.min() == count && pick.max() == count && (!pick.ordered() || count <= 1);
     }
 
     /**
