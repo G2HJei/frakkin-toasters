@@ -2,6 +2,7 @@ import { fireEvent, render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { TurnPanel } from './TurnPanel';
 import { RevealLayer, useReveal } from '../reveal';
+import { usePreview } from '../../art/Art';
 import { Table, tableContext } from '../tableContext';
 import type { GameProjection } from '../../wire/types';
 
@@ -83,7 +84,7 @@ describe('the turn', () => {
     useReveal.getState().hide();
   });
 
-  it("shows a Crisis Card's skill check under the card, without the card again and without a meter", () => {
+  it("shows a Crisis Card at full size with its skill check beside it, without the card again and without a meter", () => {
     const skillCheck = {
       type: 'CRIPPLED_RAIDER',
       targetPlayer: null,
@@ -93,14 +94,32 @@ describe('the turn', () => {
       totalStrength: null,
     };
     const panel = renderPanel({ step: 'CRISIS', currentPlayer: 1, actingPlayer: 1, crisisCards: ['CRIPPLED_RAIDER'] }, { skillCheck });
+    const cards = panel.querySelector('section.turn [aria-label="cards of the turn"]')!;
     const check = panel.querySelector('section.turn [aria-label="skill check"]')!;
 
-    expect(check.previousElementSibling?.querySelector('small')?.textContent).toBe('Crisis');
+    expect([...cards.querySelectorAll('.card-tile')].map((tile) => tile.className)).toEqual(['tile card-tile size-full crisis']);
+    expect(cards.nextElementSibling?.contains(check)).toBe(true);
     expect(check.querySelector('.block-text')?.textContent).toBe('Difficulty 10');
     expect(check.querySelector('.card-tile')).toBeNull();
     expect([...check.querySelectorAll('.row-name')].map((row) => row.textContent)).toEqual(['Before the check: Laura Roslin', 'Face down']);
     expect(panel.querySelector('.meter-bar')).toBeNull();
-    expect(panel.querySelector('section.turn .block-text')?.textContent).toBe('Crippled Raider');
+  });
+
+  it('shows the Crisis Cards without a label or their names, which the step and the cards show', () => {
+    const panel = renderPanel({ step: 'ACTIVATE_CYLON_SHIPS', currentPlayer: 1, actingPlayer: 1, crisisCards: ['FULFILLER_OF_PROPHECY', 'CRIPPLED_RAIDER'] });
+    const cards = panel.querySelector('section.turn [aria-label="cards of the turn"]')!;
+
+    expect([...cards.querySelectorAll('.card-tile img')].map((image) => image.getAttribute('alt'))).toEqual(['Fulfiller of Prophecy', 'Crippled Raider']);
+    expect(panel.querySelector('section.turn small')).toBeNull();
+    expect(panel.textContent).not.toContain('Fulfiller of Prophecy');
+    expect(panel.textContent).not.toContain('Crippled Raider');
+  });
+
+  it('opens no preview of a Crisis Card, which shows at full size', () => {
+    const panel = renderPanel({ step: 'CRISIS', currentPlayer: 1, actingPlayer: 1, crisisCards: ['CRIPPLED_RAIDER'] });
+
+    fireEvent.mouseEnter(panel.querySelector('[aria-label="cards of the turn"] img')!);
+    expect(usePreview.getState().art).toBeNull();
   });
 
   it('shows the cards an Investigative Committee put face up, with who played them', () => {
@@ -120,18 +139,33 @@ describe('the turn', () => {
     expect(rows[0].querySelectorAll('.card-tile')).toHaveLength(1);
   });
 
-  it("shows a location's skill check with its location", () => {
+  // the images of the cards of the turn, by their names
+  function turnCards(panel: HTMLElement) {
+    return [...panel.querySelectorAll('section.turn [aria-label="cards of the turn"] .card-tile.size-full img')].map((image) => image.getAttribute('alt'));
+  }
+
+  it("shows a location's skill check beside its location at full size, without its name", () => {
     const skillCheck = { type: 'ADMIRALS_QUARTERS', targetPlayer: 2, difficulty: 7, cards: { count: 0, colors: null, cards: null }, totalStrength: 8, result: 'PASS' };
     const panel = renderPanel({ step: 'ACTION', currentPlayer: 1, actingPlayer: 1 }, { skillCheck });
     const check = panel.querySelector('section.turn [aria-label="skill check"]')!;
 
-    expect(check.querySelector('.card-tile')).not.toBeNull();
-    expect([...check.querySelectorAll('.block-text > *')].map((line) => line.textContent)).toEqual([
-      'Admirals Quarters',
-      'about Laura Roslin',
-      'Difficulty 7',
-      'Strength 8 · Pass',
-    ]);
+    expect(turnCards(panel)).toEqual(["Admiral's Quarters"]);
+    expect(check.querySelector('.card-tile')).toBeNull();
+    expect([...check.querySelectorAll('.block-text > *')].map((line) => line.textContent)).toEqual(['about Laura Roslin', 'Difficulty 7', 'Strength 8 · Pass']);
+  });
+
+  it("shows a Super Crisis Card's skill check beside the card at full size", () => {
+    const skillCheck = { type: 'CYLON_INTRUDERS', targetPlayer: null, difficulty: 18, cards: { count: 0, colors: null, cards: null }, totalStrength: null };
+    const panel = renderPanel({ step: 'ACTION', currentPlayer: 1, actingPlayer: 1 }, { skillCheck });
+
+    expect(turnCards(panel)).toEqual(['Cylon Intruders']);
+  });
+
+  it("shows a skill check about none of the turn's Crisis Cards with its card after them", () => {
+    const skillCheck = { type: 'BRIG', targetPlayer: 1, difficulty: 7, cards: { count: 0, colors: null, cards: null }, totalStrength: null };
+    const panel = renderPanel({ step: 'ACTIVATE_CYLON_SHIPS', currentPlayer: 1, actingPlayer: 1, crisisCards: ['CRIPPLED_RAIDER'] }, { skillCheck });
+
+    expect(turnCards(panel)).toEqual(['Crippled Raider', 'Brig']);
   });
 
   it('says when the Politics Cards count positive', () => {

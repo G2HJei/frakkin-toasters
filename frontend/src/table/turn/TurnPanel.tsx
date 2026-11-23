@@ -16,8 +16,9 @@ const STEPS: TurnStep[] = ['RECEIVE_SKILLS', 'MOVEMENT', 'ACTION', 'CRISIS', 'AC
 /**
  * The game, named after the logo on the panel's tab, with the connection beside it while it isn't open, and the turn
  * once one has started: the turn's number with the current character, and the acting one beside it when it's another, the steps
- * as icons (the step the turn is at named beside its icon), the turn's Crisis Cards, the skill check, the die, an open
- * interrupt window, and what left the game.
+ * as icons (the step the turn is at named beside its icon), then the turn's Crisis Cards and the card of a skill check
+ * about none of them at full size, with the rest beside them: the skill check, the die, an open interrupt window, and
+ * what left the game.
  */
 export function TurnPanel({ name, connection }: { name: string; connection: ConnectionState }) {
   const table = useTable();
@@ -30,6 +31,11 @@ export function TurnPanel({ name, connection }: { name: string; connection: Conn
   // the turn line names the character without the version of his sheet
   const turnName = (playerNumber: number) => table.playerName(playerNumber).replace(/ \(alternate\)$/, '');
   const die = dieArt(turn?.dieRoll?.value);
+  const crisisCards = turn?.crisisCards ?? [];
+  // a skill check about none of the turn's Crisis Cards lies beside them with its own card: its location, a Super Crisis Card
+  const check = game.skillCheck;
+  const checkCard =
+    check && !crisisCards.some((card) => card === check.type) ? { art: skillCheckArt(check.type), label: constantLabel('SkillCheckType', check.type) } : null;
   const { changes, version } = useChanges();
   return (
     <section className="panel cf turn" aria-label="turn">
@@ -65,68 +71,69 @@ export function TurnPanel({ name, connection }: { name: string; connection: Conn
           {turn.returnsToCrisisStep ? 'The turn returns to the Crisis step.' : ''}
         </p>
       )}
-      {turn && (turn.crisisCards ?? []).length > 0 && (
-        <Block label="Crisis">
-          <span className="cards">
-            {(turn.crisisCards ?? []).map((card, index) => (
-              <CardTile key={index} art={cardArt('CrisisCard', card)} label={constantLabel('CrisisCard', card)} size="md" className="crisis" />
+      {/* the cards at full size, side by side, each card naming itself; the rest beside them */}
+      <div className="turn-body">
+        {(crisisCards.length > 0 || checkCard) && (
+          <div className="turn-cards" role="group" aria-label="cards of the turn">
+            {crisisCards.map((card, index) => (
+              <CardTile key={index} art={cardArt('CrisisCard', card)} label={constantLabel('CrisisCard', card)} size="full" className="crisis" />
             ))}
-          </span>
-          <span className="block-text">
-            <b>{(turn.crisisCards ?? []).map((card) => constantLabel('CrisisCard', card)).join(', ')}</b>
-          </span>
-        </Block>
-      )}
-      <SkillCheck />
-      {(game.crisisCardsInPlay ?? []).length > 0 && (
-        <Block label="In play">
-          <span className="cards">
-            {(game.crisisCardsInPlay ?? []).map((type, index) => (
-              <CardTile key={index} art={skillCheckArt(type)} label={constantLabel('SkillCheckType', type)} size="xs" className="crisis" />
-            ))}
-          </span>
-        </Block>
-      )}
-      {turn?.dieRoll && (
-        <Block label="Die roll">
-          <span className="die-roll">
-            {turn.dieRoll.value === null ? (
-              <span className="muted">not rolled yet</span>
-            ) : (
-              <>
-                {/* a new roll tumbles once, keyed by the game message */}
-                <span key={changes.rolled ? `rolled-${version}` : 'die'} className={changes.rolled ? 'die-tumble' : undefined}>
-                  {die ? <ArtImg art={die} className="die-face" /> : <span className="die">{turn.dieRoll.value}</span>}
-                </span>
-                {turn.dieRoll.modifier !== 0 && (
-                  <span className="modifier">
-                    {turn.dieRoll.modifier > 0 ? '+' : '−'}
-                    {Math.abs(turn.dieRoll.modifier)}
-                  </span>
+            {checkCard && <CardTile art={checkCard.art} label={checkCard.label} size="full" />}
+          </div>
+        )}
+        <div className="turn-details">
+          <SkillCheck />
+          {(game.crisisCardsInPlay ?? []).length > 0 && (
+            <Block label="In play">
+              <span className="cards">
+                {(game.crisisCardsInPlay ?? []).map((type, index) => (
+                  <CardTile key={index} art={skillCheckArt(type)} label={constantLabel('SkillCheckType', type)} size="xs" className="crisis" />
+                ))}
+              </span>
+            </Block>
+          )}
+          {turn?.dieRoll && (
+            <Block label="Die roll">
+              <span className="die-roll">
+                {turn.dieRoll.value === null ? (
+                  <span className="muted">not rolled yet</span>
+                ) : (
+                  <>
+                    {/* a new roll tumbles once, keyed by the game message */}
+                    <span key={changes.rolled ? `rolled-${version}` : 'die'} className={changes.rolled ? 'die-tumble' : undefined}>
+                      {die ? <ArtImg art={die} className="die-face" /> : <span className="die">{turn.dieRoll.value}</span>}
+                    </span>
+                    {turn.dieRoll.modifier !== 0 && (
+                      <span className="modifier">
+                        {turn.dieRoll.modifier > 0 ? '+' : '−'}
+                        {Math.abs(turn.dieRoll.modifier)}
+                      </span>
+                    )}
+                    <span className="arrow">→</span>
+                    <span className="die result" title="the result">
+                      {turn.dieRoll.result}
+                    </span>
+                  </>
                 )}
-                <span className="arrow">→</span>
-                <span className="die result" title="the result">
-                  {turn.dieRoll.result}
-                </span>
-              </>
-            )}
-            {(turn.dieRoll.cards ?? []).map((type, index) => (
-              <CardTile key={index} art={skillTypeArt(type)} label={constantLabel('SkillCardType', type)} size="xs" />
-            ))}
-          </span>
-        </Block>
-      )}
-      {turn?.interruptWindow && <InterruptWindow />}
-      {turn && (turn.resolvedInterruptCards ?? []).length > 0 && (
-        <Block label="Resolved this turn">
-          <span className="cards">
-            {(turn.resolvedInterruptCards ?? []).map((type, index) => (
-              <CardTile key={index} art={skillTypeArt(type)} label={constantLabel('SkillCardType', type)} size="xs" />
-            ))}
-          </span>
-        </Block>
-      )}
-      <OutOfTheGame />
+                {(turn.dieRoll.cards ?? []).map((type, index) => (
+                  <CardTile key={index} art={skillTypeArt(type)} label={constantLabel('SkillCardType', type)} size="xs" />
+                ))}
+              </span>
+            </Block>
+          )}
+          {turn?.interruptWindow && <InterruptWindow />}
+          {turn && (turn.resolvedInterruptCards ?? []).length > 0 && (
+            <Block label="Resolved this turn">
+              <span className="cards">
+                {(turn.resolvedInterruptCards ?? []).map((type, index) => (
+                  <CardTile key={index} art={skillTypeArt(type)} label={constantLabel('SkillCardType', type)} size="xs" />
+                ))}
+              </span>
+            </Block>
+          )}
+          <OutOfTheGame />
+        </div>
+      </div>
     </section>
   );
 }
@@ -208,8 +215,9 @@ function OutOfTheGame() {
 }
 
 /**
- * The skill check: its card, the difficulty, who played before it, the cards an "Investigative Committee" shows face
- * up, the face-down pile (counted; a sandbox shows it on hover), the piles once revealed, the strength and the result.
+ * The skill check, beside its card: the difficulty, who played before it, the cards an "Investigative Committee" shows
+ * face up, the face-down pile (counted; a sandbox shows it on hover), the piles once revealed, the strength and the
+ * result.
  */
 function SkillCheck() {
   const table = useTable();
@@ -217,17 +225,11 @@ function SkillCheck() {
   if (!check) {
     return null;
   }
-  const name = constantLabel('SkillCheckType', check.type);
-  // a Crisis Card's check is about the card the Crisis block shows just above, a location's check shows its location
-  const fromCrisis = (table.game?.turn?.crisisCards ?? []).some((card) => card === check.type);
-  const subject = fromCrisis ? null : skillCheckArt(check.type);
   return (
     <div className="block skill-check" role="group" aria-label="skill check">
       <small>Skill check</small>
       <div className="block-body">
-        {subject && <CardTile art={subject} label={name} size="md" />}
         <span className="block-text">
-          {!fromCrisis && <b>{name}</b>}
           {check.targetPlayer !== null && <span>about {table.playerName(check.targetPlayer)}</span>}
           {check.emergencyDeclared && <span>emergency declared</span>}
           {check.politicsCountPositive && <span>Politics counts positive</span>}

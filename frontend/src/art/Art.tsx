@@ -83,9 +83,13 @@ export function ArtImg({ art, className = '', preview = true }: { art: ArtRef; c
   );
 }
 
-export type CardSize = 'xs' | 'sm' | 'md' | 'lg';
+// `full` is the card as large as its image, smaller only where its place is narrower
+export type CardSize = 'xs' | 'sm' | 'md' | 'lg' | 'full';
 
-/** A card face up: its image, or its name where it has none. A face-up card is a `tile`, a face-down one a `tile back`. */
+/**
+ * A card face up: its image, or its name where it has none. A face-up card is a `tile`, a face-down one a `tile back`.
+ * A card at full size has no preview, which would show the same image again, unless the preview shows more parts.
+ */
 export function CardTile({ art, label, size = 'sm', className = '', caption }: {
   art: ArtRef | null;
   label: string;
@@ -103,7 +107,7 @@ export function CardTile({ art, label, size = 'sm', className = '', caption }: {
   }
   return (
     <span className={`tile card-tile size-${size} ${className}`.trim()}>
-      <ArtImg art={art} />
+      <ArtImg art={art} preview={size !== 'full' || art.preview.length > 1} />
       {caption && <span className="card-caption">{caption}</span>}
     </span>
   );
