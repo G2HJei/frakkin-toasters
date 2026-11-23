@@ -68,9 +68,10 @@ final class AnswerClasses {
                 .filter(Class::isRecord)
                 .filter(type -> !Modifier.isAbstract(type.getModifiers()))
                 .filter(ProcessorRegistry::hasProcessor)
-                // Neither is an answer: submit rejects a sandbox event and runs an anytime event ahead of the decision.
+                // Neither answers a decision: submit rejects a sandbox event and runs an anytime event ahead of it. The
+                // anytime events are listed only on their own, as what a player may do at any pause.
                 .filter(type -> !SandboxEvent.class.isAssignableFrom(type))
-                .filter(type -> !AnytimeEvent.class.isAssignableFrom(type))
+                .filter(type -> action == AnytimeEvent.class || !AnytimeEvent.class.isAssignableFrom(type))
                 .filter(type -> type != PlayerDecisionEvent.class)
                 .sorted(Comparator.comparing(Class::getName))
                 .map(AnswerClasses::answerClass)

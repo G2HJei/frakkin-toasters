@@ -47,6 +47,8 @@ import java.util.Optional;
  * shows), and a field that holds cards is {@code null} for a viewer who may not see them.
  *
  * @param input   what the game waits for, as this viewer may know it. {@code null} once the game has ended
+ * @param anytime what the players the viewer acts for may do now without being asked: his own, every player's in a
+ *                sandbox, only the players who can do something. Empty once the game has ended
  * @param outcome {@code null} while the game goes on
  */
 public record GameProjection(
@@ -70,6 +72,7 @@ public record GameProjection(
         List<Character> removedCharacters,
         List<ShipProjection> destroyedShips,
         InputProjection input,
+        List<AnytimeAnswers> anytime,
         Outcome outcome) {
 
     public static GameProjection of(GameView game, Optional<PendingInput> pendingInput, Viewer viewer) {
@@ -273,6 +276,12 @@ public record GameProjection(
     }
 
     public record WaitingFor(int player, Topic topic) implements InputProjection {
+    }
+
+    /**
+     * The {@code AnytimeEvent}s a player may submit now, at any pause and whoever is asked.
+     */
+    public record AnytimeAnswers(int player, LegalAnswers answers) {
     }
 
     /**

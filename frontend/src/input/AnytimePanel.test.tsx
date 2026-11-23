@@ -4,16 +4,21 @@ import { AnytimePanel } from './AnytimePanel';
 import { Table, tableContext } from '../table/tableContext';
 import type { GameProjection } from '../wire/types';
 
-// Cavil holds two Motive Cards while William Adama is asked to choose.
-const game = (viewer: unknown) =>
+const reveal = { kind: 'RevealMotiveCardEvent', playerNumber: 2, card: 'END_THE_CHASE' };
+
+// Cavil holds two Motive Cards while William Adama is asked to choose; the engine lists what he may reveal.
+const game = (viewer: unknown, anytime: unknown[]) =>
   ({
     viewer,
     players: [
       { number: 1, character: 'WILLIAM_ADAMA', motiveCards: null },
-      { number: 2, character: 'CAVIL', motiveCards: { count: 2, revealed: [], cards: ['END_THE_CHASE', 'MAKE_AN_ALLY'] } },
+      { number: 2, character: 'CAVIL', motiveCards: { count: 2, revealed: [], cards: ['END_THE_CHASE', 'KEEP_THEM_DOCILE'] } },
     ],
     input: { kind: 'WaitingFor', player: 1 },
+    anytime,
   }) as unknown as GameProjection;
+
+const cavilMayReveal = [{ player: 2, answers: { events: [reveal], shapes: [] } }];
 
 function renderPanel(projection: GameProjection, onSubmit = vi.fn()) {
   return render(
@@ -24,30 +29,27 @@ function renderPanel(projection: GameProjection, onSubmit = vi.fn()) {
 }
 
 describe('acting at any time', () => {
-  it('lets a Cylon Leader reveal one of his Motive Cards while another player is asked', () => {
+  it('lets a Cylon Leader reveal the Motive Card the engine allows while another player is asked', () => {
     const onSubmit = vi.fn();
-    const { container } = renderPanel(game({ kind: 'PlayerViewer', playerNumber: 2 }), onSubmit);
+    renderPanel(game({ kind: 'PlayerViewer', playerNumber: 2 }, cavilMayReveal), onSubmit);
 
-    // the panel is closed until opened, so the form is found by its field
-    const select = container.querySelector('[data-field="card"] select') as HTMLSelectElement;
-    // his two cards, and "none" for the nullable field
-    expect(Array.from(select.options).map((option) => option.value)).toEqual(['', 'END_THE_CHASE', 'MAKE_AN_ALLY']);
-    fireEvent.change(select, { target: { value: 'MAKE_AN_ALLY' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Reveal', hidden: true }));
+    // the card whose requirement is met, not the one that waits for the end
+    expect(screen.queryByRole('button', { name: /Keep Them Docile/ })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /End the Chase/ }));
 
-    expect(onSubmit).toHaveBeenCalledWith({ kind: 'RevealMotiveCardEvent', playerNumber: 2, card: 'MAKE_AN_ALLY' });
+    expect(onSubmit).toHaveBeenCalledWith(reveal);
   });
 
-  it('shows nothing to a player without Motive Cards', () => {
-    renderPanel(game({ kind: 'PlayerViewer', playerNumber: 1 }));
+  it('shows nothing while the engine lists nothing, Motive Cards in hand or not', () => {
+    renderPanel(game({ kind: 'PlayerViewer', playerNumber: 2 }, []));
 
     expect(screen.queryByRole('region', { name: 'at any time' })).toBeNull();
   });
 
-  it('lets a sandbox reveal for any player who holds one', () => {
-    renderPanel(game({ kind: 'Sandbox' }));
+  it('names the player a sandbox acts for', () => {
+    renderPanel(game({ kind: 'Sandbox' }, cavilMayReveal));
 
-    expect(screen.getByText(/Cavil: reveal a Motive Card/)).toBeTruthy();
-    expect(screen.queryByText(/William Adama: reveal/)).toBeNull();
+    expect(screen.getByRole('group', { name: 'Cavil' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /End the Chase/ })).toBeTruthy();
   });
 });

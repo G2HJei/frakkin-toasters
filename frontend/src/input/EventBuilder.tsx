@@ -12,8 +12,6 @@ export interface EventBuilderProps {
   playerNumber: number | null;
   constraints?: string[];
   submitLabel?: string;
-  // narrows the constants an enum offers, by the enum's name (see Field)
-  choices?: Record<string, string[]>;
   onSubmit(event: EventValue): void;
 }
 
@@ -21,7 +19,7 @@ export interface EventBuilderProps {
  * A form made from the schema for the event a decision asks for. It builds exactly the JSON the codec reads; the
  * server fills in the player and the constraints.
  */
-export function EventBuilder({ action, playerNumber, constraints = [], submitLabel = 'Send', choices, onSubmit }: EventBuilderProps) {
+export function EventBuilder({ action, playerNumber, constraints = [], submitLabel = 'Send', onSubmit }: EventBuilderProps) {
   const table = useTable();
   const location = table.game?.players?.find((player) => player.number === playerNumber)?.location ?? null;
   const held = heldQuorumCards(table.game, playerNumber).join(',');
@@ -36,11 +34,11 @@ export function EventBuilder({ action, playerNumber, constraints = [], submitLab
     return [...events].sort((a, b) => Number(recordNamed(b)?.location === location) - Number(recordNamed(a)?.location === location));
   }, [action, location, held, heldMutiny]);
   const [kind, setKind] = useState<string>(kinds[0] ?? action);
-  const [value, setValue] = useState<EventValue>(() => narrowed(emptyEvent(kinds[0] ?? action, playerNumber), choices));
+  const [value, setValue] = useState<EventValue>(() => emptyEvent(kinds[0] ?? action, playerNumber));
 
   const choose = (next: string) => {
     setKind(next);
-    setValue(narrowed(emptyEvent(next, playerNumber), choices));
+    setValue(emptyEvent(next, playerNumber));
   };
   const missing = missingFields(value);
   const wanted = expectedCount(constraints);
@@ -80,7 +78,6 @@ export function EventBuilder({ action, playerNumber, constraints = [], submitLab
           component={component}
           value={value[component.name] ?? null}
           owner={kind}
-          choices={choices}
           onChange={(next) => setValue({ ...value, [component.name]: next })}
         />
       ))}
@@ -116,21 +113,6 @@ export function pickedCount(value: Record<string, unknown>): number | null {
     }
   }
   return null;
-}
-
-// An enum field starts at the first constant it offers.
-function narrowed(event: EventValue, choices: Record<string, string[]> | undefined): EventValue {
-  if (!choices) {
-    return event;
-  }
-  const value: EventValue = { ...event };
-  for (const component of recordNamed(event.kind)?.components ?? []) {
-    const offered = component.type.t === 'enum' ? choices[component.type.name ?? ''] : undefined;
-    if (offered && !offered.includes(value[component.name] as string)) {
-      value[component.name] = offered[0] ?? null;
-    }
-  }
-  return value;
 }
 
 // The Mutiny Cards in the player's hand. Only a narrowing, the engine judges.

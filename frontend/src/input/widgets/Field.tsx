@@ -17,16 +17,14 @@ export interface FieldProps {
   onChange(value: Value): void;
   // the record the field belongs to, so a card picker knows a setup from an answer
   owner: string;
-  // the constants an enum offers, by the enum's name, e.g. the Motive Cards a Cylon Leader holds; all of them otherwise
-  choices?: Record<string, string[]>;
 }
 
-export function Field({ component, value, onChange, owner, choices }: FieldProps) {
+export function Field({ component, value, onChange, owner }: FieldProps) {
   const label = humanizeType(component.name);
   return (
     <div className="field" data-field={component.name}>
       <span className="field-name">{label}</span>
-      <Widget type={component.type} value={value} onChange={onChange} owner={owner} name={label} choices={choices} />
+      <Widget type={component.type} value={value} onChange={onChange} owner={owner} name={label} />
     </div>
   );
 }
@@ -37,7 +35,6 @@ interface WidgetProps {
   onChange(value: Value): void;
   owner: string;
   name: string;
-  choices?: Record<string, string[]>;
 }
 
 function Widget(props: WidgetProps) {
@@ -130,7 +127,7 @@ function NumberInput(props: WidgetProps) {
 
 function EnumSelect(props: WidgetProps) {
   const { type, value, onChange } = props;
-  const values = props.choices?.[type.name ?? ''] ?? enumValues(type.name ?? '');
+  const values = enumValues(type.name ?? '');
   const art = value === null ? null : enumArt(type.name ?? '', value as string);
   return (
     <>

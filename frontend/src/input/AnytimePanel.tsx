@@ -1,8 +1,6 @@
-import { useGameStore } from '../live/gameStore';
 import { useTable } from '../table/tableContext';
-import { schema } from '../wire/schema';
-import type { GameProjection } from '../wire/types';
-import { EventBuilder } from './EventBuilder';
+import { Groups } from './AnswerPanel';
+import { anytimeMoves } from './answers';
 import type { EventValue } from './eventModel';
 
 export interface AnytimePanelProps {
@@ -10,50 +8,30 @@ export interface AnytimePanelProps {
 }
 
 /**
- * What a player may do at any pause without being asked (`AnytimeEvent`): a Cylon Leader reveals a Motive Card, even
- * while the game waits for someone else. A player sees his own; a sandbox every player's. The pending input stays as it
- * is; the engine judges whether the requirement is met.
+ * What a player may do at any pause without being asked (`AnytimeEvent`), e.g. a Cylon Leader reveals a Motive Card
+ * whose requirement is met, even while the game waits for someone else. The engine lists them with the game
+ * (`anytime`): a player gets his own, a sandbox every player's, and the panel shows only while there is one. The pending
+ * input stays as it is.
  */
 export function AnytimePanel({ onSubmit }: AnytimePanelProps) {
   const table = useTable();
-  const version = useGameStore((state) => state.version);
-  const game = table.game;
-  if (!game || game.outcome || schema.lists.anytimeEvents.length === 0) {
-    return null;
-  }
-  const actors = anytimeActors(game);
+  const actors = (table.game?.anytime ?? [])
+    .flatMap((entry) => (entry ? [{ player: entry.player, moves: anytimeMoves(entry.answers) }] : []))
+    .filter((actor) => actor.moves.length > 0);
   if (actors.length === 0) {
     return null;
   }
+  const sandbox = table.game?.viewer?.kind === 'Sandbox';
   return (
     <section className="panel cf anytime-panel" aria-label="at any time">
-      {actors.map(({ playerNumber, motiveCards }) => (
-        <details key={playerNumber}>
-          <summary>{table.playerName(playerNumber)}: reveal a Motive Card</summary>
-          <EventBuilder
-            key={`${version}-${playerNumber}`}
-            action="AnytimeEvent"
-            playerNumber={playerNumber}
-            choices={{ MotiveCard: motiveCards }}
-            submitLabel="Reveal"
-            onSubmit={onSubmit}
-          />
-        </details>
+      <h2>At any time</h2>
+      {actors.map(({ player, moves }) => (
+        <div key={player} role="group" aria-label={table.playerName(player)}>
+          {/* a sandbox acts for every seat */}
+          {sandbox && <p className="pool-name">{table.playerName(player)}</p>}
+          <Groups moves={moves} onMove={(move) => move.event && onSubmit(move.event)} />
+        </div>
       ))}
     </section>
   );
-}
-
-// The players the viewer acts for who hold a Motive Card face down: only a narrowing, the engine judges.
-function anytimeActors(game: GameProjection): { playerNumber: number; motiveCards: string[] }[] {
-  const viewer = game.viewer;
-  const players = (game.players ?? []).filter((player) =>
-    viewer?.kind === 'Sandbox' || (viewer?.kind === 'PlayerViewer' && viewer.playerNumber === player.number),
-  );
-  return players
-    .map((player) => ({
-      playerNumber: player.number,
-      motiveCards: (player.motiveCards?.cards ?? []).flatMap((card) => (card ? [card] : [])),
-    }))
-    .filter((actor) => actor.motiveCards.length > 0);
 }

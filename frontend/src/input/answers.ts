@@ -42,6 +42,12 @@ export function moves(input: InputProjection | null | undefined): Move[] {
   });
 }
 
+/** What a player may do at any pause (`AnytimeEvent`): answers to no decision, each submitted as it is. */
+export function anytimeMoves(answers: LegalAnswers | null | undefined): Move[] {
+  // a shape's picker belongs to the pending input's panel, and no anytime event has a part to pick
+  return answerMoves(answers, null, null).filter((move) => !move.pick);
+}
+
 function answerMoves(answers: LegalAnswers | null | undefined, option: number | null, followup: Followup | null): Move[] {
   const events = ((answers?.events ?? []) as unknown as (Answer | null)[])
     .filter((event): event is Answer => event !== null)

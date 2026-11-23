@@ -7,9 +7,11 @@ import xyz.zlatanov.frakkintoasters.TestHarness;
 import xyz.zlatanov.frakkintoasters.engine.PendingInput;
 import xyz.zlatanov.frakkintoasters.engine.PendingInput.AwaitingChoice;
 import xyz.zlatanov.frakkintoasters.engine.PendingInput.AwaitingDecision;
+import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
 import xyz.zlatanov.frakkintoasters.event.interrupt.PlayInterruptCardEvent;
+import xyz.zlatanov.frakkintoasters.event.loyalty.RevealMotiveCardEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.MoveEvent;
 import xyz.zlatanov.frakkintoasters.engine.answer.LegalAnswers;
@@ -36,6 +38,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.ADMIRALS_QUARTERS;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.FTL_CONTROL;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_6_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.RESEARCH_LAB;
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.*;
@@ -250,6 +253,22 @@ class GameProjectionTest extends TestHarness {
     }
 
     @Test
+    void whatAPlayerMayDoAtAnyTimeShowsOnlyToHim() {
+        // the cards decide what he may reveal: "End the Chase" is met, "Keep Them Docile" waits for the end
+        player(1).motiveCards().addOnTop(MotiveCard.END_THE_CHASE, MotiveCard.KEEP_THEM_DOCILE);
+        galacticaBoard.damage(FTL_CONTROL);
+        val reveal = List.<Event>of(new RevealMotiveCardEvent(1, MotiveCard.END_THE_CHASE));
+
+        assertEquals(reveal, reveals(projection(HOLDER), 1));
+        assertEquals(reveal, reveals(projection(Viewer.sandbox()), 1));
+        for (val viewer : List.of(OTHER, OBSERVER)) {
+            assertTrue(projection(viewer).anytime().stream().noneMatch(answers -> answers.player() == 1));
+        }
+        ops.endGame(Team.CYLONS, List.of(1));
+        assertEquals(List.of(), projection(HOLDER).anytime());
+    }
+
+    @Test
     void nobodyElseLearnsWhoAnswersASecretInput() {
         val secret = new AwaitingDecision(new PlayerDecisionEvent<>(1, PlayInterruptCardEvent.class));
 
@@ -316,6 +335,15 @@ class GameProjectionTest extends TestHarness {
 
     private GameProjection projection(Viewer viewer, PendingInput input) {
         return GameProjection.of(game, Optional.of(input), viewer);
+    }
+
+    // The test fixtures add an anytime event of their own.
+    private static List<Event> reveals(GameProjection projection, int player) {
+        return projection.anytime().stream()
+                .filter(answers -> answers.player() == player)
+                .flatMap(answers -> answers.answers().events().stream())
+                .filter(RevealMotiveCardEvent.class::isInstance)
+                .toList();
     }
 
     private PlayerProjection player(Viewer viewer, int number) {

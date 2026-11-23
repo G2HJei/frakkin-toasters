@@ -11,12 +11,14 @@ import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.LocationEvent;
 import xyz.zlatanov.frakkintoasters.event.NoOpEvent;
+import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
 import xyz.zlatanov.frakkintoasters.event.action.character.ReorderTopQuorumCardsEvent;
 import xyz.zlatanov.frakkintoasters.event.action.mutiny.SetTheAgendaChoiceEvent;
 import xyz.zlatanov.frakkintoasters.event.action.quorum.AuthorizationOfBrutalForceEvent;
 import xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint;
 import xyz.zlatanov.frakkintoasters.event.interrupt.PlayInterruptCardEvent;
 import xyz.zlatanov.frakkintoasters.event.location.galactica.ResearchLabEvent;
+import xyz.zlatanov.frakkintoasters.event.loyalty.RevealMotiveCardEvent;
 import xyz.zlatanov.frakkintoasters.event.loyalty.RevealPersonalGoalEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.DiscardSkillCardsEvent;
@@ -26,6 +28,7 @@ import xyz.zlatanov.frakkintoasters.event.player.SelectCharacterEvent;
 import xyz.zlatanov.frakkintoasters.event.sandbox.SandboxEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.PlayCardsIntoSkillCheckEvent;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
+import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
 import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
@@ -293,6 +296,28 @@ class LegalAnswersTest extends TestHarness {
         assertEquals(LegalAnswers.NONE, LegalAnswers.forOption(game, Followup.single(new NoOpEvent(1))));
     }
 
+    /* at any time */
+
+    @Test
+    void aCylonLeaderMayRevealTheMotiveCardsWhoseRequirementIsMet() {
+        player(1).character(CAVIL);
+        player(1).motiveCards().addOnTop(MotiveCard.END_THE_CHASE, MotiveCard.SAVOR_THEIR_DEMISE);
+        galacticaBoard.damage(FTL_CONTROL);
+
+        val answers = answers(1, AnytimeEvent.class);
+
+        assertEquals(answers, LegalAnswers.anytime(game, 1));
+        assertEquals(List.of(new RevealMotiveCardEvent(1, MotiveCard.END_THE_CHASE)), reveals(answers));
+        assertFalse(answers.covers(new RevealMotiveCardEvent(1, MotiveCard.SAVOR_THEIR_DEMISE)), "it waits for the end");
+        assertTrue(reveals(answers(2, AnytimeEvent.class)).isEmpty(), "not his cards");
+    }
+
+    @Test
+    void anAnytimeEventAnswersNoDecision() {
+        assertFalse(LegalAnswers.answerTypes(PlayerEvent.class).contains(RevealMotiveCardEvent.class));
+        assertTrue(LegalAnswers.answerTypes(AnytimeEvent.class).contains(RevealMotiveCardEvent.class));
+    }
+
     /* every list */
 
     // A record with a list that no source covers would never be offered: it has to be one that only a choice offers,
@@ -305,7 +330,7 @@ class LegalAnswersTest extends TestHarness {
         val withoutSource = new TreeSet<String>();
         for (val type : EventCatalog.types()) {
             if (!type.isRecord() || !ProcessorRegistry.hasProcessor(type) || SandboxEvent.class.isAssignableFrom(type)
-                    || AnytimeEvent.class.isAssignableFrom(type) || type == PlayerDecisionEvent.class
+                    || type == PlayerDecisionEvent.class
                     || !main.equals(GameEngineCodeSource.of(type))) {
                 continue;
             }
@@ -390,6 +415,11 @@ class LegalAnswersTest extends TestHarness {
             assertTrue(answers.covers(shape.example()), "a shape covers its example");
         });
         return answers;
+    }
+
+    // The test fixtures add an anytime event of their own.
+    private static List<Event> reveals(LegalAnswers answers) {
+        return answers.events().stream().filter(RevealMotiveCardEvent.class::isInstance).toList();
     }
 
     private void assertTaken(Event event) {

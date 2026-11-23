@@ -457,7 +457,8 @@ constructor takes any first event, and `GameEngineTest` uses the test-only `Scri
   pause without being asked. `submit` takes one from its own player at any pause, a choice or a secret decision too,
   and runs it ahead of the pending input as `inject` does (`runAhead`, recorded as `EventInjected`), so restore and undo
   treat it as one input. It answers nothing: the pending input stays as it was. A finished game, an event that names
-  another player or fails `isValid()` is rejected and changes nothing.
+  another player or fails `isValid()` is rejected and changes nothing. `LegalAnswers.anytime(game, n)` lists the ones a
+  player may submit now, which the projection carries (see "Projections").
 - Only answers: an engine after `takeOnlyAnswers()` (the backend's, `frakkin.take-only-answers`) answers a decision
   whose `LegalAnswers.only()` is present itself, as the run loop reaches it: one concrete answer, or one shape that
   takes every element of its pick (by position, so two equal cards are two ways and he is asked). A search that reported
@@ -486,8 +487,10 @@ judges a client's input (`legal-answers-plan.md`).
   `QuorumCardPick`, `ShipPick`) names the component, the elements to pick from by position, `min` and `max`, and
   whether the order counts. A move's discard is a pick of one card. `covers(event)` says whether an event is one of
   them (a list compares as a multiset), `forOption(game, option)` gives the answers of the decision an option of a
-  choice asks first (`decisionOf`), and `answerTypes(action)` the classes that may answer.
-- `AnswerClasses`: the records that may answer an action (not a sandbox or an anytime event), each skipped when the
+  choice asks first (`decisionOf`), `answerTypes(action)` the classes that may answer, and `anytime(game, n)` the
+  `AnytimeEvent`s a player may submit now, as the answers of a decision on `AnytimeEvent` itself.
+- `AnswerClasses`: the records that may answer an action (not a sandbox event, and an anytime event only for the action
+  `AnytimeEvent`), each skipped when the
   check the game asks before it offers one says no (`SkillCardPlays.canPlay`, `QuorumCardPlays`, `MutinyCardPlays`,
   `CharacterActions`, `CharacterMovements`, `LocationEvent.canAct`, `canActIgnoringDamage` with
   `ANYWHERE_EVEN_IF_DAMAGED`).
@@ -976,7 +979,9 @@ the frontend owns the wording.
   `Topic` (`GameProjection.of(view, pendingInput, pendingScope, viewer)`: the event that queued it, a `SecretEvent` only
   to its actor and its fields only when public, as the log shows the scope) and with its legal
   answers (`Decide.answers`, and `Choose.answers`: an `OptionAnswers` per option that asks the chooser a decision at
-  once, e.g. the action of the Action step), and everything once the game has ended. The Mutineer card is faceup once held ("immediately reveal this card").
+  once, e.g. the action of the Action step), what a player may do at any pause (`anytime`: an `AnytimeAnswers` per
+  player the viewer acts for who can do something, his own, a sandbox's every player's; empty once the game has
+  ended), and everything once the game has ended. The Mutineer card is faceup once held ("immediately reveal this card").
 - `LiveUpdateProjection.of(journal, from, viewer)` is what happened: the scopes (`ScopeLog`: actor, event type, its
   fields when public, the facts, and `automatic` for the only answer the engine took, which only its actor sees: that
   it was his only one can tell what he holds) and the choices (`ChoiceLog`). `LiveUpdateProjector` has an exhaustive switch over every
@@ -1070,9 +1075,8 @@ REST (the lobby lists poll), Zustand for the game.
   only names, never a card's printed text), `src/input/` (the input panel, see "Answers"; under "Advanced" a choice's
   plain options, answered by index, and for a decision the `EventBuilder`, a form made from the schema, which builds
   exactly the codec's JSON and leaves the player and the constraints to the server; under it the `AnytimePanel`, the
-  `AnytimeEvent`s of the
-  schema's `anytimeEvents` for each player the viewer acts for who can use one, e.g. a Cylon Leader with Motive Cards,
-  built by the `EventBuilder` with its `choices` narrowing an enum to his cards), `src/table/` (the board and the panels around it, see "The
+  game's `anytime` answers as moves (`anytimeMoves`) in the answers' `Groups`, e.g. the Motive Cards whose requirement
+  is met, shown only while a player the viewer acts for has one and sent as listed), `src/table/` (the board and the panels around it, see "The
   table"), `src/sandbox/` (undo, export, restart with the seed, setup by injecting a `SandboxEvent`, the inspector),
   `src/pages/`.
 - The browser holds no game rules: a picker only narrows to plausible answers, the engine judges them.

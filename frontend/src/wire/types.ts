@@ -146,6 +146,11 @@ export interface AnalyzeEnemyFighterPassEvent {
   kind: 'AnalyzeEnemyFighterPassEvent';
 }
 
+export interface AnytimeAnswers {
+  player: number;
+  answers: LegalAnswers | null;
+}
+
 export type AnytimeEvent = RevealMotiveCardEvent;
 
 export type AnywhereLocationEvent = ArmoryEvent | CommandEvent | CommunicationsEvent | WeaponsControlEvent;
@@ -1566,6 +1571,7 @@ export interface GameProjection {
   removedCharacters: Array<Character> | null;
   destroyedShips: Array<ShipProjection> | null;
   input: InputProjection | null;
+  anytime: Array<AnytimeAnswers> | null;
   outcome: Outcome | null;
 }
 

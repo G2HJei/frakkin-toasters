@@ -1,6 +1,7 @@
 package xyz.zlatanov.frakkintoasters.engine.answer;
 
 import lombok.val;
+import xyz.zlatanov.frakkintoasters.event.AnytimeEvent;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
@@ -67,6 +68,14 @@ public record LegalAnswers(List<Event> events, List<ShapedAnswer> shapes) {
 
     public static LegalAnswers of(GameView game, PlayerDecisionEvent<?> decision, Listener listener) {
         return new AnswerSearch(new Asked(game, decision), listener).run();
+    }
+
+    /**
+     * @return the {@link AnytimeEvent}s the player may submit now without being asked, e.g. a Motive Card whose
+     * requirement is met. They answer no decision: the engine runs one ahead of the pending input
+     */
+    public static LegalAnswers anytime(GameView game, int playerNumber) {
+        return of(game, new PlayerDecisionEvent<>(playerNumber, AnytimeEvent.class));
     }
 
     /**

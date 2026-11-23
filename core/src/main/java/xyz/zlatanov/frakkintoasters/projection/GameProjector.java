@@ -56,6 +56,7 @@ import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.*;
  *     <li>the cards in an open interrupt window: the player who played them. The others count them in his hand</li>
  *     <li>the pending input: the player who answers it, with its legal answers. The others learn who is asked, but
  *     not while it is secret</li>
+ *     <li>what a player may do at any pause ({@code AnytimeEvent}s): only he</li>
  *     <li>everything, once the game has ended, and to the user of a sandbox, who sees the draw piles in order too</li>
  * </ul>
  */
@@ -108,6 +109,7 @@ final class GameProjector {
                         .map(ship -> ship((Ship) ship, null, true))
                         .toList(),
                 input(),
+                anytime(),
                 game.outcome().map(winner -> new Outcome(winner, game.winners())).orElse(null));
     }
 
@@ -361,6 +363,18 @@ final class GameProjector {
             }
         }
         return new Choose(player, options, answers, topic());
+    }
+
+    // Only to the player who may act: they tell what he holds.
+    private List<AnytimeAnswers> anytime() {
+        if (ended) {
+            return List.of();
+        }
+        return game.players().stream()
+                .filter(player -> viewer.is(player.number()) || viewer instanceof Viewer.Sandbox)
+                .map(player -> new AnytimeAnswers(player.number(), LegalAnswers.anytime(game, player.number())))
+                .filter(answers -> !answers.answers().isEmpty())
+                .toList();
     }
 
     // The event that queued the input, as the log shows its scope: a secret one only to its actor, its fields only when

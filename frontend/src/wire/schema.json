@@ -395,6 +395,26 @@
       "interfaces" : [ "Event" ],
       "components" : [ ]
     },
+    "AnytimeAnswers" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "player",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "player"
+        }
+      }, {
+        "name" : "answers",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "LegalAnswers"
+        }
+      } ]
+    },
     "AnytimeEvent" : {
       "kind" : "union",
       "discriminator" : "kind",
@@ -5386,6 +5406,17 @@
           "nullable" : true,
           "t" : "ref",
           "name" : "InputProjection"
+        }
+      }, {
+        "name" : "anytime",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "AnytimeAnswers"
+          }
         }
       }, {
         "name" : "outcome",
