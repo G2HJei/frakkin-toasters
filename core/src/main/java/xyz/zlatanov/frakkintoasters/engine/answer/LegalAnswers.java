@@ -12,8 +12,7 @@ import java.util.Optional;
 
 /**
  * The legal answers to a decision, for the player it asks. Every candidate comes from the game as it is and is judged
- * by its processor's {@code isValid()}, as a client's input is, so no rule is written twice (see
- * {@code legal-answers-plan.md}).
+ * by its processor's {@code isValid()}, as a client's input is, so no rule is written twice.
  * <ul>
  *     <li>a concrete answer is an event {@code submit} takes as it is, with the decision's constraints on it</li>
  *     <li>a shaped answer has a part to pick, e.g. the cards of a discard: its example is legal, and its pick says what

@@ -65,10 +65,10 @@ Next steps, in order:
    `./gradlew :core:fuzz` plays the games and writes `fuzzer-report.md`, a finding exports as a regression journal
    with its failing input, and hostile inputs probe the checks. 10,000 seeds per player count ran with no finding left
    but NO_END games that are a valid stall: every human in the "Brig", where nobody draws a Crisis Card.
-7. ~~Legal-move hints (`roadmap.md` milestone B, `legal-answers-plan.md`).~~ Done: `LegalAnswers` in `core` (see
+7. ~~Legal-move hints (`roadmap.md` milestone B).~~ Done: `LegalAnswers` in `core` (see
    "Legal answers"), in the asked viewer's `input` (see "Projections"), read by the table's answers,
    and the fuzzer answers from them (see "Random playouts").
-8. ~~The table's inputs (`roadmap.md` milestone C, `table-ux-plan.md`).~~ Done: the answers panel (see "Answers"),
+8. ~~The table's inputs (`roadmap.md` milestone C).~~ Done: the answers panel (see "Answers"),
    the board and the mats answering, what the game waits for (`Topic`), the log's story, the animations (see "The
    table") and the reference. `playthrough.spec.ts` plays a game to an ending without the builder. Next: milestone D
    of `roadmap.md`, sessions that survive real people.
@@ -480,7 +480,7 @@ constructor takes any first event, and `GameEngineTest` uses the test-only `Scri
 
 `LegalAnswers.of(game, decision)` (`engine/answer/`) lists the answers a pending decision takes, for the player it
 asks. It adds no rule: every candidate comes from the game as it is and its processor's `prepare` judges it, as it
-judges a client's input (`legal-answers-plan.md`).
+judges a client's input.
 
 - `LegalAnswers(events, shapes)`: an event is an answer `submit` takes as it is, with the decision's constraints on it.
   A `ShapedAnswer(example, pick)` has a part to pick: the example is legal, and the `Pick` (`SkillCardPick`,
@@ -1080,7 +1080,7 @@ REST (the lobby lists poll), Zustand for the game.
   table"), `src/sandbox/` (undo, export, restart with the seed, setup by injecting a `SandboxEvent`, the inspector),
   `src/pages/`.
 - The browser holds no game rules: a picker only narrows to plausible answers, the engine judges them.
-- Answers (`table-ux-plan.md`): `input/answers.ts` turns the pending input into `Move`s, one per concrete answer, shape
+- Answers: `input/answers.ts` turns the pending input into `Move`s, one per concrete answer, shape
   (an example and a `Pick`) or option of a choice, and an option that asks a decision first into one per answer of that
   decision. `targetsOf(move)` lists what a move names (its kind, the location of a location action, locations, ships,
   other players, held cards, nested records too), `narrow` keeps the moves that name every pick of the `selection`

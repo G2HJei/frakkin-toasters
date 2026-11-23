@@ -1,7 +1,7 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import { openGame } from './tabs';
 
-// The exit of milestone C (table-ux-plan.md): a seeded four-player sandbox plays from setup to an ending through the
+// The exit of milestone C (roadmap.md): a seeded four-player sandbox plays from setup to an ending through the
 // answers alone (the options, the answers by kind, the counters and the pickers), never through the event builder
 // under "Advanced". The answers are picked at random from a seeded generator, so a run is the same game every time.
 const SEED = Number(process.env.PLAYTHROUGH_SEED ?? 7);

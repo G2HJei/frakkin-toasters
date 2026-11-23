@@ -63,7 +63,7 @@ Random games played by `./gradlew :core:fuzz`. The block between the markers is 
 
 ## Fixes
 
-Milestone B (`legal-answers-plan.md`): the fuzzer answers from the game's `LegalAnswers`, and a probe or a mutation the
+Milestone B (`roadmap.md`): the fuzzer answers from the game's `LegalAnswers`, and a probe or a mutation the
 game takes outside them is a `HINT_MISSING`.
 
 - **F-9dd6f5** (HINT_MISSING): a draw that names a color at 0 draws nothing of it, so `covers` compares the counts per

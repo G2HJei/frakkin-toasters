@@ -2,11 +2,13 @@
 
 Where the project stands and what is left, in order: first what a full, playable online game with the Kobol objective
 still needs (milestones A to F), then the long term (G onwards). Written 2026-11-21 against `master` (`4606f76`); the
-open questions were answered on 2026-11-22.
+open questions were answered on 2026-11-22. Updated 2026-11-23 against `88e3d61`: milestones A to C are done, D is
+next.
 
 This is a roadmap, not a work order: each milestone gets its own `<topic>-plan.md` (context, decisions, phases that
-end green) before it is built, as the backend, skill card and quorum card plans did. `CLAUDE.md`'s "Roadmap" section
-still lists the finished steps; fix it per milestone, not at the end.
+end green) before it is built, and the file is deleted once the plan is executed: what it decided lives on in
+`CLAUDE.md` and in its milestone's "Where it differs from the plan" here. `CLAUDE.md`'s "Roadmap"
+section still lists the finished steps; fix it per milestone, not at the end.
 
 ## Where we are
 
@@ -15,151 +17,109 @@ Done, and covered by tests:
 - **Rules engine** (`core`): every component of the Kobol game (all Crisis, Super Crisis, Destination, Skill, Quorum,
   Mutiny, Loyalty and Motive Cards, every location and Title Card action, Pegasus, 99 character abilities), the turn
   loop, the jump and the end game. Fact-sourced journal, restore, rollback, undo, seeded randomness, per-viewer
-  projections.
+  projections. The engine takes an input's only answer itself (`takeOnlyAnswers`).
+- **Completable** (A): `./gradlew :core:fuzz` plays seeded random games to an ending; 10,000 seeds per player count
+  leave no finding but a valid stall.
+- **Legal answers** (B): `LegalAnswers` lists the answers of every decision, the asked viewer's `input` carries them,
+  and the fuzzer answers from them.
 - **Backend**: Google and Discord logins, lobby (host, join, observe, leave, start with 3 to 7), a live web socket per
-  game with the state token, Postgres journal, sandbox with undo, export and import, regression journals.
-- **Frontend**: the table (board image with the components on it, turn panel, log, players' mats, hover reveals), the
-  lobby and room pages, the sandbox tools, e2e specs for a sandbox turn and a five-user lobby.
+  game with the state token, Postgres journal, sandbox with undo, export and import, regression journals (the fuzzer's
+  findings among them).
+- **Frontend** (C): the table (board image with the components on it, turn panel, log, players' mats, hover reveals),
+  played through the engine's answers in the answers panel, on the board and on the mats, with every pause said in
+  words, a log by step, deltas and animations, and a reference drawer; the lobby and room pages, the sandbox tools,
+  e2e specs for a sandbox turn, a five-user lobby and a whole game played through the answers.
 
-What stands between this and "a group of friends can play a whole game online":
+What stands between this and "a group of friends can play a whole game online" is no longer the engine or the inputs,
+but the session around them and a place to run it:
 
-1. **Nobody has proved the engine survives a whole game.** Tests cover single rows (one engine test per feature) and a
-   few scripted turns. There is no evidence that a random 4-player game reaches an ending without a deadlock ("a
-   decision must always have a legal answer"), an exception, or a rollback.
-2. **The input side is the clunky part.** A choice is a column of text buttons, and every decision is a form generated
-   from the wire schema (`EventBuilder`: a "Which" dropdown of event types, then a field per record component). It is
-   correct and complete, and it is what makes playing feel like filling in forms. `boardMoves.ts` covers moving and
-   the "Act" button only. The engine publishes no legal answers, so the browser can only narrow by guessing.
-3. **A real game is not a real session.** No turn clock or absence handling, no presence, no chat, no end-of-game
-   screen beyond one line, no rematch, no deployment pipeline, no CI.
+1. **A real game is not a real session** (D, E). No presence, no turn clock or absence handling, no way to hand a seat
+   over, no chat, no notifications, no end-of-game screen beyond one line, no rematch, no replay of a finished game.
+2. **Nothing runs it for real players** (F). No CI, no staging or production, no backups, no frozen journal format, no
+   privacy notice.
 
 ## Principles for the milestones
 
 - **Legal moves come from the engine.** The browser holds no rules (`CLAUDE.md`). Every UX improvement that needs "what
-  can this player do now" asks `core`, and the same list drives a random-playout fuzzer. Milestone B is the hinge.
-- **The generic `EventBuilder` stays** as "Advanced" and as the sandbox's tool. Dedicated inputs are added per kind of
-  decision, each building the same JSON the builder would (the `boardMoves.ts` pattern, with a test that says so).
+  can this player do now" asks `core` (`LegalAnswers`), and the same list drives the random-playout fuzzer.
+- **The generic `EventBuilder` stays** as "Advanced" and as the sandbox's tool. Every other input sends one of the
+  engine's answers as it was listed (`input/answers.ts`), and the engine judges it again.
 - **Each milestone ends green** (`./gradlew build`, e2e where it touches the table) and updates `CLAUDE.md`.
 
 ---
 
 ## Part 1: to a full playable online game
 
-### A. Prove the game is completable (core, small, first)
+### A. Prove the game is completable: done 2026-11-22
 
-Everything else is built on the engine being sound, so find out now. Done 2026-11-22: `./gradlew :core:fuzz` played
-10,000 seeds per player count with no finding left but a valid stall (every human in the "Brig"); each run writes
-`fuzzer-report.md` anew.
+`./gradlew :core:fuzz` (the `fuzz/` test fixtures, "Random playouts" in `CLAUDE.md`) plays seeded games of 3 to 7
+players with random legal answers until they end. It restores them on the way and compares the twins, probes the checks
+with hostile inputs, and rewrites `fuzzer-report.md`: the findings, the endings, the rounds to finish and the wins by
+team. A finding exports as a regression journal with the input that failed (`FuzzJournalExportTest`), beside a core
+test of its fix. The fix loop took four batches.
 
-- **Random-playout fuzzer** (test fixture, runs in `core`): start a seeded game with 3 to 7 players, answer every
-  `Waiting` with a random legal answer, restore at random pauses and compare `GameSnapshot`s, until `Finished`. Needs
-  legal answers, so it begins with B1's enumeration for the decisions whose set is small, and falls back to
-  constructing candidates from the wire schema for the rest. Asserts: no `FrakCallTheAdmiralException`, no pause with
-  no legal answer, the game ends within a turn cap, every ending is one of the rule's.
-- Run it over thousands of seeds in a nightly Gradle task (not in `build`), keep failing seeds as regression journals
-  in `backend/src/test/resources/journals/`, each with a core test next to its fix. A journal that a `FORMAT_VERSION`
-  change makes unloadable is deleted, and its core test stays (decided 2026-11-22).
-- Fix what it finds. Expect the findings to be deadlocks at rare card combinations and unreachable-`Finished` loops (a
-  game where the resources never hit 0 and the jump track can't advance). Decided 2026-11-22: "Political Prowess",
-  "Change of Plans" and "Declare Emergency" are still asked of every player, so nobody learns who holds one, and a
-  player without the card is offered only the pass.
-- A **game-length and balance readout** from the same runs: turns to finish, win rate by team. Random play is not
-  meaningful balance, only a smoke test for broken distributions (e.g. humans never win).
+*Exit met:* 10,000 seeds per player count (last run 2026-11-22, `78a0421`) leave one finding, `NO_END`: 332 of 50,000
+games, nearly all with 3 players, stall with every human in the "Brig", where nobody draws a Crisis Card. That is a
+valid game, not an engine error.
 
-*Exit:* 10,000 seeded random games per player count finish with no engine error.
+Where it differs from the plan:
 
-### B. Legal-move hints (core + wire, the hinge)
+- The fuzzer runs by hand, not nightly: the nightly run comes with F's CI.
+- Random play says nothing about balance: the Cylons win 49,654 of 50,000 games, in 5 rounds (median). The readout
+  only shows that the endings are reachable: every one but "no character left to choose" happened, the humans' win at
+  Kobol in 14 games.
+- Decided on the way: "Political Prowess", "Change of Plans" and "Declare Emergency" are still asked of every player,
+  so nobody learns who holds one, and a player without the card is offered only the pass.
 
-The "Still open" item of the frontend plan, and the prerequisite for most of C. Done 2026-11-22 (`legal-answers-plan.md`):
-`LegalAnswers` in `core` lists the concrete and the shaped answers of every decision, judged by the processors
-themselves; the asked viewer's `input` carries them, also for a choice's options; the board's moves and "Act" button
-read them; and the fuzzer answers from them, 10,000 seeds per player count with no answer missing and no decision
-without one.
+### B. Legal-move hints: done 2026-11-22
 
-- **B1. `LegalAnswers` in `core`**: for a pending `PlayerDecisionEvent<T>`, enumerate the concrete answers where the set
-  is small and finite, and describe the shape of the answer where it is not. Group by kind of decision:
-    - *enumerable*: moves (destinations and whether a discard is needed), location actions, viper activations (viper ×
-      `ViperActivation`), Skill Card plays (`SkillCardPlays.canPlay`, `QuorumCardPlays.canPlay`, `MutinyCardPlays`,
-      `CharacterActions.canUse`), targets of a choice (`ChooseCrisisTargetEventProcessor.legalTargets` is the pattern),
-      ships to damage, interrupt-window cards.
-    - *shaped*: "discard exactly 3 of these cards", "draw exactly 2 of these colors", "place cards in this order", with
-      the candidate cards and the counts, not every combination.
+`LegalAnswers` (`engine/answer/`, "Legal answers" in `CLAUDE.md`) lists the answers of every decision for the player it
+asks: concrete events, and where the set is too large, shaped answers (an example and a `Pick` of cards or ships, with
+`min`, `max` and whether the order counts). The asked viewer's `input` carries them (`Decide.answers`, and
+`Choose.answers` for each option that asks a decision at once), and `anytime` the `AnytimeEvent`s a player may submit
+at any pause, e.g. a Motive Card. The fuzzer answers from them and checks them: over 10,000 seeds per player count no
+decision is without an answer, no option leads to a dead end, and the game takes no input they don't cover.
 
-  Processors already own the checks (`canPlay`, `canAct`, `legalTargets`); this collects them behind one entry point
-  instead of adding a second rule set. A test per decision type asserts that every enumerated answer passes `isValid()`
-  and that a known-illegal one is absent.
-- **B2. Wire**: `input` in the projection carries the hints for the asked viewer only (secret inputs stay secret).
-  `WireSchema` gains the new records, `npm run gen`, `WireSchemaTest` pins them, `FORMAT_VERSION` untouched (it is a
-  projection, not the journal).
-- **B3. Fuzzer upgrade**: A's fuzzer answers from B's enumeration, so it also checks that the enumeration is complete (a
-  pending decision with an empty enumeration is a failure unless it is a shaped one).
+Where it differs from the plan: there is no enumeration per kind of decision. One search tries the values of each
+answer record's components (`AnswerClasses`, `Domains`, `Shapes`, `AnswerSearch`), skips a record when the check the
+game asks before it offers one says no (`canPlay`, `canAct`, ...), and lets the processor's own `prepare` judge every
+candidate, so no rule is written twice.
 
-*Exit:* every `PlayerDecisionEvent` the game can ask has hints or a documented shape; the table has them in `input`.
+### C. A table that is pleasant to play: done 2026-11-22
 
-### C. A table that is pleasant to play (frontend, the biggest milestone)
+What the table has now ("Frontend" in `CLAUDE.md`):
 
-Goal: a player can play a whole turn without opening the event builder. Split into phases that each end green.
-Done 2026-11-22 (`table-ux-plan.md`): the answers panel (options, answers by kind, counters and pickers, the builder
-under "Advanced"), the board and the mats answering (targets that light up, "Act" chips, viper activations, card plays
-from the mat, a popover next to the click), a sentence for every pause from the input's `topic`, the log as a story by
-step with "Mine" and a flash on the board, deltas and small animations, and a reference drawer (every card, the
-character sheets, the rulebook's pages, cheat sheets). The e2e `playthrough.spec.ts` plays a seeded four-player
-sandbox to an ending without the builder.
+- **C1, inputs**: the answers panel (a choice's options in order, the answers grouped by kind, a draw as a card per
+  color, a picker for a shape, an answer made of several parts picked part by part, "Back" and "Clear", the builder
+  under "Advanced"), the board and the mats answering (targets that light up, "Act" chips, a viper's activations, card
+  plays from the mat, a popover next to the click), sorted hands, and the characters to choose grouped by pool.
+- **C2, turn flow**: a red edge on the asked viewer's board, a sentence for every pause from the input's `topic`, led
+  by the card or ability that asks (`@Source`), the log by step with a flash on the board, deltas at the resources,
+  the tracks and the nukes, and small animations (ships, the die, cards, damage).
+- **C3, reference**: a drawer (the R key) with every card by deck and a search, the character sheets, the rulebook's
+  sections and cheat sheets (the turn, a skill check, the Attack Table from the engine's thresholds, the Crisis Card
+  icons, loyalty), and a link to the article to read beside each pause. The rulebook PDFs ship with the app.
 
-**C1. Inputs on the board and the hand** (uses B)
+*Exit met:* `playthrough.spec.ts` plays a seeded four-player sandbox from setup to an ending through the answers
+alone, and "Advanced" never opens (seed 7: a Cylon win in 254 pauses).
 
-- **Play from the player mat**: the mat already shows the player's piles full size in a popover (Skill, Quorum, Mutiny
-  and Loyalty cards). When it is the player's turn to act, the cards playable now are highlighted there, and a click
-  plays one (the card's event built from the hints, asking for its choices in a small dialog next to the card, not in
-  the side panel). No separate hand tray.
-- **Sorted hands**: a player's Skill Cards are always sorted by color, in the order of `SkillCardColor` (Politics,
-  Leadership, Tactics, Piloting, Engineering, Treachery), then by value, highest first.
-- **Targets light up**: when the game asks for a player, location, viper, raider, basestar, civilian ship or card
-  target, the legal ones glow on the board and click to answer (the "Act"/move model extended). Hover shows what the
-  answer does when the label can say it.
-- **Viper activation** on the board (still open in `CLAUDE.md`): click a fighter, a menu of its legal activations (move,
-  attack, land), with the attack's target picked on the board.
-- **Discard / draw / order pickers**: one widget for "pick exactly n of these cards" with a visible counter, one for
-  "put these in order" (drag or numbered clicks), replacing the generic list fields.
-- **Choices as cards, not strings**: where options name cards, locations or players, show them (`choiceArt` already
-  does for art; extend to a grid layout). The labels stay names, never a card's printed text; a rules reminder is a
-  link to the rulebook page, quoting the article to read there (open question 1).
-- **Undo for the unrevealed**: a "take back" within the player's own current pending input (selection state), not an
-  engine undo.
+Where it differs from the plan:
 
-**C2. Turn flow and awareness**
-
-- **"Your move" on the board edge**: the turn panel already shows whose turn and which step, and the tab title and
-  favicon already say it is your move; add the same cue on the board's edge.
-- **Pause explanation**: when the game waits for someone, say what for in a sentence ("Kat is deciding whether to play
-  a card on the roll"), not only "Waiting for X". Interrupt windows are the worst case: say which window, how many have
-  answered.
-- **Log you can read**: group by step, collapse the mechanical facts, keep the story ("Adama played Strategic Planning,
-  the roll became 6, 2 raiders destroyed"), filter to "what changed for me". Click an entry to flash what it touched on
-  the board.
-- **Resource and track deltas**: a floating "-1 morale" where the dial is, when it changes; the same for the jump
-  track, distance and the nukes.
-- **Animations, small**: ship moves, die roll, card draw to the hand, a damaged location flashing. They always play:
-  no setting to turn them off yet.
-
-**C3. Reference without leaving the table**
-
-- **Card browser / rules lookup**: any card name in the log or a prompt is hoverable; a searchable "all cards" drawer;
-  the character sheet and the Cylon/human loyalty rules a click away; a rules PDF link per rulebook section, quoting
-  the article (open question 1). The PDF in `materials-sorted/` ships with the app: the project is for private play
-  (open question 2).
-- **Cheat sheets**: the turn sequence, the Attack Table, the skill check order, the Crisis step icons.
-
-*Exit:* a four-player game from setup to an ending without a single use of the generic builder.
+- The log's filter to what changed for the viewer ("Mine") was built and then removed.
+- During an interrupt window the pause says only that someone may play a card or use an ability: naming the window
+  or who has answered would tell who holds a card.
+- Ordering is by numbered clicks, not drag and drop. The animations always play (no setting yet).
 
 ### D. Sessions that survive real people (backend + frontend)
 
 - **Presence**: who is connected, shown on the players' mats and in the room; a disconnected asked player is marked.
 - **Turn clock and absence** (per-game option, off by default for friends, on for open games): a soft reminder, then a
-  vote or host action to hand the seat over (next item). The engine picks a *default answer* only when an input has a
-  single answer and every player can see it, e.g. drawing the Skill Cards of a character whose skill set leaves no
-  choice (open question 4); it never passes or discards for an absent player. Never silent: a default answer is a
-  logged fact with its actor "default".
+  vote or host action to hand the seat over (next item). The engine never passes or discards for an absent player. What
+  it may answer alone is built already, for every input and not only on a timeout: with `frakkin.take-only-answers`
+  (on by default) it takes a decision's only answer itself, e.g. the Skill Cards of a character whose skill set leaves
+  no choice (open question 4). A choice is always asked. The journal records it (`OnlyAnswerTaken`), and the log marks
+  it "automatic" for its actor alone, because an only answer can tell what a player holds. The clock adds no other
+  default.
 - **Take over / replace a seat**: a vacated seat (left, banned, abandoned) can be taken by an observer (bots are out of
   scope, open question 7); the replacement sees what the seat sees, no more. The hand and secrets belong to the seat,
   not the user.
@@ -173,13 +133,14 @@ sandbox to an ending without the builder.
   social game: accusations and bluffing are most of it), and no private messages. Per-game, stored apart from the
   journal (it is not game state), with a rate limit and a mute. Cylon-team private chat is out (rules forbid
   out-of-band communication between hidden Cylons), see "Not in this roadmap".
-- **Reconnect polish**: the socket reconnects with backoff already; show a banner, resync the log, keep a half-filled
-  input across a reconnect.
+- **Reconnect polish**: the socket reconnects with backoff, a new connection gets the game and the whole log, and the
+  turn panel's tab shows the connection while it isn't open. Left: keep a half-filled input (the picks of the
+  selection, which every `game` message clears) across a reconnect.
 - **Game end**: a results screen (winner, winners by name, every revealed loyalty, motive cards, the story of the game,
   turns played), a shareable read-only replay link, and a **rematch** that reopens the room with the same seats.
 
-*Exit:* a game played over three days across restarts, with one player replaced mid-game after the clock ran out and
-a default answer given by the engine, finishes with the right ending and the results screen.
+*Exit:* a game played over three days across restarts, with one player replaced mid-game after the clock ran out,
+finishes with the right ending and the results screen.
 
 ### E. Replays, review and "learn from the game"
 
@@ -225,14 +186,14 @@ author.
 
 ```text
 A fuzzer ──► B legal hints ──► C table UX ──► D sessions ──► E replays
-   │                │                              │
-   └── fixes engine └──── upgrades A               └── needs C's results screen
-F (CI, ops, compliance) runs alongside from C on; its staging is the gate for inviting players.
+  done          done             done            │
+                                                 └── E builds on D's results screen and replay link
+F (CI, ops, compliance) runs alongside D; its staging is the gate for inviting players.
 ```
 
-A first, because it can change the engine and every later milestone assumes it is sound. B before C because C's
-inputs are the legal-hints' consumers. D can start in parallel with C's later phases (it is mostly backend). The rule
-for "playable" is the exit line of D plus F's staging.
+A to C are done, in that order: A made the engine sound, B gave A its answers and C its inputs. D is next (mostly
+backend). F was to start alongside C and hasn't (there is no CI yet), so it starts with D, the CI first. The rule for
+"playable" is the exit line of D plus F's staging.
 
 ---
 
@@ -295,13 +256,15 @@ scope" would come back with their rulebook sections (the blue, green and orange 
 
 ## Open questions (answered 2026-11-22)
 
-1. **Rules reminders on the table** (C1/C3). A link to the rulebook page with quoted article to read there.
+1. **Rules reminders on the table** (C1/C3). A link to the rulebook page with quoted article to read there. Built in C
+   (`labels/rules.ts`, the reference drawer).
 2. **Redistributing the artwork and the rulebook** (C3, F). `materials-sorted/` holds card images and the rules PDF
-   that are not ours. Fine for private play as is the intent of this entire project.
+   that are not ours. Fine for private play as is the intent of this entire project. The PDFs ship with the app since C.
 3. **Format migration** (F). Freeze `FORMAT_VERSION` at launch (add-only, new facts only). Freeze the format as late as
    possible and never refuse a game after that.
 4. **Timeouts and defaults** (D). Default only when it is the only option that is visible to all players. For example
-   auto-drawing skill cards when the skill set of the character is fixed.
+   auto-drawing skill cards when the skill set of the character is fixed. Built ahead of D as the engine's only
+   answers (`takeOnlyAnswers`), see D's "Turn clock and absence".
 5. **Chat and hidden information** (D). Only public chat will be available.
 6. **Hosting and who pays** (F). Self-hosted, a single small VPS, free to sign up.
 7. **Bots in a ranked/open game** (G). Bots are out of the scope for this project.

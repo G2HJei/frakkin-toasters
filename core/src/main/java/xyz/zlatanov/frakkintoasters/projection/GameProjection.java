@@ -253,7 +253,7 @@ public record GameProjection(
     /**
      * The viewer has to answer with an event of the action's type.
      *
-     * @param answers the answers the game takes ({@code legal-answers-plan.md})
+     * @param answers the answers the game takes
      */
     public record Decide(int player, Class<? extends Event> action, List<EventConstraint> constraints,
                          LegalAnswers answers, Topic topic) implements InputProjection {
