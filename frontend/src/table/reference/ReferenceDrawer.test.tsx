@@ -23,6 +23,39 @@ describe('the reference', () => {
     expect(document.querySelector('.cheat-sheet')).not.toBeNull();
   });
 
+  it('opens and closes on R', () => {
+    render(<ReferenceDrawer />);
+
+    fireEvent.keyDown(window, { key: 'r', code: 'KeyR' });
+    expect(screen.getByRole('dialog', { name: 'reference' })).toBeInTheDocument();
+    fireEvent.keyDown(window, { key: 'Escape', code: 'Escape' });
+    expect(screen.getByRole('dialog', { name: 'reference' })).toBeInTheDocument();
+    fireEvent.keyDown(window, { key: 'R', code: 'KeyR', shiftKey: true });
+    expect(screen.queryByRole('dialog')).toBeNull();
+
+    // not with Ctrl, the browser's reload, but the R key of a Cyrillic layout
+    fireEvent.keyDown(window, { key: 'r', code: 'KeyR', ctrlKey: true });
+    expect(screen.queryByRole('dialog')).toBeNull();
+    fireEvent.keyDown(window, { key: 'р', code: 'KeyR' });
+    expect(screen.getByRole('dialog', { name: 'reference' })).toBeInTheDocument();
+  });
+
+  it('takes an R typed into a field as text', () => {
+    render(<ReferenceDrawer />);
+    act(() => useReference.getState().show('cards'));
+
+    // the search doesn't close it
+    fireEvent.keyDown(screen.getByLabelText('search'), { key: 'r', code: 'KeyR' });
+    expect(screen.getByRole('dialog', { name: 'reference' })).toBeInTheDocument();
+
+    // a field elsewhere on the table doesn't open it
+    act(() => useReference.getState().close());
+    const field = document.body.appendChild(document.createElement('input'));
+    fireEvent.keyDown(field, { key: 'r', code: 'KeyR' });
+    expect(screen.queryByRole('dialog')).toBeNull();
+    field.remove();
+  });
+
   it('lists every deck and narrows it to the search', () => {
     render(<ReferenceDrawer />);
     act(() => useReference.getState().show('cards'));

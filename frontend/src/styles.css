@@ -2462,6 +2462,23 @@ button.playable.picked .art {
 .reference-open {
   margin-left: auto;
   font-size: 12px;
+  white-space: nowrap;
+}
+
+/* its hotkey, a little key beside the label */
+.reference-open kbd {
+  display: inline-block;
+  min-width: 16px;
+  margin-left: 3px;
+  padding: 1px 3px;
+  font: 600 10px/1.2 var(--display);
+  text-align: center;
+  color: var(--steel-100);
+  background: var(--panel-raised);
+  border: 1px solid var(--steel-500);
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  vertical-align: 1px;
 }
 
 button.avatar-button {

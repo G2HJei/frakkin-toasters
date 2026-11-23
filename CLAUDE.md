@@ -1088,7 +1088,8 @@ REST (the lobby lists poll), Zustand for the game.
   (`unnamedSource`: "Forward Thinker: Lee Adama may activate his location", "Executive Order: Move or Action"); a
   secret input says only that someone may play an interrupt card. The asked viewer's board
   gets a red edge and a "Your move" banner with the same line.
-- Reference (`table/reference/ReferenceDrawer.tsx`, the turn panel's "Reference", a mat's portrait for its sheet):
+- Reference (`table/reference/ReferenceDrawer.tsx`, the turn panel's "Reference" or the R key outside a field, which
+  closes it too, a mat's portrait for its sheet):
   every card by deck with a search, the character sheets, the rulebook's sections and cheat sheets (the turn, a skill
   check, the Attack Table from the schema, the Crisis Card's icons, loyalty). `labels/rules.ts` indexes the in-scope
   articles of the combined rulebook and its Appendix by page (the PDFs ship as Vite assets) and gives each kind of input

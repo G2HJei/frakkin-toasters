@@ -114,6 +114,7 @@ export function search(cards: ArtRef[], query: string): ArtRef[] {
  */
 export function ReferenceDrawer() {
     const {open, tab, query, focus} = useReference();
+    useReferenceKeys();
     const all = useMemo(() => (open ? decks() : []), [open]);
     if (!open) {
         return null;
@@ -149,6 +150,36 @@ export function ReferenceDrawer() {
             </div>
         </aside>
     );
+}
+
+// R opens the reference at the cheat sheets and closes it again. A key with Ctrl, Alt or Meta is the browser's, and an R
+// typed into a field is text.
+function useReferenceKeys() {
+    useEffect(() => {
+        const onKey = (event: KeyboardEvent) => {
+            if (event.defaultPrevented || event.isComposing || event.ctrlKey || event.altKey || event.metaKey
+                || !isRKey(event) || isTextField(event.target)) {
+                return;
+            }
+            const reference = useReference.getState();
+            if (reference.open) {
+                reference.close();
+            } else {
+                reference.show();
+            }
+        };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, []);
+}
+
+// the key R, also the R key of a layout without Latin letters, e.g. Cyrillic
+function isRKey(event: KeyboardEvent): boolean {
+    return event.key.toLowerCase() === 'r' || (event.code === 'KeyR' && !/^[a-z]$/i.test(event.key));
+}
+
+function isTextField(target: EventTarget | null): boolean {
+    return target instanceof HTMLElement && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName));
 }
 
 function SearchBox({placeholder}: { placeholder: string }) {

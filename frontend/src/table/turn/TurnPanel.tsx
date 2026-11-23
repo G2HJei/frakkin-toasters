@@ -34,8 +34,8 @@ export function TurnPanel({ name, connection }: { name: string; connection: Conn
         <img src="/logo.png" alt="" className="logo" />
         <span title={name}>{name || 'Game'}</span>
         {connection !== 'open' && <small className={`connection ${connection}`}>{connection}</small>}
-        <button type="button" className="link reference-open" onClick={() => useReference.getState().show()}>
-          Reference
+        <button type="button" className="link reference-open" aria-keyshortcuts="R" onClick={() => useReference.getState().show()}>
+          Reference <kbd aria-hidden="true">R</kbd>
         </button>
       </div>
       {turn && (
