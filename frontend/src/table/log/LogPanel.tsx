@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { ArtStrip } from '../../art/Art';
 import { factArt, optionArt, recordArt, unique } from '../../art/refs';
 import { partArt, Words } from '../../art/Words';
-import { constantLabel, eventParts, factParts, optionLabel, partsText, typeLabel, type LabelContext } from '../../labels/describe';
+import { constantLabel, eventParts, factParts, optionLabel, partsText, typeLabel, unnamedSource, type LabelContext } from '../../labels/describe';
 import { useGameStore } from '../../live/gameStore';
 import type { FactProjection, LogEntry } from '../../wire/types';
 import { entryTargets, isAbout, useFlash } from '../flash';
@@ -202,6 +202,8 @@ function Entry({ entry, all, words }: { entry: LogEntry; all: boolean; words: La
   // "William Adama moves to the Armory" names its actor itself
   const named = parts[0]?.text === actor;
   const line = partsText(parts);
+  // the card or ability the entry exists for, e.g. "Forward Thinker" beside "Lee Adama may activate his location"
+  const source = unnamedSource(entry.event ?? '', details, parts, words);
   const split = splitFacts(entry.facts ?? []);
   // a fact that says what the line says, e.g. the move of a character who moved
   const story = split.story.filter((fact) => partsText(factParts(fact, words)) !== line);
@@ -220,6 +222,11 @@ function Entry({ entry, all, words }: { entry: LogEntry; all: boolean; words: La
             <Words parts={parts} />
           </span>
         </>
+      )}
+      {source && (
+        <span className="source-tag">
+          <Words parts={[source]} />
+        </span>
       )}
       <ArtStrip refs={unique([...recordArt(details), ...(entry.facts ?? []).flatMap(factArt)])} />
       {(story.length > 0 || (all && rest.length > 0)) && (

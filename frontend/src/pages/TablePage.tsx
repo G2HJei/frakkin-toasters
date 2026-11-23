@@ -11,7 +11,7 @@ import { chooseMessage, injectMessage, submitMessage, undoMessage, useGameStore 
 import { SandboxToolbar } from '../sandbox/SandboxToolbar';
 import { BoardSvg } from '../table/board/BoardSvg';
 import { ArtPreview } from '../art/Art';
-import { pauseOf } from '../labels/pause';
+import { pauseLineText, pauseOf } from '../labels/pause';
 import { AnswerPopover } from '../input/AnswerPopover';
 import { afterPick, AnsweringContext, offerOf, type Answering } from '../input/boardAnswers';
 import { LogPanel } from '../table/log/LogPanel';
@@ -184,7 +184,8 @@ function LiveTable({ gameId, name, seed, userNames }: { gameId: string; name: st
                   // the cue on the board's edge that the game waits for the viewer, and what for
                   <div className="move-banner" role="status">
                     <strong>{sandbox ? `${context.playerName(asked!)}'s move` : 'Your move'}</strong>
-                    {pauseOf(game.input, context).line && <span>{pauseOf(game.input, context).line}</span>}
+                    {/* plain words: the banner lets the pointer through to the board */}
+                    {pauseLineText(pauseOf(game.input, context)) && <span>{pauseLineText(pauseOf(game.input, context))}</span>}
                   </div>
                 )}
                 <BoardSvg />

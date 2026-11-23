@@ -41,6 +41,11 @@ export const CONSTANT_LABELS: Record<string, Record<string, string>> = {
   ShipType: {
     VIPER_MARK_VII: 'Viper Mk VII',
   },
+  CharacterAbility: {
+    DONT_TRUST_ANYONE: "Don't Trust Anyone",
+    ECO_OFFICER: 'ECO Officer',
+    LOGIC_BOUND: 'Logic-Bound',
+  },
 };
 
 export const TYPE_LABELS: Record<string, string> = {

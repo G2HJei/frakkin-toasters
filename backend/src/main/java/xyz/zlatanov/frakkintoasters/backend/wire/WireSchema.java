@@ -13,12 +13,14 @@ import xyz.zlatanov.frakkintoasters.event.AnytimeEvent;
 import xyz.zlatanov.frakkintoasters.event.AttackTable;
 import xyz.zlatanov.frakkintoasters.event.ComponentRole;
 import xyz.zlatanov.frakkintoasters.event.Event;
+import xyz.zlatanov.frakkintoasters.event.EventSources;
 import xyz.zlatanov.frakkintoasters.event.LocationEvent;
 import xyz.zlatanov.frakkintoasters.event.action.MutinyCardEvent;
 import xyz.zlatanov.frakkintoasters.event.action.MutinyCardEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.action.QuorumCardEvent;
 import xyz.zlatanov.frakkintoasters.event.action.QuorumCardEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.sandbox.SandboxEvent;
+import xyz.zlatanov.frakkintoasters.state.character.CharacterAbility;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 
 import java.lang.reflect.ParameterizedType;
@@ -43,10 +45,12 @@ import static xyz.zlatanov.frakkintoasters.backend.journal.ValueCodec.typeArgume
  * types from it, and its event builder makes a form of each event from it. Nothing copies a Java record by hand.
  * <ul>
  *     <li>a record: its components with their types, the interfaces it implements, whether it carries {@code kind},
- *     the {@code location} of a location's action, and the {@code quorumCard} or {@code mutinyCard} a card's event
- *     plays</li>
+ *     the {@code location} of a location's action, the {@code quorumCard} or {@code mutinyCard} a card's event
+ *     plays, and the {@code source} of an event that exists for a card or an ability ({@code Source})</li>
  *     <li>an interface: the records that implement it, a union told apart by {@code kind}</li>
- *     <li>an enum: its constants, and for {@code SkillCardType} the color of each</li>
+ *     <li>an enum: its constants, for {@code SkillCardType} the color of each, for {@code CharacterAbility} the
+ *     character of each, and the {@code sources} of constants that stand for a card or an ability, e.g. what granted
+ *     a {@code GrantEvent}</li>
  *     <li>the socket messages, told apart by {@code type}</li>
  *     <li>the Attack Table as the game applies it ({@code AttackTable})</li>
  * </ul>
@@ -142,6 +146,15 @@ public final class WireSchema {
                 val colors = node.putObject("colors");
                 Arrays.stream(SkillCardType.values()).forEach(card -> colors.put(card.name(), card.color().name()));
             }
+            if (type == CharacterAbility.class) {
+                // the character sheet an ability is printed on
+                val characters = node.putObject("characters");
+                Arrays.stream(CharacterAbility.values()).forEach(ability -> characters.put(ability.name(), ability.character().name()));
+            }
+            val sources = sources(type, names);
+            if (!sources.isEmpty()) {
+                node.set("sources", sources);
+            }
             return node;
         }
         if (type.isInterface()) {
@@ -177,6 +190,7 @@ public final class WireSchema {
         if (MutinyCardEvent.class.isAssignableFrom(type)) {
             node.put("mutinyCard", mutinyCard(type));
         }
+        EventSources.of(type).ifPresent(source -> node.set("source", sourceRef(source, names)));
         val components = node.putArray("components");
         for (val component : type.getRecordComponents()) {
             val described = components.addObject();
@@ -268,6 +282,25 @@ public final class WireSchema {
         } catch (ReflectiveOperationException | RuntimeException e) {
             return null;
         }
+    }
+
+    // The card or the ability, as the enum the schema names and its constant.
+    private static ObjectNode sourceRef(Enum<?> source, Map<Class<?>, String> names) {
+        val enumName = names.get(source.getDeclaringClass());
+        if (enumName == null) {
+            throw new IllegalStateException(source.getDeclaringClass() + " names a source but isn't a wire type");
+        }
+        return NODES.objectNode().put("enum", enumName).put("constant", source.name());
+    }
+
+    // What the constants of an enum stand for, e.g. the card that granted a GrantEvent. Empty for most enums.
+    private static ObjectNode sources(Class<?> type, Map<Class<?>, String> names) {
+        val sources = NODES.objectNode();
+        for (val constant : type.getEnumConstants()) {
+            val named = (Enum<?>) constant;
+            EventSources.of(named).ifPresent(source -> sources.set(named.name(), sourceRef(source, names)));
+        }
+        return sources;
     }
 
     // The record is the card, and its processor names it.

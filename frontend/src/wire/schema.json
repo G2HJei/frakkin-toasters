@@ -17,6 +17,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "ABUSE_POWER"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -48,6 +52,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "ABUSE_POWER"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -217,6 +225,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "ADAPTABLE"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -302,6 +314,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "CharacterMovementEvent", "Event", "MovementAbilityEvent", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "AGGRESSIVE_TACTICS"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -336,6 +352,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "ALERT_VIPER_PILOT"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -696,6 +716,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "ATTORNEY"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -916,6 +940,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "BLIND_DEVOTION"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -936,6 +964,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "BLIND_JUMP"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -1086,6 +1118,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "BROADCAST"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -1126,6 +1162,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "CAG"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -1283,7 +1323,108 @@
     },
     "CharacterAbility" : {
       "kind" : "enum",
-      "values" : [ "INDUSTRIOUS", "METICULOUS", "VANITY", "EFFICIENT", "FAST_LEARNER", "EMOTIONALLY_FRAGILE", "MEMENTO", "ESCORT", "FORCED_TO_EJECT", "QUICK_FIX", "DISCHARGE_OF_A_FIREARM", "IMPULSIVE", "INTIMATE", "HUMAN_DELUSION", "CONFLICTED_LOYALTIES", "PRIMACY", "AGGRESSIVE_TACTICS", "LIES_AND_SECRETS", "MAINTENANCE_ENGINEER", "BLIND_DEVOTION", "RECKLESS", "VISIONS", "DONT_TRUST_ANYONE", "HERETIC", "POLITICALLY_ADROIT", "MANIPULATIVE", "NOTHING_BUT_TROUBLE", "FTL_OPERATOR", "COUP", "MISGUIDED", "DELUSIONAL_INTUITION", "CYLON_DETECTOR", "COWARD", "CULT_LEADER", "BROADCAST", "SPIRITUAL_CRISIS", "INTOLERANT", "BLIND_JUMP", "BENT_ON_REVENGE", "ECO_OFFICER", "MORAL_COMPASS", "STRANDED", "RAPTOR_PILOT", "NO_ONE_GETS_LEFT_BEHIND", "FAMILY_COMMITMENTS", "EXPERT_PILOT", "SECRET_DESTINY", "INSUBORDINATE", "RELIGIOUS_VISIONS", "SKILLED_POLITICIAN", "TERMINAL_ILLNESS", "FORWARD_THINKER", "CHOOSE_A_DIFFERENT_PATH", "MORAL_DILEMMA", "ALERT_VIPER_PILOT", "CAG", "HEADSTRONG", "GLIMPSE_THE_FACE_OF_GOD", "CRYPTIC_MESSAGE", "CLOUDED", "HOTSHOT", "SACRIFICE", "STIM_JUNKIE", "DUTIFUL", "ORGANIZED", "RELUCTANT", "DECEITFUL", "ATTORNEY", "KLEPTOMANIA", "STAR_PLAYER", "LONGSHOT", "STARTS_ON_THE_BENCH", "CYLON_HATRED", "DECLARE_MARTIAL_LAW", "ALCOHOLIC", "FOR_LOVE", "RESOLUTE", "GRIEVING", "RECON", "MYSTERIOUS_INTUITION", "SLEEPER_AGENT", "TREATMENT", "QUARANTINE", "SPECIALIZED", "CALCULATING", "MODIFICATIONS", "LOGIC_BOUND", "FRIENDS_IN_LOW_PLACES", "UNCONVENTIONAL_TACTICS", "CONVICTED_CRIMINAL", "NECESSARY_STEPS", "ABUSE_POWER", "DISREPUTABLE", "ADAPTABLE", "INFLUENTIAL", "AMORAL", "INSPIRATIONAL_LEADER", "COMMAND_AUTHORITY", "EMOTIONALLY_ATTACHED" ]
+      "values" : [ "INDUSTRIOUS", "METICULOUS", "VANITY", "EFFICIENT", "FAST_LEARNER", "EMOTIONALLY_FRAGILE", "MEMENTO", "ESCORT", "FORCED_TO_EJECT", "QUICK_FIX", "DISCHARGE_OF_A_FIREARM", "IMPULSIVE", "INTIMATE", "HUMAN_DELUSION", "CONFLICTED_LOYALTIES", "PRIMACY", "AGGRESSIVE_TACTICS", "LIES_AND_SECRETS", "MAINTENANCE_ENGINEER", "BLIND_DEVOTION", "RECKLESS", "VISIONS", "DONT_TRUST_ANYONE", "HERETIC", "POLITICALLY_ADROIT", "MANIPULATIVE", "NOTHING_BUT_TROUBLE", "FTL_OPERATOR", "COUP", "MISGUIDED", "DELUSIONAL_INTUITION", "CYLON_DETECTOR", "COWARD", "CULT_LEADER", "BROADCAST", "SPIRITUAL_CRISIS", "INTOLERANT", "BLIND_JUMP", "BENT_ON_REVENGE", "ECO_OFFICER", "MORAL_COMPASS", "STRANDED", "RAPTOR_PILOT", "NO_ONE_GETS_LEFT_BEHIND", "FAMILY_COMMITMENTS", "EXPERT_PILOT", "SECRET_DESTINY", "INSUBORDINATE", "RELIGIOUS_VISIONS", "SKILLED_POLITICIAN", "TERMINAL_ILLNESS", "FORWARD_THINKER", "CHOOSE_A_DIFFERENT_PATH", "MORAL_DILEMMA", "ALERT_VIPER_PILOT", "CAG", "HEADSTRONG", "GLIMPSE_THE_FACE_OF_GOD", "CRYPTIC_MESSAGE", "CLOUDED", "HOTSHOT", "SACRIFICE", "STIM_JUNKIE", "DUTIFUL", "ORGANIZED", "RELUCTANT", "DECEITFUL", "ATTORNEY", "KLEPTOMANIA", "STAR_PLAYER", "LONGSHOT", "STARTS_ON_THE_BENCH", "CYLON_HATRED", "DECLARE_MARTIAL_LAW", "ALCOHOLIC", "FOR_LOVE", "RESOLUTE", "GRIEVING", "RECON", "MYSTERIOUS_INTUITION", "SLEEPER_AGENT", "TREATMENT", "QUARANTINE", "SPECIALIZED", "CALCULATING", "MODIFICATIONS", "LOGIC_BOUND", "FRIENDS_IN_LOW_PLACES", "UNCONVENTIONAL_TACTICS", "CONVICTED_CRIMINAL", "NECESSARY_STEPS", "ABUSE_POWER", "DISREPUTABLE", "ADAPTABLE", "INFLUENTIAL", "AMORAL", "INSPIRATIONAL_LEADER", "COMMAND_AUTHORITY", "EMOTIONALLY_ATTACHED" ],
+      "characters" : {
+        "INDUSTRIOUS" : "AARON_DORAL",
+        "METICULOUS" : "AARON_DORAL",
+        "VANITY" : "AARON_DORAL",
+        "EFFICIENT" : "ANASTASIA_DEE_DUALLA",
+        "FAST_LEARNER" : "ANASTASIA_DEE_DUALLA",
+        "EMOTIONALLY_FRAGILE" : "ANASTASIA_DEE_DUALLA",
+        "MEMENTO" : "BRENDAN_HOTDOG_COSTANZA",
+        "ESCORT" : "BRENDAN_HOTDOG_COSTANZA",
+        "FORCED_TO_EJECT" : "BRENDAN_HOTDOG_COSTANZA",
+        "QUICK_FIX" : "CALLANDRA_CALLY_TYROL",
+        "DISCHARGE_OF_A_FIREARM" : "CALLANDRA_CALLY_TYROL",
+        "IMPULSIVE" : "CALLANDRA_CALLY_TYROL",
+        "INTIMATE" : "CAPRICA_SIX",
+        "HUMAN_DELUSION" : "CAPRICA_SIX",
+        "CONFLICTED_LOYALTIES" : "CAPRICA_SIX",
+        "PRIMACY" : "CAVIL",
+        "AGGRESSIVE_TACTICS" : "CAVIL",
+        "LIES_AND_SECRETS" : "CAVIL",
+        "MAINTENANCE_ENGINEER" : "CHIEF_GALEN_TYROL",
+        "BLIND_DEVOTION" : "CHIEF_GALEN_TYROL",
+        "RECKLESS" : "CHIEF_GALEN_TYROL",
+        "VISIONS" : "DANNA_BIERS",
+        "DONT_TRUST_ANYONE" : "DANNA_BIERS",
+        "HERETIC" : "DANNA_BIERS",
+        "POLITICALLY_ADROIT" : "ELLEN_TIGH",
+        "MANIPULATIVE" : "ELLEN_TIGH",
+        "NOTHING_BUT_TROUBLE" : "ELLEN_TIGH",
+        "FTL_OPERATOR" : "FELIX_GAETA",
+        "COUP" : "FELIX_GAETA",
+        "MISGUIDED" : "FELIX_GAETA",
+        "DELUSIONAL_INTUITION" : "GAIUS_BALTAR",
+        "CYLON_DETECTOR" : "GAIUS_BALTAR",
+        "COWARD" : "GAIUS_BALTAR",
+        "CULT_LEADER" : "GAIUS_BALTAR_ALT",
+        "BROADCAST" : "GAIUS_BALTAR_ALT",
+        "SPIRITUAL_CRISIS" : "GAIUS_BALTAR_ALT",
+        "INTOLERANT" : "HELENA_CAIN",
+        "BLIND_JUMP" : "HELENA_CAIN",
+        "BENT_ON_REVENGE" : "HELENA_CAIN",
+        "ECO_OFFICER" : "KARL_HELO_AGATHON",
+        "MORAL_COMPASS" : "KARL_HELO_AGATHON",
+        "STRANDED" : "KARL_HELO_AGATHON",
+        "RAPTOR_PILOT" : "KARL_HELO_AGATHON_ALT",
+        "NO_ONE_GETS_LEFT_BEHIND" : "KARL_HELO_AGATHON_ALT",
+        "FAMILY_COMMITMENTS" : "KARL_HELO_AGATHON_ALT",
+        "EXPERT_PILOT" : "KARA_STARBUCK_THRACE",
+        "SECRET_DESTINY" : "KARA_STARBUCK_THRACE",
+        "INSUBORDINATE" : "KARA_STARBUCK_THRACE",
+        "RELIGIOUS_VISIONS" : "LAURA_ROSLIN",
+        "SKILLED_POLITICIAN" : "LAURA_ROSLIN",
+        "TERMINAL_ILLNESS" : "LAURA_ROSLIN",
+        "FORWARD_THINKER" : "LEE_ADAMA",
+        "CHOOSE_A_DIFFERENT_PATH" : "LEE_ADAMA",
+        "MORAL_DILEMMA" : "LEE_ADAMA",
+        "ALERT_VIPER_PILOT" : "LEE_APOLLO_ADAMA",
+        "CAG" : "LEE_APOLLO_ADAMA",
+        "HEADSTRONG" : "LEE_APOLLO_ADAMA",
+        "GLIMPSE_THE_FACE_OF_GOD" : "LEOBEN_CONOY",
+        "CRYPTIC_MESSAGE" : "LEOBEN_CONOY",
+        "CLOUDED" : "LEOBEN_CONOY",
+        "HOTSHOT" : "LOUANNE_KAT_KATRAINE",
+        "SACRIFICE" : "LOUANNE_KAT_KATRAINE",
+        "STIM_JUNKIE" : "LOUANNE_KAT_KATRAINE",
+        "DUTIFUL" : "LOUIS_HOSHI",
+        "ORGANIZED" : "LOUIS_HOSHI",
+        "RELUCTANT" : "LOUIS_HOSHI",
+        "DECEITFUL" : "ROMO_LAMPKIN",
+        "ATTORNEY" : "ROMO_LAMPKIN",
+        "KLEPTOMANIA" : "ROMO_LAMPKIN",
+        "STAR_PLAYER" : "SAMUEL_T_ANDERS",
+        "LONGSHOT" : "SAMUEL_T_ANDERS",
+        "STARTS_ON_THE_BENCH" : "SAMUEL_T_ANDERS",
+        "CYLON_HATRED" : "SAUL_TIGH",
+        "DECLARE_MARTIAL_LAW" : "SAUL_TIGH",
+        "ALCOHOLIC" : "SAUL_TIGH",
+        "FOR_LOVE" : "SHARON_ATHENA_AGATHON",
+        "RESOLUTE" : "SHARON_ATHENA_AGATHON",
+        "GRIEVING" : "SHARON_ATHENA_AGATHON",
+        "RECON" : "SHARON_BOOMER_VALERII",
+        "MYSTERIOUS_INTUITION" : "SHARON_BOOMER_VALERII",
+        "SLEEPER_AGENT" : "SHARON_BOOMER_VALERII",
+        "TREATMENT" : "SHERMAN_DOC_COTTLE",
+        "QUARANTINE" : "SHERMAN_DOC_COTTLE",
+        "SPECIALIZED" : "SHERMAN_DOC_COTTLE",
+        "CALCULATING" : "SIMON_ONEIL",
+        "MODIFICATIONS" : "SIMON_ONEIL",
+        "LOGIC_BOUND" : "SIMON_ONEIL",
+        "FRIENDS_IN_LOW_PLACES" : "TOM_ZAREK",
+        "UNCONVENTIONAL_TACTICS" : "TOM_ZAREK",
+        "CONVICTED_CRIMINAL" : "TOM_ZAREK",
+        "NECESSARY_STEPS" : "TOM_ZAREK_ALT",
+        "ABUSE_POWER" : "TOM_ZAREK_ALT",
+        "DISREPUTABLE" : "TOM_ZAREK_ALT",
+        "ADAPTABLE" : "TORY_FOSTER",
+        "INFLUENTIAL" : "TORY_FOSTER",
+        "AMORAL" : "TORY_FOSTER",
+        "INSPIRATIONAL_LEADER" : "WILLIAM_ADAMA",
+        "COMMAND_AUTHORITY" : "WILLIAM_ADAMA",
+        "EMOTIONALLY_ATTACHED" : "WILLIAM_ADAMA"
+      }
     },
     "CharacterActionEvent" : {
       "kind" : "union",
@@ -1399,6 +1540,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "CHOOSE_A_DIFFERENT_PATH"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -1779,6 +1924,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "COMMAND_AUTHORITY"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -1918,6 +2067,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "COUP"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -1985,6 +2138,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "CRYPTIC_MESSAGE"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -2005,6 +2162,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "CULT_LEADER"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -2035,6 +2196,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "CYLON_DETECTOR"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -2117,6 +2282,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "CYLON_HATRED"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -2398,6 +2567,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "DECEITFUL"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -2671,6 +2844,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "DECLARE_MARTIAL_LAW"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -2728,6 +2905,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "DELUSIONAL_INTUITION"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -3209,6 +3390,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "DISCHARGE_OF_A_FIREARM"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -3256,6 +3441,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "DONT_TRUST_ANYONE"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -3388,6 +3577,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "DUTIFUL"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -3408,6 +3601,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "DUTIFUL"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -3435,6 +3632,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "EMOTIONALLY_FRAGILE"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -3502,6 +3703,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "VISIONS"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -3580,6 +3785,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "ESCORT"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -3794,6 +4003,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "FAST_LEARNER"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -3814,6 +4027,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "FAST_LEARNER"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -3928,6 +4145,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "FOR_LOVE"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -3982,6 +4203,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "FOR_LOVE"
+      },
       "components" : [ {
         "name" : "discarderPlayerNumber",
         "type" : {
@@ -4015,6 +4240,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "FORWARD_THINKER"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -4028,6 +4257,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "FRIENDS_IN_LOW_PLACES"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -5007,6 +5240,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "CharacterMovementEvent", "Event", "MovementAbilityEvent", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "GLIMPSE_THE_FACE_OF_GOD"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -5020,6 +5257,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "GLIMPSE_THE_FACE_OF_GOD"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -5073,7 +5314,45 @@
     },
     "GrantedBy" : {
       "kind" : "enum",
-      "values" : [ "HANGAR_DECK", "EXECUTIVE_ORDER", "STATE_OF_EMERGENCY", "CAG_TITLE", "EXPERT_PILOT", "METICULOUS", "AGGRESSIVE_TACTICS", "MAINTENANCE_ENGINEER", "ALERT_VIPER_PILOT" ]
+      "values" : [ "HANGAR_DECK", "EXECUTIVE_ORDER", "STATE_OF_EMERGENCY", "CAG_TITLE", "EXPERT_PILOT", "METICULOUS", "AGGRESSIVE_TACTICS", "MAINTENANCE_ENGINEER", "ALERT_VIPER_PILOT" ],
+      "sources" : {
+        "HANGAR_DECK" : {
+          "enum" : "Location",
+          "constant" : "HANGAR_DECK"
+        },
+        "EXECUTIVE_ORDER" : {
+          "enum" : "SkillCardType",
+          "constant" : "EXECUTIVE_ORDER"
+        },
+        "STATE_OF_EMERGENCY" : {
+          "enum" : "SkillCardType",
+          "constant" : "STATE_OF_EMERGENCY"
+        },
+        "CAG_TITLE" : {
+          "enum" : "Title",
+          "constant" : "CAG"
+        },
+        "EXPERT_PILOT" : {
+          "enum" : "CharacterAbility",
+          "constant" : "EXPERT_PILOT"
+        },
+        "METICULOUS" : {
+          "enum" : "CharacterAbility",
+          "constant" : "METICULOUS"
+        },
+        "AGGRESSIVE_TACTICS" : {
+          "enum" : "CharacterAbility",
+          "constant" : "AGGRESSIVE_TACTICS"
+        },
+        "MAINTENANCE_ENGINEER" : {
+          "enum" : "CharacterAbility",
+          "constant" : "MAINTENANCE_ENGINEER"
+        },
+        "ALERT_VIPER_PILOT" : {
+          "enum" : "CharacterAbility",
+          "constant" : "ALERT_VIPER_PILOT"
+        }
+      }
     },
     "GrantedViperActivationEvent" : {
       "kind" : "record",
@@ -5113,6 +5392,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "HERETIC"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -5246,6 +5529,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "HUMAN_DELUSION"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -5376,6 +5663,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "INFLUENTIAL"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -5585,6 +5876,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "CharacterMovementEvent", "Event", "MovementAbilityEvent", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "INTIMATE"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -5612,6 +5907,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "INTOLERANT"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -5684,6 +5983,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "KLEPTOMANIA"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -5983,6 +6286,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "LOGIC_BOUND"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -6121,6 +6428,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "MAINTENANCE_ENGINEER"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -6220,6 +6531,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "MANIPULATIVE"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -6260,6 +6575,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "MEMENTO"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -6273,6 +6592,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "METICULOUS"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -6293,6 +6616,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "MODIFICATIONS"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -6313,6 +6640,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "MORAL_COMPASS"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -6457,6 +6788,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "MYSTERIOUS_INTUITION"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -6503,6 +6838,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "NECESSARY_STEPS"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -6563,6 +6902,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "NO_ONE_GETS_LEFT_BEHIND"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -6665,12 +7008,20 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "ADAPTABLE"
+      },
       "components" : [ ]
     },
     "OfferAlertViperPilotEvent" : {
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "ALERT_VIPER_PILOT"
+      },
       "components" : [ {
         "name" : "viperIds",
         "type" : {
@@ -6688,12 +7039,20 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "COMMAND_AUTHORITY"
+      },
       "components" : [ ]
     },
     "OfferDutifulEvent" : {
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "DUTIFUL"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -6714,6 +7073,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "FORWARD_THINKER"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -6727,6 +7090,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "MEMENTO"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -6740,6 +7107,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CrisisCard",
+        "constant" : "RETURN_TO_DUTY"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -6836,6 +7207,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "ORGANIZED"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -6849,6 +7224,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "ORGANIZED"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -6880,6 +7259,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "ORGANIZED"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -8129,6 +8512,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "POLITICALLY_ADROIT"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -8340,6 +8727,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "PRIMACY"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -8463,6 +8854,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "QUARANTINE"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -8483,6 +8878,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "QUARANTINE"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -8496,6 +8895,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "QUICK_FIX"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -8627,6 +9030,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "RAPTOR_PILOT"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -8686,6 +9093,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "RECON"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -8750,6 +9161,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "RELIGIOUS_VISIONS"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -8790,6 +9205,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "INFLUENTIAL"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -8936,6 +9355,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "RESOLUTE"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -9472,6 +9895,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "SACRIFICE"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -9660,6 +10087,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "SECRET_DESTINY"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -10801,6 +11232,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "SKILLED_POLITICIAN"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -10832,6 +11267,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "SKILLED_POLITICIAN"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -10845,6 +11284,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "SLEEPER_AGENT"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -10870,6 +11313,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "STAR_PLAYER"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -11210,6 +11657,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "TREATMENT"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -11241,6 +11692,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "TREATMENT"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -11423,6 +11878,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "UNCONVENTIONAL_TACTICS"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -11455,6 +11914,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "CAG"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {
@@ -11770,6 +12233,10 @@
       "kind" : "record",
       "tagged" : true,
       "interfaces" : [ "ActionEvent", "CharacterActionEvent", "Event", "PlayerEvent" ],
+      "source" : {
+        "enum" : "CharacterAbility",
+        "constant" : "VISIONS"
+      },
       "components" : [ {
         "name" : "playerNumber",
         "type" : {

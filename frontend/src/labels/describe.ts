@@ -2,7 +2,7 @@
 // template names fields in braces; a value is worded by its type in the schema.
 import { humanizeConstant, humanizeType } from './humanize';
 import { CONSTANT_LABELS, TYPE_LABELS } from './overrides';
-import { recordNamed, type TypeRef } from '../wire/schema';
+import { recordNamed, typeNamed, type SourceRef, type TypeRef } from '../wire/schema';
 import type { FactProjection, Followup } from '../wire/types';
 
 export interface LabelContext {
@@ -362,6 +362,51 @@ function playedCardLabel(event: Record<string, unknown>, kind: string, enumName:
     .map((component) => `${humanizeType(component.name).toLowerCase()} ${valueLabel(event[component.name], component.type, context)}`);
   const played = `${valueLabel(event.playerNumber, player?.type, context)} plays ${constantLabel(enumName, card)}`;
   return parts.length > 0 ? `${played} (${parts.join(', ')})` : played;
+}
+
+/* sources */
+
+/**
+ * The card or ability an event exists for, where its fields don't name it: its record's `source`, or the source of a
+ * constant it holds, e.g. the card a GrantEvent's `grantedBy` names. The type alone gives the first, so an event whose
+ * fields are hidden still has it. Null for most events.
+ */
+export function eventSource(kind: string, event: Record<string, unknown> | null | undefined): SourceRef | null {
+  const record = recordNamed(kind);
+  if (!record) {
+    return null;
+  }
+  if (record.source) {
+    return record.source;
+  }
+  for (const component of event ? record.components : []) {
+    const value = event?.[component.name];
+    const type = component.type.t === 'enum' ? typeNamed(component.type.name ?? '') : undefined;
+    const source = type?.kind === 'enum' && typeof value === 'string' ? type.sources?.[value] : undefined;
+    if (source) {
+      return source;
+    }
+  }
+  return null;
+}
+
+/** A source as a name to hover: the card, or the character sheet that prints the ability. */
+export function sourcePart(source: SourceRef, context: LabelContext): Part {
+  const type: TypeRef = { t: 'enum', nullable: false, name: source.enum };
+  return { text: constantLabel(source.enum, source.constant), art: context.artOf?.(source.constant, type) ?? null };
+}
+
+/**
+ * The source of an event, to show beside its words: null when it has none, or when its words name it already, e.g.
+ * "Cavil uses Primacy".
+ */
+export function unnamedSource(kind: string, event: Record<string, unknown> | null | undefined, words: Part[], context: LabelContext): Part | null {
+  const source = eventSource(kind, event);
+  if (!source) {
+    return null;
+  }
+  const part = sourcePart(source, context);
+  return partsText(words).toLowerCase().includes(part.text.toLowerCase()) ? null : part;
 }
 
 /* options of a choice */

@@ -1,6 +1,7 @@
 // The images of materials-sorted at the repository's root: a folder per enum of the core, a file per constant, named
 // like it. Vite copies them into the build and gives each its URL. A component that has no image falls back to its name.
 import { constantLabel, skillCardLabel, type SkillCardLike } from '../labels/describe';
+import { abilityCharacter } from '../wire/schema';
 
 // only the folders: the full-size board scan at the root isn't for the browser (the table's board is board.jpg)
 const FILES = import.meta.glob<string>('./*/**/*.{png,jpg,gif}', {
@@ -187,6 +188,11 @@ export function enumArt(enumName: string, constant: Constant): ArtRef | null {
       return skillCheckArt(constant);
     case 'SkillCardType':
       return skillTypeArt(constant);
+    case 'CharacterAbility':
+      // the character sheet that prints it
+      return characterSheetArt(abilityCharacter(constant));
+    case 'Title':
+      return constant === 'PRESIDENT' || constant === 'ADMIRAL' || constant === 'CAG' ? titleArt(constant) : null;
     default:
       return null;
   }

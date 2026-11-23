@@ -1382,6 +1382,16 @@ details > summary {
   font-weight: 600;
 }
 
+/* the card or ability a log entry exists for, when its words don't name it */
+.table-page .log .source-tag {
+  margin-left: 6px;
+  padding: 0 5px;
+  font-size: 0.85em;
+  color: var(--steel-300, var(--muted));
+  border: 1px solid rgba(143, 208, 255, 0.35);
+  white-space: nowrap;
+}
+
 /* the players' mats: no panel around them, each mat has the cut corners and the edge */
 
 .players .mats {

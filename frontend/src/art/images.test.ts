@@ -106,6 +106,12 @@ describe('the images', () => {
     expect(art?.preview).toHaveLength(1);
   });
 
+  it('shows an ability by the sheet that prints it, and a title by its card', () => {
+    expect(enumArt('CharacterAbility', 'FORWARD_THINKER')?.key).toBe('Character/card/LEE_ADAMA');
+    expect(enumValues('CharacterAbility').filter((ability) => !enumArt('CharacterAbility', ability))).toEqual([]);
+    expect(enumArt('Title', 'CAG')?.key).toBe(titleArt('CAG')?.key);
+  });
+
   it('finds the card of every skill check: a Crisis Card, a Super Crisis Card or a location', () => {
     expect(enumValues('SkillCheckType').filter((type) => skillCheckArt(type) === null)).toEqual([]);
     expect(enumArt('SkillCheckType', 'BRIG')?.key).toBe('Location/BRIG');

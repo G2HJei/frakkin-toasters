@@ -1,5 +1,6 @@
 import { ArtStrip, CardTile } from '../art/Art';
 import { choiceArt } from '../art/refs';
+import { partArt, Words } from '../art/Words';
 import { optionLabel } from '../labels/describe';
 import { pauseOf } from '../labels/pause';
 import { ruleFor } from '../labels/rules';
@@ -36,13 +37,14 @@ export function InputPanel({ onChoose, onSubmit, onMove }: InputPanelProps) {
 
   // the viewer is asked: a Choose or a Decide only reaches the one who answers
   const yourMove = input?.kind === 'Choose' || input?.kind === 'Decide';
-  const pause = pauseOf(input, table);
+  // its names show their images on hover, like the log's
+  const pause = pauseOf(input, { ...table, artOf: partArt });
   return (
     <section className={`panel cf input-panel ${yourMove ? 'your-move' : ''} ${sending ? 'sending' : ''}`.trim()} aria-label="input" aria-busy={sending}>
       <h2>{pause.heading}</h2>
       {(pause.line || ruleFor(input)) && (
         <p className="pause-line">
-          {pause.line}
+          {pause.line && <Words parts={pause.line} />}
           {/* where to read up on it */}
           {ruleFor(input) && <RuleLink article={ruleFor(input)!.article} found={ruleFor(input)} />}
         </p>
