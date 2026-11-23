@@ -1,5 +1,7 @@
 import { fireEvent, render } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { AnsweringContext, NO_OFFER, type Offer } from '../../input/boardAnswers';
+import type { Move } from '../../input/answers';
 import { BoardSvg, groupShips, shortName } from './BoardSvg';
 import { ArtPreview, usePreview } from '../../art/Art';
 import { RevealLayer, useReveal } from '../reveal';
@@ -62,12 +64,14 @@ const game = {
   nukes: 2,
 } as unknown as GameProjection;
 
-function renderBoard(targets?: Set<string>, projection: GameProjection = game, sandbox = false) {
+function renderBoard(offer?: Offer, projection: GameProjection = game, sandbox = false, onTarget = vi.fn()) {
   return render(
     <Table.Provider value={tableContext(projection, sandbox, null)}>
-      <BoardSvg targets={targets} />
-      <RevealLayer />
-      <ArtPreview />
+      <AnsweringContext.Provider value={{ offer: offer ?? NO_OFFER, onTarget }}>
+        <BoardSvg />
+        <RevealLayer />
+        <ArtPreview />
+      </AnsweringContext.Provider>
     </Table.Provider>,
   ).container;
 }
@@ -357,11 +361,38 @@ describe('the board', () => {
     expect(document.querySelector('.reveal-pop .sandbox-only')).not.toBeNull();
   });
 
-  it('lights up the locations an input can be answered with', () => {
-    const board = renderBoard(new Set(['ARMORY']));
+  it('lights up the locations, ships and standees an input can be answered with, and the Act chip', () => {
+    const move = { option: null, followup: null, event: { kind: 'MoveEvent', playerNumber: 1, destination: 'ARMORY', discardCard: null }, submits: true, pick: null } as Move;
+    const offer: Offer = {
+      targets: new Map([
+        ['location:ARMORY', [move]],
+        ['ship:3', [move, move]],
+        ['player:1', [move]],
+      ]),
+      acts: new Map([['RESEARCH_LAB', { kind: 'ResearchLabEvent', moves: [move] }]]),
+      picked: new Set(),
+    };
+    const onTarget = vi.fn();
+    const board = renderBoard(offer, game, false, onTarget);
 
-    expect(board.querySelector('[data-location="ARMORY"]')?.getAttribute('role')).toBe('button');
+    const armory = board.querySelector('[data-location="ARMORY"]')!;
+    expect(armory.getAttribute('role')).toBe('button');
+    expect(armory.querySelector('title')?.textContent).toBe('William Adama moves to Armory');
     expect(board.querySelector('[data-location="RESEARCH_LAB"]')?.getAttribute('role')).toBeNull();
+    fireEvent.click(armory);
+    expect(onTarget).toHaveBeenLastCalledWith({ type: 'location', location: 'ARMORY' }, expect.anything());
+
+    const viper = board.querySelector('[data-ship="3"]')!;
+    expect(viper.classList).toContain('target');
+    expect(viper.querySelector('title')?.textContent).toBe('2 answers');
+    fireEvent.click(viper);
+    expect(onTarget).toHaveBeenLastCalledWith({ type: 'ship', id: 3 }, expect.anything());
+
+    fireEvent.click(board.querySelector('[data-character="WILLIAM_ADAMA"]')!);
+    expect(onTarget).toHaveBeenLastCalledWith({ type: 'player', playerNumber: 1 }, expect.anything());
+
+    fireEvent.click(board.querySelector('[data-location="RESEARCH_LAB"] .act')!);
+    expect(onTarget).toHaveBeenLastCalledWith({ type: 'kind', kind: 'ResearchLabEvent' }, expect.anything());
   });
 
   it('puts a nickname, or the last name, on a token', () => {

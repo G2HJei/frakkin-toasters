@@ -1,4 +1,6 @@
-import type { ReactNode } from 'react';
+import { useLayoutEffect, useRef, type ReactNode } from 'react';
+import { signed, useChanges, type Changes } from '../changes';
+import { useGameStore } from '../../live/gameStore';
 import {
   cardArt,
   characterArt,
@@ -18,6 +20,11 @@ import { previewHandlers, SvgArt } from '../../art/Art';
 import { cardLabel, constantLabel } from '../../labels/describe';
 import type { CivilianShip, Character, DeckProjection, GameProjection, Location, ShipProjection } from '../../wire/types';
 import { PlayerMatOf } from '../players/PlayersPanel';
+import { anchorOf, useAnswering } from '../../input/boardAnswers';
+import { useFlash } from '../flash';
+import { moveSentence } from '../../input/moveLabels';
+import type { Move, Target } from '../../input/answers';
+import type { LabelContext } from '../../labels/describe';
 import { useRevealHandlers, type RevealCard, type RevealSection } from '../reveal';
 import { useTable } from '../tableContext';
 import boardUrl from './board.jpg';
@@ -40,14 +47,6 @@ import {
 } from './layout';
 import { CargoIcons, cargoText, inRedZone, RESOURCE_NAMES, resourceLabel } from './resources';
 
-export interface BoardSvgProps {
-  // the locations a pending input can be answered with, which light up and take a click
-  targets?: ReadonlySet<string>;
-  onLocation?(location: Location): void;
-  // the location whose action the asked player can take, with an "Act" button on it
-  actAt?: string | null;
-  onAct?(): void;
-}
 
 // the decks whose discard pile lies face down (Disclosure.FACEDOWN_DISCARDS in the core)
 const FACEDOWN_DISCARDS = new Set(['CIVILIAN_SHIPS', 'GALACTICA_DAMAGE', 'PEGASUS_DAMAGE', 'BASESTAR_DAMAGE', 'DESTINATION', 'DESTINY', 'LOYALTY', 'LOYALTY_NOT_CYLON', 'MOTIVE']);
@@ -59,10 +58,17 @@ const FACEDOWN_DISCARDS = new Set(['CIVILIAN_SHIPS', 'GALACTICA_DAMAGE', 'PEGASU
  * piles, the civilian ships lie with the ship reserves, and the destinations tuck under the objective. The cards kept in
  * play lie on the free starfield. The card being resolved, its skill check and the die are the turn panel's, and the
  * nukes the Admiral's mat's. Hovering a deck shows its discard pile, and in a sandbox what the players can't see;
- * hovering a location shows its card, and hovering a standee its character sheet with its player's mat.
+ * hovering a location shows its card, and hovering a standee its character sheet with its player's mat. What the
+ * pending input's moves name lights up and takes a click (`input/boardAnswers.ts`): locations, ships, standees, and the
+ * "Act" chip of a location action.
  */
-export function BoardSvg({ targets, onLocation, actAt, onAct }: BoardSvgProps) {
+export function BoardSvg() {
   const table = useTable();
+  const { offer, onTarget } = useAnswering();
+  const flashed = useFlash((state) => state.keys);
+  const { changes, version } = useChanges();
+  const svg = useRef<SVGSVGElement>(null);
+  useGlidingShips(svg, version);
   const game = table.game;
   if (!game) {
     return null;
@@ -74,7 +80,7 @@ export function BoardSvg({ targets, onLocation, actAt, onAct }: BoardSvgProps) {
   const cylons = new Set((game.players ?? []).filter((player) => player.revealedCylon).map((player) => player.character));
 
   return (
-    <svg className="board-svg" viewBox={`0 0 ${BOARD_WIDTH} ${BOARD_HEIGHT}`} role="img" aria-label="the board">
+    <svg ref={svg} className="board-svg" viewBox={`0 0 ${BOARD_WIDTH} ${BOARD_HEIGHT}`} role="img" aria-label="the board">
       <image href={boardUrl} x={0} y={0} width={BOARD_WIDTH} height={BOARD_HEIGHT} className="board-image" />
       <Resources game={game} />
       <Tracks game={game} />
@@ -89,7 +95,10 @@ export function BoardSvg({ targets, onLocation, actAt, onAct }: BoardSvgProps) {
         if (!place) {
           return null;
         }
-        const isTarget = targets?.has(name) ?? false;
+        const targetKey = `location:${name}`;
+        const lit = offer.targets.get(targetKey);
+        const isTarget = lit !== undefined;
+        const act = offer.acts.get(name);
         const space = place.area === 'galacticaSpace' || place.area === 'cylonFleetSpace';
         const destroyed = (place.area === 'colonialOne' && (galactica?.colonialOneDestroyed ?? false))
           || (place.area === 'pegasus' && (game.pegasus?.destroyed ?? false));
@@ -98,12 +107,22 @@ export function BoardSvg({ targets, onLocation, actAt, onAct }: BoardSvgProps) {
         return (
           <g
             key={name}
-            className={['location', place.area, location.damaged ? 'damaged' : '', destroyed ? 'destroyed' : '', isTarget ? 'target' : ''].join(' ')}
+            className={[
+              'location',
+              place.area,
+              location.damaged ? 'damaged' : '',
+              destroyed ? 'destroyed' : '',
+              isTarget ? 'target' : '',
+              offer.picked.has(targetKey) ? 'picked' : '',
+              flashed.has(targetKey) ? 'flash' : '',
+              changes.damaged.includes(name) ? 'just-damaged' : '',
+            ].join(' ')}
             data-location={name}
-            onClick={isTarget && onLocation ? () => onLocation(name) : undefined}
+            onClick={isTarget ? (event) => onTarget({ type: 'location', location: name }, anchorOf(event)) : undefined}
             role={isTarget ? 'button' : undefined}
             aria-label={isTarget ? constantLabel('Location', name) : undefined}
           >
+            {lit && <title>{hint(lit, table)}</title>}
             <rect className={space ? 'space-frame' : 'frame'} x={place.x - 6} y={place.y - 6} width={place.width + 12} height={place.height + 12} rx={14} />
             {space ? (
               <Ships place={place} ships={ships.filter((ship) => ship.location === name)} toMiss={game.turn?.raidersToMiss?.[name] ?? 0} avoid={LAUNCH_TUBES[name]} />
@@ -114,8 +133,17 @@ export function BoardSvg({ targets, onLocation, actAt, onAct }: BoardSvgProps) {
             {card && <rect className="location-hotspot" x={place.x} y={place.y} width={place.width} height={place.height} {...previewHandlers(card)} />}
             <Standees place={place} title={TITLES[name]} characters={(location.characters ?? []) as Character[]} current={currentCharacter} cylons={cylons} nameOf={table.playerName} game={game} />
             {!space && location.damaged && <DamagedLabel place={place} title={TITLES[name]} />}
-            {actAt === name && onAct && (
-              <g className="act" role="button" aria-label="Act" onClick={onAct}>
+            {act && (
+              <g
+                className="act"
+                role="button"
+                aria-label="Act"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onTarget({ type: 'kind', kind: act.kind }, anchorOf(event));
+                }}
+              >
+                <title>{hint(act.moves, table)}</title>
                 <rect x={place.x + place.width - 96} y={place.y - 22} width={110} height={52} rx={6} />
                 <text x={place.x + place.width - 41} y={place.y + 14} textAnchor="middle">
                   Act
@@ -125,8 +153,81 @@ export function BoardSvg({ targets, onLocation, actAt, onAct }: BoardSvgProps) {
           </g>
         );
       })}
+      <Deltas changes={changes} version={version} jump={game.galactica?.jumpPreparation ?? null} />
     </svg>
   );
+}
+
+// What changed with the last game message floats up where it shows: the resources, the jump track and the distance.
+// Keyed by the version, so each change plays once.
+function Deltas({ changes, version, jump }: { changes: Changes; version: number; jump: string | null }) {
+  const marker = jump ? JUMP_TRACK[jump] : null;
+  return (
+    <g className="deltas" aria-hidden="true">
+      {changes.resources.map(({ resource, delta }) => (
+        <text key={`${resource}-${version}`} className={`delta ${delta < 0 ? 'loss' : 'gain'}`} x={RESOURCES[resource].x + 30} y={RESOURCES[resource].y - 40}>
+          {signed(delta)} {resourceLabel(resource)}
+        </text>
+      ))}
+      {changes.jump && marker && (
+        <text key={`jump-${version}`} className="delta gain" x={marker.x} y={marker.y - 60} textAnchor="middle">
+          {changes.jump.reset ? 'Jump!' : signed(changes.jump.delta)}
+        </text>
+      )}
+      {changes.distance > 0 && (
+        <text key={`distance-${version}`} className="delta gain" x={DISTANCE.x + DISTANCE.width / 2} y={DISTANCE.y - 16} textAnchor="middle">
+          {signed(changes.distance)} distance
+        </text>
+      )}
+    </g>
+  );
+}
+
+// A ship that moved glides from where it was: its last place is kept by id, and the new one starts there (FLIP). A
+// snapshot (no previous game) only notes the places.
+function useGlidingShips(svg: React.RefObject<SVGSVGElement | null>, version: number) {
+  const places = useRef(new Map<string, { x: number; y: number }>());
+  useLayoutEffect(() => {
+    const root = svg.current;
+    if (!root) {
+      return;
+    }
+    const animate = useGameStore.getState().previous !== null;
+    const next = new Map<string, { x: number; y: number }>();
+    root.querySelectorAll<SVGGraphicsElement>('[data-ship]').forEach((element) => {
+      const id = element.dataset.ship ?? '';
+      let box: { x: number; y: number };
+      try {
+        box = element.getBBox();
+      } catch {
+        return;
+      }
+      next.set(id, { x: box.x, y: box.y });
+      const before = places.current.get(id);
+      const dx = before ? before.x - box.x : 0;
+      const dy = before ? before.y - box.y : 0;
+      if (animate && (dx !== 0 || dy !== 0) && typeof element.animate === 'function') {
+        element.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'translate(0, 0)' }], { duration: 650, easing: 'ease-in-out' });
+      }
+    });
+    places.current = next;
+  }, [svg, version]);
+}
+
+// What a click on a lit target does: the move it sends, or how many it leaves to choose from.
+function hint(moves: Move[], context: LabelContext): string {
+  return moves.length === 1 ? moveSentence(moves[0], context) : `${moves.length} answers`;
+}
+
+// A lit piece takes the click before the location under it.
+function targetHandlers(target: Target, onTarget: (target: Target, anchor: { x: number; y: number }) => void) {
+  return {
+    role: 'button',
+    onClick: (event: React.MouseEvent) => {
+      event.stopPropagation();
+      onTarget(target, anchorOf(event));
+    },
+  };
 }
 
 // ---------------------------------------------------------------- the resources and the tracks
@@ -426,6 +527,9 @@ function Standees({ place, title, characters, current, cylons, nameOf, game }: {
   nameOf(playerNumber: number): string;
   game: GameProjection;
 }) {
+  const table = useTable();
+  const { offer, onTarget } = useAnswering();
+  const flashed = useFlash((state) => state.keys);
   if (characters.length === 0) {
     return null;
   }
@@ -441,9 +545,19 @@ function Standees({ place, title, characters, current, cylons, nameOf, game }: {
         const player = game.players?.find((candidate) => candidate.character === character);
         const name = player ? nameOf(player.number) : constantLabel('Character', character);
         const x = left + index * step;
-        const classes = ['character', character === current ? 'current' : '', cylons.has(character) ? 'cylon' : ''].join(' ').trim();
+        const key = player ? `player:${player.number}` : '';
+        const lit = player ? offer.targets.get(key) : undefined;
+        const classes = ['character', character === current ? 'current' : '', cylons.has(character) ? 'cylon' : '', lit ? 'target' : '', offer.picked.has(key) ? 'picked' : '', flashed.has(key) ? 'flash' : '']
+          .join(' ')
+          .trim();
         return (
-          <g key={character} className={classes} data-character={character}>
+          <g
+            key={character}
+            className={classes}
+            data-character={character}
+            {...(lit && player ? { ...targetHandlers({ type: 'player', playerNumber: player.number }, onTarget), 'aria-label': name } : {})}
+          >
+            {lit && <title>{hint(lit, table)}</title>}
             {art ? (
               <>
                 <rect className="token-ring" x={x - 3} y={top - 3} width={width + 6} height={height + 6} rx={8} />
@@ -636,11 +750,19 @@ function Piles({ placed }: { placed: PlacedGroup[] }) {
 
 // A ship, with its image large on hover unless its pile shows more.
 function Ship({ ship, x, y, width, height, preview = true }: { ship: ShipProjection; x: number; y: number; width: number; height: number; preview?: boolean }) {
+  const table = useTable();
+  const { offer, onTarget } = useAnswering();
   const art = shipArt(ship.type);
   const label = boardShipLabel(ship);
   const pilot = ship.pilot ? pilotArt(ship.pilot) : null;
+  const flashed = useFlash((state) => state.keys);
+  const key = `ship:${ship.id}`;
+  const lit = offer.targets.get(key);
+  const classes = ['ship', `ship-${(ship.type ?? '').toLowerCase()}`, lit ? 'target' : '', offer.picked.has(key) ? 'picked' : '', flashed.has(key) ? 'flash' : ''].join(' ').trim();
   return (
-    <g className={`ship ship-${(ship.type ?? '').toLowerCase()}`} data-ship={ship.id} aria-label={label}>
+    <g className={classes} data-ship={ship.id} aria-label={label} {...(lit ? targetHandlers({ type: 'ship', id: ship.id }, onTarget) : {})}>
+      {lit && <title>{hint(lit, table)}</title>}
+      {(lit || flashed.has(key)) && <rect className="target-ring" x={x - 4} y={y - 4} width={width + 8} height={height + 8} rx={8} />}
       {art ? (
         <SvgArt art={art} x={x} y={y} width={width} height={height} title={label} className="piece" preview={preview} />
       ) : (

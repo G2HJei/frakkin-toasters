@@ -39,6 +39,8 @@ export interface UnionType {
 export interface EnumType {
   kind: 'enum';
   values: string[];
+  // SkillCardType only: the color of each card type
+  colors?: Record<string, string>;
 }
 
 export type SchemaType = RecordType | UnionType | EnumType;
@@ -82,4 +84,10 @@ export function concreteEvents(action: string): string[] {
     return type.members.filter((member) => recordNamed(member) && schema.lists.events.includes(member));
   }
   return [];
+}
+
+/** The color of a Skill Card type, e.g. POLITICS for RED_TAPE. */
+export function skillCardColor(type: string | null | undefined): string | null {
+  const skillCardType = schema.types.SkillCardType;
+  return type && skillCardType?.kind === 'enum' ? (skillCardType.colors?.[type] ?? null) : null;
 }

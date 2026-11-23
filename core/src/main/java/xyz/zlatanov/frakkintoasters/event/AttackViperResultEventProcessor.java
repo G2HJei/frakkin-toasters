@@ -9,10 +9,10 @@ import xyz.zlatanov.frakkintoasters.state.view.HumanFighterView;
 
 public class AttackViperResultEventProcessor extends EventProcessor<AttackViperResultEvent> {
 
-    private static final int ROLL_TO_DESTROY                  = 8;
-    private static final int LOWEST_ROLL_TO_DESTROY_A_RAPTOR  = 7;
-    private static final int LOWEST_ROLL_TO_DAMAGE_A_VIPER    = 5;
-    private static final int LOWEST_ROLL_TO_DAMAGE_A_MARK_VII = 6;
+    static final int ROLL_TO_DESTROY                  = 8;
+    static final int LOWEST_ROLL_TO_DESTROY_A_RAPTOR  = 7;
+    static final int LOWEST_ROLL_TO_DAMAGE_A_VIPER    = 5;
+    static final int LOWEST_ROLL_TO_DAMAGE_A_MARK_VII = 6;
 
     @Override
     protected boolean isValid() {

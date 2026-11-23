@@ -29,6 +29,7 @@ import xyz.zlatanov.frakkintoasters.event.player.PlaceInSetupLocationEvent;
 import xyz.zlatanov.frakkintoasters.event.player.SelectCharacterEvent;
 import xyz.zlatanov.frakkintoasters.event.ship.DamageGalacticaEvent;
 import xyz.zlatanov.frakkintoasters.event.turn.EndTurnEvent;
+import xyz.zlatanov.frakkintoasters.event.turn.StartGameEvent;
 import xyz.zlatanov.frakkintoasters.state.Game;
 import xyz.zlatanov.frakkintoasters.state.Randomness;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
@@ -464,6 +465,15 @@ class GameEngineTest {
     @Test
     void theOptionsOfAChoiceCantNameDifferentPlayers() {
         assertThrows(FrakCallTheAdmiralException.class, () -> start(one(new NoOpEvent(1), new NoOpEvent(2))));
+    }
+
+    @Test
+    void thePendingScopeIsTheEventThatQueuedTheInput() {
+        val engine = GameEngine.start(4, 42L);
+
+        // the character choices come from the start of the game
+        assertInstanceOf(StartGameEvent.class, engine.pendingScope().orElseThrow().event());
+        assertEquals(engine.pendingScope(), GameEngine.restore(engine.journal(), 42L).pendingScope());
     }
 
     private static GameEngine start(Followup script) {

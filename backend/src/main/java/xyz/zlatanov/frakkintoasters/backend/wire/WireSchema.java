@@ -10,6 +10,7 @@ import xyz.zlatanov.frakkintoasters.backend.journal.TypeWalker;
 import xyz.zlatanov.frakkintoasters.backend.journal.ValueCodec;
 import xyz.zlatanov.frakkintoasters.engine.journal.fact.Fact;
 import xyz.zlatanov.frakkintoasters.event.AnytimeEvent;
+import xyz.zlatanov.frakkintoasters.event.AttackTable;
 import xyz.zlatanov.frakkintoasters.event.ComponentRole;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.LocationEvent;
@@ -18,6 +19,7 @@ import xyz.zlatanov.frakkintoasters.event.action.MutinyCardEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.action.QuorumCardEvent;
 import xyz.zlatanov.frakkintoasters.event.action.QuorumCardEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.sandbox.SandboxEvent;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.RecordComponent;
@@ -44,8 +46,9 @@ import static xyz.zlatanov.frakkintoasters.backend.journal.ValueCodec.typeArgume
  *     the {@code location} of a location's action, and the {@code quorumCard} or {@code mutinyCard} a card's event
  *     plays</li>
  *     <li>an interface: the records that implement it, a union told apart by {@code kind}</li>
- *     <li>an enum: its constants</li>
+ *     <li>an enum: its constants, and for {@code SkillCardType} the color of each</li>
  *     <li>the socket messages, told apart by {@code type}</li>
+ *     <li>the Attack Table as the game applies it ({@code AttackTable})</li>
  * </ul>
  * An int component gets a {@code role} from its name ({@link ComponentRole}): a {@code player}, a {@code ship}, a journal
  * {@code scope}, or a {@code count}.
@@ -96,6 +99,15 @@ public final class WireSchema {
         lists.set("facts", sorted(types.stream()
                 .filter(type -> type.isRecord() && Fact.class.isAssignableFrom(type))
                 .map(names::get).toList()));
+        // the Attack Table as the game applies it, for the table's cheat sheet
+        val attackTable = schema.putArray("attackTable");
+        AttackTable.rows().forEach(row -> attackTable.addObject()
+                .put("attacker", row.attacker())
+                .put("target", row.target())
+                .put("from", row.from())
+                .put("to", row.to())
+                .put("effect", row.effect().name()));
+        schema.put("structuralDamageBonus", AttackTable.structuralDamageBonus());
         val messages = schema.putObject("messages");
         WireMessages.TYPES.entrySet().stream()
                 .sorted(Map.Entry.comparingByValue())
@@ -125,6 +137,11 @@ public final class WireSchema {
             node.put("kind", "enum");
             val values = node.putArray("values");
             Arrays.stream(type.getEnumConstants()).forEach(constant -> values.add(((Enum<?>) constant).name()));
+            if (type == SkillCardType.class) {
+                // the table sorts a hand by color
+                val colors = node.putObject("colors");
+                Arrays.stream(SkillCardType.values()).forEach(card -> colors.put(card.name(), card.color().name()));
+            }
             return node;
         }
         if (type.isInterface()) {

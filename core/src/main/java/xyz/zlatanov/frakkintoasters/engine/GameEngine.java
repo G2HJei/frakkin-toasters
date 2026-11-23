@@ -7,6 +7,7 @@ import xyz.zlatanov.frakkintoasters.engine.PendingInput.AwaitingDecision;
 import xyz.zlatanov.frakkintoasters.engine.journal.FactRecorder;
 import xyz.zlatanov.frakkintoasters.engine.journal.GameReplayer;
 import xyz.zlatanov.frakkintoasters.engine.journal.Journal;
+import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry;
 import xyz.zlatanov.frakkintoasters.event.AnytimeEvent;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
@@ -343,6 +344,14 @@ public class GameEngine {
         if (game.outcome().isPresent()) {
             agenda.clear(); // AgendaReplayer does the same at the scope that ended the game
         }
+    }
+
+    /**
+     * @return the scope of the event that queued the pending input, e.g. the Crisis Card whose section is chosen. Empty
+     * once the game has ended, and for an input queued by no event
+     */
+    public Optional<JournalEntry.ScopeOpened> pendingScope() {
+        return agenda.top().flatMap(frame -> journal.scope(frame.parentScope()));
     }
 
     /**

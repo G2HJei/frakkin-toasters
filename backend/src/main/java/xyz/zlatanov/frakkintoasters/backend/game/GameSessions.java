@@ -397,7 +397,7 @@ public class GameSessions {
 
     private GameMessage message(GameSession session, Viewer viewer) {
         return new GameMessage(tokens.token(session.gameBundleId(), session.sequence()),
-                GameProjection.of(session.view(), session.engine().pendingInput(), viewer));
+                GameProjection.of(session.view(), session.engine().pendingInput(), session.engine().pendingScope(), viewer));
     }
 
     // The viewer's connection gets the current game, which every other connection of his has already: so it counts as

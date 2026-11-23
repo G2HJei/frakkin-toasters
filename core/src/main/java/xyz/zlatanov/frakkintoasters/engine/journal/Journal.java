@@ -14,6 +14,7 @@ import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Append-only record of what the game ops did. At most one scope is open at a time: a followup runs after its parent's
@@ -101,6 +102,19 @@ public class Journal {
      */
     public int currentScope() {
         return openScope;
+    }
+
+    /**
+     * @return the opening of the scope, empty for {@link #ROOT_SCOPE}
+     */
+    public Optional<ScopeOpened> scope(int scopeId) {
+        // the scope asked for is usually one of the last
+        for (int at = entries.size() - 1; at >= 0; at--) {
+            if (entries.get(at) instanceof ScopeOpened opened && opened.scopeId() == scopeId) {
+                return Optional.of(opened);
+            }
+        }
+        return Optional.empty();
     }
 
     public List<JournalEntry> entries() {

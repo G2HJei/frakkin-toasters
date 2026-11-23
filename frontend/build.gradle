@@ -14,9 +14,9 @@ node {
 
 def sources = [file('src'), file('index.html'), file('package.json'), file('package-lock.json'), file('vite.config.ts'),
                file('tsconfig.json')]
-// the images the app shows (src/art), without the rulebooks
+// the images the app shows (src/art), and the rulebooks its references open (src/labels/rules.ts)
 def materials = fileTree(rootProject.file('materials-sorted')) {
-    include '**/*.png', '**/*.jpg', '**/*.gif'
+    include '**/*.png', '**/*.jpg', '**/*.gif', 'bsg-rules/*.pdf'
 }
 
 tasks.register('npmBuild', NpmTask) {

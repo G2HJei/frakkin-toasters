@@ -1,6 +1,7 @@
 import { createContext, useContext } from 'react';
 import { constantLabel, NO_CONTEXT, type LabelContext } from '../labels/describe';
-import type { GameProjection, PlayedCard, PlayedInterruptCard, SkillCard } from '../wire/types';
+import { sortSkillCards } from './skillCards';
+import type { GameProjection, PlayedCard, PlayedInterruptCard, ShipProjection, SkillCard } from '../wire/types';
 
 export interface ShipChoice {
   id: number;
@@ -19,6 +20,8 @@ export interface TableContext extends LabelContext {
   userName(playerNumber: number): string | null;
   players(): { number: number; label: string }[];
   ships(): ShipChoice[];
+  // a ship anywhere on the boards, or out of the game
+  ship(id: number): ShipProjection | null;
   hand(playerNumber: number | null): SkillCard[];
   deckSkillCards(): SkillCard[];
   // the cards of the active skill check once they are divided, face up
@@ -39,11 +42,27 @@ export function tableContext(
     const player = players.find((candidate) => candidate.number === playerNumber);
     return player?.character ? constantLabel('Character', player.character) : `Player ${playerNumber}`;
   };
+  const allShips = [
+    ...(game?.galactica?.ships ?? []),
+    ...(game?.galactica?.reserves ?? []),
+    ...(game?.galactica?.damagedVipers ?? []),
+    ...(game?.cylonFleet?.ships ?? []),
+    ...(game?.destroyedShips ?? []),
+  ];
+  const shipName = (id: number) => {
+    const ship = allShips.find((candidate) => candidate.id === id);
+    if (ship) {
+      return `${constantLabel('ShipType', ship.type)} #${id}`;
+    }
+    return (game?.galactica?.boardingParty ?? []).some((centurion) => centurion.id === id) ? `Centurion #${id}` : `ship #${id}`;
+  };
   return {
     game,
     sandbox,
     askedPlayer,
     playerName,
+    shipName,
+    ship: (id) => allShips.find((candidate) => candidate.id === id) ?? null,
     userName: (playerNumber) => userNames[playerNumber] ?? null,
     players: () => players.map((player) => ({ number: player.number, label: playerName(player.number) })),
     ships: () => {
@@ -65,7 +84,7 @@ export function tableContext(
         })),
       ];
     },
-    hand: (playerNumber) => players.find((player) => player.number === playerNumber)?.skillCards?.cards ?? [],
+    hand: (playerNumber) => sortSkillCards(players.find((player) => player.number === playerNumber)?.skillCards?.cards ?? []),
     deckSkillCards: () =>
       (game?.decks ?? [])
         .filter((deck) => ['POLITICS', 'LEADERSHIP', 'TACTICS', 'PILOTING', 'ENGINEERING', 'TREACHERY', 'DESTINY'].includes(deck.deck ?? ''))
@@ -87,6 +106,7 @@ export const Table = createContext<TableContext>({
   userName: () => null,
   players: () => [],
   ships: () => [],
+  ship: () => null,
   hand: () => [],
   deckSkillCards: () => [],
   checkCards: () => [],

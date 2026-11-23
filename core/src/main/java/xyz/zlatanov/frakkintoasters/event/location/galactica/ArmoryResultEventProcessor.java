@@ -9,7 +9,7 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 
 public class ArmoryResultEventProcessor extends EventProcessor<ArmoryResultEvent> {
 
-    private static final int LOWEST_ROLL_TO_DESTROY = 7;
+    public static final int LOWEST_ROLL_TO_DESTROY = 7;
 
     @Override
     protected boolean isValid() {

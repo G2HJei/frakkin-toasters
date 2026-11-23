@@ -1740,3 +1740,644 @@ details > summary {
 .cargo-none {
   color: var(--steel-500);
 }
+
+/* the answers of the input (input/AnswerPanel.tsx): a choice's options, an option's decision unfolded, the answers by
+   what they do, the pickers */
+
+.answers {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.answer-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.answer-section.open > .section-head {
+  border-color: var(--amber, var(--accent));
+  color: var(--amber, var(--accent));
+}
+
+.section-head::after {
+  content: '▸';
+  margin-left: auto;
+  opacity: 0.7;
+}
+
+.answer-section.open > .section-head::after {
+  content: '▾';
+}
+
+.answer-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 10px;
+  border-left: 2px solid var(--steel-500, var(--line));
+}
+
+.answer-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.group-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font: 600 14px var(--display, inherit);
+  color: var(--steel-300, var(--muted));
+  letter-spacing: 0.02em;
+}
+
+.option .detail,
+.group-title .detail {
+  display: block;
+  font-size: 0.85em;
+  color: var(--steel-300, var(--muted));
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  font-size: 0.9rem;
+}
+
+.chips.card-grid,
+.options.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+  gap: 6px;
+}
+
+.chips.card-grid .chip,
+.options.card-grid .option {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 4px;
+  font-size: 0.8rem;
+}
+
+.chips.card-grid .art-strip .art,
+.options.card-grid .art-strip .art {
+  height: 96px;
+}
+
+.counts-widget {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.count-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.count-row .count-name {
+  min-width: 6.5rem;
+}
+
+.count-row.on .count-name {
+  color: var(--amber, var(--accent));
+}
+
+button.step {
+  width: 28px;
+  padding: 2px 0;
+  text-align: center;
+  font-weight: 700;
+}
+
+.pick-widget {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pick-widget .card-pick {
+  position: relative;
+}
+
+.pick-widget .card-pick .art {
+  height: 96px;
+}
+
+.pick-widget .order {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  min-width: 20px;
+  padding: 0 4px;
+  border-radius: 10px;
+  background: var(--amber, var(--accent));
+  color: var(--accent-text);
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.selection-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px;
+  border: 1px dashed var(--steel-500, var(--line));
+}
+
+.selection-bar .muted {
+  margin-right: auto;
+}
+
+details.advanced > summary {
+  cursor: pointer;
+  color: var(--steel-500, var(--muted));
+  font-size: 0.85rem;
+  margin-top: 6px;
+}
+
+details.advanced[open] > summary {
+  margin-bottom: 6px;
+}
+
+/* the moves a click on the board or a mat left, next to the click */
+.answer-pop {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: min(420px, calc(100vw - 16px));
+  max-height: calc(100vh - 16px);
+  overflow: auto;
+  padding: 10px 12px;
+  background: rgba(9, 18, 34, 0.97);
+  border: 1px solid var(--amber, var(--accent));
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+  clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+}
+
+.answer-pop .answer-groups {
+  border-left: none;
+  padding-left: 0;
+}
+
+/* what the pending input's moves name, lit on the board and the mats (input/boardAnswers.ts) */
+.board-svg .location.picked .frame,
+.board-svg .location.picked .space-frame {
+  stroke: var(--dradis-glow);
+  stroke-width: 8;
+}
+
+.board-svg .ship.target,
+.board-svg .character.target {
+  cursor: pointer;
+}
+
+.board-svg .ship .target-ring {
+  fill: rgba(242, 180, 65, 0.18);
+  stroke: var(--amber);
+  stroke-width: 4;
+  filter: drop-shadow(0 0 10px rgba(242, 180, 65, 0.9));
+}
+
+.board-svg .ship.target:hover .target-ring {
+  fill: rgba(242, 180, 65, 0.4);
+}
+
+.board-svg .character.target .token-ring {
+  stroke: var(--amber);
+  stroke-width: 7;
+  filter: drop-shadow(0 0 12px rgba(242, 180, 65, 0.95));
+}
+
+.board-svg .character.picked .token-ring,
+.board-svg .ship.picked .target-ring {
+  stroke: var(--dradis-glow);
+}
+
+.table-page .mat.target {
+  --edge: var(--amber);
+  --bw: 2px;
+  cursor: pointer;
+  filter: drop-shadow(0 0 8px rgba(242, 180, 65, 0.6));
+}
+
+.table-page .mat.picked {
+  --edge: var(--dradis-glow);
+}
+
+button.playable {
+  padding: 0;
+  border: none;
+  background: none;
+  line-height: 0;
+  cursor: pointer;
+}
+
+button.playable .art {
+  outline: 2px solid var(--amber, var(--accent));
+  box-shadow: 0 0 10px rgba(242, 180, 65, 0.85);
+}
+
+button.playable:hover .art {
+  transform: translateY(-3px);
+}
+
+button.playable.picked .art {
+  outline-color: var(--dradis-glow, var(--accent));
+}
+
+/* the board's edge says when the game waits for the viewer, and what for */
+.table-main > .board.your-move::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 3px var(--alert), inset 0 0 36px rgba(200, 50, 43, 0.45);
+}
+
+.move-banner {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  max-width: 80%;
+  padding: 6px 16px;
+  line-height: 1.3;
+  background: rgba(9, 18, 34, 0.92);
+  border: 2px solid var(--alert);
+  clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%, 0 10px);
+  pointer-events: none;
+}
+
+.move-banner strong {
+  font: 700 16px var(--display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ff8a80;
+  white-space: nowrap;
+}
+
+.move-banner span {
+  font-size: 13px;
+  color: var(--steel-100);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.input-panel .pause-line {
+  margin: -4px 0 10px;
+  color: var(--steel-300, var(--muted));
+}
+
+/* the log's story (table/log/LogPanel.tsx): the filters, the steps of a turn, the folded facts, the names to hover */
+.table-page .log-tools {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.table-page .log-tools .toggle {
+  padding: 2px 10px;
+  font: 600 11px/1.6 var(--display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.table-page .log-tools .toggle.on {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+.table-page .log .step-name {
+  margin: 8px 0 2px;
+  font: 600 11px var(--display);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dradis-glow);
+}
+
+.table-page .log .entries > li {
+  cursor: pointer;
+}
+
+.table-page .log .entries > li:hover {
+  background: rgba(143, 208, 255, 0.06);
+}
+
+.table-page .log .more-facts > summary {
+  font: 400 12px var(--display);
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: var(--steel-500);
+  cursor: pointer;
+}
+
+.named {
+  text-decoration: underline dotted rgba(143, 208, 255, 0.6);
+  text-underline-offset: 3px;
+  cursor: help;
+}
+
+/* what a clicked log entry touched, lit for a moment */
+@keyframes flash-on-board {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.board-svg .location.flash .frame,
+.board-svg .location.flash .space-frame {
+  fill: rgba(143, 208, 255, 0.18);
+  stroke: var(--dradis-glow);
+  stroke-width: 8;
+  animation: flash-on-board 0.6s ease-in-out 3;
+}
+
+.board-svg .ship.flash .target-ring,
+.board-svg .character.flash .token-ring {
+  stroke: var(--dradis-glow);
+  stroke-width: 7;
+  animation: flash-on-board 0.6s ease-in-out 3;
+}
+
+/* what changed with the last game message (table/changes.ts): it floats, slides, tumbles or pulses once */
+@keyframes float-up {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  15% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-36px);
+  }
+}
+
+.board-svg .delta {
+  font: 700 46px var(--display);
+  paint-order: stroke;
+  stroke: rgba(0, 0, 0, 0.85);
+  stroke-width: 8px;
+  animation: float-up 2.6s ease-out forwards;
+  pointer-events: none;
+}
+
+.board-svg .delta.gain {
+  fill: #8fe39a;
+}
+
+.board-svg .delta.loss {
+  fill: #ff7a70;
+}
+
+.float-delta {
+  display: inline-block;
+  font: 700 13px var(--display);
+  animation: float-up 2.6s ease-out forwards;
+}
+
+.float-delta.gain {
+  color: #8fe39a;
+}
+
+.float-delta.loss {
+  color: #ff7a70;
+}
+
+@keyframes slide-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-18px) scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.hand .drawn,
+.hand .tile.drawn {
+  display: inline-block;
+  animation: slide-in 0.5s ease-out;
+}
+
+@keyframes die-tumble {
+  0% {
+    transform: rotate(-200deg) scale(0.4);
+    opacity: 0;
+  }
+  70% {
+    transform: rotate(15deg) scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: none;
+  }
+}
+
+.die-tumble {
+  display: inline-block;
+  animation: die-tumble 0.7s ease-out;
+}
+
+@keyframes damaged-pulse {
+  0%,
+  100% {
+    fill: rgba(229, 83, 75, 0);
+  }
+  50% {
+    fill: rgba(229, 83, 75, 0.45);
+  }
+}
+
+.board-svg .location.just-damaged .frame {
+  stroke: #ff6b60;
+  stroke-width: 6;
+  animation: damaged-pulse 0.7s ease-in-out 3;
+}
+
+/* the reference beside the table (table/reference/ReferenceDrawer.tsx) */
+.reference {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  width: min(720px, 100vw);
+  background: rgba(9, 14, 24, 0.98);
+  border-left: 2px solid var(--dradis, var(--accent));
+  box-shadow: -12px 0 30px rgba(0, 0, 0, 0.6);
+}
+
+.reference-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.reference-tabs {
+  display: flex;
+  gap: 4px;
+  margin-right: auto;
+}
+
+.reference-tabs button.on {
+  border-color: var(--amber, var(--accent));
+  color: var(--amber, var(--accent));
+}
+
+.reference-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 12px 16px 24px;
+}
+
+.reference-search {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.reference h3 {
+  margin: 14px 0 6px;
+  font: 600 15px var(--display, inherit);
+  letter-spacing: 0.04em;
+}
+
+.reference h3 small {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.reference-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.reference-grid.sheets {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.reference-grid li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.reference-grid li.focus {
+  outline: 2px solid var(--amber, var(--accent));
+  outline-offset: 3px;
+}
+
+.reference-grid .art {
+  width: 100%;
+  height: auto;
+  border-radius: 5px;
+}
+
+.reference-rules ul,
+.cheat-sheet ul,
+.cheat-sheet ol {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.reference-rules li,
+.cheat-sheet li {
+  margin: 3px 0;
+}
+
+.turn-sheet {
+  list-style: none;
+  padding-left: 0 !important;
+}
+
+.turn-sheet li {
+  display: block;
+}
+
+.turn-sheet svg {
+  width: 16px;
+  height: 16px;
+  margin-right: 6px;
+  vertical-align: -2px;
+}
+
+.attack-table {
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.attack-table th,
+.attack-table td {
+  padding: 3px 10px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+
+.rule-link {
+  margin-left: 8px;
+  font-size: 12px;
+  color: var(--dradis-glow, var(--accent));
+  white-space: nowrap;
+}
+
+.reference-open {
+  margin-left: auto;
+  font-size: 12px;
+}
+
+button.avatar-button {
+  padding: 0;
+  border: none;
+  background: none;
+  line-height: 0;
+  cursor: zoom-in;
+}
+
+/* an answer is on its way after the option it chose */
+.input-panel.sending .answers {
+  opacity: 0.5;
+  pointer-events: none;
+}

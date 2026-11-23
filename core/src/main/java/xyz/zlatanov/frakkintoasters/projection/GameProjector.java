@@ -5,8 +5,10 @@ import xyz.zlatanov.frakkintoasters.engine.PendingInput;
 import xyz.zlatanov.frakkintoasters.engine.PendingInput.AwaitingChoice;
 import xyz.zlatanov.frakkintoasters.engine.PendingInput.AwaitingDecision;
 import xyz.zlatanov.frakkintoasters.engine.answer.LegalAnswers;
+import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ScopeOpened;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.Event;
+import xyz.zlatanov.frakkintoasters.event.SecretEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.DetermineSkillCheckResultEventProcessor;
 import xyz.zlatanov.frakkintoasters.projection.GameProjection.*;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
@@ -65,12 +67,14 @@ final class GameProjector {
 
     private final GameView               game;
     private final Optional<PendingInput> pendingInput;
+    private final Optional<ScopeOpened>  asking;
     private final Viewer                 viewer;
     private final boolean                ended;
 
-    GameProjector(GameView game, Optional<PendingInput> pendingInput, Viewer viewer) {
+    GameProjector(GameView game, Optional<PendingInput> pendingInput, Optional<ScopeOpened> asking, Viewer viewer) {
         this.game = game;
         this.pendingInput = pendingInput;
+        this.asking = asking;
         this.viewer = viewer;
         this.ended = game.outcome().isPresent();
     }
@@ -336,11 +340,12 @@ final class GameProjector {
         }
         return pendingInput.map(input -> {
             if (!answers(input)) {
-                return input.secret() ? new Waiting() : (InputProjection) new WaitingFor(input.player());
+                return input.secret() ? new Waiting() : (InputProjection) new WaitingFor(input.player(), topic());
             }
             return switch (input) {
                 case AwaitingDecision(var decision) -> new Decide(decision.playerNumber(),
-                        eventClass(decision.action()), decision.eventConstraints(), LegalAnswers.of(game, decision));
+                        eventClass(decision.action()), decision.eventConstraints(), LegalAnswers.of(game, decision),
+                        topic());
                 case AwaitingChoice(int player, var options) -> choose(player, List.copyOf(options));
             };
         }).orElse(null);
@@ -355,7 +360,17 @@ final class GameProjector {
                 answers.add(new OptionAnswers(option, LegalAnswers.of(game, decision)));
             }
         }
-        return new Choose(player, options, answers);
+        return new Choose(player, options, answers, topic());
+    }
+
+    // The event that queued the input, as the log shows its scope: a secret one only to its actor, its fields only when
+    // they are public.
+    private Topic topic() {
+        return asking
+                .filter(scope -> !(scope.event() instanceof SecretEvent) || seesEverything() || viewer.is(scope.actor()))
+                .map(scope -> new Topic(eventClass(scope.event().getClass()),
+                        seesEverything() || Disclosure.isPublic(scope.event()) ? scope.event() : null))
+                .orElse(null);
     }
 
     private boolean answers(PendingInput input) {

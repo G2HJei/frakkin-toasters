@@ -13,6 +13,7 @@ import xyz.zlatanov.frakkintoasters.event.interrupt.PlayInterruptCardEvent;
 import xyz.zlatanov.frakkintoasters.event.placeholder.PlayerDecisionEvent;
 import xyz.zlatanov.frakkintoasters.event.player.MoveEvent;
 import xyz.zlatanov.frakkintoasters.engine.answer.LegalAnswers;
+import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ScopeOpened;
 import xyz.zlatanov.frakkintoasters.projection.GameProjection.*;
 import xyz.zlatanov.frakkintoasters.state.Team;
 import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
@@ -208,14 +209,33 @@ class GameProjectionTest extends TestHarness {
         val decision = new AwaitingDecision(new PlayerDecisionEvent<>(1, MoveEvent.class));
 
         val moves = LegalAnswers.of(game, decision.decision());
-        assertEquals(new Decide(1, MoveEvent.class, List.of(), moves), projection(HOLDER, decision).input());
-        assertEquals(new WaitingFor(1), projection(OTHER, decision).input());
-        assertEquals(new WaitingFor(1), projection(OBSERVER, decision).input());
+        assertEquals(new Decide(1, MoveEvent.class, List.of(), moves, null), projection(HOLDER, decision).input());
+        assertEquals(new WaitingFor(1, null), projection(OTHER, decision).input());
+        assertEquals(new WaitingFor(1, null), projection(OBSERVER, decision).input());
 
         // the second option asks for the move: its answers come with it
         val options = new LinkedHashSet<Followup>(List.of(single(new NoOpEvent(1)), single(new PlayerDecisionEvent<>(1, MoveEvent.class))));
-        assertEquals(new Choose(1, List.copyOf(options), List.of(new OptionAnswers(1, moves))),
+        assertEquals(new Choose(1, List.copyOf(options), List.of(new OptionAnswers(1, moves)), null),
                 projection(HOLDER, new AwaitingChoice(1, options)).input());
+    }
+
+    @Test
+    void anInputNamesTheEventThatQueuedItAsTheLogShowsIt() {
+        val decision = new AwaitingDecision(new PlayerDecisionEvent<>(1, MoveEvent.class));
+        val pass = new ScopeOpened(7, 0, new NoOpEvent(2), 2);
+
+        val topic = new Topic(NoOpEvent.class, new NoOpEvent(2));
+        assertEquals(topic, ((Decide) projection(HOLDER, decision, pass).input()).topic());
+        assertEquals(new WaitingFor(1, topic), projection(OBSERVER, decision, pass).input());
+
+        // a secret scope shows only to its actor, and to a sandbox
+        val secret = new ScopeOpened(8, 0, PlayInterruptCardEvent.pass(2), 2);
+        assertNull(((Decide) projection(HOLDER, decision, secret).input()).topic());
+        assertNull(((WaitingFor) projection(OBSERVER, decision, secret).input()).topic());
+        assertEquals(new Topic(PlayInterruptCardEvent.class, null),
+                ((WaitingFor) projection(OTHER, decision, secret).input()).topic());
+        assertEquals(PlayInterruptCardEvent.pass(2),
+                ((Decide) projection(Viewer.sandbox(), decision, secret).input()).topic().details());
     }
 
     @Test
@@ -233,7 +253,7 @@ class GameProjectionTest extends TestHarness {
     void nobodyElseLearnsWhoAnswersASecretInput() {
         val secret = new AwaitingDecision(new PlayerDecisionEvent<>(1, PlayInterruptCardEvent.class));
 
-        assertEquals(new Decide(1, PlayInterruptCardEvent.class, List.of(), LegalAnswers.of(game, secret.decision())),
+        assertEquals(new Decide(1, PlayInterruptCardEvent.class, List.of(), LegalAnswers.of(game, secret.decision()), null),
                 projection(HOLDER, secret).input());
         assertEquals(new Waiting(), projection(OTHER, secret).input());
         assertEquals(new Waiting(), projection(OBSERVER, secret).input());
@@ -280,7 +300,7 @@ class GameProjectionTest extends TestHarness {
         assertEquals(new Cargo(1, 0, 2), civilianShip(Viewer.sandbox()).cargo());
         assertEquals(List.of(played), sandbox.turn().windowCards());
         // a secret input in full
-        assertEquals(new Decide(3, PlayInterruptCardEvent.class, List.of(), LegalAnswers.of(game, secret.decision())),
+        assertEquals(new Decide(3, PlayInterruptCardEvent.class, List.of(), LegalAnswers.of(game, secret.decision()), null),
                 sandbox.input());
         assertEquals(game.decks().deck(DeckId.CRISIS).cards(), sandbox.decks().stream()
                 .filter(deck -> deck.deck() == DeckId.CRISIS).findFirst().orElseThrow().drawPile());
@@ -288,6 +308,10 @@ class GameProjectionTest extends TestHarness {
 
     private GameProjection projection(Viewer viewer) {
         return GameProjection.of(game, Optional.empty(), viewer);
+    }
+
+    private GameProjection projection(Viewer viewer, PendingInput input, ScopeOpened asking) {
+        return GameProjection.of(game, Optional.of(input), Optional.of(asking), viewer);
     }
 
     private GameProjection projection(Viewer viewer, PendingInput input) {

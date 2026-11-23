@@ -2,9 +2,14 @@ import type { ReactNode } from 'react';
 import { cardArt, characterArt, skillCardArt, titleArt, tokenArt, type ArtRef, type CardEnum, type TitleName, type TokenName } from '../../art/images';
 import { ArtImg, CardBack, CardTile, previewHandlers } from '../../art/Art';
 import { constantLabel, skillCardLabel } from '../../labels/describe';
-import type { HiddenCards, PlayerProjection, QuorumCardInPlay, SkillHand } from '../../wire/types';
+import type { HiddenCards, PlayerProjection, QuorumCardInPlay, SkillCard, SkillHand } from '../../wire/types';
 import { faceDown, useRevealHandlers, type RevealSection } from '../reveal';
 import { useTable } from '../tableContext';
+import { sortSkillCards } from '../skillCards';
+import { signed, useChanges } from '../changes';
+import { useReference } from '../reference/ReferenceDrawer';
+import { anchorOf, useAnswering } from '../../input/boardAnswers';
+import { targetKey, type Target } from '../../input/answers';
 
 /**
  * Every player's mat: his portrait with the titles and tokens in front of him under it (the nukes with the Admiral),
@@ -41,16 +46,41 @@ function PlayerMat({ player }: { player: PlayerProjection }) {
   const portrait = characterArt(player.character);
   const user = table.userName(player.number);
   const current = turn?.currentPlayer === player.number;
-  const classes = ['player', 'mat', 'cf', current ? 'current' : '', player.revealedCylon ? 'cylon' : ''].join(' ').trim();
+  const { offer, onTarget } = useAnswering();
+  const key = `player:${player.number}`;
+  const lit = offer.targets.has(key);
+  const classes = ['player', 'mat', 'cf', current ? 'current' : '', player.revealedCylon ? 'cylon' : '', lit ? 'target' : '', offer.picked.has(key) ? 'picked' : '']
+    .join(' ')
+    .trim();
   return (
-    <article className={classes} data-player={player.number}>
+    <article
+      className={classes}
+      data-player={player.number}
+      onClick={lit ? (event) => onTarget({ type: 'player', playerNumber: player.number }, anchorOf(event)) : undefined}
+    >
       <div className="mat-side">
-        {portrait ? <ArtImg art={portrait} className="avatar" /> : <span className="avatar empty" />}
+        {portrait ? (
+          // the character sheet in the reference, a click away
+          <button
+            type="button"
+            className="avatar-button"
+            aria-label={`${constantLabel('Character', player.character)}: character sheet`}
+            onClick={(event) => {
+              event.stopPropagation();
+              useReference.getState().show('characters', player.character);
+            }}
+          >
+            <ArtImg art={portrait} className="avatar" />
+          </button>
+        ) : (
+          <span className="avatar empty" />
+        )}
         <p className="badges">
           {president && <TitleBadge title="PRESIDENT" />}
           {holds(titles?.admiral) && <TitleBadge title="ADMIRAL" />}
           {/* the nukes lie in front of the Admiral */}
           {holds(titles?.admiral) && (game?.nukes ?? 0) > 0 && <Badge className="token nukes" art={tokenArt('NUKE')} label={`${game?.nukes} nuke${game?.nukes === 1 ? '' : 's'}`} />}
+          {holds(titles?.admiral) && <NukesDelta />}
           {holds(titles?.cag) && <TitleBadge title="CAG" />}
           {player.infiltrating && <TitleBadge title="INFILTRATING" />}
           {player.mutineer && <Badge className="mutineer" art={cardArt('LoyaltyCard', 'MUTINEER')} label="Mutineer" />}
@@ -132,24 +162,73 @@ function Badge({ className, art, label, round = false }: { className: string; ar
   );
 }
 
-// Face up only in a live game, for the viewer whose cards they are; a sandbox shows backs like an observer sees them.
-function faceUp<T>(cards: T[] | null, sandbox: boolean): cards is T[] {
-  return cards !== null && !sandbox;
+// Face up only in a live game, for the viewer whose cards they are; a sandbox shows backs like an observer sees them,
+// but the asked player's own, which the sandbox answers for as he would.
+function faceUp<T>(cards: T[] | null, sandbox: boolean, asked = false): cards is T[] {
+  return cards !== null && (!sandbox || asked);
+}
+
+/** A card that starts a move of the pending input lights up, and a click picks it. */
+function Playable({ target, children }: { target: Target; children: ReactNode }) {
+  const { offer, onTarget } = useAnswering();
+  const key = targetKey(target);
+  if (!offer.targets.has(key) && !offer.picked.has(key)) {
+    return <>{children}</>;
+  }
+  return (
+    <button
+      type="button"
+      className={`playable ${offer.picked.has(key) ? 'picked' : ''}`.trim()}
+      aria-pressed={offer.picked.has(key)}
+      onClick={(event) => {
+        event.stopPropagation();
+        onTarget(target, anchorOf(event));
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
+// The nukes the Admiral gained or spent with the last game message, floating up once.
+function NukesDelta() {
+  const { changes, version } = useChanges();
+  return changes.nukes !== 0 ? (
+    <span key={version} className={`float-delta ${changes.nukes < 0 ? 'loss' : 'gain'}`}>
+      {signed(changes.nukes)} nuke{Math.abs(changes.nukes) === 1 ? '' : 's'}
+    </span>
+  ) : null;
+}
+
+// The cards of a hand that came with the last game message: as many of each as it gained.
+function drawnFlags(cards: SkillCard[], gained: SkillCard[]): boolean[] {
+  const left = gained.map((card) => JSON.stringify(card));
+  return cards.map((card) => {
+    const at = left.indexOf(JSON.stringify(card));
+    return at >= 0 && left.splice(at, 1).length === 1;
+  });
 }
 
 /** A hand of Skill Cards: the cards face up for who may see them, otherwise a back per color with how many. */
 export function Hand({ hand, owner }: { hand: SkillHand | null; owner: number }) {
   const table = useTable();
+  const { changes, version } = useChanges();
   if (!hand || hand.count === 0) {
     return null;
   }
-  const cards = hand.cards;
-  if (faceUp(cards, table.sandbox)) {
+  const cards = hand.cards ? sortSkillCards(hand.cards) : null;
+  if (faceUp(cards, table.sandbox, table.askedPlayer === owner)) {
     return (
       <div className="hand">
-        {cards.map((card, index) => (
-          <CardTile key={index} art={skillCardArt(card)} label={skillCardLabel(card)} className={`skill-${(card.type ?? '').toLowerCase()}`} />
-        ))}
+        {(() => {
+          // a card that just came slides in, once
+          const drawn = drawnFlags(cards, changes.gained.get(owner) ?? []);
+          return cards.map((card, index) => (
+            <Playable key={drawn[index] ? `${index}-${version}` : index} target={{ type: 'card', deck: 'SkillCard', card }}>
+              <CardTile art={skillCardArt(card)} label={skillCardLabel(card)} className={`skill-${(card.type ?? '').toLowerCase()}${drawn[index] ? ' drawn' : ''}`} />
+            </Playable>
+          ));
+        })()}
       </div>
     );
   }
@@ -158,9 +237,14 @@ export function Hand({ hand, owner }: { hand: SkillHand | null; owner: number })
   ];
   return (
     <Hidden id={`hand-${owner}`} title={`${table.playerName(owner)}: Skill Cards`} sections={sections} className="hand">
-      {Object.entries(hand.colors ?? {}).map(([color, count]) => (
-        <CardBack key={color} color={color} count={count ?? 0} size="xs" />
-      ))}
+      {Object.entries(hand.colors ?? {}).map(([color, count]) => {
+        const drawn = (changes.gainedColors.get(owner)?.[color] ?? 0) > 0;
+        return (
+          <span key={drawn ? `${color}-${version}` : color} className={drawn ? 'drawn' : undefined}>
+            <CardBack color={color} count={count ?? 0} size="xs" />
+          </span>
+        );
+      })}
     </Hidden>
   );
 }
@@ -183,12 +267,16 @@ function Pile<T extends string>({ label, cards, enumName, deck, owner }: {
   if (revealed.length === 0 && downCount === 0) {
     return null;
   }
-  const tile = (card: T, key: string) => <CardTile key={key} art={cardArt(enumName, card)} label={constantLabel(enumName, card)} size="xs" />;
+  const tile = (card: T, key: string) => (
+    <Playable key={key} target={{ type: 'card', deck: enumName, card }}>
+      <CardTile art={cardArt(enumName, card)} label={constantLabel(enumName, card)} size="xs" />
+    </Playable>
+  );
   return (
     <div className="pile">
       <span className="pile-cards">
         {revealed.map((card, index) => tile(card, `revealed-${index}`))}
-        {faceUp(down, table.sandbox)
+        {faceUp(down, table.sandbox, table.askedPlayer === owner)
           ? down.map((card, index) => tile(card, `down-${index}`))
           : downCount > 0 && (
               <Hidden

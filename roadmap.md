@@ -99,6 +99,12 @@ without one.
 ### C. A table that is pleasant to play (frontend, the biggest milestone)
 
 Goal: a player can play a whole turn without opening the event builder. Split into phases that each end green.
+Done 2026-11-22 (`table-ux-plan.md`): the answers panel (options, answers by kind, counters and pickers, the builder
+under "Advanced"), the board and the mats answering (targets that light up, "Act" chips, viper activations, card plays
+from the mat, a popover next to the click), a sentence for every pause from the input's `topic`, the log as a story by
+step with "Mine" and a flash on the board, deltas and small animations, and a reference drawer (every card, the
+character sheets, the rulebook's pages, cheat sheets). The e2e `playthrough.spec.ts` plays a seeded four-player
+sandbox to an ending without the builder.
 
 **C1. Inputs on the board and the hand** (uses B)
 

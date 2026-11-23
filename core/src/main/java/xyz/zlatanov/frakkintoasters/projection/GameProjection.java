@@ -2,6 +2,7 @@ package xyz.zlatanov.frakkintoasters.projection;
 
 import xyz.zlatanov.frakkintoasters.engine.PendingInput;
 import xyz.zlatanov.frakkintoasters.engine.answer.LegalAnswers;
+import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry.ScopeOpened;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint;
@@ -72,7 +73,16 @@ public record GameProjection(
         Outcome outcome) {
 
     public static GameProjection of(GameView game, Optional<PendingInput> pendingInput, Viewer viewer) {
-        return new GameProjector(game, pendingInput, viewer).project();
+        return of(game, pendingInput, Optional.empty(), viewer);
+    }
+
+    /**
+     * @param asking the scope of the event that queued the pending input ({@code GameEngine.pendingScope()}), which the
+     *               input names as its {@link Topic}
+     */
+    public static GameProjection of(GameView game, Optional<PendingInput> pendingInput, Optional<ScopeOpened> asking,
+                                    Viewer viewer) {
+        return new GameProjector(game, pendingInput, asking, viewer).project();
     }
 
     /**
@@ -243,7 +253,7 @@ public record GameProjection(
      * @param answers the answers the game takes ({@code legal-answers-plan.md})
      */
     public record Decide(int player, Class<? extends Event> action, List<EventConstraint> constraints,
-                         LegalAnswers answers) implements InputProjection {
+                         LegalAnswers answers, Topic topic) implements InputProjection {
     }
 
     /**
@@ -252,7 +262,8 @@ public record GameProjection(
      * @param answers the answers of the decision each option that asks one asks first, e.g. the action of the Action
      *                step, so the table can show what the option leads to before it is picked
      */
-    public record Choose(int player, List<Followup> options, List<OptionAnswers> answers) implements InputProjection {
+    public record Choose(int player, List<Followup> options, List<OptionAnswers> answers, Topic topic)
+            implements InputProjection {
     }
 
     /**
@@ -261,7 +272,17 @@ public record GameProjection(
     public record OptionAnswers(int option, LegalAnswers answers) {
     }
 
-    public record WaitingFor(int player) implements InputProjection {
+    public record WaitingFor(int player, Topic topic) implements InputProjection {
+    }
+
+    /**
+     * What an input is about: the event that queued it, e.g. the Crisis Card whose section is chosen, as the log shows its
+     * scope. {@code null} on the input when no event queued it, or when the log hides that event's scope from the
+     * viewer (a {@code SecretEvent} of another player).
+     *
+     * @param details the event, {@code null} when its cards aren't public ({@code Disclosure.isPublic})
+     */
+    public record Topic(Class<? extends Event> event, Event details) {
     }
 
     /**

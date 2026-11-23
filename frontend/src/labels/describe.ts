@@ -7,6 +7,28 @@ import type { FactProjection, Followup } from '../wire/types';
 
 export interface LabelContext {
   playerName(playerNumber: number): string;
+  // a ship by its type and id, e.g. "Viper #1", where the table knows it
+  shipName?(id: number): string;
+  // the image a value names, for a name to hover (`Words`); the labels don't load images themselves
+  artOf?(value: unknown, type: TypeRef): PartArt | null;
+}
+
+/** An image a part of a label names, as `art/images.ts` gives it. */
+export interface PartArt {
+  key: string;
+  url: string;
+  label: string;
+  shape: string;
+}
+
+/** A piece of a label: its words, and the image of what it names. */
+export interface Part {
+  text: string;
+  art?: PartArt | null;
+}
+
+export function partsText(parts: Part[]): string {
+  return parts.map((part) => part.text).join('');
 }
 
 export const NO_CONTEXT: LabelContext = { playerName: (playerNumber) => `Player ${playerNumber}` };
@@ -46,7 +68,7 @@ export function valueLabel(value: unknown, type: TypeRef | undefined, context: L
         return context.playerName(value as number);
       }
       if (type.role === 'ship') {
-        return `ship #${value}`;
+        return context.shipName?.(value as number) ?? `ship #${value}`;
       }
       return String(value);
     case 'boolean':
@@ -94,6 +116,9 @@ function recordLabel(value: Record<string, unknown>, name: string, context: Labe
   if (name === 'SkillCard') {
     return skillCardLabel(value as unknown as SkillCardLike);
   }
+  if (name === 'ViperActivation') {
+    return activationLabel(value, context);
+  }
   const kind = typeof value.kind === 'string' ? value.kind : name;
   const record = recordNamed(kind);
   if (!record) {
@@ -105,10 +130,32 @@ function recordLabel(value: Record<string, unknown>, name: string, context: Labe
   return parts.length > 0 ? `${typeLabel(kind)} (${parts.join(', ')})` : typeLabel(kind);
 }
 
+// One activation of a viper (rule 11.1.1): a launch, a move, an attack or an escort.
+function activationLabel(activation: Record<string, unknown>, context: LabelContext): string {
+  const ship = (id: unknown) => context.shipName?.(id as number) ?? `ship #${id}`;
+  if (activation.launchShipType) {
+    return `Launch a ${constantLabel('ShipType', activation.launchShipType as string)} to ${constantLabel('Location', activation.launchLocation as string)}`;
+  }
+  const fighter = ship(activation.humanFighterId);
+  if (activation.moveLocation) {
+    return `${fighter} to ${constantLabel('Location', activation.moveLocation as string)}`;
+  }
+  if (activation.attackCylonShipId !== null && activation.attackCylonShipId !== undefined) {
+    return `${fighter} attacks ${ship(activation.attackCylonShipId)}`;
+  }
+  if (activation.escortCivilianShipId !== null && activation.escortCivilianShipId !== undefined) {
+    return `${fighter} escorts ${ship(activation.escortCivilianShipId)}`;
+  }
+  return fighter;
+}
+
 /* events */
 
 const EVENT_TEMPLATES: Record<string, string> = {
   NoOpEvent: 'Pass',
+  // an option of "Executive Order" reads "Move then Action"
+  GrantEvent: '{grant}',
+  CrisisStepEvent: 'Crisis step',
   MoveEvent: '{playerNumber} moves to {destination}',
   SelectCharacterEvent: '{playerNumber} chooses {selectedCharacter}',
   DrawSkillCardsEvent: '{playerNumber} draws {selection}',
@@ -257,24 +304,46 @@ const EVENT_TEMPLATES: Record<string, string> = {
   DestroyPegasusEvent: 'Pegasus is destroyed',
 };
 
-function fill(template: string, value: Record<string, unknown>, recordName: string, context: LabelContext): string {
+// A template's words, each field a part of its own with the image of what it names.
+function fill(template: string, value: Record<string, unknown>, recordName: string, context: LabelContext): Part[] {
   const record = recordNamed(recordName);
-  return template.replace(/\{(\w+)}/g, (_, field: string) => {
-    const component = record?.components.find((candidate) => candidate.name === field);
-    return valueLabel(value[field], component?.type, context);
-  });
+  const parts: Part[] = [];
+  let at = 0;
+  for (const match of template.matchAll(/\{(\w+)}/g)) {
+    if (match.index > at) {
+      parts.push({ text: template.substring(at, match.index) });
+    }
+    const component = record?.components.find((candidate) => candidate.name === match[1]);
+    const field = value[match[1]];
+    const art = component && field !== null && field !== undefined && !Array.isArray(field) ? (context.artOf?.(field, component.type) ?? null) : null;
+    parts.push({ text: valueLabel(field, component?.type, context), art });
+    at = match.index + match[0].length;
+  }
+  if (at < template.length) {
+    parts.push({ text: template.substring(at) });
+  }
+  return parts;
 }
 
 /** An event with its fields, by its template, or its name and fields. */
 export function eventLabel(event: Record<string, unknown> | null | undefined, context: LabelContext): string {
+  return partsText(eventParts(event, context));
+}
+
+/** An event's label in parts, the names it fills in with their images. */
+export function eventParts(event: Record<string, unknown> | null | undefined, context: LabelContext): Part[] {
   if (!event) {
-    return '—';
+    return [{ text: '—' }];
   }
   const kind = String(event.kind);
   const template = EVENT_TEMPLATES[kind];
   if (template) {
     return fill(template, event, kind, context);
   }
+  return [{ text: eventFallback(event, kind, context) }];
+}
+
+function eventFallback(event: Record<string, unknown>, kind: string, context: LabelContext): string {
   const quorumCard = recordNamed(kind)?.quorumCard;
   if (quorumCard) {
     return playedCardLabel(event, kind, 'QuorumCard', quorumCard, context);
@@ -385,8 +454,35 @@ const FACT_TEMPLATES: Record<string, string> = {
 };
 
 export function factLabel(fact: FactProjection | null | undefined, context: LabelContext): string {
+  return partsText(factParts(fact, context));
+}
+
+// What happened to a ship, by where it went: destroyed, damaged, launched, landed or moved in space.
+function shipMovedParts(fact: Record<string, unknown>, context: LabelContext): Part[] | null {
+  const ship = context.shipName?.(fact.shipId as number) ?? `Ship #${fact.shipId}`;
+  const from = fact.from as string | null;
+  const to = fact.to as string | null;
+  const inSpace = (zone: string | null) => zone === 'GALACTICA_SPACE' || zone === 'CYLON_FLEET_SPACE' || zone === 'BOARDING_PARTY';
+  const where = (location: unknown) => [{ text: constantLabel('Location', location as string), art: context.artOf?.(location, { t: 'enum', nullable: false, name: 'Location' }) ?? null }];
+  if (inSpace(from) && (to === 'REMOVED' || to === 'CYLON_SUPPLY' || to === 'CENTURION_SUPPLY')) {
+    return [{ text: `${ship} is destroyed` }];
+  }
+  if (to === 'DAMAGED') {
+    return [{ text: `${ship} is damaged` }];
+  }
+  if (to === 'RESERVES' && inSpace(from)) {
+    return [{ text: `${ship} lands` }];
+  }
+  if (to === 'GALACTICA_SPACE' && fact.location) {
+    return [{ text: `${ship} ${from === 'GALACTICA_SPACE' ? 'moves' : 'launches'} to ` }, ...where(fact.location)];
+  }
+  return null;
+}
+
+/** A fact's label in parts, the names it fills in with their images. */
+export function factParts(fact: FactProjection | null | undefined, context: LabelContext): Part[] {
   if (!fact) {
-    return '—';
+    return [{ text: '—' }];
   }
   if (fact.kind === 'Hidden') {
     const who = fact.playerNumber !== null ? `${context.playerName(fact.playerNumber)}: ` : '';
@@ -394,15 +490,19 @@ export function factLabel(fact: FactProjection | null | undefined, context: Labe
     const colors = fact.colors
       ? ` — ${Object.entries(fact.colors).map(([color, count]) => `${count} ${constantLabel('SkillCardColor', color).toLowerCase()}`).join(', ')}`
       : '';
-    return `${who}${typeLabel(fact.fact ?? '')}: ${fact.count} hidden${where}${colors}`;
+    return [{ text: `${who}${typeLabel(fact.fact ?? '')}: ${fact.count} hidden${where}${colors}` }];
   }
   const shown = fact.fact as unknown as Record<string, unknown> | null;
   if (!shown) {
-    return '—';
+    return [{ text: '—' }];
   }
   const kind = String(shown.kind);
+  const ship = kind === 'ShipFact.ShipMoved' ? shipMovedParts(shown, context) : null;
+  if (ship) {
+    return ship;
+  }
   const template = FACT_TEMPLATES[kind];
-  return template ? fill(template, shown, kind, context) : recordLabel(shown, kind, context);
+  return template ? fill(template, shown, kind, context) : [{ text: recordLabel(shown, kind, context) }];
 }
 
 export const TEMPLATED_EVENTS = Object.keys(EVENT_TEMPLATES);

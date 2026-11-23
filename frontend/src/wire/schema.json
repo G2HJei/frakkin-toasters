@@ -1386,6 +1386,13 @@
             "name" : "OptionAnswers"
           }
         }
+      }, {
+        "name" : "topic",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "Topic"
+        }
       } ]
     },
     "ChooseADifferentPathEvent" : {
@@ -2449,6 +2456,13 @@
           "nullable" : true,
           "t" : "ref",
           "name" : "LegalAnswers"
+        }
+      }, {
+        "name" : "topic",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "Topic"
         }
       } ]
     },
@@ -10232,7 +10246,60 @@
     },
     "SkillCardType" : {
       "kind" : "enum",
-      "values" : [ "CONSOLIDATE_POWER", "INVESTIGATIVE_COMMITTEE", "SUPPORT_THE_PEOPLE", "PREVENTIVE_POLICY", "RED_TAPE", "POLITICAL_PROWESS", "FORCE_THEIR_HAND", "POPULAR_INFLUENCE", "NEGOTIATION", "EXECUTIVE_ORDER", "DECLARE_EMERGENCY", "MAJOR_VICTORY", "AT_ANY_COST", "IRON_WILL", "STATE_OF_EMERGENCY", "ALL_HANDS_ON_DECK", "RESTORE_ORDER", "CHANGE_OF_PLANS", "LAUNCH_SCOUT", "STRATEGIC_PLANNING", "GUTS_AND_INITIATIVE", "CRITICAL_SITUATION", "TRUST_INSTINCTS", "SCOUTING_FOR_FUEL", "QUICK_THINKING", "UNORTHODOX_PLAN", "A_SECOND_CHANCE", "EVASIVE_MANOEUVRES", "MAXIMUM_FIREPOWER", "FULL_THROTTLE", "RUN_INTERFERENCE", "PROTECT_THE_FLEET", "BEST_OF_THE_BEST", "DOGFIGHT", "COMBAT_VETERAN", "LAUNCH_RESERVES", "REPAIR", "SCIENTIFIC_RESEARCH", "JURY_RIGGED", "CALCULATIONS", "ESTABLISH_NETWORK", "BUILD_NUKE", "INSTALL_UPGRADES", "RAPTOR_SPECIALIST", "TEST_THE_LIMITS", "DRADIS_CONTACT", "BAIT", "A_BETTER_MACHINE", "PERSONAL_VICES", "VIOLENT_OUTBURSTS", "EXPLOIT_A_WEAKNESS" ]
+      "values" : [ "CONSOLIDATE_POWER", "INVESTIGATIVE_COMMITTEE", "SUPPORT_THE_PEOPLE", "PREVENTIVE_POLICY", "RED_TAPE", "POLITICAL_PROWESS", "FORCE_THEIR_HAND", "POPULAR_INFLUENCE", "NEGOTIATION", "EXECUTIVE_ORDER", "DECLARE_EMERGENCY", "MAJOR_VICTORY", "AT_ANY_COST", "IRON_WILL", "STATE_OF_EMERGENCY", "ALL_HANDS_ON_DECK", "RESTORE_ORDER", "CHANGE_OF_PLANS", "LAUNCH_SCOUT", "STRATEGIC_PLANNING", "GUTS_AND_INITIATIVE", "CRITICAL_SITUATION", "TRUST_INSTINCTS", "SCOUTING_FOR_FUEL", "QUICK_THINKING", "UNORTHODOX_PLAN", "A_SECOND_CHANCE", "EVASIVE_MANOEUVRES", "MAXIMUM_FIREPOWER", "FULL_THROTTLE", "RUN_INTERFERENCE", "PROTECT_THE_FLEET", "BEST_OF_THE_BEST", "DOGFIGHT", "COMBAT_VETERAN", "LAUNCH_RESERVES", "REPAIR", "SCIENTIFIC_RESEARCH", "JURY_RIGGED", "CALCULATIONS", "ESTABLISH_NETWORK", "BUILD_NUKE", "INSTALL_UPGRADES", "RAPTOR_SPECIALIST", "TEST_THE_LIMITS", "DRADIS_CONTACT", "BAIT", "A_BETTER_MACHINE", "PERSONAL_VICES", "VIOLENT_OUTBURSTS", "EXPLOIT_A_WEAKNESS" ],
+      "colors" : {
+        "CONSOLIDATE_POWER" : "POLITICS",
+        "INVESTIGATIVE_COMMITTEE" : "POLITICS",
+        "SUPPORT_THE_PEOPLE" : "POLITICS",
+        "PREVENTIVE_POLICY" : "POLITICS",
+        "RED_TAPE" : "POLITICS",
+        "POLITICAL_PROWESS" : "POLITICS",
+        "FORCE_THEIR_HAND" : "POLITICS",
+        "POPULAR_INFLUENCE" : "POLITICS",
+        "NEGOTIATION" : "POLITICS",
+        "EXECUTIVE_ORDER" : "LEADERSHIP",
+        "DECLARE_EMERGENCY" : "LEADERSHIP",
+        "MAJOR_VICTORY" : "LEADERSHIP",
+        "AT_ANY_COST" : "LEADERSHIP",
+        "IRON_WILL" : "LEADERSHIP",
+        "STATE_OF_EMERGENCY" : "LEADERSHIP",
+        "ALL_HANDS_ON_DECK" : "LEADERSHIP",
+        "RESTORE_ORDER" : "LEADERSHIP",
+        "CHANGE_OF_PLANS" : "LEADERSHIP",
+        "LAUNCH_SCOUT" : "TACTICS",
+        "STRATEGIC_PLANNING" : "TACTICS",
+        "GUTS_AND_INITIATIVE" : "TACTICS",
+        "CRITICAL_SITUATION" : "TACTICS",
+        "TRUST_INSTINCTS" : "TACTICS",
+        "SCOUTING_FOR_FUEL" : "TACTICS",
+        "QUICK_THINKING" : "TACTICS",
+        "UNORTHODOX_PLAN" : "TACTICS",
+        "A_SECOND_CHANCE" : "TACTICS",
+        "EVASIVE_MANOEUVRES" : "PILOTING",
+        "MAXIMUM_FIREPOWER" : "PILOTING",
+        "FULL_THROTTLE" : "PILOTING",
+        "RUN_INTERFERENCE" : "PILOTING",
+        "PROTECT_THE_FLEET" : "PILOTING",
+        "BEST_OF_THE_BEST" : "PILOTING",
+        "DOGFIGHT" : "PILOTING",
+        "COMBAT_VETERAN" : "PILOTING",
+        "LAUNCH_RESERVES" : "PILOTING",
+        "REPAIR" : "ENGINEERING",
+        "SCIENTIFIC_RESEARCH" : "ENGINEERING",
+        "JURY_RIGGED" : "ENGINEERING",
+        "CALCULATIONS" : "ENGINEERING",
+        "ESTABLISH_NETWORK" : "ENGINEERING",
+        "BUILD_NUKE" : "ENGINEERING",
+        "INSTALL_UPGRADES" : "ENGINEERING",
+        "RAPTOR_SPECIALIST" : "ENGINEERING",
+        "TEST_THE_LIMITS" : "ENGINEERING",
+        "DRADIS_CONTACT" : "TREACHERY",
+        "BAIT" : "TREACHERY",
+        "A_BETTER_MACHINE" : "TREACHERY",
+        "PERSONAL_VICES" : "TREACHERY",
+        "VIOLENT_OUTBURSTS" : "TREACHERY",
+        "EXPLOIT_A_WEAKNESS" : "TREACHERY"
+      }
     },
     "SkillCheckFact" : {
       "kind" : "union",
@@ -11113,6 +11180,26 @@
         }
       } ]
     },
+    "Topic" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "event",
+        "type" : {
+          "nullable" : true,
+          "t" : "class",
+          "of" : "Event"
+        }
+      }, {
+        "name" : "details",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "Event"
+        }
+      } ]
+    },
     "TotalSkillCheckStrengthEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -11716,6 +11803,13 @@
           "nullable" : false,
           "role" : "player"
         }
+      }, {
+        "name" : "topic",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "Topic"
+        }
       } ]
     },
     "WeaponsArmedEvent" : {
@@ -11766,6 +11860,104 @@
     "anytimeEvents" : [ "RevealMotiveCardEvent" ],
     "facts" : [ "BoardFact.BoardingPartyAdvanced", "BoardFact.EngineRoomActivated", "BoardFact.JumpPreparationDecreased", "BoardFact.JumpPreparationIncreased", "BoardFact.JumpPreparationReset", "BoardFact.LocationDamaged", "BoardFact.LocationRepaired", "BoardFact.PegasusDestroyed", "BoardFact.PursuitAdvanced", "BoardFact.PursuitReset", "BoardFact.ResourceDecreased", "BoardFact.ResourceIncreased", "DeckFact.CardsAddedOnTop", "DeckFact.CardsAddedToBottom", "DeckFact.CardsDiscarded", "DeckFact.CardsDrawn", "DeckFact.CardsPulled", "DeckFact.CardsRemovedFromGame", "DeckFact.DeckShuffled", "GameFact.ActingPlayerChanged", "GameFact.ActionCostPaid", "GameFact.CrisisCardKeptInPlay", "GameFact.CrisisCardPlayed", "GameFact.CrisisCardsCleared", "GameFact.CurrentPlayerChanged", "GameFact.CylonShipsHeld", "GameFact.DestinationReached", "GameFact.DieRollAbilityUsed", "GameFact.DieRollCardPlayed", "GameFact.DieRollReplaced", "GameFact.DieRollStarted", "GameFact.DieRolled", "GameFact.GameEnded", "GameFact.GameStarted", "GameFact.LossReduced", "GameFact.LossReductionAdded", "GameFact.MoraleLostToExecution", "GameFact.NukeDiscarded", "GameFact.NukeGained", "GameFact.RemoteActionAllowed", "GameFact.RemoteActionEnded", "GameFact.ReturnToCrisisStepChanged", "GameFact.SentToBrigAtEndOfTurn", "GameFact.SkillCardPlayed", "GameFact.StartLocationNoted", "GameFact.StepChanged", "GameFact.TitleBorrowed", "GameFact.TurnEndedEarly", "GameFact.TurnLimitUsed", "GameFact.TurnStarted", "InterruptFact.InterruptCardPlayed", "InterruptFact.InterruptCardResolved", "InterruptFact.InterruptCardReturned", "InterruptFact.InterruptWindowClosed", "InterruptFact.InterruptWindowOpened", "InterruptFact.RaiderMissed", "InterruptFact.RaidersWillMiss", "InterruptFact.RollAbilityResolved", "InterruptFact.RollAbilityUsed", "InterruptFact.RollAbilityWithdrawn", "PlayerFact.AbilityTriggerCleared", "PlayerFact.AbilityTriggered", "PlayerFact.AbilityUsed", "PlayerFact.CardsGained", "PlayerFact.CardsLost", "PlayerFact.CardsSeen", "PlayerFact.CharacterMoved", "PlayerFact.CharacterRemoved", "PlayerFact.CharacterRemovedFromBoards", "PlayerFact.CharacterSelected", "PlayerFact.CivilianShipForgotten", "PlayerFact.CivilianShipRevealed", "PlayerFact.FinalFiveCardShown", "PlayerFact.InfiltrationEnded", "PlayerFact.InfiltrationStarted", "PlayerFact.LoyaltyCardRevealed", "PlayerFact.LoyaltyCardSeen", "PlayerFact.MiracleTokenGained", "PlayerFact.MiracleTokenLost", "PlayerFact.MotiveCardRevealed", "PlayerFact.OwnTurnStarted", "ShipFact.BasestarDamageAttached", "ShipFact.BasestarDamageCleared", "ShipFact.PilotChanged", "ShipFact.ShipMoved", "SkillCheckFact.AbilityResolved", "SkillCheckFact.CardRemoved", "SkillCheckFact.CardsDivided", "SkillCheckFact.CardsDrawn", "SkillCheckFact.CardsLookedAt", "SkillCheckFact.CardsPlaced", "SkillCheckFact.CardsPlayedBefore", "SkillCheckFact.CardsShown", "SkillCheckFact.DifficultyAdjusted", "SkillCheckFact.EmergencyDeclared", "SkillCheckFact.FailResultPrevented", "SkillCheckFact.PassResultReplaced", "SkillCheckFact.PlayedBeforeRevealed", "SkillCheckFact.PlayedBy", "SkillCheckFact.PoliticsCountPositive", "SkillCheckFact.ResultDetermined", "SkillCheckFact.SkillCheckEnded", "SkillCheckFact.SkillCheckStarted", "SkillCheckFact.StrengthZeroed", "SkillCheckFact.TargetChosen", "SkillCheckFact.TotalStrengthDetermined", "TitleFact.AdmiralAssigned", "TitleFact.CagAssigned", "TitleFact.PresidentAssigned", "TitleFact.PresidentQuorumCardGained", "TitleFact.PresidentQuorumCardsLost", "TitleFact.QuorumCardLeftPlay", "TitleFact.QuorumCardPutInPlay" ]
   },
+  "attackTable" : [ {
+    "attacker" : "VIPER",
+    "target" : "RAIDER",
+    "from" : 3,
+    "to" : 8,
+    "effect" : "DESTROYED"
+  }, {
+    "attacker" : "VIPER",
+    "target" : "HEAVY_RAIDER",
+    "from" : 7,
+    "to" : 8,
+    "effect" : "DESTROYED"
+  }, {
+    "attacker" : "VIPER",
+    "target" : "BASESTAR",
+    "from" : 8,
+    "to" : 8,
+    "effect" : "DAMAGED"
+  }, {
+    "attacker" : "ASSAULT_RAPTOR",
+    "target" : "RAIDER",
+    "from" : 3,
+    "to" : 8,
+    "effect" : "DESTROYED"
+  }, {
+    "attacker" : "ASSAULT_RAPTOR",
+    "target" : "HEAVY_RAIDER",
+    "from" : 7,
+    "to" : 8,
+    "effect" : "DESTROYED"
+  }, {
+    "attacker" : "ASSAULT_RAPTOR",
+    "target" : "BASESTAR",
+    "from" : 7,
+    "to" : 8,
+    "effect" : "DAMAGED"
+  }, {
+    "attacker" : "GALACTICA",
+    "target" : "RAIDER",
+    "from" : 3,
+    "to" : 8,
+    "effect" : "DESTROYED"
+  }, {
+    "attacker" : "GALACTICA",
+    "target" : "HEAVY_RAIDER",
+    "from" : 7,
+    "to" : 8,
+    "effect" : "DESTROYED"
+  }, {
+    "attacker" : "GALACTICA",
+    "target" : "BASESTAR",
+    "from" : 5,
+    "to" : 8,
+    "effect" : "DAMAGED"
+  }, {
+    "attacker" : "RAIDER",
+    "target" : "VIPER",
+    "from" : 5,
+    "to" : 7,
+    "effect" : "DAMAGED"
+  }, {
+    "attacker" : "RAIDER",
+    "target" : "VIPER_MARK_VII",
+    "from" : 6,
+    "to" : 7,
+    "effect" : "DAMAGED"
+  }, {
+    "attacker" : "RAIDER",
+    "target" : "VIPER",
+    "from" : 8,
+    "to" : 8,
+    "effect" : "DESTROYED"
+  }, {
+    "attacker" : "RAIDER",
+    "target" : "ASSAULT_RAPTOR",
+    "from" : 7,
+    "to" : 8,
+    "effect" : "DESTROYED"
+  }, {
+    "attacker" : "RAIDER",
+    "target" : "GALACTICA",
+    "from" : 8,
+    "to" : 8,
+    "effect" : "HIT"
+  }, {
+    "attacker" : "BASESTAR",
+    "target" : "GALACTICA",
+    "from" : 4,
+    "to" : 8,
+    "effect" : "HIT"
+  }, {
+    "attacker" : "ARMORY",
+    "target" : "CENTURION",
+    "from" : 7,
+    "to" : 8,
+    "effect" : "DESTROYED"
+  } ],
+  "structuralDamageBonus" : 2,
   "messages" : {
     "choose" : "ChooseMessage",
     "game" : "GameMessage",

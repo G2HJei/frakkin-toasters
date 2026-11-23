@@ -21,12 +21,12 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.BEST_OF_THE
 
 public class AttackCylonShipResultEventProcessor extends EventProcessor<AttackCylonShipResultEvent> {
 
-    private static final int LOWEST_ROLL_TO_DESTROY_A_RAIDER       = 3;
-    private static final int LOWEST_ROLL_TO_DESTROY_A_HEAVY_RAIDER = 7;
-    private static final int LOWEST_ROLL_TO_DAMAGE_WITH_GALACTICA  = 5;
-    private static final int LOWEST_ROLL_TO_DAMAGE_WITH_A_RAPTOR   = 7;
-    private static final int LOWEST_ROLL_TO_DAMAGE_WITH_A_VIPER    = 8;
-    private static final int STRUCTURAL_DAMAGE_BONUS               = 2;
+    static final int LOWEST_ROLL_TO_DESTROY_A_RAIDER       = 3;
+    static final int LOWEST_ROLL_TO_DESTROY_A_HEAVY_RAIDER = 7;
+    static final int LOWEST_ROLL_TO_DAMAGE_WITH_GALACTICA  = 5;
+    static final int LOWEST_ROLL_TO_DAMAGE_WITH_A_RAPTOR   = 7;
+    static final int LOWEST_ROLL_TO_DAMAGE_WITH_A_VIPER    = 8;
+    static final int STRUCTURAL_DAMAGE_BONUS               = 2;
 
     // It is queued before the roll, so what the roll's cards and abilities did may have taken the fighter or its
     // target away, e.g. "Hotshot"'s discard drew a second Mutiny Card and sent the pilot to the "Brig".

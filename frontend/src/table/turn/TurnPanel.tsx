@@ -7,6 +7,8 @@ import type { SkillCard, SkillHand } from '../../wire/types';
 import { useRevealHandlers, type RevealSection } from '../reveal';
 import { useTable } from '../tableContext';
 import { StepIcon, type TurnStep } from './StepIcon';
+import { useChanges } from '../changes';
+import { useReference } from '../reference/ReferenceDrawer';
 
 // the steps of a player's turn, in order
 const STEPS: TurnStep[] = ['RECEIVE_SKILLS', 'MOVEMENT', 'ACTION', 'CRISIS', 'ACTIVATE_CYLON_SHIPS', 'PREPARE_FOR_JUMP', 'DISCARD'];
@@ -25,12 +27,16 @@ export function TurnPanel({ name, connection }: { name: string; connection: Conn
   }
   const turn = game.turn;
   const die = dieArt(turn?.dieRoll?.value);
+  const { changes, version } = useChanges();
   return (
     <section className="panel cf turn" aria-label="turn">
       <div className="tab">
         <img src="/logo.png" alt="" className="logo" />
         <span title={name}>{name || 'Game'}</span>
         {connection !== 'open' && <small className={`connection ${connection}`}>{connection}</small>}
+        <button type="button" className="link reference-open" onClick={() => useReference.getState().show()}>
+          Reference
+        </button>
       </div>
       {turn && (
         <>
@@ -81,7 +87,10 @@ export function TurnPanel({ name, connection }: { name: string; connection: Conn
               <span className="muted">not rolled yet</span>
             ) : (
               <>
-                {die ? <ArtImg art={die} className="die-face" /> : <span className="die">{turn.dieRoll.value}</span>}
+                {/* a new roll tumbles once, keyed by the game message */}
+                <span key={changes.rolled ? `rolled-${version}` : 'die'} className={changes.rolled ? 'die-tumble' : undefined}>
+                  {die ? <ArtImg art={die} className="die-face" /> : <span className="die">{turn.dieRoll.value}</span>}
+                </span>
                 {turn.dieRoll.modifier !== 0 && (
                   <span className="modifier">
                     {turn.dieRoll.modifier > 0 ? '+' : '−'}

@@ -1,5 +1,7 @@
 import { fireEvent, render } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import { AnsweringContext } from '../../input/boardAnswers';
+import type { Move } from '../../input/answers';
 import { PlayersPanel } from './PlayersPanel';
 import { RevealLayer, useReveal } from '../reveal';
 import { usePreview } from '../../art/Art';
@@ -109,7 +111,9 @@ describe('the players', () => {
     const panel = renderPanel();
     const side = panel.querySelector('[data-player="1"] .mat-side');
 
-    expect(side?.firstElementChild?.matches('img.avatar')).toBe(true);
+    // the portrait first, a button that opens the character sheet in the reference
+    expect(side?.firstElementChild?.matches('button.avatar-button')).toBe(true);
+    expect(side?.firstElementChild?.querySelector('img.avatar')).not.toBeNull();
     expect(side?.querySelector('.badges')?.textContent).toBe('AdmiralCurrent');
     const admiral = side!.querySelector('.badge.title')!;
     expect(admiral.querySelector('img')?.getAttribute('alt')).toBe('Admiral');
@@ -156,5 +160,35 @@ describe('the players', () => {
     // a back has no preview, which would cover the pile's popover
     fireEvent.mouseEnter(other!.querySelector('[data-art="DeckId/QUORUM"]')!);
     expect(usePreview.getState().art).toBeNull();
+  });
+
+  it('lights the cards that start a move and the players a move targets, and picks them on a click', () => {
+    const move = { option: null, followup: null, event: { kind: 'NoOpEvent' }, submits: true, pick: null } as unknown as Move;
+    const onTarget = vi.fn();
+    const offer = {
+      targets: new Map([
+        ['card:SkillCard:EXECUTIVE_ORDER:2', [move]],
+        ['player:2', [move]],
+      ]),
+      acts: new Map(),
+      picked: new Set<string>(),
+    };
+    const { container } = render(
+      <Table.Provider value={tableContext(game, false, 1)}>
+        <AnsweringContext.Provider value={{ offer, onTarget }}>
+          <PlayersPanel />
+        </AnsweringContext.Provider>
+      </Table.Provider>,
+    );
+
+    const playable = container.querySelectorAll('[data-player="1"] button.playable');
+    expect([...playable].map((button) => button.querySelector('img')?.getAttribute('alt'))).toEqual(['Executive Order 2']);
+    fireEvent.click(playable[0]);
+    expect(onTarget).toHaveBeenLastCalledWith({ type: 'card', deck: 'SkillCard', card: { type: 'EXECUTIVE_ORDER', value: 2 } }, expect.anything());
+
+    const roslin = container.querySelector('[data-player="2"]')!;
+    expect(roslin.classList).toContain('target');
+    fireEvent.click(roslin);
+    expect(onTarget).toHaveBeenLastCalledWith({ type: 'player', playerNumber: 2 }, expect.anything());
   });
 });

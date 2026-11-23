@@ -488,6 +488,7 @@ export interface Choose {
   player: number;
   options: Array<Followup> | null;
   answers: Array<OptionAnswers> | null;
+  topic: Topic | null;
 }
 
 export interface ChooseADifferentPathEvent {
@@ -820,6 +821,7 @@ export interface Decide {
   action: string | null;
   constraints: Array<EventConstraint> | null;
   answers: LegalAnswers | null;
+  topic: Topic | null;
 }
 
 export type DeckFact = DeckFact_CardsAddedOnTop | DeckFact_CardsAddedToBottom | DeckFact_CardsDiscarded | DeckFact_CardsDrawn | DeckFact_CardsPulled | DeckFact_CardsRemovedFromGame | DeckFact_DeckShuffled;
@@ -3534,6 +3536,11 @@ export interface Titles {
   cag: Character | null;
 }
 
+export interface Topic {
+  event: string | null;
+  details: Event | null;
+}
+
 export interface TotalSkillCheckStrengthEvent {
   kind: 'TotalSkillCheckStrengthEvent';
 }
@@ -3690,6 +3697,7 @@ export interface Waiting {
 export interface WaitingFor {
   kind: 'WaitingFor';
   player: number;
+  topic: Topic | null;
 }
 
 export interface WeaponsArmedEvent {

@@ -59,8 +59,7 @@ test('players host, join, observe, leave and start a game, and nobody sees anoth
     for (const other of players.filter((player) => player !== asked)) {
       await expect(other.page.getByRole('region', { name: 'input' }).getByRole('heading')).toContainText('Waiting for');
     }
-    await asked.page.getByRole('region', { name: 'input' }).getByLabel('selected character').selectOption(character);
-    await asked.page.getByRole('region', { name: 'input' }).getByRole('button', { name: 'Send' }).click();
+    await asked.page.getByRole('region', { name: 'input' }).getByRole('button', { name: answerName(character), exact: true }).click();
     // a mat names its character first: the user names, e.g. "Starbuck …", show under it
     await expect(asked.page.getByRole('region', { name: 'players' }).locator('.who strong', { hasText: characterName(character) })).toHaveCount(1);
   }
@@ -119,7 +118,7 @@ async function whoIsAsked<T extends { page: Page }>(players: T[]): Promise<T> {
   await expect
     .poll(async () => {
       for (const player of players) {
-        if ((await player.page.getByRole('region', { name: 'input' }).getByRole('button', { name: 'Send' }).count()) > 0) {
+        if ((await player.page.getByRole('region', { name: 'input' }).getByRole('group', { name: 'answers' }).count()) > 0) {
           return true;
         }
       }
@@ -127,11 +126,16 @@ async function whoIsAsked<T extends { page: Page }>(players: T[]): Promise<T> {
     })
     .toBeTruthy();
   for (const player of players) {
-    if ((await player.page.getByRole('region', { name: 'input' }).getByRole('button', { name: 'Send' }).count()) > 0) {
+    if ((await player.page.getByRole('region', { name: 'input' }).getByRole('group', { name: 'answers' }).count()) > 0) {
       return player;
     }
   }
   throw new Error('Nobody is asked');
+}
+
+// the answer that picks a character is named after him
+function answerName(constant: string): string {
+  return { WILLIAM_ADAMA: 'William Adama', LAURA_ROSLIN: 'Laura Roslin', KARA_STARBUCK_THRACE: 'Kara "Starbuck" Thrace' }[constant] ?? constant;
 }
 
 function characterName(constant: string): string {

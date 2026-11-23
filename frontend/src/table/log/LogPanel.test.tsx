@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { LogPanel } from './LogPanel';
+import { groupBySteps, LogPanel, splitFacts } from './LogPanel';
+import { useFlash } from '../flash';
 import { useGameStore } from '../../live/gameStore';
 import { Table, tableContext } from '../tableContext';
 import type { GameProjection, LogEntry } from '../../wire/types';
@@ -44,7 +45,7 @@ afterEach(() => {
 
 function renderLog(entries: LogEntry[]) {
   useGameStore.setState({ log: entries });
-  const game = { players: [{ number: 1, character: 'WILLIAM_ADAMA' }] } as unknown as GameProjection;
+  const game = { viewer: { kind: 'PlayerViewer', playerNumber: 1 }, players: [{ number: 1, character: 'WILLIAM_ADAMA' }] } as unknown as GameProjection;
   const container = render(
     <Table.Provider value={tableContext(game, false, 1)}>
       <LogPanel />
@@ -66,7 +67,7 @@ function scrollTo(body: HTMLElement, top: number) {
 describe('the log', () => {
   it('has no title and keeps every turn open', () => {
     const body = renderLog([scope(1), turnStarted(2, 1), scope(3), turnStarted(4, 2), scope(5)]);
-    const turns = [...body.querySelectorAll('details')];
+    const turns = [...body.querySelectorAll<HTMLDetailsElement>('details.turn')];
 
     expect(document.querySelector('.log .tab')).toBeNull();
     expect(turns.map((turn) => turn.querySelector('summary')?.textContent)).toEqual(['Setup', 'Turn 1', 'Turn 2']);
@@ -115,5 +116,53 @@ describe('the log', () => {
     addEntry(scope(3), 600);
 
     expect(body.scrollTop).toBe(500);
+  });
+
+  it('groups a turn by its steps, and folds the mechanical facts under the line', () => {
+    const step = (scopeId: number, name: string) => ({ ...scope(scopeId), facts: [{ kind: 'Shown', fact: { kind: 'GameFact.StepChanged', step: name } }] }) as LogEntry;
+    const move = {
+      ...scope(7),
+      event: 'MoveEvent',
+      details: { kind: 'MoveEvent', playerNumber: 1, destination: 'ARMORY', discardCard: null },
+      facts: [
+        { kind: 'Shown', fact: { kind: 'PlayerFact.CharacterMoved', character: 'WILLIAM_ADAMA', to: 'ARMORY' } },
+        { kind: 'Shown', fact: { kind: 'GameFact.TurnLimitUsed', playerNumber: 1, limit: 'CAG_PILOT_ACTION' } },
+      ],
+    } as LogEntry;
+    const entries = [turnStarted(1, 1), step(2, 'MOVEMENT'), move, step(8, 'ACTION')];
+
+    expect(groupBySteps(entries).map((group) => [group.step, group.entries.length])).toEqual([[null, 1], ['MOVEMENT', 2], ['ACTION', 1]]);
+    const { story, rest } = splitFacts(move.kind === 'ScopeLog' ? (move.facts ?? []) : []);
+    expect([story.length, rest.length]).toEqual([1, 1]);
+
+    const body = renderLog(entries);
+    expect([...body.querySelectorAll('.step-name')].map((name) => name.textContent)).toEqual(['Movement', 'Action']);
+    // the turn's and the steps' own scopes say nothing their headers don't
+    expect(body.querySelectorAll('.entries > li')).toHaveLength(1);
+    expect(body.querySelector('.more-facts summary')?.textContent).toBe('1 more fact');
+    // the destination's card shows on hover
+    expect(body.querySelector('.event .named')?.textContent).toBe('Armory');
+
+    fireEvent.click(screen.getByRole('button', { name: 'All facts' }));
+    expect(body.querySelector('.more-facts')).toBeNull();
+    expect(body.querySelectorAll('.entries > li')).toHaveLength(4);
+  });
+
+  it('keeps the entries about the viewer with "Mine", and lights what an entry touched on a click', () => {
+    const other = { ...scope(2), actor: 2 } as LogEntry;
+    const body = renderLog([scope(1), other]);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Mine' }));
+    expect(body.querySelectorAll('.entries > li')).toHaveLength(1);
+
+    fireEvent.click(body.querySelector('.entries > li')!);
+    expect([...useFlash.getState().keys]).toEqual([]);
+  });
+
+  it('words what happened to a ship', () => {
+    const destroyed = { ...scope(3), facts: [{ kind: 'Shown', fact: { kind: 'ShipFact.ShipMoved', shipId: 34, from: 'GALACTICA_SPACE', to: 'CYLON_SUPPLY', location: null } }] } as LogEntry;
+    const body = renderLog([destroyed]);
+
+    expect(body.querySelector('.facts li')?.textContent).toBe('ship #34 is destroyed');
   });
 });

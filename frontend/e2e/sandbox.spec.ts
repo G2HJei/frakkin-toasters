@@ -19,9 +19,8 @@ test('a seeded sandbox is played through a turn, undone, exported and imported',
   await expect(input(page).getByRole('heading')).toHaveText(/^Player [1-4] decides$/);
 
   // the characters, one per seat, answered by the sandbox's one user
-  for (const character of ['WILLIAM_ADAMA', 'LAURA_ROSLIN', 'KARA_STARBUCK_THRACE', 'SAUL_TIGH']) {
-    await input(page).getByLabel('selected character').selectOption(character);
-    await send(page);
+  for (const character of ['William Adama', 'Laura Roslin', 'Kara "Starbuck" Thrace', 'Saul Tigh']) {
+    await answer(page, character);
   }
   // the starting Skill Cards of everyone but the first player
   await draw(page, { POLITICS: 3 });
@@ -30,10 +29,10 @@ test('a seeded sandbox is played through a turn, undone, exported and imported',
 
   // turn 1: Adama draws, moves to the Research Lab, stacks a Crisis Card, draws there, and resolves the stacked card
   await expectTurn(page, 'Turn 1 · William Adama', 'Receive Skills');
-  await draw(page, { LEADERSHIP: 3, TACTICS: 2 });
-  await input(page).getByRole('button', { name: 'Move' }).click();
-  await input(page).getByLabel('destination').selectOption('RESEARCH_LAB');
-  await send(page);
+  // his skill set leaves one draw: a single answer
+  await answer(page, 'Draw Skill Cards: Leadership ×3, Tactics ×2');
+  // the Movement step opens the move: its destinations are the answers
+  await answer(page, 'Research Lab');
   await page.getByRole('region', { name: 'sandbox' }).locator('summary', { hasText: 'Setup' }).click();
   await page.getByLabel('setup').selectOption('PutCrisisCardOnTopEvent');
   await page.getByRole('region', { name: 'sandbox' }).getByLabel('card').selectOption('RIOTS_NO_JUMP');
@@ -41,9 +40,9 @@ test('a seeded sandbox is played through a turn, undone, exported and imported',
   // the sandbox shows the Crisis deck's draw pile on hover, top first
   await page.locator('[data-reveal="deck-CRISIS"]').hover();
   await expect(page.locator('.reveal-pop ol.pile li').first()).toHaveText('Riots No Jump');
-  await input(page).getByRole('button', { name: 'Take an action' }).click();
-  await input(page).getByLabel('skill card color').selectOption('ENGINEERING');
-  await send(page);
+  // the Action step opens the action: the Research Lab's colors
+  await expect(input(page).getByRole('button', { name: 'Take an action' })).toHaveAttribute('aria-expanded', 'true');
+  await answer(page, 'Engineering');
   // "Secret Destiny": Starbuck lets the revealed card resolve
   await input(page).getByRole('button', { name: /Crisis: Riots No Jump/ }).click();
   await input(page).getByRole('button', { name: /Top of Riots No Jump/ }).click();
@@ -76,19 +75,23 @@ function input(page: Page) {
   return page.getByRole('region', { name: 'input' });
 }
 
-async function send(page: Page) {
-  const before = await input(page).getByRole('heading').textContent();
-  await input(page).getByRole('button', { name: 'Send' }).click();
+// clicks an answer, and waits for the game to ask the next thing
+async function answer(page: Page, name: string) {
+  const before = await page.evaluate(() => document.querySelector('[aria-label="input"]')?.innerHTML ?? '');
+  await input(page).getByRole('group', { name: 'answers' }).getByRole('button', { name, exact: true }).click();
   await expect(input(page).getByRole('alert')).toHaveCount(0);
-  // the next game came when the question changed, or the same player is asked something new
-  await expect.poll(async () => (await input(page).getByRole('heading').textContent()) !== before || (await input(page).getByRole('button', { name: 'Send' }).count()) === 0).toBeTruthy();
+  await expect.poll(async () => page.evaluate(() => document.querySelector('[aria-label="input"]')?.innerHTML ?? '')).not.toBe(before);
 }
 
+// a draw counts the cards of each color, then draws
 async function draw(page: Page, counts: Record<string, number>) {
+  const names: Record<string, string> = { POLITICS: 'Politics', LEADERSHIP: 'Leadership', TACTICS: 'Tactics', PILOTING: 'Piloting', ENGINEERING: 'Engineering' };
   for (const [color, count] of Object.entries(counts)) {
-    await input(page).getByLabel(color, { exact: true }).fill(String(count));
+    for (let at = 0; at < count; at++) {
+      await input(page).getByRole('button', { name: `more ${names[color]}` }).click();
+    }
   }
-  await send(page);
+  await answer(page, 'Draw Skill Cards');
 }
 
 // the turn's line (its number, the current character and the acting one when it's another) and the step it is at

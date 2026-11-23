@@ -1,20 +1,23 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Link, useParams } from 'react-router';
 import { useRoom } from '../api/queries';
 import { AnytimePanel } from '../input/AnytimePanel';
 import { InputPanel } from '../input/InputPanel';
+import { intentDue, moves, plan, type Answer, type Move } from '../input/answers';
+import { useSelection } from '../input/selection';
 import type { EventValue } from '../input/eventModel';
 import { GameSocket } from '../live/GameSocket';
 import { chooseMessage, injectMessage, submitMessage, undoMessage, useGameStore } from '../live/gameStore';
 import { SandboxToolbar } from '../sandbox/SandboxToolbar';
 import { BoardSvg } from '../table/board/BoardSvg';
-import { actLocation, actOption, moveDiscards, moveEvent, moveTargets } from '../input/boardMoves';
-import { skillCardArt } from '../art/images';
-import { ArtImg, ArtPreview } from '../art/Art';
-import { constantLabel, skillCardLabel } from '../labels/describe';
+import { ArtPreview } from '../art/Art';
+import { pauseOf } from '../labels/pause';
+import { AnswerPopover } from '../input/AnswerPopover';
+import { afterPick, AnsweringContext, offerOf, type Answering } from '../input/boardAnswers';
 import { LogPanel } from '../table/log/LogPanel';
 import { PlayersPanel } from '../table/players/PlayersPanel';
 import { RevealLayer } from '../table/reveal';
+import { ReferenceDrawer } from '../table/reference/ReferenceDrawer';
 import { Table, tableContext } from '../table/tableContext';
 import { TurnPanel } from '../table/turn/TurnPanel';
 import type { ClientMessage } from '../wire/types';
@@ -65,6 +68,7 @@ function LiveTable({ gameId, name, seed, userNames }: { gameId: string; name: st
   const token = useGameStore((state) => state.token);
   const connection = useGameStore((state) => state.connection);
   const rejected = useGameStore((state) => state.rejected);
+  const version = useGameStore((state) => state.version);
   const socket = useRef<GameSocket | null>(null);
 
   useEffect(() => {
@@ -81,12 +85,65 @@ function LiveTable({ gameId, name, seed, userNames }: { gameId: string; name: st
   const sandbox = game?.viewer?.kind === 'Sandbox';
   const asked = game?.input?.kind === 'Decide' || game?.input?.kind === 'Choose' ? game.input.player : null;
   const context = useMemo(() => tableContext(game, sandbox, asked, userNames), [game, sandbox, asked, userNames]);
-  const targets = useMemo(() => moveTargets(game), [game]);
-  const [pendingMove, setPendingMove] = useState<string | null>(null);
   const send = (message: ClientMessage) => socket.current?.send(message);
+  const all = useMemo(() => moves(game?.input), [game]);
+  const picked = useSelection((state) => state.picked);
 
+  // a move picks an option, submits an answer, or picks the option and answers the decision it asks next
+  const sendMove = (move: Move, event: Answer | null) => {
+    const { choose, submit, intent } = plan(move, event);
+    if (choose !== null) {
+      if (intent && asked !== null) {
+        useGameStore.getState().setIntent({ player: asked, event: intent, afterVersion: version });
+      }
+      send(chooseMessage(token, choose));
+    } else if (submit) {
+      send(submitMessage(token, submit));
+    }
+  };
+
+  // the board and the mats: what the moves left name lights up; a click picks it, and sends the only move left
+  const answering = useMemo<Answering>(
+    () => ({
+      offer: offerOf(all, picked),
+      onTarget: (target, anchor) => {
+        const selection = useSelection.getState();
+        const { send: only } = afterPick(all, selection.picked, target);
+        if (only && !only.pick) {
+          selection.clear();
+          sendMove(only, only.event);
+          return;
+        }
+        selection.pick(target, anchor);
+        if (only) {
+          selection.startPick(only);
+        }
+      },
+    }),
+    // sendMove reads the latest token and version
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [all, picked, token, version],
+  );
+
+  // a new game answers the decision a move chose its option for, while it still takes it; the panel stays busy until
+  // the game after that answer comes (a rejection clears it too)
   useEffect(() => {
-    const yourMove = game?.input?.kind === 'Decide' || game?.input?.kind === 'Choose';
+    const store = useGameStore.getState();
+    const intent = store.intent;
+    if (!intent || version <= intent.afterVersion) {
+      return;
+    }
+    const due = intent.sent ? null : intentDue(intent, version, game?.input);
+    if (due) {
+      store.setIntent({ ...intent, sent: true, afterVersion: version });
+      send(submitMessage(store.token, due));
+    } else {
+      store.setIntent(null);
+    }
+  }, [version, game]);
+
+  const yourMove = game?.input?.kind === 'Decide' || game?.input?.kind === 'Choose';
+  useEffect(() => {
     document.title = `${yourMove ? '● ' : ''}${name || 'Frakkin Toasters'}`;
     // the tab's icon marks an input for you too
     const icon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
@@ -97,71 +154,64 @@ function LiveTable({ gameId, name, seed, userNames }: { gameId: string; name: st
 
   return (
     <Table.Provider value={context}>
-      <main className="table-page">
-        {!game ? (
-          // before a game, only a refusal is rejected: the server says why it can't open the game
-          rejected ? (
-            <div className="connecting">
-              <p className="error">{rejected.message}</p>
-              <Link to="/">Back</Link>
-            </div>
+      <AnsweringContext.Provider value={answering}>
+        <main className="table-page">
+          {!game ? (
+            // before a game, only a refusal is rejected: the server says why it can't open the game
+            rejected ? (
+              <div className="connecting">
+                <p className="error">{rejected.message}</p>
+                <Link to="/">Back</Link>
+              </div>
+            ) : (
+              <p className="muted connecting">Connecting…</p>
+            )
           ) : (
-            <p className="muted connecting">Connecting…</p>
-          )
-        ) : (
-          <div className="table-main">
-            <div className="table-side left">
-              <TurnPanel name={name} connection={connection} />
-              <InputPanel onChoose={(option) => send(chooseMessage(token, option))} onSubmit={(event) => send(submitMessage(token, event))} />
-              <AnytimePanel onSubmit={(event) => send(submitMessage(token, event))} />
-              {pendingMove && asked !== null && (
-                <section className="panel cf move-prompt" aria-label="discard to move">
-                  <h2>Moving to {constantLabel('Location', pendingMove)}: discard a Skill Card</h2>
-                  <div className="picker">
-                    {(moveDiscards(game, pendingMove) ?? []).map((card, index) => (
-                      <button key={index} type="button" className="tile card-pick" onClick={() => { send(submitMessage(token, moveEvent(asked, pendingMove, card))); setPendingMove(null); }}>
-                        {skillCardArt(card) && <ArtImg art={skillCardArt(card)!} />}
-                        <span>{skillCardLabel(card)}</span>
-                      </button>
-                    ))}
-                    <button type="button" className="link" onClick={() => setPendingMove(null)}>Cancel</button>
-                  </div>
-                </section>
-              )}
-              {/* the log takes what the panels above leave */}
-              <LogPanel />
-            </div>
-            <div className="board">
-              <BoardSvg
-                targets={targets}
-                onLocation={(location) => {
-                  // a move to another ship discards a card, which the answers name
-                  if (asked !== null && moveDiscards(game, location) !== null) {
-                    setPendingMove(location);
-                  } else if (asked !== null) {
-                    send(submitMessage(token, moveEvent(asked, location, null)));
-                  }
-                }}
-                actAt={actLocation(game)}
-                onAct={() => send(chooseMessage(token, actOption(game) ?? 0))}
-              />
-            </div>
-            <div className="table-side right">
-              {sandbox && (
-                <SandboxToolbar
-                  gameId={gameId}
-                  seed={seed}
-                  onUndo={() => send(undoMessage(token))}
-                  onInject={(event: EventValue) => send(injectMessage(token, event))}
+            <div className="table-main">
+              <div className="table-side left">
+                <TurnPanel name={name} connection={connection} />
+                <InputPanel
+                  onChoose={(option) => send(chooseMessage(token, option))}
+                  onSubmit={(event) => send(submitMessage(token, event))}
+                  onMove={sendMove}
                 />
-              )}
-              <PlayersPanel />
+                <AnytimePanel onSubmit={(event) => send(submitMessage(token, event))} />
+                {/* the log takes what the panels above leave */}
+                <LogPanel />
+              </div>
+              <div className={`board ${yourMove ? 'your-move' : ''}`.trim()}>
+                {yourMove && (
+                  // the cue on the board's edge that the game waits for the viewer, and what for
+                  <div className="move-banner" role="status">
+                    <strong>{sandbox ? `${context.playerName(asked!)}'s move` : 'Your move'}</strong>
+                    {pauseOf(game.input, context).line && <span>{pauseOf(game.input, context).line}</span>}
+                  </div>
+                )}
+                <BoardSvg />
+              </div>
+              <div className="table-side right">
+                {sandbox && (
+                  <SandboxToolbar
+                    gameId={gameId}
+                    seed={seed}
+                    onUndo={() => {
+                      // the game comes back as it was: nothing to animate
+                      useGameStore.getState().expectSnapshot();
+                      send(undoMessage(token));
+                    }}
+                    onInject={(event: EventValue) => send(injectMessage(token, event))}
+                  />
+                )}
+                <PlayersPanel />
+              </div>
             </div>
-          </div>
-        )}
-        <ArtPreview />
-        <RevealLayer />
-      </main>
+          )}
+          <ArtPreview />
+          <RevealLayer />
+          <AnswerPopover onMove={sendMove} />
+          <ReferenceDrawer />
+        </main>
+      </AnsweringContext.Provider>
     </Table.Provider>
   );
 }

@@ -11,8 +11,8 @@ import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.damageGalactica;
 
 public class AttackGalacticaResultEventProcessor extends EventProcessor<AttackGalacticaResultEvent> {
 
-    private static final int LOWEST_ROLL_FOR_A_RAIDER   = 8;
-    private static final int LOWEST_ROLL_FOR_A_BASESTAR = 4;
+    static final int LOWEST_ROLL_FOR_A_RAIDER   = 8;
+    static final int LOWEST_ROLL_FOR_A_BASESTAR = 4;
 
     @Override
     protected boolean isValid() {
