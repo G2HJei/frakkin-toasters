@@ -292,9 +292,9 @@ describe('the answers', () => {
     expect(pools).toEqual([
       ['Military Leader', ['Saul Tigh', 'William Adama']],
       ['Political Leader', ['Laura Roslin']],
+      ['Pilot', ['Kara "Starbuck" Thrace']],
       ['Support', ['Chief Galen Tyrol']],
       ['Cylon Leader', ['Cavil']],
-      ['Pilot', ['Kara "Starbuck" Thrace']],
     ]);
     fireEvent.click(within(screen.getByRole('group', { name: 'Cylon Leader' })).getByRole('button', { name: 'Cavil' }));
     expect(onMove).toHaveBeenCalledWith(expect.objectContaining({ event: events[1] }), events[1]);

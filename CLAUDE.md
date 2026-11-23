@@ -1092,7 +1092,7 @@ REST (the lobby lists poll), Zustand for the game.
   itself. `AnswerPanel` shows them: a choice's options in order, an option's decision as a section of
   its answers (the first one open), the answers grouped by kind (`groupMoves`; a group's moves differ in
   `varyingComponents`, worded by `moveLabels.ts`; characters to choose lie by pool: military leader, political leader,
-  support, Cylon Leader, pilot), a draw as a card per color that a click takes one more of, back to
+  pilot, support, Cylon Leader), a draw as a card per color that a click takes one more of, back to
   what every answer draws once it has the most an answer leaves it beside the other colors (what every answer draws
   is picked from the start, e.g. a skill set's one-color options in the Receive Skills step, and a color every answer
   draws as many of comes first, fixed, so a two-color option's colors are left to pick, held to their shared count; a
@@ -1168,7 +1168,7 @@ REST (the lobby lists poll), Zustand for the game.
   (it stays the image's `alt`); a pile keeps a label that says more, e.g. who played the card. A face-up discard
   pile shows to everyone. A sandbox looks like a live table, every hand and deck face down, and shows on hover what the
   players can't see (`hidden` sections: hands, Loyalty and other player cards, draw piles, face-down discards, a skill
-  check's cards).
+  check's cards). The cards played before a skill check lie face up there too once revealed (`playedBeforeRevealed`).
 - The website: `GamesPage` (the lobby: my sandboxes and games, open lobbies, games to watch, hosting), `RoomPage`
   (seats and observers, join, leave, start), `SettingsPage`. A 401 goes to the login page. The lobby's pages and a
   game's room have the top bar (`TopNav`), the table doesn't. A game opens in a tab of its own: the links to it, and

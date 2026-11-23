@@ -215,7 +215,7 @@ function OutOfTheGame() {
 }
 
 /**
- * The skill check, beside its card: the difficulty, who played before it, the cards an "Investigative Committee" shows
+ * The skill check, beside its card: the difficulty, who played before it (face up once revealed, in a sandbox too), the cards an "Investigative Committee" shows
  * face up, the face-down pile (counted; a sandbox shows it on hover), the piles once revealed, the strength and the
  * result.
  */
@@ -249,7 +249,12 @@ function SkillCheck() {
       </div>
       {(check.playedBefore ?? []).map((played) => (
         <Row key={played.player} label={`Before the check: ${table.playerName(played.player)}`}>
-          <Cards id={`before-${played.player}`} title={`Played before the check by ${table.playerName(played.player)}`} hand={played.cards} />
+          <Cards
+            id={`before-${played.player}`}
+            title={`Played before the check by ${table.playerName(played.player)}`}
+            hand={played.cards}
+            faceUp={check.playedBeforeRevealed}
+          />
         </Row>
       ))}
       {(check.shownCards ?? []).map((shown) => (
@@ -290,15 +295,16 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-// Cards face up for who may see them in a live game, otherwise their backs, which a sandbox opens on hover.
-function Cards({ id, title, hand }: { id: string; title: string; hand: SkillHand | null }) {
+// Cards face up for who may see them in a live game, otherwise their backs, which a sandbox opens on hover. Cards
+// revealed to everyone (faceUp) lie face up in a sandbox too.
+function Cards({ id, title, hand, faceUp = false }: { id: string; title: string; hand: SkillHand | null; faceUp?: boolean }) {
   const table = useTable();
   const sections: RevealSection[] = [{ title: 'Cards', cards: (hand?.cards ?? []).map((card) => ({ art: skillCardArt(card), label: skillCardLabel(card) })), hidden: true }];
   const handlers = useRevealHandlers(id, title, sections);
   if (!hand || hand.count === 0) {
     return <span className="muted">—</span>;
   }
-  if (hand.cards && !table.sandbox) {
+  if (hand.cards && (faceUp || !table.sandbox)) {
     return <CardList cards={hand.cards} />;
   }
   const colors = Object.entries(hand.colors ?? {});

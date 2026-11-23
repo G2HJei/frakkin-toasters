@@ -11,10 +11,10 @@ const players = [
   { number: 2, character: 'LAURA_ROSLIN' },
 ];
 
-function renderPanel(turn: { step: string; currentPlayer: number; actingPlayer: number; crisisCards?: string[] }, more: object = {}) {
+function renderPanel(turn: { step: string; currentPlayer: number; actingPlayer: number; crisisCards?: string[] }, more: object = {}, sandbox = false) {
   const game = { objective: 'KOBOL', distanceTraveled: 0, nukes: 1, players, turn: { number: 4, ...turn }, ...more } as unknown as GameProjection;
   return render(
-    <Table.Provider value={tableContext(game, false, null)}>
+    <Table.Provider value={tableContext(game, sandbox, null)}>
       <TurnPanel name="Sandbox" connection="open" />
       <RevealLayer />
     </Table.Provider>,
@@ -137,6 +137,53 @@ describe('the turn', () => {
 
     expect(rows.map((row) => row.querySelector('.row-name')?.textContent)).toEqual(['Face up: Laura Roslin', 'Face down']);
     expect(rows[0].querySelectorAll('.card-tile')).toHaveLength(1);
+  });
+
+  // a skill check with 2 cards Laura Roslin played before it, which a sandbox sees whether they are revealed or not
+  function playedBeforeCheck(playedBeforeRevealed: boolean) {
+    return {
+      type: 'ADMIRALS_QUARTERS',
+      targetPlayer: 2,
+      difficulty: 7,
+      playedBefore: [
+        {
+          player: 2,
+          cards: {
+            count: 2,
+            colors: { POLITICS: 1, ENGINEERING: 1 },
+            cards: [
+              { value: 3, type: 'INVESTIGATIVE_COMMITTEE' },
+              { value: 3, type: 'SCIENTIFIC_RESEARCH' },
+            ],
+          },
+        },
+      ],
+      playedBeforeRevealed,
+      cards: { count: 0, colors: null, cards: null },
+      totalStrength: null,
+    };
+  }
+
+  // the "Before the check" row: its face-up cards and its backs
+  function beforeTheCheck(panel: HTMLElement) {
+    const row = panel.querySelector('section.turn [aria-label="skill check"] .row')!;
+    expect(row.querySelector('.row-name')?.textContent).toBe('Before the check: Laura Roslin');
+    return { faceUp: row.querySelectorAll('.card-tile').length, backs: row.querySelectorAll('.card-back').length };
+  }
+
+  it('keeps the cards played before the check face down in a sandbox until they are revealed', () => {
+    const panel = renderPanel({ step: 'ACTION', currentPlayer: 1, actingPlayer: 1 }, { skillCheck: playedBeforeCheck(false) }, true);
+
+    expect(beforeTheCheck(panel)).toEqual({ faceUp: 0, backs: 2 });
+  });
+
+  it('shows the cards played before the check face up once they are revealed, in a sandbox too', () => {
+    const live = renderPanel({ step: 'ACTION', currentPlayer: 1, actingPlayer: 1 }, { skillCheck: playedBeforeCheck(true) });
+    expect(beforeTheCheck(live)).toEqual({ faceUp: 2, backs: 0 });
+    live.remove();
+
+    const sandbox = renderPanel({ step: 'ACTION', currentPlayer: 1, actingPlayer: 1 }, { skillCheck: playedBeforeCheck(true) }, true);
+    expect(beforeTheCheck(sandbox)).toEqual({ faceUp: 2, backs: 0 });
   });
 
   // the images of the cards of the turn, by their names
