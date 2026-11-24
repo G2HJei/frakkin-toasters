@@ -341,10 +341,6 @@ nav.top .brand img {
   border-color: var(--cylon);
 }
 
-.tile.crisis {
-  border-color: var(--accent);
-}
-
 .skill-politics {
   border-left: 4px solid var(--politics);
 }
@@ -484,8 +480,37 @@ details[open] > summary::before {
   outline: 2px solid var(--cylon);
 }
 
-.tile.crisis .art {
-  outline: 1px solid var(--accent);
+/* A Crisis or Super Crisis Card at full size, without the card stock its scan lies on. The scans are 275 by 432 pixels,
+   and the face, a panel with a thin dark outline and cut corners, starts 11 to 19 pixels in, a little differently on
+   each. The crop is the same for every card: it stops at the face nearest each edge, so no card loses its outline and
+   the others keep a sliver of stock, and the cut corners go a few pixels past the printed ones. */
+.card-tile.size-full.crisis {
+  --scan-width: 275;
+  --scan-height: 432;
+  --crop-left: 13;
+  --crop-right: 12;
+  --crop-top: 11;
+  --crop-bottom: 13;
+  --cut: 22;
+  --face-width: calc(var(--scan-width) - var(--crop-left) - var(--crop-right));
+  --face-height: calc(var(--scan-height) - var(--crop-top) - var(--crop-bottom));
+  --cut-x: calc(var(--cut) / var(--face-width) * 100%);
+  --cut-y: calc(var(--cut) / var(--face-height) * 100%);
+  width: calc(var(--face-width) * 1px);
+  max-width: 100%;
+  aspect-ratio: var(--face-width) / var(--face-height);
+  clip-path: polygon(
+    var(--cut-x) 0, calc(100% - var(--cut-x)) 0, 100% var(--cut-y), 100% calc(100% - var(--cut-y)),
+    calc(100% - var(--cut-x)) 100%, var(--cut-x) 100%, 0 calc(100% - var(--cut-y)), 0 var(--cut-y)
+  );
+}
+
+.card-tile.size-full.crisis .art {
+  position: absolute;
+  left: calc(var(--crop-left) / var(--face-width) * -100%);
+  top: calc(var(--crop-top) / var(--face-height) * -100%);
+  width: calc(var(--scan-width) / var(--face-width) * 100%);
+  max-width: none;
 }
 
 .card-caption {

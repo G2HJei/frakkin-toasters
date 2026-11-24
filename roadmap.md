@@ -136,6 +136,8 @@ Where it differs from the plan:
   the room with the same seats.
 - **Report a problem**: A link below the `Reference` Link opens a small drawer with a multiline edit box for the player
   to add a comment (1000 chars max). Sending it stores the comment and the game id in a dedicated table.
+- **Dev simulation**: Allow testing in real people-like environment locally, by using the dev login with incognito
+  browser tabs or separate browsers.
 
 *Exit:* a game played over three days across restarts, with one player replaced mid-game after the clock ran out,
 finishes with the right ending and the results screen.

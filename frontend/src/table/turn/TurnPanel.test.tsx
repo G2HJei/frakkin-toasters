@@ -197,6 +197,8 @@ describe('the turn', () => {
     const check = panel.querySelector('section.turn [aria-label="skill check"]')!;
 
     expect(turnCards(panel)).toEqual(["Admiral's Quarters"]);
+    // a location isn't a card scan to trim
+    expect(panel.querySelector('section.turn .card-tile.crisis')).toBeNull();
     expect(check.querySelector('.card-tile')).toBeNull();
     expect([...check.querySelectorAll('.block-text > *')].map((line) => line.textContent)).toEqual(['Targets Laura Roslin', 'Difficulty 7', 'Strength 8 · passes']);
   });
@@ -206,6 +208,8 @@ describe('the turn', () => {
     const panel = renderPanel({ step: 'ACTION', currentPlayer: 1, actingPlayer: 1 }, { skillCheck });
 
     expect(turnCards(panel)).toEqual(['Cylon Intruders']);
+    // trimmed of its card stock like a Crisis Card
+    expect(panel.querySelector('section.turn .card-tile.size-full')?.className).toBe('tile card-tile size-full crisis');
   });
 
   it("shows a skill check about none of the turn's Crisis Cards with its card after them", () => {

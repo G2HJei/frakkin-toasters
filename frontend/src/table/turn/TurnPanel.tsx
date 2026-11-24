@@ -77,7 +77,8 @@ export function TurnPanel({ name, connection }: { name: string; connection: Conn
             {crisisCards.map((card, index) => (
               <CardTile key={index} art={cardArt('CrisisCard', card)} label={constantLabel('CrisisCard', card)} size="full" className="crisis" />
             ))}
-            {checkCard && <CardTile art={checkCard.art} label={checkCard.label} size="full" />}
+            {/* a Super Crisis Card's scan is trimmed like a Crisis Card's, a location's isn't */}
+            {checkCard && <CardTile art={checkCard.art} label={checkCard.label} size="full" className={checkCard.art?.shape === 'card' ? 'crisis' : ''} />}
           </div>
         )}
         <div className="turn-details">
@@ -86,7 +87,7 @@ export function TurnPanel({ name, connection }: { name: string; connection: Conn
             <Block label="Crisis Cards in play">
               <span className="cards">
                 {(game.crisisCardsInPlay ?? []).map((type, index) => (
-                  <CardTile key={index} art={skillCheckArt(type)} label={constantLabel('SkillCheckType', type)} size="xs" className="crisis" />
+                  <CardTile key={index} art={skillCheckArt(type)} label={constantLabel('SkillCheckType', type)} size="xs" />
                 ))}
               </span>
             </Block>
