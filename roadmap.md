@@ -114,31 +114,26 @@ Where it differs from the plan:
 ### D. Sessions that survive real people (backend + frontend)
 
 - **Presence**: who is connected, shown on the players' mats and in the room; a disconnected asked player is marked.
-- **Turn clock and absence** (per-game option, off by default for friends, on for open games): a soft reminder, then a
-  vote or host action to hand the seat over (next item). The engine never passes or discards for an absent player. What
-  it may answer alone is built already, for every input and not only on a timeout: with `frakkin.take-only-answers`
-  (on by default) it takes a decision's only answer itself, e.g. the Skill Cards of a character whose skill set leaves
-  no choice (open question 4). A choice is always asked. The journal records it (`OnlyAnswerTaken`), and the log marks
-  it "automatic" for its actor alone, because an only answer can tell what a player holds. The clock adds no other
-  default.
+- **Absence**: No clock/timer, just option to hold a vote or host action to hand the seat over (next item). The engine
+  never passes or discards for an
+  absent player. What it may answer alone is built already, for every input and not only on a timeout: with
+  `frakkin.take-only-answers`  (on by default) it takes a decision's only answer itself, e.g. the Skill Cards of a
+  character whose skill set leaves no choice (open question 4). A choice is always asked.
 - **Take over / replace a seat**: a vacated seat (left, banned, abandoned) can be taken by an observer (bots are out of
   scope, open question 7); the replacement sees what the seat sees, no more. The hand and secrets belong to the seat,
   not the user.
 - **Host tools**: kick before the start, cancel a lobby, abandon a running game (vote or host, ends it without a
-  winner, `FINISHED` with a reason), and a delete of finished games the host owns.
-- **Notifications**: "your move" by browser notification and, optionally, email or a Discord webhook; rate limited, off
-  by default. A game that lasts 3 to 4 hours spread over days needs this.
-- **Async play**: a long-lived game that can sit for days: the session cache already restores from the rows; check
-  restart, idle eviction and the `StateTokens` on very old tabs. Also a "last seen / waiting since" in the lobby list.
+  winner, `FINISHED` with a reason).
+- **Notifications**: "your move" by browser notification and flashing browser tab / favicon change. The notification is
+  showed only if the browser tab is NOT opened.
 - **Chat**: public only (open question 5): a game chat for players and a separate one for observers (the table is a
   social game: accusations and bluffing are most of it), and no private messages. Per-game, stored apart from the
-  journal (it is not game state), with a rate limit and a mute. Cylon-team private chat is out (rules forbid
-  out-of-band communication between hidden Cylons), see "Not in this roadmap".
-- **Reconnect polish**: the socket reconnects with backoff, a new connection gets the game and the whole log, and the
-  turn panel's tab shows the connection while it isn't open. Left: keep a half-filled input (the picks of the
-  selection, which every `game` message clears) across a reconnect.
+  journal (it is not game state), with a rate limit and a message limit. Cylon-team private chat is out (rules forbid
+  out-of-band communication between hidden Cylons), see "Not in this roadmap". The log panel can be switched to `Chat`
+  panel and vice versa.
 - **Game end**: a results screen (winner, winners by name, every revealed loyalty, motive cards, the story of the game,
-  turns played), a shareable read-only replay link, and a **rematch** that reopens the room with the same seats.
+  turns played, statistics per player and per game), a shareable read-only replay link, and a **rematch** that reopens
+  the room with the same seats.
 
 *Exit:* a game played over three days across restarts, with one player replaced mid-game after the clock ran out,
 finishes with the right ending and the results screen.
@@ -177,8 +172,8 @@ finishes with the right ending and the results screen.
   need review by whoever acts as the DPO or legal counsel, not by this document. The game, its artwork and text belong
   to their rights holders; the card and board images and the rulebook in `materials-sorted/` are used as they are,
   because the project is for private play (open question 2).
-- **Moderation**: anyone can sign up for free (open question 6), so at minimum: report a user, and ban from a lobby
-  (D's host tools).
+- **Moderation**: anyone can sign up for free (open question 6), so at minimum: report a user, and ban from a lobby (D's
+  host tools).
 
 *Exit:* a public staging environment where an invited group plays a full game and a rollback or error pages the
 author.
