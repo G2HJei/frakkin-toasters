@@ -42,6 +42,8 @@ const KIND_ART: Record<string, () => Found[]> = {
   DiscardFromDestinyDeckEvent: () => [skillBackArt()],
   CylonPowerDrawTreacheryEvent: () => [skillColorBackArt('TREACHERY')],
   DrawDestinationCardsEvent: () => [back('DESTINATION')],
+  // the cards drawn show once above the options: each option keeps the back
+  ChooseDestinationEvent: () => [back('DESTINATION')],
   DrawAndDestroyCivilianShipsEvent: () => [shipArt('CIVILIAN')],
   PresidentTitleActionEvent: () => [title('PRESIDENT'), back('QUORUM')],
   DefendPresidencyEvent: () => [title('PRESIDENT')],

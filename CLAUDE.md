@@ -1105,7 +1105,8 @@ REST (the lobby lists poll), Zustand for the game.
   character's portrait, a deck as its back, a Skill Card color as a back in it, a die result as the face, ships by
   their ids, no location: the board shows it), the event's `@Source`, what its kind does where its fields don't say
   (`KIND_ART`: the deck a draw takes from, the Skill Card back of the cards a random discard or the Destiny deck takes,
-  the title a Title Card action is), the back of a shape's cards to pick (the Skill Card back for the cards to play into
+  the title a Title Card action is, the Destination back on each destination to choose, whose cards the choice shows
+  once above its options), the back of a shape's cards to pick (the Skill Card back for the cards to play into
   a skill check or to discard), and the miracle token last on every
   answer of a miracle ability (it never moves to the group's name). A draw as a card per color that a click takes one more of, back to
   what every answer draws once it has the most an answer leaves it beside the other colors (what every answer draws

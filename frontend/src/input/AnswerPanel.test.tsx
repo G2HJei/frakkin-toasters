@@ -325,6 +325,21 @@ describe('the answers', () => {
     expect(images(rows[1])).toEqual(['DeckId/QUORUM']);
   });
 
+  it('show the Destination back on each destination to choose, the cards both name once above them', () => {
+    const choose = (chosen: string, other: string) => ({ kind: 'Single', event: { kind: 'ChooseDestinationEvent', playerNumber: 1, chosen, others: [other] } });
+    const { container } = renderPanel(
+      game({
+        kind: 'Choose',
+        player: 1,
+        options: [choose('A_CIVILIAN_CONVOY', 'DERELICT_BASESTAR'), choose('DERELICT_BASESTAR', 'A_CIVILIAN_CONVOY')],
+        answers: [],
+      }),
+    );
+
+    const rows = [...container.querySelectorAll('.options > button.answer-row')];
+    expect(rows.map(images)).toEqual([['DeckId/DESTINATION'], ['DeckId/DESTINATION']]);
+  });
+
   it("put a decision's pass after its other answers, and name the answer left by what told them apart", () => {
     const play = { kind: 'PlayInterruptCardEvent', playerNumber: 1, card: card('STRATEGIC_PLANNING', 3), calculationsModifier: null };
     const pass = { ...play, card: null };

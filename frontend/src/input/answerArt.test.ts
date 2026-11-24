@@ -59,6 +59,14 @@ describe("an answer's images", () => {
     expect(art({ kind: 'ResearchLabEvent', playerNumber: 1, skillCardColor: 'TACTICS' })).toEqual(['SkillCardColor/TACTICS']);
   });
 
+  it('show the Destination back on the choice of a destination, before the cards it names', () => {
+    expect(art({ kind: 'ChooseDestinationEvent', playerNumber: 1, chosen: 'A_CIVILIAN_CONVOY', others: ['DERELICT_BASESTAR'] })).toEqual([
+      'DeckId/DESTINATION',
+      'DestinationCard/A_CIVILIAN_CONVOY',
+      'DestinationCard/DERELICT_BASESTAR',
+    ]);
+  });
+
   it('show the Skill Card back where Skill Cards are taken without being named: a shape to pick, a random discard', () => {
     const cards = [{ type: 'REPAIR', value: 1 }];
     const pick = { kind: 'SkillCardPick', component: 'skillCards', cards, min: 1, max: 3, ordered: false, minStrength: 0 } as unknown as Move['pick'];
