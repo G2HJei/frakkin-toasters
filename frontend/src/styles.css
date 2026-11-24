@@ -633,18 +633,29 @@ details[open] > summary::before {
   box-shadow: 0 0 0 2px var(--accent);
 }
 
+/* a card or key to pick: as wide as the others, its name wrapping under its image, clear of the cut corners */
 .tile.card-pick {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.15rem;
-  padding: 0.2rem;
+  gap: 0.3rem;
+  width: 6rem;
+  padding: 0.5rem;
   font-size: 0.75rem;
+  line-height: 1.2;
+  text-align: center;
 }
 
 .tile.card-pick .art {
   height: 72px;
+  max-width: 100%;
+  object-fit: contain;
   border-radius: 4px;
+}
+
+.tile.card-pick :is(.pick-label, .count-name) {
+  max-width: 100%;
+  overflow-wrap: break-word;
 }
 
 .tile.card-pick.picked {
@@ -2199,7 +2210,6 @@ details[open] > summary::before {
 }
 
 .count-key {
-  min-width: 64px;
   cursor: pointer;
 }
 
@@ -2259,6 +2269,11 @@ details[open] > summary::before {
   position: relative;
 }
 
+/* room for a 96px damage token beside the padding; a wider image is scaled into it */
+:is(.pick-widget, .parts-widget) .card-pick {
+  width: 7.5rem;
+}
+
 .pick-widget .card-pick .art {
   height: 96px;
 }
@@ -2302,10 +2317,11 @@ details[open] > summary::before {
   grid-column: 1 / -1;
 }
 
+/* inside the cut corner */
 .pick-widget .order {
   position: absolute;
-  top: 2px;
-  left: 2px;
+  top: 4px;
+  left: 4px;
   min-width: 20px;
   padding: 0 4px;
   border-radius: 10px;

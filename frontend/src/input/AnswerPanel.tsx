@@ -543,7 +543,7 @@ function PartsWidget({group, parts, onMove}: { group: MoveGroup; parts: Part[]; 
                                         onClick={() => toggle(part, at)}
                                     >
                                         {asTiles ? arts[0] && <ArtImg art={arts[0]}/> : <ArtSlot refs={arts}/>}
-                                        <span>{label}</span>
+                                        <span className={asTiles ? 'pick-label' : undefined}>{label}</span>
                                     </button>
                                 );
                             })}
@@ -667,7 +667,7 @@ function PickWidget({move, onSend}: { move: Move; onSend(event: Answer | null): 
                             onClick={() => toggle(position)}
                         >
                             {art && <ArtImg art={art}/>}
-                            <span>{label}</span>
+                            <span className="pick-label">{label}</span>
                             {ordered && at >= 0 && <b className="order">{at + 1}</b>}
                         </button>
                     );
