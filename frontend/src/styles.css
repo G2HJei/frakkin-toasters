@@ -766,10 +766,12 @@ details > summary {
   color: var(--steel-100);
 }
 
-/* cut corners like the cards: resolved on each element, so each uses its own --c */
+/* cut corners like the cards: resolved on each element, so each uses its own --c. --notch cuts only the top left and
+   the bottom right, like the board's section labels */
 .table-page *,
 .table-page *::before {
   --chamfer: polygon(var(--c) 0, calc(100% - var(--c)) 0, 100% var(--c), 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%, var(--c) 100%, 0 calc(100% - var(--c)), 0 var(--c));
+  --notch: polygon(var(--c) 0, 100% 0, 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%, 0 100%, 0 var(--c));
 }
 
 .table-page .cf {
@@ -789,6 +791,24 @@ details > summary {
   z-index: -1;
   background: var(--fill);
   clip-path: var(--chamfer);
+}
+
+/* the mats' badges and the turn's lines: notched, with the edge along the cuts as in .cf (a border would be cut off
+   there). The fill has to be opaque, or the edge shows through it */
+.table-page :is(.badge, .turn-line) {
+  position: relative;
+  isolation: isolate;
+  background: var(--edge);
+  clip-path: var(--notch);
+}
+
+.table-page :is(.badge, .turn-line)::before {
+  content: '';
+  position: absolute;
+  inset: var(--bw);
+  z-index: -1;
+  background: var(--fill);
+  clip-path: var(--notch);
 }
 
 .table-page .tab {
@@ -1170,20 +1190,23 @@ details > summary {
   color: var(--steel-300);
 }
 
+/* the padding includes the edge's width */
 .table-page .badge {
+  --c: 6px;
+  --edge: var(--steel-500);
+  --fill: #0e1626;
+  --bw: 1px;
   display: inline-flex;
   align-items: center;
   gap: 5px;
   height: 24px;
-  padding: 0 9px 0 3px;
+  padding: 0 10px 0 4px;
   font: 600 11px/1 var(--display);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  background: #0e1626;
-  border: 1px solid var(--steel-500);
+  border: 0;
   border-radius: 0;
   color: var(--steel-100);
-  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
 }
 
 .table-page .badge .art {
@@ -1199,24 +1222,24 @@ details > summary {
 }
 
 .table-page .badge.title {
-  border-color: #d9a640;
+  --edge: #d9a640;
   color: #f3d38a;
 }
 
 .table-page .badge.mutineer {
-  border-color: #c0503f;
+  --edge: #c0503f;
   color: #f0a090;
 }
 
 .table-page .badge.cylon {
-  border-color: var(--alert);
-  background: var(--alert-dim);
+  --edge: var(--alert);
+  --fill: var(--alert-dim);
   color: #fff;
-  padding-left: 9px;
+  padding-left: 10px;
 }
 
 .table-page .badge.token {
-  border-color: var(--dradis);
+  --edge: var(--dradis);
   color: var(--dradis-glow);
 }
 
@@ -1231,22 +1254,23 @@ details > summary {
   margin: 0 0 8px;
 }
 
+/* the fill as rgba(9, 18, 34, 0.92) over the panel's gunmetal; the padding includes the edge's width */
 .turn .turn-line {
-  --line: var(--amber);
+  --c: 10px;
+  --edge: var(--amber);
+  --fill: #0b1423;
+  --bw: 2px;
   display: flex;
   align-items: baseline;
   gap: 8px;
   min-width: 0;
   max-width: 100%;
-  padding: 5px 14px;
+  padding: 7px 16px;
   line-height: 1.3;
-  background: rgba(9, 18, 34, 0.92);
-  border: 2px solid var(--line);
-  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
 }
 
 .turn .turn-line.acting {
-  --line: var(--alert);
+  --edge: var(--alert);
 }
 
 .turn .turn-line strong {
@@ -1691,7 +1715,7 @@ details > summary {
 /* a little tighter, so the longest ("Infiltrating") fits the column */
 .table-page .mat .badges .badge {
   margin: 0;
-  padding-right: 7px;
+  padding-right: 8px;
   letter-spacing: 0.05em;
 }
 
@@ -2179,10 +2203,11 @@ details > summary {
   margin-right: auto;
 }
 
-/* the input's buttons, cut like the log's arrow: steel at rest, lit like the dradis under the pointer or the keyboard.
-   The edge is the background and the fill a layer inset by --bw, as in .cf. Not the cards to pick, which are tiles, and
-   not the sandbox's own event builder */
-.table-page :is(.input-panel, .anytime-panel, .answer-pop) :where(.option, .chip, .primary, .selection-bar .link, .actions .link) {
+/* the input's buttons, the reference's and the sandbox's tools, cut like the log's arrow: steel at rest, lit like the
+   dradis under the pointer or the keyboard. The edge is the background and the fill a layer inset by --bw, as in .cf.
+   Not the cards to pick, which are tiles, nor the fields of the sandbox's event builder */
+.table-page :is(.input-panel, .anytime-panel, .answer-pop) :where(.option, .chip, .primary, .selection-bar .link, .actions .link),
+.table-page :is(.reference-head, .sandbox .toolbar, .sandbox .actions) :where(button, .button) {
   --c: 6px;
   --edge: var(--steel-500);
   --fill: #1a2129;
@@ -2196,7 +2221,8 @@ details > summary {
   color: var(--steel-100);
 }
 
-.table-page :is(.input-panel, .anytime-panel, .answer-pop) :where(.option, .chip, .primary, .selection-bar .link, .actions .link)::before {
+.table-page :is(.input-panel, .anytime-panel, .answer-pop) :where(.option, .chip, .primary, .selection-bar .link, .actions .link)::before,
+.table-page :is(.reference-head, .sandbox .toolbar, .sandbox .actions) :where(button, .button)::before {
   content: '';
   position: absolute;
   inset: var(--bw);
@@ -2205,15 +2231,16 @@ details > summary {
   clip-path: var(--chamfer);
 }
 
-.table-page :is(.input-panel, .anytime-panel, .answer-pop) :where(.option, .chip, .selection-bar .link, .actions .link):is(:hover, :focus-visible):not(:disabled) {
+.table-page :is(.input-panel, .anytime-panel, .answer-pop) :where(.option, .chip, .selection-bar .link, .actions .link):is(:hover, :focus-visible):not(:disabled),
+.table-page :is(.reference-head, .sandbox .toolbar) :where(button:not(.on), .button):is(:hover, :focus-visible):not(:disabled) {
   --edge: var(--dradis-glow);
   --fill: #16263a;
   color: var(--dradis-glow);
   outline: none;
 }
 
-/* the button that sends: amber, like the arrow over new entries, in printed letters */
-.table-page :is(.input-panel, .anytime-panel, .answer-pop) .primary {
+/* the button that sends (the sandbox's Inject too): amber, like the arrow over new entries, in printed letters */
+.table-page :is(.input-panel, .anytime-panel, .answer-pop, .sandbox) .primary {
   --edge: var(--amber);
   --fill: #3b2d10;
   color: var(--amber);
@@ -2238,8 +2265,9 @@ details > summary {
 }
 
 /* the amber ones brighten instead */
-.table-page :is(.input-panel, .anytime-panel, .answer-pop) .primary:is(:hover, :focus-visible):not(:disabled),
-.table-page .answer-section.open > .section-head:is(:hover, :focus-visible) {
+.table-page :is(.input-panel, .anytime-panel, .answer-pop, .sandbox) .primary:is(:hover, :focus-visible):not(:disabled),
+.table-page .answer-section.open > .section-head:is(:hover, :focus-visible),
+.table-page .reference-tabs button.on:is(:hover, :focus-visible) {
   filter: brightness(1.3);
   outline: none;
 }
@@ -2583,9 +2611,15 @@ button.playable.picked .art {
   margin-right: auto;
 }
 
-.reference-tabs button.on {
-  border-color: var(--amber, var(--accent));
-  color: var(--amber, var(--accent));
+/* the open tab: amber, as the open section of a choice */
+.table-page .reference-tabs button.on {
+  --edge: var(--amber);
+  color: var(--amber);
+}
+
+/* a button like the tabs, not a link, so the cut corners have room */
+.table-page .reference-head .close {
+  padding: 0.35rem 0.75rem;
 }
 
 .reference-body {
