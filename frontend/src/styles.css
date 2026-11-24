@@ -2736,6 +2736,22 @@ button.playable.picked .art {
   align-items: start;
 }
 
+/* every line as high as one with art: an empty strut as tall as the art strip's cards (`.art-strip .art`), aligned
+   like the strip, so the first line's box is the same with or without art */
+.table-page .log .line-body::before {
+  content: '';
+  display: inline-block;
+  height: 34px;
+  vertical-align: middle;
+}
+
+/* the token in the middle of that first line */
+.table-page .log .line-token {
+  display: flex;
+  align-items: center;
+  height: 34px;
+}
+
 .table-page .log .line-token img {
   display: block;
   width: 22px;
