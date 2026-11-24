@@ -9,6 +9,7 @@ import { Table, tableContext } from '../tableContext';
 import type { GameProjection, ShipProjection } from '../../wire/types';
 import { BOARD_LABELS, type BoardLabel } from '../../labels/board';
 import { DECK_SLOTS, DISTANCE, JUMP_TRACK, LABELS, LAUNCH_TUBES, LAYOUT, RESOURCES, SLOTS, TITLES } from './layout';
+import { resourceIconUrl } from './resources';
 
 const location = (name: string, characters: string[] = [], damaged = false) => ({ location: name, damaged, characters });
 
@@ -191,7 +192,7 @@ describe('the board', () => {
     expect(gauge('population').querySelector('.resource-tip')?.textContent).toBe('Population 12');
     // the icon first, the strip after it, all inside the resource's box, which takes the hover
     const icon = gauge('fuel').querySelector('image')!;
-    expect(icon.getAttribute('href')).toContain('FUEL');
+    expect(icon.getAttribute('href')).toBe(resourceIconUrl('fuel'));
     expect(Number(icon.getAttribute('x'))).toBe(RESOURCES.fuel.x);
     const hit = gauge('fuel').querySelector('.gauge-hit')!;
     expect(Number(hit.getAttribute('x'))).toBeLessThan(RESOURCES.fuel.x);

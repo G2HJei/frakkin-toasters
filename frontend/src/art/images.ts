@@ -4,7 +4,7 @@ import { constantLabel, skillCardLabel, type SkillCardLike } from '../labels/des
 import { abilityCharacter } from '../wire/schema';
 
 // only the folders: the full-size board scan at the root isn't for the browser (the table's board is board.jpg)
-const FILES = import.meta.glob<string>('./*/**/*.{png,jpg,gif}', {
+const FILES = import.meta.glob<string>('./*/**/*.{png,jpg,gif,svg}', {
   base: '../../../materials-sorted',
   eager: true,
   query: '?url',

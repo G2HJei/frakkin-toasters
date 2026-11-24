@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 46">
+  <!-- three people, the one in front cut free of the two behind -->
+  <defs>
+    <g id="front">
+      <circle cx="28" cy="13" r="7.5"/>
+      <path d="M14.5 46C14.5 33 20 26.5 28 26.5S41.5 33 41.5 46Z"/>
+    </g>
+  </defs>
+  <mask id="behind">
+    <rect width="56" height="46" fill="#fff"/>
+    <use href="#front" fill="#000" stroke="#000" stroke-width="5"/>
+  </mask>
+  <g fill="#cfe0f0">
+    <g mask="url(#behind)">
+      <circle cx="11.5" cy="11" r="6"/>
+      <path d="M0 40C0 30 4.5 23.5 11.5 23.5S23 30 23 40Z"/>
+      <circle cx="44.5" cy="11" r="6"/>
+      <path d="M33 40C33 30 37.5 23.5 44.5 23.5S56 30 56 40Z"/>
+    </g>
+    <use href="#front"/>
+  </g>
+</svg>

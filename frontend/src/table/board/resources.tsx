@@ -1,10 +1,11 @@
-// The four resources: their icons (cut from the board's picture, which printed them by their labels), their red zones,
-// and the resources a civilian ship costs when it is destroyed.
+// The four resources: their icons (flat drawings in one colour, like the board's printed icons: a battlestar for fuel,
+// crates for food, a phoenix for morale, people for population), their red zones, and the resources a civilian ship
+// costs when it is destroyed.
 import type { Cargo } from '../../wire/types';
-import food from './icons/FOOD.png';
-import fuel from './icons/FUEL.png';
-import morale from './icons/MORALE.png';
-import population from './icons/POPULATION.png';
+import food from './icons/FOOD.svg';
+import fuel from './icons/FUEL.svg';
+import morale from './icons/MORALE.svg';
+import population from './icons/POPULATION.svg';
 
 export type ResourceName = 'fuel' | 'food' | 'morale' | 'population';
 

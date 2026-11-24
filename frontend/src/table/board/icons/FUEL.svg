@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="2.2 1.1 79.2 31.4">
+  <!-- a battlestar seen from above, after the template: the engine bay notched into the stern on the left, the hull
+       narrowing under the flight pods and the bow tapering to the right; each pod rounded and held by two struts -->
+  <g fill="#cfe0f0">
+    <path d="M2.7 8.4C6 7.5 10 6.7 15 6.7 19 6.7 22 7.4 24.5 8 27 8.6 28.5 9.2 30 9.3L50 9.3 57.8 9.8 58.3 7.4C66 7.6 75 9.4 80 11.6 80.6 11.9 80.9 12.2 80.9 12.8L80.9 20.8C80.9 21.4 80.6 21.7 80 22 75 24.2 66 26 58.3 26.2L57.8 23.8 50 24.3 30 24.3C28.5 24.4 27 25 24.5 25.6 22 26.2 19 26.9 15 26.9 10 26.9 6 26.1 2.7 25.2L2.7 21.2 5.4 21.2 5.4 19.9 8.2 19.9 8.2 13.7 5.4 13.7 5.4 12.4 2.7 12.4Z"/>
+    <path d="M22.2 4.2C28 2.2 33 1.6 40 1.6 47 1.6 52.5 2.2 58.1 4.1L58.1 7.1C52 7.8 46 8 40 8 34 8 28 7.8 22.2 7Z"/>
+    <path d="M22.2 29.4C28 31.4 33 32 40 32 47 32 52.5 31.4 58.1 29.5L58.1 26.5C52 25.8 46 25.6 40 25.6 34 25.6 28 25.8 22.2 26.6Z"/>
+    <rect x="34.3" y="7.5" width="2.7" height="2.3"/>
+    <rect x="43.5" y="7.5" width="2.4" height="2.3"/>
+    <rect x="34.3" y="23.8" width="2.7" height="2.3"/>
+    <rect x="43.5" y="23.8" width="2.4" height="2.3"/>
+  </g>
+</svg>

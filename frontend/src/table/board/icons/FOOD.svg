@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 46">
+  <!-- three crates of rations, stacked, each with its lid cut off -->
+  <mask id="lids">
+    <rect width="52" height="46" fill="#fff"/>
+    <path d="M0 7.5H52M0 30.5H52" stroke="#000" stroke-width="2.4"/>
+  </mask>
+  <g fill="#cfe0f0" mask="url(#lids)">
+    <rect x="1" y="24" width="23" height="21" rx="2"/>
+    <rect x="28" y="24" width="23" height="21" rx="2"/>
+    <rect x="14.5" y="1" width="23" height="21" rx="2"/>
+  </g>
+</svg>

@@ -1151,7 +1151,7 @@ REST (the lobby lists poll), Zustand for the game.
   Room's "activated", at the bottom of the panel its name is printed in, under the name. The ships fly in the middle
   of their space areas, the Cylon ships first, a ship as large in every area of its board, alone or piled (the bow's
   strip is 8 o'clock, the stern's 2 o'clock; the ships leave the launch tubes free). The resources lie in a row
-  of gauges where nothing is printed (`RESOURCES`): each its icon (`icons/`) and a pip after it for each of its amount
+  of gauges where nothing is printed (`RESOURCES`): each its icon (`icons/`, flat one-colour SVGs) and a pip after it for each of its amount
   (up to 15, centred on the jump track's line), the red zone's pips a muted red that turns bright and glows while the amount is in it (`resources.tsx`),
   and hovering one shows its name and amount;
   markers sit on the tracks (the Boarding Party track isn't printed: `boarding-party.png`, red only at its end, lies
