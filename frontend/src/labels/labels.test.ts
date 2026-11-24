@@ -48,20 +48,33 @@ describe('labels', () => {
     expect(missing).toEqual([]);
   });
 
-  it('names only fields its record has in every template', () => {
+  it('names only fields its record has in every template, and constants that exist', () => {
     const wrong: string[] = [];
     const templates = [EVENT_TEMPLATES, CHOSEN_TEMPLATES, HIDDEN_TEMPLATES, OPTION_TEMPLATES, FACT_TEMPLATES];
+    // the tokens have icons but no enum
+    const tokens = ['MIRACLE', 'NUKE', 'CENTURION'];
     for (const all of templates) {
       for (const [name, template] of Object.entries(all)) {
         const components = recordNamed(name)?.components.map((component) => component.name) ?? [];
-        for (const match of template.matchAll(/\{(\$?\w+)/g)) {
-          if (match[1] !== '$card' && !components.includes(match[1])) {
-            wrong.push(`${name}.${match[1]}`);
+        for (const match of template.matchAll(/\{!?(\$?\w+)(?::(\w+))?/g)) {
+          const [, field, constant] = match;
+          const known = constant ? (field === 'Token' ? tokens.includes(constant) : enumValues(field).includes(constant)) : field === '$card' || components.includes(field);
+          if (!known) {
+            wrong.push(`${name}.${field}${constant ? `:${constant}` : ''}`);
           }
         }
       }
     }
     expect(wrong).toEqual([]);
+  });
+
+  it('opens and closes every tone marker of a template', () => {
+    const unbalanced = [EVENT_TEMPLATES, CHOSEN_TEMPLATES, HIDDEN_TEMPLATES, OPTION_TEMPLATES, FACT_TEMPLATES]
+      .flatMap((all) => Object.entries(all))
+      .filter(([, template]) => (template.match(/<[+-]/g) ?? []).length !== (template.match(/>/g) ?? []).length)
+      .map(([name]) => name);
+
+    expect(unbalanced).toEqual([]);
   });
 
   it('starts the sentence of an event about a player with him, and its hidden words too', () => {
@@ -112,6 +125,59 @@ describe('labels', () => {
 
     it('names the card a Quorum Card event plays', () => {
       expect(eventLabel({ kind: 'ArrestOrderEvent', playerNumber: 2, targetPlayerNumber: 3 }, names)).toBe('Laura Roslin plays Arrest Order on Kara "Starbuck" Thrace');
+    });
+
+    describe('with icons and tones', () => {
+      const icons: LabelContext = {
+        ...names,
+        iconOf: (enumName, constant) => ({ key: `${enumName}/${String(constant)}`, url: '', shape: 'icon' }),
+        shipType: (id) => (id === 1016 ? 'RAIDER' : null),
+        shipName: (id) => (id === 1016 ? 'Raider #1016' : `ship #${id}`),
+      };
+      // each part's words, icon and tone
+      const parts = (template: string, value: Record<string, unknown>, record: string) =>
+        fillTemplate(template, value, record, icons).map((part) => [part.text, part.icon?.key ?? null, part.tone ?? null]);
+
+      it('tones the words between the markers, the fields inside too, and drops the markers', () => {
+        expect(parts(FACT_TEMPLATES['BoardFact.ResourceDecreased'], { resource: 'FOOD', amount: 1 }, 'BoardFact.ResourceDecreased')).toEqual([
+          ['The fleet loses ', null, null],
+          ['1 ', null, 'bad'],
+          ['food', 'Resource/FOOD', 'bad'],
+        ]);
+        expect(parts(FACT_TEMPLATES['BoardFact.ResourceIncreased'], { resource: 'MORALE', amount: 2 }, 'BoardFact.ResourceIncreased').at(-1)).toEqual(['morale', 'Resource/MORALE', 'good']);
+      });
+
+      it("tones a skill check's result by its words", () => {
+        const result = (value: string) => parts(FACT_TEMPLATES['SkillCheckFact.ResultDetermined'], { result: value }, 'SkillCheckFact.ResultDetermined').at(-1);
+
+        expect(result('PASS')).toEqual(['passes', null, 'good']);
+        expect(result('PARTIAL_PASS')).toEqual(['partially passes', null, 'good']);
+        expect(result('FAIL')).toEqual(['fails', null, 'bad']);
+        expect(parts(EVENT_TEMPLATES.MysteriousIntuitionEvent, { playerNumber: 1, pass: false }, 'MysteriousIntuitionEvent').at(-1)).toEqual(['fail', null, 'bad']);
+      });
+
+      it('puts an icon in front of a constant it names, a ship, a resource, and the die', () => {
+        expect(parts(EVENT_TEMPLATES.PlaceRaidersBehindEvent, { count: 3 }, 'PlaceRaidersBehindEvent')).toEqual([
+          ['3 ', null, null],
+          ['', 'ShipType/RAIDER', null],
+          ['raiders appear behind Galactica', null, null],
+        ]);
+        expect(parts(EVENT_TEMPLATES.NoOneGetsLeftBehindEvent, { playerNumber: 1 }, 'NoOneGetsLeftBehindEvent').filter(([, icon]) => icon)).toEqual([
+          ['fuel', 'Resource/FUEL', 'bad'],
+          ['population', 'Resource/POPULATION', 'good'],
+        ]);
+        expect(parts(EVENT_TEMPLATES.ActivateRaiderEvent, { raiderShipId: 1016 }, 'ActivateRaiderEvent')[0]).toEqual(['Raider #1016', 'ShipType/RAIDER', null]);
+        expect(parts(FACT_TEMPLATES['GameFact.DieRolled'], { value: 5 }, 'GameFact.DieRolled')).toEqual([
+          ['The die shows ', null, null],
+          ['5', 'Die/5', null],
+        ]);
+        expect(parts(FACT_TEMPLATES['TitleFact.CagAssigned'], { character: 'LEE_APOLLO_ADAMA' }, 'TitleFact.CagAssigned').at(-1)).toEqual(['CAG', 'Title/CAG', null]);
+      });
+
+      it('words the same without icons', () => {
+        expect(fill(EVENT_TEMPLATES.PlaceRaidersBehindEvent, { count: 1 }, 'PlaceRaidersBehindEvent')).toBe('1 raider appears behind Galactica');
+        expect(fill(FACT_TEMPLATES['SkillCheckFact.ResultDetermined'], { result: 'PARTIAL_PASS' }, 'SkillCheckFact.ResultDetermined')).toBe('The skill check partially passes');
+      });
     });
   });
 

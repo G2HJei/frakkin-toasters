@@ -5,6 +5,7 @@ import { recordArt, unique, factArt } from '../../art/refs';
 import type { ArtRef } from '../../art/images';
 import {
   chosenParts,
+  constantLabel,
   eventParts,
   eventSource,
   sourcePart,
@@ -19,6 +20,7 @@ import {
   type Part,
 } from '../../labels/describe';
 import { factKind, factSentences, namedCards, repeats, sameShipMove, sentenceParts, type FactContext, type Sentence } from '../../labels/facts';
+import { recordNamed } from '../../wire/schema';
 import type { FactProjection, LogEntry, ScopeLog } from '../../wire/types';
 
 export interface LogLine {
@@ -34,7 +36,7 @@ export interface LogLine {
   art: ArtRef[];
   automatic: boolean;
   // ships that moved alike, which the next such line joins
-  ships?: { names: string[]; move: ShipMove };
+  ships?: { names: Part[]; move: ShipMove };
 }
 
 export interface StepStory {
@@ -223,7 +225,8 @@ function shownFact(entry: LogEntry, kind: string): Record<string, unknown> | nul
 }
 
 /** The log by turn and step. */
-export function logStory(entries: LogEntry[], context: FactContext): TurnStory[] {
+export function logStory(entries: LogEntry[], table: FactContext): TurnStory[] {
+  const context = withLearnedShips(table, learnedShips(entries));
   const scopes = new Map<number, ScopeLog>();
   for (const entry of entries) {
     if (entry.kind === 'ScopeLog') {
@@ -273,8 +276,85 @@ export function logStory(entries: LogEntry[], context: FactContext): TurnStory[]
     chosenBy = null;
   });
   return turns
-    .map((turn) => ({ ...turn, steps: turn.steps.filter((step) => step.lines.length > 0) }))
+    .map((turn) => ({ ...turn, steps: turn.steps.filter((step) => step.lines.length > 0).map((step) => ({ ...step, lines: step.lines.map(withoutShownArt) })) }))
     .filter((turn) => turn.turn > 0 || turn.steps.some((step) => step.lines.length > 0));
+}
+
+// The images a line's words show already, as a name to hover or an icon, aren't repeated after them.
+function withoutShownArt(line: LogLine): LogLine {
+  const shown = new Set([...line.words, ...(line.source ? [line.source] : [])].flatMap((part) => [part.art?.key, part.icon?.key]).filter((key) => key));
+  return shown.size === 0 ? line : { ...line, art: line.art.filter((ref) => !shown.has(ref.key)) };
+}
+
+// The fields that name a ship of one type, and the events whose ships are all of one type.
+const SHIP_FIELDS: [RegExp, string][] = [
+  [/^raider/, 'RAIDER'],
+  [/basestar/i, 'BASESTAR'],
+  [/^centurion/, 'CENTURION'],
+  [/civilian/i, 'CIVILIAN'],
+];
+const SHIP_EVENTS: Record<string, string> = { DestroyRaidersEvent: 'RAIDER', DestroyHeavyRaiderEvent: 'HEAVY_RAIDER', DestroyCivilianShipEvent: 'CIVILIAN' };
+
+/**
+ * The type of every ship the log's events name by a typed field (a raider that activates, a basestar that attacks) or
+ * that moves where only one type goes: the table doesn't show a raider back in the supply, but its line still says
+ * "Raider #1012".
+ */
+function learnedShips(entries: LogEntry[]): Map<number, string> {
+  const types = new Map<number, string>();
+  const learn = (ids: unknown, type: string) => {
+    for (const id of Array.isArray(ids) ? ids : [ids]) {
+      if (typeof id === 'number') {
+        types.set(id, type);
+      }
+    }
+  };
+  for (const entry of entries) {
+    if (entry.kind !== 'ScopeLog') {
+      continue;
+    }
+    const details = entry.details as unknown as Record<string, unknown> | null;
+    for (const component of details ? (recordNamed(entry.event ?? '')?.components ?? []) : []) {
+      const of = typeof component.type.of === 'object' ? component.type.of : null;
+      if ((component.type.role ?? of?.role) !== 'ship') {
+        continue;
+      }
+      const name = component.name;
+      const type = (name === 'shipId' || name === 'shipIds' ? SHIP_EVENTS[entry.event ?? ''] : undefined) ?? SHIP_FIELDS.find(([pattern]) => pattern.test(name))?.[1];
+      if (type) {
+        learn(details?.[name], type);
+      }
+    }
+    for (const fact of entry.facts ?? []) {
+      const moved = fact.kind === 'Shown' ? (fact.fact as unknown as { kind: string; shipId: number; from: string | null; to: string | null }) : null;
+      if (moved?.kind !== 'ShipFact.ShipMoved') {
+        continue;
+      }
+      const zones = [moved.from, moved.to];
+      if (zones.includes('CENTURION_SUPPLY') || zones.includes('BOARDING_PARTY')) {
+        learn(moved.shipId, 'CENTURION');
+      } else if (zones.includes('CIVILIAN_DECK')) {
+        learn(moved.shipId, 'CIVILIAN');
+      }
+    }
+  }
+  return types;
+}
+
+// The table's names of the ships, and the learned type of a ship it doesn't show.
+function withLearnedShips(context: FactContext, learned: Map<number, string>): FactContext {
+  if (learned.size === 0) {
+    return context;
+  }
+  const shown = (id: number) => context.shipType?.(id) ?? null;
+  return {
+    ...context,
+    shipType: (id) => shown(id) ?? learned.get(id) ?? null,
+    shipName: (id) => {
+      const type = learned.get(id);
+      return !shown(id) && type ? `${constantLabel('ShipType', type)} #${id}` : (context.shipName?.(id) ?? `ship #${id}`);
+    },
+  };
 }
 
 function addLine(turns: TurnStory[], line: LogLine) {

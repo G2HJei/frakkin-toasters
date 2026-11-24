@@ -13,8 +13,8 @@ export function ArtSlot({ refs, pass = false }: { refs: ArtRef[]; pass?: boolean
   );
 }
 
-// skip ahead: two arrowheads against a bar, in the button's color
-function PassIcon() {
+/** Skip ahead: two arrowheads against a bar, in the color of its text. A pass, and the log's automatic answer. */
+export function PassIcon() {
   return (
     <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
       <path d="M3 5.5 11 12l-8 6.5zM11 5.5l8 6.5-8 6.5z" fill="currentColor" />

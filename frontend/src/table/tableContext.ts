@@ -39,12 +39,12 @@ export function tableContext(
     ...(game?.cylonFleet?.ships ?? []),
     ...(game?.destroyedShips ?? []),
   ];
+  // a centurion on the Boarding Party track is no ShipType
+  const shipType = (id: number) =>
+    allShips.find((candidate) => candidate.id === id)?.type ?? ((game?.galactica?.boardingParty ?? []).some((centurion) => centurion.id === id) ? 'CENTURION' : null);
   const shipName = (id: number) => {
-    const ship = allShips.find((candidate) => candidate.id === id);
-    if (ship) {
-      return `${constantLabel('ShipType', ship.type)} #${id}`;
-    }
-    return (game?.galactica?.boardingParty ?? []).some((centurion) => centurion.id === id) ? `Centurion #${id}` : `ship #${id}`;
+    const type = shipType(id);
+    return type ? `${constantLabel('ShipType', type)} #${id}` : `ship #${id}`;
   };
   return {
     game,
@@ -52,6 +52,7 @@ export function tableContext(
     askedPlayer,
     playerName,
     shipName,
+    shipType,
     ship: (id) => allShips.find((candidate) => candidate.id === id) ?? null,
     userName: (playerNumber) => userNames[playerNumber] ?? null,
     players: () => players.map((player) => ({ number: player.number, label: playerName(player.number) })),

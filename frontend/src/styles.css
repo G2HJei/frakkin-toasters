@@ -1678,11 +1678,11 @@ details[open] > summary::before {
   white-space: nowrap;
 }
 
-/* an answer the server took for its player: his only one, a bolt in front of the line */
+/* an answer the server took for its player: his only one, the answers' pass icon in white in front of the line */
 .table-page .log .auto-icon {
   display: inline-block;
   margin-right: 5px;
-  color: var(--muted);
+  color: #fff;
   vertical-align: -0.15em;
   cursor: help;
 }
@@ -1691,10 +1691,52 @@ details[open] > summary::before {
   display: block;
   width: 1em;
   height: 1em;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linejoin: round;
+}
+
+/* a small picture in front of a part's words (`art/Words.tsx`): a resource's icon, tinted like its words, a ship, a
+   title's insignia, a token, the die's face */
+.part-icon {
+  display: inline-block;
+  height: 1.1em;
+  margin-right: 0.22em;
+  vertical-align: -0.2em;
+}
+
+.part-icon.tint {
+  width: 1.25em;
+  background-color: currentColor;
+  -webkit-mask: var(--icon) center / contain no-repeat;
+  mask: var(--icon) center / contain no-repeat;
+}
+
+/* the ships are wider than high */
+.part-icon.icon-ship {
+  height: 0.95em;
+  vertical-align: -0.12em;
+}
+
+/* the die's face as large as its number can be read: a black d8, lifted off the panel by a light rim */
+.part-icon.icon-die {
+  height: 1.45em;
+  vertical-align: -0.38em;
+  filter: drop-shadow(0 0 1px rgba(226, 230, 235, 0.7));
+}
+
+.part-icon.icon-title,
+.part-icon.icon-token {
+  height: 1.2em;
+  vertical-align: -0.25em;
+}
+
+/* good and bad news for the fleet: a resource gained or lost, a skill check passed or failed, a ship lost or destroyed */
+.table-page .log .tone-good {
+  color: #6fd36b;
+  font-weight: 600;
+}
+
+.table-page .log .tone-bad {
+  color: #f0645b;
+  font-weight: 600;
 }
 
 /* the players' mats: no panel around them, each mat has the cut corners and the edge */

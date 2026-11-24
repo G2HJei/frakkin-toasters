@@ -269,7 +269,9 @@ describe('the log', () => {
       }) as LogEntry;
     const body = renderLog([raider(1, 31), raider(2, 32)]);
 
-    expect(rows(body)).toEqual([[null, "ship #31 and ship #32 move to Space 6 o'clock"]]);
+    // the table doesn't show them, but the activations named them as raiders
+    expect(rows(body)).toEqual([[null, "Raider #31 and Raider #32 move to Space 6 o'clock"]]);
+    expect([...body.querySelectorAll('.event .part-icon')].map((icon) => icon.getAttribute('data-icon'))).toEqual(['ShipType/RAIDER', 'ShipType/RAIDER']);
   });
 
   it('shows every line, and lights what a line touched on a click', () => {
@@ -294,9 +296,11 @@ describe('the log', () => {
     expect(icons[0].nextElementSibling).toBe(line.querySelector('.event'));
     expect(icons[0].getAttribute('aria-label')).toBe('automatic');
     expect(icons[0].getAttribute('title')).toBe('The only answer, taken automatically');
+    // the answers' pass icon: it skipped ahead
+    expect(icons[0].querySelector('svg path')?.getAttribute('d')).toBe('M3 5.5 11 12l-8 6.5zM11 5.5l8 6.5-8 6.5z');
   });
 
-  it('words what happened to a ship', () => {
+  it('words what happened to a ship, a Cylon ship destroyed as good news', () => {
     const destroyed = {
       ...scope(3),
       event: 'DestroyRaidersEvent',
@@ -305,5 +309,63 @@ describe('the log', () => {
     const body = renderLog([destroyed]);
 
     expect(lines(body)).toEqual(['ship #34 is destroyed']);
+    expect(body.querySelector('.event .tone-good')?.textContent).toBe('destroyed');
+  });
+
+  it("puts a resource's icon in front of it, green when the fleet gains it and red when it loses it", () => {
+    const resource = (scopeId: number, kind: string, resource: string) =>
+      ({ ...scope(scopeId), event: 'LoseResourceEvent', facts: [{ kind: 'Shown', fact: { kind, resource, amount: 1 } }] }) as LogEntry;
+    const body = renderLog([resource(1, 'BoardFact.ResourceDecreased', 'FOOD'), resource(2, 'BoardFact.ResourceIncreased', 'MORALE')]);
+    const [lost, gained] = body.querySelectorAll('.lines > li');
+
+    expect(lines(body)).toEqual(['The fleet loses 1 food', 'The fleet gains 1 morale']);
+    expect([...lost.querySelectorAll('.tone-bad')].map((part) => part.textContent)).toEqual(['1 ', 'food']);
+    expect(lost.querySelector('.tone-bad .part-icon.tint')?.getAttribute('data-icon')).toBe('ResourceIcon/FOOD');
+    expect(gained.querySelector('.tone-good .part-icon.tint')?.getAttribute('data-icon')).toBe('ResourceIcon/MORALE');
+  });
+
+  it("colors a skill check's result: a pass or a partial pass green, a fail red", () => {
+    const result = (scopeId: number, value: string) =>
+      ({ ...scope(scopeId), event: 'DetermineSkillCheckResultEvent', facts: [{ kind: 'Shown', fact: { kind: 'SkillCheckFact.ResultDetermined', result: value } }] }) as LogEntry;
+    const body = renderLog([result(1, 'PASS'), result(2, 'PARTIAL_PASS'), result(3, 'FAIL')]);
+
+    expect([...body.querySelectorAll('.lines > li')].map((line) => [line.querySelector('.tone-good, .tone-bad')?.className, line.querySelector('.tone-good, .tone-bad')?.textContent])).toEqual([
+      ['tone-good', 'passes'],
+      ['tone-good', 'partially passes'],
+      ['tone-bad', 'fails'],
+    ]);
+  });
+
+  it('shows the die with the number it rolled', () => {
+    const roll = { ...scope(1), event: 'RollDieEvent', facts: [{ kind: 'Shown', fact: { kind: 'GameFact.DieRolled', value: 6 } }] } as LogEntry;
+    const body = renderLog([roll]);
+
+    expect(lines(body)).toEqual(['The die shows 6']);
+    expect(body.querySelector('.event img.part-icon.icon-die')?.getAttribute('data-icon')).toBe('Die/6');
+  });
+
+  it('shows no image after a line that its words name already', () => {
+    const move = {
+      ...scope(1),
+      event: 'MoveEvent',
+      details: { kind: 'MoveEvent', playerNumber: 1, destination: 'ARMORY', discardCard: { type: 'REPAIR', value: 1 } },
+      facts: [{ kind: 'Shown', fact: { kind: 'PlayerFact.CardsSeen', playerNumber: 1, deck: 'CRISIS', cards: ['RIOTS_NO_JUMP'] } }],
+    } as LogEntry;
+    const body = renderLog([move]);
+    const strip = [...body.querySelectorAll('.art-strip img')].map((image) => image.getAttribute('data-art'));
+
+    expect([...body.querySelectorAll('.event .named')].map((name) => name.textContent)).toEqual(['Armory', 'Repair 1']);
+    // the Crisis Card it looked at isn't in its words
+    expect(strip).toEqual(['CrisisCard/RIOTS_NO_JUMP']);
+  });
+
+  it("shows no player's token after a line that it leads", () => {
+    const admiral = { ...scope(1), event: 'MakeAdmiralEvent', facts: [{ kind: 'Shown', fact: { kind: 'TitleFact.AdmiralAssigned', character: 'WILLIAM_ADAMA' } }] } as LogEntry;
+    const body = renderLog([admiral]);
+
+    expect(rows(body)).toEqual([['William Adama', 'becomes Admiral']]);
+    expect(body.querySelector('.line-token img')?.getAttribute('data-art')).toBe('Character/player-token/WILLIAM_ADAMA');
+    expect(body.querySelector('.event .part-icon')?.getAttribute('data-icon')).toBe('TitleIcon/ADMIRAL');
+    expect(body.querySelector('.art-strip')).toBeNull();
   });
 });

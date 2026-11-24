@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { ArtImg, ArtStrip } from '../../art/Art';
 import { characterArt } from '../../art/images';
-import { partArt, Words } from '../../art/Words';
+import { partArt, partIcon, Words } from '../../art/Words';
+import { PassIcon } from '../../input/ArtSlot';
 import { constantLabel } from '../../labels/describe';
 import type { FactContext } from '../../labels/facts';
 import { useGameStore } from '../../live/gameStore';
@@ -14,7 +15,9 @@ import { useFollowBottom } from './useFollowBottom';
  * The story of the game: grouped by turn, every turn open, and by step within a turn. Each line is what an event did,
  * in words, after the portrait and name of the player it is about, every time; what happens to the game has none. A
  * sandbox can show the facts that tell more under each line, the ones that change the table first. Card and character
- * names show their image on hover. A click on a line lights what it touched on the board. The log follows the newest
+ * names show their image on hover; resources, ships, titles and the die have an icon in front of their words, and good
+ * and bad news (a resource gained or lost, a skill check's result) are green or red. A click on a line lights what it
+ * touched on the board. The log follows the newest
  * line until the user scrolls up, and the arrow at its bottom right follows again, lit while new lines came below.
  */
 export function LogPanel() {
@@ -22,7 +25,7 @@ export function LogPanel() {
   const log = useGameStore((state) => state.log);
   const players = table.game?.players;
   const words: FactContext = useMemo(
-    () => ({ ...table, artOf: partArt, playerOf: (character: string) => players?.find((player) => player.character === character)?.number ?? null }),
+    () => ({ ...table, artOf: partArt, iconOf: partIcon, playerOf: (character: string) => players?.find((player) => player.character === character)?.number ?? null }),
     [table, players],
   );
   const turns = useMemo(() => logStory(log, words), [log, words]);
@@ -104,12 +107,10 @@ function Line({ line, withFacts }: { line: LogLine; withFacts: boolean }) {
             <span className="actor">{table.playerName(line.actor)}</span>{' '}
           </>
         )}
-        {/* the server answered for him: it was his only answer */}
+        {/* the server answered for him: it was his only answer, so it skipped ahead like a pass */}
         {line.automatic && (
           <span className="auto-icon" role="img" aria-label="automatic" title="The only answer, taken automatically">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M13 3 5 14h6l-1 7 8-11h-6z" />
-            </svg>
+            <PassIcon />
           </span>
         )}
         <span className="event">
@@ -121,7 +122,8 @@ function Line({ line, withFacts }: { line: LogLine; withFacts: boolean }) {
             <Words parts={[line.source]} />
           </span>
         )}
-        <ArtStrip refs={line.art} />
+        {/* his token leads the line already */}
+        <ArtStrip refs={token ? line.art.filter((ref) => ref.key !== token.key) : line.art} />
         {withFacts && line.facts.length > 0 && (
           <ul className="facts">
             {line.facts.map((fact, index) => (

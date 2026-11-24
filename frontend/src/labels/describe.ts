@@ -10,8 +10,12 @@ export interface LabelContext {
   playerName(playerNumber: number): string;
   // a ship by its type and id, e.g. "Viper #1", where the table knows it
   shipName?(id: number): string;
+  // a ship's type by its id (a ShipType constant, or CENTURION), where the table knows it
+  shipType?(id: number): string | null;
   // the image a value names, for a name to hover (`Words`); the labels don't load images themselves
   artOf?(value: unknown, type: TypeRef): PartArt | null;
+  // the small picture in front of a value's words: a resource, a ship type, a title, a token, a die's face ("Die")
+  iconOf?(enumName: string, constant: unknown): PartIcon | null;
 }
 
 /** An image a part of a label names, as `art/images.ts` gives it. */
@@ -22,10 +26,57 @@ export interface PartArt {
   shape: string;
 }
 
-/** A piece of a label: its words, and the image of what it names. */
+/** A small picture in front of a part's words; a tinted one takes the color of its words. */
+export interface PartIcon {
+  key: string;
+  url: string;
+  shape: string;
+  tint?: boolean;
+}
+
+/** Words that are good or bad news for the fleet. */
+export type Tone = 'good' | 'bad';
+
+/** A piece of a label: its words, the image of what it names, the icon in front of it and its tone. */
 export interface Part {
   text: string;
   art?: PartArt | null;
+  icon?: PartIcon | null;
+  tone?: Tone;
+}
+
+function withIcon(part: Part, icon: PartIcon | null | undefined): Part {
+  return icon ? { ...part, icon } : part;
+}
+
+function toned(part: Part, tone: Tone | undefined): Part {
+  return tone && !part.tone ? { ...part, tone } : part;
+}
+
+// "<+passes>" is good news, "<-fails>" bad news: the markers of a template's words
+const TONE_MARK = /<([+-])|>/g;
+
+// Words with their tone markers as parts, starting in a tone and saying the tone they end in.
+function marked(text: string, tone: Tone | undefined): { parts: Part[]; tone: Tone | undefined } {
+  const parts: Part[] = [];
+  let current = tone;
+  let at = 0;
+  for (const match of text.matchAll(TONE_MARK)) {
+    if (match.index > at) {
+      parts.push(toned({ text: text.substring(at, match.index) }, current));
+    }
+    current = match[1] === '+' ? 'good' : match[1] === '-' ? 'bad' : undefined;
+    at = match.index + match[0].length;
+  }
+  if (at < text.length) {
+    parts.push(toned({ text: text.substring(at) }, current));
+  }
+  return { parts, tone: current };
+}
+
+/** Words with tone markers as parts: "is <-destroyed>". */
+export function markedParts(text: string): Part[] {
+  return marked(text, undefined).parts;
 }
 
 export function partsText(parts: Part[]): string {
@@ -74,7 +125,8 @@ export function joinWords(words: string[]): string {
   return partsText(joinParts(words.map((text) => [{ text }])));
 }
 
-function joinParts(items: Part[][]): Part[] {
+/** Items of words joined like `joinWords`. */
+export function joinParts(items: Part[][]): Part[] {
   const parts: Part[] = [];
   items.forEach((item, index) => {
     if (index > 0) {
@@ -129,7 +181,7 @@ export function valueParts(value: unknown, type: TypeRef | undefined, context: L
         return [{ text: context.playerName(value as number) }];
       }
       if (type.role === 'ship') {
-        return [{ text: shipLabel(value as number, context) }];
+        return [shipPart(value as number, context)];
       }
       return [{ text: String(value) }];
     case 'boolean':
@@ -139,7 +191,7 @@ export function valueParts(value: unknown, type: TypeRef | undefined, context: L
     case 'class':
       return [{ text: typeLabel(String(value)) }];
     case 'enum':
-      return [{ text: constantLabel(type.name ?? '', value as string), art: context.artOf?.(value, type) ?? null }];
+      return [withIcon({ text: constantLabel(type.name ?? '', value as string), art: context.artOf?.(value, type) ?? null }, context.iconOf?.(type.name ?? '', value))];
     case 'list':
     case 'set': {
       const elements = value as unknown[];
@@ -161,6 +213,16 @@ export function valueParts(value: unknown, type: TypeRef | undefined, context: L
 
 function shipLabel(id: number, context: LabelContext): string {
   return context.shipName?.(id) ?? `ship #${id}`;
+}
+
+/**
+ * A ship by its id, with its type's icon where its type is known: "Raider #1016". A civilian ship the table doesn't
+ * show is "Civilian ship #2007".
+ */
+export function shipPart(id: number, context: LabelContext, civilian = false): Part {
+  const type = context.shipType?.(id) ?? (civilian ? 'CIVILIAN' : null);
+  const text = shipLabel(id, context);
+  return withIcon({ text: civilian ? text.replace(/^ship #/, 'Civilian ship #') : text }, type ? context.iconOf?.('ShipType', type) : null);
 }
 
 // The Skill Card colors a draw takes: "1 Leadership and 2 Piloting cards".
@@ -209,7 +271,7 @@ function refParts(value: Record<string, unknown>, name: string, context: LabelCo
     case 'SkillCard':
       return cardParts(value, { t: 'ref', nullable: false, name }, context);
     case 'ViperActivation':
-      return [{ text: activationLabel(value, context, 'third') }];
+      return activationParts(value, context, 'third');
     // a card or an ability someone played: "Laura Roslin's Declare Emergency 5"
     case 'PlayedCard':
     case 'PlayedInterruptCard':
@@ -239,22 +301,32 @@ function recordLabel(value: Record<string, unknown>, name: string, context: Labe
  * ("Launch a Viper to …"), in a sentence about its player what he does ("launches a Viper to …").
  */
 export function activationLabel(activation: Record<string, unknown>, context: LabelContext, form: 'order' | 'third' = 'order'): string {
+  return partsText(activationParts(activation, context, form));
+}
+
+/** An activation of a viper in parts, each ship with its icon. */
+export function activationParts(activation: Record<string, unknown>, context: LabelContext, form: 'order' | 'third' = 'order'): Part[] {
   const verb = (order: string, third: string) => (form === 'order' ? order : third);
-  const ship = (id: unknown) => shipLabel(id as number, context);
+  const ship = (id: unknown, civilian = false) => shipPart(id as number, context, civilian);
   if (activation.launchShipType) {
-    return `${verb('Launch', 'launches')} a ${constantLabel('ShipType', activation.launchShipType as string)} to ${constantLabel('Location', activation.launchLocation as string)}`;
+    const type = activation.launchShipType as string;
+    return merged([
+      { text: `${verb('Launch', 'launches')} a ` },
+      withIcon({ text: constantLabel('ShipType', type) }, context.iconOf?.('ShipType', type)),
+      { text: ` to ${constantLabel('Location', activation.launchLocation as string)}` },
+    ]);
   }
   const fighter = ship(activation.humanFighterId);
   if (activation.moveLocation) {
-    return `${verb('Move', 'moves')} ${fighter} to ${constantLabel('Location', activation.moveLocation as string)}`;
+    return merged([{ text: `${verb('Move', 'moves')} ` }, fighter, { text: ` to ${constantLabel('Location', activation.moveLocation as string)}` }]);
   }
   if (activation.attackCylonShipId !== null && activation.attackCylonShipId !== undefined) {
-    return `${verb('Attack', 'attacks')} ${ship(activation.attackCylonShipId)} with ${fighter}`;
+    return merged([{ text: `${verb('Attack', 'attacks')} ` }, ship(activation.attackCylonShipId), { text: ' with ' }, fighter]);
   }
   if (activation.escortCivilianShipId !== null && activation.escortCivilianShipId !== undefined) {
-    return `${verb('Escort', 'escorts')} ${ship(activation.escortCivilianShipId)} with ${fighter}`;
+    return merged([{ text: `${verb('Escort', 'escorts')} ` }, ship(activation.escortCivilianShipId, true), { text: ' with ' }, fighter]);
   }
-  return `${verb('Activate', 'activates')} ${fighter}`;
+  return merged([{ text: `${verb('Activate', 'activates')} ` }, fighter]);
 }
 
 /* templates */
@@ -279,7 +351,10 @@ const WITH_ARTICLE = new Set([
   'BASESTAR_BRIDGE',
 ]);
 
-const PLACEHOLDER = /\{(\$?\w+)(?:\|(lower)|#([^}]+)|\?([^:}]*):([^}]*)|=([^}]+))?\}/g;
+const PLACEHOLDER = /\{(\$?\w+|!?[A-Z]\w*:\w+|!\w+)(?:\|(lower|die)|#([^}]+)|\?([^:}]*):([^}]*)|=([^}]+))?\}/g;
+
+// a constant a template names itself, worded like a field of its enum: {Resource:FUEL}
+const CONSTANT = /^([A-Z]\w*):(\w+)$/;
 
 interface Fill {
   value: Record<string, unknown>;
@@ -289,6 +364,10 @@ interface Fill {
 
 function componentOf(fill: Fill, name: string): { value: unknown; type: TypeRef | undefined } {
   const record = recordNamed(fill.recordName);
+  const constant = CONSTANT.exec(name);
+  if (constant) {
+    return { value: constant[2], type: { t: 'enum', nullable: false, name: constant[1] } };
+  }
   if (name === '$card') {
     const enumName = record?.quorumCard ? 'QuorumCard' : 'MutinyCard';
     return { value: record?.quorumCard ?? record?.mutinyCard ?? null, type: { t: 'enum', nullable: false, name: enumName } };
@@ -306,21 +385,30 @@ function countOf(value: unknown): number {
 
 // The words of one placeholder, after the parts so far, which decide "the" or "The" in front of a location.
 function placeholderParts(match: RegExpMatchArray, fill: Fill, before: Part[]): Part[] {
-  const [, name, lower, forms, yes, no, cases] = match;
+  const [, name, modifier, forms, yes, no, cases] = match;
+  if (name.startsWith('!')) {
+    // only the icons of the value, in front of words of the template's own: "{!ShipType:RAIDER}raiders"
+    const { value, type } = componentOf(fill, name.substring(1));
+    return valueParts(value, type, fill.context, fill.value).flatMap((part) => (part.icon ? [{ text: '', icon: part.icon }] : []));
+  }
   const { value, type } = componentOf(fill, name);
   if (forms !== undefined) {
     const [one, many] = forms.includes('/') ? forms.split('/') : [forms, `${forms}s`];
     return [{ text: countOf(value) === 1 ? one : many }];
   }
   if (yes !== undefined) {
-    return [{ text: value ? yes : no }];
+    return markedParts(value ? yes : no);
   }
   if (cases !== undefined) {
     const words = Object.fromEntries(cases.split('|').map((entry) => entry.split(':') as [string, string]));
-    return [{ text: words[String(value)] ?? words['*'] ?? constantLabel(type?.name ?? '', value as string) }];
+    return markedParts(words[String(value)] ?? words['*'] ?? constantLabel(type?.name ?? '', value as string));
   }
-  const parts = civilianNamed(valueParts(value, type, fill.context, fill.value), /civilian/i.test(name));
-  if (lower) {
+  if (modifier === 'die') {
+    // the die's face in front of the number it shows
+    return [withIcon({ text: String(value) }, fill.context.iconOf?.('Die', value))];
+  }
+  const parts = civilianNamed(valueParts(value, type, fill.context, fill.value), /civilian/i.test(name), fill.context);
+  if (modifier === 'lower') {
     return parts.map((part) => ({ ...part, text: part.text.toLowerCase() }));
   }
   if (type?.t === 'enum' && (type.name === 'Location' || type.name === 'SkillCheckType') && WITH_ARTICLE.has(value as string)) {
@@ -362,28 +450,36 @@ export function fillTemplate(template: string, value: Record<string, unknown>, r
   // the optional segments first, so their placeholders fill like the others
   const chosen = template.replace(/\[([^\]]*)]/g, (_, segment: string) => chooseAlternative(segment, fill));
   const parts: Part[] = [];
+  // the tone of a marker that the words between the fields open, e.g. "<-{amount} {resource}>"
+  let tone: Tone | undefined;
+  const words = (text: string) => {
+    const next = marked(text, tone);
+    parts.push(...next.parts);
+    tone = next.tone;
+  };
   let at = 0;
   for (const match of chosen.matchAll(PLACEHOLDER)) {
     if (match.index > at) {
-      parts.push({ text: chosen.substring(at, match.index) });
+      words(chosen.substring(at, match.index));
     }
-    parts.push(...placeholderParts(match, fill, parts));
+    parts.push(...placeholderParts(match, fill, parts).map((part) => toned(part, tone)));
     at = match.index + match[0].length;
   }
   if (at < chosen.length) {
-    parts.push({ text: chosen.substring(at) });
+    words(chosen.substring(at));
   }
   return merged(parts);
 }
 
-// Neighbouring plain words as one part.
+// Neighbouring plain words of a tone as one part.
 function merged(parts: Part[]): Part[] {
   const out: Part[] = [];
+  const plain = (part: Part) => !part.art && !part.icon;
   for (const part of parts) {
     const last = out[out.length - 1];
-    if (last && !last.art && !part.art) {
+    if (last && plain(last) && plain(part) && last.tone === part.tone) {
       last.text += part.text;
-    } else if (part.text !== '' || part.art) {
+    } else if (part.text !== '' || part.art || part.icon) {
       out.push({ ...part });
     }
   }
@@ -576,37 +672,50 @@ export function factLabel(fact: FactProjection | null | undefined, context: Labe
 const IN_SPACE = new Set(['GALACTICA_SPACE', 'CYLON_FLEET_SPACE', 'BOARDING_PARTY']);
 
 // "ship #2007" for a civilian ship the table doesn't show is "Civilian ship #2007"
-function civilianNamed(parts: Part[], civilian: boolean): Part[] {
-  return civilian ? parts.map((part) => ({ ...part, text: part.text.replace(/^ship #/, 'Civilian ship #') })) : parts;
+function civilianNamed(parts: Part[], civilian: boolean, context: LabelContext): Part[] {
+  if (!civilian) {
+    return parts;
+  }
+  return parts.map((part) => (/^ship #/.test(part.text) ? withIcon({ ...part, text: part.text.replace(/^ship #/, 'Civilian ship #') }, part.icon ?? context.iconOf?.('ShipType', 'CIVILIAN')) : part));
 }
 
-/** A ship's move in words: the ship, the verb for one ship and for several, and where. */
+/**
+ * A ship's move in words: the ship, the verb for one ship and for several, and where. The verb has tone markers: a
+ * human ship lost is bad news, a Cylon ship destroyed good news.
+ */
 export interface ShipMove {
-  ship: string;
+  ship: Part;
   one: string;
   many: string;
   tail: Part[];
 }
+
+const CYLON_SHIPS = new Set(['RAIDER', 'HEAVY_RAIDER', 'BASESTAR', 'CENTURION']);
+const CYLON_ZONES = new Set(['CYLON_SUPPLY', 'CENTURION_SUPPLY', 'CYLON_FLEET_SPACE', 'BOARDING_PARTY']);
 
 // What happened to a ship, by where it went: destroyed, damaged, launched, landed, repaired or moved in space.
 export function shipMove(fact: Record<string, unknown>, context: LabelContext): ShipMove {
   const from = fact.from as string | null;
   const to = fact.to as string | null;
   const civilian = from === 'CIVILIAN_DECK' || to === 'CIVILIAN_DECK';
-  const ship = partsText(civilianNamed([{ text: shipLabel(fact.shipId as number, context) }], civilian));
+  const ship = shipPart(fact.shipId as number, context, civilian);
+  const type = context.shipType?.(fact.shipId as number) ?? null;
+  const cylon = type ? CYLON_SHIPS.has(type) : CYLON_ZONES.has(from ?? '') || CYLON_ZONES.has(to ?? '');
+  // what a loss is for the fleet: bad for its own ships, good for the Cylons'
+  const lost = cylon ? '+' : '-';
   const where = (location: unknown) => fillTemplate(' {location}', { location }, 'ShipFact.ShipMoved', context);
   const move = (one: string, many: string, tail: Part[] = []): ShipMove => ({ ship, one, many, tail });
   if ((IN_SPACE.has(from ?? '') || from === 'RESERVES') && (to === 'REMOVED' || to === 'CYLON_SUPPLY' || to === 'CENTURION_SUPPLY')) {
-    return move('is destroyed', 'are destroyed');
+    return move(`is <${lost}destroyed>`, `are <${lost}destroyed>`);
   }
   switch (to) {
     case 'DAMAGED':
-      return move('is damaged', 'are damaged');
+      return move(`is <${lost}damaged>`, `are <${lost}damaged>`);
     case 'RESERVES':
       if (IN_SPACE.has(from ?? '')) {
         return move('lands', 'land');
       }
-      return from === 'HUMAN_SUPPLY' ? move('joins the Reserves', 'join the Reserves') : move('is repaired', 'are repaired');
+      return from === 'HUMAN_SUPPLY' ? move('joins the Reserves', 'join the Reserves') : move('is <+repaired>', 'are <+repaired>');
     case 'GALACTICA_SPACE':
       if (from === 'GALACTICA_SPACE') {
         return move('moves to', 'move to', where(fact.location));
@@ -621,7 +730,7 @@ export function shipMove(fact: Record<string, unknown>, context: LabelContext): 
     case 'CYLON_FLEET_SPACE':
       return move('goes to', 'go to', [...where(fact.location), { text: ' of the Cylon Fleet board' }]);
     case 'BOARDING_PARTY':
-      return move('boards Galactica', 'board Galactica');
+      return move('<-boards Galactica>', '<-board Galactica>');
     case 'CIVILIAN_DECK':
       return move('goes back into the deck', 'go back into the deck');
     case 'HUMAN_SUPPLY':
@@ -636,8 +745,8 @@ export function shipMove(fact: Record<string, unknown>, context: LabelContext): 
 }
 
 /** Ship moves of one kind as one sentence: "Raider #1016 and Raider #1017 move to Space 6 o'clock". */
-export function shipMovesParts(ships: string[], move: ShipMove): Part[] {
-  return merged([{ text: `${joinWords(ships)} ${ships.length === 1 ? move.one : move.many}` }, ...move.tail]);
+export function shipMovesParts(ships: Part[], move: ShipMove): Part[] {
+  return merged([...joinParts(ships.map((ship) => [ship])), ...markedParts(` ${ships.length === 1 ? move.one : move.many}`), ...move.tail]);
 }
 
 // The cards of a hidden fact by their kind: "2 Skill Cards (1 Politics, 1 Tactics)", "a Loyalty Card".
