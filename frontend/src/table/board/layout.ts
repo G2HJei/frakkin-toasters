@@ -6,6 +6,7 @@
 // Galactica's bow points left: the area in front of it (8 o'clock, where Cylon ships appear) is the strip at the bow,
 // the one behind it (2 o'clock, where civilian ships appear) the strip at the stern, the others clockwise. The Cylon
 // Fleet board's areas sit around the basestar at the clock positions of the Galactica areas they lead to.
+import type { BoardLabel } from '../../labels/board';
 import type { Location } from '../../wire/types';
 import printed from './board.layout.json';
 import type { ResourceName } from './resources';
@@ -60,13 +61,15 @@ export const JUMP_TRACK: Record<string, Point> = printed.tracks.jump;
 export const PURSUIT_TRACK: Record<string, Point> = printed.tracks.pursuit;
 export const BOARDING_TRACK: Record<string, Point> = printed.tracks.boarding;
 
-// the resources, printed in a row, each an icon and a label ("FUEL:"), and where the amount goes after the label: the
-// left end of the text and its baseline
-export const RESOURCES: Record<ResourceName, Point> = {
-  fuel: printed.resources.fuel,
-  food: printed.resources.food,
-  morale: printed.resources.morale,
-  population: printed.resources.population,
+// the middle of each section's label, which the board draws where the picture once printed it
+export const LABELS: Record<BoardLabel, Point> = printed.labels;
+
+// the resources in a row, each its icon and the strip of pips after it (nothing is printed there)
+export const RESOURCES: Record<ResourceName, Box> = {
+  fuel: printedBox(printed.resources.fuel),
+  food: printedBox(printed.resources.food),
+  morale: printedBox(printed.resources.morale),
+  population: printedBox(printed.resources.population),
 };
 
 // the deck rack: a printed slot per deck, by DeckId ("deck.superCrisis" is SUPER_CRISIS)

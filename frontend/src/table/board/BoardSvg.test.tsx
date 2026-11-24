@@ -7,7 +7,8 @@ import { ArtPreview, usePreview } from '../../art/Art';
 import { RevealLayer, useReveal } from '../reveal';
 import { Table, tableContext } from '../tableContext';
 import type { GameProjection, ShipProjection } from '../../wire/types';
-import { DECK_SLOTS, DISTANCE, JUMP_TRACK, LAUNCH_TUBES, LAYOUT, RESOURCES, SLOTS, TITLES } from './layout';
+import { BOARD_LABELS, type BoardLabel } from '../../labels/board';
+import { DECK_SLOTS, DISTANCE, JUMP_TRACK, LABELS, LAUNCH_TUBES, LAYOUT, RESOURCES, SLOTS, TITLES } from './layout';
 
 const location = (name: string, characters: string[] = [], damaged = false) => ({ location: name, damaged, characters });
 
@@ -162,6 +163,10 @@ describe('the board', () => {
     expect(board.querySelector('[data-location="RESEARCH_LAB"] .damaged-label')).toBeNull();
     expect(board.querySelector('[data-track="JumpPreparation"]')?.getAttribute('data-position')).toBe('POSITION_2');
     expect(board.querySelector('[data-track="Pursuit"]')?.getAttribute('data-position')).toBe('START');
+    // the highlights' corners are cut, as the spaces' are
+    for (const track of ['JumpPreparation', 'Pursuit']) {
+      expect(board.querySelector(`[data-track="${track}"] polygon`)?.getAttribute('points')?.split(' ')).toHaveLength(8);
+    }
     expect(board.querySelector('[data-track="BoardingParty"] [data-position="POSITION_1"]')?.getAttribute('aria-label')).toBe('1 centurion at Position 1');
   });
 
@@ -176,18 +181,64 @@ describe('the board', () => {
     expect(renderBoard(undefined, nobody).querySelector('[data-track="BoardingParty"]')).toBeNull();
   });
 
-  it('puts each amount after its printed resource, red in the red zone', () => {
+  it('shows each resource as its icon and a strip of pips, its name and amount only on hover', () => {
     const board = renderBoard();
+    const gauge = (resource: string) => board.querySelector(`[data-gauge="${resource}"]`)!;
 
-    const amount = (resource: string) => board.querySelector(`.resource[data-resource="${resource}"]`)!;
-    expect(['fuel', 'food', 'morale', 'population'].map((resource) => amount(resource).textContent)).toEqual(['8', '7', '9', '12']);
-    expect([amount('fuel').getAttribute('x'), amount('fuel').getAttribute('y')]).toEqual([String(RESOURCES.fuel.x), String(RESOURCES.fuel.y)]);
-    expect(amount('food').getAttribute('aria-label')).toBe('Food: 7');
-    expect(board.querySelectorAll('.resource.red-zone')).toHaveLength(0);
+    expect(['fuel', 'food', 'morale', 'population'].map((resource) => gauge(resource).getAttribute('aria-label'))).toEqual(['Fuel: 8', 'Food: 7', 'Morale: 9', 'Population: 12']);
+    // no amount on the board: the chip that hovering shows names it
+    expect(board.querySelector('.resources text:not(.resource-tip text)')).toBeNull();
+    expect(gauge('population').querySelector('.resource-tip')?.textContent).toBe('Population 12');
+    // the icon first, the strip after it, all inside the resource's box, which takes the hover
+    const icon = gauge('fuel').querySelector('image')!;
+    expect(icon.getAttribute('href')).toContain('FUEL');
+    expect(Number(icon.getAttribute('x'))).toBe(RESOURCES.fuel.x);
+    const hit = gauge('fuel').querySelector('.gauge-hit')!;
+    expect(Number(hit.getAttribute('x'))).toBeLessThan(RESOURCES.fuel.x);
+    expect(Number(hit.getAttribute('width'))).toBeGreaterThan(RESOURCES.fuel.width);
+  });
 
-    // the red zones: fuel and food under 5, morale under 6, population under 7
-    const low = renderBoard(undefined, { ...game, galactica: { ...game.galactica!, fuel: 4, food: 5, morale: 5, population: 7 } } as GameProjection);
-    expect([...low.querySelectorAll('.resource.red-zone')].map((red) => red.getAttribute('data-resource'))).toEqual(['fuel', 'morale']);
+  it("labels each section where the picture printed its name, a chip like the mats' badges", () => {
+    const board = renderBoard();
+    for (const key of Object.keys(BOARD_LABELS) as BoardLabel[]) {
+      const label = board.querySelector(`[data-label="${key}"]`)!;
+      const text = label.querySelector('text')!;
+      expect(text.textContent).toBe(BOARD_LABELS[key].toUpperCase());
+      expect([Number(text.getAttribute('x')), text.getAttribute('text-anchor')]).toEqual([LABELS[key].x, 'middle']);
+      // the chip's top left and bottom right corners are cut, as a badge's
+      expect(label.querySelector('polygon')!.getAttribute('points')!.split(' ')).toHaveLength(6);
+    }
+    expect(board.querySelectorAll('.section-label')).toHaveLength(8);
+  });
+
+  it('puts a pip after each icon for each of its amount, the red zone in red', () => {
+    const board = renderBoard();
+    const resources = ['fuel', 'food', 'morale', 'population'];
+    const pips = (resource: string, root: ParentNode = board) => [...root.querySelectorAll(`[data-gauge="${resource}"] .pip`)];
+    const red = (resource: string, root?: ParentNode) => pips(resource, root).filter((pip) => pip.classList.contains('red')).length;
+
+    expect(resources.map((resource) => pips(resource).length)).toEqual([8, 7, 9, 12]);
+    // the red zones: fuel and food under 5, morale under 6, population under 7, the first pips
+    expect(resources.map((resource) => red(resource))).toEqual([4, 4, 5, 6]);
+    expect(pips('fuel').map((pip) => pip.classList.contains('red'))).toEqual([...Array(4).fill(true), ...Array(4).fill(false)]);
+    expect(board.querySelectorAll('.gauge.red-zone')).toHaveLength(0);
+
+    // at 15 the pips run after the icon to the end of the box, as high as it, and the box is level with the jump track
+    const full = renderBoard(undefined, { ...game, galactica: { ...game.galactica!, food: 15 } } as GameProjection);
+    const [first, last] = [pips('food', full)[0], pips('food', full)[14]];
+    const box = RESOURCES.food;
+    expect(pips('food', full)).toHaveLength(15);
+    expect(Number(first.getAttribute('x'))).toBeGreaterThan(box.x + 50);
+    expect(Number(last.getAttribute('x')) + Number(last.getAttribute('width'))).toBeCloseTo(box.x + box.width);
+    expect([Number(first.getAttribute('y')), Number(first.getAttribute('height'))]).toEqual([box.y, box.height]);
+    expect(box.y + box.height / 2).toBeCloseTo(JUMP_TRACK.START.y, 0);
+
+    // none at 0, and the box still takes the hover
+    const low = renderBoard(undefined, { ...game, galactica: { ...game.galactica!, fuel: 0, food: 5, morale: 5, population: 7 } } as GameProjection);
+    expect([...low.querySelectorAll('.gauge.red-zone')].map((gauge) => gauge.getAttribute('data-gauge'))).toEqual(['fuel', 'morale']);
+    expect(pips('fuel', low)).toHaveLength(0);
+    expect(low.querySelector('[data-gauge="fuel"] .gauge-hit')).not.toBeNull();
+    expect(red('morale', low)).toBe(5);
   });
 
   it('stands each character on the printed name of his location, reaching a little into its picture', () => {

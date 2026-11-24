@@ -1,5 +1,5 @@
-// The four resources as the board prints them: their icons (cut from the board's picture, where they stand by their
-// labels), their red zones, and the resources a civilian ship costs when it is destroyed.
+// The four resources: their icons (cut from the board's picture, which printed them by their labels), their red zones,
+// and the resources a civilian ship costs when it is destroyed.
 import type { Cargo } from '../../wire/types';
 import food from './icons/FOOD.png';
 import fuel from './icons/FUEL.png';
@@ -23,6 +23,10 @@ export function resourceLabel(resource: ResourceName): string {
 
 export function inRedZone(resource: ResourceName, value: number | null | undefined): boolean {
   return value !== null && value !== undefined && value < RED_ZONE[resource];
+}
+
+export function resourceIconUrl(resource: ResourceName): string {
+  return ICONS[resource];
 }
 
 export function ResourceIcon({ resource }: { resource: ResourceName }) {

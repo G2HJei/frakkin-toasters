@@ -992,26 +992,68 @@ details > summary {
   stroke: var(--alert);
 }
 
-/* each resource's amount after its printed label, red in the red zone */
-.board-svg .resource {
-  font-size: 38px;
-  font-weight: 700;
-  fill: var(--steel-100);
+/* the board's section labels: like the badges on the players' mats, in greys so they stay out of the way */
+.board-svg .section-label polygon {
+  fill: #0d131d;
+  stroke: #56606c;
+  stroke-width: 1.5;
 }
 
-.board-svg .resource.red-zone {
+.board-svg .section-label text {
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  fill: #9aa4b0;
+}
+
+/* each resource as its icon and a pip for each of its amount, in the jump track's blue and red; the red zone's pips are
+   a muted red, bright and glowing only while the amount is in it; hovering shows the name and amount */
+.board-svg .gauge-hit {
+  fill: transparent;
+}
+
+.board-svg .gauge .pip {
+  fill: var(--dradis);
+  transition: fill 0.4s;
+}
+
+.board-svg .gauge .pip.red {
+  fill: #a8392d;
+}
+
+.board-svg .gauge.red-zone .pip.red {
+  fill: #ff5a45;
+}
+
+.board-svg .gauge.red-zone .pips {
+  filter: drop-shadow(0 0 6px rgba(255, 70, 50, 0.75));
+}
+
+.board-svg .gauge .resource-tip {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+
+.board-svg .gauge:hover .resource-tip {
+  opacity: 1;
+}
+
+.board-svg .gauge.red-zone .resource-tip polygon {
+  stroke: var(--alert);
+}
+
+.board-svg .gauge.red-zone .resource-tip text {
   fill: #ff4f43;
-  filter: drop-shadow(0 0 8px rgba(255, 70, 50, 0.75));
 }
 
-.board-svg .marker rect {
+.board-svg .marker polygon {
   fill: none;
   stroke: var(--dradis-glow);
   stroke-width: 7;
   filter: drop-shadow(0 0 12px rgba(143, 208, 255, 0.95));
 }
 
-.board-svg .marker-pursuit rect {
+.board-svg .marker-pursuit polygon {
   stroke: #ffb199;
   filter: drop-shadow(0 0 12px rgba(255, 90, 60, 0.95));
 }

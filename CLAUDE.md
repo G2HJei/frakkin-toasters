@@ -1144,12 +1144,16 @@ REST (the lobby lists poll), Zustand for the game.
 - The board (`src/table/board/`): `board.jpg` is the surface, and `BoardSvg` lays the components on its printed
   slots, in the image's pixels. `board.layout.json`, measured with the image, holds what is printed, and `layout.ts`
   reads it (a place for every `Location`, which a test checks, the title panels, the tracks, the resources, the deck
-  rack, the launch tubes) and adds the free starfield (`SLOTS`). The standees stand on the printed names of their
+  rack, the launch tubes) and adds the free starfield (`SLOTS`). The sections' names (`labels/board.ts`) aren't printed:
+  the board draws each where the picture once printed it (`LABELS`), a chip like the mats' badges in greys, on the top
+  edge of a box that has one. The standees stand on the printed names of their
   locations, reaching a little into the pictures, and a damaged location gets a red "damaged" chip, like the Engine
   Room's "activated", at the bottom of the panel its name is printed in, under the name. The ships fly in the middle
   of their space areas, the Cylon ships first, a ship as large in every area of its board, alone or piled (the bow's
-  strip is 8 o'clock, the stern's 2 o'clock; the ships leave the launch tubes free). The resources are printed in a
-  row, each amount after its icon and label ("FUEL:"), red in the red zone (`resources.tsx`, the icons in `icons/`),
+  strip is 8 o'clock, the stern's 2 o'clock; the ships leave the launch tubes free). The resources lie in a row
+  of gauges where nothing is printed (`RESOURCES`): each its icon (`icons/`) and a pip after it for each of its amount
+  (up to 15, centred on the jump track's line), the red zone's pips a muted red that turns bright and glows while the amount is in it (`resources.tsx`),
+  and hovering one shows its name and amount;
   markers sit on the tracks (the Boarding Party track isn't printed: `boarding-party.png`, red only at its end, lies
   over the hull while a centurion is on it, and its centurions stand large and glow red), the decks lie in the rack, which prints no names but rings each Skill Card deck in its
   color, with their counts and their top discard over them, the civilian ships lie at the end of the ship reserves, and

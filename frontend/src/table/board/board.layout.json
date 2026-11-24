@@ -1,182 +1,182 @@
 {
  "image": "board.jpg",
- "note": "pixels of the image; boxes are [x, y, width, height]; location boxes end with their BoardArea; locationTitles are the panels the names are printed in; distanceTraveled is where destinations tuck under the objective (nothing is printed there); launch.* are the printed launch strips; boardingParty is not printed: boarding-party.png lies there while a centurion is on the track, and tracks.boarding are the centres of its spaces; cylonSectors is the centre and slope of the Cylon fleet board's sector lines; resources are where each amount goes after its printed icon and label, in a row: the left end of the text and its baseline",
+ "note": "pixels of the image; boxes are [x, y, width, height]; location boxes end with their BoardArea; locationTitles are the panels the names are printed in; distanceTraveled is where destinations tuck under the objective (nothing is printed there); launch.* are the printed launch strips; boardingParty is not printed: boarding-party.png lies there while a centurion is on the track, and tracks.boarding are the centres of its spaces; labels are the middles of the section labels the board draws where the picture once printed them; cylonSectors is the centre and slope of the Cylon fleet board's sector lines; resources are the boxes of each resource's icon and the strip of pips after it, in a row centred on the jump track's line (nothing is printed there)",
  "width": 2003,
  "height": 2317,
  "locations": {
   "CAPRICA": [
-   196,
-   413,
-   168,
-   237,
+   195,
+   412,
+   173,
+   242,
    "cylon"
   ],
   "CYLON_FLEET": [
-   383,
-   413,
-   171,
-   237,
+   381,
+   412,
+   176,
+   242,
    "cylon"
   ],
   "HUMAN_FLEET": [
-   572,
-   416,
-   171,
-   237,
+   570,
+   413,
+   178,
+   242,
    "cylon"
   ],
   "RESURRECTION_SHIP": [
-   776,
-   411,
-   168,
-   237,
+   775,
+   413,
+   174,
+   242,
    "cylon"
   ],
   "BASESTAR_BRIDGE": [
-   979,
-   413,
-   168,
-   237,
+   978,
+   412,
+   173,
+   242,
    "cylonFleet"
   ],
   "QUORUM_CHAMBER": [
-   110,
-   866,
-   171,
-   234,
+   109,
+   861,
+   172,
+   242,
    "colonialOne"
   ],
   "PRESS_ROOM": [
    313,
-   866,
+   861,
    172,
-   234,
+   242,
    "colonialOne"
   ],
   "PRESIDENTS_OFFICE": [
-   518,
-   866,
-   177,
-   234,
+   517,
+   861,
+   178,
+   242,
    "colonialOne"
   ],
   "ADMINISTRATION": [
-   722,
-   866,
-   169,
-   234,
+   721,
+   861,
+   170,
+   242,
    "colonialOne"
   ],
   "PEGASUS_CIC": [
    1074,
-   884,
+   878,
    172,
-   243,
+   252,
    "pegasus"
   ],
   "AIRLOCK": [
    1278,
-   956,
+   953,
    172,
-   237,
+   241,
    "pegasus"
   ],
   "MAIN_BATTERIES": [
    1510,
-   956,
+   953,
    171,
-   237,
+   241,
    "pegasus"
   ],
   "ENGINE_ROOM": [
-   1713,
-   890,
-   172,
-   237,
+   1712,
+   889,
+   173,
+   242,
    "pegasus"
   ],
   "FTL_CONTROL": [
    267,
-   1728,
-   177,
-   237,
+   1727,
+   178,
+   242,
    "galactica"
   ],
   "WEAPONS_CONTROL": [
-   480,
-   1587,
-   172,
-   238,
+   479,
+   1586,
+   174,
+   242,
    "galactica"
   ],
   "COMMUNICATIONS": [
-   748,
-   1587,
-   177,
-   238,
+   747,
+   1586,
+   179,
+   242,
    "galactica"
   ],
   "RESEARCH_LAB": [
    1025,
-   1587,
-   171,
-   238,
+   1586,
+   172,
+   242,
    "galactica"
   ],
   "ARMORY": [
-   1247,
-   1728,
-   177,
-   237,
+   1246,
+   1727,
+   179,
+   242,
    "galactica"
   ],
   "COMMAND": [
-   480,
-   1872,
-   172,
-   237,
+   479,
+   1869,
+   174,
+   242,
    "galactica"
   ],
   "ADMIRALS_QUARTERS": [
    753,
-   1872,
-   180,
-   237,
+   1869,
+   182,
+   242,
    "galactica"
   ],
   "HANGAR_DECK": [
    1019,
-   1872,
-   183,
-   237,
+   1869,
+   184,
+   242,
    "galactica"
   ],
   "SICKBAY": [
    1525,
-   1580,
-   177,
-   237,
+   1578,
+   178,
+   242,
    "galactica"
   ],
   "BRIG": [
    1525,
-   1877,
-   171,
-   248,
+   1876,
+   172,
+   242,
    "galactica"
   ]
  },
  "spaceAreas": {
   "CYLON_FLEET_SPACE_5_6": [
    1241,
-   168,
+   182,
    330,
    60,
    "cylonFleetSpace"
   ],
   "CYLON_FLEET_SPACE_3": [
    1587,
-   168,
+   182,
    330,
    60,
    "cylonFleetSpace"
@@ -255,45 +255,45 @@
  "tracks": {
   "pursuit": {
    "START": {
-    "x": 1400,
-    "y": 94
+    "x": 1352,
+    "y": 100
    },
    "ONE_CIVILIAN_SHIP": {
-    "x": 1482,
-    "y": 94
+    "x": 1465,
+    "y": 100
    },
    "POSITION_2": {
-    "x": 1564,
-    "y": 94
+    "x": 1578,
+    "y": 100
    },
    "TWO_CIVILIAN_SHIPS": {
-    "x": 1646,
-    "y": 94
+    "x": 1691,
+    "y": 100
    },
    "AUTO_ATTACK": {
-    "x": 1743,
-    "y": 94
+    "x": 1804,
+    "y": 100
    }
   },
   "jump": {
    "START": {
-    "x": 288,
+    "x": 201,
     "y": 1336
    },
    "POSITION_1": {
-    "x": 382,
+    "x": 314,
     "y": 1336
    },
    "POSITION_2": {
-    "x": 474,
+    "x": 427,
     "y": 1336
    },
    "MINUS_3": {
-    "x": 568,
+    "x": 540,
     "y": 1336
    },
    "MINUS_1": {
-    "x": 660,
+    "x": 653,
     "y": 1336
    }
   },
@@ -320,23 +320,65 @@
    }
   }
  },
- "resources": {
-  "fuel": {
-   "x": 1120,
-   "y": 1290
+ "labels": {
+  "objective": {
+   "x": 94,
+   "y": 40
   },
-  "food": {
-   "x": 1334,
-   "y": 1290
+  "pursuit": {
+   "x": 1578,
+   "y": 38
   },
-  "morale": {
-   "x": 1572,
-   "y": 1290
+  "cylonReserves": {
+   "x": 1580,
+   "y": 610
   },
-  "population": {
-   "x": 1873,
-   "y": 1290
+  "colonialOne": {
+   "x": 420,
+   "y": 771
+  },
+  "pegasus": {
+   "x": 1132,
+   "y": 803
+  },
+  "damagedVipers": {
+   "x": 218,
+   "y": 1141
+  },
+  "shipReserves": {
+   "x": 645,
+   "y": 1141
+  },
+  "jump": {
+   "x": 427,
+   "y": 1274
   }
+ },
+ "resources": {
+  "fuel": [
+   963,
+   1308,
+   202,
+   56
+  ],
+  "food": [
+   1217,
+   1308,
+   202,
+   56
+  ],
+  "morale": [
+   1471,
+   1308,
+   202,
+   56
+  ],
+  "population": [
+   1725,
+   1308,
+   202,
+   56
+  ]
  },
  "slots": {
   "objective": [
@@ -478,140 +520,140 @@
   "FTL_CONTROL": [
    273,
    1852,
-   165,
-   110
+   166,
+   112
   ],
   "WEAPONS_CONTROL": [
-   486,
+   485,
    1710,
-   160,
-   111
+   162,
+   113
   ],
   "COMMUNICATIONS": [
-   754,
+   753,
    1710,
-   165,
-   111
+   167,
+   113
   ],
   "RESEARCH_LAB": [
    1031,
    1710,
-   159,
-   111
+   160,
+   113
   ],
   "ARMORY": [
-   1253,
+   1252,
    1852,
-   165,
-   110
+   167,
+   112
   ],
   "COMMAND": [
-   486,
+   485,
    1993,
-   160,
-   111
+   162,
+   113
   ],
   "ADMIRALS_QUARTERS": [
    759,
-   1994,
-   168,
-   110
+   1993,
+   170,
+   113
   ],
   "HANGAR_DECK": [
    1025,
    1994,
-   171,
-   110
+   172,
+   112
   ],
   "SICKBAY": [
    1531,
    1702,
-   165,
-   112
+   166,
+   113
   ],
   "BRIG": [
    1531,
    2000,
-   159,
-   112
+   160,
+   113
   ],
   "QUORUM_CHAMBER": [
    116,
    981,
-   159,
-   112
+   160,
+   113
   ],
   "PRESS_ROOM": [
-   319,
+   320,
    981,
    160,
-   112
+   113
   ],
   "PRESIDENTS_OFFICE": [
    524,
    981,
-   165,
-   112
+   166,
+   113
   ],
   "ADMINISTRATION": [
    728,
    981,
-   157,
-   112
+   158,
+   113
   ],
   "PEGASUS_CIC": [
    1080,
    1011,
-   160,
-   110
+   161,
+   111
   ],
   "AIRLOCK": [
    1284,
    1076,
-   160,
-   109
+   161,
+   110
   ],
   "MAIN_BATTERIES": [
    1516,
    1076,
-   159,
-   109
-  ],
-  "ENGINE_ROOM": [
-   1719,
-   1012,
    160,
    110
+  ],
+  "ENGINE_ROOM": [
+   1718,
+   1012,
+   162,
+   111
   ],
   "CAPRICA": [
    202,
    531,
-   156,
-   116
+   159,
+   117
   ],
   "CYLON_FLEET": [
-   389,
+   388,
    531,
-   159,
-   116
+   162,
+   117
   ],
   "HUMAN_FLEET": [
-   578,
+   577,
    532,
-   159,
-   113
+   164,
+   117
   ],
   "RESURRECTION_SHIP": [
    782,
    532,
-   156,
-   116
+   160,
+   117
   ],
   "BASESTAR_BRIDGE": [
    985,
    531,
-   156,
-   116
+   159,
+   117
   ]
  },
  "areaNumbers": {

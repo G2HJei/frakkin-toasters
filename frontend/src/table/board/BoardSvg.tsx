@@ -17,6 +17,7 @@ import {
   type ArtRef,
 } from '../../art/images';
 import { previewHandlers, SvgArt } from '../../art/Art';
+import { BOARD_LABELS, type BoardLabel } from '../../labels/board';
 import { cardLabel, constantLabel } from '../../labels/describe';
 import type { CivilianShip, Character, DeckProjection, GameProjection, Location, ShipProjection } from '../../wire/types';
 import { PlayerMatOf } from '../players/PlayersPanel';
@@ -36,6 +37,7 @@ import {
   DECK_SLOTS,
   DISTANCE,
   JUMP_TRACK,
+  LABELS,
   LAUNCH_TUBES,
   LAYOUT,
   PURSUIT_TRACK,
@@ -46,7 +48,7 @@ import {
   type Place,
   type Point,
 } from './layout';
-import { CargoIcons, cargoText, inRedZone, RESOURCE_NAMES, resourceLabel } from './resources';
+import { CargoIcons, cargoText, inRedZone, RESOURCE_NAMES, resourceIconUrl, resourceLabel, type ResourceName } from './resources';
 
 
 // the decks whose discard pile lies face down (Disclosure.FACEDOWN_DISCARDS in the core)
@@ -54,8 +56,8 @@ const FACEDOWN_DISCARDS = new Set(['CIVILIAN_SHIPS', 'GALACTICA_DAMAGE', 'PEGASU
 
 /**
  * The board as it lies on the table: board.jpg, with every component on its printed slot. The characters stand on the
- * printed names of their locations, the ships fly in the middle of the space areas, the amounts follow the printed
- * resources, the markers sit on the tracks, the decks lie in the rack with their counts and the top of their discard
+ * printed names of their locations, the ships fly in the middle of the space areas, the resources lie in a row of
+ * gauges (an icon and a strip of pips, the amount on hover), the markers sit on the tracks, the decks lie in the rack with their counts and the top of their discard
  * piles, the civilian ships lie with the ship reserves, and the destinations tuck under the objective. The cards kept in
  * play lie on the free starfield. The card being resolved, its skill check and the die are the turn panel's, and the
  * nukes the Admiral's mat's. Hovering a deck shows its discard pile, and in a sandbox what the players can't see;
@@ -82,6 +84,7 @@ export function BoardSvg() {
   return (
     <svg ref={svg} className="board-svg" viewBox={`0 0 ${BOARD_WIDTH} ${BOARD_HEIGHT}`} role="img" aria-label="the board">
       <image href={boardUrl} x={0} y={0} width={BOARD_WIDTH} height={BOARD_HEIGHT} className="board-image" />
+      <SectionLabels />
       <Resources game={game} />
       <Tracks game={game} />
       <Reserves game={game} />
@@ -165,7 +168,13 @@ function Deltas({ changes, version, jump }: { changes: Changes; version: number;
   return (
     <g className="deltas" aria-hidden="true">
       {changes.resources.map(({ resource, delta }) => (
-        <text key={`${resource}-${version}`} className={`delta ${delta < 0 ? 'loss' : 'gain'}`} x={RESOURCES[resource].x + 30} y={RESOURCES[resource].y - 40}>
+        <text
+          key={`${resource}-${version}`}
+          className={`delta ${delta < 0 ? 'loss' : 'gain'}`}
+          x={RESOURCES[resource].x + RESOURCES[resource].width / 2}
+          y={RESOURCES[resource].y - 14}
+          textAnchor="middle"
+        >
           {signed(delta)} {resourceLabel(resource)}
         </text>
       ))}
@@ -230,28 +239,104 @@ function targetHandlers(target: Target, onTarget: (target: Target, anchor: { x: 
   };
 }
 
+// ---------------------------------------------------------------- the section labels
+
+// like the badges on the players' mats: a chip with its top left and bottom right corners cut, in greys here so it stays
+// out of the way; the board's font is about 0.62 of its size a letter, its letters 0.08 of it apart
+const LABEL_HEIGHT = 30;
+const LABEL_FONT = 15;
+const LABEL_LETTER = 0.7;
+const LABEL_PAD = 12;
+const LABEL_CUT = 7;
+
+/** Each section's name, where the picture once printed it: on the starfield, or on the top edge of its box. */
+function SectionLabels() {
+  return (
+    <g className="section-labels">
+      {(Object.keys(BOARD_LABELS) as BoardLabel[]).map((key) => {
+        const name = BOARD_LABELS[key];
+        const at = LABELS[key];
+        const width = name.length * LABEL_FONT * LABEL_LETTER + 2 * LABEL_PAD;
+        const [left, top, right, bottom] = [at.x - width / 2, at.y - LABEL_HEIGHT / 2, at.x + width / 2, at.y + LABEL_HEIGHT / 2];
+        const points = [
+          [left + LABEL_CUT, top],
+          [right, top],
+          [right, bottom - LABEL_CUT],
+          [right - LABEL_CUT, bottom],
+          [left, bottom],
+          [left, top + LABEL_CUT],
+        ];
+        return (
+          <g key={key} className="section-label" data-label={key}>
+            <polygon points={points.map(([x, y]) => `${x},${y}`).join(' ')} />
+            <text x={at.x} y={at.y + LABEL_FONT * 0.36} textAnchor="middle" fontSize={LABEL_FONT}>
+              {name.toUpperCase()}
+            </text>
+          </g>
+        );
+      })}
+    </g>
+  );
+}
+
 // ---------------------------------------------------------------- the resources and the tracks
 
-// Each amount after its printed icon and label ("FUEL:"), red in the red zone.
 function Resources({ game }: { game: GameProjection }) {
   return (
     <g className="resources">
-      {RESOURCE_NAMES.map((resource) => {
-        const value = game.galactica?.[resource] ?? null;
-        const at = RESOURCES[resource];
-        return (
-          <text
-            key={resource}
-            className={inRedZone(resource, value) ? 'resource red-zone' : 'resource'}
-            data-resource={resource}
-            x={at.x}
-            y={at.y}
-            aria-label={`${resourceLabel(resource)}: ${value ?? 'unknown'}`}
-          >
-            {value ?? '—'}
-          </text>
-        );
-      })}
+      {RESOURCE_NAMES.map((resource) => (
+        <Gauge key={resource} resource={resource} value={game.galactica?.[resource] ?? null} box={RESOURCES[resource]} />
+      ))}
+    </g>
+  );
+}
+
+// the icon right-aligned in its place, so each strip starts as far from it; the printed dials go up to 15: a pip for
+// each, as high as the resource's box, in fives a little apart
+const ICON_WIDTH = 54;
+const ICON_HEIGHT = 28;
+const ICON_GAP = 8;
+const PIPS = 15;
+const PIP_WIDTH = 6;
+const PIP_GAP = 3;
+const FIVES_GAP = 4;
+
+/**
+ * A resource as its icon and a pip after it for each of its amount, the red zone's pips red; they glow red while the
+ * amount is in it. Hovering anywhere on its box shows its name and amount.
+ */
+function Gauge({ resource, value, box }: { resource: ResourceName; value: number | null; box: Box }) {
+  const label = resourceLabel(resource);
+  const left = box.x + ICON_WIDTH + ICON_GAP;
+  return (
+    <g className={inRedZone(resource, value) ? 'gauge red-zone' : 'gauge'} data-gauge={resource} role="img" aria-label={`${label}: ${value ?? 'unknown'}`}>
+      {/* takes the hover over the gaps too */}
+      <rect className="gauge-hit" x={box.x - 6} y={box.y - 6} width={box.width + 12} height={box.height + 12} />
+      <image
+        href={resourceIconUrl(resource)}
+        x={box.x}
+        y={box.y + (box.height - ICON_HEIGHT) / 2}
+        width={ICON_WIDTH}
+        height={ICON_HEIGHT}
+        preserveAspectRatio="xMaxYMid meet"
+      />
+      {/* only the pips up to the amount: the box keeps its place and the hover */}
+      <g className="pips">
+        {Array.from({ length: Math.min(Math.max(value ?? 0, 0), PIPS) }, (_, index) => {
+          const pip = index + 1;
+          return (
+            <rect
+              key={pip}
+              className={inRedZone(resource, pip) ? 'pip red' : 'pip'}
+              x={left + index * (PIP_WIDTH + PIP_GAP) + Math.floor(index / 5) * FIVES_GAP}
+              y={box.y}
+              width={PIP_WIDTH}
+              height={box.height}
+            />
+          );
+        })}
+      </g>
+      <Count x={box.x + box.width / 2} y={box.y - 50} value={`${label} ${value ?? '—'}`} size={26} align="middle" className="resource-tip" />
     </g>
   );
 }
@@ -271,7 +356,7 @@ function Tracks({ game }: { game: GameProjection }) {
   return (
     <g className="tracks">
       {jump && JUMP_TRACK[jump] && <Marker track="JumpPreparation" position={jump} at={JUMP_TRACK[jump]} size={88} label={constantLabel('JumpPreparation', jump)} />}
-      {pursuit && PURSUIT_TRACK[pursuit] && <Marker track="Pursuit" position={pursuit} at={PURSUIT_TRACK[pursuit]} size={78} label={constantLabel('Pursuit', pursuit)} />}
+      {pursuit && PURSUIT_TRACK[pursuit] && <Marker track="Pursuit" position={pursuit} at={PURSUIT_TRACK[pursuit]} size={88} label={constantLabel('Pursuit', pursuit)} />}
       {/* the track isn't printed: it lies over the hull only while a centurion is on it */}
       {boarding.size > 0 && (
         <g className="boarding" data-track="BoardingParty">
@@ -297,11 +382,29 @@ function Tracks({ game }: { game: GameProjection }) {
   );
 }
 
+// the printed spaces of the Jump Preparation and Pursuit tracks: 79 pixels, their corners cut by 12
+const TRACK_SPACE = 79;
+const TRACK_SPACE_CUT = 12;
+
+/** A highlight around a track's space, its corners cut as the space's, at the same 45 degrees. */
 function Marker({ track, position, at, size, label }: { track: string; position: string; at: Point; size: number; label: string }) {
+  // an outline parallel to the space's: moved out by o, its cut grows by o times (2 - √2)
+  const cut = TRACK_SPACE_CUT + ((size - TRACK_SPACE) / 2) * (2 - Math.SQRT2);
+  const [left, top, right, bottom] = [at.x - size / 2, at.y - size / 2, at.x + size / 2, at.y + size / 2];
+  const points = [
+    [left + cut, top],
+    [right - cut, top],
+    [right, top + cut],
+    [right, bottom - cut],
+    [right - cut, bottom],
+    [left + cut, bottom],
+    [left, bottom - cut],
+    [left, top + cut],
+  ];
   return (
     <g className={`marker marker-${track.toLowerCase()}`} data-track={track} data-position={position}>
       <title>{label}</title>
-      <rect x={at.x - size / 2} y={at.y - size / 2} width={size} height={size} rx={12} />
+      <polygon points={points.map(([x, y]) => `${x},${y}`).join(' ')} />
     </g>
   );
 }
