@@ -39,7 +39,7 @@ export function TurnPanel({ name, connection }: { name: string; connection: Conn
   return (
     <section className="panel cf turn" aria-label="turn">
       <div className="tab">
-        <img src="/logo.png" alt="" className="logo" />
+        <img src="/logo.svg" alt="" className="logo" />
         <span title={name}>{name || 'Game'}</span>
         {connection !== 'open' && <small className={`connection ${connection}`}>{connection}</small>}
         <button type="button" className="link reference-open" aria-keyshortcuts="R" onClick={() => useReference.getState().show()}>

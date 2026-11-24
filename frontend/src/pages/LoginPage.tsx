@@ -17,7 +17,7 @@ export function LoginPage() {
   }
   return (
     <main className="page login">
-      <img className="login-logo" src="/logo.png" alt="" />
+      <img className="login-logo" src="/logo.svg" alt="" />
       <h1>Frakkin Toasters</h1>
       <p className="muted">Log in to host, join and watch games, or to play a sandbox.</p>
       <div className="providers">

@@ -142,14 +142,12 @@ nav.top .brand {
 nav.top .brand img {
   width: 28px;
   height: 28px;
-  border-radius: 4px;
 }
 
 .login-logo {
   display: block;
   width: 96px;
   height: 96px;
-  border-radius: var(--radius);
 }
 
 .spacer {
@@ -840,7 +838,6 @@ details > summary {
   flex: none;
   width: 28px;
   height: 28px;
-  border-radius: 4px;
 }
 
 .table-page .turn .tab span {

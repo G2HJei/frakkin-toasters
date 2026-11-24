@@ -8,7 +8,7 @@ export function TopNav() {
   return (
     <nav className="top">
       <Link to="/" className="brand">
-        <img src="/logo.png" alt="" />
+        <img src="/logo.svg" alt="" />
         Frakkin Toasters
       </Link>
       <span className="spacer" />
