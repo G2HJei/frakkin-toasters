@@ -11,6 +11,9 @@ import { useReference } from '../reference/ReferenceDrawer';
 import { anchorOf, useAnswering } from '../../input/boardAnswers';
 import { targetKey, type Target } from '../../input/answers';
 import { characterSkillSet, characterType } from '../../wire/schema';
+import admiralIcon from './icons/ADMIRAL.png';
+import cagIcon from './icons/CAG.png';
+import presidentIcon from './icons/PRESIDENT.png';
 
 /**
  * Every player's mat: his portrait with his skill set's colors beside it and the titles and tokens in front of him
@@ -175,20 +178,24 @@ function viewerIs(game: { viewer?: { kind?: string; playerNumber?: number } | nu
   return game?.viewer?.kind === 'PlayerViewer' && game.viewer.playerNumber === playerNumber;
 }
 
+// The insignia of the title cards, cut out of their cards: the whole card is too small to read in a badge. The
+// Infiltration Card has none.
+const TITLE_ICONS: Partial<Record<TitleName, string>> = { PRESIDENT: presidentIcon, ADMIRAL: admiralIcon, CAG: cagIcon };
+
 function TitleBadge({ title }: { title: TitleName }) {
   const art = titleArt(title);
-  return <Badge className="title" art={art} label={art?.label ?? constantLabel('Title', title)} />;
+  return <Badge className="title" art={art} icon={TITLE_ICONS[title]} label={art?.label ?? constantLabel('Title', title)} />;
 }
 
 function TokenBadge({ token, label }: { token: TokenName; label: string }) {
   return <Badge className="token" art={tokenArt(token)} label={label} round />;
 }
 
-// The whole badge shows the preview, not just its icon.
-function Badge({ className, art, label, round = false }: { className: string; art: ArtRef | null; label: string; round?: boolean }) {
+// The whole badge shows the preview, not just its icon. An icon stands in for the art's image, which still previews.
+function Badge({ className, art, icon, label, round = false }: { className: string; art: ArtRef | null; icon?: string; label: string; round?: boolean }) {
   return (
     <span className={`badge ${className}`} {...(art ? previewHandlers(art) : {})}>
-      {art && <ArtImg art={art} className={round ? 'round' : ''} preview={false} />}
+      {icon ? <img className="icon" src={icon} alt={label} draggable={false} /> : art && <ArtImg art={art} className={round ? 'round' : ''} preview={false} />}
       {label}
     </span>
   );

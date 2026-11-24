@@ -117,9 +117,12 @@ describe('the players', () => {
     expect(side?.firstElementChild?.querySelector('img.avatar')).not.toBeNull();
     expect(side?.querySelector('.badges')?.textContent).toBe('Admiral');
     const admiral = side!.querySelector('.badge.title')!;
+    // the title's insignia as an icon, and the card itself as the preview
+    expect(admiral.querySelector('img')?.matches('.icon')).toBe(true);
     expect(admiral.querySelector('img')?.getAttribute('alt')).toBe('Admiral');
     fireEvent.mouseEnter(admiral);
     expect(usePreview.getState().art?.label).toBe('Admiral');
+    expect(usePreview.getState().art?.key).toBe('Title/ADMIRAL');
     fireEvent.mouseLeave(admiral);
     expect(usePreview.getState().art).toBeNull();
   });

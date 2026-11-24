@@ -1258,6 +1258,13 @@ details[open] > summary::before {
   object-position: center;
 }
 
+/* a title's insignia, cut out of its card */
+.table-page .badge .icon {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+
 .table-page .badge.title {
   --edge: #d9a640;
   color: #f3d38a;
