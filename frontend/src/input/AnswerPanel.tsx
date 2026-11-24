@@ -1,7 +1,7 @@
 import {useState} from 'react';
 import {ArtImg, ArtStrip, CardBack} from '../art/Art';
 import {type ArtRef, CARD_ENUMS, skillCardArt} from '../art/images';
-import {recordArt} from '../art/refs';
+import {choiceArt} from '../art/refs';
 import {actionArt, isNoOp, moveArt, partValueArt, staysOnEachAnswer} from './answerArt';
 import {ArtSlot} from './ArtSlot';
 import {constantLabel, optionEventParts, skillCardLabel, typeLabel, valueLabel} from '../labels/describe';
@@ -125,8 +125,8 @@ function ChoiceAnswers({moves: left, narrowed, onMove}: {
     const options = [...listed.filter((option) => !passes(option)), ...listed.filter(passes)];
     const sections = options.filter((option) => left.some((move) => move.option === option && move.submits));
     const [open, setOpen] = useState<number | null>(sections[0] ?? null);
-    // every option names the same thing (the card a section is chosen of): the panel shows it once above them
-    const common = sharedArt(options.map((option) => left.find((move) => move.option === option && !move.submits)?.event ?? null));
+    // what every option names shows once above them (the Destination Cards drawn), not on each
+    const common = new Set(choiceArt(table.game?.input?.kind === 'Choose' ? (table.game.input.options ?? []) : []).map((ref) => ref.key));
     const products = productOptions(left);
     return (
         <div className="options">
@@ -197,14 +197,6 @@ function productOptions(left: Move[]): ProductOptions[] {
         const options = new Set(group.moves.map((move) => move.option as number));
         return [{group: {...group, moves: shown}, parts, options, first: Math.min(...options)}];
     });
-}
-
-function sharedArt(events: (Answer | null)[]): Set<string> {
-    const refs = events.map((event) => (event ? recordArt(event) : []));
-    if (refs.length < 2) {
-        return new Set();
-    }
-    return new Set(refs[0].filter((ref) => refs.every((other) => other.some((candidate) => candidate.key === ref.key))).map((ref) => ref.key));
 }
 
 // A section's lone group doesn't repeat the section's name. The passes come last, after every group, each named after

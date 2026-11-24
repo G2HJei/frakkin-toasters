@@ -100,13 +100,20 @@ export function optionArt(option: Followup | null | undefined): ArtRef[] {
   }
 }
 
-/** The images every option of a choice names, shown once as what the choice is about. */
+/**
+ * The images every option of a choice names, shown once as what the choice is about, e.g. the Destination Cards drawn.
+ * A Crisis Card stays on each option instead: the turn panel shows the card being resolved.
+ */
 export function choiceArt(options: (Followup | null)[]): ArtRef[] {
   const perOption = options.map((option) => optionArt(option));
   if (perOption.length < 2) {
     return [];
   }
-  return perOption[0].filter((candidate) => perOption.every((refs) => refs.some((ref) => ref.key === candidate.key)));
+  return perOption[0].filter((candidate) => !isCrisisCard(candidate) && perOption.every((refs) => refs.some((ref) => ref.key === candidate.key)));
+}
+
+function isCrisisCard(ref: ArtRef): boolean {
+  return ref.key.startsWith('CrisisCard/') || ref.key.startsWith('SuperCrisisCard/');
 }
 
 export function unique(refs: ArtRef[]): ArtRef[] {

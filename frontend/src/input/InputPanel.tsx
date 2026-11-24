@@ -18,8 +18,8 @@ export interface InputPanelProps {
 /**
  * What the game waits for. The asked player gets the input's answers (`AnswerPanel`): a choice's options, a decision's
  * answers by what they do, a picker for a shape. The others see who is asked, or a plain "waiting" while it is secret.
- * What every option of a choice names, e.g. the Crisis Card whose section is chosen, shows once above them, large
- * enough to read.
+ * What every option of a choice names, e.g. the Destination Cards the Admiral chooses from, shows once above them,
+ * large enough to read.
  */
 export function InputPanel({ onMove }: InputPanelProps) {
   const table = useTable();

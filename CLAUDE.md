@@ -1106,7 +1106,7 @@ REST (the lobby lists poll), Zustand for the game.
   resource as the board's icon (`resourceIconArt`), ships by their ids, no location: the board shows it), the event's `@Source`, what its kind does where its fields don't say
   (`KIND_ART`: the deck a draw takes from, the Skill Card back of the cards a random discard or the Destiny deck takes,
   the title a Title Card action is, the Destination back on each destination to choose, whose cards the choice shows
-  once above its options, a move (`MoveEvent`, `LeaveBrigEvent`) and the head of the "Movement:" answers as the turn
+  once above its options (`choiceArt`; a Crisis Card stays on each option, the turn panel shows it), a move (`MoveEvent`, `LeaveBrigEvent`) and the head of the "Movement:" answers as the turn
   panel's Movement step: `stepIconArt` draws `StepIcon`'s markup as an image), the back of a shape's cards to pick (the
   Skill Card back for the cards to play into a skill check or to discard), and the miracle token last on every
   answer of a miracle ability. Neither the token nor a step's icon moves to the group's name (`staysOnEachAnswer`). A draw as a card per color that a click takes one more of, back to

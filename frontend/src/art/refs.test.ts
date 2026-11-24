@@ -34,9 +34,16 @@ describe('what a log entry or an option names', () => {
     expect(optionArt(single({ kind: 'PlayerDecisionEvent', playerNumber: 1, action: 'MoveEvent', constraints: [] }))).toEqual([]);
   });
 
-  it('shows the card every option of a choice names once', () => {
+  it('shows the cards every option of a choice names once, but not the Crisis Card being resolved', () => {
+    const choose = (chosen: string, other: string) => single({ kind: 'ChooseDestinationEvent', playerNumber: 1, chosen, others: [other] });
     const section = (side: string) => single({ kind: 'ChooseCrisisSectionEvent', playerNumber: 1, card: 'RIOTS_NO_JUMP', section: side });
+    const superSection = (side: string) => single({ kind: 'ChooseSuperCrisisSectionEvent', playerNumber: 1, card: 'FIGHTING_BLIND', section: side });
 
-    expect(keys(choiceArt([section('TOP'), section('BOTTOM')]))).toEqual(['CrisisCard/RIOTS_NO_JUMP']);
+    expect(keys(choiceArt([choose('A_CIVILIAN_CONVOY', 'DERELICT_BASESTAR'), choose('DERELICT_BASESTAR', 'A_CIVILIAN_CONVOY')]))).toEqual([
+      'DestinationCard/A_CIVILIAN_CONVOY',
+      'DestinationCard/DERELICT_BASESTAR',
+    ]);
+    expect(choiceArt([section('TOP'), section('BOTTOM')])).toEqual([]);
+    expect(choiceArt([superSection('TOP'), superSection('BOTTOM')])).toEqual([]);
   });
 });

@@ -17,7 +17,7 @@ const game = {
 } as unknown as GameProjection;
 
 describe('the input', () => {
-  it('shows the card a choice is about once, above its options', () => {
+  it('shows the Crisis Card on each option, not above them: the turn panel shows it', () => {
     const onMove = vi.fn();
     const { container } = render(
       <Table.Provider value={tableContext(game, false, 1)}>
@@ -25,8 +25,8 @@ describe('the input', () => {
       </Table.Provider>,
     );
 
-    expect(container.querySelectorAll('[data-art="CrisisCard/RIOTS_NO_JUMP"]')).toHaveLength(1);
-    expect(container.querySelector('.choice-subject [data-art="CrisisCard/RIOTS_NO_JUMP"]')).not.toBeNull();
+    expect(container.querySelector('.choice-subject')).toBeNull();
+    expect(container.querySelectorAll('.options > button.answer-row [data-art="CrisisCard/RIOTS_NO_JUMP"]')).toHaveLength(2);
     fireEvent.click(screen.getAllByRole('button', { name: 'Choose the bottom option of Riots No Jump' })[0]);
     expect(onMove).toHaveBeenCalledWith(expect.objectContaining({ option: 1, submits: false }), section('BOTTOM').event);
   });
