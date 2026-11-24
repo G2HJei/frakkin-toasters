@@ -1,7 +1,7 @@
 // The images on an answer's button: what the answer names, the card or ability it comes from, and what it does where
 // its fields don't say, e.g. the back of the deck it draws from. A player shows as his character's portrait, a title as
-// its insignia, an ability as the portrait of the character it is printed on, a die roll as the die's face, and an
-// answer of a miracle ability ends with the miracle token. The board shows the locations: none of their cards.
+// its insignia, an ability as the portrait of the character it is printed on, a die roll as the die's face, a resource
+// as the board's icon, and an answer of a miracle ability ends with the miracle token. The board shows the locations: none of their cards.
 import {
   characterArt,
   deckBackArt,
@@ -9,6 +9,7 @@ import {
   dieArt,
   enumArt,
   isTitleName,
+  resourceIconArt,
   shipArt,
   skillBackArt,
   skillColorBackArt,
@@ -138,6 +139,8 @@ function answerValueArt(table: TableContext) {
           return present([deckBackArt(value) ?? skillColorBackArt(value) ?? (deckCards(value) === 'SkillCard' ? skillBackArt() : null)]);
         case 'SkillCardColor':
           return present([skillColorBackArt(value)]);
+        case 'Resource':
+          return present([resourceIconArt(value)]);
         default:
           return undefined;
       }

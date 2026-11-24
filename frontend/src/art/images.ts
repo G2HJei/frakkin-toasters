@@ -5,6 +5,7 @@ import { abilityCharacter } from '../wire/schema';
 import admiralIcon from '../table/players/icons/ADMIRAL.png';
 import cagIcon from '../table/players/icons/CAG.png';
 import presidentIcon from '../table/players/icons/PRESIDENT.png';
+import { RESOURCE_NAMES, resourceIconUrl, resourceLabel, type ResourceName } from '../table/board/resources';
 
 // only the folders: the full-size board scan at the root isn't for the browser (the table's board is board.jpg)
 const FILES = import.meta.glob<string>('./*/**/*.{png,jpg,gif,svg}', {
@@ -202,6 +203,16 @@ export function deckBackArt(deck: Constant): ArtRef | null {
 /** A resource dial set to a value, 0 to 15. */
 export function resourceArt(resource: Constant, value: number): ArtRef | null {
   return resource ? art(`Resource/${resource}_${value}`, `${constantLabel('Resource', resource)} ${value}`, 'dial', []) : null;
+}
+
+/** A resource's icon, as the board's gauges draw it: what an answer gains or loses. */
+export function resourceIconArt(resource: Constant): ArtRef | null {
+  const name = resource?.toLowerCase();
+  if (!(RESOURCE_NAMES as string[]).includes(name ?? '')) {
+    return null;
+  }
+  const own = name as ResourceName;
+  return { key: `ResourceIcon/${resource}`, url: resourceIconUrl(own), label: resourceLabel(own), shape: 'icon', preview: [] };
 }
 
 /** A track with its token at a position. */

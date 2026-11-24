@@ -1102,8 +1102,8 @@ REST (the lobby lists poll), Zustand for the game.
   answer is a row of its own, as high as a card, its images in a slot as wide on every row so the words line up
   (`ArtSlot`). `input/answerArt.ts` picks them: what the answer names (`recordArt` with a `ValueArt` for the answers: a
   player as his character's portrait, a title as its insignia with the card as the preview, an ability as its
-  character's portrait, a deck as its back, a Skill Card color as a back in it, a die result as the face, ships by
-  their ids, no location: the board shows it), the event's `@Source`, what its kind does where its fields don't say
+  character's portrait, a deck as its back, a Skill Card color as a back in it, a die result as the face, a
+  resource as the board's icon (`resourceIconArt`), ships by their ids, no location: the board shows it), the event's `@Source`, what its kind does where its fields don't say
   (`KIND_ART`: the deck a draw takes from, the Skill Card back of the cards a random discard or the Destiny deck takes,
   the title a Title Card action is, the Destination back on each destination to choose, whose cards the choice shows
   once above its options), the back of a shape's cards to pick (the Skill Card back for the cards to play into

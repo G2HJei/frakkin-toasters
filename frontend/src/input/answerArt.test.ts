@@ -90,6 +90,20 @@ describe("an answer's images", () => {
     expect(keys(actionArt({ option: 0, followup: decision, event: null, submits: false, pick: null }))).toEqual(['ShipType/VIPER']);
   });
 
+  it('show the resources an answer loses or gains by their icons, in its order', () => {
+    const trade = { kind: 'AllOf', followups: [
+      { kind: 'Single', event: { kind: 'LoseResourceEvent', resource: 'MORALE', amount: 1 } },
+      { kind: 'Single', event: { kind: 'GainResourceEvent', resource: 'FUEL', amount: 1 } },
+    ] } as unknown as Followup;
+
+    expect(keys(moveArt({ option: 0, followup: trade, event: null, submits: false, pick: null }, table))).toEqual(['ResourceIcon/MORALE', 'ResourceIcon/FUEL']);
+    expect(art({ kind: 'PreventivePolicyEvent', playerNumber: 1, card: { type: 'PREVENTIVE_POLICY', value: 3 }, resource: 'FOOD' })).toEqual([
+      'SkillCardType/PREVENTIVE_POLICY_3',
+      'ResourceIcon/FOOD',
+    ]);
+    expect(moveArt(answer({ kind: 'LoseResourceEvent', resource: 'POPULATION', amount: 1 }), table)[0]).toMatchObject({ shape: 'icon', label: 'Population' });
+  });
+
   it("show a part's value: a player, an ability with its miracle token", () => {
     expect(keys(partValueArt(2, 'targetPlayerNumber', { t: 'int', nullable: false, role: 'player' }, table))).toEqual(['Character/player-token/LAURA_ROSLIN']);
     expect(keys(partValueArt('LONGSHOT', 'ability', { t: 'enum', nullable: false, name: 'CharacterAbility' }, table))).toEqual([
