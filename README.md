@@ -103,9 +103,9 @@ of `core` builds the game and the log per viewer.
 The `frontend` module is a React app: the website (login, the lobby with its games, game rooms,
 settings) and the table, where a game is played over the web socket. The table shows exactly what the server's
 projection holds: the board as our own schematic, the players, the turn, the skill check, the decks and the log. A
-choice is a button per option; a decision is answered on the board where it can be (a move by clicking a location,
-an action by the "Act" button on your location) and otherwise by the event builder, a form made from the wire schema
-that the backend exports. The browser holds no game rules: the engine judges every answer.
+pending input comes with its legal answers, which the input panel lists by what they do; many are answered on the
+board too (a move by clicking a location, an action by the "Act" button on your location). The browser holds no game
+rules: the engine judges every answer.
 
 A **sandbox** is a game one user plays for every seat: he sees everything, the draw piles too, and can undo, restart
 with the same seed, set up scenarios (stack a card, give a card, move a character, place a ship, change a resource,

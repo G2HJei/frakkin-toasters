@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, type ReactNode } from 'react';
-import { signed, useChanges, type Changes } from '../changes';
+import { signed, trackPosition, TRACKS, useChanges, type Changes, type Track } from '../changes';
 import { useGameStore } from '../../live/gameStore';
 import {
   cardArt,
@@ -86,7 +86,7 @@ export function BoardSvg() {
       <image href={boardUrl} x={0} y={0} width={BOARD_WIDTH} height={BOARD_HEIGHT} className="board-image" />
       <SectionLabels />
       <Resources game={game} />
-      <Tracks game={game} />
+      <Tracks game={game} changes={changes} version={version} />
       <Reserves game={game} />
       <DeckRack game={game} />
       <Objective game={game} />
@@ -156,15 +156,14 @@ export function BoardSvg() {
           </g>
         );
       })}
-      <Deltas changes={changes} version={version} jump={game.galactica?.jumpPreparation ?? null} />
+      <Deltas changes={changes} version={version} />
     </svg>
   );
 }
 
-// What changed with the last game message floats up where it shows: the resources, the jump track and the distance.
-// Keyed by the version, so each change plays once.
-function Deltas({ changes, version, jump }: { changes: Changes; version: number; jump: string | null }) {
-  const marker = jump ? JUMP_TRACK[jump] : null;
+// What changed with the last game message floats up where it shows: the resources and the distance. Keyed by the
+// version, so each change plays once.
+function Deltas({ changes, version }: { changes: Changes; version: number }) {
   return (
     <g className="deltas" aria-hidden="true">
       {changes.resources.map(({ resource, delta }) => (
@@ -178,11 +177,6 @@ function Deltas({ changes, version, jump }: { changes: Changes; version: number;
           {signed(delta)} {resourceLabel(resource)}
         </text>
       ))}
-      {changes.jump && marker && (
-        <text key={`jump-${version}`} className="delta gain" x={marker.x} y={marker.y - 60} textAnchor="middle">
-          {changes.jump.reset ? 'Jump!' : signed(changes.jump.delta)}
-        </text>
-      )}
       {changes.distance > 0 && (
         <text key={`distance-${version}`} className="delta gain" x={DISTANCE.x + DISTANCE.width / 2} y={DISTANCE.y - 16} textAnchor="middle">
           {signed(changes.distance)} distance
@@ -342,9 +336,10 @@ function Gauge({ resource, value, box }: { resource: ResourceName; value: number
   );
 }
 
-function Tracks({ game }: { game: GameProjection }) {
-  const jump = game.galactica?.jumpPreparation;
-  const pursuit = game.cylonFleet?.pursuit;
+// the printed spaces of each track with a marker
+const TRACK_SPACES: Record<Track, Record<string, Point>> = { JumpPreparation: JUMP_TRACK, Pursuit: PURSUIT_TRACK };
+
+function Tracks({ game, changes, version }: { game: GameProjection; changes: Changes; version: number }) {
   // the centurions of a space stand side by side
   const boarding = new Map<string, number>();
   for (const centurion of game.galactica?.boardingParty ?? []) {
@@ -356,8 +351,23 @@ function Tracks({ game }: { game: GameProjection }) {
   const panel = SLOTS.boardingParty;
   return (
     <g className="tracks">
-      {jump && JUMP_TRACK[jump] && <Marker track="JumpPreparation" position={jump} at={JUMP_TRACK[jump]} size={88} label={constantLabel('JumpPreparation', jump)} />}
-      {pursuit && PURSUIT_TRACK[pursuit] && <Marker track="Pursuit" position={pursuit} at={PURSUIT_TRACK[pursuit]} size={88} label={constantLabel('Pursuit', pursuit)} />}
+      {TRACKS.map((track) => {
+        const position = trackPosition(game, track);
+        const at = position ? TRACK_SPACES[track][position] : undefined;
+        if (!position || !at) {
+          return null;
+        }
+        // a marker that moved with the last game message fades out of the space it left, then in on its new one; keyed
+        // by the version, so each move plays once
+        const from = changes.tracks.find((change) => change.track === track)?.from;
+        const left = from ? TRACK_SPACES[track][from] : undefined;
+        return (
+          <g key={track}>
+            {left && <Marker key={`left-${version}`} track={track} at={left} size={88} leaving />}
+            <Marker key={left ? `at-${version}` : 'at'} track={track} position={position} at={at} size={88} label={constantLabel(track, position)} arriving={!!left} />
+          </g>
+        );
+      })}
       {/* the track isn't printed: it lies over the hull only while a centurion is on it */}
       {boarding.size > 0 && (
         <g className="boarding" data-track="BoardingParty">
@@ -434,13 +444,26 @@ function cutBox(left: number, top: number, width: number, height: number, cut: n
     .join(' ');
 }
 
-/** A highlight around a track's space, its corners cut as the space's, at the same 45 degrees. */
-function Marker({ track, position, at, size, label }: { track: string; position: string; at: Point; size: number; label: string }) {
+/**
+ * A highlight around a track's space, its corners cut as the space's, at the same 45 degrees. The one `leaving` the
+ * space the marker moved from only fades out, and names no space.
+ */
+function Marker(props: { track: string; at: Point; size: number } & ({ leaving: true } | { position: string; label: string; arriving: boolean })) {
+  const { track, at, size } = props;
   const cut = outsideCut(TRACK_SPACE_CUT, (size - TRACK_SPACE) / 2);
+  const polygon = <polygon points={cutBox(at.x - size / 2, at.y - size / 2, size, size, cut)} />;
+  const className = `marker marker-${track.toLowerCase()}`;
+  if ('leaving' in props) {
+    return (
+      <g className={`${className} leaving`} aria-hidden="true">
+        {polygon}
+      </g>
+    );
+  }
   return (
-    <g className={`marker marker-${track.toLowerCase()}`} data-track={track} data-position={position}>
-      <title>{label}</title>
-      <polygon points={cutBox(at.x - size / 2, at.y - size / 2, size, size, cut)} />
+    <g className={props.arriving ? `${className} arriving` : className} data-track={track} data-position={props.position}>
+      <title>{props.label}</title>
+      {polygon}
     </g>
   );
 }

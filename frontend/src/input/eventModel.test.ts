@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { askedComponents, emptyEvent, isServerFilled, toWire } from './eventModel';
 import { recordNamed } from '../wire/schema';
 
-// The builder's JSON has to be exactly what the backend's codec writes: `kind`, then every component in order.
+// An event's JSON has to be exactly what the backend's codec writes: `kind`, then every component in order.
 describe('the event model', () => {
   it('builds a move as the codec writes it', () => {
     const move = { ...emptyEvent('MoveEvent', 2), destination: 'COMMAND' };

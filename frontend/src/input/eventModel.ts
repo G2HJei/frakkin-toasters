@@ -1,11 +1,12 @@
-// The model of the event builder: a form's value is the event as the codec writes it, `kind` and every component in
-// order. The server fills in what a client must not forge: the player of a player's event, and the constraints.
+// An event as the client sends it: the event as the codec writes it, `kind` and every component in order. The
+// sandbox's setup form builds one from the schema. The server fills in what a client must not forge: the player of a
+// player's event, and the constraints.
 import { enumValues, recordNamed, type Component, type TypeRef } from '../wire/schema';
 
 export type Value = unknown;
 export type EventValue = Record<string, Value> & { kind: string };
 
-/** A component the builder doesn't ask for, because the server sets it. */
+/** A component a client doesn't fill in, because the server sets it. */
 export function isServerFilled(component: Component): boolean {
   return (
     component.name === 'playerNumber' ||
@@ -59,7 +60,7 @@ export function emptyEvent(kind: string, playerNumber?: number | null): EventVal
   return { ...emptyRecord(kind, playerNumber), kind } as EventValue;
 }
 
-/** The fields of a record the builder asks for. */
+/** The fields of a record a form asks for. */
 export function askedComponents(kind: string): Component[] {
   return (recordNamed(kind)?.components ?? []).filter((component) => !isServerFilled(component));
 }

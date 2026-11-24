@@ -73,7 +73,7 @@ describe('the moves of an input', () => {
     expect(all[0]).toMatchObject({ option: 0, event: null, submits: false });
   });
 
-  it('build exactly the JSON the builder would for the same answer', () => {
+  it('build exactly the JSON the codec writes for the same answer', () => {
     for (const move of [...moves(actionStep), ...moves({ kind: 'Decide', player: 4, action: 'ActivateViperEvent', constraints: [], answers: viperAnswers, topic: null })]) {
       const event = move.event as EventValue;
 

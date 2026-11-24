@@ -1,18 +1,21 @@
-// What changed from one game message to the next, for the table's small animations: a resource, the jump track, the
+// What changed from one game message to the next, for the table's small animations: a resource, a track's marker, the
 // distance, the nukes, a newly damaged location, a die roll and the cards that came into a hand. Only two projections
 // in a row count: after a reconnect or an undo the store keeps no previous game (gameStore.previous), so a snapshot
 // animates nothing it can't attribute.
 import { useMemo } from 'react';
-import { enumValues } from '../wire/schema';
 import { useGameStore } from '../live/gameStore';
 import type { GameProjection, SkillCard } from '../wire/types';
 
 export const RESOURCES = ['fuel', 'food', 'morale', 'population'] as const;
 
+// the tracks with a marker on the board, by the enum of their spaces
+export const TRACKS = ['JumpPreparation', 'Pursuit'] as const;
+export type Track = (typeof TRACKS)[number];
+
 export interface Changes {
   resources: { resource: (typeof RESOURCES)[number]; delta: number }[];
-  // steps along the jump track, null when it didn't move; a reset after a jump counts as one
-  jump: { delta: number; reset: boolean } | null;
+  // the space each moved marker left, a reset after a jump too: it fades out there, then in on its new space
+  tracks: { track: Track; from: string }[];
   distance: number;
   nukes: number;
   damaged: string[];
@@ -23,7 +26,7 @@ export interface Changes {
   gainedColors: Map<number, Record<string, number>>;
 }
 
-export const NO_CHANGES: Changes = { resources: [], jump: null, distance: 0, nukes: 0, damaged: [], rolled: false, gained: new Map(), gainedColors: new Map() };
+export const NO_CHANGES: Changes = { resources: [], tracks: [], distance: 0, nukes: 0, damaged: [], rolled: false, gained: new Map(), gainedColors: new Map() };
 
 export function changesBetween(previous: GameProjection | null, next: GameProjection | null): Changes {
   if (!previous || !next) {
@@ -32,10 +35,10 @@ export function changesBetween(previous: GameProjection | null, next: GameProjec
   const resources = RESOURCES.map((resource) => ({ resource, delta: (next.galactica?.[resource] ?? 0) - (previous.galactica?.[resource] ?? 0) })).filter(
     (change) => change.delta !== 0,
   );
-  const track = enumValues('JumpPreparation');
-  const from = track.indexOf(previous.galactica?.jumpPreparation ?? '');
-  const to = track.indexOf(next.galactica?.jumpPreparation ?? '');
-  const jump = from < 0 || to < 0 || from === to ? null : { delta: to - from, reset: to === 0 && next.distanceTraveled > previous.distanceTraveled };
+  const tracks = TRACKS.flatMap((track) => {
+    const [from, to] = [trackPosition(previous, track), trackPosition(next, track)];
+    return from && to && from !== to ? [{ track, from }] : [];
+  });
 
   const damagedIn = (game: GameProjection) =>
     new Set([...(game.galactica?.locations ?? []), ...(game.pegasus?.locations ?? [])].filter((location) => location.damaged).map((location) => location.location as string));
@@ -74,7 +77,7 @@ export function changesBetween(previous: GameProjection | null, next: GameProjec
   }
   return {
     resources,
-    jump,
+    tracks,
     distance: next.distanceTraveled - previous.distanceTraveled,
     nukes: next.nukes - previous.nukes,
     damaged,
@@ -82,6 +85,11 @@ export function changesBetween(previous: GameProjection | null, next: GameProjec
     gained,
     gainedColors,
   };
+}
+
+/** Where a track's marker is. */
+export function trackPosition(game: GameProjection, track: Track): string | null {
+  return (track === 'JumpPreparation' ? game.galactica?.jumpPreparation : game.cylonFleet?.pursuit) ?? null;
 }
 
 /** The changes of the latest game message, and its version, which keys the animations so each plays once. */

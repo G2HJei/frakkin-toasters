@@ -2,8 +2,9 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
 import { openGame } from './tabs';
 
 // The exit of milestone C (roadmap.md): a seeded four-player sandbox plays from setup to an ending through the
-// answers alone (the options, the answers by kind, the counters and the pickers), never through the event builder
-// under "Advanced". The answers are picked at random from a seeded generator, so a run is the same game every time.
+// answers alone (the options, the answers by kind, the counters and the pickers). An input without answers can't be
+// answered, so it fails the run. The answers are picked at random from a seeded generator, so a run is the same game
+// every time.
 const SEED = Number(process.env.PLAYTHROUGH_SEED ?? 7);
 const MAX_PAUSES = 4000;
 
@@ -29,8 +30,6 @@ test('a seeded sandbox plays to an ending through the answers alone', async ({ p
     if ((await input(page).getByRole('heading').textContent()) === 'The game is over') {
       break;
     }
-    // every input has answers: "Advanced" opens by itself only for one that has none
-    await expect(input(page).locator('details.advanced[open]')).toHaveCount(0);
     const before = await signature(page);
     await answer(page, random);
     await expect.poll(() => signature(page), { timeout: 15_000 }).not.toBe(before);

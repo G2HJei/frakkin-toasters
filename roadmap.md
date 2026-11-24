@@ -42,8 +42,9 @@ but the session around them and a place to run it:
 
 - **Legal moves come from the engine.** The browser holds no rules (`CLAUDE.md`). Every UX improvement that needs "what
   can this player do now" asks `core` (`LegalAnswers`), and the same list drives the random-playout fuzzer.
-- **The generic `EventBuilder` stays** as "Advanced" and as the sandbox's tool. Every other input sends one of the
-  engine's answers as it was listed (`input/answers.ts`), and the engine judges it again.
+- **Every input sends one of the engine's answers** as it was listed (`input/answers.ts`), and the engine judges it
+  again. The generic `EventBuilder` under "Advanced" was removed on 2026-11-24; only the sandbox's setup still builds
+  an event from the schema (`sandbox/SetupForm.tsx`).
 - **Each milestone ends green** (`./gradlew build`, e2e where it touches the table) and updates `CLAUDE.md`.
 
 ---

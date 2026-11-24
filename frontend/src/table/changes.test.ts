@@ -17,6 +17,7 @@ function game(overrides: Record<string, unknown> = {}, players: unknown[] = []):
       locations: [{ location: 'ARMORY', damaged: false, characters: [] }],
     },
     pegasus: null,
+    cylonFleet: { pursuit: 'START' },
     distanceTraveled: 0,
     nukes: 2,
     players,
@@ -27,9 +28,10 @@ function game(overrides: Record<string, unknown> = {}, players: unknown[] = []):
 afterEach(() => useGameStore.getState().reset());
 
 describe('the changes of a game message', () => {
-  it('are the resources, the jump track, the distance and the nukes that moved', () => {
+  it('are the resources, the tracks, the distance and the nukes that moved', () => {
     const next = game({
       galactica: { fuel: 7, food: 8, morale: 9, population: 13, jumpPreparation: 'START', locations: [{ location: 'ARMORY', damaged: true, characters: [] }] },
+      cylonFleet: { pursuit: 'ONE_CIVILIAN_SHIP' },
       distanceTraveled: 2,
       nukes: 1,
     });
@@ -41,7 +43,12 @@ describe('the changes of a game message', () => {
       { resource: 'morale', delta: -1 },
       { resource: 'population', delta: 1 },
     ]);
-    expect(changes.jump).toEqual({ delta: -1, reset: true });
+    // a reset after the jump moves the marker too
+    expect(changes.tracks).toEqual([
+      { track: 'JumpPreparation', from: 'POSITION_1' },
+      { track: 'Pursuit', from: 'START' },
+    ]);
+    expect(changesBetween(next, next).tracks).toEqual([]);
     expect([changes.distance, changes.nukes]).toEqual([2, -1]);
     expect(changes.damaged).toEqual(['ARMORY']);
   });

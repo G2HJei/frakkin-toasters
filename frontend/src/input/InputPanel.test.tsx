@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { InputPanel } from './InputPanel';
 import { Table, tableContext } from '../table/tableContext';
@@ -21,7 +21,7 @@ describe('the input', () => {
     const onMove = vi.fn();
     const { container } = render(
       <Table.Provider value={tableContext(game, false, 1)}>
-        <InputPanel onChoose={vi.fn()} onSubmit={vi.fn()} onMove={onMove} />
+        <InputPanel onMove={onMove} />
       </Table.Provider>,
     );
 
@@ -29,17 +29,5 @@ describe('the input', () => {
     expect(container.querySelector('.choice-subject [data-art="CrisisCard/RIOTS_NO_JUMP"]')).not.toBeNull();
     fireEvent.click(screen.getAllByRole('button', { name: 'Choose the bottom option of Riots No Jump' })[0]);
     expect(onMove).toHaveBeenCalledWith(expect.objectContaining({ option: 1, submits: false }), section('BOTTOM').event);
-  });
-
-  it('keeps the plain options under Advanced', () => {
-    const onChoose = vi.fn();
-    const { container } = render(
-      <Table.Provider value={tableContext(game, false, 1)}>
-        <InputPanel onChoose={onChoose} onSubmit={vi.fn()} onMove={vi.fn()} />
-      </Table.Provider>,
-    );
-
-    fireEvent.click(within(container.querySelector('details.advanced') as HTMLElement).getByRole('button', { name: /bottom option of Riots No Jump/ }));
-    expect(onChoose).toHaveBeenCalledWith(1);
   });
 });

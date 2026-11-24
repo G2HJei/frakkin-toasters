@@ -70,7 +70,7 @@ Next steps, in order:
    and the fuzzer answers from them (see "Random playouts").
 8. ~~The table's inputs (`roadmap.md` milestone C).~~ Done: the answers panel (see "Answers"),
    the board and the mats answering, what the game waits for (`Topic`), the log's story, the animations (see "The
-   table") and the reference. `playthrough.spec.ts` plays a game to an ending without the builder. Next: milestone D
+   table") and the reference. `playthrough.spec.ts` plays a game to an ending through the answers. Next: milestone D
    of `roadmap.md`, sessions that survive real people.
 
 ## Project Structure
@@ -671,8 +671,8 @@ on its event.
   in skill checks (see "Skill Check Sequence"), the Mission Specialist at the jump and the Vice President and "Accept
   Prophecy" at the "Administration" (see "Jump and Kobol" and "Skill Check Sequence").
 - The sandbox gives the President a card with `GiveQuorumCardToPresidentEvent`. The wire schema names each Quorum
-  event's `quorumCard`, and the `EventBuilder` lists a Quorum event only when the asked player holds its card. The
-  mats show the cards in play face up in front of their holder.
+  event's `quorumCard`, by which the answers and the log name the card played. The mats show the cards in play face up
+  in front of their holder.
 
 ### End of Game and Titles
 
@@ -1060,8 +1060,8 @@ REST (the lobby lists poll), Zustand for the game.
 
 - The wire schema: `./gradlew :backend:exportSchema` writes `frontend/src/wire/schema.json` (`backend/wire/WireSchema`:
   every record with its components and type references, unions, enums, the socket messages, the `location` of a
-  location's action, the `quorumCard` or `mutinyCard` a card's event plays (the `EventBuilder` offers only the cards
-  the asked player holds), the `source` of an event (`@Source`) and the `sources` of an enum's constants (`GrantedBy`),
+  location's action, the `quorumCard` or `mutinyCard` a card's event plays, the `source` of an event (`@Source`) and
+  the `sources` of an enum's constants (`GrantedBy`),
   the `colors` of `SkillCardType` (a hand lies by color, `table/skillCards.ts`), the `characters` of `CharacterAbility`
   (the sheet that prints each, its art), the `types` and `skillSets` of `Character` (the skill set as its sheet prints
   it, for the strip beside a mat's portrait), the `attackTable` (`AttackTable` in `core`, read from the attack results' thresholds, for the cheat sheet), and a `role`
@@ -1077,12 +1077,11 @@ REST (the lobby lists poll), Zustand for the game.
   as sentences (a card drawn into a hand is "draws …", one lost to a discard pile "discards …", moves of a kind in a
   row and ships that moved alike are one sentence, the bookkeeping left out); they fill in as `Part`s so
   `art/Words.tsx` shows a named card, character or location on hover (`artOf`: `partArt`); an answer is an order to
-  the player it names ("Choose the top option of Riots"); only names, never a card's printed text), `src/input/` (the input panel, see "Answers"; under "Advanced" a choice's
-  plain options, answered by index, and for a decision the `EventBuilder`, a form made from the schema, which builds
-  exactly the codec's JSON and leaves the player and the constraints to the server; under it the `AnytimePanel`, the
+  the player it names ("Choose the top option of Riots"); only names, never a card's printed text), `src/input/` (the input panel, see "Answers"; under it the `AnytimePanel`, the
   game's `anytime` answers as moves (`anytimeMoves`) in the answers' `Groups`, e.g. the Motive Cards whose requirement
   is met, shown only while a player the viewer acts for has one and sent as listed), `src/table/` (the board and the panels around it, see "The
-  table"), `src/sandbox/` (undo, export, restart with the seed, setup by injecting a `SandboxEvent`, the inspector),
+  table"), `src/sandbox/` (undo, export, restart with the seed, setup by injecting a `SandboxEvent` that `SetupForm`
+  builds from the schema, exactly the codec's JSON, the inspector),
   `src/pages/`.
 - The browser holds no game rules: a picker only narrows to plausible answers, the engine judges them.
 - Answers: `input/answers.ts` turns the pending input into `Move`s, one per concrete answer, shape
@@ -1134,7 +1133,7 @@ REST (the lobby lists poll), Zustand for the game.
   game and the turn (`TurnPanel`, its tab names the game, with the connection beside it while it isn't open, the turn's
   number and the current character in a banner, red while he acts, otherwise amber with a red one of the acting
   character beside it, and the
-  skill check under the turn's Crisis Card), the decision (`InputPanel`) and its prompts, and under them the log, which takes the height they leave (at least 260px) and scrolls inside its body. Neither has a title. The log (`table/log/LogPanel.tsx`, the story in `table/log/story.ts`) keeps every turn open (named with its current player), groups it by step (`StepChanged`, a step without a line has no header), and tells each scope as a line: a player's lines in a row stand under his token and name once, and an event about no player (no `playerNumber`) under none. A choice is told by the event it picked, under the player who picked it, and a pass by what it passed on ("doesn't move"); the passes on the cards every player is asked about, the scopes that only ask, and an event about no player that changed nothing are left out, and an event whose facts say everything (the steps, a skill check's mechanics, a roll, a result) is told by them, each under the player it is about. A line has a bolt icon in front of an only answer the server took ("automatic" on hover) and a tag with the card or ability it comes from when its words don't name it, and its facts under it, the ones that change the table first (`isStoryFact`; a ship destroyed, damaged or launched counts) and without the ones its words say already. A click on a line lights what it names on the board for a moment (`table/flash.ts`, `entryTargets`, `useFlash`). It follows the newest entry until the user scrolls up (`useFollowBottom`: only a scroll up leaves the end, since a scroll event arrives a frame late), and the arrow at its bottom right follows again, amber while new entries came below. What changed with the last game message plays once (`table/changes.ts`, `changesBetween` of `gameStore.previous` and the game, keyed by the version): a floating delta at a resource, the jump track and the distance, and at the Admiral's nukes, a newly damaged location pulsing red, a ship gliding from its old place (FLIP on `data-ship`), the die tumbling, new cards sliding into a hand. A snapshot (a reconnect, an undo: `expectSnapshot`) leaves no previous game, so it animates nothing. On the
+  skill check under the turn's Crisis Card), the decision (`InputPanel`) and its prompts, and under them the log, which takes the height they leave (at least 260px) and scrolls inside its body. Neither has a title. The log (`table/log/LogPanel.tsx`, the story in `table/log/story.ts`) keeps every turn open (named with its current player), groups it by step (`StepChanged`, a step without a line has no header), and tells each scope as a line: a player's lines in a row stand under his token and name once, and an event about no player (no `playerNumber`) under none. A choice is told by the event it picked, under the player who picked it, and a pass by what it passed on ("doesn't move"); the passes on the cards every player is asked about, the scopes that only ask, and an event about no player that changed nothing are left out, and an event whose facts say everything (the steps, a skill check's mechanics, a roll, a result) is told by them, each under the player it is about. A line has a bolt icon in front of an only answer the server took ("automatic" on hover) and a tag with the card or ability it comes from when its words don't name it, and its facts under it, the ones that change the table first (`isStoryFact`; a ship destroyed, damaged or launched counts) and without the ones its words say already. A click on a line lights what it names on the board for a moment (`table/flash.ts`, `entryTargets`, `useFlash`). It follows the newest entry until the user scrolls up (`useFollowBottom`: only a scroll up leaves the end, since a scroll event arrives a frame late), and the arrow at its bottom right follows again, amber while new entries came below. What changed with the last game message plays once (`table/changes.ts`, `changesBetween` of `gameStore.previous` and the game, keyed by the version): a floating delta at a resource and the distance, and at the Admiral's nukes, the marker of the Jump Preparation or Pursuit track fading out of the space it left and in on its new one, a newly damaged location pulsing red, a ship gliding from its old place (FLIP on `data-ship`), the die tumbling, new cards sliding into a hand. A snapshot (a reconnect, an undo: `expectSnapshot`) leaves no previous game, so it animates nothing. On the
   right the sandbox's tools in a sandbox, above the players' mats (`PlayersPanel`, the nukes beside the Admiral; right
   of the portrait a strip with a cell per card of the sheet's skill set, in its colors, split along the diagonal for
   "either", for everyone but a revealed Cylon, who draws 2 of any colors). Under 1100px the board goes across the width
@@ -1191,9 +1190,8 @@ REST (the lobby lists poll), Zustand for the game.
   `lobby.spec.ts` has five users host, join, observe, leave and start a game, checks that nobody sees another
   player's cards and that an observer gets no input, and races two users for the last seat. `playthrough.spec.ts`
   plays a seeded four-player sandbox (`PLAYTHROUGH_SEED`, 7 by default) to an ending through the answers alone, picked
-  at random from a seeded generator (the options, the answers by kind, the counters, the parts, the pickers), and
-  checks at every pause that "Advanced" stayed closed, which opens by itself only for an input without answers. It
-  takes minutes.
+  at random from a seeded generator (the options, the answers by kind, the counters, the parts, the pickers), so an
+  input without answers fails it. It takes minutes.
 - Commands: `npm run dev` (Vite on 5173, proxying `/api`, `/ws`, `/oauth2` to 8080; the `dev` profile allows its
   origin), `npm test` (Vitest), `npm run gen`, `npm run e2e` (Playwright, against the running app with the `dev`
   profile, `E2E_BASE_URL` to point elsewhere).

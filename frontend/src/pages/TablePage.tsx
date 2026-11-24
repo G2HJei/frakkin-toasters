@@ -169,11 +169,7 @@ function LiveTable({ gameId, name, seed, userNames }: { gameId: string; name: st
             <div className="table-main">
               <div className="table-side left">
                 <TurnPanel name={name} connection={connection} />
-                <InputPanel
-                  onChoose={(option) => send(chooseMessage(token, option))}
-                  onSubmit={(event) => send(submitMessage(token, event))}
-                  onMove={sendMove}
-                />
+                <InputPanel onMove={sendMove} />
                 <AnytimePanel onSubmit={(event) => send(submitMessage(token, event))} />
                 {/* the log takes what the panels above leave */}
                 <LogPanel />

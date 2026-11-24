@@ -1,16 +1,11 @@
 import { createContext, useContext } from 'react';
 import { constantLabel, NO_CONTEXT, type LabelContext } from '../labels/describe';
-import { sortSkillCards } from './skillCards';
-import type { GameProjection, PlayedCard, PlayedInterruptCard, ShipProjection, SkillCard } from '../wire/types';
-
-export interface ShipChoice {
-  id: number;
-  label: string;
-}
+import type { GameProjection, ShipProjection, SkillCard } from '../wire/types';
 
 /**
- * What the widgets of the table need to know of the game: the players, the ships and the cards a picker offers. The
- * UI only narrows a picker to plausible answers; the engine judges them (frontend decision 2).
+ * What the widgets of the table need to know of the game: its names, the players and ships, and the Skill Cards the
+ * sandbox's setup offers. The UI only narrows a picker to plausible answers; the engine judges them (frontend
+ * decision 2).
  */
 export interface TableContext extends LabelContext {
   game: GameProjection | null;
@@ -19,15 +14,10 @@ export interface TableContext extends LabelContext {
   // the name of the user in a seat, which only the players panel shows: everywhere else a player is his character
   userName(playerNumber: number): string | null;
   players(): { number: number; label: string }[];
-  ships(): ShipChoice[];
   // a ship anywhere on the boards, or out of the game
   ship(id: number): ShipProjection | null;
-  hand(playerNumber: number | null): SkillCard[];
+  // the Skill Cards of the draw piles, which a sandbox sees
   deckSkillCards(): SkillCard[];
-  // the cards of the active skill check once they are divided, face up
-  checkCards(): SkillCard[];
-  playedBefore(): PlayedCard[];
-  windowCards(): PlayedInterruptCard[];
 }
 
 export function tableContext(
@@ -65,36 +55,10 @@ export function tableContext(
     ship: (id) => allShips.find((candidate) => candidate.id === id) ?? null,
     userName: (playerNumber) => userNames[playerNumber] ?? null,
     players: () => players.map((player) => ({ number: player.number, label: playerName(player.number) })),
-    ships: () => {
-      if (!game) {
-        return [];
-      }
-      const ship = (where: string) => (projection: { id: number; type: string | null; location: string | null }) => ({
-        id: projection.id,
-        label: `${constantLabel('ShipType', projection.type)} #${projection.id} — ${projection.location ? constantLabel('Location', projection.location) : where}`,
-      });
-      return [
-        ...(game.galactica?.ships ?? []).map(ship('space')),
-        ...(game.galactica?.reserves ?? []).map(ship('reserves')),
-        ...(game.galactica?.damagedVipers ?? []).map(ship('damaged')),
-        ...(game.cylonFleet?.ships ?? []).map(ship('Cylon Fleet')),
-        ...(game.galactica?.boardingParty ?? []).map((centurion) => ({
-          id: centurion.id,
-          label: `Centurion #${centurion.id} — ${constantLabel('BoardingParty', centurion.position)}`,
-        })),
-      ];
-    },
-    hand: (playerNumber) => sortSkillCards(players.find((player) => player.number === playerNumber)?.skillCards?.cards ?? []),
     deckSkillCards: () =>
       (game?.decks ?? [])
         .filter((deck) => ['POLITICS', 'LEADERSHIP', 'TACTICS', 'PILOTING', 'ENGINEERING', 'TREACHERY', 'DESTINY'].includes(deck.deck ?? ''))
         .flatMap((deck) => (deck.drawPile ?? []) as SkillCard[]),
-    checkCards: () => [...(game?.skillCheck?.matchingPile ?? []), ...(game?.skillCheck?.nonMatchingPile ?? [])],
-    playedBefore: () =>
-      (game?.skillCheck?.playedBefore ?? []).flatMap((played) =>
-        (played.cards?.cards ?? []).map((skillCard) => ({ playerNumber: played.player, skillCard })),
-      ),
-    windowCards: () => game?.turn?.windowCards ?? [],
   };
 }
 
@@ -105,13 +69,8 @@ export const Table = createContext<TableContext>({
   askedPlayer: null,
   userName: () => null,
   players: () => [],
-  ships: () => [],
   ship: () => null,
-  hand: () => [],
   deckSkillCards: () => [],
-  checkCards: () => [],
-  playedBefore: () => [],
-  windowCards: () => [],
 });
 
 export function useTable(): TableContext {

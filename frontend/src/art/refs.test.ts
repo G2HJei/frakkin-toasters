@@ -34,12 +34,9 @@ describe('what a log entry or an option names', () => {
     expect(optionArt(single({ kind: 'PlayerDecisionEvent', playerNumber: 1, action: 'MoveEvent', constraints: [] }))).toEqual([]);
   });
 
-  it('shows the card every option of a choice names once, and the rest per option', () => {
+  it('shows the card every option of a choice names once', () => {
     const section = (side: string) => single({ kind: 'ChooseCrisisSectionEvent', playerNumber: 1, card: 'RIOTS_NO_JUMP', section: side });
 
-    const { common, perOption } = choiceArt([section('TOP'), section('BOTTOM')]);
-
-    expect(keys(common)).toEqual(['CrisisCard/RIOTS_NO_JUMP']);
-    expect(perOption).toEqual([[], []]);
+    expect(keys(choiceArt([section('TOP'), section('BOTTOM')]))).toEqual(['CrisisCard/RIOTS_NO_JUMP']);
   });
 });

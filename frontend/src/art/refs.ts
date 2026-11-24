@@ -85,17 +85,13 @@ export function optionArt(option: Followup | null | undefined): ArtRef[] {
   }
 }
 
-/**
- * The images of a choice: those every option names, shown once as what the choice is about, and the others per option.
- */
-export function choiceArt(options: (Followup | null)[]): { common: ArtRef[]; perOption: ArtRef[][] } {
+/** The images every option of a choice names, shown once as what the choice is about. */
+export function choiceArt(options: (Followup | null)[]): ArtRef[] {
   const perOption = options.map((option) => optionArt(option));
   if (perOption.length < 2) {
-    return { common: [], perOption };
+    return [];
   }
-  const common = perOption[0].filter((candidate) => perOption.every((refs) => refs.some((ref) => ref.key === candidate.key)));
-  const commonKeys = new Set(common.map((ref) => ref.key));
-  return { common, perOption: perOption.map((refs) => refs.filter((ref) => !commonKeys.has(ref.key))) };
+  return perOption[0].filter((candidate) => perOption.every((refs) => refs.some((ref) => ref.key === candidate.key)));
 }
 
 export function unique(refs: ArtRef[]): ArtRef[] {

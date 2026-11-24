@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router';
 import { useCreateSandbox } from '../api/queries';
 import { typeLabel } from '../labels/describe';
 import { useGameStore } from '../live/gameStore';
-import { EventBuilder } from '../input/EventBuilder';
 import type { EventValue } from '../input/eventModel';
 import { schema } from '../wire/schema';
+import { SetupForm } from './SetupForm';
 
 export interface SandboxToolbarProps {
   gameId: string;
@@ -57,7 +57,7 @@ export function SandboxToolbar({ gameId, seed, onUndo, onInject }: SandboxToolba
             ))}
           </select>
         </label>
-        {setup && <EventBuilder key={`${setup}-${version}`} action={setup} playerNumber={null} submitLabel="Inject" onSubmit={onInject} />}
+        {setup && <SetupForm key={`${setup}-${version}`} kind={setup} onSubmit={onInject} />}
       </details>
       <details>
         <summary>Inspector</summary>

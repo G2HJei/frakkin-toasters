@@ -10,6 +10,7 @@ import type { GameProjection, ShipProjection } from '../../wire/types';
 import { BOARD_LABELS, type BoardLabel } from '../../labels/board';
 import { DECK_SLOTS, DISTANCE, JUMP_TRACK, LABELS, LAUNCH_TUBES, LAYOUT, RESOURCES, SLOTS, TITLES } from './layout';
 import { resourceIconUrl } from './resources';
+import { useGameStore } from '../../live/gameStore';
 
 const location = (name: string, characters: string[] = [], damaged = false) => ({ location: name, damaged, characters });
 
@@ -81,6 +82,7 @@ function renderBoard(offer?: Offer, projection: GameProjection = game, sandbox =
 afterEach(() => {
   useReveal.getState().hide();
   usePreview.setState({ art: null, pointer: null, extra: null });
+  useGameStore.getState().reset();
 });
 
 // where the images of a space area's ships lie
@@ -169,6 +171,24 @@ describe('the board', () => {
       expect(board.querySelector(`[data-track="${track}"] polygon`)?.getAttribute('points')?.split(' ')).toHaveLength(8);
     }
     expect(board.querySelector('[data-track="BoardingParty"] [data-position="POSITION_1"]')?.getAttribute('aria-label')).toBe('1 centurion at Position 1');
+  });
+
+  it('fades a moved marker out of the space it left and in on its new one, with no delta', () => {
+    const before = { ...game, galactica: { ...game.galactica!, jumpPreparation: 'POSITION_1' } } as GameProjection;
+    useGameStore.setState({ previous: before, game, version: 4 });
+    const board = renderBoard();
+
+    const leaving = board.querySelectorAll('.marker-jumppreparation.leaving');
+    expect(leaving).toHaveLength(1);
+    // the space it left, and nothing that names it
+    expect(leaving[0].getAttribute('data-track')).toBeNull();
+    expect(leaving[0].querySelector('polygon')?.getAttribute('points')).toContain(`${JUMP_TRACK.POSITION_1.x - 44},`);
+    expect(board.querySelector('[data-track="JumpPreparation"]')?.classList).toContain('arriving');
+    expect(board.querySelector('[data-track="JumpPreparation"]')?.getAttribute('data-position')).toBe('POSITION_2');
+    // the track that didn't move stays as it is
+    expect(board.querySelector('[data-track="Pursuit"]')?.classList).not.toContain('arriving');
+    expect(board.querySelector('.marker-pursuit.leaving')).toBeNull();
+    expect(board.querySelector('.deltas text')).toBeNull();
   });
 
   it('lays the Boarding Party track over the hull only while a centurion is on it', () => {

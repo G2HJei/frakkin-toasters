@@ -43,7 +43,8 @@ import static xyz.zlatanov.frakkintoasters.backend.journal.ValueCodec.typeArgume
 
 /**
  * The wire schema: every type a client reads or writes, as the codec writes it. The frontend generates its TypeScript
- * types from it, and its event builder makes a form of each event from it. Nothing copies a Java record by hand.
+ * types from it, and the sandbox's setup makes a form of each setup event from it. Nothing copies a Java record by
+ * hand.
  * <ul>
  *     <li>a record: its components with their types, the interfaces it implements, whether it carries {@code kind},
  *     the {@code location} of a location's action, the {@code quorumCard} or {@code mutinyCard} a card's event
