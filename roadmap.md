@@ -134,6 +134,8 @@ Where it differs from the plan:
 - **Game end**: a results screen (winner, winners by name, every revealed loyalty, motive cards, the story of the game,
   turns played, statistics per player and per game), a shareable read-only replay link, and a **rematch** that reopens
   the room with the same seats.
+- **Report a problem**: A link below the `Reference` Link opens a small drawer with a multiline edit box for the player
+  to add a comment (1000 chars max). Sending it stores the comment and the game id in a dedicated table.
 
 *Exit:* a game played over three days across restarts, with one player replaced mid-game after the clock ran out,
 finishes with the right ending and the results screen.
