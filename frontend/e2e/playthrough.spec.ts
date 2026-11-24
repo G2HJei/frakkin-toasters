@@ -83,8 +83,8 @@ async function answer(page: Page, random: (n: number) => number) {
       await head.click();
     }
   }
-  // a part's value only picks, it sends nothing
-  const candidates = answers.locator('button.answer, button.chip:not(.part-value), .options > button.option:not(.section-head)');
+  // a part's value only picks, it sends nothing; a decision's pass stands after its groups
+  const candidates = answers.locator('button.answer, button.chip:not(.part-value), button.pass, .options > button.option:not(.section-head)');
   const count = await candidates.count();
   const counters = answers.locator('.counts-widget');
   if ((await counters.count()) > 0 && (count === 0 || random(2) === 0)) {

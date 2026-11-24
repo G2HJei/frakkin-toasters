@@ -1063,7 +1063,7 @@ REST (the lobby lists poll), Zustand for the game.
   location's action, the `quorumCard` or `mutinyCard` a card's event plays, the `source` of an event (`@Source`) and
   the `sources` of an enum's constants (`GrantedBy`),
   the `colors` of `SkillCardType` (a hand lies by color, `table/skillCards.ts`), the `characters` of `CharacterAbility`
-  (the sheet that prints each, its art), the `types` and `skillSets` of `Character` (the skill set as its sheet prints
+  (the sheet that prints each, its art) and its `miracles` (the tokens a miracle ability spends, `isMiracle`), the `types` and `skillSets` of `Character` (the skill set as its sheet prints
   it, for the strip beside a mat's portrait), the `attackTable` (`AttackTable` in `core`, read from the attack results' thresholds, for the cheat sheet), and a `role`
   for each int by its name (`ComponentRole` in `core`): `player`, `ship`, `scope` or `count`). `npm run gen` turns it into `src/wire/types.ts`. `WireSchemaTest` fails when the checked-in schema is stale, and `tsc` when the UI uses a field
   that went away. `GET /api/schema` serves the same JSON.
@@ -1095,8 +1095,19 @@ REST (the lobby lists poll), Zustand for the game.
   intent is pending). An update with an `automatic` scope of its player drops it: the server took that only answer
   itself. `AnswerPanel` shows them: a choice's options in order, an option's decision as a section of
   its answers (the first one open), the answers grouped by kind (`groupMoves`; a group's moves differ in
-  `varyingComponents`, worded by `moveLabels.ts`; characters to choose lie by pool: military leader, political leader,
-  pilot, support, Cylon Leader), a draw as a card per color that a click takes one more of, back to
+  `varyingComponents`, worded by `moveLabels.ts`; the characters to choose at the start and after an execution
+  (`SelectCharacterEvent`) lie by pool, side by side as large as their portraits: military leader, political leader,
+  pilot, support, Cylon Leader), the Pass last (a `NoOpEvent`, or an answer that names none of what its group's others
+  do, e.g. no interrupt card; its group then names the answer left by what told them apart) with its icon. Every other
+  answer is a row of its own, as high as a card, its images in a slot as wide on every row so the words line up
+  (`ArtSlot`). `input/answerArt.ts` picks them: what the answer names (`recordArt` with a `ValueArt` for the answers: a
+  player as his character's portrait, a title as its insignia with the card as the preview, an ability as its
+  character's portrait, a deck as its back, a Skill Card color as a back in it, a die result as the face, ships by
+  their ids, no location: the board shows it), the event's `@Source`, what its kind does where its fields don't say
+  (`KIND_ART`: the deck a draw takes from, the Skill Card back of the cards a random discard or the Destiny deck takes,
+  the title a Title Card action is), the back of a shape's cards to pick (the Skill Card back for the cards to play into
+  a skill check or to discard), and the miracle token last on every
+  answer of a miracle ability (it never moves to the group's name). A draw as a card per color that a click takes one more of, back to
   what every answer draws once it has the most an answer leaves it beside the other colors (what every answer draws
   is picked from the start, e.g. a skill set's one-color options in the Receive Skills step, and a color every answer
   draws as many of comes first, fixed, so a two-color option's colors are left to pick, held to their shared count; a
@@ -1123,10 +1134,12 @@ REST (the lobby lists poll), Zustand for the game.
   `TYPE_value`, a dial as `RESOURCE_value`; and for what no enum names, `Title/`, `Token/`, `Die/` and `Back/SKILL`).
   `images.ts` loads the folders with `import.meta.glob` (not the full board scan at the root), so Vite copies them
   into the build, and gives an `ArtRef` per component (`cardArt`, `skillCardArt`, `characterArt` (the standee, with
-  the character sheet as the preview), `locationArt`, `shipArt`, `deckBackArt`, `titleArt`, `tokenArt`, `dieArt`, ...)
-  or `null` where there is none: the UI then shows the name. `refs.ts` finds what an event, a fact or an option names
-  through the schema, for the log and the input. `Art.tsx`: `CardTile` (a face-up card is a `tile`, a face-down one a
-  `tile back`, which the lobby e2e checks), `CardBack`, `ArtStrip`, `SvgArt`, and the hover preview (`ArtPreview`).
+  the character sheet as the preview), `locationArt`, `shipArt`, `deckBackArt`, `titleArt`, `titleIconArt` (the
+  insignia the mats' badges show too), `tokenArt`, `dieArt`, `skillColorBackArt` (drawn: the Skill decks print no
+  back), ...) or `null` where there is none: the UI then shows the name. `refs.ts` finds what an event, a fact or an
+  option names through the schema, for the log and the input. `Art.tsx`: `CardTile` (a face-up card is a `tile`, a
+  face-down one a `tile back`, which the lobby e2e checks), `CardBack`, `ArtStrip`, `SvgArt`, and the hover preview
+  (`ArtPreview`), which an image takes with it when it goes away under the pointer.
   `images.test.ts` checks that every constant has its image and every image names a constant.
 - The table (`TablePage`): no bar over it, the board in the middle, as high as the screen (`.table-main` is a size
   container, the board's width follows its height), and a column on each side that scrolls on its own. On the left the

@@ -300,6 +300,82 @@ describe('the answers', () => {
     expect(onMove).toHaveBeenCalledWith(expect.objectContaining({ event: events[1] }), events[1]);
   });
 
+  const labels = (container: HTMLElement) => [...container.querySelectorAll('button.answer-row')].map((button) => button.getAttribute('aria-label'));
+  const images = (button: Element) => [...button.querySelectorAll('img')].map((image) => image.getAttribute('data-art'));
+
+  it("list a choice's Pass last, with its icon, wherever the choice has it", () => {
+    const { container } = renderPanel(
+      game({
+        kind: 'Choose',
+        player: 1,
+        options: [
+          { kind: 'Single', event: { kind: 'NoOpEvent', playerNumber: 1 } },
+          { kind: 'Single', event: { kind: 'MementoEvent', playerNumber: 1 } },
+          { kind: 'Single', event: { kind: 'DrawQuorumCardEvent' } },
+        ],
+        answers: [],
+      }),
+    );
+
+    const rows = [...container.querySelectorAll('.options > button.answer-row')];
+    expect(rows.at(-1)).toHaveClass('pass');
+    expect(rows.at(-1)!.querySelector('.art-slot.pass-icon svg')).not.toBeNull();
+    // every row has its slot, so their words line up
+    expect(rows.every((row) => row.firstElementChild?.classList.contains('art-slot'))).toBe(true);
+    expect(images(rows[1])).toEqual(['DeckId/QUORUM']);
+  });
+
+  it("put a decision's pass after its other answers, and name the answer left by what told them apart", () => {
+    const play = { kind: 'PlayInterruptCardEvent', playerNumber: 1, card: card('STRATEGIC_PLANNING', 3), calculationsModifier: null };
+    const pass = { ...play, card: null };
+    const { onMove, container } = renderPanel(game({ kind: 'Decide', player: 1, action: 'PlayInterruptCardEvent', constraints: [], answers: { events: [pass, play], shapes: [] } }));
+
+    expect(labels(container)).toEqual(['Play an interrupt card: Strategic Planning 3', 'Pass']);
+    expect(images(screen.getByRole('button', { name: /Strategic Planning/ }))).toEqual(['SkillCardType/STRATEGIC_PLANNING_3']);
+    fireEvent.click(screen.getByRole('button', { name: 'Pass' }));
+    expect(onMove).toHaveBeenCalledWith(expect.objectContaining({ event: pass }), pass);
+  });
+
+  it('show the Skill Card back on the cards to play into a skill check, and the Pass after them', () => {
+    const hand = [card('REPAIR', 1), card('BAIT', 0)];
+    const example = { kind: 'PlayCardsIntoSkillCheckEvent', playerNumber: 1, skillCards: [hand[0]] };
+    const pick = { kind: 'SkillCardPick', component: 'skillCards', cards: hand, min: 1, max: 2, ordered: false, minStrength: 0 };
+    const { container } = renderPanel(
+      game({
+        kind: 'Decide',
+        player: 1,
+        action: 'PlayCardsIntoSkillCheckEvent',
+        constraints: [],
+        answers: { events: [{ ...example, skillCards: [] }], shapes: [{ example, pick }] },
+      }),
+    );
+
+    const [play, pass] = [...container.querySelectorAll('button.answer-row')];
+    expect(play).toHaveAttribute('aria-label', 'Play cards into the skill check: choose 1 to 2 cards');
+    expect(images(play)).toEqual(['Back/SKILL']);
+    expect(pass).toHaveClass('pass');
+  });
+
+  it("lie a choice among the players' characters as rows with their portraits, not as the characters to choose", () => {
+    const make = (character: string) => ({ kind: 'MakePresidentEvent', character });
+    const { container } = renderPanel(game({ kind: 'Decide', player: 1, action: 'MakePresidentEvent', constraints: [], answers: { events: [make('WILLIAM_ADAMA'), make('LAURA_ROSLIN')], shapes: [] } }));
+
+    expect(container.querySelector('.card-grid, .pool')).toBeNull();
+    expect(labels(container)).toEqual(['William Adama', 'Laura Roslin']);
+    expect(images(screen.getByRole('button', { name: 'Laura Roslin' }))).toEqual(['Character/player-token/LAURA_ROSLIN']);
+    // the title it gives, once with the group's name
+    expect(images(container.querySelector('.group-title')!)).toEqual(['TitleIcon/PRESIDENT']);
+  });
+
+  it('keep the miracle token on every answer of a miracle ability, its character with the group', () => {
+    const detect = (target: number) => ({ kind: 'CylonDetectorEvent', playerNumber: 1, targetPlayerNumber: target });
+    const { container } = renderPanel(game({ kind: 'Decide', player: 1, action: 'ActionEvent', constraints: [], answers: { events: [detect(1), detect(2)], shapes: [] } }));
+
+    expect(images(container.querySelector('.group-title')!)).toEqual(['Character/player-token/GAIUS_BALTAR']);
+    expect(images(screen.getByRole('button', { name: 'Laura Roslin' }))).toEqual(['Character/player-token/LAURA_ROSLIN', 'Token/MIRACLE']);
+    expect(images(screen.getByRole('button', { name: 'William Adama' }))).toEqual(['Character/player-token/WILLIAM_ADAMA', 'Token/MIRACLE']);
+  });
+
   it('show only what the picks on the board left, with a way back', () => {
     const move = (destination: string) => ({ kind: 'MoveEvent', playerNumber: 1, destination, discardCard: null });
     renderPanel(game({ kind: 'Decide', player: 1, action: 'MoveEvent', constraints: [], answers: { events: [move('ARMORY'), move('ADMIRALS_QUARTERS')], shapes: [] } }));

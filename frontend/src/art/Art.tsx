@@ -1,6 +1,6 @@
 // The images on the table. A thumbnail is too small to read, so hovering one shows it large in the preview, which
 // follows the pointer.
-import { useRef, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { create } from 'zustand';
 import { deckBackArt, type ArtRef } from './images';
 import { usePlaceNear, type Point } from './nearPointer';
@@ -14,6 +14,7 @@ interface PreviewState {
   show(art: ArtRef, pointer: Point, extra?: ReactNode): void;
   move(art: ArtRef, pointer: Point): void;
   hide(art: ArtRef): void;
+  hideKey(key: string): void;
 }
 
 export const usePreview = create<PreviewState>((set, get) => ({
@@ -27,8 +28,9 @@ export const usePreview = create<PreviewState>((set, get) => ({
     }
   },
   // only the image that showed the preview hides it
-  hide: (art) => {
-    if (get().art?.key === art.key) {
+  hide: (art) => get().hideKey(art.key),
+  hideKey: (key) => {
+    if (get().art?.key === key) {
       set({ art: null, pointer: null, extra: null });
     }
   },
@@ -68,8 +70,14 @@ export function ArtPreview() {
   );
 }
 
-/** An image with the preview on hover, unless what it is part of shows it (`preview={false}`). */
+/**
+ * An image with the preview on hover, unless what it is part of shows it (`preview={false}`). An image that goes away
+ * under the pointer, e.g. on the button just clicked, takes its preview with it: no mouse leaves it.
+ */
 export function ArtImg({ art, className = '', preview = true }: { art: ArtRef; className?: string; preview?: boolean }) {
+  // by its key: a render makes new refs of the same image
+  const { key } = art;
+  useEffect(() => () => usePreview.getState().hideKey(key), [key]);
   return (
     <img
       src={art.url}

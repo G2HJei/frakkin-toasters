@@ -1,15 +1,25 @@
 // The components an event, a fact or an option names, found through their types in the schema: the cards, characters,
 // locations, ships and damage that have an image. The log and the input show them next to the words.
 import { deckBackArt, deckCardArt, deckCards, enumArt, pileDeck, skillCardArt, type ArtRef } from './images';
-import { recordNamed, type TypeRef } from '../wire/schema';
+import { recordNamed, type Component, type RecordType, type TypeRef } from '../wire/schema';
 import type { FactProjection, Followup } from '../wire/types';
 
 type Fields = Record<string, unknown>;
 
+/**
+ * The images a place shows for a value of a record instead, e.g. the answers show a player by his character: undefined
+ * leaves the value to `recordArt`. A list asks for each of its elements.
+ */
+export type ValueArt = (value: unknown, component: Component, record: RecordType) => ArtRef[] | undefined;
+
 const MAX_DEPTH = 4;
 
 /** The images a record names, the record known by its `kind` or by the given name. */
-export function recordArt(value: Fields | null | undefined, recordName?: string, depth = 0): ArtRef[] {
+export function recordArt(value: Fields | null | undefined, recordName?: string, override?: ValueArt): ArtRef[] {
+  return walk(value, recordName, override, 0);
+}
+
+function walk(value: Fields | null | undefined, recordName: string | undefined, override: ValueArt | undefined, depth: number): ArtRef[] {
   if (!value || depth > MAX_DEPTH) {
     return [];
   }
@@ -18,12 +28,17 @@ export function recordArt(value: Fields | null | undefined, recordName?: string,
   if (!record) {
     return [];
   }
-  return unique(record.components.flatMap((component) => valueArt(value[component.name], component.type, value, depth)));
+  return unique(record.components.flatMap((component) => valueArt(value[component.name], component.type, value, depth, override, component, record)));
 }
 
-function valueArt(value: unknown, type: TypeRef, siblings: Fields, depth: number): ArtRef[] {
+function valueArt(value: unknown, type: TypeRef, siblings: Fields, depth: number, override?: ValueArt, component?: Component, record?: RecordType): ArtRef[] {
   if (value === null || value === undefined) {
     return [];
+  }
+  // a list's elements and a nested record's components are asked one by one
+  const own = override && component && record && !['list', 'set', 'ref'].includes(type.t) ? override(value, { ...component, type }, record) : undefined;
+  if (own) {
+    return own;
   }
   switch (type.t) {
     case 'enum': {
@@ -32,7 +47,7 @@ function valueArt(value: unknown, type: TypeRef, siblings: Fields, depth: number
     }
     case 'list':
     case 'set':
-      return Array.isArray(value) ? value.flatMap((element) => valueArt(element, type.of as TypeRef, siblings, depth)) : [];
+      return Array.isArray(value) ? value.flatMap((element) => valueArt(element, type.of as TypeRef, siblings, depth, override, component, record)) : [];
     case 'cards': {
       // a list of cards takes its kind from the deck or the pile beside it
       const kind = deckCards(siblings.deck as string | undefined) ?? pileCards(siblings.pile as string | undefined);
@@ -43,7 +58,7 @@ function valueArt(value: unknown, type: TypeRef, siblings: Fields, depth: number
         const found = skillCardArt(value as { type: string | null; value: number });
         return found ? [found] : [];
       }
-      return typeof value === 'object' ? recordArt(value as Fields, type.name, depth + 1) : [];
+      return typeof value === 'object' ? walk(value as Fields, type.name, override, depth + 1) : [];
     }
     default:
       return [];

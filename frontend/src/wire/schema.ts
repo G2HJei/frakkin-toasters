@@ -49,8 +49,9 @@ export interface EnumType {
   values: string[];
   // SkillCardType only: the color of each card type
   colors?: Record<string, string>;
-  // CharacterAbility only: the character whose sheet prints each ability
+  // CharacterAbility only: the character whose sheet prints each ability, and the miracle tokens a miracle one spends
   characters?: Record<string, string>;
+  miracles?: Record<string, number>;
   // Character only: the type of each character, and the skill set his sheet prints, in its order
   types?: Record<string, string>;
   skillSets?: Record<string, SkillSetOption[]>;
@@ -111,6 +112,12 @@ export function concreteEvents(action: string): string[] {
 export function abilityCharacter(ability: string | null | undefined): string | null {
   const characterAbility = schema.types.CharacterAbility;
   return ability && characterAbility?.kind === 'enum' ? (characterAbility.characters?.[ability] ?? null) : null;
+}
+
+/** Whether an ability is a miracle ability ("Once per game"), which spends miracle tokens, e.g. SECRET_DESTINY. */
+export function isMiracle(ability: string | null | undefined): boolean {
+  const characterAbility = schema.types.CharacterAbility;
+  return !!ability && characterAbility?.kind === 'enum' && (characterAbility.miracles?.[ability] ?? 0) > 0;
 }
 
 /** The type of a character, e.g. CYLON_LEADER for CAVIL. */

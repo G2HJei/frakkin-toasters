@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { cardArt, characterArt, skillCardArt, titleArt, tokenArt, type ArtRef, type CardEnum, type TitleName, type TokenName } from '../../art/images';
+import { cardArt, characterArt, skillCardArt, titleArt, titleIcon, tokenArt, type ArtRef, type CardEnum, type TitleName, type TokenName } from '../../art/images';
 import { ArtImg, CardBack, CardTile, previewHandlers } from '../../art/Art';
 import { constantLabel, skillCardLabel } from '../../labels/describe';
 import type { HiddenCards, PlayerProjection, QuorumCardInPlay, SkillCard, SkillHand } from '../../wire/types';
@@ -11,9 +11,6 @@ import { useReference } from '../reference/ReferenceDrawer';
 import { anchorOf, useAnswering } from '../../input/boardAnswers';
 import { targetKey, type Target } from '../../input/answers';
 import { characterSkillSet, characterType } from '../../wire/schema';
-import admiralIcon from './icons/ADMIRAL.png';
-import cagIcon from './icons/CAG.png';
-import presidentIcon from './icons/PRESIDENT.png';
 
 /**
  * Every player's mat: his portrait with his skill set's colors beside it and the titles and tokens in front of him
@@ -178,13 +175,9 @@ function viewerIs(game: { viewer?: { kind?: string; playerNumber?: number } | nu
   return game?.viewer?.kind === 'PlayerViewer' && game.viewer.playerNumber === playerNumber;
 }
 
-// The insignia of the title cards, cut out of their cards: the whole card is too small to read in a badge. The
-// Infiltration Card has none.
-const TITLE_ICONS: Partial<Record<TitleName, string>> = { PRESIDENT: presidentIcon, ADMIRAL: admiralIcon, CAG: cagIcon };
-
 function TitleBadge({ title }: { title: TitleName }) {
   const art = titleArt(title);
-  return <Badge className="title" art={art} icon={TITLE_ICONS[title]} label={art?.label ?? constantLabel('Title', title)} />;
+  return <Badge className="title" art={art} icon={titleIcon(title)} label={art?.label ?? constantLabel('Title', title)} />;
 }
 
 function TokenBadge({ token, label }: { token: TokenName; label: string }) {

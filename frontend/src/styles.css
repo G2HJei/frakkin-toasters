@@ -2063,10 +2063,11 @@ details[open] > summary::before {
   transform: rotate(90deg);
 }
 
+/* the groups stand further apart than a group's rows, so a lone answer after a group isn't taken for one of its own */
 .answer-groups {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 12px;
   padding-left: 10px;
   border-left: 2px solid var(--steel-500, var(--line));
 }
@@ -2108,7 +2109,7 @@ details[open] > summary::before {
 
 .chips {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 4px;
 }
 
@@ -2120,15 +2121,59 @@ details[open] > summary::before {
   font-size: 0.9rem;
 }
 
-.chips.card-grid,
-.options.card-grid {
+/* every answer is a row of its own, as high as a card's image beside its words: the images lie in a slot as wide on
+   every row, empty where there are none, so the words line up (input/ArtSlot.tsx) */
+.answer-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 46px;
+  padding: 5px 12px 5px 6px;
+  font-size: 0.9rem;
+  text-align: left;
+}
+
+.art-slot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 52px;
+  height: 34px;
+}
+
+/* several images share the slot, each smaller when they don't fit */
+.art-slot .art {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 3px;
+}
+
+.art-slot .art-icon,
+.art-slot .art-damage {
+  height: 28px;
+  border-radius: 0;
+}
+
+/* a standee as the mats print it: the top corners cut */
+.art-slot .art-token[data-art^='Character/'] {
+  clip-path: polygon(16% 0, 84% 0, 100% 11%, 100% 100%, 0 100%, 0 11%);
+  border-radius: 0;
+}
+
+/* the characters to choose: side by side, as large as their portraits */
+.chips.card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
   gap: 6px;
 }
 
-.chips.card-grid .chip,
-.options.card-grid .option {
+.chips.card-grid .chip {
   flex-direction: column;
   align-items: center;
   text-align: center;
@@ -2136,8 +2181,7 @@ details[open] > summary::before {
   font-size: 0.8rem;
 }
 
-.chips.card-grid .art-strip .art,
-.options.card-grid .art-strip .art {
+.chips.card-grid .art-strip .art {
   height: 96px;
 }
 
@@ -2336,6 +2380,25 @@ details[open] > summary::before {
   font: 600 11px/1 var(--display);
   letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+/* the Pass, always the last answer: its icon in amber and its word in printed letters, so it doesn't pass for an
+   action */
+.table-page :is(.input-panel, .anytime-panel, .answer-pop) .answer-row.pass {
+  --edge: var(--steel-300);
+  font: 600 12px/1.2 var(--display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.answer-row.pass .art-slot {
+  color: var(--amber, var(--accent));
+}
+
+.answer-row.pass .detail {
+  font: 400 12px/1.3 'Segoe UI', system-ui, -apple-system, sans-serif;
+  letter-spacing: normal;
+  text-transform: none;
 }
 
 /* the open section of a choice: amber, as long as it is open */

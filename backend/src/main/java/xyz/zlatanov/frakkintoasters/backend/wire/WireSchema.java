@@ -51,7 +51,7 @@ import static xyz.zlatanov.frakkintoasters.backend.journal.ValueCodec.typeArgume
  *     plays, and the {@code source} of an event that exists for a card or an ability ({@code Source})</li>
  *     <li>an interface: the records that implement it, a union told apart by {@code kind}</li>
  *     <li>an enum: its constants, for {@code SkillCardType} the color of each, for {@code CharacterAbility} the
- *     character of each, for {@code Character} the type and skill set of each, and the {@code sources} of constants
+ *     character of each and the miracle tokens of the miracle ones, for {@code Character} the type and skill set of each, and the {@code sources} of constants
  *     that stand for a card or an ability, e.g. what granted a {@code GrantEvent}</li>
  *     <li>the socket messages, told apart by {@code type}</li>
  *     <li>the Attack Table as the game applies it ({@code AttackTable})</li>
@@ -152,6 +152,11 @@ public final class WireSchema {
                 // the character sheet an ability is printed on
                 val characters = node.putObject("characters");
                 Arrays.stream(CharacterAbility.values()).forEach(ability -> characters.put(ability.name(), ability.character().name()));
+                // the miracle tokens a use spends, for the miracle abilities only: the answers show the token
+                val miracles = node.putObject("miracles");
+                Arrays.stream(CharacterAbility.values())
+                        .filter(CharacterAbility::isMiracle)
+                        .forEach(ability -> miracles.put(ability.name(), ability.miracleTokens()));
             }
             if (type == Character.class) {
                 // the type and the skill set a character sheet prints, in its order, for the strip beside a mat's

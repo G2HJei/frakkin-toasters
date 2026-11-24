@@ -2,6 +2,9 @@
 // like it. Vite copies them into the build and gives each its URL. A component that has no image falls back to its name.
 import { constantLabel, skillCardLabel, type SkillCardLike } from '../labels/describe';
 import { abilityCharacter } from '../wire/schema';
+import admiralIcon from '../table/players/icons/ADMIRAL.png';
+import cagIcon from '../table/players/icons/CAG.png';
+import presidentIcon from '../table/players/icons/PRESIDENT.png';
 
 // only the folders: the full-size board scan at the root isn't for the browser (the table's board is board.jpg)
 const FILES = import.meta.glob<string>('./*/**/*.{png,jpg,gif,svg}', {
@@ -19,7 +22,7 @@ export function artPaths(): string[] {
   return [...URLS.keys()];
 }
 
-export type ArtShape = 'card' | 'token' | 'pilot' | 'location' | 'ship' | 'damage' | 'dial' | 'track' | 'back';
+export type ArtShape = 'card' | 'token' | 'pilot' | 'location' | 'ship' | 'damage' | 'dial' | 'track' | 'back' | 'icon';
 
 /** An image of a component: its file, its name as alt text, and what the preview shows large. */
 export interface ArtRef {
@@ -125,6 +128,25 @@ export function titleArt(title: TitleName): ArtRef | null {
   return art(`Title/${title}`, TITLE_LABELS[title], 'card');
 }
 
+// The insignia of the title cards, cut out of their cards: the whole card is too small to read in a badge or a button.
+// The Infiltration Card has none.
+const TITLE_ICONS: Partial<Record<TitleName, string>> = { PRESIDENT: presidentIcon, ADMIRAL: admiralIcon, CAG: cagIcon };
+
+export function titleIcon(title: TitleName): string | undefined {
+  return TITLE_ICONS[title];
+}
+
+/** A title's insignia, with its card as the preview; the card where it has none. */
+export function titleIconArt(title: TitleName): ArtRef | null {
+  const icon = TITLE_ICONS[title];
+  const card = titleArt(title);
+  return icon && card ? { key: `TitleIcon/${title}`, url: icon, label: card.label, shape: 'icon', preview: card.preview } : card;
+}
+
+export function isTitleName(constant: Constant): constant is TitleName {
+  return constant === 'PRESIDENT' || constant === 'ADMIRAL' || constant === 'CAG' || constant === 'INFILTRATING';
+}
+
 export type TokenName = 'CURRENT_PLAYER' | 'MIRACLE' | 'NUKE' | 'CENTURION';
 
 const TOKEN_LABELS: Record<TokenName, string> = { CURRENT_PLAYER: 'Current player', MIRACLE: 'Miracle token', NUKE: 'Nuke', CENTURION: 'Centurion' };
@@ -141,6 +163,30 @@ export function dieArt(value: number | null | undefined): ArtRef | null {
 /** The back of every Skill Card, whatever its color. */
 export function skillBackArt(): ArtRef | null {
   return art('Back/SKILL', 'Skill Card', 'back', []);
+}
+
+// the colors of the Skill Cards, as the table's styles have them (--politics, ...)
+const SKILL_COLORS: Record<string, string> = {
+  POLITICS: '#c9a227',
+  LEADERSHIP: '#5f9e4f',
+  TACTICS: '#8a63c9',
+  PILOTING: '#c0503f',
+  ENGINEERING: '#3f7fc0',
+  TREACHERY: '#6d4a3a',
+};
+
+/** A Skill Card back in a color, hatched as the table draws a color's backs (`.card-back`), e.g. for a draw of it. */
+export function skillColorBackArt(color: Constant): ArtRef | null {
+  const fill = color ? SKILL_COLORS[color] : undefined;
+  if (!color || !fill) {
+    return null;
+  }
+  const svg =
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 46 72">' +
+    '<pattern id="h" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="4" height="9" fill="#ffffff" fill-opacity="0.16"/></pattern>' +
+    `<rect x="0.5" y="0.5" width="45" height="71" rx="4" fill="${fill}" stroke="#ffffff" stroke-opacity="0.35"/>` +
+    '<rect x="0.5" y="0.5" width="45" height="71" rx="4" fill="url(#h)"/></svg>';
+  return { key: `SkillCardColor/${color}`, url: `data:image/svg+xml,${encodeURIComponent(svg)}`, label: constantLabel('SkillCardColor', color), shape: 'back', preview: [] };
 }
 
 /**
@@ -192,7 +238,7 @@ export function enumArt(enumName: string, constant: Constant): ArtRef | null {
       // the character sheet that prints it
       return characterSheetArt(abilityCharacter(constant));
     case 'Title':
-      return constant === 'PRESIDENT' || constant === 'ADMIRAL' || constant === 'CAG' ? titleArt(constant) : null;
+      return isTitleName(constant) && constant !== 'INFILTRATING' ? titleArt(constant) : null;
     default:
       return null;
   }
