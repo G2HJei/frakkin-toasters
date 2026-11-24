@@ -1493,7 +1493,7 @@ details[open] > summary::before {
   color: var(--steel-300);
 }
 
-/* the log takes what the panels above it leave in the left column, at least 260px, and scrolls inside its body */
+/* the log takes what the panels above it leave in the left column, at least 15vh, and scrolls inside its body */
 .table-page .log {
   display: flex;
   flex-direction: column;
@@ -1571,9 +1571,29 @@ details[open] > summary::before {
   }
 }
 
+/* the left column doesn't scroll as a whole: the input panel takes what its answers need while the log keeps 15vh, and
+   scrolls inside its body past that; the log takes the rest */
+.table-side.left > .input-panel {
+  flex: 0 1 auto;
+  /* it gives way down to 12rem (its content, when that is less), so a tall turn panel can't squeeze it away; where
+     even that doesn't fit, the column scrolls. Without calc-size() it gives way entirely */
+  min-height: 0;
+  min-height: calc-size(max-content, min(size, 12rem));
+  display: flex;
+  flex-direction: column;
+}
+
+.table-page .input-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--steel-500) transparent;
+}
+
 .table-side.left > .log {
-  flex: 1 0 260px;
-  min-height: 260px;
+  flex: 1 0 15vh;
+  min-height: 15vh;
 }
 
 .table-page .log-body {
@@ -1590,7 +1610,7 @@ details[open] > summary::before {
 }
 
 @media (max-width: 1100px) {
-  .table-side.left > .log {
+  .table-side.left > :is(.input-panel, .log) {
     flex: none;
   }
 
@@ -2605,6 +2625,9 @@ button.playable.picked .art {
 .table-main > .board.your-move {
   --bw: 3px;
   clip-path: var(--chamfer);
+  /* the clip-path hides the glow's frame outside the board, but it would still overflow the screen, and the page
+     would scroll by its width */
+  overflow: clip;
 }
 
 /* the glow as an inset shadow: the outside of the cut shape (a frame around the board and the corners it cuts), blurred

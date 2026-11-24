@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { CardTile } from '../art/Art';
 import { choiceArt } from '../art/refs';
 import { partArt, Words } from '../art/Words';
@@ -34,6 +35,13 @@ export function InputPanel({ onMove }: InputPanelProps) {
   const yourMove = input?.kind === 'Choose' || input?.kind === 'Decide';
   // its names show their images on hover, like the log's
   const pause = pauseOf(input, { ...table, artOf: partArt });
+  const bodyRef = useRef<HTMLDivElement>(null);
+  // a new input starts at its top, not where the last one was scrolled to
+  useEffect(() => {
+    if (bodyRef.current) {
+      bodyRef.current.scrollTop = 0;
+    }
+  }, [version]);
   return (
     <section className={`panel cf input-panel ${yourMove ? 'your-move' : ''} ${sending ? 'sending' : ''}`.trim()} aria-label="input" aria-busy={sending}>
       <h2>{pause.heading}</h2>
@@ -44,20 +52,23 @@ export function InputPanel({ onMove }: InputPanelProps) {
           {ruleFor(input) && <RuleLink article={ruleFor(input)!.article} found={ruleFor(input)} />}
         </p>
       )}
-      {outcome && (
-        <p className="outcome">
-          The {outcome.winner === 'HUMANS' ? 'humans' : 'Cylons'} win
-          {outcome.winners && outcome.winners.length > 0 ? `: ${outcome.winners.map(table.playerName).join(', ')}` : ''}.
-        </p>
-      )}
-      {art.length > 0 && (
-        <div className="choice-subject">
-          {art.map((ref) => (
-            <CardTile key={ref.key} art={ref} label={ref.label} size="lg" />
-          ))}
-        </div>
-      )}
-      {yourMove && <AnswerPanel key={version} onMove={onMove} />}
+      {/* the body scrolls where the column leaves the panel less than it needs; the heading stays above it */}
+      <div className="input-body" ref={bodyRef}>
+        {outcome && (
+          <p className="outcome">
+            The {outcome.winner === 'HUMANS' ? 'humans' : 'Cylons'} win
+            {outcome.winners && outcome.winners.length > 0 ? `: ${outcome.winners.map(table.playerName).join(', ')}` : ''}.
+          </p>
+        )}
+        {art.length > 0 && (
+          <div className="choice-subject">
+            {art.map((ref) => (
+              <CardTile key={ref.key} art={ref} label={ref.label} size="lg" />
+            ))}
+          </div>
+        )}
+        {yourMove && <AnswerPanel key={version} onMove={onMove} />}
+      </div>
       {rejected && (
         <p className="rejected" role="alert">
           {rejected.reason === 'STALE' ? 'The game moved on: try again.' : rejected.message}
