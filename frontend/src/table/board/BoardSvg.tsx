@@ -126,7 +126,7 @@ export function BoardSvg() {
             aria-label={isTarget ? constantLabel('Location', name) : undefined}
           >
             {lit && <title>{hint(lit, table)}</title>}
-            <rect className={space ? 'space-frame' : 'frame'} x={place.x - 6} y={place.y - 6} width={place.width + 12} height={place.height + 12} rx={14} />
+            <polygon className={space ? 'space-frame' : 'frame'} points={cutBox(place.x - 6, place.y - 6, place.width + 12, place.height + 12, outsideCut(LOCATION_CUT, 6))} />
             {space ? (
               <Ships place={place} ships={ships.filter((ship) => ship.location === name)} toMiss={game.turn?.raidersToMiss?.[name] ?? 0} avoid={LAUNCH_TUBES[name]} />
             ) : (
@@ -387,12 +387,40 @@ function Tracks({ game }: { game: GameProjection }) {
 const TRACK_SPACE = 79;
 const TRACK_SPACE_CUT = 12;
 
-/** A highlight around a track's space, its corners cut as the space's, at the same 45 degrees. */
-function Marker({ track, position, at, size, label }: { track: string; position: string; at: Point; size: number; label: string }) {
-  // an outline parallel to the space's: moved out by o, its cut grows by o times (2 - √2)
-  const cut = TRACK_SPACE_CUT + ((size - TRACK_SPACE) / 2) * (2 - Math.SQRT2);
-  const [left, top, right, bottom] = [at.x - size / 2, at.y - size / 2, at.x + size / 2, at.y + size / 2];
-  const points = [
+// the printed locations' corners are cut by 15, and the rings around the ships by about as much as the table's buttons
+// at a usual height
+const LOCATION_CUT = 15;
+const RING_CUT = 12;
+
+// the portraits' top corners are cut by 14 of their 87 pixels, their bottom is square. The ring around a standee lies
+// this far out, the middle of its stroke, which is twice as wide (styles.css)
+const PORTRAIT_CUT = 14 / 87;
+const TOKEN_RING_OUT = 2.5;
+
+/** The points of a box with its top corners cut at 45 degrees and its bottom square, like the portraits. */
+function topCutBox(left: number, top: number, width: number, height: number, cut: number): string {
+  const [right, bottom] = [left + width, top + height];
+  return [
+    [left + cut, top],
+    [right - cut, top],
+    [right, top + cut],
+    [right, bottom],
+    [left, bottom],
+    [left, top + cut],
+  ]
+    .map(([x, y]) => `${x},${y}`)
+    .join(' ');
+}
+
+/** An outline parallel to a box with corners cut by `cut`, moved out by `out`: its cut grows by out times (2 - √2). */
+function outsideCut(cut: number, out: number): number {
+  return cut + out * (2 - Math.SQRT2);
+}
+
+/** The points of a box with its corners cut at 45 degrees, like the printed spaces and the table's buttons. */
+function cutBox(left: number, top: number, width: number, height: number, cut: number): string {
+  const [right, bottom] = [left + width, top + height];
+  return [
     [left + cut, top],
     [right - cut, top],
     [right, top + cut],
@@ -401,11 +429,18 @@ function Marker({ track, position, at, size, label }: { track: string; position:
     [left + cut, bottom],
     [left, bottom - cut],
     [left, top + cut],
-  ];
+  ]
+    .map(([x, y]) => `${x},${y}`)
+    .join(' ');
+}
+
+/** A highlight around a track's space, its corners cut as the space's, at the same 45 degrees. */
+function Marker({ track, position, at, size, label }: { track: string; position: string; at: Point; size: number; label: string }) {
+  const cut = outsideCut(TRACK_SPACE_CUT, (size - TRACK_SPACE) / 2);
   return (
     <g className={`marker marker-${track.toLowerCase()}`} data-track={track} data-position={position}>
       <title>{label}</title>
-      <polygon points={points.map(([x, y]) => `${x},${y}`).join(' ')} />
+      <polygon points={cutBox(at.x - size / 2, at.y - size / 2, size, size, cut)} />
     </g>
   );
 }
@@ -669,7 +704,10 @@ function Standees({ place, title, characters, acting, nameOf, game }: {
             {lit && <title>{hint(lit, table)}</title>}
             {art ? (
               <>
-                <rect className="token-ring" x={x - 3} y={top - 3} width={width + 6} height={height + 6} rx={8} />
+                <polygon
+                  className="token-ring"
+                  points={topCutBox(x - TOKEN_RING_OUT, top - TOKEN_RING_OUT, width + 2 * TOKEN_RING_OUT, height + 2 * TOKEN_RING_OUT, outsideCut(width * PORTRAIT_CUT, TOKEN_RING_OUT))}
+                />
                 <SvgArt art={art} x={x} y={top} width={width} height={height} title={name} previewExtra={player ? <PlayerMatOf playerNumber={player.number} /> : undefined} />
               </>
             ) : (
@@ -871,7 +909,7 @@ function Ship({ ship, x, y, width, height, preview = true }: { ship: ShipProject
   return (
     <g className={classes} data-ship={ship.id} aria-label={label} {...(lit ? targetHandlers({ type: 'ship', id: ship.id }, onTarget) : {})}>
       {lit && <title>{hint(lit, table)}</title>}
-      {(lit || flashed.has(key)) && <rect className="target-ring" x={x - 4} y={y - 4} width={width + 8} height={height + 8} rx={8} />}
+      {(lit || flashed.has(key)) && <polygon className="target-ring" points={cutBox(x - 4, y - 4, width + 8, height + 8, RING_CUT)} />}
       {art ? (
         <SvgArt art={art} x={x} y={y} width={width} height={height} title={label} className="piece" preview={preview} />
       ) : (

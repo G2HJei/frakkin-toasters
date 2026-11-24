@@ -67,7 +67,7 @@ function PlayerMat({ player }: { player: PlayerProjection }) {
             // the character sheet in the reference, a click away
             <button
               type="button"
-              className="avatar-button"
+              className="avatar-frame avatar-button"
               aria-label={`${constantLabel('Character', player.character)}: character sheet`}
               onClick={(event) => {
                 event.stopPropagation();
@@ -77,7 +77,9 @@ function PlayerMat({ player }: { player: PlayerProjection }) {
               <ArtImg art={portrait} className="avatar" />
             </button>
           ) : (
-            <span className="avatar empty" />
+            <span className="avatar-frame">
+              <span className="avatar empty" />
+            </span>
           )}
           {/* a revealed Cylon draws 2 cards of any colors instead (rule 8.2.2.3), a Cylon Leader his skill set, infiltrating or not (rule 8.2.2.4) */}
           {(!player.revealedCylon || characterType(player.character) === 'CYLON_LEADER') && <SkillStrip character={player.character} />}

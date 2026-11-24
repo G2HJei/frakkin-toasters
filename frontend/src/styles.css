@@ -1128,11 +1128,18 @@ details > summary {
   fill: none;
 }
 
-/* the acting player: the current player, unless another acts during his turn */
+/* a standee as its portrait prints it, Cavil's too, as on the mats (.mat .avatar): the top corners cut by 14 of its 87
+   pixels, the bottom square */
+.board-svg .character image {
+  clip-path: polygon(16.09% 0, 83.91% 0, 100% 10.94%, 100% 100%, 0 100%, 0 10.94%);
+}
+
+/* the acting player: the current player, unless another acts during his turn. As on his mat: a red edge along the
+   portrait's shape and a red glow, in the board's pixels (about 2.3 a screen pixel at a usual height) */
 .board-svg .character.acting .token-ring {
   stroke: #e0352b;
-  stroke-width: 6;
-  filter: drop-shadow(0 0 10px rgba(224, 53, 43, 0.8));
+  stroke-width: 5;
+  filter: drop-shadow(0 0 5px rgba(224, 53, 43, 0.8)) drop-shadow(0 0 16px rgba(224, 53, 43, 0.6));
 }
 
 .board-svg .character rect:not(.token-ring) {
@@ -1619,14 +1626,25 @@ details > summary {
   gap: 8px;
 }
 
+/* the portrait as the images print it: the top corners cut by 14 of their 87 pixels, at 45 degrees, the bottom square.
+   Cavil's image isn't cut, so the clip cuts it alike. The shadow is on the frame around it, outside the clipping, so it
+   follows the cuts */
+.table-page .mat .avatar-frame {
+  position: relative;
+  isolation: isolate;
+  flex: none;
+  line-height: 0;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.6));
+}
+
 .table-page .mat .avatar {
   width: 88px;
   height: 130px;
   object-fit: cover;
   border: 0;
-  border-radius: 5px;
+  border-radius: 0;
   flex: none;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.6);
+  clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%, 0 14px);
 }
 
 .table-page .mat .avatar.empty {
@@ -1654,8 +1672,19 @@ details > summary {
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
 }
 
-.table-page .mat.acting .avatar {
-  box-shadow: 0 0 0 2px #e0352b, 0 0 14px 3px rgba(224, 53, 43, 0.6);
+/* the acting player: a red edge 2px out along the portrait's shape (moved out by 2, the cut grows by 2 times (2 - √2)),
+   and a red glow instead of the shadow */
+.table-page .mat.acting .avatar-frame {
+  filter: drop-shadow(0 0 2px rgba(224, 53, 43, 0.8)) drop-shadow(0 0 7px rgba(224, 53, 43, 0.6));
+}
+
+.table-page .mat.acting .avatar-frame::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  background: #e0352b;
+  clip-path: polygon(15.2px 0, calc(100% - 15.2px) 0, 100% 15.2px, 100% 100%, 0 100%, 0 15.2px);
 }
 
 .table-page .mat-body {
@@ -2272,8 +2301,8 @@ details > summary {
   outline: none;
 }
 
-/* a part's value picked, and one the other picks leave no choice about (a tile keeps its dashed outline, which the cut
-   corners would clip) */
+/* a part's value picked, and one the other picks leave no choice about (the tiles are below, with the other tiles to
+   pick) */
 .table-page .parts-widget .chip.picked {
   --edge: var(--dradis-glow);
   --bw: 2px;
@@ -2283,6 +2312,41 @@ details > summary {
 
 .table-page .parts-widget .chip.implied {
   --edge: var(--amber);
+}
+
+/* the cards and keys to pick, cut like the input's buttons: steel at rest, amber once picked, and a hatched amber edge
+   for one the other picks leave no choice about */
+.table-page :is(.input-panel, .anytime-panel, .answer-pop) button.tile {
+  --c: 6px;
+  --edge: var(--steel-500);
+  --fill: #1a2129;
+  --bw: 1.5px;
+  position: relative;
+  isolation: isolate;
+  border: 0;
+  border-radius: 0;
+  background: var(--edge);
+  clip-path: var(--chamfer);
+  box-shadow: none;
+}
+
+.table-page :is(.input-panel, .anytime-panel, .answer-pop) button.tile::before {
+  content: '';
+  position: absolute;
+  inset: var(--bw);
+  z-index: -1;
+  background: var(--fill);
+  clip-path: var(--chamfer);
+}
+
+.table-page :is(.input-panel, .anytime-panel, .answer-pop) button.tile.picked {
+  --edge: var(--amber);
+  --bw: 2px;
+}
+
+.table-page :is(.input-panel, .anytime-panel, .answer-pop) button.tile.implied {
+  outline: none;
+  background: repeating-linear-gradient(45deg, var(--amber) 0 4px, transparent 4px 8px);
 }
 
 details.advanced > summary {
@@ -2384,6 +2448,40 @@ button.playable:hover .art {
 
 button.playable.picked .art {
   outline-color: var(--dradis-glow, var(--accent));
+}
+
+/* on the table, framed like the input's buttons: an amber edge with cut corners, the card cut alike, and the glow on the
+   button, outside the clipping, so it follows the cuts */
+.table-page button.playable {
+  --c: 6px;
+  position: relative;
+  isolation: isolate;
+  padding: 2px;
+  margin: -2px;
+  filter: drop-shadow(0 0 5px rgba(242, 180, 65, 0.85));
+}
+
+.table-page button.playable::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--amber);
+  clip-path: var(--chamfer);
+}
+
+.table-page button.playable .art {
+  outline: none;
+  box-shadow: none;
+  clip-path: var(--chamfer);
+}
+
+.table-page button.playable.picked {
+  filter: drop-shadow(0 0 5px rgba(143, 208, 255, 0.85));
+}
+
+.table-page button.playable.picked::before {
+  background: var(--dradis-glow);
 }
 
 /* the board's edge says when the game waits for the viewer */
