@@ -1,28 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-  <!-- a phoenix rising: its wings raised as fanned feathers of flame, a flame for a head, the body tapering to a forked
-       tail; the wings are cut free of the body -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 39.8 47.8">
+  <!-- a phoenix rising, after the template: on each side five feathers like blades, the two upper ones raised high,
+       the three lower ones swept down to the body, each pointed at its tip and cut off or pointed where it meets the
+       body; a flame for a head on a narrow neck, the body broad at the shoulders, pinched at the waist and tapering to
+       a pointed tail -->
   <defs>
-    <path id="feather" d="M0 0C-3.2-6-4-14-1.2-23 1.2-14 2.2-6 0 0Z"/>
-    <g id="bird">
-      <path d="M24 5C26.8 9.5 27.8 13 27.2 15.6 26.8 17.6 25.5 18.8 24 18.8S21.2 17.6 20.8 15.6C20.2 13 21.2 9.5 24 5Z"/>
-      <path d="M24 20.5C21 21.8 19.2 24.5 19.2 27.8 19.2 32 21.3 36 22.2 40L19.8 46.5 24 43.2 28.2 46.5 25.8 40C26.7 36 28.8 32 28.8 27.8 28.8 24.5 27 21.8 24 20.5Z"/>
-    </g>
-    <g id="wing">
-      <use href="#feather" transform="translate(19 30) rotate(-12)"/>
-      <use href="#feather" transform="translate(19 31) rotate(-32) scale(.95)"/>
-      <use href="#feather" transform="translate(19.5 32) rotate(-52) scale(.85)"/>
-      <use href="#feather" transform="translate(20 33) rotate(-72) scale(.7)"/>
-    </g>
+    <path id="wing" d="M13.6 27.1L15.7 26C7.8 17.3 11.5 8.4 17.3 0.2 14.2 1.7 8.2 12.7 8.2 16.4 8.2 19.3 11.7 24.9 13.6 27.1ZM7 4.5C4.8 9.7 3.6 19 6.5 24.2 7.9 26.6 10.9 28.5 13 30.2 13 29.5 13 28.7 13.1 28 8.5 22.9 6.3 16 6.6 9.2 6.6 7.6 7 6 7 4.5ZM0.2 14.1C0 15.7 0.6 17.6 1 19.3 3 27 8 30.4 14.8 34 13.7 30.9 9.5 28.8 7.1 26.4 3.6 22.8 1.7 18.7 0.2 14.1ZM1 23.9C1.1 24.8 1.8 25.8 2.3 26.6 5.3 31.7 11.4 34.3 16.4 36.9 16.1 35.1 12.9 34.3 11.2 33.2 7.2 30.9 3.7 27.7 1 23.9ZM2.6 28.9C3.3 32.8 12.9 38.1 16.6 39.3L17.4 38.2C11.8 36.2 7 33.1 2.6 28.9Z"/>
   </defs>
-  <mask id="free">
-    <rect width="48" height="48" fill="#fff"/>
-    <use href="#bird" fill="#000" stroke="#000" stroke-width="3.4"/>
-  </mask>
   <g fill="#cfe0f0">
-    <g mask="url(#free)">
-      <use href="#wing"/>
-      <use href="#wing" transform="translate(48 0) scale(-1 1)"/>
-    </g>
-    <use href="#bird"/>
+    <use href="#wing"/>
+    <use href="#wing" transform="translate(39.8 0) scale(-1 1)"/>
+    <path d="M19.9 17.1C20.7 18.6 22.1 21.8 21.5 23.6 21.2 24.3 20.7 24.8 20.5 25.6 21.7 27.3 24.3 26.6 25.7 28.2 26.2 32 22.5 34.9 21.3 38.2 21.8 39.7 23.6 40.6 23 42.4 22.7 43.4 21.8 44.1 21.3 45 20.8 46 20.8 47 19.9 47.7 19 47 19 46 18.5 45 18 44.1 17.1 43.4 16.8 42.4 16.2 40.6 18 39.7 18.5 38.2 17.3 34.9 13.6 32 14.1 28.2 15.5 26.6 18.1 27.3 19.3 25.6 19.1 24.8 18.6 24.3 18.3 23.6 17.7 21.8 19.1 18.6 19.9 17.1Z"/>
   </g>
 </svg>

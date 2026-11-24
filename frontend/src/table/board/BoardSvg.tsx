@@ -294,7 +294,7 @@ function Resources({ game }: { game: GameProjection }) {
 // the icon right-aligned in its place, so each strip starts as far from it; the printed dials go up to 15: a pip for
 // each, as high as the resource's box, in fives a little apart
 const ICON_WIDTH = 54;
-// the phoenix is as wide as high, so it stands taller than the others to look as large
+// the phoenix is taller than wide, so it stands taller than the others to look as large
 const ICON_HEIGHT: Record<ResourceName, number> = { fuel: 28, food: 28, morale: 42, population: 28 };
 const ICON_GAP = 8;
 const PIPS = 15;
