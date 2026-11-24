@@ -11,6 +11,7 @@ import {
   isTitleName,
   resourceIconArt,
   shipArt,
+  stepIconArt,
   skillBackArt,
   skillColorBackArt,
   titleIconArt,
@@ -29,10 +30,14 @@ type Found = ArtRef | null;
 
 const title = (name: TitleName): Found => titleIconArt(name);
 const back = (deck: string): Found => deckBackArt(deck);
+const movement = (): Found => stepIconArt('MOVEMENT');
 
 // What an event, or a decision on it, does that its fields don't name: the deck it draws from, the Skill Cards it takes
-// without naming them, the title it acts with. A draw of a color shows its color instead (`SkillCardColor`).
+// without naming them, the title it acts with, a move as the turn panel's Movement step. A draw of a color shows its
+// color instead (`SkillCardColor`).
 const KIND_ART: Record<string, () => Found[]> = {
+  MoveEvent: () => [movement()],
+  LeaveBrigEvent: () => [movement()],
   DrawQuorumCardEvent: () => [back('QUORUM')],
   DrawMutinyCardEvent: () => [back('MUTINY')],
   DrawSkillCardsEvent: () => [skillBackArt()],
@@ -57,9 +62,11 @@ const KIND_ART: Record<string, () => Found[]> = {
   CagPilotActionEvent: () => [title('CAG')],
 };
 
-// A decision that an option of a choice asks, as the head of its answers: the activation of a viper
+// A decision that an option of a choice asks, as the head of its answers: the activation of a viper, a "Movement:"
+// card or ability (each answer shows its card or its character)
 const ACTION_ART: Record<string, () => Found[]> = {
   ActivateViperEvent: () => [shipArt('VIPER')],
+  MovementAbilityEvent: () => [movement()],
 };
 
 /** The event kinds the images above are for, which a test holds to the schema. */
@@ -110,6 +117,14 @@ export function miracleArt(): ArtRef | null {
 /** Whether the miracle token is one of the images, which stays on every button of a miracle ability. */
 export function isMiracleArt(art: ArtRef): boolean {
   return art.key === miracleArt()?.key;
+}
+
+/**
+ * Whether an image stays on every button of its group instead of going with the group's name: the miracle token, and
+ * the step a move acts in, which a section's lone group, without a name, would otherwise lose.
+ */
+export function staysOnEachAnswer(art: ArtRef): boolean {
+  return isMiracleArt(art) || art.key.startsWith('StepIcon/');
 }
 
 /** The images of a value a part of an answer picks, e.g. a target player, an ability or a die's result. */

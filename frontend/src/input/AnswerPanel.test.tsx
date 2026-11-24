@@ -325,6 +325,22 @@ describe('the answers', () => {
     expect(images(rows[1])).toEqual(['DeckId/QUORUM']);
   });
 
+  it("show the Movement step's icon on the moves and their section, which keep it on every row", () => {
+    const move = (destination: string, discardCard: unknown) => ({ kind: 'MoveEvent', playerNumber: 1, destination, discardCard });
+    const { container } = renderPanel(
+      game({
+        kind: 'Choose',
+        player: 1,
+        options: [decision('MoveEvent'), { kind: 'Single', event: { kind: 'NoOpEvent', playerNumber: 1 } }],
+        answers: [{ option: 0, answers: { events: [move('ARMORY', null), move('PRESS_ROOM', card('REPAIR', 1))], shapes: [] } }],
+      }),
+    );
+
+    expect(images(container.querySelector('button.section-head')!)).toEqual(['StepIcon/MOVEMENT']);
+    const rows = [...container.querySelectorAll('.answer-section .chips button.answer-row')];
+    expect(rows.map(images)).toEqual([['StepIcon/MOVEMENT'], ['StepIcon/MOVEMENT', 'SkillCardType/REPAIR_1']]);
+  });
+
   it('show the Destination back on each destination to choose, the cards both name once above them', () => {
     const choose = (chosen: string, other: string) => ({ kind: 'Single', event: { kind: 'ChooseDestinationEvent', playerNumber: 1, chosen, others: [other] } });
     const { container } = renderPanel(

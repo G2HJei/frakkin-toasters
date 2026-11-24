@@ -3,7 +3,7 @@ import { actionArt, ART_KINDS, moveArt, partValueArt } from './answerArt';
 import type { Answer, Move } from './answers';
 import { titleArt } from '../art/images';
 import { tableContext } from '../table/tableContext';
-import { isMiracle, recordNamed, schema } from '../wire/schema';
+import { isMiracle, recordNamed, schema, typeNamed } from '../wire/schema';
 import type { Followup, GameProjection, ShipProjection } from '../wire/types';
 
 const keys = (refs: { key: string }[]) => refs.map((ref) => ref.key);
@@ -19,8 +19,21 @@ const answer = (event: Answer): Move => ({ option: null, followup: null, event, 
 const art = (event: Answer) => keys(moveArt(answer(event), table));
 
 describe("an answer's images", () => {
-  it('name events of the schema', () => {
-    expect(ART_KINDS.filter((kind) => !recordNamed(kind) || !schema.lists.events.includes(kind))).toEqual([]);
+  it('name events of the schema, or an interface of events a decision asks for', () => {
+    const isEvent = (kind: string) => recordNamed(kind) !== undefined && schema.lists.events.includes(kind);
+    expect(ART_KINDS.filter((kind) => !isEvent(kind) && typeNamed(kind)?.kind !== 'union')).toEqual([]);
+  });
+
+  it("show a move as the turn panel's Movement step, before the card it discards", () => {
+    const repair = { type: 'REPAIR', value: 1 };
+    expect(art({ kind: 'MoveEvent', playerNumber: 1, destination: 'PRESS_ROOM', discardCard: repair })).toEqual(['StepIcon/MOVEMENT', 'SkillCardType/REPAIR_1']);
+    expect(art({ kind: 'LeaveBrigEvent', playerNumber: 1, destination: 'ARMORY', destinationLimit: null })).toEqual(['StepIcon/MOVEMENT']);
+    const decision = { kind: 'Single', event: { kind: 'PlayerDecisionEvent', playerNumber: 1, action: 'MovementAbilityEvent', eventConstraints: [] } } as unknown as Followup;
+    expect(keys(actionArt({ option: 0, followup: decision, event: null, submits: false, pick: null }))).toEqual(['StepIcon/MOVEMENT']);
+    expect(moveArt(answer({ kind: 'MoveEvent', playerNumber: 1, destination: 'ARMORY', discardCard: null }), table)[0]).toMatchObject({
+      shape: 'icon',
+      label: 'Movement',
+    });
   });
 
   it("show a target by his character's portrait, not the player who answers, and no location", () => {
@@ -28,7 +41,8 @@ describe("an answer's images", () => {
       'SkillCardType/EXECUTIVE_ORDER_2',
       'Character/player-token/LAURA_ROSLIN',
     ]);
-    expect(art({ kind: 'MoveEvent', playerNumber: 1, destination: 'ARMORY', discardCard: null })).toEqual([]);
+    // the step it moves in, the board shows where to
+    expect(art({ kind: 'MoveEvent', playerNumber: 1, destination: 'ARMORY', discardCard: null })).toEqual(['StepIcon/MOVEMENT']);
   });
 
   it('end with the miracle token on an answer of a miracle ability, after its character', () => {

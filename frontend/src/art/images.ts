@@ -6,6 +6,7 @@ import admiralIcon from '../table/players/icons/ADMIRAL.png';
 import cagIcon from '../table/players/icons/CAG.png';
 import presidentIcon from '../table/players/icons/PRESIDENT.png';
 import { RESOURCE_NAMES, resourceIconUrl, resourceLabel, type ResourceName } from '../table/board/resources';
+import { stepIconSvg, type TurnStep } from '../table/turn/StepIcon';
 
 // only the folders: the full-size board scan at the root isn't for the browser (the table's board is board.jpg)
 const FILES = import.meta.glob<string>('./*/**/*.{png,jpg,gif,svg}', {
@@ -213,6 +214,12 @@ export function resourceIconArt(resource: Constant): ArtRef | null {
   }
   const own = name as ResourceName;
   return { key: `ResourceIcon/${resource}`, url: resourceIconUrl(own), label: resourceLabel(own), shape: 'icon', preview: [] };
+}
+
+/** A step of the turn, as the turn panel draws it, in the resource icons' light steel: the step an answer acts in. */
+export function stepIconArt(step: TurnStep): ArtRef {
+  const svg = stepIconSvg(step, '#cfe0f0');
+  return { key: `StepIcon/${step}`, url: `data:image/svg+xml,${encodeURIComponent(svg)}`, label: constantLabel('GameStep', step), shape: 'icon', preview: [] };
 }
 
 /** A track with its token at a position. */

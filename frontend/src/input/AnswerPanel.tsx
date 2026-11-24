@@ -2,7 +2,7 @@ import {useState} from 'react';
 import {ArtImg, ArtStrip, CardBack} from '../art/Art';
 import {type ArtRef, CARD_ENUMS, skillCardArt} from '../art/images';
 import {recordArt} from '../art/refs';
-import {actionArt, isMiracleArt, isNoOp, moveArt, partValueArt} from './answerArt';
+import {actionArt, isNoOp, moveArt, partValueArt, staysOnEachAnswer} from './answerArt';
 import {ArtSlot} from './ArtSlot';
 import {constantLabel, optionEventParts, skillCardLabel, typeLabel, valueLabel} from '../labels/describe';
 import {partArt, Words} from '../art/Words';
@@ -285,8 +285,8 @@ function GroupView({group: listed, varying: before, onMove, untitled = false, na
     const title = groupTitle(group, table);
     const varying = before ?? varyingComponents(group);
     const arts = group.moves.map((move) => moveArt(move, table));
-    // what every answer shows goes with the group's name, but the miracle token stays on each button of its ability
-    const common = arts[0]?.filter((ref) => !isMiracleArt(ref) && arts.every((refs) => refs.some((candidate) => candidate.key === ref.key))) ?? [];
+    // what every answer shows goes with the group's name, but the miracle token and a move's step stay on each button
+    const common = arts[0]?.filter((ref) => !staysOnEachAnswer(ref) && arts.every((refs) => refs.some((candidate) => candidate.key === ref.key))) ?? [];
     const own = arts.map((refs) => refs.filter((ref) => !common.some((candidate) => candidate.key === ref.key)));
     const start = (move: Move) => (move.pick ? useSelection.getState().startPick(move) : onMove(move));
 
