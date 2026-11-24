@@ -1,6 +1,6 @@
-// The log as a story: the scopes and choices of the journal as lines, by turn and step, and the lines of one player in
-// a row under his name once. A choice is told by the event it picked, bookkeeping is left out, and an event whose
-// facts say everything is told by them.
+// The log as a story: the scopes and choices of the journal as lines, by turn and step, each under the player it is
+// about. A choice is told by the event it picked, bookkeeping is left out, and an event whose facts say everything is
+// told by them.
 import { recordArt, unique, factArt } from '../../art/refs';
 import type { ArtRef } from '../../art/images';
 import {
@@ -37,16 +37,10 @@ export interface LogLine {
   ships?: { names: string[]; move: ShipMove };
 }
 
-/** Lines in a row about one player, under his name once; or lines about the game, under none. */
-export interface Run {
-  actor: number | null;
-  lines: LogLine[];
-}
-
 export interface StepStory {
   // the step the lines happen in, null before the first step of a turn
   step: string | null;
-  runs: Run[];
+  lines: LogLine[];
 }
 
 export interface TurnStory {
@@ -228,7 +222,7 @@ function shownFact(entry: LogEntry, kind: string): Record<string, unknown> | nul
   return found?.kind === 'Shown' ? (found.fact as unknown as Record<string, unknown>) : null;
 }
 
-/** The log by turn and step, each step's lines in runs of one player. */
+/** The log by turn and step. */
 export function logStory(entries: LogEntry[], context: FactContext): TurnStory[] {
   const scopes = new Map<number, ScopeLog>();
   for (const entry of entries) {
@@ -236,7 +230,7 @@ export function logStory(entries: LogEntry[], context: FactContext): TurnStory[]
       scopes.set(entry.scopeId, entry);
     }
   }
-  const turns: TurnStory[] = [{ turn: 0, player: null, steps: [{ step: null, runs: [] }] }];
+  const turns: TurnStory[] = [{ turn: 0, player: null, steps: [{ step: null, lines: [] }] }];
   const state = { cardsBefore: false };
   // the player who picked the next scope's event in a choice
   let chosenBy: number | null = null;
@@ -267,11 +261,11 @@ export function logStory(entries: LogEntry[], context: FactContext): TurnStory[]
     }
     const started = shownFact(entry, 'GameFact.TurnStarted');
     if (started) {
-      turns.push({ turn: started.turn as number, player: entry.actor, steps: [{ step: null, runs: [] }] });
+      turns.push({ turn: started.turn as number, player: entry.actor, steps: [{ step: null, lines: [] }] });
     }
     const changed = shownFact(entry, 'GameFact.StepChanged');
     if (changed) {
-      turns[turns.length - 1].steps.push({ step: changed.step as string, runs: [] });
+      turns[turns.length - 1].steps.push({ step: changed.step as string, lines: [] });
     }
     for (const line of scopeLines(entry, index, chosenBy, scopes, state, context)) {
       addLine(turns, line);
@@ -279,23 +273,20 @@ export function logStory(entries: LogEntry[], context: FactContext): TurnStory[]
     chosenBy = null;
   });
   return turns
-    .map((turn) => ({ ...turn, steps: turn.steps.filter((step) => step.runs.length > 0) }))
-    .filter((turn) => turn.turn > 0 || turn.steps.some((step) => step.runs.length > 0));
+    .map((turn) => ({ ...turn, steps: turn.steps.filter((step) => step.lines.length > 0) }))
+    .filter((turn) => turn.turn > 0 || turn.steps.some((step) => step.lines.length > 0));
 }
 
 function addLine(turns: TurnStory[], line: LogLine) {
   const steps = turns[turns.length - 1].steps;
-  const runs = steps[steps.length - 1].runs;
-  const last = runs[runs.length - 1];
-  const previous = last?.lines[last.lines.length - 1];
-  if (last && last.actor === line.actor && previous?.ships && line.ships && sameShipMove(previous.ships.move, line.ships.move)) {
+  const lines = steps[steps.length - 1].lines;
+  const previous = lines[lines.length - 1];
+  if (previous && previous.actor === line.actor && previous.ships && line.ships && sameShipMove(previous.ships.move, line.ships.move)) {
     // "Raider #1016, Raider #1017 and Raider #1018 move to Space 6 o'clock", one activation each
     const ships = { ...previous.ships, names: [...previous.ships.names, ...line.ships.names] };
-    last.lines[last.lines.length - 1] = { ...previous, ships, words: shipMovesParts(ships.names, ships.move), art: [...previous.art, ...line.art] };
-  } else if (last && last.actor === line.actor) {
-    last.lines.push(line);
+    lines[lines.length - 1] = { ...previous, ships, words: shipMovesParts(ships.names, ships.move), art: [...previous.art, ...line.art] };
   } else {
-    runs.push({ actor: line.actor, lines: [line] });
+    lines.push(line);
   }
 }
 

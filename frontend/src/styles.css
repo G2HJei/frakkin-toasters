@@ -365,19 +365,6 @@ nav.top .brand img {
   border-left: 4px solid var(--treachery);
 }
 
-.log .entries {
-  list-style: none;
-  margin: 0.2rem 0;
-  padding: 0;
-  max-height: 32rem;
-  overflow: auto;
-}
-
-.log .entries > li {
-  padding: 0.2rem 0;
-  border-bottom: 1px solid var(--line);
-}
-
 .log .actor {
   color: var(--accent);
 }
@@ -1529,6 +1516,43 @@ details[open] > summary::before {
   font-size: 0.9em;
 }
 
+/* the sandbox's switch for the facts under the lines: over the top right of the log, clear of its scrollbar, with the
+   lines scrolling behind it; amber while they show, as an open tab */
+.table-page .log-facts {
+  --c: 6px;
+  --edge: var(--steel-500);
+  --fill: #1a2129;
+  position: absolute;
+  top: 10px;
+  right: 32px;
+  z-index: 1;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 0;
+  font: 600 11px/1 var(--display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--steel-100);
+}
+
+.table-page .log-facts:hover,
+.table-page .log-facts:focus-visible {
+  --edge: var(--dradis-glow);
+  --fill: #16263a;
+  color: var(--dradis-glow);
+  outline: none;
+}
+
+.table-page .log-facts.on {
+  --edge: var(--amber);
+  --fill: #3b2d10;
+  color: var(--amber);
+}
+
+.table-page .log-facts.on:is(:hover, :focus-visible) {
+  filter: brightness(1.3);
+}
+
 /* a cut-corner arrow over the bottom right of the log while the user reads further up, clear of its scrollbar */
 .table-page .log-to-bottom {
   --c: 7px;
@@ -1629,11 +1653,6 @@ details[open] > summary::before {
   scrollbar-color: var(--steel-500) transparent;
 }
 
-.table-page .log .entries {
-  max-height: none;
-  overflow: visible;
-}
-
 @media (max-width: 1100px) {
   .table-side.left > :is(.input-panel, .log) {
     flex: none;
@@ -1642,10 +1661,6 @@ details[open] > summary::before {
   .table-page .log-body {
     max-height: 34rem;
   }
-}
-
-.table-page .log .entries > li {
-  border-bottom-color: rgba(255, 255, 255, 0.07);
 }
 
 .table-page .log .actor {
@@ -2701,35 +2716,32 @@ button.playable.picked .art {
   color: var(--dradis-glow);
 }
 
-/* a player's lines in a row stand under his token and name once; the game's lines under none */
-.table-page .log .run-head {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: 2px 0 1px;
-}
-
-.table-page .log .run-head .run-token {
-  width: 22px;
-  height: 22px;
-  object-fit: cover;
-  border-radius: 50%;
-  flex: none;
-}
-
+/* every line of a player starts with his token and his name, its words right after them and wrapping under the name;
+   the game's lines have neither */
 .table-page .log .lines {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.table-page .log .run:not(.game) .lines {
-  padding-left: 28px;
+.table-page .log .lines > li {
+  padding: 2px;
+  cursor: pointer;
 }
 
-.table-page .log .lines > li {
-  padding: 1px 2px;
-  cursor: pointer;
+.table-page .log .lines > li:not(.game) {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  column-gap: 6px;
+  align-items: start;
+}
+
+.table-page .log .line-token img {
+  display: block;
+  width: 22px;
+  height: 22px;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .table-page .log .lines > li:hover {

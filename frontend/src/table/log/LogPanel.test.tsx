@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { LogPanel } from './LogPanel';
 import { useFlash } from '../flash';
@@ -43,11 +43,11 @@ afterEach(() => {
   useGameStore.getState().reset();
 });
 
-function renderLog(entries: LogEntry[], players = [{ number: 1, character: 'WILLIAM_ADAMA' }]) {
+function renderLog(entries: LogEntry[], players = [{ number: 1, character: 'WILLIAM_ADAMA' }], sandbox = false) {
   useGameStore.setState({ log: entries });
   const game = { viewer: { kind: 'PlayerViewer', playerNumber: 1 }, players } as unknown as GameProjection;
   const container = render(
-    <Table.Provider value={tableContext(game, false, 1)}>
+    <Table.Provider value={tableContext(game, sandbox, 1)}>
       <LogPanel />
     </Table.Provider>,
   ).container;
@@ -59,12 +59,9 @@ function lines(body: HTMLElement): string[] {
   return [...body.querySelectorAll('.lines > li .event')].map((line) => line.textContent ?? '');
 }
 
-// each run's player, or null, then its lines' words
-function runs(body: HTMLElement): (string | null)[][] {
-  return [...body.querySelectorAll('.entries > .run')].map((run) => [
-    run.querySelector('.run-head .actor')?.textContent ?? null,
-    ...[...run.querySelectorAll('.lines > li .event')].map((line) => line.textContent ?? ''),
-  ]);
+// each line's player, or null, and its words
+function rows(body: HTMLElement): [string | null, string][] {
+  return [...body.querySelectorAll('.lines > li')].map((line) => [line.querySelector('.actor')?.textContent ?? null, line.querySelector('.event')?.textContent ?? '']);
 }
 
 function addEntry(entry: LogEntry, scrollHeight: number) {
@@ -162,7 +159,7 @@ describe('the log', () => {
     expect(body.scrollTop).toBe(500);
   });
 
-  it('groups a turn by its steps, the facts under their line, what changes the table first', () => {
+  it('groups a turn by its steps, and shows a sandbox the facts under their line, what changes the table first', () => {
     const step = (scopeId: number, name: string) => ({ ...scope(scopeId), event: 'MovementStepEvent', facts: [{ kind: 'Shown', fact: { kind: 'GameFact.StepChanged', step: name } }] }) as LogEntry;
     const move = {
       ...scope(7),
@@ -177,17 +174,51 @@ describe('the log', () => {
     } as LogEntry;
     const entries = [turnStarted(1, 1), step(2, 'MOVEMENT'), move, step(8, 'ACTION')];
 
-    const body = renderLog(entries);
+    const body = renderLog(entries, undefined, true);
     // a step without a line has no header
     expect([...body.querySelectorAll('.step-name')].map((name) => name.textContent)).toEqual(['Movement']);
     expect(lines(body)).toEqual(['moves to the Armory']);
+    // hidden until the sandbox asks for them
+    expect(body.querySelector('.facts')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Facts' }));
+
     // the move says what its line says, the turn limit keeps the books
     expect([...body.querySelectorAll('.facts li')].map((fact) => fact.textContent)).toEqual(['The fleet loses 1 food', 'looks at Riots No Jump']);
     // the destination's card shows on hover
     expect(body.querySelector('.event .named')?.textContent).toBe('Armory');
   });
 
-  it("names a player once above his lines in a row, and nobody above the game's", () => {
+  it('shows the facts only in a sandbox, through a switch outside the lines', () => {
+    const lost = {
+      ...scope(2),
+      event: 'DrawMutinyCardEvent',
+      details: { kind: 'DrawMutinyCardEvent', playerNumber: 1 },
+      facts: [{ kind: 'Shown', fact: { kind: 'BoardFact.ResourceDecreased', resource: 'FOOD', amount: 1 } }],
+    } as LogEntry;
+
+    const game = renderLog([lost]);
+    expect(screen.queryByRole('button', { name: 'Facts' })).toBeNull();
+    expect(game.querySelector('.facts')).toBeNull();
+    cleanup();
+
+    const sandbox = renderLog([lost], undefined, true);
+    const toggle = screen.getByRole('button', { name: 'Facts' });
+    // over the log, not in its body, so it pushes no line down
+    expect(sandbox.contains(toggle)).toBe(false);
+    expect(toggle).toHaveAttribute('aria-pressed', 'false');
+
+    fireEvent.click(toggle);
+
+    expect(toggle).toHaveAttribute('aria-pressed', 'true');
+    expect([...sandbox.querySelectorAll('.facts li')].map((fact) => fact.textContent)).toEqual(['The fleet loses 1 food']);
+
+    fireEvent.click(toggle);
+
+    expect(sandbox.querySelector('.facts')).toBeNull();
+  });
+
+  it("names the player in front of each of his lines, and nobody in front of the game's", () => {
     const draw = (scopeId: number, player: number) =>
       ({ ...scope(scopeId), actor: player, event: 'DrawMutinyCardEvent', details: { kind: 'DrawMutinyCardEvent', playerNumber: player } }) as LogEntry;
     const loss = { ...scope(4), event: 'LoseResourceEvent', facts: [{ kind: 'Shown', fact: { kind: 'BoardFact.ResourceDecreased', resource: 'MORALE', amount: 1 } }] } as LogEntry;
@@ -196,13 +227,18 @@ describe('the log', () => {
       { number: 2, character: 'KARL_HELO_AGATHON_ALT' },
     ]);
 
-    expect(runs(body)).toEqual([
-      ['William Adama', 'draws a Mutiny Card', 'draws a Mutiny Card'],
+    expect(rows(body)).toEqual([
+      ['William Adama', 'draws a Mutiny Card'],
+      ['William Adama', 'draws a Mutiny Card'],
       ['Karl "Helo" Agathon', 'draws a Mutiny Card'],
       [null, 'The fleet loses 1 morale'],
       ['Karl "Helo" Agathon', 'draws a Mutiny Card'],
     ]);
-    expect(body.querySelector('.run-head img')?.getAttribute('data-art')).toBe('Character/player-token/WILLIAM_ADAMA');
+    // the token, then the name and the words on the same row
+    const first = body.querySelector('.lines > li')!;
+    expect(first.querySelector('.line-token img')?.getAttribute('data-art')).toBe('Character/player-token/WILLIAM_ADAMA');
+    expect(first.querySelector('.actor')?.parentElement).toBe(first.querySelector('.event')?.parentElement);
+    expect(body.querySelectorAll('.lines > li.game .line-token, .lines > li.game .actor')).toHaveLength(0);
   });
 
   it('tells a choice by the event it picked, under the player who picked it', () => {
@@ -211,7 +247,7 @@ describe('the log', () => {
     const picked = { ...scope(4), parentId: 3, event: 'ActivateRaiderAreaEvent', details: area } as LogEntry;
     const body = renderLog([choice, picked]);
 
-    expect(runs(body)).toEqual([['William Adama', "activates the raiders at Space 8 o'clock"]]);
+    expect(rows(body)).toEqual([['William Adama', "activates the raiders at Space 8 o'clock"]]);
   });
 
   it('leaves out a pass on a card every player is asked about, and says what other passes passed on', () => {
@@ -220,7 +256,7 @@ describe('the log', () => {
     const pass = (scopeId: number, parentId: number) => ({ ...scope(scopeId), parentId, details: { kind: 'NoOpEvent', playerNumber: 1 } }) as LogEntry;
     const body = renderLog([total, pass(11, 10), movement, pass(21, 20)]);
 
-    expect(runs(body)).toEqual([['William Adama', "doesn't move"]]);
+    expect(rows(body)).toEqual([['William Adama', "doesn't move"]]);
   });
 
   it('tells an event about the game by its facts, and joins ships that moved alike', () => {
@@ -233,7 +269,7 @@ describe('the log', () => {
       }) as LogEntry;
     const body = renderLog([raider(1, 31), raider(2, 32)]);
 
-    expect(runs(body)).toEqual([[null, "ship #31 and ship #32 move to Space 6 o'clock"]]);
+    expect(rows(body)).toEqual([[null, "ship #31 and ship #32 move to Space 6 o'clock"]]);
   });
 
   it('shows every line, and lights what a line touched on a click', () => {
@@ -252,8 +288,10 @@ describe('the log', () => {
 
     const icons = body.querySelectorAll('.auto-icon');
     expect(icons).toHaveLength(1);
-    // in front of the line it marks
-    expect(icons[0]).toBe(body.querySelectorAll('.lines > li')[1].firstElementChild);
+    // after the name, in front of the words it marks
+    const line = body.querySelectorAll('.lines > li')[1];
+    expect(icons[0].previousElementSibling).toBe(line.querySelector('.actor'));
+    expect(icons[0].nextElementSibling).toBe(line.querySelector('.event'));
     expect(icons[0].getAttribute('aria-label')).toBe('automatic');
     expect(icons[0].getAttribute('title')).toBe('The only answer, taken automatically');
   });

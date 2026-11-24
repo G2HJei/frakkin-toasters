@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { ArtImg, ArtStrip } from '../../art/Art';
 import { characterArt } from '../../art/images';
 import { partArt, Words } from '../../art/Words';
@@ -7,16 +7,15 @@ import type { FactContext } from '../../labels/facts';
 import { useGameStore } from '../../live/gameStore';
 import { entryTargets, useFlash } from '../flash';
 import { useTable } from '../tableContext';
-import { logStory, type LogLine, type Run } from './story';
+import { logStory, type LogLine } from './story';
 import { useFollowBottom } from './useFollowBottom';
 
 /**
- * The story of the game: grouped by turn, every turn open, and by step within a turn. The lines of one player in a
- * row stand under his portrait and name once, and what happens to the game stands under none. Each line is what an
- * event did, in words, with the facts that tell more under it, the ones that change the table first. Card and
- * character names show their image on hover. A click on a line lights what it touched on the board. The log follows
- * the newest line until the user scrolls up, and the arrow at its bottom right follows again, lit while new lines came
- * below.
+ * The story of the game: grouped by turn, every turn open, and by step within a turn. Each line is what an event did,
+ * in words, after the portrait and name of the player it is about, every time; what happens to the game has none. A
+ * sandbox can show the facts that tell more under each line, the ones that change the table first. Card and character
+ * names show their image on hover. A click on a line lights what it touched on the board. The log follows the newest
+ * line until the user scrolls up, and the arrow at its bottom right follows again, lit while new lines came below.
  */
 export function LogPanel() {
   const table = useTable();
@@ -28,8 +27,22 @@ export function LogPanel() {
   );
   const turns = useMemo(() => logStory(log, words), [log, words]);
   const { scrollRef, contentRef, following, unseen, onScroll, toBottom } = useFollowBottom(log);
+  const [factsShown, setFactsShown] = useState(false);
+  const withFacts = table.sandbox && factsShown;
   return (
     <section className="panel cf log" aria-label="log">
+      {/* over the top right of the lines, which scroll behind it */}
+      {table.sandbox && (
+        <button
+          type="button"
+          className={factsShown ? 'log-facts cf on' : 'log-facts cf'}
+          aria-pressed={factsShown}
+          title={factsShown ? 'Hide the facts under each line' : 'Show the facts under each line'}
+          onClick={() => setFactsShown(!factsShown)}
+        >
+          Facts
+        </button>
+      )}
       {/* the body scrolls, so the log can take whatever height its column leaves it */}
       <div className="log-body" ref={scrollRef} onScroll={onScroll}>
         <div ref={contentRef}>
@@ -48,9 +61,9 @@ export function LogPanel() {
               {turn.steps.map((step, at) => (
                 <div key={at} className="log-step">
                   {step.step && <h4 className="step-name">{constantLabel('GameStep', step.step)}</h4>}
-                  <ol className="entries">
-                    {step.runs.map((run, position) => (
-                      <RunItem key={position} run={run} />
+                  <ol className="lines">
+                    {step.lines.map((line) => (
+                      <Line key={line.key} line={line} withFacts={withFacts} />
                     ))}
                   </ol>
                 </div>
@@ -76,60 +89,49 @@ export function LogPanel() {
   );
 }
 
-// A player's lines under his token and name, or the game's lines under nothing.
-function RunItem({ run }: { run: Run }) {
-  const table = useTable();
-  const character = run.actor !== null ? table.game?.players?.find((player) => player.number === run.actor)?.character : null;
-  const token = character ? characterArt(character) : null;
-  return (
-    <li className={run.actor !== null ? 'run' : 'run game'}>
-      {run.actor !== null && (
-        <div className="run-head">
-          {token && <ArtImg art={token} className="run-token" />}
-          <span className="actor">{table.playerName(run.actor)}</span>
-        </div>
-      )}
-      <ol className="lines">
-        {run.lines.map((line) => (
-          <Line key={line.key} line={line} />
-        ))}
-      </ol>
-    </li>
-  );
-}
-
-function Line({ line }: { line: LogLine }) {
+// The player's token and name, then what happened; what happens to the game has neither.
+function Line({ line, withFacts }: { line: LogLine; withFacts: boolean }) {
   const table = useTable();
   const flash = () => useFlash.getState().flash(entryTargets(line.entry, table.game));
+  const character = line.actor !== null ? table.game?.players?.find((player) => player.number === line.actor)?.character : null;
+  const token = character ? characterArt(character) : null;
   return (
-    <li className="scope" onClick={flash}>
-      {/* the server answered for him: it was his only answer */}
-      {line.automatic && (
-        <span className="auto-icon" role="img" aria-label="automatic" title="The only answer, taken automatically">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M13 3 5 14h6l-1 7 8-11h-6z" />
-          </svg>
+    <li className={line.actor !== null ? 'scope' : 'scope game'} onClick={flash}>
+      {line.actor !== null && <span className="line-token">{token && <ArtImg art={token} />}</span>}
+      <div className="line-body">
+        {line.actor !== null && (
+          <>
+            <span className="actor">{table.playerName(line.actor)}</span>{' '}
+          </>
+        )}
+        {/* the server answered for him: it was his only answer */}
+        {line.automatic && (
+          <span className="auto-icon" role="img" aria-label="automatic" title="The only answer, taken automatically">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M13 3 5 14h6l-1 7 8-11h-6z" />
+            </svg>
+          </span>
+        )}
+        <span className="event">
+          <Words parts={line.words} />
         </span>
-      )}
-      <span className="event">
-        <Words parts={line.words} />
-      </span>
-      {line.source && ' '}
-      {line.source && (
-        <span className="source-tag">
-          <Words parts={[line.source]} />
-        </span>
-      )}
-      <ArtStrip refs={line.art} />
-      {line.facts.length > 0 && (
-        <ul className="facts">
-          {line.facts.map((fact, index) => (
-            <li key={index}>
-              <Words parts={fact} />
-            </li>
-          ))}
-        </ul>
-      )}
+        {line.source && ' '}
+        {line.source && (
+          <span className="source-tag">
+            <Words parts={[line.source]} />
+          </span>
+        )}
+        <ArtStrip refs={line.art} />
+        {withFacts && line.facts.length > 0 && (
+          <ul className="facts">
+            {line.facts.map((fact, index) => (
+              <li key={index}>
+                <Words parts={fact} />
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </li>
   );
 }
