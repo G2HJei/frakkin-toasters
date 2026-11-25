@@ -388,26 +388,42 @@ describe('the log', () => {
     const moved = { kind: 'Shown', fact: { kind: 'PlayerFact.CharacterMoved', character: 'LAURA_ROSLIN', to: 'ARMORY' } };
     const leaves = { ...scope(1), event: 'MoveFromBrigEvent', details: { kind: 'MoveFromBrigEvent', targetPlayerNumber: 2, destination: 'ARMORY' }, facts: [moved] } as LogEntry;
     const sends = { ...scope(2), event: 'ChooseCharacterForBrigEvent', details: { kind: 'ChooseCharacterForBrigEvent', playerNumber: 1, targetPlayerNumber: 2 } } as LogEntry;
-    const executed = { ...scope(3), event: 'EmotionallyFragileEvent', details: { kind: 'EmotionallyFragileEvent', playerNumber: 1 } } as LogEntry;
-    const body = renderLog([leaves, sends, executed], players);
+    const extra = { ...scope(3), event: 'ChooseExtraLoyaltyCardEvent', details: { kind: 'ChooseExtraLoyaltyCardEvent', playerNumber: 1, targetPlayerNumber: 1 } } as LogEntry;
+    const body = renderLog([leaves, sends, extra], players);
     const portraits = (line: Element) => [...line.querySelectorAll('.event img.icon-portrait')].map((image) => image.getAttribute('data-icon'));
     const named = (line: Element) => [...line.querySelectorAll('.event .named')].map((name) => name.textContent);
-    const [left, sent, fragile] = [...body.querySelectorAll('.lines > li')];
+    const [left, sent, own] = [...body.querySelectorAll('.lines > li')];
 
     expect(rows(body)).toEqual([
       [null, 'Laura Roslin leaves the Brig for the Armory'],
       ['William Adama', 'sends Laura Roslin to the Brig'],
-      ['William Adama', 'Morale is down to 2 or less: William Adama is executed'],
+      ['William Adama', 'has William Adama draw another Loyalty Card'],
     ]);
     expect(portraits(left)).toEqual(['Character/player-token/LAURA_ROSLIN']);
     expect(named(left)).toEqual(['Laura Roslin', 'Brig', 'Armory']);
     expect(portraits(sent)).toEqual(['Character/player-token/LAURA_ROSLIN']);
     expect(named(sent)).toEqual(['Laura Roslin', 'Brig']);
     // his portrait leads the line already; his name keeps his sheet on hover
-    expect(portraits(fragile)).toEqual([]);
-    expect(named(fragile)).toEqual(['William Adama']);
+    expect(portraits(own)).toEqual([]);
+    expect(named(own)).toEqual(['William Adama']);
     // a name keeps the color of the words around it
     expect(left.querySelector('.event .named')?.className).toBe('named');
+  });
+
+  it("keeps the portrait of a title the line's own player holds, as its words don't name him", () => {
+    const players = [
+      { number: 1, character: 'SAUL_TIGH' },
+      { number: 2, character: 'LAURA_ROSLIN' },
+    ];
+    const admiral = { ...scope(1), event: 'MakeAdmiralEvent', details: null, facts: [{ kind: 'Shown', fact: { kind: 'TitleFact.AdmiralAssigned', character: 'SAUL_TIGH' } }] } as LogEntry;
+    const martialLaw = { ...scope(2), event: 'DeclareMartialLawEvent', details: { kind: 'DeclareMartialLawEvent', playerNumber: 1 } } as LogEntry;
+    const line = [...renderLog([admiral, martialLaw], players).querySelectorAll('.lines > li')].at(-1);
+
+    expect(line?.querySelector('.event')?.textContent).toBe('makes the Admiral President');
+    expect(line?.querySelector('.event img.icon-portrait')?.getAttribute('data-icon')).toBe('Character/player-token/SAUL_TIGH');
+    // "Admiral" is a name to hover, the title's card
+    expect(line?.querySelector('.event .named')?.textContent).toBe('Admiral');
+    expect(line?.querySelector('.source-tag')?.textContent).toBe('Declare Martial Law');
   });
 
   it('colors a type of Skill Cards by its deck, and keeps a card a name to hover', () => {

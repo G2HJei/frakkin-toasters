@@ -52,6 +52,8 @@ export interface Part {
   tone?: Tone;
   // the player a name stands for, so a line of the log can leave its own player without his portrait
   player?: number | null;
+  // the title it names by its holder: his portrait stays on his own line too, as its words don't name him
+  title?: string;
   // the Skill Card color it names, a type of cards or its deck, which the log shows in that color
   skillColor?: string | null;
 }
@@ -281,7 +283,7 @@ export function holderPart(title: string, context: LabelContext): Part {
     return { text };
   }
   const type: TypeRef = { t: 'enum', nullable: false, name: 'Title' };
-  return withIcon({ text, art: context.artOf?.(title, type) ?? null, player: holder }, context.iconOf?.('Character', character));
+  return withIcon({ text, art: context.artOf?.(title, type) ?? null, player: holder, title }, context.iconOf?.('Character', character));
 }
 
 const HOLDER_TITLES: Record<string, string> = { President: 'PRESIDENT', Admiral: 'ADMIRAL', CAG: 'CAG' };

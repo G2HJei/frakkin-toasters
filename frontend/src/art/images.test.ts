@@ -117,6 +117,10 @@ describe('the images', () => {
     expect(enumArt('SkillCheckType', 'BRIG')?.key).toBe('Location/BRIG');
   });
 
+  it('shows a risk by the Destination Card the ships are risked at', () => {
+    expect(enumValues('Risk').filter((risk) => enumArt('Risk', risk)?.key !== `DestinationCard/${risk}`)).toEqual([]);
+  });
+
   it('sets the dials from 0 to 15, and puts the tokens on the tracks', () => {
     expect(resourceArt('FOOD', 0)?.key).toBe('Resource/FOOD_0');
     expect(resourceArt('MORALE', 15)?.key).toBe('Resource/MORALE_15');

@@ -250,6 +250,9 @@ export function enumArt(enumName: string, constant: Constant): ArtRef | null {
       return damageArt(enumName, constant);
     case 'SkillCheckType':
       return skillCheckArt(constant);
+    case 'Risk':
+      // the Destination Card the ships are risked at
+      return cardArt('DestinationCard', constant);
     case 'SkillCardType':
       return skillTypeArt(constant);
     case 'CharacterAbility':

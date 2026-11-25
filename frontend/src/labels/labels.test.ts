@@ -12,6 +12,7 @@ import {
   TEMPLATED_EVENTS,
   TEMPLATED_FACTS,
   typeLabel,
+  unnamedSource,
   withoutSubject,
   type LabelContext,
   type Part,
@@ -231,6 +232,47 @@ describe('labels', () => {
     expect(eventLabel({ kind: 'ResourcesForGalacticaEvent', playerNumber: 2, location: null, viperIds: [3, 4] }, types)).toBe('Laura Roslin plays Resources for Galactica and 2 vipers');
   });
 
+  it('counts the Cylon ships a card or an ability destroys', () => {
+    const types: LabelContext = {
+      ...names,
+      shipName: (id) => (id > 1020 ? `Heavy Raider #${id}` : `Raider #${id}`),
+      shipType: (id) => (id > 1020 ? 'HEAVY_RAIDER' : 'RAIDER'),
+    };
+    const brutalForce = (shipIds: number[]) => eventLabel({ kind: 'AuthorizationOfBrutalForceEvent', playerNumber: 2, shipIds }, types);
+    const sacrifice = (shipIds: number[]) => eventLabel({ kind: 'SacrificeEvent', playerNumber: 3, shipIds }, types);
+
+    expect(brutalForce([1016, 1017, 1018])).toBe('Laura Roslin plays Authorization of Brutal Force on 3 raiders');
+    expect(brutalForce([1021])).toBe('Laura Roslin plays Authorization of Brutal Force on Heavy Raider #1021');
+    expect(sacrifice([1016, 1017])).toBe('Kara "Starbuck" Thrace goes to Sickbay to destroy 2 raiders');
+    expect(sacrifice([1021, 1022])).toBe('Kara "Starbuck" Thrace goes to Sickbay to destroy 2 heavy raiders');
+  });
+
+  it('says what Primacy does, so the log tags it with the ability', () => {
+    const primacy = (removedBasestarId: number | null, placeRaidersAndCivilianShip: boolean) => {
+      const event = { kind: 'PrimacyEvent', playerNumber: 1, removedBasestarId, placeRaidersAndCivilianShip };
+      return { words: eventLabel(event, names), source: unnamedSource('PrimacyEvent', event, eventParts(event, names), names)?.text };
+    };
+
+    expect(primacy(null, false)).toEqual({ words: 'William Adama places a basestar in front of Galactica', source: 'Primacy' });
+    expect(primacy(null, true).words).toBe('William Adama places a basestar in front of Galactica, then places 3 raiders in front and a civilian ship behind');
+    expect(primacy(1001, false).words).toBe('William Adama takes ship #1001 off the board');
+    expect(primacy(1001, true).words).toBe('William Adama takes ship #1001 off the board, then places 3 raiders in front and a civilian ship behind');
+    // words that name the ability leave the tag out
+    expect(unnamedSource('PrimacyEvent', { kind: 'PrimacyEvent', playerNumber: 1 }, [{ text: 'William Adama uses Primacy' }], names)).toBeNull();
+  });
+
+  it('names the Destination Card of a risk and of the Derelict Basestar, so the log shows it on hover', () => {
+    const cards: LabelContext = { ...names, artOf: (value, type) => ({ key: `${type.name}/${String(value)}`, url: '', label: String(value), shape: 'card' }) };
+    const named = (parts: Part[]) => parts.filter((part) => part.art).map((part) => [part.text, part.art?.key]);
+    const risks = eventParts({ kind: 'RiskShipsEvent', playerNumber: 1, risk: 'ICY_MOON' }, cards);
+    const derelict = eventParts({ kind: 'DerelictBasestarEvent' }, cards);
+
+    expect(partsText(risks)).toBe('William Adama risks ships at Icy Moon');
+    expect(named(risks)).toEqual([['Icy Moon', 'Risk/ICY_MOON']]);
+    expect(partsText(derelict)).toBe('Ships appear around the Derelict Basestar');
+    expect(named(derelict)).toEqual([['Derelict Basestar', 'DestinationCard/DERELICT_BASESTAR']]);
+  });
+
   it("puts the ship a Raptor Specialist builds or returns in front of its words", () => {
     const icons: LabelContext = { ...names, iconOf: (enumName, constant) => (enumName === 'Choice' ? { key: `Choice:${String(constant)}`, url: '', shape: 'ship' } : null) };
     const plays = (choice: string) => eventParts({ kind: 'RaptorSpecialistEvent', playerNumber: 3, card: { type: 'RAPTOR_SPECIALIST', value: 3 }, choice }, icons);
@@ -369,6 +411,25 @@ describe('labels', () => {
         expect(parts(EVENT_TEMPLATES.MysteriousIntuitionEvent, { playerNumber: 1, pass: false }, 'MysteriousIntuitionEvent').at(-1)).toEqual(['fail', null, 'bad']);
       });
 
+      it('tones the jump, the Sleeper Agent phase and the end of the game, and leaves the abilities around an execution plain', () => {
+        const event = (kind: string, value: Record<string, unknown> = {}) => parts(EVENT_TEMPLATES[kind], value, kind);
+
+        expect(event('JumpingTheFleetEvent', { blindJump: true })).toEqual([
+          ['The fleet ', null, null],
+          ['jumps', null, 'good'],
+          [' blind', null, null],
+        ]);
+        expect(event('JumpingTheFleetEvent', { blindJump: false }).map(([text]) => text)).toEqual(['The fleet ', 'jumps']);
+        expect(event('SleeperAgentPhaseEvent')).toEqual([['The Sleeper Agent phase begins', null, 'bad']]);
+        expect(event('EndGameEvent')).toEqual([['The fleet makes its final jump', null, 'good']]);
+        expect(event('CylonsWinEvent')).toEqual([['The Cylons win', null, 'bad']]);
+        expect(event('EmotionallyFragileEvent', { playerNumber: 1 })).toEqual([
+          ['William Adama', null, null],
+          [' is being executed', null, null],
+        ]);
+        expect(event('CylonHatredEvent', { playerNumber: 1 }).filter(([, , tone]) => tone)).toEqual([]);
+      });
+
       it('puts an icon in front of a constant it names, a ship, a resource, and the die', () => {
         expect(parts(EVENT_TEMPLATES.PlaceRaidersBehindEvent, { count: 3 }, 'PlaceRaidersBehindEvent')).toEqual([
           ['3 ', null, null],
@@ -380,6 +441,11 @@ describe('labels', () => {
           ['population', 'Resource/POPULATION', 'good'],
         ]);
         expect(parts(EVENT_TEMPLATES.ActivateRaiderEvent, { raiderShipId: 1016 }, 'ActivateRaiderEvent')[0]).toEqual(['Raider #1016', 'ShipType/RAIDER', null]);
+        expect(parts(EVENT_TEMPLATES.CylonPowerPlaceCenturionEvent, { playerNumber: 1 }, 'CylonPowerPlaceCenturionEvent').slice(1)).toEqual([
+          [' places a ', null, null],
+          ['', 'Token/CENTURION', null],
+          ['centurion', null, null],
+        ]);
         expect(parts(FACT_TEMPLATES['GameFact.DieRolled'], { value: 5 }, 'GameFact.DieRolled')).toEqual([
           ['The die shows ', null, null],
           ['5', 'Die/5', null],

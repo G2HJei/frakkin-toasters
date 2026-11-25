@@ -307,12 +307,13 @@ export function logStory(entries: LogEntry[], table: FactContext): TurnStory[] {
     .filter((turn) => turn.turn > 0 || turn.steps.some((step) => step.lines.length > 0));
 }
 
-// The portrait of the line's own player leads it already: where its words name him again, they do without it.
+// The portrait of the line's own player leads it already: where its words name him again, they do without it. A title
+// he holds keeps it ("makes the [Saul Tigh] Admiral President"), as its words don't say it is him.
 function withoutOwnPortrait(line: LogLine): LogLine {
   if (line.actor === null) {
     return line;
   }
-  const own = (parts: Part[]) => parts.map((part) => (part.icon && part.player === line.actor ? { ...part, icon: null } : part));
+  const own = (parts: Part[]) => parts.map((part) => (part.icon && part.player === line.actor && !part.title ? { ...part, icon: null } : part));
   return { ...line, words: own(line.words), facts: line.facts.map(own) };
 }
 

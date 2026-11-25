@@ -47,9 +47,9 @@ describe('a pause', () => {
     expect(topicLabel(grant, context)).toBe('Executive Order: Laura Roslin may move or take an action');
   });
 
-  it('leaves out an ability the topic names already', () => {
+  it('leads with an ability whose words say only what it does', () => {
     const primacy = topic('PrimacyEvent', { kind: 'PrimacyEvent', playerNumber: 1, removedBasestarId: null, placeRaidersAndCivilianShip: false });
 
-    expect(topicLabel(primacy, context)).toBe('William Adama uses Primacy');
+    expect(topicLabel(primacy, context)).toBe('Primacy: William Adama places a basestar in front of Galactica');
   });
 });
