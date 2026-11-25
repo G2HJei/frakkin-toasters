@@ -21,6 +21,8 @@ export interface LabelContext {
   characterOf?(playerNumber: number): string | null;
   // the player who plays a character, where the table knows it
   playerOf?(character: string): number | null;
+  // the player who held a title (PRESIDENT, ADMIRAL, CAG) when the words happened, where the log knows him
+  titleHolder?(title: string): number | null;
 }
 
 /** An image a part of a label names, as `art/images.ts` gives it. */
@@ -228,7 +230,10 @@ export function valueParts(value: unknown, type: TypeRef | undefined, context: L
         return [{ ...part, player: context.playerOf?.(value as string) ?? null }];
       }
       // a color of Skill Cards, or the deck of one
-      return [(type.name === 'SkillCardColor' || type.name === 'DeckId') && SKILL_COLORS.has(value as string) ? { ...part, skillColor: value as string } : part];
+      if ((type.name === 'SkillCardColor' || type.name === 'DeckId') && SKILL_COLORS.has(value as string)) {
+        return [{ ...part, skillColor: value as string }];
+      }
+      return type.name === 'Title' ? [part] : holdersNamed(part, context);
     }
     case 'list':
     case 'set': {
@@ -261,6 +266,36 @@ export function playerPart(playerNumber: number, context: LabelContext): Part {
   }
   const type: TypeRef = { t: 'enum', nullable: false, name: 'Character' };
   return withIcon({ ...part, art: context.artOf?.(character, type) ?? null }, context.iconOf?.('Character', character));
+}
+
+/**
+ * A title as the player who held it: where the log knows him, his portrait in front of the title's name and the title's
+ * card on hover ("the [portrait] President draws …"). A line about a change of the title shows its insignia instead
+ * (`{Title:PRESIDENT}`).
+ */
+export function holderPart(title: string, context: LabelContext): Part {
+  const text = constantLabel('Title', title);
+  const holder = context.titleHolder?.(title) ?? null;
+  const character = holder !== null ? context.characterOf?.(holder) : null;
+  if (!character) {
+    return { text };
+  }
+  const type: TypeRef = { t: 'enum', nullable: false, name: 'Title' };
+  return withIcon({ text, art: context.artOf?.(title, type) ?? null, player: holder }, context.iconOf?.('Character', character));
+}
+
+const HOLDER_TITLES: Record<string, string> = { President: 'PRESIDENT', Admiral: 'ADMIRAL', CAG: 'CAG' };
+
+// A label that names a title's holder, "A civilian ship for the CAG", shows him where the log knows him.
+function holdersNamed(part: Part, context: LabelContext): Part[] {
+  if (!context.titleHolder || part.art || part.icon) {
+    return [part];
+  }
+  const pieces = part.text.split(/\b(?<=the )(President|Admiral|CAG)\b(?!')/);
+  if (pieces.length === 1) {
+    return [part];
+  }
+  return merged(pieces.map((piece, index) => (index % 2 === 1 ? holderPart(HOLDER_TITLES[piece], context) : { ...part, text: piece })));
 }
 
 function shipLabel(id: number, context: LabelContext): string {
@@ -438,6 +473,10 @@ function countOf(value: unknown): number {
 // The words of one placeholder, after the parts so far, which decide "the" or "The" in front of a location.
 function placeholderParts(match: RegExpMatchArray, fill: Fill, before: Part[]): Part[] {
   const [, name, modifier, forms, yes, no, cases] = match;
+  const holder = /^Holder:(\w+)$/.exec(name);
+  if (holder) {
+    return [holderPart(holder[1], fill.context)];
+  }
   if (name.startsWith('!')) {
     // only the icons of the value, in front of words of the template's own: "{!ShipType:RAIDER}raiders"
     const { value, type } = componentOf(fill, name.substring(1));
@@ -483,20 +522,44 @@ function inSentence(label: string): string {
   return /^[A-Z]{2,}\b/.test(label) ? label : label.charAt(0).toLowerCase() + label.substring(1);
 }
 
+// A constant's label as a common noun: "Assault Raptor" → "assault raptor"; a short or all-capitals word stays as it
+// is: "viper Mk VII".
+function commonNoun(enumName: string, constant: string): string {
+  return constantLabel(enumName, constant).replace(/\b[A-Z][a-z]{2,}\b/g, (word) => word.toLowerCase());
+}
+
 // Constants counted by kind, each kind as a common noun in the plural its count asks for, with its icon in front:
-// "2 vipers", "a viper and an assault raptor". A short or all-capitals word stays as it is: "viper Mk VII".
+// "2 vipers", "a viper and an assault raptor". Ships are counted by their type where two or more have it, and a ship
+// alone keeps its name: "2 vipers and Viper Mk VII #71".
 function countedParts(values: unknown[], type: TypeRef | undefined, context: LabelContext): Part[] {
-  const enumName = (typeof type?.of === 'object' && type.of ? type.of.name : type?.name) ?? '';
+  const of = typeof type?.of === 'object' && type.of ? type.of : type;
+  if (of?.role === 'ship') {
+    return countedShips(values as number[], context);
+  }
+  const enumName = of?.name ?? '';
   const counts = new Map<unknown, number>();
   for (const value of values) {
     counts.set(value, (counts.get(value) ?? 0) + 1);
   }
   const kinds = [...counts].map(([value, count]) => {
-    const noun = constantLabel(enumName, value as string).replace(/\b[A-Z][a-z]{2,}\b/g, (word) => word.toLowerCase());
+    const noun = commonNoun(enumName, value as string);
     const amount = count === 1 ? (/^[aeiou]/i.test(noun) ? 'an ' : 'a ') : `${count} `;
     return [{ text: amount }, withIcon({ text: count === 1 ? noun : `${noun}s` }, context.iconOf?.(enumName, value))];
   });
   return merged(joinParts(kinds));
+}
+
+function countedShips(ids: number[], context: LabelContext): Part[] {
+  const byType = new Map<string, number[]>();
+  for (const id of ids) {
+    // a ship of no known type is a kind of its own
+    const type = context.shipType?.(id) ?? `#${id}`;
+    byType.set(type, [...(byType.get(type) ?? []), id]);
+  }
+  const items = [...byType].flatMap(([type, ships]) =>
+    ships.length > 1 ? [[{ text: `${ships.length} ` }, withIcon({ text: `${commonNoun('ShipType', type)}s` }, context.iconOf?.('ShipType', type))]] : ships.map((id) => [shipPart(id, context)]),
+  );
+  return merged(joinParts(items));
 }
 
 // What Galactica's damage tokens do, after "to": the locations they damage, by their names to hover, and what the fuel
@@ -513,7 +576,8 @@ function galacticaDamageParts(tokens: unknown[], context: LabelContext): Part[] 
   return merged(joinParts([damage, lose].filter((words) => words.length > 0)));
 }
 
-// "[a|b]": a when every field it names has a value, otherwise b, or nothing.
+// "[a|b]": a when every field it names has a value, otherwise b, or nothing. A field it names only for its icon is a
+// condition too: "[{!discardAcceptProphecy}discards …|gives up …]".
 function chooseAlternative(segment: string, fill: Fill): string {
   const alternatives: string[] = [];
   let depth = 0;
@@ -530,7 +594,7 @@ function chooseAlternative(segment: string, fill: Fill): string {
   alternatives.push(segment.substring(start));
   // only a field whose value it prints has to be there, not one that picks a plural or a word
   const prints = (match: RegExpMatchArray) => match[3] === undefined && match[4] === undefined && match[6] === undefined;
-  const fits = (alternative: string) => [...alternative.matchAll(PLACEHOLDER)].filter(prints).every((match) => present(componentOf(fill, match[1]).value));
+  const fits = (alternative: string) => [...alternative.matchAll(PLACEHOLDER)].filter(prints).every((match) => present(componentOf(fill, match[1].replace(/^!/, '')).value));
   if (fits(alternatives[0])) {
     return alternatives[0];
   }
@@ -944,9 +1008,9 @@ function hiddenFactParts(fact: Extract<FactProjection, { kind: 'Hidden' }>, cont
     case 'SkillCheckFact.CardsLookedAt':
       return [who, { text: ' looks at the cards ' }, other, { text: ' put in' }];
     case 'TitleFact.PresidentQuorumCardGained':
-      return [{ text: `The President gets ${hiddenCardsLabel(fact.count, 'QUORUM', null, null)}` }];
+      return [{ text: 'The ' }, holderPart('PRESIDENT', context), { text: ` gets ${hiddenCardsLabel(fact.count, 'QUORUM', null, null)}` }];
     case 'TitleFact.PresidentQuorumCardsLost':
-      return [{ text: `The President loses ${hiddenCardsLabel(fact.count, 'QUORUM', null, null)}` }];
+      return [{ text: 'The ' }, holderPart('PRESIDENT', context), { text: ` loses ${hiddenCardsLabel(fact.count, 'QUORUM', null, null)}` }];
     case 'InterruptFact.InterruptCardPlayed':
       return [who, { text: ' plays an interrupt card' }];
     case 'InterruptFact.RollAbilityUsed':

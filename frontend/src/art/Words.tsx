@@ -63,6 +63,9 @@ export function partIcon(enumName: string, constant: unknown): PartIcon | null {
       return icon(dieArt(constant as number), 'die');
     case 'Character':
       return icon(characterArt(constant as string), 'portrait');
+    case 'Choice':
+      // "Raptor Specialist" builds an assault raptor or returns a raptor
+      return icon(shipArt(constant === 'BUILD_ASSAULT_RAPTOR' ? 'ASSAULT_RAPTOR' : 'RAPTOR'), 'ship');
     default:
       return null;
   }

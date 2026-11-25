@@ -9,12 +9,16 @@
 //   {field=A:a|*:b}  the words for each constant, * for the others
 //   {field|die}      a die result: the die's face, then the number
 //   {field|damage}   what Galactica's damage tokens do: "damage the Armory and Command", "lose 1 fuel"
-//   {field|count}    a list of constants counted, each kind with its icon: "2 vipers", "a viper and an assault raptor"
+//   {field|count}    a list counted by kind, each kind with its icon: "2 vipers", "a viper and an assault raptor"; a
+//                    ship alone of its type keeps its name: "2 vipers and Viper Mk VII #71"
 //   {$card}          the Quorum or Mutiny Card the record plays
 //   {Enum:CONSTANT}  a constant the template names itself, worded like a field: {Resource:FUEL|lower}
+//   {Holder:TITLE}   a title (PRESIDENT, ADMIRAL, CAG) as the player who held it: his portrait, the title's card on hover.
+//                    A change of the title names it with its insignia instead: {Title:PRESIDENT}
 //   {!field}         only the icon of the value (a ship type, a resource), in front of the template's own words:
 //                    {!ShipType:RAIDER}raiders; {!Token:MIRACLE}, {!Token:NUKE} and {!Token:CENTURION} for the tokens
-//   [a|b]            a when every field it names has a value (a list: an element), otherwise b, or nothing
+//   [a|b]            a when every field it names has a value (a list: an element), otherwise b, or nothing; a
+//                    {!field} in a is a condition alone: [{!discardAcceptProphecy}discards …|gives up …]
 //   <+words>         good news for the fleet, green in the log; <-words> bad news, red. Fields inside take the tone,
 //                    and the words of a {field?a:b} or a {field=A:a} may have their own
 // An event about a player starts with {playerNumber}, so the log can name him once above several of his lines.
@@ -30,9 +34,9 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   CreateLoyaltyDeckEvent: 'The Loyalty Cards are dealt',
   SelectCharacterEvent: '{playerNumber} chooses {selectedCharacter}',
   PlaceInSetupLocationEvent: '{playerNumber} starts at {location}',
-  DetermineNextPresidentEvent: 'The next President in line takes the title',
-  DetermineNextAdmiralEvent: 'The next Admiral in line takes the title',
-  DetermineNextCagEvent: 'The next CAG in line takes the title',
+  DetermineNextPresidentEvent: 'The next {Title:PRESIDENT} in line takes the title',
+  DetermineNextAdmiralEvent: 'The next {Title:ADMIRAL} in line takes the title',
+  DetermineNextCagEvent: 'The next {Title:CAG} in line takes the title',
   MakePresidentEvent: '{character} becomes {Title:PRESIDENT}',
   MakeAdmiralEvent: '{character} becomes {Title:ADMIRAL}',
   MakeCagEvent: '{character} becomes {Title:CAG}',
@@ -67,7 +71,7 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   DiscardDownTo1MutinyCardEvent: '{playerNumber} keeps {cardToKeep} and discards the other Mutiny Cards',
   DiscardQuorumCardsEvent: '{playerNumber} discards {cards}',
   DiscardHeldQuorumCardEvent: '{playerNumber} discards {card}',
-  DrawQuorumCardEvent: 'The President draws a Quorum Card',
+  DrawQuorumCardEvent: 'The {Holder:PRESIDENT} draws a Quorum Card',
   DealLoyaltyCardsEvent: '{playerNumber} is dealt {count} Loyalty {count#Card}',
   ExecuteEvent: '{playerNumber} is <-executed>',
   FinishExecutionEvent: '{playerNumber} replaces the executed {executedCharacter}',
@@ -107,8 +111,8 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   PegasusCicResultEvent: "{Location:PEGASUS_CIC}'s attack on {basestarId} is resolved",
   EngineRoomEvent: '{playerNumber} discards {discardCard1} and {discardCard2} at {Location:ENGINE_ROOM}',
   AdministrationEvent: '{playerNumber} draws a Mutiny Card at {Location:ADMINISTRATION}',
-  ReplaceMutinousPresidentEvent: '{playerNumber} may replace the President',
-  DefendPresidencyEvent: '{playerNumber} {discardAcceptProphecy?discards:gives up the presidency rather than discard} {QuorumCard:ACCEPT_PROPHECY}{discardAcceptProphecy? to stay President:}',
+  ReplaceMutinousPresidentEvent: '{playerNumber} may replace the {Title:PRESIDENT}',
+  DefendPresidencyEvent: '{playerNumber} [{!discardAcceptProphecy}discards {QuorumCard:ACCEPT_PROPHECY} to stay {Title:PRESIDENT}|gives up the {!Title:PRESIDENT}presidency rather than discard {QuorumCard:ACCEPT_PROPHECY}]',
   PresidentsOfficeEvent: "{playerNumber} draws {SkillCardColor:POLITICS} cards at {Location:PRESIDENTS_OFFICE}",
   PressRoomEvent: '{playerNumber} has {targetPlayer} draw a Mutiny Card at {Location:PRESS_ROOM}',
   QuorumChamberEvent: '{playerNumber} draws a Quorum Card at {Location:QUORUM_CHAMBER}',
@@ -187,15 +191,15 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   CombatVeteranEvent: '{playerNumber} plays {card} and {first}',
   FullThrottleEvent: '{playerNumber} plays {card}[ and flies to {destination}]',
   LaunchReservesEvent: '{playerNumber} plays {card} and launches {shipTypes|count} to {area}',
-  RepairEvent: '{playerNumber} plays {card} and <+repairs> [{viperIds}|a location]',
-  RaptorSpecialistEvent: '{playerNumber} plays {card} to {choice|lower}',
+  RepairEvent: '{playerNumber} plays {card} and <+repairs> [{viperIds|count}|a location]',
+  RaptorSpecialistEvent: '{playerNumber} plays {card} to {choice=BUILD_ASSAULT_RAPTOR:build an|*:return a destroyed} {!choice}{choice=BUILD_ASSAULT_RAPTOR:assault raptor|*:raptor}',
   TestTheLimitsEvent: '{playerNumber} plays {card}',
   TestTheLimitsResultEvent: 'Test the Limits is resolved',
   MajorVictoryResultEvent: 'Major Victory is resolved',
   ShuffleTreacheryIntoDestinyDeckEvent: '{count} {SkillCardColor:TREACHERY} {count#card} {count#is/are} shuffled into the Destiny deck',
   ReplaceDestinyDeckEvent: 'The Destiny deck is rebuilt from {count} {color} {count#card}',
   DiscardFromDestinyDeckEvent: '{playerNumber} discards {cards} from the Destiny deck',
-  PopularInfluenceChoiceEvent: '{playerNumber} gives {given} to the President and keeps {other}',
+  PopularInfluenceChoiceEvent: '{playerNumber} gives {given} to the {Holder:PRESIDENT} and keeps {other}',
 
   /* Quorum Cards: each record is its card */
   AcceptProphecyEvent: '{playerNumber} plays {$card}',
@@ -225,10 +229,10 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   ReleaseCylonMugshotsEvent: '{playerNumber} plays {$card} on {targetPlayerNumber}',
   ReleaseCylonMugshotsResultEvent: '{QuorumCard:RELEASE_CYLON_MUGSHOTS} is resolved',
   ResignationEvent: '{playerNumber} plays {$card}[, discarding {discards}]',
-  ResourcesForGalacticaEvent: '{playerNumber} plays {$card}[ to <+repair> {location}][ and {viperIds}]',
+  ResourcesForGalacticaEvent: '{playerNumber} plays {$card}[ to <+repair> {location}][ and {viperIds|count}]',
   UnsavoryConnectionsEvent: '{playerNumber} plays {$card} for {resource|lower}',
   DiscardPlayedQuorumCardEvent: '{card} goes to the discard pile',
-  SetTheAgendaLookEvent: "{playerNumber} looks at the President's Quorum Cards",
+  SetTheAgendaLookEvent: "{playerNumber} looks at the {Holder:PRESIDENT}'s Quorum Cards",
   SetTheAgendaChoiceEvent: '{playerNumber} puts {cards} at the bottom of the Quorum deck',
 
   /* Mutiny Cards: each record is its card */
@@ -336,7 +340,7 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   AdvancePursuitTrackEvent: 'The Cylon pursuit <-advances>',
   MoveCivilianShipEvent: '{civilianShipId} moves to {location}',
   ShuffleCivilianShipIntoDeckEvent: '{civilianShipId} is shuffled back into the deck',
-  DiscardNukeTokenEvent: 'The Admiral discards a {!Token:NUKE}nuke',
+  DiscardNukeTokenEvent: 'The {Holder:ADMIRAL} discards a {!Token:NUKE}nuke',
   GainResourceEvent: 'The fleet gains <+{amount} {resource|lower}>',
   LoseResourceEvent: 'The fleet loses <-{amount} {resource|lower}>',
   IncreaseJumpPreparationEvent: 'The jump preparation track <+advances>',
@@ -347,7 +351,7 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   ReturnVipersToReservesEvent: 'The {!ShipType:VIPER}vipers return to the Reserves',
   ReturnAssaultRaptorEvent: '{playerNumber} brings {shipId} back to the Reserves',
   MoveCylonShipsToFleetBoardEvent: 'The Cylon ships move to the Cylon Fleet board',
-  DrawDestinationCardsEvent: '{blindJump?The Admiral draws a Destination Card:The Admiral draws Destination Cards}',
+  DrawDestinationCardsEvent: 'The {Holder:ADMIRAL} draws {blindJump?a Destination Card:Destination Cards}',
   ChooseDestinationEvent: '{playerNumber} chooses {chosen}[ and puts {others} at the bottom]',
   ResolveDestinationCardEvent: 'The fleet arrives at {card}',
   ObjectiveInstructionsEvent: 'The Objective Card is checked',
@@ -419,7 +423,7 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   OrganizedLocationEvent: '{playerNumber} acts at {location}',
   OrganizedNextEvent: '{playerNumber} chooses the next location',
   AttorneyEvent: '{playerNumber} frees {targetPlayerNumber}, who goes to {destination}',
-  DeclareMartialLawEvent: '{playerNumber} makes the Admiral President',
+  DeclareMartialLawEvent: '{playerNumber} makes the {Holder:ADMIRAL} {Title:PRESIDENT}',
   ResoluteEvent: '{playerNumber} acts at {location}',
   QuarantineEvent: '{playerNumber} looks at every civilian ship',
   QuarantineChoiceEvent: '{playerNumber} replaces {civilianShipId}',
@@ -484,7 +488,7 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   PutSkillCardOnTopEvent: 'Setup: {card} on top of its deck',
   PutDestinyCardOnTopEvent: 'Setup: {card} on top of the Destiny deck',
   GiveSkillCardToPlayerEvent: 'Setup: {targetPlayerNumber} gets {card}',
-  GiveQuorumCardToPresidentEvent: 'Setup: the President gets {card}',
+  GiveQuorumCardToPresidentEvent: 'Setup: the {Holder:PRESIDENT} gets {card}',
   GiveMutinyCardToPlayerEvent: 'Setup: {targetPlayerNumber} gets {card}',
   GiveLoyaltyCardToPlayerEvent: 'Setup: {targetPlayerNumber} gets {card}',
   GiveSuperCrisisCardToPlayerEvent: 'Setup: {targetPlayerNumber} gets {card}',
@@ -556,7 +560,7 @@ export const HIDDEN_TEMPLATES: Record<string, string> = {
   PlayInterruptCardEvent: '{playerNumber} answers the interrupt window',
   UseRollAbilityEvent: '{playerNumber} answers the interrupt window',
   PoliticallyAdroitEvent: '{playerNumber} gives a Skill Card away',
-  PopularInfluenceChoiceEvent: '{playerNumber} gives the President a Quorum Card',
+  PopularInfluenceChoiceEvent: '{playerNumber} gives the {Holder:PRESIDENT} a Quorum Card',
   ReligiousVisionsEvent: '{playerNumber} picks a Crisis Card',
   ResolveCapricaCrisisCardEvent: '{playerNumber} picks a Crisis Card',
   SetTheAgendaChoiceEvent: '{playerNumber} puts 2 Quorum Cards at the bottom',
@@ -618,8 +622,8 @@ export const FACT_TEMPLATES: Record<string, string> = {
   'GameFact.TitleBorrowed': 'The {title} title is taken from {previousHolder} for the turn',
   'GameFact.LossReductionAdded': 'The next {resource|lower} loss this turn is 1 smaller',
   'GameFact.LossReduced': 'The {resource|lower} loss is <+1 smaller>',
-  'GameFact.NukeDiscarded': 'The Admiral uses up a {!Token:NUKE}nuke',
-  'GameFact.NukeGained': 'The Admiral gains a {!Token:NUKE}nuke',
+  'GameFact.NukeDiscarded': 'The {Holder:ADMIRAL} uses up a {!Token:NUKE}nuke',
+  'GameFact.NukeGained': 'The {Holder:ADMIRAL} gains a {!Token:NUKE}nuke',
   'GameFact.CylonShipsHeld': 'The Cylon ships hold still this turn',
   'GameFact.ReturnToCrisisStepChanged': '{returns?The turn will return to the Crisis step:The turn no longer returns to the Crisis step}',
   'TitleFact.PresidentAssigned': '{character} becomes {Title:PRESIDENT}',
@@ -627,8 +631,8 @@ export const FACT_TEMPLATES: Record<string, string> = {
   'TitleFact.CagAssigned': '{character} becomes {Title:CAG}',
   'TitleFact.QuorumCardPutInPlay': '{card} stays in play[ with {holderPlayerNumber}]',
   'TitleFact.QuorumCardLeftPlay': '{card} leaves play',
-  'TitleFact.PresidentQuorumCardGained': 'The President gets {card}',
-  'TitleFact.PresidentQuorumCardsLost': 'The President loses {cards}',
+  'TitleFact.PresidentQuorumCardGained': 'The {Holder:PRESIDENT} gets {card}',
+  'TitleFact.PresidentQuorumCardsLost': 'The {Holder:PRESIDENT} loses {cards}',
   'SkillCheckFact.SkillCheckStarted': 'The skill check of {type} begins',
   'SkillCheckFact.TargetChosen': 'The skill check is about {playerNumber}',
   'SkillCheckFact.PlayedBy': '{playerNumber} played the Super Crisis Card',

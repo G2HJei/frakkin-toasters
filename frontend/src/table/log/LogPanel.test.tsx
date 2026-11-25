@@ -474,4 +474,26 @@ describe('the log', () => {
     expect([...body.querySelectorAll('.event .tone-bad')].map((part) => part.textContent)).toEqual(['damage', '1 ', 'fuel']);
     expect([...body.querySelectorAll('.art-strip img')].map((image) => image.getAttribute('data-art')).filter((art) => art?.startsWith('GalacticaDamage/'))).toEqual([]);
   });
+
+  it('shows the President who held the title when a line happened', () => {
+    const players = [
+      { number: 1, character: 'WILLIAM_ADAMA' },
+      { number: 2, character: 'LAURA_ROSLIN' },
+      { number: 3, character: 'KARA_STARBUCK_THRACE' },
+    ];
+    const assigned = (scopeId: number, character: string) =>
+      ({ ...scope(scopeId), event: 'MakePresidentEvent', details: null, facts: [{ kind: 'Shown', fact: { kind: 'TitleFact.PresidentAssigned', character } }] }) as LogEntry;
+    const gained = { kind: 'Hidden', fact: 'TitleFact.PresidentQuorumCardGained', playerNumber: null, otherPlayerNumber: null, deck: null, pile: null, skillCheckPile: null, count: 1, colors: null };
+    const draws = (scopeId: number) => ({ ...scope(scopeId), event: 'DrawQuorumCardEvent', details: { kind: 'DrawQuorumCardEvent' }, facts: [gained] }) as LogEntry;
+    const body = renderLog([assigned(1, 'LAURA_ROSLIN'), draws(2), assigned(3, 'KARA_STARBUCK_THRACE'), draws(4)], players);
+    const drawn = [...body.querySelectorAll('.lines > li')].filter((line) => line.querySelector('.actor') === null);
+
+    expect(drawn.map((line) => line.querySelector('.event')?.textContent)).toEqual(['The President draws a Quorum Card', 'The President draws a Quorum Card']);
+    expect(drawn.map((line) => line.querySelector('.event img.icon-portrait')?.getAttribute('data-icon'))).toEqual([
+      'Character/player-token/LAURA_ROSLIN',
+      'Character/player-token/KARA_STARBUCK_THRACE',
+    ]);
+    // "President" is a name to hover, the title's card
+    expect(drawn[0].querySelector('.event .named')?.textContent).toBe('President');
+  });
 });

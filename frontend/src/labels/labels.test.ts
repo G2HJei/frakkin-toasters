@@ -53,14 +53,14 @@ describe('labels', () => {
   it('names only fields its record has in every template, and constants that exist', () => {
     const wrong: string[] = [];
     const templates = [EVENT_TEMPLATES, CHOSEN_TEMPLATES, HIDDEN_TEMPLATES, OPTION_TEMPLATES, FACT_TEMPLATES];
-    // the tokens have icons but no enum
-    const tokens = ['MIRACLE', 'NUKE', 'CENTURION'];
+    // the tokens have icons but no enum, and a holder holds one of the three titles
+    const pseudo: Record<string, string[]> = { Token: ['MIRACLE', 'NUKE', 'CENTURION'], Holder: ['PRESIDENT', 'ADMIRAL', 'CAG'] };
     for (const all of templates) {
       for (const [name, template] of Object.entries(all)) {
         const components = recordNamed(name)?.components.map((component) => component.name) ?? [];
         for (const match of template.matchAll(/\{!?(\$?\w+)(?::(\w+))?/g)) {
           const [, field, constant] = match;
-          const known = constant ? (field === 'Token' ? tokens.includes(constant) : enumValues(field).includes(constant)) : field === '$card' || components.includes(field);
+          const known = constant ? (pseudo[field] ?? enumValues(field)).includes(constant) : field === '$card' || components.includes(field);
           if (!known) {
             wrong.push(`${name}.${field}${constant ? `:${constant}` : ''}`);
           }
@@ -98,6 +98,10 @@ describe('labels', () => {
 
   it('names every Quorum Card the log mentions, so it shows the card on hover', () => {
     expect(spelledOut('QuorumCard', enumValues('QuorumCard'))).toEqual([]);
+  });
+
+  it('names every title the log mentions, by its holder or by its insignia where it changes hands', () => {
+    expect(spelledOut('Title', ['PRESIDENT', 'ADMIRAL', 'CAG'])).toEqual([]);
   });
 
   it('writes CAG in capitals in every name and sentence', () => {
@@ -168,6 +172,76 @@ describe('labels', () => {
     expect(launches(['VIPER', 'VIPER']).filter((part) => part.icon).map((part) => `${part.icon?.key} ${part.text}`)).toEqual(['ShipType/VIPER vipers']);
     expect(partsText(launches(['VIPER']))).toBe('Kara "Starbuck" Thrace plays Launch Reserves 5 and launches a viper to Space 8 o\'clock');
     expect(partsText(launches(['VIPER', 'ASSAULT_RAPTOR']))).toBe('Kara "Starbuck" Thrace plays Launch Reserves 5 and launches a viper and an assault raptor to Space 8 o\'clock');
+  });
+
+  describe('a title', () => {
+    const log: LabelContext = {
+      ...names,
+      characterOf: (playerNumber) => ['', 'WILLIAM_ADAMA', 'LAURA_ROSLIN', 'KARA_STARBUCK_THRACE'][playerNumber] ?? null,
+      titleHolder: (title) => ({ PRESIDENT: 2, ADMIRAL: 1, CAG: 3 })[title] ?? null,
+      // as the log's: characters and titles have images and icons
+      artOf: (value, type) => (type.name === 'Character' || type.name === 'Title' ? { key: `art:${String(value)}`, url: '', label: String(value), shape: 'card' } : null),
+      iconOf: (enumName, constant) => (enumName === 'Character' || enumName === 'Title' ? { key: `${enumName}:${String(constant)}`, url: '', shape: 'icon' } : null),
+    };
+    // each part with an icon after the subject: its icon, its words and its image on hover
+    const iconed = (parts: Part[]) =>
+      parts
+        .slice(1)
+        .filter((part) => part.icon)
+        .map((part) => [part.icon?.key, part.text, part.art?.key ?? null]);
+
+    it("shows its holder's portrait, with the title's card on hover", () => {
+      const parts = eventParts({ kind: 'PopularInfluenceChoiceEvent', playerNumber: 1, given: 'ARREST_ORDER', other: 'RESIGNATION' }, log);
+
+      expect(partsText(parts)).toBe('William Adama gives Arrest Order to the President and keeps Resignation');
+      expect(iconed(parts)).toEqual([['Character:LAURA_ROSLIN', 'President', 'art:PRESIDENT']]);
+      expect(partsText(eventParts({ kind: 'PopularInfluenceChoiceEvent', playerNumber: 1, given: 'ARREST_ORDER', other: 'RESIGNATION' }, names))).toBe(
+        'William Adama gives Arrest Order to the President and keeps Resignation',
+      );
+    });
+
+    it('shows its insignia where it changes hands, and its holder where he is only named', () => {
+      const martialLaw = eventParts({ kind: 'DeclareMartialLawEvent', playerNumber: 1 }, log);
+
+      // "The next President …": its first part is no subject
+      expect(iconed([{ text: '' }, ...eventParts({ kind: 'DetermineNextPresidentEvent' }, log)])).toEqual([['Title:PRESIDENT', 'President', 'art:PRESIDENT']]);
+      expect(partsText(martialLaw)).toBe('William Adama makes the Admiral President');
+      expect(iconed(martialLaw)).toEqual([
+        ['Character:WILLIAM_ADAMA', 'Admiral', 'art:ADMIRAL'],
+        ['Title:PRESIDENT', 'President', 'art:PRESIDENT'],
+      ]);
+    });
+
+    it('shows the holder a label names', () => {
+      const chooses = eventParts({ kind: 'BasestarBridgeAbilityEvent', playerNumber: 4, ability: 'CAG_PLACES_CIVILIAN_SHIP' }, log);
+
+      expect(partsText(chooses)).toBe('Player 4 chooses a civilian ship for the CAG');
+      expect(iconed(chooses)).toEqual([['Character:KARA_STARBUCK_THRACE', 'CAG', 'art:CAG']]);
+    });
+  });
+
+  it('counts the repaired ships of a type, and names a ship alone of its type', () => {
+    const types: LabelContext = { ...names, shipName: (id) => (id > 70 ? `Viper Mk VII #${id}` : `Viper #${id}`), shipType: (id) => (id > 70 ? 'VIPER_MARK_VII' : 'VIPER') };
+    const repairs = (viperIds: number[]) => eventLabel({ kind: 'RepairEvent', playerNumber: 1, card: { type: 'REPAIR', value: 1 }, viperIds }, types);
+
+    expect(repairs([1, 2])).toBe('William Adama plays Repair 1 and repairs 2 vipers');
+    expect(repairs([1])).toBe('William Adama plays Repair 1 and repairs Viper #1');
+    expect(repairs([1, 71])).toBe('William Adama plays Repair 1 and repairs Viper #1 and Viper Mk VII #71');
+    expect(repairs([])).toBe('William Adama plays Repair 1 and repairs a location');
+    expect(eventLabel({ kind: 'ResourcesForGalacticaEvent', playerNumber: 2, location: null, viperIds: [3, 4] }, types)).toBe('Laura Roslin plays Resources for Galactica and 2 vipers');
+  });
+
+  it("puts the ship a Raptor Specialist builds or returns in front of its words", () => {
+    const icons: LabelContext = { ...names, iconOf: (enumName, constant) => (enumName === 'Choice' ? { key: `Choice:${String(constant)}`, url: '', shape: 'ship' } : null) };
+    const plays = (choice: string) => eventParts({ kind: 'RaptorSpecialistEvent', playerNumber: 3, card: { type: 'RAPTOR_SPECIALIST', value: 3 }, choice }, icons);
+
+    // the icon, then the words it stands in front of
+    const iconed = (parts: Part[]) => parts.flatMap((part, index) => (part.icon ? [`${part.icon.key} ${parts[index + 1]?.text ?? ''}`] : []));
+
+    expect(partsText(plays('BUILD_ASSAULT_RAPTOR'))).toBe('Kara "Starbuck" Thrace plays Raptor Specialist 3 to build an assault raptor');
+    expect(iconed(plays('BUILD_ASSAULT_RAPTOR'))).toEqual(['Choice:BUILD_ASSAULT_RAPTOR assault raptor']);
+    expect(iconed(plays('RETURN_RAPTOR'))).toEqual(['Choice:RETURN_RAPTOR raptor']);
+    expect(partsText(plays('RETURN_RAPTOR'))).toBe('Kara "Starbuck" Thrace plays Raptor Specialist 3 to return a destroyed raptor');
   });
 
   it('words the damage a player chooses for Galactica, the locations as names and the damage in red', () => {

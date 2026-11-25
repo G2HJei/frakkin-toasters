@@ -9,6 +9,7 @@ import {
   deckParts,
   factParts,
   hiddenCardsParts,
+  holderPart,
   joinParts,
   partsText,
   playerPart,
@@ -552,13 +553,13 @@ function sentence(one: Draft, context: FactContext): Sentence {
     case 'notMatching':
       return make(words('Not matching: ', cards), null);
     case 'presidentDraws':
-      return make(words('The President draws ', cards), null);
+      return make(words('The ', [holderPart('PRESIDENT', context)], ' draws ', cards), null);
     case 'presidentGets':
-      return make(words('The President gets ', cards), null);
+      return make(words('The ', [holderPart('PRESIDENT', context)], ' gets ', cards), null);
     case 'presidentLoses':
-      return make(words('The President loses ', cards), null);
+      return make(words('The ', [holderPart('PRESIDENT', context)], ' loses ', cards), null);
     case 'presidentDiscards':
-      return make(words('The President discards ', cards), null);
+      return make(words('The ', [holderPart('PRESIDENT', context)], ' discards ', cards), null);
     case 'crisis':
       return make(words('The Crisis Card is ', cards), null);
     case 'shuffled':

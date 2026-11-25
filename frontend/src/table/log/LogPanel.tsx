@@ -24,17 +24,21 @@ export function LogPanel() {
   const table = useTable();
   const log = useGameStore((state) => state.log);
   const players = table.game?.players;
-  // a player named in a line shows his portrait and his sheet on hover
-  const words: FactContext = useMemo(
-    () => ({
+  const titles = table.game?.titles;
+  // a player named in a line shows his portrait and his sheet on hover, and so does a title's holder (the story knows
+  // who held it then; these are the holders now)
+  const words: FactContext = useMemo(() => {
+    const playerOf = (character: string | null | undefined) => players?.find((player) => player.character === character)?.number ?? null;
+    const holders: Record<string, string | null | undefined> = { PRESIDENT: titles?.president, ADMIRAL: titles?.admiral, CAG: titles?.cag };
+    return {
       ...table,
       artOf: partArt,
       iconOf: partIcon,
       characterOf: (playerNumber: number) => players?.find((player) => player.number === playerNumber)?.character ?? null,
-      playerOf: (character: string) => players?.find((player) => player.character === character)?.number ?? null,
-    }),
-    [table, players],
-  );
+      playerOf: (character: string) => playerOf(character),
+      titleHolder: (title: string) => (holders[title] ? playerOf(holders[title]) : null),
+    };
+  }, [table, players, titles]);
   const turns = useMemo(() => logStory(log, words), [log, words]);
   const { scrollRef, contentRef, following, unseen, onScroll, toBottom } = useFollowBottom(log);
   const [factsShown, setFactsShown] = useState(false);

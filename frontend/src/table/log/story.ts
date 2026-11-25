@@ -230,12 +230,18 @@ function shownFact(entry: LogEntry, kind: string): Record<string, unknown> | nul
 // window, told under his name whether he chose or not.
 const KEPT_BY_CURRENT_PLAYER = new Set(['TiebreakCardsBeforeSkillCheckEvent', 'TiebreakInterruptCardsEvent']);
 
+// The facts that give a title, borrowed for a turn ("Manipulative") and given back too.
+const TITLES_ASSIGNED: Record<string, string> = { 'TitleFact.PresidentAssigned': 'PRESIDENT', 'TitleFact.AdmiralAssigned': 'ADMIRAL', 'TitleFact.CagAssigned': 'CAG' };
+
 // The damage tokens a player chooses among: his words say what they damage, so no token is pictured after them.
 const DAMAGE_CHOSEN = new Set(['ChooseGalacticaDamageEvent', 'ChooseGalacticaDamageTokensEvent']);
 
 /** The log by turn and step. */
 export function logStory(entries: LogEntry[], table: FactContext): TurnStory[] {
-  const context = withLearnedShips(table, learnedShips(entries));
+  const learned = withLearnedShips(table, learnedShips(entries));
+  // who held each title when each line happened, by the facts that gave it; before the first, the table's holder
+  const holders = new Map<string, number | null>();
+  const context: FactContext = { ...learned, titleHolder: (title) => (holders.has(title) ? (holders.get(title) ?? null) : (learned.titleHolder?.(title) ?? null)) };
   const scopes = new Map<number, ScopeLog>();
   for (const entry of entries) {
     if (entry.kind === 'ScopeLog') {
@@ -283,6 +289,13 @@ export function logStory(entries: LogEntry[], table: FactContext): TurnStory[] {
     const by = chosenBy ?? (KEPT_BY_CURRENT_PLAYER.has(entry.event ?? '') ? turns[turns.length - 1].player : null);
     for (const line of scopeLines(entry, index, by, scopes, state, context)) {
       addLine(turns, line);
+    }
+    for (const fact of entry.facts ?? []) {
+      const title = fact.kind === 'Shown' ? TITLES_ASSIGNED[factKind(fact)] : undefined;
+      if (title) {
+        const character = (fact.fact as unknown as { character?: string | null }).character ?? null;
+        holders.set(title, character ? (context.playerOf?.(character) ?? null) : null);
+      }
     }
     chosenBy = null;
   });
