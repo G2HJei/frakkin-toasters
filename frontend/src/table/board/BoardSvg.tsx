@@ -686,7 +686,9 @@ function DeckPile({ deck, slot, back, ships = false, extra }: {
       <g className="deck-slot" data-deck={deck.deck} data-pile="draw">
         <rect className="hotspot" x={slot.x} y={slot.y} width={slot.width} height={slot.height} />
         {back && count > 0 && <SvgArt art={back} x={slot.x + 3} y={slot.y + 3} width={slot.width - 6} height={slot.height - 6} className="card" preview={false} />}
-        <Count x={slot.x - 8} y={slot.y + slot.height - 34} value={count} size={26} />
+        {/* a count past 2 digits (the Crisis deck's) grows to the left, into the gap before the deck, clear of its own
+            discard pile; a digit is 0.56 of the size, as in Count */}
+        <Count x={slot.x - 8 - Math.max(String(count).length - 2, 0) * 26 * 0.56} y={slot.y + slot.height - 34} value={count} size={26} />
       </g>
     </RevealGroup>
   );

@@ -44,14 +44,16 @@ export function InputPanel({ onMove }: InputPanelProps) {
   }, [version]);
   return (
     <section className={`panel cf input-panel ${yourMove ? 'your-move' : ''} ${sending ? 'sending' : ''}`.trim()} aria-label="input" aria-busy={sending}>
-      <h2>{pause.heading}</h2>
-      {(pause.line || ruleFor(input)) && (
-        <p className="pause-line">
-          {pause.line && <Words parts={pause.line} />}
-          {/* where to read up on it */}
-          {ruleFor(input) && <RuleLink article={ruleFor(input)!.article} found={ruleFor(input)} />}
-        </p>
-      )}
+      <div className="input-head">
+        <h2>{pause.heading}</h2>
+        {(pause.line || ruleFor(input)) && (
+          <p className="pause-line">
+            {pause.line && <Words parts={pause.line} />}
+            {/* where to read up on it */}
+            {ruleFor(input) && <RuleLink article={ruleFor(input)!.article} found={ruleFor(input)} />}
+          </p>
+        )}
+      </div>
       {/* the body scrolls where the column leaves the panel less than it needs; the heading stays above it */}
       <div className="input-body" ref={bodyRef}>
         {outcome && (
