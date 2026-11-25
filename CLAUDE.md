@@ -1076,14 +1076,17 @@ REST (the lobby lists poll), Zustand for the game.
   language (optional parts, plurals, the words per constant, "the" in front of a location, a constant named in the
   template, an icon alone, a die's face, and tone markers: `<+…>` good news for the fleet, `<-…>` bad news, e.g. a
   resource gained or lost, a skill check's result; a location the words mention is a constant, `{Location:BRIG}`, so
-  it shows its card, which `labels.test.ts` checks), `facts.ts` a scope's facts
+  it shows its card, and so is a type of Skill Cards, `{SkillCardColor:TREACHERY}`, so it shows in its color, which
+  `labels.test.ts` checks), `facts.ts` a scope's facts
   as sentences (a card drawn into a hand is "draws …", one lost to a discard pile "discards …", moves of a kind in a
   row and ships that moved alike are one sentence, the bookkeeping left out); they fill in as `Part`s so
   `art/Words.tsx` shows a named card, character or location on hover (`artOf`: `partArt`), the icon in front of a
   resource (tinted like its words), a ship (by its type, `shipType`), a title, a token, the die or a character's
   portrait (`iconOf`: `partIcon`, which only the log passes), a player by his portrait and his sheet on hover where
-  the context knows his character (`playerPart`, the log's `characterOf`; a `Part` keeps the `player` it names), and
-  a part's tone (green or red, in the log); an answer is an order to
+  the context knows his character (`playerPart`, the log's `characterOf`; a `Part` keeps the `player` it names), a
+  type of Skill Cards in its deck's color, the count of hidden cards and a Skill Card deck's name too (`skillColor`,
+  `skill-type-*` in the log: Politics yellow, Leadership green, Tactics purple, Piloting red, Engineering blue,
+  Treachery brown; a named card stays a name to hover), and a part's tone (green or red, in the log); an answer is an order to
   the player it names ("Choose the top option of Riots"); only names, never a card's printed text), `src/input/` (the input panel, see "Answers"; under it the `AnytimePanel`, the
   game's `anytime` answers as moves (`anytimeMoves`) in the answers' `Groups`, e.g. the Motive Cards whose requirement
   is met, shown only while a player the viewer acts for has one and sent as listed), `src/table/` (the board and the panels around it, see "The

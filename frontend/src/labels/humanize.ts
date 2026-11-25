@@ -24,7 +24,10 @@ export function humanizeConstant(constant: string): string {
     .join(' ');
 }
 
-/** `MoveEvent` → `Move`, `DeckFact.CardsDrawn` → `Cards drawn`, `ResolveCrisisCardEvent` → `Resolve crisis card`. */
+/**
+ * `MoveEvent` → `Move`, `DeckFact.CardsDrawn` → `Cards drawn`, `ResolveCrisisCardEvent` → `Resolve crisis card`,
+ * `MakeCagEvent` → `Make CAG`.
+ */
 export function humanizeType(name: string): string {
   const simple = name.includes('.') ? name.substring(name.lastIndexOf('.') + 1) : name;
   const words = simple
@@ -34,6 +37,12 @@ export function humanizeType(name: string): string {
     .split(' ')
     .filter((word) => word.length > 0);
   return words
-    .map((word, index) => (index === 0 ? word : /^[A-Z]{2,}$/.test(word) ? word : word.toLowerCase()))
+    .map((word, index) => {
+      // an acronym a type name writes as a word: "Cag" in MakeCagEvent
+      if (UPPER.has(word.toLowerCase()) || /^[A-Z]{2,}$/.test(word)) {
+        return word.toUpperCase();
+      }
+      return index === 0 ? word : word.toLowerCase();
+    })
     .join(' ');
 }

@@ -11,7 +11,7 @@ export function Words({ parts }: { parts: Part[] }) {
   return (
     <>
       {parts.map((part, index) => {
-        const className = [part.art ? 'named' : '', part.tone ? `tone-${part.tone}` : ''].filter((name) => name).join(' ');
+        const className = [part.art ? 'named' : '', part.tone ? `tone-${part.tone}` : '', part.skillColor ? `skill-type-${part.skillColor.toLowerCase()}` : ''].filter((name) => name).join(' ');
         return (
           <span key={index} className={className || undefined} {...(part.art ? previewHandlers(part.art as ArtRef) : {})}>
             {part.icon && <Icon icon={part.icon} />}

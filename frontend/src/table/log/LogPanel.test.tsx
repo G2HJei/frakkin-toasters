@@ -409,4 +409,39 @@ describe('the log', () => {
     // a name keeps the color of the words around it
     expect(left.querySelector('.event .named')?.className).toBe('named');
   });
+
+  it('colors a type of Skill Cards by its deck, and keeps a card a name to hover', () => {
+    const selection = { kind: 'DrawSkillCardsEvent', playerNumber: 1, selection: { POLITICS: 1, TACTICS: 2 }, drawLimit: null };
+    const draw = { ...scope(1), event: 'DrawSkillCardsEvent', details: selection } as LogEntry;
+    const hidden = { kind: 'Hidden', playerNumber: 1, otherPlayerNumber: null, skillCheckPile: null, colors: { PILOTING: 2 } };
+    const unseen = {
+      ...scope(2),
+      event: 'ResolveCrisisSectionThenEvent',
+      facts: [
+        { ...hidden, fact: 'DeckFact.CardsDrawn', deck: 'PILOTING', pile: null, count: 2 },
+        { ...hidden, fact: 'PlayerFact.CardsGained', deck: null, pile: 'SKILL', count: 2 },
+      ],
+    } as LogEntry;
+    const played = {
+      ...scope(3),
+      event: 'ConsolidatePowerEvent',
+      details: { kind: 'ConsolidatePowerEvent', playerNumber: 1, card: { type: 'CONSOLIDATE_POWER', value: 1 } },
+    } as LogEntry;
+    const body = renderLog([draw, unseen, played]);
+    const colored = (line: Element) => [...line.querySelectorAll('.event [class*="skill-type-"]')].map((type) => [type.className, type.textContent]);
+    const [drew, drewUnseen, play] = [...body.querySelectorAll('.lines > li')];
+
+    expect(rows(body)).toEqual([
+      ['William Adama', 'draws 1 Politics and 2 Tactics cards'],
+      ['William Adama', 'draws 2 Piloting cards'],
+      ['William Adama', 'plays Consolidate Power 1'],
+    ]);
+    expect(colored(drew)).toEqual([
+      ['skill-type-politics', 'Politics'],
+      ['skill-type-tactics', 'Tactics'],
+    ]);
+    expect(colored(drewUnseen)).toEqual([['skill-type-piloting', 'Piloting']]);
+    expect(colored(play)).toEqual([]);
+    expect(play.querySelector('.event .named')?.textContent).toBe('Consolidate Power 1');
+  });
 });

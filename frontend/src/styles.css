@@ -1748,6 +1748,36 @@ details[open] > summary::before {
   font-weight: 600;
 }
 
+/* a type of Skill Cards in its deck's color, lightened to read on the panel; the brown toward a warm light, so it
+   stays brown */
+.table-page .log :is(.skill-type-politics, .skill-type-leadership, .skill-type-tactics, .skill-type-piloting, .skill-type-engineering, .skill-type-treachery) {
+  font-weight: 600;
+}
+
+.table-page .log .skill-type-politics {
+  color: color-mix(in srgb, var(--politics) 90%, white);
+}
+
+.table-page .log .skill-type-leadership {
+  color: color-mix(in srgb, var(--leadership) 75%, white);
+}
+
+.table-page .log .skill-type-tactics {
+  color: color-mix(in srgb, var(--tactics) 75%, white);
+}
+
+.table-page .log .skill-type-piloting {
+  color: color-mix(in srgb, var(--piloting) 80%, white);
+}
+
+.table-page .log .skill-type-engineering {
+  color: color-mix(in srgb, var(--engineering) 70%, white);
+}
+
+.table-page .log .skill-type-treachery {
+  color: color-mix(in srgb, var(--treachery) 55%, #f0c08a);
+}
+
 /* the players' mats: no panel around them, each mat has the cut corners and the edge */
 
 .players .mats {
