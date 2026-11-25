@@ -21,6 +21,15 @@ the frontend owns the wording.
   fact, so a new fact doesn't compile until it has a rule. A fact the viewer may not see becomes `Hidden` (count,
   colors). A shuffle never shows its order, a draw only a count. The scope of a `SecretEvent` shows only to its actor.
   Followups never show. It reads the whole journal, e.g. for who was President when a Quorum Card was drawn.
+- `GameReport.of(journal)` tells a finished game whole, for its results (empty while it goes on): the winner and
+  winners, every player's character (and the ones he lost), all his Loyalty and Motive Cards, whether he ended a Cylon
+  and the turn he revealed it, his turns and statistics (Skill Cards gained, played into checks with their printed
+  strength, played for their text, Crisis Cards on his turns, abilities used, times in the "Brig"), the game's
+  statistics (Crisis Cards, skill checks by result, jumps, ships lost by type, vipers and locations damaged, nukes), the
+  resources at each turn's start and at the end, and the story (`Moment`s: jumps, Cylon reveals, characters leaving,
+  title changes after the setup, Pegasus destroyed, the end). `GameReporter` applies the facts one by one to a game of
+  its own, as a restore does, and tallies each with the game as it stood then. Everything is public once the game has
+  ended, so it is one report for every viewer; `GameReportTest` plays seeded random games to their end and checks it.
 - What a player learns is a fact (backend decision 8): a player who looks at cards he doesn't take records
   `PlayerFact.CardsSeen` (`PlayerOps.see`), which applies nothing, like `LoyaltyCardSeen` and `CivilianShipRevealed`.
 - `Disclosure.CARD_COMPONENTS` marks every event component that holds a card public or private, and a test fails until

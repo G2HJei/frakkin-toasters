@@ -1,8 +1,12 @@
 package xyz.zlatanov.frakkintoasters.backend.wire;
 
+import xyz.zlatanov.frakkintoasters.backend.chat.Chat;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.projection.GameProjection;
+import xyz.zlatanov.frakkintoasters.projection.GameReport;
 import xyz.zlatanov.frakkintoasters.projection.LiveUpdateProjection;
+
+import java.util.List;
 
 /**
  * The messages of the game socket, as records, so the wire schema lists them. They are told apart by {@code type},
@@ -35,10 +39,37 @@ public final class WireMessages {
     public record RejectedMessage(String reason, String message) implements ServerMessage {
     }
 
+    public record PongMessage() implements ServerMessage {
+    }
+
+    // The ended game told whole, for its results: on a new connection, and with the command that ended it.
+    public record ReportMessage(GameReport report) implements ServerMessage {
+    }
+
+    // A chat message, to every connection of the game.
+    public record ChatMessage(Chat.ChatLine message) implements ServerMessage {
+    }
+
+    // The last chat messages, after the log on a new connection.
+    public record ChatLogMessage(List<Chat.ChatLine> messages) implements ServerMessage {
+    }
+
+    // Why the chat refused the sender's message.
+    public record ChatRejectedMessage(String message) implements ServerMessage {
+    }
+
     /**
      * Client to server.
      */
     public sealed interface ClientMessage {
+    }
+
+    // The client is there; it pings while it has nothing else to say.
+    public record PingMessage() implements ClientMessage {
+    }
+
+    // A message in the game's chat, from a player or an observer.
+    public record SayMessage(String text) implements ClientMessage {
     }
 
     public record StatusMessage() implements ClientMessage {
@@ -67,6 +98,13 @@ public final class WireMessages {
             java.util.Map.entry(UpdateMessage.class, "update"),
             java.util.Map.entry(LogMessage.class, "log"),
             java.util.Map.entry(RejectedMessage.class, "rejected"),
+            java.util.Map.entry(PongMessage.class, "pong"),
+            java.util.Map.entry(ReportMessage.class, "report"),
+            java.util.Map.entry(ChatMessage.class, "chat"),
+            java.util.Map.entry(ChatLogMessage.class, "chatLog"),
+            java.util.Map.entry(ChatRejectedMessage.class, "chatRejected"),
+            java.util.Map.entry(PingMessage.class, "ping"),
+            java.util.Map.entry(SayMessage.class, "say"),
             java.util.Map.entry(StatusMessage.class, "status"),
             java.util.Map.entry(HistoryMessage.class, "history"),
             java.util.Map.entry(SubmitMessage.class, "submit"),

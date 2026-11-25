@@ -6,6 +6,7 @@ import { pauseOf } from '../labels/pause';
 import { ruleFor } from '../labels/rules';
 import { RuleLink } from '../table/reference/ReferenceDrawer';
 import { useGameStore } from '../live/gameStore';
+import { useResults } from '../table/results/ResultsDialog';
 import { useTable } from '../table/tableContext';
 import { AnswerPanel } from './AnswerPanel';
 import type { Answer, Move } from './answers';
@@ -29,12 +30,16 @@ export function InputPanel({ onMove }: InputPanelProps) {
   const sending = useGameStore((state) => state.intent !== null);
   const input = table.game?.input ?? null;
   const outcome = table.game?.outcome ?? null;
+  const hasReport = useGameStore((state) => state.report !== null);
   const art = input?.kind === 'Choose' ? choiceArt(input.options ?? []) : [];
 
   // the viewer is asked: a Choose or a Decide only reaches the one who answers
   const yourMove = input?.kind === 'Choose' || input?.kind === 'Decide';
   // its names show their images on hover, like the log's
   const pause = pauseOf(input, { ...table, artOf: partArt });
+  // the game waits for a seat whose user isn't there, or that nobody holds
+  const waitingFor = input?.kind === 'WaitingFor' ? input.player : null;
+  const seat = waitingFor !== null ? table.seatState(waitingFor) : null;
   const bodyRef = useRef<HTMLDivElement>(null);
   // a new input starts at its top, not where the last one was scrolled to
   useEffect(() => {
@@ -53,13 +58,28 @@ export function InputPanel({ onMove }: InputPanelProps) {
             {ruleFor(input) && <RuleLink article={ruleFor(input)!.article} found={ruleFor(input)} />}
           </p>
         )}
+        {waitingFor !== null && seat === 'away' && (
+          <p className="presence-note" role="status">
+            {table.playerName(waitingFor)} is disconnected: the game waits for them.
+          </p>
+        )}
+        {waitingFor !== null && seat === 'vacant' && (
+          <p className="presence-note" role="status">
+            Nobody holds {table.playerName(waitingFor)}'s seat: the game waits for someone to take it under "Seats".
+          </p>
+        )}
       </div>
       {/* the body scrolls where the column leaves the panel less than it needs; the heading stays above it */}
       <div className="input-body" ref={bodyRef}>
         {outcome && (
           <p className="outcome">
             The {outcome.winner === 'HUMANS' ? 'humans' : 'Cylons'} win
-            {outcome.winners && outcome.winners.length > 0 ? `: ${outcome.winners.map(table.playerName).join(', ')}` : ''}.
+            {outcome.winners && outcome.winners.length > 0 ? `: ${outcome.winners.map(table.playerName).join(', ')}` : ''}.{' '}
+            {hasReport && (
+              <button type="button" className="link" onClick={() => useResults.getState().show()}>
+                Results
+              </button>
+            )}
           </p>
         )}
         {art.length > 0 && (

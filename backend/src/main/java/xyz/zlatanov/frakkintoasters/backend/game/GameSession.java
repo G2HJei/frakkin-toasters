@@ -3,11 +3,13 @@ package xyz.zlatanov.frakkintoasters.backend.game;
 import xyz.zlatanov.frakkintoasters.engine.GameEngine;
 import xyz.zlatanov.frakkintoasters.engine.journal.Journal;
 import xyz.zlatanov.frakkintoasters.projection.GameProjection;
+import xyz.zlatanov.frakkintoasters.projection.GameReport;
 import xyz.zlatanov.frakkintoasters.projection.Viewer;
 import xyz.zlatanov.frakkintoasters.state.view.GameView;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -20,6 +22,13 @@ public final class GameSession {
 
     // The last game each viewer was sent after a command, so a viewer for whom nothing changed gets nothing.
     private final Map<Viewer, GameProjection> published = new HashMap<>();
+
+    // abandoned: the game takes no command, and shows no input
+    private boolean closed;
+
+    // the report of the ended game, and the sequence it was read at: an undo can take the ending back
+    private GameReport report;
+    private int        reportedAt = -1;
 
     GameSession(UUID gameBundleId, GameEngine engine) {
         this.gameBundleId = gameBundleId;
@@ -47,6 +56,28 @@ public final class GameSession {
      */
     public int sequence() {
         return engine.journal().size();
+    }
+
+    /**
+     * @return the report of the game once it has ended, read once from the journal
+     */
+    public Optional<GameReport> report() {
+        if (engine.view().outcome().isEmpty()) {
+            return Optional.empty();
+        }
+        if (reportedAt != sequence()) {
+            report = GameReport.of(journal().entries()).orElse(null);
+            reportedAt = sequence();
+        }
+        return Optional.ofNullable(report);
+    }
+
+    public boolean closed() {
+        return closed;
+    }
+
+    void close() {
+        closed = true;
     }
 
     GameProjection publish(Viewer viewer, GameProjection game) {

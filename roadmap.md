@@ -2,8 +2,8 @@
 
 Where the project stands and what is left, in order: first what a full, playable online game with the Kobol objective
 still needs (milestones A to F), then the long term (G onwards). Written 2026-11-21 against `master` (`4606f76`); the
-open questions were answered on 2026-11-22. Updated 2026-11-23 against `88e3d61`: milestones A to C are done, D is
-next.
+open questions were answered on 2026-11-22. Updated 2026-11-23 against `88e3d61`: milestones A to C are done.
+Updated 2026-11-25 against `cba4390`: D is done, E and F are next.
 
 This is a roadmap, not a work order: each milestone gets its own `<topic>-plan.md` (context, decisions, phases that
 end green) before it is built, and the file is deleted once the plan is executed: what it decided lives on in
@@ -30,11 +30,13 @@ Done, and covered by tests:
   words, a log by step, deltas and animations, and a reference drawer; the lobby and room pages, the sandbox tools,
   e2e specs for a sandbox turn, a five-user lobby and a whole game played through the answers.
 
-What stands between this and "a group of friends can play a whole game online" is no longer the engine or the inputs,
-but the session around them and a place to run it:
+- **Sessions** (D): presence, seats that change hands by a vote or the host, host tools, chat, notifications,
+  last-seen lines, results with a report, a read-only link and a rematch, problem reports, the dev login per tab.
 
-1. **A real game is not a real session** (D, E). No presence, no turn clock or absence handling, no way to hand a seat
-   over, no chat, no notifications, no end-of-game screen beyond one line, no rematch, no replay of a finished game.
+What stands between this and "a group of friends can play a whole game online" is no longer the engine, the inputs or
+the session, but the replays and a place to run it:
+
+1. **A finished game can't be stepped through** (E): the read-only link shows its end and its log, no slider yet.
 2. **Nothing runs it for real players** (F). No CI, no staging or production, no backups, no frozen journal format, no
    privacy notice.
 
@@ -115,38 +117,47 @@ Where it differs from the plan:
   or who has answered would tell who holds a card.
 - Ordering is by numbered clicks, not drag and drop. The animations always play (no setting yet).
 
-### D. Sessions that survive real people (backend + frontend)
+### D. Sessions that survive real people: done 2026-11-25
 
-- **Presence**: who is connected, shown on the players' mats and in the room; a disconnected asked player is marked.
-- **Absence**: No clock/timer, just option to hold a vote or host action to hand the seat over (next item). The engine
-  never passes or discards for an
-  absent player. What it may answer alone is built already, for every input and not only on a timeout: with
-  `frakkin.take-only-answers`  (on by default) it takes a decision's only answer itself, e.g. the Skill Cards of a
-  character whose skill set leaves no choice (open question 4). A choice is always asked.
-- **Take over / replace a seat**: a vacated seat (left, banned, abandoned) can be taken by an observer (bots are out of
-  scope, open question 7); the replacement sees what the seat sees, no more. The hand and secrets belong to the seat,
-  not the user.
-- **Host tools**: kick before the start, cancel a lobby, abandon a running game (vote or host, ends it without a
-  winner, `FINISHED` with a reason).
-- **Notifications**: "your move" by browser notification and flashing browser tab / favicon change. The notification is
-  showed only if the browser tab is NOT opened.
-- **Chat**: public only (open question 5): a game chat for players and a separate one for observers (the table is a
-  social game: accusations and bluffing are most of it), and no private messages. Per-game, stored apart from the
-  journal (it is not game state), with a rate limit and a message limit. Cylon-team private chat is out (rules forbid
-  out-of-band communication between hidden Cylons), see "Not in this roadmap". The log panel can be switched to `Chat`
-  panel and vice versa. The existing websockets communicate chat messages too.
-- **Game end**: a results screen (winner, winners by name, every revealed loyalty, motive cards, the story of the game,
-  turns played, statistics per player and per game), a shareable read-only replay link, and a **rematch** that reopens
-  the room with the same seats.
-- **Report a problem**: A link below the `Reference` Link opens a small drawer with a multiline edit box for the player
-  to add a comment (1000 chars max). Sending it stores the comment and the game id in a dedicated table.
-- **Dev simulation**: Allow testing in real people-like environment locally, by using the dev login with incognito
-  browser tabs or separate browsers.
-- **Last seen in logs/chat** Show red last seen horizontal line in chat and logs to help users catch up what they have
-  missed. Disappears on taking an decision (logs) or opening the chat tab (chat).
+What a session has now (`agents/backend.md` "lobby/", "chat/", "problem/"; `agents/frontend-table.md`):
 
-*Exit:* a game played over three days across restarts, with one player replaced mid-game after the clock ran out,
-finishes with the right ending and the results screen.
+- **Presence**: in a lobby whoever's room page polls, in a running game whoever has a socket; the client pings every 20
+  s and the server closes a connection silent for a minute. A dot per user in the room, on the mats and in the seats
+  panel, "away" and "vacant seat" chips, and a line under the pause when the game waits for such a seat.
+- **Seats**: a seat belongs to the game and a user holds it (`seat_holder` keeps who and why he left). A player leaves
+  his seat and watches on; anyone not banned takes a vacant one, a former holder only his own, and sees what the seat
+  sees. A vote of more than half of the other seated players hands a seat over, the host's passes at once. The users
+  whose seat changed reconnect at once (`4001`) with their new viewer. No clock: the engine never passes for anyone.
+- **Host tools**: remove or ban a user (before or after the start), cancel a lobby (`end_reason = 'CANCELLED'`),
+  abandon a game (also by a vote of more than half of the players: `FINISHED`, `ABANDONED`, no input, nothing revealed).
+- **Notifications**: "your move" as a browser notification while the tab is hidden (asked for by "Notify me", never on
+  load), the tab's title flashing until it shows, and the favicon.
+- **Chat**: one public chat for everyone at the table, players and observers, over the game socket, stored in
+  `chat_message`, 500 characters, 5 messages per 10 s; the log panel switches to it and back, with a count of what came
+  while it was closed.
+- **Last seen**: a red line in the log above what came after the viewer's last decision, and in the chat under what he
+  had seen when he opened it.
+- **Game end**: `GameReport` in `core` (winners, every player's cards, statistics per player and per game, the
+  resources per turn, the story), sent as `report`; a results dialog over the table with the winners by every user who
+  held their seat and a resources chart; the table's URL as a read-only link for anyone logged in; the host's rematch
+  with the same seats.
+- **Report a problem**: under "Reference", a drawer with 1000 characters, stored with the game and its journal sequence.
+- **Dev simulation**: the dev login per tab (`X-Dev-User`, `?as=<name>`, "Another user in this tab"), beside incognito
+  windows and other browsers.
+
+*Exit met:* `SessionExitTest` plays a seeded four-player game through `GameSessions`, restored from the rows every 40
+inputs, hands the second seat to an observer by a vote mid-game and finishes with the engine's winner, the report and
+the seat's history; `sessions.spec.ts` plays presence, chat, a hand-over and an abandon in four browsers.
+
+Where it differs from the plan:
+
+- No clock: the exit line once said "after the clock ran out"; a vote hands the seat over instead.
+- The room is polled (every 3 s) for presence, seats and votes; the socket carries the game, the chat, the report and
+  the pings. The client's heartbeat came forward from F.
+- Standard games stay unseeded: the room shows a game's seed, which would tell the decks.
+- An abandoned game reveals nothing, and its results name only who held each seat.
+- One chat, not a players' and an observers' one (decided on 2026-11-25): observers write at the table too. A sandbox
+  has no chat and no last-seen lines.
 
 ### E. Replays, review and "learn from the game"
 
@@ -192,13 +203,13 @@ author.
 
 ```text
 A fuzzer ──► B legal hints ──► C table UX ──► D sessions ──► E replays
-  done          done             done            │
+  done          done             done           done
                                                  └── E builds on D's results screen and replay link
 F (CI, ops, compliance) runs alongside D; its staging is the gate for inviting players.
 ```
 
-A to C are done, in that order: A made the engine sound, B gave A its answers and C its inputs. D is next (mostly
-backend). F was to start alongside C and hasn't (there is no CI yet), so it starts with D, the CI first. The rule for
+A to D are done, in that order: A made the engine sound, B gave A its answers, C its inputs and D its sessions. F was
+to start alongside C and hasn't (there is no CI yet, the heartbeat came with D), so it starts now, the CI first. The rule for
 "playable" is the exit line of D plus F's staging.
 
 ---
@@ -270,7 +281,7 @@ scope" would come back with their rulebook sections (the blue, green and orange 
    possible and never refuse a game after that.
 4. **Timeouts and defaults** (D). Default only when it is the only option that is visible to all players. For example
    auto-drawing skill cards when the skill set of the character is fixed. Built ahead of D as the engine's only
-   answers (`takeOnlyAnswers`), see D's "Turn clock and absence".
+   answers (`takeOnlyAnswers`); D has no clock.
 5. **Chat and hidden information** (D). Only public chat will be available.
 6. **Hosting and who pays** (F). Self-hosted, a single small VPS, free to sign up.
 7. **Bots in a ranked/open game** (G). Bots are out of the scope for this project.

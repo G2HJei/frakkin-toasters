@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { ArtImg, ArtStrip } from '../../art/Art';
 import { characterArt } from '../../art/images';
 import { partArt, partIcon, Words } from '../../art/Words';
@@ -20,7 +20,16 @@ import { useFollowBottom } from './useFollowBottom';
  * touched on the board. The log follows the newest
  * line until the user scrolls up, and the arrow at its bottom right follows again, lit while new lines came below.
  */
-export function LogPanel() {
+export interface LogPanelProps {
+  // the switch between the log and the chat, over the panel
+  tabs?: ReactNode;
+  // how many entries the viewer had seen at his last decision: a red line goes above the first one after them
+  seenBefore?: number | null;
+  // a click on the red line: all is seen
+  onSeen?(): void;
+}
+
+export function LogPanel({ tabs, seenBefore = null, onSeen }: LogPanelProps = {}) {
   const table = useTable();
   const log = useGameStore((state) => state.log);
   const players = table.game?.players;
@@ -40,11 +49,28 @@ export function LogPanel() {
     };
   }, [table, players, titles]);
   const turns = useMemo(() => logStory(log, words), [log, words]);
+  // the first line of an entry the viewer hadn't seen at his last decision
+  const firstUnseen = useMemo(() => {
+    if (seenBefore === null || seenBefore >= log.length) {
+      return null;
+    }
+    const index = new Map(log.map((entry, at) => [entry, at]));
+    for (const turn of turns) {
+      for (const step of turn.steps) {
+        const line = step.lines.find((candidate) => (index.get(candidate.entry) ?? -1) >= seenBefore);
+        if (line) {
+          return line.key;
+        }
+      }
+    }
+    return null;
+  }, [log, turns, seenBefore]);
   const { scrollRef, contentRef, following, unseen, onScroll, toBottom } = useFollowBottom(log);
   const [factsShown, setFactsShown] = useState(false);
   const withFacts = table.sandbox && factsShown;
   return (
     <section className="panel cf log" aria-label="log">
+      {tabs}
       {/* over the top right of the lines, which scroll behind it */}
       {table.sandbox && (
         <button
@@ -77,7 +103,7 @@ export function LogPanel() {
                   {step.step && <h4 className="step-name">{constantLabel('GameStep', step.step)}</h4>}
                   <ol className="lines">
                     {step.lines.map((line) => (
-                      <Line key={line.key} line={line} withFacts={withFacts} />
+                      <LineWithMark key={line.key} line={line} withFacts={withFacts} unseenFromHere={line.key === firstUnseen} onSeen={onSeen} />
                     ))}
                   </ol>
                 </div>
@@ -100,6 +126,22 @@ export function LogPanel() {
         </button>
       )}
     </section>
+  );
+}
+
+// The red line over the first line the viewer hadn't seen at his last decision; a click on it marks all seen.
+function LineWithMark({ line, withFacts, unseenFromHere, onSeen }: { line: LogLine; withFacts: boolean; unseenFromHere: boolean; onSeen?(): void }) {
+  return (
+    <>
+      {unseenFromHere && (
+        <li className="last-seen" aria-label="new since your last move">
+          <button type="button" className="link" title="Mark all as seen" onClick={() => onSeen?.()}>
+            new since your last move
+          </button>
+        </li>
+      )}
+      <Line line={line} withFacts={withFacts} />
+    </>
   );
 }
 

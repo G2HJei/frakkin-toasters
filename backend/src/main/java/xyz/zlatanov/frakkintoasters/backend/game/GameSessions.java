@@ -12,6 +12,7 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ObjectNode;
 import xyz.zlatanov.frakkintoasters.backend.game.CommandResult.Reason;
 import xyz.zlatanov.frakkintoasters.backend.game.CommandResult.Rejected;
+import xyz.zlatanov.frakkintoasters.backend.game.GameBundle.EndReason;
 import xyz.zlatanov.frakkintoasters.backend.game.GameBundle.GameStatus;
 import xyz.zlatanov.frakkintoasters.backend.game.ProjectionSink.Frames;
 import xyz.zlatanov.frakkintoasters.backend.game.ProjectionSink.GameMessage;
@@ -24,11 +25,13 @@ import xyz.zlatanov.frakkintoasters.engine.PendingInput.AwaitingChoice;
 import xyz.zlatanov.frakkintoasters.engine.PendingInput.AwaitingDecision;
 import xyz.zlatanov.frakkintoasters.engine.journal.Journal;
 import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.GameFact;
 import xyz.zlatanov.frakkintoasters.event.AnytimeEvent;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.PlayerEvent;
 import xyz.zlatanov.frakkintoasters.event.sandbox.SandboxEvent;
 import xyz.zlatanov.frakkintoasters.projection.GameProjection;
+import xyz.zlatanov.frakkintoasters.projection.GameReport;
 import xyz.zlatanov.frakkintoasters.projection.LiveUpdateProjection;
 import xyz.zlatanov.frakkintoasters.projection.Viewer;
 import xyz.zlatanov.frakkintoasters.state.exception.FrakCallTheAdmiralException;
@@ -38,6 +41,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
@@ -64,6 +68,8 @@ import static xyz.zlatanov.frakkintoasters.backend.game.CommandResult.rejected;
 @Slf4j
 @Service
 public class GameSessions {
+
+    static final String ABANDONED = "The game was abandoned";
 
     private final GameBundles                         bundles;
     private final JournalStore                        store;
@@ -138,7 +144,7 @@ public class GameSessions {
         withLock(gameBundleId, () -> {
             val session = session(gameBundleId);
             register.accept(new Frames(null, LiveUpdateProjection.of(session.journal().entries(), viewer),
-                    handOut(session, viewer)));
+                    handOut(session, viewer), session.report().orElse(null)));
             return null;
         });
     }
@@ -149,7 +155,8 @@ public class GameSessions {
     public Frames history(UUID gameBundleId, Viewer viewer) {
         return withLock(gameBundleId, () -> {
             val session = session(gameBundleId);
-            return new Frames(null, LiveUpdateProjection.of(session.journal().entries(), viewer), handOut(session, viewer));
+            return new Frames(null, LiveUpdateProjection.of(session.journal().entries(), viewer), handOut(session, viewer),
+                    session.report().orElse(null));
         });
     }
 
@@ -273,11 +280,41 @@ public class GameSessions {
             } catch (GameNotAvailableException e) {
                 return rejected(Reason.INVALID, e.getMessage());
             }
+            if (session.closed()) {
+                return rejected(Reason.INVALID, ABANDONED);
+            }
             if (!tokens.matches(token, gameBundleId, session.sequence())) {
                 return new Rejected(Reason.STALE, "The game has moved on", handOut(session, viewer));
             }
             return command.apply(session);
         });
+    }
+
+    /**
+     * Ends a running game without a winner: it is {@code FINISHED} as {@code ABANDONED}, takes no command any more, and
+     * every connection gets the game without its input. The engine stays as it was, so nothing is revealed.
+     */
+    public void abandon(UUID gameBundleId) {
+        withLock(gameBundleId, () -> {
+            final GameSession session;
+            try {
+                session = session(gameBundleId);
+            } catch (GameNotAvailableException e) {
+                bundles.end(gameBundleId, EndReason.ABANDONED);
+                return null;
+            }
+            transaction.executeWithoutResult(ignored -> bundles.end(gameBundleId, EndReason.ABANDONED));
+            session.close();
+            publish(session, session.sequence(), false);
+            return null;
+        });
+    }
+
+    /**
+     * The users' connections to the game open again, with the viewer of the seat each holds now.
+     */
+    public void reconnect(UUID gameBundleId, Set<UUID> userIds) {
+        sinks.getIfAvailable(() -> ProjectionSink.NONE).reconnect(gameBundleId, userIds);
     }
 
     /**
@@ -310,6 +347,9 @@ public class GameSessions {
                 session = session(gameBundleId);
             } catch (GameNotAvailableException e) {
                 return rejected(Reason.INVALID, e.getMessage());
+            }
+            if (session.closed()) {
+                return rejected(Reason.INVALID, ABANDONED);
             }
             if (!tokens.matches(token, gameBundleId, session.sequence())) {
                 return new Rejected(Reason.STALE, "The game has moved on", handOut(session, viewer));
@@ -371,6 +411,9 @@ public class GameSessions {
         val journal = store.load(gameBundleId);
         val engine = bundle.seed() == null ? GameEngine.restore(journal) : GameEngine.restore(journal, bundle.seed());
         val session = new GameSession(gameBundleId, withOptions(engine));
+        if (bundle.abandoned()) {
+            session.close();
+        }
         cache.put(gameBundleId, session);
         return session;
     }
@@ -408,9 +451,23 @@ public class GameSessions {
                 session.engine().pendingInput().map(input -> input.player()).orElse(null));
     }
 
+    // An abandoned game shows what it waited for no more, and offers nothing.
     private GameMessage message(GameSession session, Viewer viewer) {
-        return new GameMessage(tokens.token(session.gameBundleId(), session.sequence()),
+        val token = tokens.token(session.gameBundleId(), session.sequence());
+        if (session.closed()) {
+            val game = GameProjection.of(session.view(), Optional.empty(), Optional.empty(), viewer);
+            return new GameMessage(token, withoutAnytime(game));
+        }
+        return new GameMessage(token,
                 GameProjection.of(session.view(), session.engine().pendingInput(), session.engine().pendingScope(), viewer));
+    }
+
+    private static GameProjection withoutAnytime(GameProjection game) {
+        return new GameProjection(game.viewer(), game.objective(), game.turn(), game.players(), game.titles(),
+                game.galactica(), game.pegasus(), game.cylonFleet(), game.cylonSupply(), game.decks(),
+                game.presidentHand(), game.quorumCardsInPlay(), game.skillCheck(), game.nukes(),
+                game.crisisCardsInPlay(), game.destinations(), game.distanceTraveled(), game.removedCharacters(),
+                game.destroyedShips(), null, List.of(), game.outcome());
     }
 
     // The viewer's connection gets the current game, which every other connection of his has already: so it counts as
@@ -433,10 +490,13 @@ public class GameSessions {
         if (replacesLog) {
             session.forgetPublished();
         }
+        // the report goes with the command that ended the game, or with a whole log
+        val report = replacesLog || endsIn(entries, fromSequence) ? session.report().orElse(null) : null;
         sinks.getIfAvailable(() -> ProjectionSink.NONE).publish(session.gameBundleId(), new Publication() {
             @Override
             public Optional<Frames> forViewer(Viewer viewer) {
-                return built.computeIfAbsent(viewer, ignored -> frames(session, entries, fromSequence, viewer, replacesLog));
+                return built.computeIfAbsent(viewer,
+                        ignored -> frames(session, entries, fromSequence, viewer, replacesLog, report));
             }
 
             @Override
@@ -447,17 +507,22 @@ public class GameSessions {
     }
 
     private Optional<Frames> frames(GameSession session, List<JournalEntry> entries,
-                                    int fromSequence, Viewer viewer, boolean replacesLog) {
+                                    int fromSequence, Viewer viewer, boolean replacesLog, GameReport report) {
         val message = message(session, viewer);
         val previous = session.publish(viewer, message.game());
         if (replacesLog) {
-            return Optional.of(new Frames(null, LiveUpdateProjection.of(entries, viewer), message));
+            return Optional.of(new Frames(null, LiveUpdateProjection.of(entries, viewer), message, report));
         }
         val update = LiveUpdateProjection.of(entries, fromSequence, viewer);
-        if (update.isEmpty() && message.game().equals(previous)) {
+        if (update.isEmpty() && message.game().equals(previous) && report == null) {
             return Optional.empty();
         }
-        return Optional.of(new Frames(update.isEmpty() ? null : update, null, message));
+        return Optional.of(new Frames(update.isEmpty() ? null : update, null, message, report));
+    }
+
+    private static boolean endsIn(List<JournalEntry> entries, int fromSequence) {
+        return entries.subList(Math.min(fromSequence, entries.size()), entries.size()).stream()
+                .anyMatch(entry -> entry instanceof JournalEntry.FactRecorded(var ignored, GameFact.GameEnded ended));
     }
 
     <T> T withLock(UUID gameBundleId, Supplier<T> action) {

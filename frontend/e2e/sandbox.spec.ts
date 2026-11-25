@@ -51,16 +51,16 @@ test('a seeded sandbox is played through a turn, undone, exported and imported',
   await input(page).getByRole('button', { name: /top option of Riots No Jump/ }).click();
 
   await expectTurn(page, 'Turn 2 · Laura Roslin', 'Movement');
-  await expect(resource(page, 'Food')).toHaveText('7');
-  await expect(resource(page, 'Morale')).toHaveText('9');
+  await expect(resource(page, 'Food')).toHaveAttribute('aria-label', 'Food: 7');
+  await expect(resource(page, 'Morale')).toHaveAttribute('aria-label', 'Morale: 9');
 
   // undo goes back to the section, and the same answer gives the same game
   await page.getByRole('button', { name: 'Undo' }).click();
   await expectTurn(page, 'Turn 1 · William Adama', 'Crisis');
-  await expect(resource(page, 'Food')).toHaveText('8');
+  await expect(resource(page, 'Food')).toHaveAttribute('aria-label', 'Food: 8');
   await input(page).getByRole('button', { name: /top option of Riots No Jump/ }).click();
   await expectTurn(page, 'Turn 2 · Laura Roslin', 'Movement');
-  await expect(resource(page, 'Food')).toHaveText('7');
+  await expect(resource(page, 'Food')).toHaveAttribute('aria-label', 'Food: 7');
 
   // export, then import as a new sandbox: the same game
   const id = page.url().split('/').pop();
@@ -70,7 +70,7 @@ test('a seeded sandbox is played through a turn, undone, exported and imported',
   const file = { name: 'sandbox.json', mimeType: 'application/json', buffer: await exported.body() };
   page = await openGame(lobby, (from) => from.getByLabel('journal file').setInputFiles(file));
   await expectTurn(page, 'Turn 2 · Laura Roslin', 'Movement');
-  await expect(resource(page, 'Food')).toHaveText('7');
+  await expect(resource(page, 'Food')).toHaveAttribute('aria-label', 'Food: 7');
   await expect(input(page).getByRole('heading')).toHaveText('Laura Roslin chooses');
 });
 
@@ -108,6 +108,7 @@ async function expectTurn(page: Page, line: string, step: string) {
   await expect(turn.locator('.steps [aria-current="step"]')).toHaveText(step);
 }
 
+// a resource's gauge on the board, which names its amount
 function resource(page: Page, name: string) {
-  return page.locator(`svg.board-svg .resource[data-resource="${name.toLowerCase()}"]`);
+  return page.locator(`svg.board-svg [data-gauge="${name.toLowerCase()}"]`);
 }

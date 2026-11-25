@@ -26,12 +26,14 @@ code. That includes:
 
 Built and covered by tests: every component of the Kobol game (every Crisis, Super Crisis, Destination, Skill, Quorum,
 Mutiny, Loyalty and Motive Card, every location and Title Card action, Pegasus' destruction, the 99 character
-abilities), the engine with its journal, restore and rollback, the backend, the sandbox, and the table with its inputs.
-`roadmap.md` milestones A to C are done: random games play to an ending (`./gradlew :core:fuzz`; 10,000 seeds per
+abilities), the engine with its journal, restore and rollback, the backend, the sandbox, the table with its inputs, and
+the session around a game (seats that change hands, votes, presence, chat, notifications, results and rematch).
+`roadmap.md` milestones A to D are done: random games play to an ending (`./gradlew :core:fuzz`; 10,000 seeds per
 player count leave only `NO_END` games that are a valid stall: every human in the "Brig", where nobody draws a Crisis
-Card), legal-move hints, and the table's inputs (`playthrough.spec.ts` plays a game to an ending through the answers).
-Next: milestone D of `roadmap.md`, sessions that survive real people. `choices.md` records the choices made where the
-cards and rules are silent.
+Card), legal-move hints, the table's inputs (`playthrough.spec.ts` plays a game to an ending through the answers), and
+sessions that survive real people (`SessionExitTest`: a game across restores with a seat handed over, to its results).
+Next: milestones E (replays) and F (CI, hosting) of `roadmap.md`. `choices.md` records the choices made where the cards
+and rules are silent.
 
 ## Build Commands
 

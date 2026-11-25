@@ -2,6 +2,7 @@ package xyz.zlatanov.frakkintoasters.backend.journal;
 
 import tools.jackson.databind.JsonNode;
 import xyz.zlatanov.frakkintoasters.projection.GameProjection;
+import xyz.zlatanov.frakkintoasters.projection.GameReport;
 import xyz.zlatanov.frakkintoasters.projection.LiveUpdateProjection;
 
 /**
@@ -21,5 +22,9 @@ public final class WireCodec {
 
     public JsonNode update(LiveUpdateProjection update) {
         return codec.write(update, LiveUpdateProjection.class);
+    }
+
+    public JsonNode report(GameReport report) {
+        return codec.write(report, GameReport.class);
     }
 }

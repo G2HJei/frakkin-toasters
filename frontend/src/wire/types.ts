@@ -471,6 +471,30 @@ export type CharacterActionEvent = AbusePowerEvent | AttorneyEvent | BlindJumpEv
 
 export type CharacterMovementEvent = AggressiveTacticsEvent | GlimpseTheFaceOfGodEvent | IntimateEvent;
 
+export interface ChatLine {
+  id: number;
+  userId: string | null;
+  name: string | null;
+  playerNumber: number | null;
+  text: string | null;
+  at: string | null;
+}
+
+export interface ChatLogMessage {
+  type: 'chatLog';
+  messages: Array<ChatLine> | null;
+}
+
+export interface ChatMessage {
+  type: 'chat';
+  message: ChatLine | null;
+}
+
+export interface ChatRejectedMessage {
+  type: 'chatRejected';
+  message: string | null;
+}
+
 export type Choice = 'BUILD_ASSAULT_RAPTOR' | 'RETURN_RAPTOR';
 export const Choice_VALUES: readonly Choice[] = ['BUILD_ASSAULT_RAPTOR', 'RETURN_RAPTOR'];
 
@@ -581,7 +605,7 @@ export interface CivilianShip {
   populationCost: number;
 }
 
-export type ClientMessage = ChooseMessage | HistoryMessage | InjectMessage | StatusMessage | SubmitMessage | UndoMessage;
+export type ClientMessage = ChooseMessage | HistoryMessage | InjectMessage | PingMessage | SayMessage | StatusMessage | SubmitMessage | UndoMessage;
 
 export interface ClippedWingsEvent {
   kind: 'ClippedWingsEvent';
@@ -1575,6 +1599,27 @@ export interface GameProjection {
   outcome: Outcome | null;
 }
 
+export interface GameReport {
+  winner: Team | null;
+  winners: Array<number> | null;
+  turns: number;
+  distance: number;
+  players: Array<PlayerReport> | null;
+  statistics: GameStatistics | null;
+  resources: Array<TurnResources> | null;
+  story: Array<Moment> | null;
+}
+
+export interface GameStatistics {
+  crisisCards: number;
+  skillChecks: Partial<Record<SkillCheckResult, number>> | null;
+  jumps: number;
+  shipsLost: Partial<Record<ShipType, number>> | null;
+  vipersDamaged: number;
+  locationsDamaged: number;
+  nukesUsed: number;
+}
+
 export type GameStep = 'SETUP' | 'RECEIVE_SKILLS' | 'MOVEMENT' | 'ACTION' | 'CRISIS' | 'ACTIVATE_CYLON_SHIPS' | 'PREPARE_FOR_JUMP' | 'DISCARD';
 export const GameStep_VALUES: readonly GameStep[] = ['SETUP', 'RECEIVE_SKILLS', 'MOVEMENT', 'ACTION', 'CRISIS', 'ACTIVATE_CYLON_SHIPS', 'PREPARE_FOR_JUMP', 'DISCARD'];
 
@@ -2049,6 +2094,19 @@ export interface ModificationsEvent {
   activation: CylonActivation | null;
 }
 
+export interface Moment {
+  turn: number;
+  kind: MomentKind | null;
+  playerNumber: number | null;
+  character: Character | null;
+  destination: DestinationCard | null;
+  distance: number | null;
+  winner: Team | null;
+}
+
+export type MomentKind = 'JUMPED' | 'CYLON_REVEALED' | 'CHARACTER_REMOVED' | 'PRESIDENT' | 'ADMIRAL' | 'CAG' | 'PEGASUS_DESTROYED' | 'GAME_ENDED';
+export const MomentKind_VALUES: readonly MomentKind[] = ['JUMPED', 'CYLON_REVEALED', 'CHARACTER_REMOVED', 'PRESIDENT', 'ADMIRAL', 'CAG', 'PEGASUS_DESTROYED', 'GAME_ENDED'];
+
 export interface MoralCompassEvent {
   kind: 'MoralCompassEvent';
   playerNumber: number;
@@ -2310,6 +2368,10 @@ export interface PersonalVicesEvent {
 }
 
 export type Pick = QuorumCardPick | ShipPick | SkillCardPick;
+
+export interface PingMessage {
+  type: 'ping';
+}
 
 export interface PlaceCenturionsEvent {
   kind: 'PlaceCenturionsEvent';
@@ -2584,6 +2646,28 @@ export interface PlayerProjection {
   knownCivilianShips: Array<number> | null;
 }
 
+export interface PlayerReport {
+  number: number;
+  character: Character | null;
+  formerCharacters: Array<Character> | null;
+  loyaltyCards: Array<LoyaltyCard> | null;
+  motiveCards: Array<MotiveCard> | null;
+  cylon: boolean;
+  revealedOnTurn: number | null;
+  turns: number;
+  statistics: PlayerStatistics | null;
+}
+
+export interface PlayerStatistics {
+  skillCardsGained: number;
+  cardsIntoChecks: number;
+  strengthIntoChecks: number;
+  skillCardsPlayed: number;
+  crisisCards: number;
+  abilitiesUsed: number;
+  sentToBrig: number;
+}
+
 export interface PlayerViewer {
   kind: 'PlayerViewer';
   playerNumber: number;
@@ -2601,6 +2685,10 @@ export interface PoliticallyAdroitEvent {
   playerNumber: number;
   targetPlayerNumber: number;
   card: SkillCard | null;
+}
+
+export interface PongMessage {
+  type: 'pong';
 }
 
 export interface PopularInfluenceChoiceEvent {
@@ -2835,6 +2923,11 @@ export interface ReplaceMutinousPresidentEvent {
   playerNumber: number;
 }
 
+export interface ReportMessage {
+  type: 'report';
+  report: GameReport | null;
+}
+
 export interface ResearchLabEvent {
   kind: 'ResearchLabEvent';
   playerNumber: number;
@@ -3044,6 +3137,11 @@ export interface Sandbox {
 
 export type SandboxEvent = AssignTitleEvent | ChangeResourceEvent | DamageLocationEvent | GiveLoyaltyCardToPlayerEvent | GiveMutinyCardToPlayerEvent | GiveQuorumCardToPresidentEvent | GiveSkillCardToPlayerEvent | GiveSuperCrisisCardToPlayerEvent | MoveCharacterEvent | PlaceShipEvent | PutCrisisCardOnTopEvent | PutDestinationCardOnTopEvent | PutDestinyCardOnTopEvent | PutSkillCardOnTopEvent | SetJumpPreparationEvent;
 
+export interface SayMessage {
+  type: 'say';
+  text: string | null;
+}
+
 export interface ScavengingForPartsEvent {
   kind: 'ScavengingForPartsEvent';
   playerNumber: number;
@@ -3133,7 +3231,7 @@ export interface SendToSickbayEvent {
   targetPlayerNumber: number;
 }
 
-export type ServerMessage = GameMessage | LogMessage | RejectedMessage | UpdateMessage;
+export type ServerMessage = ChatLogMessage | ChatMessage | ChatRejectedMessage | GameMessage | LogMessage | PongMessage | RejectedMessage | ReportMessage | UpdateMessage;
 
 export interface SetATrapPassEvent {
   kind: 'SetATrapPassEvent';
@@ -3593,6 +3691,16 @@ export interface TurnProjection {
   resolvedInterruptCards: Array<SkillCardType> | null;
   raidersToMiss: Partial<Record<Location, number>> | null;
   lossReductions: Partial<Record<Resource, number>> | null;
+}
+
+export interface TurnResources {
+  turn: number;
+  end: boolean;
+  fuel: number;
+  food: number;
+  morale: number;
+  population: number;
+  distance: number;
 }
 
 export interface UnauthorizedUsageEvent {

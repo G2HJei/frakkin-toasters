@@ -1,4 +1,5 @@
 import type { NavigateFunction } from 'react-router';
+import { withTabUser } from '../api/devTab';
 
 export interface GameTab {
   /** Shows the game in the tab, or in this one when the browser blocked the tab. */
@@ -22,7 +23,8 @@ export function openGameTab(navigate: NavigateFunction): GameTab {
       if (!tab) {
         navigate(path);
       } else if (!tab.closed) {
-        tab.location.href = new URL(path, window.location.origin).href;
+        // the same user in the new tab, when this one has a dev user of its own
+        tab.location.href = new URL(withTabUser(path), window.location.origin).href;
       }
     },
     close: () => tab?.close(),

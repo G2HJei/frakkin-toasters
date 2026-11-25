@@ -34,6 +34,8 @@ final class TestClient implements AutoCloseable {
     private final CookieManager                cookies = new CookieManager(null, CookiePolicy.ACCEPT_ALL);
     private final HttpClient                   http    = HttpClient.newBuilder().cookieHandler(cookies).build();
     private final LinkedBlockingQueue<JsonNode> inbox   = new LinkedBlockingQueue<>();
+    // the chat's messages, apart from the game's, so a test of the game doesn't see them
+    private final LinkedBlockingQueue<JsonNode> chats   = new LinkedBlockingQueue<>();
     private final List<JsonNode>               received = new ArrayList<>();
     private       int                          port;
     private       WebSocket                    socket;
@@ -72,6 +74,7 @@ final class TestClient implements AutoCloseable {
     @SneakyThrows
     void connect(UUID game, int serverPort) {
         inbox.clear(); // what the old connection had left
+        chats.clear();
         closeCode = new CompletableFuture<>();
         port = serverPort;
         val cookieHeader = cookies.getCookieStore().getCookies().stream()
@@ -130,6 +133,39 @@ final class TestClient implements AutoCloseable {
             throw new AssertionError("Expected a " + type + " message, got " + message);
         }
         return message;
+    }
+
+    void say(String text) {
+        val message = NODES.objectNode();
+        message.put("type", "say");
+        message.put("text", text);
+        send(message);
+    }
+
+    /**
+     * @return the next message of the chat, which has to be of the type
+     */
+    @SneakyThrows
+    JsonNode nextChat(String type) {
+        val message = chats.poll(10, TimeUnit.SECONDS);
+        if (message == null) {
+            throw new AssertionError("No " + type + " message came");
+        }
+        if (!message.get("type").stringValue().equals(type)) {
+            throw new AssertionError("Expected a " + type + " message, got " + message);
+        }
+        return message;
+    }
+
+    /**
+     * Waits a little, and fails if a chat message came.
+     */
+    @SneakyThrows
+    void assertNoChat() {
+        val message = chats.poll(500, TimeUnit.MILLISECONDS);
+        if (message != null) {
+            throw new AssertionError("No chat message should have come, but got " + message);
+        }
     }
 
     /**
@@ -248,7 +284,11 @@ final class TestClient implements AutoCloseable {
                 synchronized (received) {
                     received.add(message);
                 }
-                inbox.add(message);
+                if (message.get("type").stringValue().startsWith("chat")) {
+                    chats.add(message);
+                } else {
+                    inbox.add(message);
+                }
             }
             webSocket.request(1);
             return null;

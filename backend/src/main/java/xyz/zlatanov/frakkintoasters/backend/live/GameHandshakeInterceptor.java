@@ -9,8 +9,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 import xyz.zlatanov.frakkintoasters.backend.game.GameBundle.GameMode;
+import xyz.zlatanov.frakkintoasters.backend.game.GameBundle.GameStatus;
 import xyz.zlatanov.frakkintoasters.backend.game.GameBundles;
 import xyz.zlatanov.frakkintoasters.backend.lobby.Participants;
+import xyz.zlatanov.frakkintoasters.backend.lobby.Seats;
 import xyz.zlatanov.frakkintoasters.backend.user.AppUserAuthentication;
 import xyz.zlatanov.frakkintoasters.projection.Viewer;
 
@@ -18,8 +20,9 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * The handshake of {@code /ws/games/{gameBundleId}} needs a logged in user who is a participant of the game. That gives
- * the connection its user, its game and its viewer: player n, an observer, or the sandbox.
+ * The handshake of {@code /ws/games/{gameBundleId}} needs a logged in user who is a participant of the game, or any user
+ * but a banned one for a finished game, which he watches: its URL is a read-only link. That gives the connection its
+ * user, its game and its viewer: player n, an observer, or the sandbox.
  */
 @Component
 @RequiredArgsConstructor
@@ -31,6 +34,7 @@ public class GameHandshakeInterceptor implements HandshakeInterceptor {
 
     private final Participants participants;
     private final GameBundles  bundles;
+    private final Seats        seats;
 
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler handler,
@@ -50,13 +54,15 @@ public class GameHandshakeInterceptor implements HandshakeInterceptor {
         val userId = authentication.getPrincipal().id();
         val participant = participants.find(gameBundleId, userId);
         val bundle = bundles.find(gameBundleId);
-        if (participant.isEmpty() || bundle.isEmpty()) {
+        val watches = bundle.isPresent() && participant.isEmpty() && bundle.get().mode() == GameMode.STANDARD
+                && bundle.get().status() == GameStatus.FINISHED && !seats.banned(gameBundleId, userId);
+        if (bundle.isEmpty() || participant.isEmpty() && !watches) {
             response.setStatusCode(HttpStatus.FORBIDDEN);
             return false;
         }
         attributes.put(GAME, gameBundleId);
         attributes.put(USER, userId);
-        attributes.put(VIEWER, viewer(bundle.get().mode(), participant.get()));
+        attributes.put(VIEWER, participant.map(seated -> viewer(bundle.get().mode(), seated)).orElse(Viewer.observer()));
         return true;
     }
 

@@ -9,6 +9,8 @@ import { useTable } from '../tableContext';
 import { StepIcon, type TurnStep } from './StepIcon';
 import { useChanges } from '../changes';
 import { useReference } from '../reference/ReferenceDrawer';
+import { NotifyButton } from '../notify';
+import { ProblemLink } from '../problem/ProblemDrawer';
 
 // the steps of a player's turn, in order
 const STEPS: TurnStep[] = ['RECEIVE_SKILLS', 'MOVEMENT', 'ACTION', 'CRISIS', 'ACTIVATE_CYLON_SHIPS', 'PREPARE_FOR_JUMP', 'DISCARD'];
@@ -42,9 +44,14 @@ export function TurnPanel({ name, connection }: { name: string; connection: Conn
         <img src="/logo.svg" alt="" className="logo" />
         <span title={name}>{name || 'Game'}</span>
         {connection !== 'open' && <small className={`connection ${connection}`}>{connection}</small>}
-        <button type="button" className="link reference-open" aria-keyshortcuts="R" onClick={() => useReference.getState().show()}>
-          Reference <kbd aria-hidden="true">R</kbd>
-        </button>
+        {/* the reference, and under it the report of a problem */}
+        <span className="tab-links">
+          <button type="button" className="link reference-open" aria-keyshortcuts="R" onClick={() => useReference.getState().show()}>
+            Reference <kbd aria-hidden="true">R</kbd>
+          </button>
+          <ProblemLink />
+          {!table.sandbox && <NotifyButton />}
+        </span>
       </div>
       {turn && (
         <>

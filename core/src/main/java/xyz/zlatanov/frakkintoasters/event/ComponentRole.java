@@ -26,7 +26,10 @@ public enum ComponentRole {
             "civilianShips", "totalStrength", "difficulty", "fuel", "food", "morale", "population", "nukes",
             "distanceTraveled", "playerCount", "calculationsModifier", "handLimit", "option", "fuelCost", "moraleCost",
             "populationCost", "result", "formatVersion", "activationsLeft", "delta", "adjustment", "raidersPerBasestar",
-            "miracleTokens", "min", "max", "minStrength");
+            "miracleTokens", "min", "max", "minStrength",
+            // the report of a finished game (GameReport)
+            "distance", "crisisCards", "jumps", "vipersDamaged", "locationsDamaged", "nukesUsed", "revealedOnTurn",
+            "skillCardsGained", "cardsIntoChecks", "strengthIntoChecks", "skillCardsPlayed", "abilitiesUsed", "sentToBrig");
 
     /**
      * @return the role of an int component by its name, empty when the name can't be placed

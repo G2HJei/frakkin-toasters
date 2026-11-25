@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
+import { withTabUser } from '../api/devTab';
 import { useGames, useLobbyAction, type GameSummary } from '../api/queries';
 import { openGameTab } from './gameTab';
 
@@ -81,15 +82,17 @@ function GameList({ title, games, action }: { title: string; games: GameSummary[
         <ul className="games">
           {games.map((game) => (
             <li key={game.id}>
-              {game.participant ? <Link to={`/games/${game.id}`} target="_blank">{game.name}</Link> : <span>{game.name}</span>}
+              {game.participant ? <Link to={withTabUser(`/games/${game.id}`)} target="_blank">{game.name}</Link> : <span>{game.name}</span>}
               <span className="muted">
                 {' '}
                 · {game.status.toLowerCase()} · {game.players} players · host {game.hostName}
                 {game.status !== 'LOBBY' ? ` · turn ${game.turn}` : ''}
                 {game.winnerTeam ? ` · ${game.winnerTeam.toLowerCase()} won` : ''}
+                {game.endReason === 'ABANDONED' ? ' · abandoned' : ''}
                 {!game.openable ? ' · saved by another version' : ''}
               </span>
               {game.waitingForMe && game.mode === 'STANDARD' && <span className="badge">your move</span>}
+              {game.vacantSeats > 0 && <span className="badge alert">{game.vacantSeats === 1 ? 'a seat is vacant' : `${game.vacantSeats} seats are vacant`}</span>}
               {action?.(game)}
             </li>
           ))}

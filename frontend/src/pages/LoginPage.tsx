@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router';
+import { useQueryClient } from '@tanstack/react-query';
+import { setTabUser } from '../api/devTab';
 import { useDevLogin, useLogins, useMe } from '../api/queries';
 
 const PROVIDER_NAMES: Record<string, string> = { google: 'Google', discord: 'Discord' };
@@ -10,7 +12,10 @@ export function LoginPage() {
   const logins = useLogins();
   const devLogin = useDevLogin();
   const navigate = useNavigate();
+  const client = useQueryClient();
   const [name, setName] = useState('');
+  // one browser, several users: this tab logs in alone, the others keep theirs
+  const [tabOnly, setTabOnly] = useState(false);
 
   if (me.data) {
     return <Navigate to="/" replace />;
@@ -32,12 +37,21 @@ export function LoginPage() {
           className="dev-login"
           onSubmit={(event) => {
             event.preventDefault();
+            if (tabOnly) {
+              setTabUser(name.trim());
+              void client.invalidateQueries().then(() => navigate('/'));
+              return;
+            }
             devLogin.mutate(name, { onSuccess: () => navigate('/') });
           }}
         >
           <label className="field">
             <span className="field-name">Name</span>
             <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Your name" aria-label="name" />
+          </label>
+          <label className="field" title="Another tab of this browser can log in as someone else: try a game with several users">
+            <input type="checkbox" checked={tabOnly} onChange={(event) => setTabOnly(event.target.checked)} aria-label="this tab only" />
+            <span>This tab only</span>
           </label>
           <button type="submit" className="primary" disabled={!name.trim() || devLogin.isPending}>
             Log in (dev)

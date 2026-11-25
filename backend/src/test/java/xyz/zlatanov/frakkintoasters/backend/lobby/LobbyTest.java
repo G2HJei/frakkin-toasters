@@ -74,7 +74,8 @@ class LobbyTest extends BackendTest {
         // after the start, only observers join
         assertConflict(() -> lobby.join(room.id(), createUser("Gaeta"), Role.PLAYER));
         assertEquals(1, lobby.join(room.id(), createUser("Dualla"), Role.OBSERVER).observers().size());
-        assertConflict(() -> lobby.leave(room.id(), apollo));
+        // a player who leaves now leaves his seat, see SeatsTest
+        assertEquals(List.of(3), lobby.leave(room.id(), apollo).vacantSeats());
     }
 
     @Test

@@ -91,6 +91,15 @@ button.link {
   padding: 0 0.25rem;
 }
 
+button.danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+button.link.danger {
+  color: var(--danger);
+}
+
 input,
 select,
 textarea {
@@ -2573,7 +2582,7 @@ details[open] > summary::before {
    dradis under the pointer or the keyboard. The edge is the background and the fill a layer inset by --bw, as in .cf.
    Not the cards to pick, which are tiles, nor the fields of the sandbox's setup */
 .table-page :is(.input-panel, .anytime-panel, .answer-pop) :where(.option, .chip, .primary, .selection-bar .link, .actions .link),
-.table-page :is(.reference-head, .sandbox .toolbar, .sandbox .actions) :where(button, .button) {
+.table-page :is(.reference-head, .sandbox .toolbar, .sandbox .actions, .session .toolbar, .results .toolbar, .problem .toolbar) :where(button, .button) {
   --c: 6px;
   --edge: var(--steel-500);
   --fill: #1a2129;
@@ -2588,7 +2597,7 @@ details[open] > summary::before {
 }
 
 .table-page :is(.input-panel, .anytime-panel, .answer-pop) :where(.option, .chip, .primary, .selection-bar .link, .actions .link)::before,
-.table-page :is(.reference-head, .sandbox .toolbar, .sandbox .actions) :where(button, .button)::before {
+.table-page :is(.reference-head, .sandbox .toolbar, .sandbox .actions, .session .toolbar, .results .toolbar, .problem .toolbar) :where(button, .button)::before {
   content: '';
   position: absolute;
   inset: var(--bw);
@@ -2598,7 +2607,7 @@ details[open] > summary::before {
 }
 
 .table-page :is(.input-panel, .anytime-panel, .answer-pop) :where(.option, .chip, .selection-bar .link, .actions .link):is(:hover, :focus-visible):not(:disabled),
-.table-page :is(.reference-head, .sandbox .toolbar) :where(button:not(.on), .button):is(:hover, :focus-visible):not(:disabled) {
+.table-page :is(.reference-head, .sandbox .toolbar, .session .toolbar, .results .toolbar) :where(button:not(.on), .button):is(:hover, :focus-visible):not(:disabled) {
   --edge: var(--dradis-glow);
   --fill: #16263a;
   color: var(--dradis-glow);
@@ -2606,7 +2615,7 @@ details[open] > summary::before {
 }
 
 /* the button that sends (the sandbox's Inject too): amber, like the arrow over new entries, in printed letters */
-.table-page :is(.input-panel, .anytime-panel, .answer-pop, .sandbox) .primary {
+.table-page :is(.input-panel, .anytime-panel, .answer-pop, .sandbox, .session, .results, .problem) .primary {
   --edge: var(--amber);
   --fill: #3b2d10;
   color: var(--amber);
@@ -3260,8 +3269,24 @@ button.playable.picked .art {
 }
 
 .reference-open {
-  margin-left: auto;
   font-size: 12px;
+  white-space: nowrap;
+}
+
+/* the reference, with the report of a problem under it, at the tab's right */
+.table-page .turn .tab .tab-links {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font: inherit;
+  overflow: visible;
+}
+
+.table-page .turn .tab .tab-links :is(.problem-open, .notify-ask) {
+  font-size: 11px;
+  color: var(--steel-300);
   white-space: nowrap;
 }
 
@@ -3293,4 +3318,618 @@ button.avatar-button {
 .input-panel.sending .answers {
   opacity: 0.5;
   pointer-events: none;
+}
+
+/* the session: the room's host tools, and the table's seats with their votes */
+
+.observers {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.host-tools {
+  margin-left: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.badge.alert {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.table-page .session summary {
+  font: 600 16px var(--display);
+  color: var(--steel-100);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.table-page .session-seats {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.table-page .session-seats li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 4px 0;
+  border-bottom: 1px solid #ffffff14;
+}
+
+.table-page .session-seats li.vacant .seat-name strong {
+  color: var(--amber);
+}
+
+.table-page .session-seats .seat-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+
+.table-page .session :is(.toolbar button, .toolbar .button) {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.table-page .session .toolbar button.on {
+  --edge: var(--amber);
+  color: var(--amber);
+}
+
+.table-page .session-observers,
+.table-page .session-actions {
+  margin: 8px 0 0;
+}
+
+/* presence: a dot by a user's name, green while he is there; a chip when he isn't, or nobody holds the seat */
+
+.presence {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--steel-500, var(--muted));
+  flex: none;
+  align-self: center;
+}
+
+.presence.online {
+  background: var(--ok);
+  box-shadow: 0 0 6px #57ab5a99;
+}
+
+.presence-chip {
+  font: 600 10px var(--display, inherit);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 1px 6px;
+  border: 1px solid var(--danger);
+  color: var(--danger);
+}
+
+.presence-chip.vacant {
+  border-color: var(--amber, var(--accent));
+  color: var(--amber, var(--accent));
+}
+
+.table-page .presence-note {
+  margin: 6px 0 0;
+  padding: 4px 8px;
+  border-left: 3px solid var(--danger);
+  color: var(--steel-100);
+  font-size: 13px;
+}
+
+/* the log or the chat: a tab for each over the panel, the chat's with a count of what came since it was last open */
+
+.table-page .talk-tabs {
+  display: flex;
+  gap: 4px;
+  margin: -2px 0 8px;
+  border-bottom: 1px solid #ffffff1f;
+}
+
+.table-page .talk-tabs button {
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  padding: 4px 10px;
+  font: 600 12px var(--display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--steel-300);
+}
+
+.table-page .talk-tabs button.on {
+  color: var(--amber);
+  border-bottom-color: var(--amber);
+}
+
+.table-page .talk-tabs .unread {
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--alert);
+  color: #fff;
+  font-size: 11px;
+  letter-spacing: 0;
+}
+
+.table-page .chat-lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.table-page .chat-line {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.table-page .chat-line .line-token {
+  flex: none;
+  width: 28px;
+  height: 28px;
+}
+
+.table-page .chat-line .line-token .initial {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--steel-500, var(--line));
+  color: var(--steel-100);
+  font: 600 13px var(--display);
+}
+
+.table-page .chat .line-body::before {
+  display: none;
+}
+
+.table-page .chat-head {
+  display: block;
+  font-size: 13px;
+}
+
+.table-page .chat-text {
+  display: block;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.table-page .chat-empty,
+.table-page .chat-readonly {
+  margin: 6px 0;
+  font-size: 13px;
+}
+
+.table-page .chat-compose {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.table-page .chat-compose textarea {
+  flex: 1 1 12rem;
+  resize: vertical;
+  min-height: 2.6em;
+  max-height: 10em;
+  font: inherit;
+  font-size: 14px;
+}
+
+/* where the viewer left off: a red rule across the lines, with its word on it */
+.table-page :is(.log .lines, .chat-lines) > li.last-seen {
+  list-style: none;
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  margin: 6px 0;
+  border-top: 1px solid var(--alert);
+}
+
+.table-page :is(.log .lines, .chat-lines) > li.last-seen:hover {
+  background: none;
+}
+
+.table-page li.last-seen > :is(span, button) {
+  position: relative;
+  top: -0.7em;
+  padding: 0 6px;
+  background: var(--fill, var(--gunmetal));
+  color: var(--alert);
+  font: 600 10px var(--display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* the results of a finished game, over the table */
+
+.results-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+  background: #050a10c4;
+}
+
+.table-page .results {
+  width: min(1100px, 100%);
+  max-height: calc(100vh - 48px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.table-page .results-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.table-page .results-head h2 {
+  font-size: 28px;
+  margin: 0;
+}
+
+.table-page .results-head p {
+  margin: 2px 0 0;
+}
+
+.table-page .results-body {
+  overflow-y: auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--steel-500) transparent;
+}
+
+.table-page .results h3 {
+  font: 600 12px var(--display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--steel-300);
+  margin: 0 0 6px;
+}
+
+.table-page .results-winners {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+}
+
+.table-page .results-winners .winner,
+.table-page .results-player {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.table-page .results-portrait {
+  flex: none;
+  width: 32px;
+  height: 32px;
+}
+
+.table-page .results-portrait img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.table-page .results-scroll {
+  overflow-x: auto;
+}
+
+.table-page .results-players {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 14px;
+}
+
+.table-page .results-players :is(th, td) {
+  padding: 6px 8px;
+  border-bottom: 1px solid #ffffff14;
+  text-align: left;
+  vertical-align: middle;
+  font-variant-numeric: tabular-nums;
+}
+
+.table-page .results-players thead th {
+  font: 600 11px var(--display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--steel-300);
+  white-space: nowrap;
+}
+
+.table-page .results-players td:nth-child(n + 4) {
+  text-align: right;
+}
+
+.table-page .results-players tr.won th strong {
+  color: var(--amber);
+}
+
+.table-page .results-players .results-users,
+.table-page .results-players .team {
+  display: block;
+  font-size: 12px;
+}
+
+.table-page .results-players .team.cylon {
+  color: var(--cylon);
+}
+
+.table-page .results-players .cards {
+  display: flex;
+  gap: 4px;
+}
+
+.table-page .results-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.table-page .tile-stat {
+  padding: 6px 10px;
+  border: 1px solid #ffffff1f;
+}
+
+.table-page .tile-stat dt {
+  font-size: 12px;
+  color: var(--steel-300);
+}
+
+.table-page .tile-stat dd {
+  margin: 0;
+  font: 600 22px var(--display);
+  color: var(--steel-100);
+  font-variant-numeric: tabular-nums;
+}
+
+.table-page .results-story {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.table-page .results-story li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.table-page .results-story .moment-turn {
+  flex: none;
+  width: 4.5rem;
+  color: var(--steel-300);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.table-page .results-story .moment.cylon_revealed span:last-child {
+  color: var(--cylon);
+}
+
+.table-page .results-story .moment.game_ended span:last-child {
+  color: var(--amber);
+  font-weight: 600;
+}
+
+.table-page .results-abandoned {
+  list-style: none;
+  padding: 0;
+}
+
+.table-page .results-actions {
+  border-top: 1px solid #ffffff1f;
+  padding-top: 10px;
+}
+
+/* the resources over the turns: four lines on one axis, in the validated slots for this dark surface */
+
+.resources-chart {
+  --series-fuel: #338ced;
+  --series-food: #e76624;
+  --series-morale: #00a888;
+  --series-population: #d28e05;
+  margin: 0;
+}
+
+.resources-chart figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px 16px;
+  margin-bottom: 6px;
+}
+
+.resources-chart .chart-title {
+  font: 600 12px var(--display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--steel-300);
+}
+
+.resources-chart .legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 13px;
+  color: var(--steel-100);
+}
+
+.resources-chart .legend-item,
+.resources-chart .tooltip-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.resources-chart .swatch {
+  width: 12px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--steel-300);
+}
+
+.resources-chart .swatch.fuel { background: var(--series-fuel); }
+.resources-chart .swatch.food { background: var(--series-food); }
+.resources-chart .swatch.morale { background: var(--series-morale); }
+.resources-chart .swatch.population { background: var(--series-population); }
+
+.resources-chart .chart-frame {
+  position: relative;
+}
+
+.resources-chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  touch-action: none;
+}
+
+.resources-chart .grid line {
+  stroke: #ffffff17;
+  stroke-width: 1;
+}
+
+.resources-chart :is(.grid, .axis) text,
+.resources-chart .axis {
+  fill: var(--steel-300);
+  font-size: 11px;
+}
+
+.resources-chart .line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.resources-chart .line.fuel { stroke: var(--series-fuel); }
+.resources-chart .line.food { stroke: var(--series-food); }
+.resources-chart .line.morale { stroke: var(--series-morale); }
+.resources-chart .line.population { stroke: var(--series-population); }
+
+.resources-chart .end-label {
+  fill: var(--steel-100);
+  font-size: 11px;
+}
+
+.resources-chart .crosshair line {
+  stroke: #ffffff59;
+  stroke-width: 1;
+}
+
+.resources-chart .marker {
+  stroke: #1a2129;
+  stroke-width: 2;
+}
+
+.resources-chart .marker.fuel { fill: var(--series-fuel); }
+.resources-chart .marker.food { fill: var(--series-food); }
+.resources-chart .marker.morale { fill: var(--series-morale); }
+.resources-chart .marker.population { fill: var(--series-population); }
+
+.resources-chart .chart-tooltip {
+  position: absolute;
+  top: 4px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 8px;
+  background: #0b1423f2;
+  border: 1px solid var(--steel-500);
+  font-size: 12px;
+  color: var(--steel-100);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.resources-chart .chart-table summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--steel-300);
+}
+
+.resources-chart .chart-table table {
+  border-collapse: collapse;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.resources-chart .chart-table :is(th, td) {
+  padding: 2px 8px;
+  text-align: right;
+}
+
+/* "Report a problem": a small drawer at the bottom right */
+
+.table-page .problem {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 55;
+  width: min(380px, calc(100vw - 32px));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 10px 40px #000a;
+}
+
+.table-page .problem h2 {
+  margin: 0;
+}
+
+.table-page .problem-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.table-page .problem-field textarea {
+  width: 100%;
+  resize: vertical;
+  font: inherit;
+  font-size: 14px;
+}
+
+.table-page .problem-close {
+  align-self: flex-end;
 }

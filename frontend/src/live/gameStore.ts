@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { ConnectionState } from './GameSocket';
-import type { ClientMessage, Event, GameProjection, LogEntry, RejectedMessage, ServerMessage } from '../wire/types';
+import type { ClientMessage, Event, GameProjection, GameReport, LogEntry, RejectedMessage, ServerMessage } from '../wire/types';
 
 export interface Intent {
   player: number;
@@ -30,6 +30,8 @@ export interface GameState {
   version: number;
   // an answer to send once the option just chosen asks its decision (answers.ts)
   intent: Intent | null;
+  // the ended game told whole, for its results
+  report: GameReport | null;
   receive(message: ServerMessage): void;
   setIntent(intent: Intent | null): void;
   expectSnapshot(): void;
@@ -50,6 +52,7 @@ const initial = {
   rejected: null,
   version: 0,
   intent: null,
+  report: null as GameReport | null,
 };
 
 /**
@@ -71,6 +74,8 @@ export const useGameStore = create<GameState>((set) => ({
             arriving: [],
             rejected: null,
             version: state.version + 1,
+            // a sandbox's undo can take the ending back
+            report: message.game?.outcome ? state.report : null,
           };
         case 'update': {
           const entries = message.update?.entries ?? [];
@@ -80,6 +85,8 @@ export const useGameStore = create<GameState>((set) => ({
           return { log: [...(message.log?.entries ?? [])], arriving: [] };
         case 'rejected':
           return { rejected: message, intent: null };
+        case 'report':
+          return { report: message.report ?? null };
         default:
           return {};
       }

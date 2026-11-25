@@ -9,6 +9,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import tools.jackson.databind.JsonNode;
+import xyz.zlatanov.frakkintoasters.backend.chat.Chat;
 import xyz.zlatanov.frakkintoasters.backend.game.CommandResult;
 import xyz.zlatanov.frakkintoasters.backend.game.CommandResult.Rejected;
 import xyz.zlatanov.frakkintoasters.backend.game.GameNotAvailableException;
@@ -25,6 +26,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * {@code /ws/games/{gameBundleId}}. A new connection gets the game and the whole log. The client sends JSON with a
  * {@code type}:
  * <ul>
+ *     <li>{@code ping}: the client is there, the server answers {@code pong}; a connection silent for a minute is
+ *     closed</li>
  *     <li>{@code status}: the game again</li>
  *     <li>{@code history}: the game and the whole log again</li>
  *     <li>{@code submit}: the token and an {@code event}, which answers the pending decision, or, an
@@ -32,6 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *     <li>{@code choose}: the token and the index of an {@code option} of the pending choice</li>
  *     <li>{@code undo}: the token; a sandbox goes back to the pause before its last input</li>
  *     <li>{@code inject}: the token and a setup {@code event}, which a sandbox runs ahead of the pending input</li>
+ *     <li>{@code say}: a chat message, its {@code text}, see {@link Chat}</li>
  * </ul>
  * After a command, every connection with something new gets the update and then the game. A rejection goes only to the
  * sender, with the current game when the command was stale.
@@ -43,6 +47,7 @@ public class GameSocketHandler extends TextWebSocketHandler {
 
     private final GameSessions                         sessions;
     private final ConnectionPool                       pool;
+    private final Chat                                 chat;
     private final Messages                             messages;
     private final Map<String, LiveConnection>          connections = new ConcurrentHashMap<>();
 
@@ -58,6 +63,9 @@ public class GameSocketHandler extends TextWebSocketHandler {
                 pool.add(connection);
                 messages.of(frames).forEach(connection::send);
             });
+            // read once the connection is in the pool, so a message that comes meanwhile is in both: the client keeps
+            // each once
+            connection.send(messages.chatLog(chat.history(connection.gameBundleId(), connection.viewer())));
         } catch (GameNotAvailableException e) {
             connection.send(messages.rejected("UNAVAILABLE", e.getMessage()));
             // the client doesn't reconnect after this close, so the rejection has to reach it first
@@ -71,6 +79,7 @@ public class GameSocketHandler extends TextWebSocketHandler {
         if (connection == null) {
             return;
         }
+        connection.heard();
         try {
             handle(connection, JournalCodec.parse(text.getPayload()));
         } catch (CodecException e) {
@@ -88,6 +97,7 @@ public class GameSocketHandler extends TextWebSocketHandler {
         val viewer = connection.viewer();
         val type = message.path("type").asString("");
         switch (type) {
+            case "ping" -> connection.send(messages.pong());
             case "status" -> connection.send(messages.game(sessions.status(game, viewer)));
             case "history" -> messages.of(sessions.history(game, viewer)).forEach(connection::send);
             case "submit" -> reply(connection, sessions.submit(game, viewer, token(message), message.get("event")));
@@ -98,9 +108,19 @@ public class GameSocketHandler extends TextWebSocketHandler {
                 }
                 reply(connection, sessions.choose(game, viewer, token(message), option.intValue()));
             }
+            case "say" -> say(connection, message);
             case "undo" -> reply(connection, sessions.undo(game, viewer, token(message)));
             case "inject" -> reply(connection, sessions.inject(game, viewer, token(message), message.get("event")));
             default -> throw new CodecException("Unknown message type '" + type + "'");
+        }
+    }
+
+    private void say(LiveConnection connection, JsonNode message) {
+        try {
+            val line = chat.post(connection.gameBundleId(), connection.userId(), message.path("text").asString(""));
+            pool.broadcast(connection.gameBundleId(), Chat::reads, messages.chat(line));
+        } catch (Chat.Refused e) {
+            connection.send(messages.chatRejected(e.getMessage()));
         }
     }
 

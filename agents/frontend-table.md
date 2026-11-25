@@ -15,12 +15,17 @@ The game page (`TablePage`) and what it draws. The rest of the frontend is in [f
   body past that (under its heading and pause line, down to 12rem); the log takes the rest and scrolls inside its body.
   The left column never scrolls as a whole, and the board's "your move" glow is clipped so the page never does. Neither
   panel has a title.
-- Right column: the sandbox's tools in a sandbox, above the players' mats (`PlayersPanel`): title badges with the
+- Right column: the sandbox's tools in a sandbox, or the seats of a standard game (`table/session/SessionPanel`, open
+  while a seat is vacant or a vote is open: each seat's character and user, "Take this seat" for whoever holds none,
+  votes to hand a seat over or to abandon with their tally, the host's "Hand over", "Ban" and "Abandon the game", which
+  pass at once, "Leave my seat", "Leave the table"), above the players' mats (`PlayersPanel`): title badges with the
   insignia cut out of the card (`table/players/icons/`, the card as their preview), the nukes beside the Admiral, and
   right of the portrait a strip with a cell per card of the sheet's skill set in its colors (split along the diagonal for
   "either"), for everyone but a revealed Cylon, who draws 2 of any colors.
 - A player is named by his character everywhere (`playerName`), "Player n" before he has one; the user in the seat shows
-  only on his mat (`userName`, from the room's seats).
+  only on his mat (`userName`, from the room's seats), with a dot for whether he is connected, "away" when he isn't and
+  "vacant seat" when nobody holds it (`seatState`, `SeatPresence`). The input panel says so under the pause when the
+  game waits for such a seat.
 
 ## The log
 
@@ -50,6 +55,41 @@ The game page (`TablePage`) and what it draws. The rest of the frontend is in [f
 - A click on a line lights what it names on the board for a moment (`table/flash.ts`, `entryTargets`, `useFlash`). The
   log follows the newest entry until the user scrolls up (`useFollowBottom`: only a scroll up leaves the end, since a
   scroll event arrives a frame late); the arrow at its bottom right follows again, amber while new entries came below.
+
+## The chat
+
+The log panel switches to the chat and back (`TalkTabs` in `TablePage`, not in a sandbox; the chat's tab counts what
+came since it was last open). `table/chat/ChatPanel.tsx` takes the log's place and sizing: one chat for everyone at the
+table; a message shows its writer's portrait (the character of the seat he held), his name, the character or
+"observer", and the time. Enter sends (500 characters at most), Shift+Enter breaks the line; whoever only watches a
+finished game reads it with a note. A refusal (too long, too fast) shows under it.
+
+## Catching up
+
+- Last seen (`table/lastSeen.ts`, per game and user in `localStorage`, guarded; `useTalk` in `TablePage`): the log's
+  red line goes above the first entry after the viewer's last decision (it moves with the game that follows his next
+  one; a click on it marks all seen; a first visit has seen all), the chat's under the last message he had seen when
+  he opened it (all is seen while it is open). A sandbox has neither.
+- "Your move" (`table/notify.tsx`): while the tab is hidden and the viewer becomes asked, a browser notification (once
+  per move, if allowed: the turn panel's "Notify me" asks on a click, never on load) and the tab's title flashing until
+  the tab shows; the favicon marks a move too. Not in a sandbox.
+
+## Report a problem
+
+"Report a problem" under the turn panel's "Reference" (`table/problem/ProblemDrawer.tsx`) opens a small drawer at the
+bottom right: a box of 1000 characters at most, sent to `POST /api/games/{id}/problems`, then a thank-you.
+
+## Results
+
+`table/results/ResultsDialog.tsx` lies over the table once the game has ended (the `report` in `gameStore`) or was
+abandoned, and opens again from "Results" beside the ending in the input panel (or in the seats panel): the ending and
+its summary, the winners by every user who held their seat (`seatHistory`: "Gaius, then Dee"), a row per player (his
+character and the ones before, the users, Cylon or human and when revealed, his Loyalty and Motive Cards, turns and
+statistics), the game's statistics as tiles, the resources over the turns (`ResourcesChart`: four lines on one axis in
+the dataviz palette's validated dark slots, a legend, the names at the line ends moved apart, a crosshair with every
+value of the turn, the numbers "As a table") and the story. An abandoned game names only who held each seat. Its
+actions: copy the link (the table's URL: anyone logged in watches a finished game), the host's "Rematch with the same
+seats" and everyone's "Go to the rematch". The words are in `labels/results.ts`.
 
 ## Animations
 

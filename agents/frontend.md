@@ -30,9 +30,15 @@ a field that went away. `GET /api/schema` serves the same JSON. It holds:
 
 ## Source layout
 
-- `src/api/`: `http.ts` sends the `XSRF-TOKEN` cookie as `X-XSRF-TOKEN`, `queries.ts` the hooks.
-- `src/live/`: `GameSocket` reconnects with backoff; `gameStore` holds the game, its token, the log, the last rejection
-  and the `intent` (an answer to submit once the option just chosen asks its decision).
+- `src/api/`: `http.ts` sends the `XSRF-TOKEN` cookie as `X-XSRF-TOKEN`, `queries.ts` the hooks. `devTab.ts`: a
+  tab's own dev user (sessionStorage, set by `?as=<name>`, the login page's "This tab only" or the top bar's "Another
+  user in this tab"), sent as `X-Dev-User` and the socket's `?devUser=`, and carried to the game tabs it opens
+  (`withTabUser`); its "Log out" forgets it, leaving the browser's session alone.
+- `src/live/`: `GameSocket` reconnects with backoff (at once after a `4001`, the seat changed), pings every 20 s and
+  drops a connection that heard nothing for 50 s (a lost network), opening a new one at once; `gameStore` holds the
+  game, its token, the log, the last rejection and the `intent` (an answer to submit once the option just chosen asks
+  its decision); `chatStore` the chat's messages (each once, by id) and the last refusal, fed the `chat`, `chatLog` and
+  `chatRejected` messages by `TablePage`.
 - `src/labels/`: all wording, see [Labels](#labels).
 - `src/input/`: the input panel, see [Answers](#answers). Under it the `AnytimePanel`: the game's `anytime` answers as
   moves (`anytimeMoves`) in the answers' `Groups` (e.g. the Motive Cards whose requirement is met), shown only while a
@@ -72,6 +78,7 @@ the player it names ("Choose the top option of Riots").
   decision and the input's `topic` ("Draw Skill Cards · Receive Skills step", "Crisis: Riots"), led by the card or
   ability the topic comes from when its words don't name it (`unnamedSource`: "Forward Thinker: Lee Adama may activate
   his location"). A secret input says only that someone may play an interrupt card.
+- `results.ts`: the words of the results (the ending, each `Moment`, the statistics' names).
 - `rules.ts`: see [Reference](frontend-table.md#reference). `board.ts`: the board's section names.
 
 ## Answers
@@ -120,8 +127,11 @@ option of a choice, and an option that asks a decision first into one per answer
 
 ## Website
 
-`GamesPage` (the lobby: my sandboxes and games, open lobbies, games to watch, hosting), `RoomPage` (seats and
-observers, join, leave, start), `SettingsPage`. A 401 goes to the login page. The lobby's pages and a room have the top
+`GamesPage` (the lobby: my sandboxes and games, open lobbies, games to watch with their vacant seats, hosting),
+`RoomPage` (seats and observers with a dot for who is there, join, leave, start; the host removes or bans a user and
+cancels the game),
+`SettingsPage`. The table page shows why it doesn't open a game: saved by another version, cancelled by the host, or a
+running game the user isn't in (a finished one anyone may watch). A 401 goes to the login page. The lobby's pages and a room have the top
 bar (`TopNav`), the table doesn't. A game opens in a tab of its own: the links to it, and hosting, joining, a new or
 imported sandbox go through `openGameTab` (`src/pages/gameTab.ts`), which opens the tab on the click, while the browser
 allows it, and points it at the game when the request answers. A sandbox's "Restart with this seed" stays in its tab.
@@ -134,6 +144,9 @@ allows it, and points it at the game when the request answers. A sandbox's "Rest
   hover, Starbuck's "Secret Destiny" letting it resolve; the seed seats the first player), undoes, exports and imports.
 - `lobby.spec.ts`: five users host, join, observe, leave and start a game; nobody sees another player's cards, an
   observer gets no input, two users race for the last seat.
+- `sessions.spec.ts`: four users and a session: who is there in the room and on the mats, the chat with a player's and
+  an observer's message, a player who goes away, a vote and the host's hand-over of the seat to the observer, who sees it
+  as hers, and the host's abandon, which shows everyone the results.
 - `playthrough.spec.ts` plays a seeded four-player sandbox (`PLAYTHROUGH_SEED`, 7 by default) to an ending through the
   answers alone, picked at random from a seeded generator (options, answers by kind, counters, parts, pickers), so an
   input without answers fails it. It takes minutes.

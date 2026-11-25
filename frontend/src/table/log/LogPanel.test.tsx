@@ -512,4 +512,32 @@ describe('the log', () => {
     // "President" is a name to hover, the title's card
     expect(drawn[0].querySelector('.event .named')?.textContent).toBe('President');
   });
+
+  it('draws a red line above the first entry after the last decision, which a click clears', () => {
+    useGameStore.setState({ log: [turnStarted(1, 1), scope(2), scope(3), scope(4)] });
+    const game = { viewer: { kind: 'PlayerViewer', playerNumber: 1 }, players: [{ number: 1, character: 'WILLIAM_ADAMA' }] } as unknown as GameProjection;
+    let seen = 0;
+    render(
+      <Table.Provider value={tableContext(game, false, 1)}>
+        <LogPanel seenBefore={3} onSeen={() => (seen += 1)} />
+      </Table.Provider>,
+    );
+
+    const marker = screen.getByLabelText('new since your last move');
+    expect(marker.nextElementSibling?.classList.contains('scope')).toBe(true);
+    expect(document.querySelectorAll('.last-seen')).toHaveLength(1);
+    fireEvent.click(screen.getByRole('button', { name: 'new since your last move' }));
+    expect(seen).toBe(1);
+  });
+
+  it('draws no red line once everything was seen', () => {
+    useGameStore.setState({ log: [turnStarted(1, 1), scope(2)] });
+    render(
+      <Table.Provider value={tableContext(null, false, 1)}>
+        <LogPanel seenBefore={2} />
+      </Table.Provider>,
+    );
+
+    expect(document.querySelector('.last-seen')).toBeNull();
+  });
 });

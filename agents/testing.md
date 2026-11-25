@@ -98,3 +98,7 @@ One-event-per-card checks: `SkillCardEventsTest`, `QuorumCardEventsTest`, `Mutin
   finding becomes a regression journal ([Backend](backend.md), "Regression journals").
 - `AnswerFinderTest`, `CandidatesTest`, `EndingsTest`, `PlayoutTest`, `ProbeTest` and `FuzzReportTest` cover it without
   failing on what the engine does wrong.
+- `AnswerFinder` plays whole games outside the fuzzer too: `GameReportTest` (seeded games to their end, for the report)
+  and the backend's `SessionExitTest`, milestone D's exit: a seeded four-player game through `GameSessions`, restored
+  from the rows every 40 inputs, its second seat voted over to an observer mid-game, to the ending with the right
+  winner, report and seat history.

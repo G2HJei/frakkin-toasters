@@ -7,6 +7,7 @@ import org.springframework.web.socket.WebSocketSession;
 import xyz.zlatanov.frakkintoasters.projection.Viewer;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -27,6 +28,8 @@ public final class LiveConnection {
     private final Viewer                viewer;
     private final BlockingQueue<Outgoing> queue = new LinkedBlockingQueue<>(MAX_QUEUED);
     private final Thread                  writer;
+    // when the client last sent anything: it pings while it has nothing else to say
+    private volatile long                 heardAt = System.nanoTime();
 
     // what the writer takes from the queue: a message, or the close that follows the messages queued before it
     private sealed interface Outgoing {
@@ -56,6 +59,14 @@ public final class LiveConnection {
 
     public Viewer viewer() {
         return viewer;
+    }
+
+    void heard() {
+        heardAt = System.nanoTime();
+    }
+
+    Duration silence() {
+        return Duration.ofNanos(System.nanoTime() - heardAt);
     }
 
     /**

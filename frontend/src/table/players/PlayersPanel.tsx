@@ -4,7 +4,7 @@ import { ArtImg, CardBack, CardTile, previewHandlers } from '../../art/Art';
 import { constantLabel, skillCardLabel } from '../../labels/describe';
 import type { HiddenCards, PlayerProjection, QuorumCardInPlay, SkillCard, SkillHand } from '../../wire/types';
 import { faceDown, useRevealHandlers, type RevealSection } from '../reveal';
-import { useTable } from '../tableContext';
+import { useTable, type SeatState } from '../tableContext';
 import { sortSkillCards } from '../skillCards';
 import { signed, useChanges } from '../changes';
 import { useReference } from '../reference/ReferenceDrawer';
@@ -29,6 +29,22 @@ export function PlayersPanel() {
         ))}
       </div>
     </section>
+  );
+}
+
+// Whether the user in the seat is there: a dot by his name, and a chip when he isn't, or nobody holds the seat.
+export function SeatPresence({ state }: { state: SeatState | null }) {
+  if (!state) {
+    return null;
+  }
+  if (state === 'vacant') {
+    return <span className="presence-chip vacant">vacant seat</span>;
+  }
+  return (
+    <>
+      <span className={`presence ${state}`} role="img" aria-label={state === 'online' ? 'connected' : 'disconnected'} title={state === 'online' ? 'Connected' : 'Disconnected'} />
+      {state === 'away' && <span className="presence-chip">away</span>}
+    </>
   );
 }
 
@@ -104,6 +120,7 @@ function PlayerMat({ player }: { player: PlayerProjection }) {
         <header className="who">
           <strong>{player.character ? constantLabel('Character', player.character) : `Player ${player.number}`}</strong>
           {user && <span className="user">{user}</span>}
+          <SeatPresence state={table.seatState(player.number)} />
           {viewerIs(table.game, player.number) && <em className="you">you</em>}
         </header>
         <p className="where">{player.location ? constantLabel('Location', player.location) : player.character ? 'off the board' : 'no character yet'}</p>

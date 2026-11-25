@@ -5,9 +5,12 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.val;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,6 +20,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextHolderFilter;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.csrf.CsrfToken;
@@ -41,9 +45,20 @@ public class SecurityConfiguration {
         return new HttpSessionSecurityContextRepository();
     }
 
+    // The dev login per tab belongs in the security chain alone, after the context is loaded from the session: Boot would
+    // put a filter bean in the servlet chain too, where the session's context would replace its user.
+    @Bean
+    @Profile("dev")
+    FilterRegistrationBean<DevTabLogin> devTabLoginRegistration(DevTabLogin filter) {
+        val registration = new FilterRegistrationBean<>(filter);
+        registration.setEnabled(false);
+        return registration;
+    }
+
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, LoginProviders providers, Users users,
-                                            SecurityContextRepository contexts) throws Exception {
+                                            SecurityContextRepository contexts,
+                                            ObjectProvider<DevTabLogin> devTabLogin) throws Exception {
         val unauthorized = new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED);
         http
                 .securityContext(context -> context.securityContextRepository(contexts))
@@ -71,6 +86,7 @@ public class SecurityConfiguration {
                 .logout(logout -> logout
                         .logoutUrl("/api/logout")
                         .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler()));
+        devTabLogin.ifAvailable(filter -> http.addFilterAfter(filter, SecurityContextHolderFilter.class));
         val registrations = providers.registrations();
         if (!registrations.isEmpty()) {
             http.oauth2Login(login -> login

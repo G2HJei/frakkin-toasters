@@ -1831,6 +1831,92 @@
       "discriminator" : "kind",
       "members" : [ "AggressiveTacticsEvent", "GlimpseTheFaceOfGodEvent", "IntimateEvent" ]
     },
+    "ChatLine" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "id",
+        "type" : {
+          "t" : "long",
+          "nullable" : false,
+          "role" : "ship"
+        }
+      }, {
+        "name" : "userId",
+        "type" : {
+          "t" : "string",
+          "nullable" : true
+        }
+      }, {
+        "name" : "name",
+        "type" : {
+          "t" : "string",
+          "nullable" : true
+        }
+      }, {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "player"
+        }
+      }, {
+        "name" : "text",
+        "type" : {
+          "t" : "string",
+          "nullable" : true
+        }
+      }, {
+        "name" : "at",
+        "type" : {
+          "t" : "string",
+          "nullable" : true
+        }
+      } ]
+    },
+    "ChatLogMessage" : {
+      "kind" : "record",
+      "type" : "chatLog",
+      "interfaces" : [ "ServerMessage" ],
+      "components" : [ {
+        "name" : "messages",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "ChatLine"
+          }
+        }
+      } ]
+    },
+    "ChatMessage" : {
+      "kind" : "record",
+      "type" : "chat",
+      "interfaces" : [ "ServerMessage" ],
+      "components" : [ {
+        "name" : "message",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "ChatLine"
+        }
+      } ]
+    },
+    "ChatRejectedMessage" : {
+      "kind" : "record",
+      "type" : "chatRejected",
+      "interfaces" : [ "ServerMessage" ],
+      "components" : [ {
+        "name" : "message",
+        "type" : {
+          "t" : "string",
+          "nullable" : true
+        }
+      } ]
+    },
     "Choice" : {
       "kind" : "enum",
       "values" : [ "BUILD_ASSAULT_RAPTOR", "RETURN_RAPTOR" ]
@@ -2266,7 +2352,7 @@
     "ClientMessage" : {
       "kind" : "union",
       "discriminator" : "type",
-      "members" : [ "ChooseMessage", "HistoryMessage", "InjectMessage", "StatusMessage", "SubmitMessage", "UndoMessage" ]
+      "members" : [ "ChooseMessage", "HistoryMessage", "InjectMessage", "PingMessage", "SayMessage", "StatusMessage", "SubmitMessage", "UndoMessage" ]
     },
     "ClippedWingsEvent" : {
       "kind" : "record",
@@ -5462,6 +5548,157 @@
         }
       } ]
     },
+    "GameReport" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "winner",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Team"
+        }
+      }, {
+        "name" : "winners",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "t" : "int",
+            "nullable" : false,
+            "role" : "player"
+          }
+        }
+      }, {
+        "name" : "turns",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "distance",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "players",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "PlayerReport"
+          }
+        }
+      }, {
+        "name" : "statistics",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "GameStatistics"
+        }
+      }, {
+        "name" : "resources",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "TurnResources"
+          }
+        }
+      }, {
+        "name" : "story",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "ref",
+            "name" : "Moment"
+          }
+        }
+      } ]
+    },
+    "GameStatistics" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "crisisCards",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "skillChecks",
+        "type" : {
+          "nullable" : true,
+          "t" : "map",
+          "key" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "SkillCheckResult"
+          },
+          "value" : {
+            "t" : "int",
+            "nullable" : false,
+            "role" : "count"
+          }
+        }
+      }, {
+        "name" : "jumps",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "shipsLost",
+        "type" : {
+          "nullable" : true,
+          "t" : "map",
+          "key" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "ShipType"
+          },
+          "value" : {
+            "t" : "int",
+            "nullable" : false,
+            "role" : "count"
+          }
+        }
+      }, {
+        "name" : "vipersDamaged",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "locationsDamaged",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "nukesUsed",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      } ]
+    },
     "GameStep" : {
       "kind" : "enum",
       "values" : [ "SETUP", "RECEIVE_SKILLS", "MOVEMENT", "ACTION", "CRISIS", "ACTIVATE_CYLON_SHIPS", "PREPARE_FOR_JUMP", "DISCARD" ]
@@ -7042,6 +7279,65 @@
         }
       } ]
     },
+    "Moment" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "turn",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "kind",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "MomentKind"
+        }
+      }, {
+        "name" : "playerNumber",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "player"
+        }
+      }, {
+        "name" : "character",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Character"
+        }
+      }, {
+        "name" : "destination",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "DestinationCard"
+        }
+      }, {
+        "name" : "distance",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "count"
+        }
+      }, {
+        "name" : "winner",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Team"
+        }
+      } ]
+    },
+    "MomentKind" : {
+      "kind" : "enum",
+      "values" : [ "JUMPED", "CYLON_REVEALED", "CHARACTER_REMOVED", "PRESIDENT", "ADMIRAL", "CAG", "PEGASUS_DESTROYED", "GAME_ENDED" ]
+    },
     "MoralCompassEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -7890,6 +8186,12 @@
       "kind" : "union",
       "discriminator" : "kind",
       "members" : [ "QuorumCardPick", "ShipPick", "SkillCardPick" ]
+    },
+    "PingMessage" : {
+      "kind" : "record",
+      "type" : "ping",
+      "interfaces" : [ "ClientMessage" ],
+      "components" : [ ]
     },
     "PlaceCenturionsEvent" : {
       "kind" : "record",
@@ -8888,6 +9190,141 @@
         }
       } ]
     },
+    "PlayerReport" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "number",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "character",
+        "type" : {
+          "nullable" : true,
+          "t" : "enum",
+          "name" : "Character"
+        }
+      }, {
+        "name" : "formerCharacters",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "Character"
+          }
+        }
+      }, {
+        "name" : "loyaltyCards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "LoyaltyCard"
+          }
+        }
+      }, {
+        "name" : "motiveCards",
+        "type" : {
+          "nullable" : true,
+          "t" : "list",
+          "of" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "MotiveCard"
+          }
+        }
+      }, {
+        "name" : "cylon",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      }, {
+        "name" : "revealedOnTurn",
+        "type" : {
+          "t" : "int",
+          "nullable" : true,
+          "role" : "count"
+        }
+      }, {
+        "name" : "turns",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "statistics",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "PlayerStatistics"
+        }
+      } ]
+    },
+    "PlayerStatistics" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "skillCardsGained",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "cardsIntoChecks",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "strengthIntoChecks",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "skillCardsPlayed",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "crisisCards",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "abilitiesUsed",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "sentToBrig",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      } ]
+    },
     "PlayerViewer" : {
       "kind" : "record",
       "tagged" : true,
@@ -8957,6 +9394,12 @@
           "name" : "SkillCard"
         }
       } ]
+    },
+    "PongMessage" : {
+      "kind" : "record",
+      "type" : "pong",
+      "interfaces" : [ "ServerMessage" ],
+      "components" : [ ]
     },
     "PopularInfluenceChoiceEvent" : {
       "kind" : "record",
@@ -9712,6 +10155,19 @@
         }
       } ]
     },
+    "ReportMessage" : {
+      "kind" : "record",
+      "type" : "report",
+      "interfaces" : [ "ServerMessage" ],
+      "components" : [ {
+        "name" : "report",
+        "type" : {
+          "nullable" : true,
+          "t" : "ref",
+          "name" : "GameReport"
+        }
+      } ]
+    },
     "ResearchLabEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -10349,6 +10805,18 @@
       "discriminator" : "kind",
       "members" : [ "AssignTitleEvent", "ChangeResourceEvent", "DamageLocationEvent", "GiveLoyaltyCardToPlayerEvent", "GiveMutinyCardToPlayerEvent", "GiveQuorumCardToPresidentEvent", "GiveSkillCardToPlayerEvent", "GiveSuperCrisisCardToPlayerEvent", "MoveCharacterEvent", "PlaceShipEvent", "PutCrisisCardOnTopEvent", "PutDestinationCardOnTopEvent", "PutDestinyCardOnTopEvent", "PutSkillCardOnTopEvent", "SetJumpPreparationEvent" ]
     },
+    "SayMessage" : {
+      "kind" : "record",
+      "type" : "say",
+      "interfaces" : [ "ClientMessage" ],
+      "components" : [ {
+        "name" : "text",
+        "type" : {
+          "t" : "string",
+          "nullable" : true
+        }
+      } ]
+    },
     "ScavengingForPartsEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -10658,7 +11126,7 @@
     "ServerMessage" : {
       "kind" : "union",
       "discriminator" : "type",
-      "members" : [ "GameMessage", "LogMessage", "RejectedMessage", "UpdateMessage" ]
+      "members" : [ "ChatLogMessage", "ChatMessage", "ChatRejectedMessage", "GameMessage", "LogMessage", "PongMessage", "RejectedMessage", "ReportMessage", "UpdateMessage" ]
     },
     "SetATrapPassEvent" : {
       "kind" : "record",
@@ -12294,6 +12762,60 @@
         }
       } ]
     },
+    "TurnResources" : {
+      "kind" : "record",
+      "tagged" : false,
+      "interfaces" : [ ],
+      "components" : [ {
+        "name" : "turn",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "end",
+        "type" : {
+          "t" : "boolean",
+          "nullable" : false
+        }
+      }, {
+        "name" : "fuel",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "food",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "morale",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "population",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      }, {
+        "name" : "distance",
+        "type" : {
+          "t" : "int",
+          "nullable" : false,
+          "role" : "count"
+        }
+      } ]
+    },
     "UnauthorizedUsageEvent" : {
       "kind" : "record",
       "tagged" : true,
@@ -12867,12 +13389,19 @@
   } ],
   "structuralDamageBonus" : 2,
   "messages" : {
+    "chat" : "ChatMessage",
+    "chatLog" : "ChatLogMessage",
+    "chatRejected" : "ChatRejectedMessage",
     "choose" : "ChooseMessage",
     "game" : "GameMessage",
     "history" : "HistoryMessage",
     "inject" : "InjectMessage",
     "log" : "LogMessage",
+    "ping" : "PingMessage",
+    "pong" : "PongMessage",
     "rejected" : "RejectedMessage",
+    "report" : "ReportMessage",
+    "say" : "SayMessage",
     "status" : "StatusMessage",
     "submit" : "SubmitMessage",
     "undo" : "UndoMessage",
