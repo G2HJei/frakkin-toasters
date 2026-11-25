@@ -40,12 +40,14 @@ but the session around them and a place to run it:
 
 ## Principles for the milestones
 
-- **Legal moves come from the engine.** The browser holds no rules (`CLAUDE.md`, "Architecture"). Every UX improvement that needs "what
+- **Legal moves come from the engine.** The browser holds no rules (`CLAUDE.md`, "Architecture"). Every UX improvement
+  that needs "what
   can this player do now" asks `core` (`LegalAnswers`), and the same list drives the random-playout fuzzer.
 - **Every input sends one of the engine's answers** as it was listed (`input/answers.ts`), and the engine judges it
   again. The generic `EventBuilder` under "Advanced" was removed on 2026-11-24; only the sandbox's setup still builds
   an event from the schema (`sandbox/SetupForm.tsx`).
-- **Each milestone ends green** (`./gradlew build`, e2e where it touches the table) and updates `CLAUDE.md` and the `agents/` topic files.
+- **Each milestone ends green** (`./gradlew build`, e2e where it touches the table) and updates `CLAUDE.md` and the
+  `agents/` topic files.
 
 ---
 
@@ -53,7 +55,8 @@ but the session around them and a place to run it:
 
 ### A. Prove the game is completable: done 2026-11-22
 
-`./gradlew :core:fuzz` (the `fuzz/` test fixtures, "Random playouts" in `agents/testing.md`) plays seeded games of 3 to 7
+`./gradlew :core:fuzz` (the `fuzz/` test fixtures, "Random playouts" in `agents/testing.md`) plays seeded games of 3 to
+7
 players with random legal answers until they end. It restores them on the way and compares the twins, probes the checks
 with hostile inputs, and rewrites `fuzzer-report.md`: the findings, the endings, the rounds to finish and the wins by
 team. A finding exports as a regression journal with the input that failed (`FuzzJournalExportTest`), beside a core
@@ -74,7 +77,8 @@ Where it differs from the plan:
 
 ### B. Legal-move hints: done 2026-11-22
 
-`LegalAnswers` (`engine/answer/`, "Legal answers" in `agents/engine.md`) lists the answers of every decision for the player it
+`LegalAnswers` (`engine/answer/`, "Legal answers" in `agents/engine.md`) lists the answers of every decision for the
+player it
 asks: concrete events, and where the set is too large, shaped answers (an example and a `Pick` of cards or ships, with
 `min`, `max` and whether the order counts). The asked viewer's `input` carries them (`Decide.answers`, and
 `Choose.answers` for each option that asks a decision at once), and `anytime` the `AnytimeEvent`s a player may submit
@@ -130,7 +134,7 @@ Where it differs from the plan:
   social game: accusations and bluffing are most of it), and no private messages. Per-game, stored apart from the
   journal (it is not game state), with a rate limit and a message limit. Cylon-team private chat is out (rules forbid
   out-of-band communication between hidden Cylons), see "Not in this roadmap". The log panel can be switched to `Chat`
-  panel and vice versa.
+  panel and vice versa. The existing websockets communicate chat messages too.
 - **Game end**: a results screen (winner, winners by name, every revealed loyalty, motive cards, the story of the game,
   turns played, statistics per player and per game), a shareable read-only replay link, and a **rematch** that reopens
   the room with the same seats.
@@ -138,6 +142,8 @@ Where it differs from the plan:
   to add a comment (1000 chars max). Sending it stores the comment and the game id in a dedicated table.
 - **Dev simulation**: Allow testing in real people-like environment locally, by using the dev login with incognito
   browser tabs or separate browsers.
+- **Last seen in logs/chat** Show red last seen horizontal line in chat and logs to help users catch up what they have
+  missed. Disappears on taking an decision (logs) or opening the chat tab (chat).
 
 *Exit:* a game played over three days across restarts, with one player replaced mid-game after the clock ran out,
 finishes with the right ending and the results screen.
