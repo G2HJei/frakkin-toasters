@@ -43,11 +43,11 @@ afterEach(() => {
   useGameStore.getState().reset();
 });
 
-function renderLog(entries: LogEntry[], players = [{ number: 1, character: 'WILLIAM_ADAMA' }], sandbox = false) {
+function renderLog(entries: LogEntry[], players = [{ number: 1, character: 'WILLIAM_ADAMA' }], sandbox = false, userNames: Partial<Record<number, string>> = {}) {
   useGameStore.setState({ log: entries });
   const game = { viewer: { kind: 'PlayerViewer', playerNumber: 1 }, players } as unknown as GameProjection;
   const container = render(
-    <Table.Provider value={tableContext(game, sandbox, 1)}>
+    <Table.Provider value={tableContext(game, sandbox, 1, userNames)}>
       <LogPanel />
     </Table.Provider>,
   ).container;
@@ -367,5 +367,46 @@ describe('the log', () => {
     expect(body.querySelector('.line-token img')?.getAttribute('data-art')).toBe('Character/player-token/WILLIAM_ADAMA');
     expect(body.querySelector('.event .part-icon')?.getAttribute('data-icon')).toBe('TitleIcon/ADMIRAL');
     expect(body.querySelector('.art-strip')).toBeNull();
+  });
+
+  it('names the user in his seat when he chooses a character, and his seat without one', () => {
+    const choose = { ...scope(1), event: 'SelectCharacterEvent', details: { kind: 'SelectCharacterEvent', playerNumber: 1, selectedCharacter: 'WILLIAM_ADAMA' } } as LogEntry;
+
+    expect(rows(renderLog([choose], undefined, false, { 1: 'User123' }))).toEqual([['User123', 'chooses William Adama']]);
+
+    cleanup();
+
+    // a sandbox has nobody in its seats
+    expect(rows(renderLog([choose], undefined, true))).toEqual([['Player 1', 'chooses William Adama']]);
+  });
+
+  it("puts the portrait of another player in front of his name, with his sheet on hover, and not the line's own", () => {
+    const players = [
+      { number: 1, character: 'WILLIAM_ADAMA' },
+      { number: 2, character: 'LAURA_ROSLIN' },
+    ];
+    const moved = { kind: 'Shown', fact: { kind: 'PlayerFact.CharacterMoved', character: 'LAURA_ROSLIN', to: 'ARMORY' } };
+    const leaves = { ...scope(1), event: 'MoveFromBrigEvent', details: { kind: 'MoveFromBrigEvent', targetPlayerNumber: 2, destination: 'ARMORY' }, facts: [moved] } as LogEntry;
+    const sends = { ...scope(2), event: 'ChooseCharacterForBrigEvent', details: { kind: 'ChooseCharacterForBrigEvent', playerNumber: 1, targetPlayerNumber: 2 } } as LogEntry;
+    const executed = { ...scope(3), event: 'EmotionallyFragileEvent', details: { kind: 'EmotionallyFragileEvent', playerNumber: 1 } } as LogEntry;
+    const body = renderLog([leaves, sends, executed], players);
+    const portraits = (line: Element) => [...line.querySelectorAll('.event img.icon-portrait')].map((image) => image.getAttribute('data-icon'));
+    const named = (line: Element) => [...line.querySelectorAll('.event .named')].map((name) => name.textContent);
+    const [left, sent, fragile] = [...body.querySelectorAll('.lines > li')];
+
+    expect(rows(body)).toEqual([
+      [null, 'Laura Roslin leaves the Brig for the Armory'],
+      ['William Adama', 'sends Laura Roslin to the Brig'],
+      ['William Adama', 'Morale is down to 2 or less: William Adama is executed'],
+    ]);
+    expect(portraits(left)).toEqual(['Character/player-token/LAURA_ROSLIN']);
+    expect(named(left)).toEqual(['Laura Roslin', 'Brig', 'Armory']);
+    expect(portraits(sent)).toEqual(['Character/player-token/LAURA_ROSLIN']);
+    expect(named(sent)).toEqual(['Laura Roslin', 'Brig']);
+    // his portrait leads the line already; his name keeps his sheet on hover
+    expect(portraits(fragile)).toEqual([]);
+    expect(named(fragile)).toEqual(['William Adama']);
+    // a name keeps the color of the words around it
+    expect(left.querySelector('.event .named')?.className).toBe('named');
   });
 });

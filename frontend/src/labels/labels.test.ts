@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   constantLabel,
   eventLabel,
+  eventParts,
   factLabel,
   fillTemplate,
   NO_CONTEXT,
@@ -66,6 +67,45 @@ describe('labels', () => {
       }
     }
     expect(wrong).toEqual([]);
+  });
+
+  it('names every location the log mentions, so it shows its card on hover', () => {
+    const locations = enumValues('Location')
+      .filter((location) => !location.includes('SPACE'))
+      .map((location) => constantLabel('Location', location));
+    const escaped = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const spelled = [EVENT_TEMPLATES, CHOSEN_TEMPLATES, HIDDEN_TEMPLATES, FACT_TEMPLATES].flatMap((templates) =>
+      Object.entries(templates).flatMap(([name, template]) => {
+        // a field names its value already, and the Cylon Fleet board is a board
+        const words = template.replace(/\{[^}]*\}/g, '').replace(/Cylon Fleet board/g, '');
+        return locations.filter((label) => new RegExp(`\\b${escaped(label)}\\b`).test(words)).map((label) => `${name}: ${label}`);
+      }),
+    );
+
+    expect(spelled).toEqual([]);
+  });
+
+  it('names a location a template names, with "the" where it takes one', () => {
+    const cards: LabelContext = { ...names, artOf: (value) => ({ key: `Location/${String(value)}`, url: '', label: String(value), shape: 'location' }) };
+    const parts = eventParts({ kind: 'LeaveBrigEvent', playerNumber: 1, destination: 'SICKBAY' }, cards);
+
+    expect(partsText(parts)).toBe('William Adama leaves the Brig for Sickbay');
+    expect(parts.filter((part) => part.art).map((part) => part.text)).toEqual(['Brig', 'Sickbay']);
+  });
+
+  it('names a player by his portrait and his sheet where the context knows his character', () => {
+    const log: LabelContext = {
+      ...names,
+      characterOf: (playerNumber) => ['', 'WILLIAM_ADAMA', 'LAURA_ROSLIN'][playerNumber] ?? null,
+      artOf: (value) => ({ key: `sheet:${String(value)}`, url: '', label: String(value), shape: 'token' }),
+      iconOf: (enumName, constant) => (enumName === 'Character' ? { key: `portrait:${String(constant)}`, url: '', shape: 'portrait' } : null),
+    };
+    const leaves = { kind: 'MoveFromBrigEvent', targetPlayerNumber: 2, destination: 'ARMORY' };
+
+    expect(eventParts(leaves, log)[0]).toMatchObject({ text: 'Laura Roslin', player: 2, art: { key: 'sheet:LAURA_ROSLIN' }, icon: { key: 'portrait:LAURA_ROSLIN' } });
+    // the answers and the pause line know no characters: his name alone, which keeps its player
+    expect(eventParts(leaves, names)[0]).toEqual({ text: 'Laura Roslin', player: 2 });
+    expect(partsText(eventParts(leaves, names))).toBe('Laura Roslin leaves the Brig for the Armory');
   });
 
   it('opens and closes every tone marker of a template', () => {

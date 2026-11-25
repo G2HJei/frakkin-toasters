@@ -14,8 +14,13 @@ export interface LabelContext {
   shipType?(id: number): string | null;
   // the image a value names, for a name to hover (`Words`); the labels don't load images themselves
   artOf?(value: unknown, type: TypeRef): PartArt | null;
-  // the small picture in front of a value's words: a resource, a ship type, a title, a token, a die's face ("Die")
+  // the small picture in front of a value's words: a resource, a ship type, a title, a token, a die's face ("Die"), a
+  // character's portrait
   iconOf?(enumName: string, constant: unknown): PartIcon | null;
+  // the character a player plays, where his name shows its portrait and sheet (the log)
+  characterOf?(playerNumber: number): string | null;
+  // the player who plays a character, where the table knows it
+  playerOf?(character: string): number | null;
 }
 
 /** An image a part of a label names, as `art/images.ts` gives it. */
@@ -43,6 +48,8 @@ export interface Part {
   art?: PartArt | null;
   icon?: PartIcon | null;
   tone?: Tone;
+  // the player a name stands for, so a line of the log can leave its own player without his portrait
+  player?: number | null;
 }
 
 function withIcon(part: Part, icon: PartIcon | null | undefined): Part {
@@ -178,7 +185,7 @@ export function valueParts(value: unknown, type: TypeRef | undefined, context: L
     case 'int':
     case 'long':
       if (type.role === 'player') {
-        return [{ text: context.playerName(value as number) }];
+        return [playerPart(value as number, context)];
       }
       if (type.role === 'ship') {
         return [shipPart(value as number, context)];
@@ -190,8 +197,10 @@ export function valueParts(value: unknown, type: TypeRef | undefined, context: L
       return [{ text: String(value) }];
     case 'class':
       return [{ text: typeLabel(String(value)) }];
-    case 'enum':
-      return [withIcon({ text: constantLabel(type.name ?? '', value as string), art: context.artOf?.(value, type) ?? null }, context.iconOf?.(type.name ?? '', value))];
+    case 'enum': {
+      const part = withIcon({ text: constantLabel(type.name ?? '', value as string), art: context.artOf?.(value, type) ?? null }, context.iconOf?.(type.name ?? '', value));
+      return [type.name === 'Character' ? { ...part, player: context.playerOf?.(value as string) ?? null } : part];
+    }
     case 'list':
     case 'set': {
       const elements = value as unknown[];
@@ -209,6 +218,20 @@ export function valueParts(value: unknown, type: TypeRef | undefined, context: L
     default:
       return [{ text: JSON.stringify(value) }];
   }
+}
+
+/**
+ * A player by his character's name: where the context knows his character (the log), with its portrait in front and
+ * its sheet on hover.
+ */
+export function playerPart(playerNumber: number, context: LabelContext): Part {
+  const part: Part = { text: context.playerName(playerNumber), player: playerNumber };
+  const character = context.characterOf?.(playerNumber);
+  if (!character) {
+    return part;
+  }
+  const type: TypeRef = { t: 'enum', nullable: false, name: 'Character' };
+  return withIcon({ ...part, art: context.artOf?.(character, type) ?? null }, context.iconOf?.('Character', character));
 }
 
 function shipLabel(id: number, context: LabelContext): string {
@@ -277,7 +300,7 @@ function refParts(value: Record<string, unknown>, name: string, context: LabelCo
     case 'PlayedInterruptCard':
     case 'UsedRollAbility': {
       const own = name === 'UsedRollAbility' ? valueParts(value.ability, { t: 'enum', nullable: false, name: 'CharacterAbility' }, context, {}) : cardParts(value.skillCard ?? value.card, { t: 'ref', nullable: false, name: 'SkillCard' }, context);
-      return [{ text: `${context.playerName(value.playerNumber as number)}'s ` }, ...own];
+      return [playerPart(value.playerNumber as number, context), { text: "'s " }, ...own];
     }
     default:
       return [{ text: recordLabel(value, name, context) }];
@@ -471,10 +494,10 @@ export function fillTemplate(template: string, value: Record<string, unknown>, r
   return merged(parts);
 }
 
-// Neighbouring plain words of a tone as one part.
+// Neighbouring plain words of a tone as one part; a player's name stays a part of its own, which knows its player.
 function merged(parts: Part[]): Part[] {
   const out: Part[] = [];
-  const plain = (part: Part) => !part.art && !part.icon;
+  const plain = (part: Part) => !part.art && !part.icon && (part.player ?? null) === null;
   for (const part of parts) {
     const last = out[out.length - 1];
     if (last && plain(last) && plain(part) && last.tone === part.tone) {
@@ -802,20 +825,20 @@ function cardNoun(deck: string | null | undefined, pile: string | null | undefin
 
 // A fact about cards the viewer may not see, in words: who, how many and of what kind.
 function hiddenFactParts(fact: Extract<FactProjection, { kind: 'Hidden' }>, context: LabelContext): Part[] {
-  const who = fact.playerNumber !== null ? context.playerName(fact.playerNumber) : 'Someone';
-  const other = fact.otherPlayerNumber !== null ? context.playerName(fact.otherPlayerNumber) : 'another player';
+  const who: Part = fact.playerNumber !== null ? playerPart(fact.playerNumber, context) : { text: 'Someone' };
+  const other: Part = fact.otherPlayerNumber !== null ? playerPart(fact.otherPlayerNumber, context) : { text: 'another player' };
   const cards = hiddenCardsLabel(fact.count, fact.deck, fact.pile, fact.colors);
   const deck = fact.deck ? `the ${constantLabel('DeckId', fact.deck)} deck` : 'the deck';
   const many = fact.count !== 1;
   switch (fact.fact) {
     case 'PlayerFact.CardsGained':
-      return [{ text: `${who} gets ${cards}` }];
+      return [who, { text: ` gets ${cards}` }];
     case 'PlayerFact.CardsLost':
-      return [{ text: `${who} loses ${cards}` }];
+      return [who, { text: ` loses ${cards}` }];
     case 'PlayerFact.CardsSeen':
-      return [{ text: `${who} looks at ${cards}` }];
+      return [who, { text: ` looks at ${cards}` }];
     case 'PlayerFact.LoyaltyCardSeen':
-      return [{ text: `${who} looks at a Loyalty Card of ${other}` }];
+      return [who, { text: ' looks at a Loyalty Card of ' }, other];
     case 'DeckFact.CardsDrawn':
       return [{ text: `${capitalized(cards)} ${many ? 'are' : 'is'} drawn` }];
     case 'DeckFact.CardsDiscarded':
@@ -833,19 +856,19 @@ function hiddenFactParts(fact: Extract<FactProjection, { kind: 'Hidden' }>, cont
     case 'SkillCheckFact.CardsDrawn':
       return [{ text: "The skill check's cards are shuffled" }];
     case 'SkillCheckFact.CardsPlayedBefore':
-      return [{ text: `${who} plays ${cards} before the skill check` }];
+      return [who, { text: ` plays ${cards} before the skill check` }];
     case 'SkillCheckFact.CardsLookedAt':
-      return [{ text: `${who} looks at the cards ${other} put in` }];
+      return [who, { text: ' looks at the cards ' }, other, { text: ' put in' }];
     case 'TitleFact.PresidentQuorumCardGained':
       return [{ text: `The President gets ${hiddenCardsLabel(fact.count, 'QUORUM', null, null)}` }];
     case 'TitleFact.PresidentQuorumCardsLost':
       return [{ text: `The President loses ${hiddenCardsLabel(fact.count, 'QUORUM', null, null)}` }];
     case 'InterruptFact.InterruptCardPlayed':
-      return [{ text: `${who} plays an interrupt card` }];
+      return [who, { text: ' plays an interrupt card' }];
     case 'InterruptFact.RollAbilityUsed':
-      return [{ text: `${who} uses an ability on the roll` }];
+      return [who, { text: ' uses an ability on the roll' }];
     default:
-      return [{ text: `${who}: ${typeLabel(fact.fact ?? '')}, ${cards}` }];
+      return [who, { text: `: ${typeLabel(fact.fact ?? '')}, ${cards}` }];
   }
 }
 
@@ -884,22 +907,22 @@ function interruptCardParts(kind: string, fact: Record<string, unknown>, context
   if (!played) {
     return null;
   }
-  const who = context.playerName(played.playerNumber as number);
+  const who = playerPart(played.playerNumber as number, context);
   const card = () => cardParts(played.card, { t: 'ref', nullable: false, name: 'SkillCard' }, context);
   const ability = () => valueParts(played.ability, { t: 'enum', nullable: false, name: 'CharacterAbility' }, context, {});
   switch (kind) {
     case 'InterruptFact.InterruptCardPlayed':
-      return [{ text: `${who} plays ` }, ...card()];
+      return [who, { text: ' plays ' }, ...card()];
     case 'InterruptFact.InterruptCardReturned':
-      return [...card(), { text: ` goes back to ${who}` }];
+      return [...card(), { text: ' goes back to ' }, who];
     case 'InterruptFact.InterruptCardResolved':
-      return [{ text: `${who}'s ` }, ...card(), { text: ' takes effect' }];
+      return [who, { text: "'s " }, ...card(), { text: ' takes effect' }];
     case 'InterruptFact.RollAbilityUsed':
-      return [{ text: `${who} uses ` }, ...ability(), { text: ' on the roll' }];
+      return [who, { text: ' uses ' }, ...ability(), { text: ' on the roll' }];
     case 'InterruptFact.RollAbilityWithdrawn':
-      return [{ text: `${who}'s ` }, ...ability(), { text: ' waits for the next roll' }];
+      return [who, { text: "'s " }, ...ability(), { text: ' waits for the next roll' }];
     case 'InterruptFact.RollAbilityResolved':
-      return [{ text: `${who}'s ` }, ...ability(), { text: ' takes effect' }];
+      return [who, { text: "'s " }, ...ability(), { text: ' takes effect' }];
     default:
       return null;
   }

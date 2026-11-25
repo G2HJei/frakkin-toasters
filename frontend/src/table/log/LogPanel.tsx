@@ -24,8 +24,15 @@ export function LogPanel() {
   const table = useTable();
   const log = useGameStore((state) => state.log);
   const players = table.game?.players;
+  // a player named in a line shows his portrait and his sheet on hover
   const words: FactContext = useMemo(
-    () => ({ ...table, artOf: partArt, iconOf: partIcon, playerOf: (character: string) => players?.find((player) => player.character === character)?.number ?? null }),
+    () => ({
+      ...table,
+      artOf: partArt,
+      iconOf: partIcon,
+      characterOf: (playerNumber: number) => players?.find((player) => player.number === playerNumber)?.character ?? null,
+      playerOf: (character: string) => players?.find((player) => player.character === character)?.number ?? null,
+    }),
     [table, players],
   );
   const turns = useMemo(() => logStory(log, words), [log, words]);
@@ -104,7 +111,7 @@ function Line({ line, withFacts }: { line: LogLine; withFacts: boolean }) {
       <div className="line-body">
         {line.actor !== null && (
           <>
-            <span className="actor">{table.playerName(line.actor)}</span>{' '}
+            <span className="actor">{line.namesUser ? (table.userName(line.actor) ?? `Player ${line.actor}`) : table.playerName(line.actor)}</span>{' '}
           </>
         )}
         {/* the server answered for him: it was his only answer, so it skipped ahead like a pass */}

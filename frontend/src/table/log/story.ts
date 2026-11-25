@@ -29,6 +29,8 @@ export interface LogLine {
   entry: LogEntry;
   // the player it is about, named above it; null for what happens to the game
   actor: number | null;
+  // named above it by the user in his seat instead of his character: the choice of a character
+  namesUser?: boolean;
   words: Part[];
   // the card or ability it comes from, when its words don't name it
   source: Part | null;
@@ -276,8 +278,20 @@ export function logStory(entries: LogEntry[], table: FactContext): TurnStory[] {
     chosenBy = null;
   });
   return turns
-    .map((turn) => ({ ...turn, steps: turn.steps.filter((step) => step.lines.length > 0).map((step) => ({ ...step, lines: step.lines.map(withoutShownArt) })) }))
+    .map((turn) => ({
+      ...turn,
+      steps: turn.steps.filter((step) => step.lines.length > 0).map((step) => ({ ...step, lines: step.lines.map((line) => withoutShownArt(withoutOwnPortrait(line))) })),
+    }))
     .filter((turn) => turn.turn > 0 || turn.steps.some((step) => step.lines.length > 0));
+}
+
+// The portrait of the line's own player leads it already: where its words name him again, they do without it.
+function withoutOwnPortrait(line: LogLine): LogLine {
+  if (line.actor === null) {
+    return line;
+  }
+  const own = (parts: Part[]) => parts.map((part) => (part.icon && part.player === line.actor ? { ...part, icon: null } : part));
+  return { ...line, words: own(line.words), facts: line.facts.map(own) };
 }
 
 // The images a line's words show already, as a name to hover or an icon, aren't repeated after them.
@@ -442,6 +456,8 @@ function scopeLines(entry: ScopeLog, index: number, chosenBy: number | null, sco
       ...base,
       key,
       actor,
+      // "User123 chooses William Adama": his character is the one he chooses
+      namesUser: kind === 'SelectCharacterEvent',
       words: line,
       source,
       facts: storyFirst(nested).map((one) => sentenceParts(one, actor, context)),

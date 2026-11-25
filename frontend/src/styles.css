@@ -1728,6 +1728,15 @@ details[open] > summary::before {
   vertical-align: -0.25em;
 }
 
+/* a character named in a line: his round token, like the one that leads the line of his own player */
+.part-icon.icon-portrait {
+  width: 1.25em;
+  height: 1.25em;
+  border-radius: 50%;
+  object-fit: cover;
+  vertical-align: -0.3em;
+}
+
 /* good and bad news for the fleet: a resource gained or lost, a skill check passed or failed, a ship lost or destroyed */
 .table-page .log .tone-good {
   color: #6fd36b;

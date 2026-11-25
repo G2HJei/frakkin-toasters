@@ -1,7 +1,24 @@
 // The facts of a scope as sentences. The journal records the mechanics one card move at a time (a card leaves a deck,
 // then a hand gets it); here a move that takes two facts is one sentence ("Laura Roslin draws Consolidate Power 2"),
 // moves of the same kind in a row are one ("discards A, B and C"), and what only keeps the books is left out.
-import { cardParts, cardType, constantLabel, factParts, hiddenCardsLabel, joinParts, joinWords, partsText, shipMove, shipMovesParts, shipPart, withoutSubject, type LabelContext, type Part, type ShipMove } from './describe';
+import {
+  cardParts,
+  cardType,
+  constantLabel,
+  factParts,
+  hiddenCardsLabel,
+  joinParts,
+  joinWords,
+  partsText,
+  playerPart,
+  shipMove,
+  shipMovesParts,
+  shipPart,
+  withoutSubject,
+  type LabelContext,
+  type Part,
+  type ShipMove,
+} from './describe';
 import { recordNamed, type TypeRef } from '../wire/schema';
 import type { FactProjection } from '../wire/types';
 
@@ -18,10 +35,8 @@ export interface Sentence {
   ships?: { names: Part[]; move: ShipMove };
 }
 
-/** What the facts of a scope are worded with: a context that can also name a character's player. */
-export interface FactContext extends LabelContext {
-  playerOf?(character: string): number | null;
-}
+/** What the facts of a scope are worded with: the labels' context, which can name a character's player. */
+export type FactContext = LabelContext;
 
 // Facts that only keep the books, or that a header or the event's line says already.
 const QUIET = new Set([
@@ -483,7 +498,7 @@ function deckName(deck: string | null): string {
 }
 
 function sentence(one: Draft, context: FactContext): Sentence {
-  const name = (player: number | null) => (player !== null ? context.playerName(player) : 'Someone');
+  const name = (player: number | null): Part[] => [player !== null ? playerPart(player, context) : { text: 'Someone' }];
   const cards = one.cards ? cardsParts(one.cards, context) : [];
   const many = (one.cards?.count ?? 0) !== 1;
   const words = (...parts: (string | Part[])[]): Part[] => parts.flatMap((part) => (typeof part === 'string' ? [{ text: part }] : part));
@@ -491,25 +506,25 @@ function sentence(one: Draft, context: FactContext): Sentence {
   const make = (parts: Part[], subject: number | null, moves = false): Sentence => ({ parts, subject, given: moves ? given : [], facts: one.facts });
   switch (one.verb) {
     case 'draws':
-      return make(words(`${name(one.who)} draws `, cards), one.who);
+      return make(words(name(one.who), ` draws `, cards), one.who);
     case 'gets':
-      return make(words(`${name(one.who)} gets `, cards), one.who);
+      return make(words(name(one.who), ` gets `, cards), one.who);
     case 'loses':
-      return make(words(`${name(one.who)} loses `, cards), one.who, true);
+      return make(words(name(one.who), ` loses `, cards), one.who, true);
     case 'discards':
-      return make(words(`${name(one.who)} discards `, cards), one.who, true);
+      return make(words(name(one.who), ` discards `, cards), one.who, true);
     case 'plays':
-      return make(words(`${name(one.who)} plays `, cards), one.who, true);
+      return make(words(name(one.who), ` plays `, cards), one.who, true);
     case 'putsIn':
-      return make(words(`${name(one.who)} puts `, cards, ' into the skill check'), one.who, true);
+      return make(words(name(one.who), ` puts `, cards, ' into the skill check'), one.who, true);
     case 'playsBefore':
-      return make(words(`${name(one.who)} plays `, cards, ' before the skill check'), one.who, true);
+      return make(words(name(one.who), ` plays `, cards, ' before the skill check'), one.who, true);
     case 'gives':
-      return make(words(`${name(one.who)} gives `, cards, ` to ${name(one.target)}`), one.who, true);
+      return make(words(name(one.who), ` gives `, cards, ` to `, name(one.target)), one.who, true);
     case 'takesBack':
-      return make(words(`${name(one.who)} takes `, cards, ' back'), one.who);
+      return make(words(name(one.who), ` takes `, cards, ' back'), one.who);
     case 'sees':
-      return make(words(`${name(one.who)} looks at `, cards), one.who);
+      return make(words(name(one.who), ` looks at `, cards), one.who);
     case 'drawn':
       return make(words(cards, ` ${many ? 'are' : 'is'} drawn from ${deckName(one.deck)}`), null);
     case 'discarded':
@@ -526,7 +541,7 @@ function sentence(one: Draft, context: FactContext): Sentence {
       // a hidden card's kind names its deck already
       return make(words(cards, one.deck && one.cards?.list ? ` from ${deckName(one.deck)}` : '', ` ${many ? 'go' : 'goes'} into the skill check`), null);
     case 'seesShips':
-      return make(words(`${name(one.who)} looks at `, joinParts((one.seen ?? []).map((ship) => [shipPart(ship, context, true)]))), one.who);
+      return make(words(name(one.who), ` looks at `, joinParts((one.seen ?? []).map((ship) => [shipPart(ship, context, true)]))), one.who);
     case 'drawnAndDiscarded':
       return make(words(cards, ` ${many ? 'are' : 'is'} drawn from ${deckName(one.deck)} and discarded`), null);
     case 'ship': {

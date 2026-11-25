@@ -1,10 +1,11 @@
 // A label in its parts: a name that has an image shows it large on hover, like a card in the log or a prompt; a part
-// may have a small icon in front of its words (a resource, a ship, a title, the die) and a tone, good or bad news.
+// may have a small icon in front of its words (a resource, a ship, a title, the die, a character's portrait) and a
+// tone, good or bad news.
 import type { CSSProperties } from 'react';
 import type { Part, PartIcon } from '../labels/describe';
 import type { TypeRef } from '../wire/schema';
 import { previewHandlers } from './Art';
-import { dieArt, enumArt, isTitleName, resourceIconArt, shipArt, skillCardArt, titleIconArt, tokenArt, type ArtRef, type TokenName } from './images';
+import { characterArt, dieArt, enumArt, isTitleName, resourceIconArt, shipArt, skillCardArt, titleIconArt, tokenArt, type ArtRef, type TokenName } from './images';
 
 export function Words({ parts }: { parts: Part[] }) {
   return (
@@ -44,7 +45,8 @@ export function partArt(value: unknown, type: TypeRef): ArtRef | null {
 
 /**
  * The icon in front of a value's words: a resource's (tinted, like the board's gauges), a ship's, a title's insignia,
- * a token, or the die's face ("Die"). For `LabelContext.iconOf`.
+ * a token, the die's face ("Die"), or a character's portrait, the token that leads a line of the log. For
+ * `LabelContext.iconOf`.
  */
 export function partIcon(enumName: string, constant: unknown): PartIcon | null {
   const icon = (art: ArtRef | null, shape: string, tint = false): PartIcon | null => (art ? { key: art.key, url: art.url, shape, tint } : null);
@@ -59,6 +61,8 @@ export function partIcon(enumName: string, constant: unknown): PartIcon | null {
       return icon(tokenArt(constant as TokenName), 'token');
     case 'Die':
       return icon(dieArt(constant as number), 'die');
+    case 'Character':
+      return icon(characterArt(constant as string), 'portrait');
     default:
       return null;
   }
