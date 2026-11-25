@@ -7,8 +7,8 @@ next.
 
 This is a roadmap, not a work order: each milestone gets its own `<topic>-plan.md` (context, decisions, phases that
 end green) before it is built, and the file is deleted once the plan is executed: what it decided lives on in
-`CLAUDE.md` and in its milestone's "Where it differs from the plan" here. `CLAUDE.md`'s "Roadmap"
-section still lists the finished steps; fix it per milestone, not at the end.
+`CLAUDE.md` and its `agents/` topic files, and in its milestone's "Where it differs from the plan" here.
+`CLAUDE.md`'s "Status" section says which milestones are done; fix it per milestone, not at the end.
 
 ## Where we are
 
@@ -40,12 +40,12 @@ but the session around them and a place to run it:
 
 ## Principles for the milestones
 
-- **Legal moves come from the engine.** The browser holds no rules (`CLAUDE.md`). Every UX improvement that needs "what
+- **Legal moves come from the engine.** The browser holds no rules (`CLAUDE.md`, "Architecture"). Every UX improvement that needs "what
   can this player do now" asks `core` (`LegalAnswers`), and the same list drives the random-playout fuzzer.
 - **Every input sends one of the engine's answers** as it was listed (`input/answers.ts`), and the engine judges it
   again. The generic `EventBuilder` under "Advanced" was removed on 2026-11-24; only the sandbox's setup still builds
   an event from the schema (`sandbox/SetupForm.tsx`).
-- **Each milestone ends green** (`./gradlew build`, e2e where it touches the table) and updates `CLAUDE.md`.
+- **Each milestone ends green** (`./gradlew build`, e2e where it touches the table) and updates `CLAUDE.md` and the `agents/` topic files.
 
 ---
 
@@ -53,7 +53,7 @@ but the session around them and a place to run it:
 
 ### A. Prove the game is completable: done 2026-11-22
 
-`./gradlew :core:fuzz` (the `fuzz/` test fixtures, "Random playouts" in `CLAUDE.md`) plays seeded games of 3 to 7
+`./gradlew :core:fuzz` (the `fuzz/` test fixtures, "Random playouts" in `agents/testing.md`) plays seeded games of 3 to 7
 players with random legal answers until they end. It restores them on the way and compares the twins, probes the checks
 with hostile inputs, and rewrites `fuzzer-report.md`: the findings, the endings, the rounds to finish and the wins by
 team. A finding exports as a regression journal with the input that failed (`FuzzJournalExportTest`), beside a core
@@ -74,7 +74,7 @@ Where it differs from the plan:
 
 ### B. Legal-move hints: done 2026-11-22
 
-`LegalAnswers` (`engine/answer/`, "Legal answers" in `CLAUDE.md`) lists the answers of every decision for the player it
+`LegalAnswers` (`engine/answer/`, "Legal answers" in `agents/engine.md`) lists the answers of every decision for the player it
 asks: concrete events, and where the set is too large, shaped answers (an example and a `Pick` of cards or ships, with
 `min`, `max` and whether the order counts). The asked viewer's `input` carries them (`Decide.answers`, and
 `Choose.answers` for each option that asks a decision at once), and `anytime` the `AnytimeEvent`s a player may submit
@@ -88,7 +88,7 @@ candidate, so no rule is written twice.
 
 ### C. A table that is pleasant to play: done 2026-11-22
 
-What the table has now ("Frontend" in `CLAUDE.md`):
+What the table has now (`agents/frontend.md` and `agents/frontend-table.md`):
 
 - **C1, inputs**: the answers panel (a choice's options in order, the answers grouped by kind, a draw as a card per
   color, a picker for a shape, an answer made of several parts picked part by part, "Back" and "Clear", the builder
