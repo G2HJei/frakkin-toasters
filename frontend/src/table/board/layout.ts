@@ -97,6 +97,9 @@ export const SLOTS = {
   shipReserves: printedBox(printed.slots.shipReserves),
   // not printed: the Boarding Party track lies over Galactica's hull while a centurion is on it
   boardingParty: printedBox(printed.slots.boardingParty),
+  // not printed: the "Critical damage" plate lies on the hull plating above the Armory, between the Research Lab and
+  // the Brig, while Galactica is critically damaged
+  criticalDamage: printedBox(printed.slots.criticalDamage),
   // no printed slot: the free starfield
   inPlay: box(785, 1262, 110, 155),
 };

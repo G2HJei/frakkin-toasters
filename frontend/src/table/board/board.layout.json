@@ -1,6 +1,6 @@
 {
  "image": "board.jpg",
- "note": "pixels of the image; boxes are [x, y, width, height]; location boxes end with their BoardArea; locationTitles are the panels the names are printed in; distanceTraveled is where destinations tuck under the objective (nothing is printed there); launch.* are the printed launch strips; boardingParty is not printed: boarding-party.png lies there while a centurion is on the track, and tracks.boarding are the centres of its spaces; labels are the middles of the section labels the board draws where the picture once printed them; cylonSectors is the centre and slope of the Cylon fleet board's sector lines; resources are the boxes of each resource's icon and the strip of pips after it, in a row centred on the jump track's line (nothing is printed there)",
+ "note": "pixels of the image; boxes are [x, y, width, height]; location boxes end with their BoardArea; locationTitles are the panels the names are printed in; distanceTraveled is where destinations tuck under the objective (nothing is printed there); launch.* are the printed launch strips; boardingParty is not printed: boarding-party.png lies there while a centurion is on the track, and tracks.boarding are the centres of its spaces; criticalDamage is not printed: the warning plate lies on the hull plating above the Armory while Galactica is critically damaged; labels are the middles of the section labels the board draws where the picture once printed them; cylonSectors is the centre and slope of the Cylon fleet board's sector lines; resources are the boxes of each resource's icon and the strip of pips after it, in a row centred on the jump track's line (nothing is printed there)",
  "width": 2003,
  "height": 2317,
  "locations": {
@@ -513,6 +513,12 @@
    1972,
    314,
    149
+  ],
+  "criticalDamage": [
+   1209,
+   1673,
+   292,
+   38
   ]
  },
  "cells": {},

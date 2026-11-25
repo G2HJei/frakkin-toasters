@@ -67,6 +67,22 @@ describe('the changes of a game message', () => {
     expect(changesBetween(after, after).rolled).toBe(false);
   });
 
+  it("are Galactica's damage turning critical: the message that brings it to 4 damaged locations, not the ones after", () => {
+    const damaged = (count: number) =>
+      game({
+        galactica: {
+          ...game().galactica,
+          locations: ['ARMORY', 'BRIG', 'COMMAND', 'SICKBAY', 'HANGAR_DECK'].map((location, index) => ({ location, damaged: index < count, characters: [] })),
+        },
+      });
+
+    expect(changesBetween(damaged(3), damaged(4)).critical).toBe(true);
+    expect(changesBetween(damaged(2), damaged(5)).critical).toBe(true);
+    expect(changesBetween(damaged(2), damaged(3)).critical).toBe(false);
+    expect(changesBetween(damaged(4), damaged(5)).critical).toBe(false);
+    expect(changesBetween(damaged(4), damaged(3)).critical).toBe(false);
+  });
+
   it('are none without a previous game: a snapshot after a reconnect or an undo animates nothing', () => {
     const message = (fuel: number) => ({ type: 'game', token: 't', game: game({ galactica: { ...game().galactica, fuel } }) }) as unknown as ServerMessage;
     const store = useGameStore.getState();

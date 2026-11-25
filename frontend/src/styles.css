@@ -1177,6 +1177,68 @@ details[open] > summary::before {
   fill: #ff8a80;
 }
 
+/* Galactica's critical damage: a warning plate on the hull, lit like the red zone of a resource and casting the pieces'
+   shadow, so it sits on the plating; its ends take the printed hazard frames' stripes in red and black */
+.board-svg .critical-damage {
+  filter: drop-shadow(0 0 6px rgba(255, 70, 50, 0.75)) drop-shadow(0 5px 5px rgba(0, 0, 0, 0.8));
+}
+
+.board-svg .critical-damage .plate {
+  fill: rgba(42, 7, 5, 0.93);
+}
+
+.board-svg .critical-damage .hazard-red {
+  fill: #c8322b;
+}
+
+.board-svg .critical-damage .hazard-dark {
+  fill: #160403;
+}
+
+.board-svg .critical-damage .rim {
+  fill: none;
+  stroke: #ff5a45;
+  stroke-width: 2;
+}
+
+.board-svg .critical-damage text {
+  font-weight: 700;
+  fill: #ff6b5c;
+}
+
+/* it comes on like a warning light, with the message that made the damage critical */
+@keyframes critical-on {
+  0% {
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  14% {
+    opacity: 0.15;
+  }
+  24% {
+    opacity: 1;
+  }
+  32% {
+    opacity: 0.35;
+  }
+  46%,
+  100% {
+    opacity: 1;
+  }
+}
+
+.board-svg .critical-damage.just-critical {
+  animation: critical-on 1.2s linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .board-svg .critical-damage.just-critical {
+    animation: none;
+  }
+}
+
 .board-svg .character .token-ring {
   fill: none;
 }

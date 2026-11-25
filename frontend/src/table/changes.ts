@@ -1,5 +1,6 @@
 // What changed from one game message to the next, for the table's small animations: a resource, a track's marker, the
-// distance, the nukes, a newly damaged location, a die roll and the cards that came into a hand. Only two projections
+// distance, the nukes, a newly damaged location, Galactica's damage turning critical, a die roll and the cards that came
+// into a hand. Only two projections
 // in a row count: after a reconnect or an undo the store keeps no previous game (gameStore.previous), so a snapshot
 // animates nothing it can't attribute.
 import { useMemo } from 'react';
@@ -19,6 +20,8 @@ export interface Changes {
   distance: number;
   nukes: number;
   damaged: string[];
+  // Galactica's damage became critical: its warning plate flickers on
+  critical: boolean;
   rolled: boolean;
   // the face-up cards new in each player's hand, by player number
   gained: Map<number, SkillCard[]>;
@@ -26,7 +29,25 @@ export interface Changes {
   gainedColors: Map<number, Record<string, number>>;
 }
 
-export const NO_CHANGES: Changes = { resources: [], tracks: [], distance: 0, nukes: 0, damaged: [], rolled: false, gained: new Map(), gainedColors: new Map() };
+export const NO_CHANGES: Changes = {
+  resources: [],
+  tracks: [],
+  distance: 0,
+  nukes: 0,
+  damaged: [],
+  critical: false,
+  rolled: false,
+  gained: new Map(),
+  gainedColors: new Map(),
+};
+
+// the damaged Galactica locations from which the board warns of critical damage; at 6 the Cylons win
+export const CRITICAL_DAMAGE = 4;
+
+// only Galactica's own locations can be damaged on its board, Colonial One's can't
+export function isCriticallyDamaged(game: GameProjection): boolean {
+  return (game.galactica?.locations ?? []).filter((location) => location.damaged).length >= CRITICAL_DAMAGE;
+}
 
 export function changesBetween(previous: GameProjection | null, next: GameProjection | null): Changes {
   if (!previous || !next) {
@@ -81,6 +102,7 @@ export function changesBetween(previous: GameProjection | null, next: GameProjec
     distance: next.distanceTraveled - previous.distanceTraveled,
     nukes: next.nukes - previous.nukes,
     damaged,
+    critical: isCriticallyDamaged(next) && !isCriticallyDamaged(previous),
     rolled,
     gained,
     gainedColors,

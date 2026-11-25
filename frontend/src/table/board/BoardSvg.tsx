@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, type ReactNode } from 'react';
-import { signed, trackPosition, TRACKS, useChanges, type Changes, type Track } from '../changes';
+import { isCriticallyDamaged, signed, trackPosition, TRACKS, useChanges, type Changes, type Track } from '../changes';
 import { useGameStore } from '../../live/gameStore';
 import {
   cardArt,
@@ -17,7 +17,7 @@ import {
   type ArtRef,
 } from '../../art/images';
 import { previewHandlers, SvgArt } from '../../art/Art';
-import { BOARD_LABELS, type BoardLabel } from '../../labels/board';
+import { BOARD_LABELS, CRITICAL_DAMAGE_EXPLAINED, CRITICAL_DAMAGE_LABEL, type BoardLabel } from '../../labels/board';
 import { cardLabel, constantLabel } from '../../labels/describe';
 import type { CivilianShip, Character, DeckProjection, GameProjection, Location, ShipProjection } from '../../wire/types';
 import { PlayerMatOf } from '../players/PlayersPanel';
@@ -91,6 +91,7 @@ export function BoardSvg() {
       <DeckRack game={game} />
       <Objective game={game} />
       <FreeSpace game={game} />
+      <CriticalDamage game={game} changes={changes} />
 
       {locations.map((location) => {
         const name = location.location as Location;
@@ -272,6 +273,74 @@ function SectionLabels() {
     </g>
   );
 }
+
+// ---------------------------------------------------------------- critical damage
+
+// a section label's chip in red, its corners cut deeper, and at each end a band of the hazard stripes that the printed
+// frames of the Sickbay and the Brig have, in red and black
+const CRITICAL_FONT = 22;
+const CRITICAL_CUT = 9;
+const CRITICAL_BAND = 18;
+const CRITICAL_PAD = 10;
+const HAZARD_STRIPES = 14;
+
+/**
+ * A warning plate on the hull plating above the Armory, between the Research Lab and the Brig, from 4 damaged
+ * Galactica locations on. Its words are fitted between the bands whatever the font, and it flickers on with the
+ * message that made the damage critical. Hovering it explains that 6 destroy Galactica, in the table's popover.
+ */
+function CriticalDamage({ game, changes }: { game: GameProjection; changes: Changes }) {
+  if (!isCriticallyDamaged(game)) {
+    return null;
+  }
+  return (
+    <RevealGroup id="critical-damage" title={CRITICAL_DAMAGE_LABEL} sections={[{ title: '', cards: [{ art: null, label: CRITICAL_DAMAGE_EXPLAINED }] }]}>
+      <CriticalDamagePlate critical={changes.critical} />
+    </RevealGroup>
+  );
+}
+
+function CriticalDamagePlate({ critical }: { critical: boolean }) {
+  const { x, y, width, height } = SLOTS.criticalDamage;
+  const [left, top, right, bottom] = [x, y, x + width, y + height];
+  const plate = [
+    [left + CRITICAL_CUT, top],
+    [right, top],
+    [right, bottom - CRITICAL_CUT],
+    [right - CRITICAL_CUT, bottom],
+    [left, bottom],
+    [left, top + CRITICAL_CUT],
+  ];
+  const leftBand = [plate[0], [left + CRITICAL_BAND, top], [left + CRITICAL_BAND, bottom], plate[4], plate[5]];
+  const rightBand = [[right - CRITICAL_BAND, top], plate[1], plate[2], plate[3], [right - CRITICAL_BAND, bottom]];
+  return (
+    <g className={critical ? 'critical-damage just-critical' : 'critical-damage'} data-label="criticalDamage" role="img" aria-label={CRITICAL_DAMAGE_EXPLAINED}>
+      <defs>
+        <pattern id="critical-damage-hazard" width={HAZARD_STRIPES} height={HAZARD_STRIPES} patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <rect className="hazard-dark" width={HAZARD_STRIPES} height={HAZARD_STRIPES} />
+          <rect className="hazard-red" width={HAZARD_STRIPES / 2} height={HAZARD_STRIPES} />
+        </pattern>
+      </defs>
+      <polygon className="plate" points={svgPoints(plate)} />
+      <polygon className="hazard" points={svgPoints(leftBand)} fill="url(#critical-damage-hazard)" />
+      <polygon className="hazard" points={svgPoints(rightBand)} fill="url(#critical-damage-hazard)" />
+      {/* the outline over the bands, so it runs unbroken */}
+      <polygon className="rim" points={svgPoints(plate)} />
+      <text
+        x={x + width / 2}
+        y={y + height / 2 + CRITICAL_FONT * 0.36}
+        textAnchor="middle"
+        fontSize={CRITICAL_FONT}
+        textLength={width - 2 * (CRITICAL_BAND + CRITICAL_PAD)}
+        lengthAdjust="spacing"
+      >
+        {CRITICAL_DAMAGE_LABEL.toUpperCase()}
+      </text>
+    </g>
+  );
+}
+
+const svgPoints = (points: number[][]) => points.map(([x, y]) => `${x},${y}`).join(' ');
 
 // ---------------------------------------------------------------- the resources and the tracks
 
