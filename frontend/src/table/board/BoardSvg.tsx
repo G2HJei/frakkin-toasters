@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, type ReactNode } from 'react';
-import { isCriticallyDamaged, signed, trackPosition, TRACKS, useChanges, type Changes, type Track } from '../changes';
+import { isCriticallyDamaged, lossReduction, signed, trackPosition, TRACKS, useChanges, type Changes, type Track } from '../changes';
 import { useGameStore } from '../../live/gameStore';
 import {
   cardArt,
@@ -17,7 +17,7 @@ import {
   type ArtRef,
 } from '../../art/images';
 import { previewHandlers, SvgArt } from '../../art/Art';
-import { BOARD_LABELS, CRITICAL_DAMAGE_EXPLAINED, CRITICAL_DAMAGE_LABEL, type BoardLabel } from '../../labels/board';
+import { BOARD_LABELS, CRITICAL_DAMAGE_EXPLAINED, CRITICAL_DAMAGE_LABEL, LOSS_REDUCTION_CARD, lossReductionExplained, type BoardLabel } from '../../labels/board';
 import { cardLabel, constantLabel } from '../../labels/describe';
 import type { CivilianShip, Character, DeckProjection, GameProjection, Location, ShipProjection } from '../../wire/types';
 import { PlayerMatOf } from '../players/PlayersPanel';
@@ -57,8 +57,9 @@ const FACEDOWN_DISCARDS = new Set(['CIVILIAN_SHIPS', 'GALACTICA_DAMAGE', 'PEGASU
 /**
  * The board as it lies on the table: board.jpg, with every component on its printed slot. The characters stand on the
  * printed names of their locations, the ships fly in the middle of the space areas, the resources lie in a row of
- * gauges (an icon and a strip of pips, the amount on hover), the markers sit on the tracks, the decks lie in the rack with their counts and the top of their discard
- * piles, the civilian ships lie with the ship reserves, and the destinations tuck under the objective. The cards kept in
+ * gauges (an icon and a strip of pips, the amount on hover; a shield around one whose next loss this turn is smaller),
+ * the markers sit on the tracks, the decks lie in the rack with their counts and the top of their discard piles, the
+ * civilian ships lie with the ship reserves, and the destinations tuck under the objective. The cards kept in
  * play lie on the free starfield. The card being resolved, its skill check and the die are the turn panel's, and the
  * nukes the Admiral's mat's. Hovering a deck shows its discard pile, and in a sandbox what the players can't see;
  * hovering a location shows its card, and hovering a standee its character sheet with its player's mat. What the
@@ -85,7 +86,7 @@ export function BoardSvg() {
     <svg ref={svg} className="board-svg" viewBox={`0 0 ${BOARD_WIDTH} ${BOARD_HEIGHT}`} role="img" aria-label="the board">
       <image href={boardUrl} x={0} y={0} width={BOARD_WIDTH} height={BOARD_HEIGHT} className="board-image" />
       <SectionLabels />
-      <Resources game={game} />
+      <Resources game={game} changes={changes} version={version} />
       <Tracks game={game} changes={changes} version={version} />
       <Reserves game={game} />
       <DeckRack game={game} />
@@ -344,12 +345,85 @@ const svgPoints = (points: number[][]) => points.map(([x, y]) => `${x},${y}`).jo
 
 // ---------------------------------------------------------------- the resources and the tracks
 
-function Resources({ game }: { game: GameProjection }) {
+function Resources({ game, changes, version }: { game: GameProjection; changes: Changes; version: number }) {
   return (
     <g className="resources">
+      <ShieldDefs />
       {RESOURCE_NAMES.map((resource) => (
-        <Gauge key={resource} resource={resource} value={game.galactica?.[resource] ?? null} box={RESOURCES[resource]} />
+        <ResourceSlot key={resource} game={game} resource={resource} changes={changes} version={version} />
       ))}
+    </g>
+  );
+}
+
+/**
+ * A resource's gauge, and while "Preventive Policy" makes its next loss this turn smaller a shield around it, which
+ * explains that in the table's popover. The shield fades in with the message that played the card, and out with the one
+ * whose loss it took, as a track's marker does.
+ */
+function ResourceSlot({ game, resource, changes, version }: { game: GameProjection; resource: ResourceName; changes: Changes; version: number }) {
+  const box = RESOURCES[resource];
+  const reduction = lossReduction(game, resource);
+  const explained = lossReductionExplained(resource, reduction);
+  const handlers = useRevealHandlers(
+    `loss-reduction-${resource}`,
+    constantLabel('SkillCardType', LOSS_REDUCTION_CARD),
+    reduction > 0 ? [{ title: '', cards: [{ art: null, label: explained }] }] : [],
+  );
+  return (
+    <g {...handlers}>
+      {reduction > 0 && <Shield resource={resource} box={box} className={changes.shieldsRaised.includes(resource) ? 'shield raised' : 'shield'} label={explained} />}
+      {reduction === 0 && changes.shieldsSpent.includes(resource) && <Shield key={version} resource={resource} box={box} className="shield spent" />}
+      <Gauge resource={resource} value={game.galactica?.[resource] ?? null} box={box} />
+    </g>
+  );
+}
+
+// the shield reaches past the gauge's box on every side, and short of the next gauge's shield
+const SHIELD_PAD_X = 14;
+const SHIELD_PAD_Y = 12;
+// the hexagons of the field, flat on top: a hexagon and the edge to the next column tile it
+const CELL = 7;
+const CELL_HEIGHT = Math.sqrt(3) * CELL;
+
+// The field's gradient, its cells and the mask that keeps them to its edge, once for every shield: each is drawn in its
+// shield's own box.
+function ShieldDefs() {
+  const half = CELL_HEIGHT / 2;
+  return (
+    <defs>
+      <radialGradient id="shield-field">
+        <stop offset="0%" stopColor="#8fd0ff" stopOpacity={0} />
+        <stop offset="62%" stopColor="#8fd0ff" stopOpacity={0.02} />
+        <stop offset="100%" stopColor="#8fd0ff" stopOpacity={0.16} />
+      </radialGradient>
+      <radialGradient id="shield-edge-fade">
+        <stop offset="35%" stopColor="#000" />
+        <stop offset="100%" stopColor="#fff" />
+      </radialGradient>
+      <mask id="shield-edge" maskContentUnits="objectBoundingBox">
+        <rect width={1} height={1} fill="url(#shield-edge-fade)" />
+      </mask>
+      <pattern id="shield-cells" width={3 * CELL} height={CELL_HEIGHT} patternUnits="userSpaceOnUse">
+        <path
+          className="shield-cell"
+          d={`M0,${half} L${CELL / 2},0 L${1.5 * CELL},0 L${2 * CELL},${half} L${1.5 * CELL},${CELL_HEIGHT} L${CELL / 2},${CELL_HEIGHT} Z M${2 * CELL},${half} L${3 * CELL},${half}`}
+        />
+      </pattern>
+    </defs>
+  );
+}
+
+/** A faint force field around a gauge: clear in the middle, its cells and its rim lit at the edge. */
+function Shield({ resource, box, className, label }: { resource: ResourceName; box: Box; className: string; label?: string }) {
+  const [x, y, width, height] = [box.x - SHIELD_PAD_X, box.y - SHIELD_PAD_Y, box.width + 2 * SHIELD_PAD_X, box.height + 2 * SHIELD_PAD_Y];
+  const radius = height / 2;
+  const outline = `M${x + radius},${y} H${x + width - radius} A${radius},${radius} 0 0 1 ${x + width - radius},${y + height} H${x + radius} A${radius},${radius} 0 0 1 ${x + radius},${y} Z`;
+  return (
+    <g className={className} data-shield={resource} {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': true })}>
+      <path className="shield-field" d={outline} fill="url(#shield-field)" />
+      <path className="shield-cells" d={outline} fill="url(#shield-cells)" mask="url(#shield-edge)" />
+      <path className="shield-rim" d={outline} />
     </g>
   );
 }

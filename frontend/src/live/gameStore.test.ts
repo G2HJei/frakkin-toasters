@@ -79,6 +79,20 @@ describe('the game store, fed by a socket', () => {
     expect(state.connection).toBe('open');
   });
 
+  it('hands the table the log entries that came with each game, whose update comes before it', () => {
+    const fresh = () => useGameStore.getState().fresh.map((entry) => (entry as { scopeId: number }).scopeId);
+    sockets[0].receive({ type: 'game', token: 't1', game: game('SETUP') });
+    sockets[0].receive({ type: 'update', update: { entries: [scope(3)] } });
+    sockets[0].receive({ type: 'update', update: { entries: [scope(4)] } });
+    expect(fresh()).toEqual([]);
+
+    sockets[0].receive({ type: 'game', token: 't2', game: game('MOVEMENT') });
+    expect(fresh()).toEqual([3, 4]);
+
+    sockets[0].receive({ type: 'game', token: 't3', game: game('ACTION') });
+    expect(fresh()).toEqual([]);
+  });
+
   it('replaces the log when a whole log comes, e.g. after an undo', () => {
     sockets[0].receive({ type: 'log', log: { entries: [scope(1), scope(2), scope(3)] } });
     sockets[0].receive({ type: 'log', log: { entries: [scope(1)] } });

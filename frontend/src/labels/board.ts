@@ -17,3 +17,11 @@ export type BoardLabel = keyof typeof BOARD_LABELS;
 export const CRITICAL_DAMAGE_LABEL = 'Critical damage';
 
 export const CRITICAL_DAMAGE_EXPLAINED = 'Galactica is destroyed when 6 of its locations are damaged, and the Cylons win.';
+
+// the shield around a resource whose next loss this turn is smaller, the card that raised it and what its popover
+// explains
+export const LOSS_REDUCTION_CARD = 'PREVENTIVE_POLICY';
+
+export function lossReductionExplained(resource: string, amount: number): string {
+  return `The next ${resource} loss this turn is reduced by ${amount}.`;
+}

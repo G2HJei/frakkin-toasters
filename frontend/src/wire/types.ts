@@ -3592,6 +3592,7 @@ export interface TurnProjection {
   windowAbilities: Array<UsedRollAbility> | null;
   resolvedInterruptCards: Array<SkillCardType> | null;
   raidersToMiss: Partial<Record<Location, number>> | null;
+  lossReductions: Partial<Record<Resource, number>> | null;
 }
 
 export interface UnauthorizedUsageEvent {

@@ -41,6 +41,8 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.ADMIRALS_QUARTER
 import static xyz.zlatanov.frakkintoasters.state.board.Location.FTL_CONTROL;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_6_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.RESEARCH_LAB;
+import static xyz.zlatanov.frakkintoasters.state.board.Resource.FOOD;
+import static xyz.zlatanov.frakkintoasters.state.board.Resource.MORALE;
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.*;
@@ -191,6 +193,20 @@ class GameProjectionTest extends TestHarness {
             assertEquals(List.of(), projection(viewer).turn().windowCards());
             assertEquals(new SkillHand(2, Map.of(TACTICS, 1, POLITICS, 1), null), player(viewer, 1).skillCards());
         }
+    }
+
+    @Test
+    void theLossReductionsOfTheTurnShowToEveryoneUntilTheLossTheyReduce() {
+        ops.reduceNextLoss(FOOD);
+        ops.reduceNextLoss(MORALE);
+
+        for (val viewer : List.of(HOLDER, OTHER, OBSERVER)) {
+            assertEquals(Map.of(FOOD, 1, MORALE, 1), projection(viewer).turn().lossReductions());
+        }
+
+        ops.galactica().decreaseResource(FOOD, 2);
+
+        assertEquals(Map.of(MORALE, 1), projection(OBSERVER).turn().lossReductions());
     }
 
     @Test

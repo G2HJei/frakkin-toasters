@@ -12276,6 +12276,22 @@
             "role" : "count"
           }
         }
+      }, {
+        "name" : "lossReductions",
+        "type" : {
+          "nullable" : true,
+          "t" : "map",
+          "key" : {
+            "nullable" : false,
+            "t" : "enum",
+            "name" : "Resource"
+          },
+          "value" : {
+            "t" : "int",
+            "nullable" : false,
+            "role" : "count"
+          }
+        }
       } ]
     },
     "UnauthorizedUsageEvent" : {

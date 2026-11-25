@@ -9,6 +9,7 @@ import xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint;
 import xyz.zlatanov.frakkintoasters.state.GameStep;
 import xyz.zlatanov.frakkintoasters.state.Team;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
+import xyz.zlatanov.frakkintoasters.state.board.Resource;
 import xyz.zlatanov.frakkintoasters.state.card.DestinationCard;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.card.MotiveCard;
@@ -93,6 +94,7 @@ public record GameProjection(
      *                        someone holds a card for it
      * @param windowCards     the cards in the open window that the viewer played
      * @param windowAbilities the abilities used in the open window that the viewer used
+     * @param lossReductions  how much smaller "Preventative Policy" makes the next loss of each resource this turn
      */
     public record TurnProjection(int number,
                                  GameStep step,
@@ -106,7 +108,8 @@ public record GameProjection(
                                  List<PlayedInterruptCard> windowCards,
                                  List<UsedRollAbility> windowAbilities,
                                  List<SkillCardType> resolvedInterruptCards,
-                                 Map<Location, Integer> raidersToMiss) {
+                                 Map<Location, Integer> raidersToMiss,
+                                 Map<Resource, Integer> lossReductions) {
     }
 
     /**

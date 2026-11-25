@@ -1076,6 +1076,49 @@ details[open] > summary::before {
   fill: #ff4f43;
 }
 
+/* "Preventive Policy"'s shield around a resource: a faint force field in the dradis glow, clear in the middle, its cells
+   and rim lit at the edge; it fades in when the card is played and out when it takes the loss, as a track's marker
+   does */
+/* the pattern's hexagon, styled where the board defines it */
+.board-svg .shield-cell {
+  fill: none;
+  stroke: var(--dradis-glow);
+  stroke-width: 0.7;
+}
+
+.board-svg .shield-cells {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.board-svg .shield-rim {
+  fill: none;
+  stroke: var(--dradis-glow);
+  stroke-width: 1.5;
+  opacity: 0.5;
+  filter: drop-shadow(0 0 3px rgba(79, 163, 224, 0.5));
+  pointer-events: none;
+}
+
+.board-svg .shield.raised {
+  animation: marker-in 0.5s ease-out;
+}
+
+.board-svg .shield.spent {
+  animation: marker-out 0.5s ease-in forwards;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .board-svg .shield {
+    animation: none;
+  }
+
+  .board-svg .shield.spent {
+    display: none;
+  }
+}
+
 .board-svg .marker polygon {
   fill: none;
   stroke: var(--dradis-glow);

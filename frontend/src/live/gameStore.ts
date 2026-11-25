@@ -21,6 +21,10 @@ export interface GameState {
   // the next game is a snapshot (a reconnect, an undo): nothing to animate from
   snapshotNext: boolean;
   log: LogEntry[];
+  // the log entries that came with the latest game, for the table's animations: an update comes before its game
+  fresh: LogEntry[];
+  // the entries of an update whose game hasn't come yet
+  arriving: LogEntry[];
   rejected: RejectedMessage | null;
   // how many game messages came, so a view can tell a new game from the same one
   version: number;
@@ -41,6 +45,8 @@ const initial = {
   previous: null,
   snapshotNext: false,
   log: [] as LogEntry[],
+  fresh: [] as LogEntry[],
+  arriving: [] as LogEntry[],
   rejected: null,
   version: 0,
   intent: null,
@@ -61,15 +67,17 @@ export const useGameStore = create<GameState>((set) => ({
             game: message.game,
             previous: state.snapshotNext ? null : state.game,
             snapshotNext: false,
+            fresh: state.arriving,
+            arriving: [],
             rejected: null,
             version: state.version + 1,
           };
         case 'update': {
           const entries = message.update?.entries ?? [];
-          return { log: [...state.log, ...entries], intent: answeredByTheServer(state.intent, entries) ? null : state.intent };
+          return { log: [...state.log, ...entries], arriving: [...state.arriving, ...entries], intent: answeredByTheServer(state.intent, entries) ? null : state.intent };
         }
         case 'log':
-          return { log: [...(message.log?.entries ?? [])] };
+          return { log: [...(message.log?.entries ?? [])], arriving: [] };
         case 'rejected':
           return { rejected: message, intent: null };
         default:

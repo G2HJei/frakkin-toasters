@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { changesBetween, NO_CHANGES } from './changes';
 import { useGameStore } from '../live/gameStore';
-import type { GameProjection, ServerMessage } from '../wire/types';
+import type { GameProjection, LogEntry, ServerMessage } from '../wire/types';
 
 const card = (type: string, value: number) => ({ type, value });
 
@@ -81,6 +81,21 @@ describe('the changes of a game message', () => {
     expect(changesBetween(damaged(2), damaged(3)).critical).toBe(false);
     expect(changesBetween(damaged(4), damaged(5)).critical).toBe(false);
     expect(changesBetween(damaged(4), damaged(3)).critical).toBe(false);
+  });
+
+  it("are Preventive Policy's shields: up with the card, spent by the loss it reduced, down unspent with the turn", () => {
+    const shielded = (lossReductions: Record<string, number>, number = 3) => game({ turn: { number, dieRoll: null, lossReductions } });
+    const reduced = (resource: string) =>
+      [{ kind: 'ScopeLog', scopeId: 9, parentId: 0, actor: 1, event: null, details: null, automatic: false, facts: [{ kind: 'Shown', fact: { kind: 'GameFact.LossReduced', resource } }] }] as unknown as LogEntry[];
+
+    expect(changesBetween(shielded({}), shielded({ FOOD: 1 })).shieldsRaised).toEqual(['food']);
+    expect(changesBetween(shielded({ FOOD: 1 }), shielded({ FOOD: 1, MORALE: 1 })).shieldsRaised).toEqual(['morale']);
+    expect(changesBetween(shielded({ FOOD: 1 }), shielded({ FOOD: 1 }))).toMatchObject({ shieldsRaised: [], shieldsSpent: [] });
+    expect(changesBetween(shielded({ FOOD: 1, MORALE: 1 }), shielded({ MORALE: 1 }), reduced('FOOD')).shieldsSpent).toEqual(['food']);
+    // the loss and the end of the turn in one message
+    expect(changesBetween(shielded({ FOOD: 1 }), shielded({}, 4), reduced('FOOD')).shieldsSpent).toEqual(['food']);
+    expect(changesBetween(shielded({ FOOD: 1 }), shielded({}, 4)).shieldsSpent).toEqual([]);
+    expect(changesBetween(shielded({ FOOD: 1 }), shielded({ FOOD: 1 }, 4)).shieldsRaised).toEqual(['food']);
   });
 
   it('are none without a previous game: a snapshot after a reconnect or an undo animates nothing', () => {

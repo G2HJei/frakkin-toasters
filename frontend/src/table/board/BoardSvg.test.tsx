@@ -6,7 +6,7 @@ import {BoardSvg, groupShips, shortName} from './BoardSvg';
 import {ArtPreview, usePreview} from '../../art/Art';
 import {RevealLayer, useReveal} from '../reveal';
 import {Table, tableContext} from '../tableContext';
-import type {GameProjection, ShipProjection} from '../../wire/types';
+import type {GameProjection, LogEntry, ShipProjection} from '../../wire/types';
 import {BOARD_LABELS, type BoardLabel} from '../../labels/board';
 import {DECK_SLOTS, DISTANCE, JUMP_TRACK, LABELS, LAUNCH_TUBES, LAYOUT, RESOURCES, SLOTS, TITLES} from './layout';
 import {resourceIconUrl} from './resources';
@@ -231,6 +231,59 @@ describe('the board', () => {
         expect(Math.max(...xs)).toBeLessThan(LAYOUT.BRIG.x);
         expect(Math.max(...ys)).toBeLessThan(LAYOUT.ARMORY.y);
         expect(Math.min(...ys)).toBeGreaterThan(LAYOUT.RESEARCH_LAB.y);
+    });
+
+    const shielded = (lossReductions: Record<string, number>, number = 3) =>
+        ({...game, turn: {...game.turn!, number, lossReductions}}) as unknown as GameProjection;
+
+    it("shields a resource while Preventive Policy makes its next loss this turn smaller, and explains it on hover", () => {
+        expect(renderBoard().querySelector('[data-shield]')).toBeNull();
+        expect(renderBoard().querySelector('[data-reveal^="loss-reduction"]')).toBeNull();
+
+        const board = renderBoard(undefined, shielded({FOOD: 1}));
+        expect([...board.querySelectorAll('[data-shield]')].map((shield) => shield.getAttribute('data-shield'))).toEqual(['food']);
+        const shield = board.querySelector('[data-shield="food"]')!;
+        // a snapshot doesn't raise it
+        expect(shield.classList).not.toContain('raised');
+        expect(shield.getAttribute('aria-label')).toBe('The next food loss this turn is reduced by 1.');
+        fireEvent.mouseEnter(board.querySelector('[data-reveal="loss-reduction-food"]')!);
+        expect(board.querySelector('.reveal-pop .reveal-title')?.textContent).toBe('Preventive Policy');
+        expect([...board.querySelectorAll('.reveal-pop ol.pile li')].map((line) => line.textContent)).toEqual([
+            'The next food loss this turn is reduced by 1.',
+        ]);
+
+        // around its gauge, short of the gauges beside it
+        // the outline starts where its left end's arc meets the top, then runs to where the right end's arc begins
+        const [, from, top, to, radius] = /^M([\d.]+),([\d.]+) H([\d.]+) A([\d.]+),/.exec(shield.querySelector('.shield-rim')!.getAttribute('d')!)!.map(Number);
+        const [left, right, bottom] = [from - radius, to + radius, top + 2 * radius];
+        const food = RESOURCES.food;
+        expect(left).toBeLessThan(food.x);
+        expect(right).toBeGreaterThan(food.x + food.width);
+        expect(top).toBeLessThan(food.y);
+        expect(bottom).toBeGreaterThan(food.y + food.height);
+        expect(left).toBeGreaterThan(RESOURCES.fuel.x + RESOURCES.fuel.width);
+        expect(right).toBeLessThan(RESOURCES.morale.x);
+    });
+
+    it('fades a shield in with the message that played the card, and out with the loss it took', () => {
+        useGameStore.setState({previous: shielded({}), game: shielded({MORALE: 1}), version: 4});
+        expect(renderBoard(undefined, shielded({MORALE: 1})).querySelector('[data-shield="morale"]')?.classList).toContain('raised');
+
+        // the loss it took, and the end of the turn in the same message
+        const reduced = [{
+            kind: 'ScopeLog', scopeId: 9, parentId: 0, actor: 1, event: null, details: null, automatic: false,
+            facts: [{kind: 'Shown', fact: {kind: 'GameFact.LossReduced', resource: 'MORALE'}}],
+        }] as unknown as LogEntry[];
+        useGameStore.setState({previous: shielded({MORALE: 1}), game: shielded({}, 4), fresh: reduced, version: 5});
+        const spent = renderBoard(undefined, shielded({}, 4)).querySelector('[data-shield="morale"]')!;
+        expect(spent.classList).toContain('spent');
+        // nothing left to explain
+        expect(spent.getAttribute('aria-hidden')).toBe('true');
+        expect(spent.closest('[data-reveal]')).toBeNull();
+
+        // the end of the turn takes it down unspent
+        useGameStore.setState({previous: shielded({MORALE: 1}), game: shielded({}, 4), fresh: [], version: 6});
+        expect(renderBoard(undefined, shielded({}, 4)).querySelector('[data-shield]')).toBeNull();
     });
 
     it('fades a moved marker out of the space it left and in on its new one, with no delta', () => {

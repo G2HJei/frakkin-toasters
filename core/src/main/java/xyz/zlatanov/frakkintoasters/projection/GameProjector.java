@@ -12,6 +12,7 @@ import xyz.zlatanov.frakkintoasters.event.SecretEvent;
 import xyz.zlatanov.frakkintoasters.event.skillcheck.DetermineSkillCheckResultEventProcessor;
 import xyz.zlatanov.frakkintoasters.projection.GameProjection.*;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
+import xyz.zlatanov.frakkintoasters.state.board.Resource;
 import xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard;
 import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
@@ -142,7 +143,15 @@ final class GameProjector {
                 turn.windowCards().stream().filter(card -> sees(card.playerNumber())).toList(),
                 turn.windowAbilities().stream().filter(used -> sees(used.playerNumber())).toList(),
                 turn.resolvedInterruptCards(),
-                turn.raidersToMiss());
+                turn.raidersToMiss(),
+                lossReductions(turn.lossReductions()));
+    }
+
+    private static Map<Resource, Integer> lossReductions(Set<Resource> resources) {
+        val reductions = new EnumMap<Resource, Integer>(Resource.class);
+        // each "Preventative Policy" makes the loss 1 smaller (AbstractOps.loseResource)
+        resources.forEach(resource -> reductions.put(resource, 1));
+        return reductions;
     }
 
     /* the players */
