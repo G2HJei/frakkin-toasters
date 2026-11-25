@@ -506,6 +506,9 @@ details[open] > summary::before {
   left: calc(var(--crop-left) / var(--face-width) * -100%);
   top: calc(var(--crop-top) / var(--face-height) * -100%);
   width: calc(var(--scan-width) / var(--face-width) * 100%);
+  /* its height before it loads: without it the lazy image is a line above the crop, outside the clip-path, so inside
+     a scrolling column it never comes into view and never loads */
+  height: calc(var(--scan-height) / var(--face-height) * 100%);
   max-width: none;
 }
 
