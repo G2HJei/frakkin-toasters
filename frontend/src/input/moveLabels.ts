@@ -57,9 +57,14 @@ export function moveDetail(move: Move, components: string[], context: LabelConte
     .filter((part): part is string => part !== null);
   const pick = move.pick ? pickHint(move.pick) : null;
   if (parts.length === 0) {
-    return pick ?? (components.length > 0 ? 'Pass' : '');
+    // an action is never a pass, it uses the action even when it names nothing, e.g. "Repair" of the location
+    return pick ?? (components.length > 0 && !takesAction(record?.interfaces) ? 'Pass' : '');
   }
   return pick ? `${parts.join(' · ')} · ${pick}` : parts.join(' · ');
+}
+
+function takesAction(interfaces: string[] | undefined): boolean {
+  return !!interfaces?.some((name) => name === 'ActionEvent' || name === 'MovementAbilityEvent');
 }
 
 /** The components of a lone move worth naming: what it targets or chooses, the played card left to its image. */

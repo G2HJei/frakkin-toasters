@@ -367,6 +367,23 @@ describe('the answers', () => {
     expect(onMove).toHaveBeenCalledWith(expect.objectContaining({ event: pass }), pass);
   });
 
+  it('never take an action that names nothing for a pass, e.g. "Repair" of the location', () => {
+    const repair = (viperIds: number[]) => ({ kind: 'RepairEvent', playerNumber: 1, card: card('REPAIR', 1), viperIds });
+    const negotiation = { kind: 'NegotiationEvent', playerNumber: 1, card: card('NEGOTIATION', 5) };
+    const { onMove, container } = renderPanel(
+      game({
+        kind: 'Choose',
+        player: 1,
+        options: [decision('ActionEvent'), { kind: 'Single', event: { kind: 'NoOpEvent', playerNumber: 1 } }],
+        answers: [{ option: 0, answers: { events: [negotiation, repair([])], shapes: [] } }],
+      }),
+    );
+
+    expect(container.querySelectorAll('button.answer-row.pass')).toHaveLength(1);
+    fireEvent.click(screen.getByRole('button', { name: 'Repair' }));
+    expect(onMove).toHaveBeenCalledWith(expect.objectContaining({ option: 0, event: repair([]) }), repair([]));
+  });
+
   it('show the Skill Card back on the cards to play into a skill check, and the Pass after them', () => {
     const hand = [card('REPAIR', 1), card('BAIT', 0)];
     const example = { kind: 'PlayCardsIntoSkillCheckEvent', playerNumber: 1, skillCards: [hand[0]] };
