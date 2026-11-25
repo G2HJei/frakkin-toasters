@@ -444,4 +444,34 @@ describe('the log', () => {
     expect(colored(play)).toEqual([]);
     expect(play.querySelector('.event .named')?.textContent).toBe('Consolidate Power 1');
   });
+
+  it('tells a tiebreak nobody was asked about under the current player', () => {
+    const players = [
+      { number: 1, character: 'WILLIAM_ADAMA' },
+      { number: 2, character: 'LAURA_ROSLIN' },
+    ];
+    const kept = { kind: 'TiebreakCardsBeforeSkillCheckEvent', keptCards: [{ playerNumber: 2, skillCard: { type: 'INVESTIGATIVE_COMMITTEE', value: 3 } }] };
+    const body = renderLog([turnStarted(1, 4), { ...scope(2), event: 'TiebreakCardsBeforeSkillCheckEvent', details: kept } as LogEntry], players);
+
+    expect(rows(body)).toEqual([['William Adama', "keeps Laura Roslin's Investigative Committee 3"]]);
+  });
+
+  it('says what damage a player chose for Galactica, in red, and pictures no damage token', () => {
+    const players = [
+      { number: 1, character: 'WILLIAM_ADAMA' },
+      { number: 2, character: 'LAURA_ROSLIN' },
+    ];
+    const damaged = { kind: 'Shown', fact: { kind: 'BoardFact.LocationDamaged', location: 'ARMORY' } };
+    const chose = {
+      ...scope(1),
+      event: 'ChooseGalacticaDamageTokensEvent',
+      details: { kind: 'ChooseGalacticaDamageTokensEvent', playerNumber: 2, resolved: ['ARMORY', 'FUEL'], returned: ['COMMAND'] },
+      facts: [damaged],
+    } as LogEntry;
+    const body = renderLog([chose], players);
+
+    expect(rows(body)).toEqual([['Laura Roslin', 'chooses to damage the Armory and lose 1 fuel']]);
+    expect([...body.querySelectorAll('.event .tone-bad')].map((part) => part.textContent)).toEqual(['damage', '1 ', 'fuel']);
+    expect([...body.querySelectorAll('.art-strip img')].map((image) => image.getAttribute('data-art')).filter((art) => art?.startsWith('GalacticaDamage/'))).toEqual([]);
+  });
 });

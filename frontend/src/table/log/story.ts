@@ -226,6 +226,13 @@ function shownFact(entry: LogEntry, kind: string): Record<string, unknown> | nul
   return found?.kind === 'Shown' ? (found.fact as unknown as Record<string, unknown>) : null;
 }
 
+// The tiebreaks of the current player: the cards he keeps when two conflict, before a skill check or in an interrupt
+// window, told under his name whether he chose or not.
+const KEPT_BY_CURRENT_PLAYER = new Set(['TiebreakCardsBeforeSkillCheckEvent', 'TiebreakInterruptCardsEvent']);
+
+// The damage tokens a player chooses among: his words say what they damage, so no token is pictured after them.
+const DAMAGE_CHOSEN = new Set(['ChooseGalacticaDamageEvent', 'ChooseGalacticaDamageTokensEvent']);
+
 /** The log by turn and step. */
 export function logStory(entries: LogEntry[], table: FactContext): TurnStory[] {
   const context = withLearnedShips(table, learnedShips(entries));
@@ -272,7 +279,9 @@ export function logStory(entries: LogEntry[], table: FactContext): TurnStory[] {
     if (changed) {
       turns[turns.length - 1].steps.push({ step: changed.step as string, lines: [] });
     }
-    for (const line of scopeLines(entry, index, chosenBy, scopes, state, context)) {
+    // a tiebreak with one way to keep the cards asks nobody, and the current player keeps them all the same
+    const by = chosenBy ?? (KEPT_BY_CURRENT_PLAYER.has(entry.event ?? '') ? turns[turns.length - 1].player : null);
+    for (const line of scopeLines(entry, index, by, scopes, state, context)) {
       addLine(turns, line);
     }
     chosenBy = null;
@@ -461,7 +470,7 @@ function scopeLines(entry: ScopeLog, index: number, chosenBy: number | null, sco
       words: line,
       source,
       facts: storyFirst(nested).map((one) => sentenceParts(one, actor, context)),
-      art: unique([...recordArt(details), ...facts.flatMap(lineArt)]),
+      art: unique([...recordArt(details), ...facts.flatMap(lineArt)]).filter((ref) => !(DAMAGE_CHOSEN.has(kind) && ref.key.startsWith('GalacticaDamage/'))),
     },
   ];
 }

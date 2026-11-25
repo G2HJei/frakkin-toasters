@@ -1663,9 +1663,9 @@ details[open] > summary::before {
   }
 }
 
+/* the player a line is about: amber, in the weight of its words */
 .table-page .log .actor {
   color: var(--amber);
-  font-weight: 600;
 }
 
 /* the card or ability a log entry exists for, when its words don't name it */

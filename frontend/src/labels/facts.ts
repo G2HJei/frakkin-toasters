@@ -4,11 +4,12 @@
 import {
   cardParts,
   cardType,
-  constantLabel,
+  capitalizedParts,
+  deckNamePart,
+  deckParts,
   factParts,
-  hiddenCardsLabel,
+  hiddenCardsParts,
   joinParts,
-  joinWords,
   partsText,
   playerPart,
   shipMove,
@@ -461,7 +462,7 @@ function mergeColors(first: Record<string, number> | null, second: Record<string
 // The cards of a sentence: their names with their images, or how many of what kind.
 function cardsParts(cards: Cards, context: LabelContext): Part[] {
   if (cards.list === null) {
-    return [{ text: hiddenCardsLabel(cards.count, cards.deck, cards.pile, cards.colors) }];
+    return hiddenCardsParts(cards.count, cards.deck, cards.pile, cards.colors);
   }
   if (cards.list.length === 0) {
     return [{ text: 'nothing' }];
@@ -493,10 +494,6 @@ function cardsParts(cards: Cards, context: LabelContext): Part[] {
   return parts;
 }
 
-function deckName(deck: string | null): string {
-  return deck ? `the ${constantLabel('DeckId', deck)} deck` : 'the deck';
-}
-
 function sentence(one: Draft, context: FactContext): Sentence {
   const name = (player: number | null): Part[] => [player !== null ? playerPart(player, context) : { text: 'Someone' }];
   const cards = one.cards ? cardsParts(one.cards, context) : [];
@@ -526,24 +523,24 @@ function sentence(one: Draft, context: FactContext): Sentence {
     case 'sees':
       return make(words(name(one.who), ` looks at `, cards), one.who);
     case 'drawn':
-      return make(words(cards, ` ${many ? 'are' : 'is'} drawn from ${deckName(one.deck)}`), null);
+      return make(words(cards, ` ${many ? 'are' : 'is'} drawn from `, deckParts(one.deck)), null);
     case 'discarded':
       return make(words(cards, ` ${many ? 'are' : 'is'} discarded`), null);
     case 'onTop':
-      return make(words(cards, ` ${many ? 'go' : 'goes'} on top of ${deckName(one.deck)}`), null);
+      return make(words(cards, ` ${many ? 'go' : 'goes'} on top of `, deckParts(one.deck)), null);
     case 'toBottom':
-      return make(words(cards, ` ${many ? 'go' : 'goes'} to the bottom of ${deckName(one.deck)}`), null);
+      return make(words(cards, ` ${many ? 'go' : 'goes'} to the bottom of `, deckParts(one.deck)), null);
     case 'pulled':
-      return make(words(cards, ` ${many ? 'are' : 'is'} taken out of ${deckName(one.deck)}`), null);
+      return make(words(cards, ` ${many ? 'are' : 'is'} taken out of `, deckParts(one.deck)), null);
     case 'removedFromGame':
       return make(words(cards, ` ${many ? 'leave' : 'leaves'} the game`), null);
     case 'intoCheck':
       // a hidden card's kind names its deck already
-      return make(words(cards, one.deck && one.cards?.list ? ` from ${deckName(one.deck)}` : '', ` ${many ? 'go' : 'goes'} into the skill check`), null);
+      return make(words(cards, one.deck && one.cards?.list ? words(' from ', deckParts(one.deck)) : [], ` ${many ? 'go' : 'goes'} into the skill check`), null);
     case 'seesShips':
       return make(words(name(one.who), ` looks at `, joinParts((one.seen ?? []).map((ship) => [shipPart(ship, context, true)]))), one.who);
     case 'drawnAndDiscarded':
-      return make(words(cards, ` ${many ? 'are' : 'is'} drawn from ${deckName(one.deck)} and discarded`), null);
+      return make(words(cards, ` ${many ? 'are' : 'is'} drawn from `, deckParts(one.deck), ' and discarded'), null);
     case 'ship': {
       const ships = one.ships!;
       return { parts: shipMovesParts(ships.names, ships.move), subject: null, given: [], facts: one.facts, ships };
@@ -564,10 +561,11 @@ function sentence(one: Draft, context: FactContext): Sentence {
       return make(words('The President discards ', cards), null);
     case 'crisis':
       return make(words('The Crisis Card is ', cards), null);
-    case 'shuffled': {
-      const decks = one.decks.map((deck) => constantLabel('DeckId', deck));
-      return make([{ text: decks.length === 1 ? `${deckName(one.decks[0])} is shuffled` : `The ${joinWords(decks)} decks are shuffled` }].map(capitalize), null);
-    }
+    case 'shuffled':
+      return make(
+        one.decks.length === 1 ? capitalizedParts(words(deckParts(one.decks[0]), ' is shuffled')) : words('The ', joinParts(one.decks.map((deck) => [deckNamePart(deck)])), ' decks are shuffled'),
+        null,
+      );
     default: {
       const fact = one.facts[0];
       return make(factParts(fact, context), subjectOf(fact, context));
@@ -575,9 +573,6 @@ function sentence(one: Draft, context: FactContext): Sentence {
   }
 }
 
-function capitalize(part: Part): Part {
-  return { ...part, text: part.text.charAt(0).toUpperCase() + part.text.substring(1) };
-}
 
 // The player a fact is about: the one it names first, by number or by character.
 function subjectOf(fact: FactProjection, context: FactContext): number | null {

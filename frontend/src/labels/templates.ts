@@ -2,11 +2,14 @@
 //
 // A template names the record's fields in braces, each worded by its type in the schema (`describe.ts`):
 //   {field}          the value: a player, a card (its image on hover), a location (with "the" where it takes one)
-//   {field|lower}    the value in lower case: "the top option", "1 food"
+//   {field|lower}    the value inside a sentence, its first letter small: "the top option", "1 food", "a civilian
+//                    ship for the CAG" (an acronym stays as it is)
 //   {field#card}     no value, the noun after it in the plural the value's count asks for; {field#is/are} names both
 //   {field?a:b}      a for a true value, b otherwise
 //   {field=A:a|*:b}  the words for each constant, * for the others
 //   {field|die}      a die result: the die's face, then the number
+//   {field|damage}   what Galactica's damage tokens do: "damage the Armory and Command", "lose 1 fuel"
+//   {field|count}    a list of constants counted, each kind with its icon: "2 vipers", "a viper and an assault raptor"
 //   {$card}          the Quorum or Mutiny Card the record plays
 //   {Enum:CONSTANT}  a constant the template names itself, worded like a field: {Resource:FUEL|lower}
 //   {!field}         only the icon of the value (a ship type, a resource), in front of the template's own words:
@@ -57,7 +60,7 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   DrawSkillCardsEvent: '{playerNumber} draws {selection}',
   DrawSkillCardsOfColorEvent: '{playerNumber} draws {count} {color} {count#card}',
   DiscardSkillCardsEvent: '{playerNumber} discards {cards}',
-  DiscardRandomSkillCardsEvent: '{playerNumber} discards {count} random {count#card}',
+  DiscardRandomSkillCardsEvent: '{playerNumber} discards {count} random Skill {count#Card}',
   DiscardAllSkillCardsEvent: '{playerNumber} discards every Skill Card',
   DrawMutinyCardEvent: '{playerNumber} draws a Mutiny Card',
   Discard1MutinyCardEvent: '{playerNumber} discards {cardToDiscard}',
@@ -66,7 +69,7 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   DiscardHeldQuorumCardEvent: '{playerNumber} discards {card}',
   DrawQuorumCardEvent: 'The President draws a Quorum Card',
   DealLoyaltyCardsEvent: '{playerNumber} is dealt {count} Loyalty {count#Card}',
-  ExecuteEvent: '{playerNumber} is executed',
+  ExecuteEvent: '{playerNumber} is <-executed>',
   FinishExecutionEvent: '{playerNumber} replaces the executed {executedCharacter}',
 
   /* vipers and the titles' actions */
@@ -82,7 +85,7 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   LaunchNukeEvent: '{playerNumber} launches a {!Token:NUKE}nuke at {area}',
   NukeResultEvent: 'The {!Token:NUKE}nuke hits {area}',
   NukeBasestarEvent: 'The {!Token:NUKE}nuke hits {basestarId}',
-  PassCagTitleEvent: '{playerNumber} {activation} and passes the CAG title to {targetPlayerNumber}',
+  PassCagTitleEvent: '{playerNumber} {activation} and passes the {Title:CAG} title to {targetPlayerNumber}',
   CagPilotActionEvent: '{playerNumber} {activation} and acts again',
 
   /* the locations */
@@ -105,8 +108,8 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   EngineRoomEvent: '{playerNumber} discards {discardCard1} and {discardCard2} at {Location:ENGINE_ROOM}',
   AdministrationEvent: '{playerNumber} draws a Mutiny Card at {Location:ADMINISTRATION}',
   ReplaceMutinousPresidentEvent: '{playerNumber} may replace the President',
-  DefendPresidencyEvent: '{playerNumber} {discardAcceptProphecy?discards Accept Prophecy to stay President:gives up the presidency}',
-  PresidentsOfficeEvent: "{playerNumber} draws Politics cards at {Location:PRESIDENTS_OFFICE}",
+  DefendPresidencyEvent: '{playerNumber} {discardAcceptProphecy?discards:gives up the presidency rather than discard} {QuorumCard:ACCEPT_PROPHECY}{discardAcceptProphecy? to stay President:}',
+  PresidentsOfficeEvent: "{playerNumber} draws {SkillCardColor:POLITICS} cards at {Location:PRESIDENTS_OFFICE}",
   PressRoomEvent: '{playerNumber} has {targetPlayer} draw a Mutiny Card at {Location:PRESS_ROOM}',
   QuorumChamberEvent: '{playerNumber} draws a Quorum Card at {Location:QUORUM_CHAMBER}',
   CapricaDrawAndResolveCrisisCardsEvent: '{playerNumber} draws Crisis Cards at {Location:CAPRICA}',
@@ -120,10 +123,10 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   BasestarBridgeEvent: '{playerNumber} activates {Location:BASESTAR_BRIDGE}[, first: {firstAbility|lower}]',
   BasestarBridgeAbilityEvent: '{playerNumber} chooses {ability|lower}',
   BasestarBridgeAbilityResultEvent: '{playerNumber} rolls for {ability|lower}',
-  BasestarBridgeShipsEvent: '{playerNumber} places {shipType=BASESTAR:a basestar|RAIDER:3 raiders} at {location}',
-  ChooseGalacticaDamageEvent: '{playerNumber} resolves the {resolved} damage token',
-  ChooseGalacticaDamageTokensEvent: '{playerNumber} resolves the {resolved} damage tokens',
-  PlaceCivilianShipEvent: '{playerNumber} places a civilian ship at {location}',
+  BasestarBridgeShipsEvent: '{playerNumber} places {shipType=BASESTAR:a|RAIDER:3} {!shipType}{shipType=BASESTAR:basestar|RAIDER:raiders} at {location}',
+  ChooseGalacticaDamageEvent: '{playerNumber} chooses to {resolved|damage}',
+  ChooseGalacticaDamageTokensEvent: '{playerNumber} chooses to {resolved|damage}',
+  PlaceCivilianShipEvent: '{playerNumber} places a {!ShipType:CIVILIAN}civilian ship at {location}',
 
   /* a skill check */
   MakeSkillCheckEvent: 'The skill check begins',
@@ -146,10 +149,10 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   ResolveSkillCheckResultEvent: 'The result of the skill check takes effect',
   OfferCommandAuthorityEvent: 'The cards of the skill check may be taken',
   EndSkillCheckEvent: 'The skill check ends',
-  UseArbitratorEvent: '{playerNumber} uses Assign Arbitrator to change the difficulty by {adjustment}',
-  UseChiefOfStaffEvent: '{playerNumber} uses Assign Chief of Staff',
-  UseProbationEvent: '{playerNumber} uses Probation on the cards of {holderPlayerNumber}',
-  DrawAndResolveRecklessCardsEvent: 'Treachery cards are added to the skill check',
+  UseArbitratorEvent: '{playerNumber} uses {QuorumCard:ASSIGN_ARBITRATOR} to change the difficulty by {adjustment}',
+  UseChiefOfStaffEvent: '{playerNumber} uses {QuorumCard:ASSIGN_CHIEF_OF_STAFF}',
+  UseProbationEvent: '{playerNumber} uses {QuorumCard:PROBATION} on the cards of {holderPlayerNumber}',
+  DrawAndResolveRecklessCardsEvent: '{SkillCardColor:TREACHERY} cards are added to the skill check',
   ABetterMachineEvent: 'A Better Machine takes effect',
   ASecondChanceEvent: 'A Second Chance takes effect',
   BaitEvent: 'Bait takes effect',
@@ -183,13 +186,13 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   MaximumFirepowerEvent: '{playerNumber} plays {card}',
   CombatVeteranEvent: '{playerNumber} plays {card} and {first}',
   FullThrottleEvent: '{playerNumber} plays {card}[ and flies to {destination}]',
-  LaunchReservesEvent: '{playerNumber} plays {card} and launches {shipTypes} to {area}',
+  LaunchReservesEvent: '{playerNumber} plays {card} and launches {shipTypes|count} to {area}',
   RepairEvent: '{playerNumber} plays {card} and <+repairs> [{viperIds}|a location]',
   RaptorSpecialistEvent: '{playerNumber} plays {card} to {choice|lower}',
   TestTheLimitsEvent: '{playerNumber} plays {card}',
   TestTheLimitsResultEvent: 'Test the Limits is resolved',
   MajorVictoryResultEvent: 'Major Victory is resolved',
-  ShuffleTreacheryIntoDestinyDeckEvent: '{count} Treachery {count#card} {count#is/are} shuffled into the Destiny deck',
+  ShuffleTreacheryIntoDestinyDeckEvent: '{count} {SkillCardColor:TREACHERY} {count#card} {count#is/are} shuffled into the Destiny deck',
   ReplaceDestinyDeckEvent: 'The Destiny deck is rebuilt from {count} {color} {count#card}',
   DiscardFromDestinyDeckEvent: '{playerNumber} discards {cards} from the Destiny deck',
   PopularInfluenceChoiceEvent: '{playerNumber} gives {given} to the President and keeps {other}',
@@ -202,25 +205,25 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   AssignMissionSpecialistEvent: '{playerNumber} plays {$card} and gives it to {holderPlayerNumber}',
   AssignVicePresidentEvent: '{playerNumber} plays {$card} and gives it to {holderPlayerNumber}',
   AuthorizationOfBrutalForceEvent: '{playerNumber} plays {$card} on {shipIds}',
-  AuthorizationOfBrutalForceResultEvent: 'Authorization of Brutal Force is resolved',
+  AuthorizationOfBrutalForceResultEvent: '{QuorumCard:AUTHORIZATION_OF_BRUTAL_FORCE} is resolved',
   CivilianSelfDefenseEvent: '{playerNumber} plays {$card}: {civilianShipId} fights a {target}',
-  CivilianSelfDefenseResultEvent: 'Civilian Self Defense is resolved',
+  CivilianSelfDefenseResultEvent: '{QuorumCard:CIVILIAN_SELF_DEFENSE} is resolved',
   ConsultTheOracleEvent: '{playerNumber} plays {$card} on the {deck} deck',
   EnactProductionQuotasEvent: '{playerNumber} plays {$card}',
   EncourageMutinyEvent: '{playerNumber} plays {$card} on {targetPlayerNumber}',
-  EncourageMutinyResultEvent: 'Encourage Mutiny is resolved for {targetPlayerNumber}',
+  EncourageMutinyResultEvent: '{QuorumCard:ENCOURAGE_MUTINY} is resolved for {targetPlayerNumber}',
   EstablishDogsvilleEvent: '{playerNumber} plays {$card}',
   EulogyEvent: '{playerNumber} plays {$card}',
   ExecutePrisonerEvent: '{playerNumber} plays {$card} on {targetPlayerNumber}',
   FoodRationingEvent: '{playerNumber} plays {$card}',
-  FoodRationingResultEvent: 'Food Rationing is resolved',
+  FoodRationingResultEvent: '{QuorumCard:FOOD_RATIONING} is resolved',
   InspirationalSpeechEvent: '{playerNumber} plays {$card}',
-  InspirationalSpeechResultEvent: 'Inspirational Speech is resolved',
+  InspirationalSpeechResultEvent: '{QuorumCard:INSPIRATIONAL_SPEECH} is resolved',
   PresidentialOrderEvent: '{playerNumber} plays {$card}: {targetPlayerNumber} becomes {title}',
   PresidentialPardonEvent: '{playerNumber} plays {$card}: {targetPlayerNumber} leaves {Location:BRIG} for {destination}',
   ProbationEvent: '{playerNumber} plays {$card} and gives it to {holderPlayerNumber}',
   ReleaseCylonMugshotsEvent: '{playerNumber} plays {$card} on {targetPlayerNumber}',
-  ReleaseCylonMugshotsResultEvent: 'Release Cylon Mugshots is resolved',
+  ReleaseCylonMugshotsResultEvent: '{QuorumCard:RELEASE_CYLON_MUGSHOTS} is resolved',
   ResignationEvent: '{playerNumber} plays {$card}[, discarding {discards}]',
   ResourcesForGalacticaEvent: '{playerNumber} plays {$card}[ to <+repair> {location}][ and {viperIds}]',
   UnsavoryConnectionsEvent: '{playerNumber} plays {$card} for {resource|lower}',
@@ -381,7 +384,7 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   CylonPowerPlaceCenturionEvent: '{playerNumber} places a centurion',
   CylonPowerDamageGalacticaEvent: '{playerNumber} draws Galactica damage tokens',
   CylonPowerDecreaseJumpTrackEvent: '{playerNumber} moves the jump preparation track back',
-  CylonPowerDrawTreacheryEvent: 'Each human trades a Skill Card for a Treachery card',
+  CylonPowerDrawTreacheryEvent: 'Each human trades a Skill Card for a {SkillCardColor:TREACHERY} card',
   CylonPowerReduceMoraleEvent: '{playerNumber} lowers <-{Resource:MORALE|lower}>',
   CylonPowerSendToBrigEvent: '{playerNumber} sends {targetPlayerNumber} to {Location:BRIG}',
   CylonPowerSendToSickbayEvent: '{playerNumber} sends {targetPlayerNumber} to {Location:SICKBAY}',
@@ -448,9 +451,9 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   ModificationsEvent: '{playerNumber} picks the {activation} icon instead',
   DeceitfulEvent: '{playerNumber} discards 1 card fewer',
   ForcedDiscardEvent: '{discarderPlayerNumber} has to discard',
-  ForLoveEvent: '{playerNumber} draws a Treachery card so that {discarderPlayerNumber} discards 1 fewer',
-  OfferMementoEvent: '{playerNumber} may draw Piloting cards',
-  MementoEvent: '{playerNumber} draws Piloting cards and keeps 2',
+  ForLoveEvent: '{playerNumber} draws a {SkillCardColor:TREACHERY} card so that {discarderPlayerNumber} discards 1 fewer',
+  OfferMementoEvent: '{playerNumber} may draw {SkillCardColor:PILOTING} cards',
+  MementoEvent: '{playerNumber} draws {SkillCardColor:PILOTING} cards and keeps 2',
   EscortEvent: '{playerNumber} <-loses {viperId}> to <+save {civilianShipId}>',
   NecessaryStepsEvent: '{playerNumber} picks {given} for {drawerPlayerNumber}',
   OfferAdaptableEvent: 'Skill Cards may be drawn after the Quorum Card',
@@ -536,8 +539,8 @@ export const CHOSEN_TEMPLATES: Record<string, string> = {
 export const HIDDEN_TEMPLATES: Record<string, string> = {
   AbusePowerChoiceEvent: '{playerNumber} keeps a Mutiny Card',
   ChooseDestinationEvent: '{playerNumber} chooses the destination',
-  ChooseGalacticaDamageEvent: '{playerNumber} resolves a damage token',
-  ChooseGalacticaDamageTokensEvent: '{playerNumber} resolves damage tokens',
+  ChooseGalacticaDamageEvent: '{playerNumber} chooses the <-damage> to Galactica',
+  ChooseGalacticaDamageTokensEvent: '{playerNumber} chooses the <-damage> to Galactica',
   DiscardDownTo1MutinyCardEvent: '{playerNumber} keeps 1 Mutiny Card',
   DiscardFromDestinyDeckEvent: '{playerNumber} discards cards from the Destiny deck',
   FastLearnerIntoCheckEvent: '{playerNumber} puts the cards into the skill check',
@@ -632,7 +635,7 @@ export const FACT_TEMPLATES: Record<string, string> = {
   'SkillCheckFact.TotalStrengthDetermined': 'The cards total {totalStrength}',
   'SkillCheckFact.ResultDetermined': 'The skill check {result=PASS:<+passes>|PARTIAL_PASS:<+partially passes>|FAIL:<-fails>}',
   'SkillCheckFact.DifficultyAdjusted': 'The difficulty changes by {delta}',
-  'SkillCheckFact.PoliticsCountPositive': 'Politics counts positive in this skill check',
+  'SkillCheckFact.PoliticsCountPositive': '{SkillCardColor:POLITICS} counts positive in this skill check',
   'SkillCheckFact.StrengthZeroed': '{color} counts 0 in this skill check',
   'SkillCheckFact.CardsLookedAt': '{playerNumber} looks at the cards {targetPlayerNumber} put in: {cards}',
   'SkillCheckFact.CardsShown': '{playerNumber} shows {cards}',

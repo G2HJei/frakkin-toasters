@@ -14,6 +14,7 @@ import {
   typeLabel,
   withoutSubject,
   type LabelContext,
+  type Part,
 } from './describe';
 import { humanizeConstant, humanizeType } from './humanize';
 import { CONSTANT_LABELS, TYPE_LABELS } from './overrides';
@@ -69,20 +70,118 @@ describe('labels', () => {
     expect(wrong).toEqual([]);
   });
 
-  it('names every location the log mentions, so it shows its card on hover', () => {
-    const locations = enumValues('Location')
-      .filter((location) => !location.includes('SPACE'))
-      .map((location) => constantLabel('Location', location));
+  // The constants of an enum the log's templates spell out in their words instead of naming them, as "Template: Name".
+  function spelledOut(enumName: string, constants: string[]): string[] {
+    const labels = constants.map((constant) => constantLabel(enumName, constant));
     const escaped = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const spelled = [EVENT_TEMPLATES, CHOSEN_TEMPLATES, HIDDEN_TEMPLATES, FACT_TEMPLATES].flatMap((templates) =>
+    return [EVENT_TEMPLATES, CHOSEN_TEMPLATES, HIDDEN_TEMPLATES, FACT_TEMPLATES].flatMap((templates) =>
       Object.entries(templates).flatMap(([name, template]) => {
-        // a field names its value already, and the Cylon Fleet board is a board
-        const words = template.replace(/\{[^}]*\}/g, '').replace(/Cylon Fleet board/g, '');
-        return locations.filter((label) => new RegExp(`\\b${escaped(label)}\\b`).test(words)).map((label) => `${name}: ${label}`);
+        // a field names its value already, but the words a field picks are the template's own: {pass?passes:fails},
+        // {shipType=RAIDER:raiders}; and the Cylon Fleet board is a board
+        const words = template
+          .replace(/\{\w+\?([^:}]*):([^}]*)\}/g, ' $1 $2 ')
+          .replace(/\{\w+=([^}]*)\}/g, (_, cases: string) => ` ${cases.split('|').map((entry) => entry.split(':')[1] ?? '').join(' ')} `)
+          .replace(/\{[^}]*\}/g, '')
+          .replace(/Cylon Fleet board/g, '');
+        return labels.filter((label) => new RegExp(`\\b${escaped(label)}\\b`).test(words)).map((label) => `${name}: ${label}`);
       }),
     );
+  }
 
-    expect(spelled).toEqual([]);
+  it('names every location the log mentions, so it shows its card on hover', () => {
+    expect(spelledOut('Location', enumValues('Location').filter((location) => !location.includes('SPACE')))).toEqual([]);
+  });
+
+  it('names every type of Skill Cards the log mentions, so it shows in its color', () => {
+    expect(spelledOut('SkillCardColor', enumValues('SkillCardColor'))).toEqual([]);
+  });
+
+  it('names every Quorum Card the log mentions, so it shows the card on hover', () => {
+    expect(spelledOut('QuorumCard', enumValues('QuorumCard'))).toEqual([]);
+  });
+
+  it('writes CAG in capitals in every name and sentence', () => {
+    const enums = Object.entries(schema.types).flatMap(([name, type]) => (type.kind === 'enum' ? type.values.map((value) => constantLabel(name, value)) : []));
+    const types = Object.keys(schema.types).map(typeLabel);
+    const templates = [EVENT_TEMPLATES, CHOSEN_TEMPLATES, HIDDEN_TEMPLATES, OPTION_TEMPLATES, FACT_TEMPLATES].flatMap((all) => Object.values(all).map((template) => template.replace(/\{[^}]*\}/g, '')));
+    const lowered = fillTemplate('{ability|lower}', { ability: 'CAG_PLACES_CIVILIAN_SHIP' }, 'BasestarBridgeAbilityEvent', names);
+
+    expect([...enums, ...types, ...templates, partsText(lowered)].filter((words) => /\bcag\b/i.test(words) && !/\bCAG\b/.test(words))).toEqual([]);
+  });
+
+  it('makes only the first letter of a value small inside a sentence, unless it starts with an acronym', () => {
+    const lower = (ability: string) => partsText(fillTemplate('{playerNumber} chooses {ability|lower}', { playerNumber: 1, ability }, 'BasestarBridgeAbilityEvent', names));
+
+    expect(lower('CAG_PLACES_CIVILIAN_SHIP')).toBe('William Adama chooses a civilian ship for the CAG');
+    expect(lower('GALACTICA_DAMAGE')).toBe('William Adama chooses damage to Galactica');
+    expect(partsText(fillTemplate('{resource|lower}', { resource: 'FOOD' }, 'LoseResourceEvent', names))).toBe('food');
+  });
+
+  it('counts the random Skill Cards a player discards, reddens an execution and puts the insignia before the CAG title', () => {
+    const icons: LabelContext = { ...names, iconOf: (enumName, constant) => (enumName === 'Title' ? { key: `TitleIcon/${String(constant)}`, url: '', shape: 'title' } : null) };
+    const executed = eventParts({ kind: 'ExecuteEvent', playerNumber: 1, withoutMoraleLoss: false }, names);
+    const activation = { launchShipType: 'VIPER', launchLocation: 'GALACTICA_SPACE_8_OCLOCK', humanFighterId: null, moveLocation: null, attackCylonShipId: null, escortCivilianShipId: null };
+    const passed = eventParts({ kind: 'PassCagTitleEvent', playerNumber: 3, activation, targetPlayerNumber: 2 }, icons);
+
+    expect(eventLabel({ kind: 'DiscardRandomSkillCardsEvent', playerNumber: 2, count: 2 }, names)).toBe('Laura Roslin discards 2 random Skill Cards');
+    expect(eventLabel({ kind: 'DiscardRandomSkillCardsEvent', playerNumber: 2, count: 1 }, names)).toBe('Laura Roslin discards 1 random Skill Card');
+    expect(partsText(executed)).toBe('William Adama is executed');
+    expect(executed.filter((part) => part.tone === 'bad').map((part) => part.text)).toEqual(['executed']);
+    expect(partsText(passed)).toBe('Kara "Starbuck" Thrace launches a Viper to Space 8 o\'clock and passes the CAG title to Laura Roslin');
+    expect(passed.find((part) => part.text === 'CAG')?.icon?.key).toBe('TitleIcon/CAG');
+  });
+
+  it("puts a ship's icon in front of the words that name its kind", () => {
+    const icons: LabelContext = { ...names, iconOf: (enumName, constant) => (enumName === 'ShipType' ? { key: `ShipType/${String(constant)}`, url: '', shape: 'ship' } : null) };
+    const raiders = eventParts({ kind: 'BasestarBridgeShipsEvent', playerNumber: 4, shipType: 'RAIDER', location: 'GALACTICA_SPACE_8_OCLOCK' }, icons);
+    const basestar = eventParts({ kind: 'BasestarBridgeShipsEvent', playerNumber: 4, shipType: 'BASESTAR', location: 'GALACTICA_SPACE_8_OCLOCK' }, icons);
+    const civilian = eventParts({ kind: 'PlaceCivilianShipEvent', playerNumber: 3, location: 'GALACTICA_SPACE_4_OCLOCK' }, icons);
+    // the words after each icon
+    const iconed = (parts: Part[]) => parts.flatMap((part, index) => (part.icon ? [`${part.icon.key} ${parts[index + 1]?.text ?? ''}`] : []));
+
+    expect(partsText(raiders)).toBe("Player 4 places 3 raiders at Space 8 o'clock");
+    expect(iconed(raiders)).toEqual(["ShipType/RAIDER raiders at Space 8 o'clock"]);
+    expect(partsText(basestar)).toBe("Player 4 places a basestar at Space 8 o'clock");
+    expect(iconed(basestar)).toEqual(["ShipType/BASESTAR basestar at Space 8 o'clock"]);
+    expect(partsText(civilian)).toBe('Kara "Starbuck" Thrace places a civilian ship at Space 4 o\'clock');
+    expect(iconed(civilian)).toEqual(["ShipType/CIVILIAN civilian ship at Space 4 o'clock"]);
+  });
+
+  it('names a Quorum Card its template names, so the log shows it on hover', () => {
+    const cards: LabelContext = { ...names, artOf: (value) => ({ key: `QuorumCard/${String(value)}`, url: '', label: String(value), shape: 'card' }) };
+    const arbitrator = eventParts({ kind: 'UseArbitratorEvent', playerNumber: 1, adjustment: -3 }, cards);
+    const defends = (discardAcceptProphecy: boolean) => eventParts({ kind: 'DefendPresidencyEvent', playerNumber: 2, discardAcceptProphecy }, cards);
+    const named = (parts: Part[]) => parts.filter((part) => part.art).map((part) => part.text);
+
+    expect(partsText(arbitrator)).toBe('William Adama uses Assign Arbitrator to change the difficulty by -3');
+    expect(named(arbitrator)).toEqual(['Assign Arbitrator']);
+    expect(partsText(defends(true))).toBe('Laura Roslin discards Accept Prophecy to stay President');
+    expect(partsText(defends(false))).toBe('Laura Roslin gives up the presidency rather than discard Accept Prophecy');
+    expect(named(defends(false))).toEqual(['Accept Prophecy']);
+  });
+
+  it('counts the ships of a kind, each kind with its icon', () => {
+    const icons: LabelContext = { ...names, iconOf: (enumName, constant) => (enumName === 'ShipType' ? { key: `ShipType/${String(constant)}`, url: '', shape: 'ship' } : null) };
+    const launches = (shipTypes: string[]) => eventParts({ kind: 'LaunchReservesEvent', playerNumber: 3, card: { type: 'LAUNCH_RESERVES', value: 5 }, area: 'GALACTICA_SPACE_8_OCLOCK', shipTypes }, icons);
+
+    expect(partsText(launches(['VIPER', 'VIPER']))).toBe('Kara "Starbuck" Thrace plays Launch Reserves 5 and launches 2 vipers to Space 8 o\'clock');
+    expect(launches(['VIPER', 'VIPER']).filter((part) => part.icon).map((part) => `${part.icon?.key} ${part.text}`)).toEqual(['ShipType/VIPER vipers']);
+    expect(partsText(launches(['VIPER']))).toBe('Kara "Starbuck" Thrace plays Launch Reserves 5 and launches a viper to Space 8 o\'clock');
+    expect(partsText(launches(['VIPER', 'ASSAULT_RAPTOR']))).toBe('Kara "Starbuck" Thrace plays Launch Reserves 5 and launches a viper and an assault raptor to Space 8 o\'clock');
+  });
+
+  it('words the damage a player chooses for Galactica, the locations as names and the damage in red', () => {
+    const cards: LabelContext = { ...names, artOf: (value) => ({ key: `Location/${String(value)}`, url: '', label: String(value), shape: 'location' }) };
+    const chooses = (resolved: string[]) => eventParts({ kind: 'ChooseGalacticaDamageTokensEvent', playerNumber: 2, resolved, returned: ['WEAPONS_CONTROL'] }, cards);
+    const bad = (parts: Part[]) => parts.filter((part) => part.tone === 'bad').map((part) => part.text);
+
+    expect(partsText(chooses(['ARMORY', 'COMMAND']))).toBe('Laura Roslin chooses to damage the Armory and Command');
+    expect(bad(chooses(['ARMORY', 'COMMAND']))).toEqual(['damage']);
+    expect(chooses(['ARMORY', 'COMMAND']).filter((part) => part.art).map((part) => part.text)).toEqual(['Armory', 'Command']);
+    expect(partsText(chooses(['ARMORY', 'FUEL']))).toBe('Laura Roslin chooses to damage the Armory and lose 1 fuel');
+    expect(partsText(chooses(['FUEL', 'FOOD']))).toBe('Laura Roslin chooses to lose 1 fuel and 1 food');
+    expect(bad(chooses(['FUEL', 'FOOD'])).join('')).toBe('1 fuel1 food');
+    expect(eventLabel({ kind: 'ChooseGalacticaDamageEvent', playerNumber: 2, resolved: 'ADMIRALS_QUARTERS', returned: 'FOOD' }, names)).toBe("Laura Roslin chooses to damage the Admiral's Quarters");
   });
 
   it('names a location a template names, with "the" where it takes one', () => {

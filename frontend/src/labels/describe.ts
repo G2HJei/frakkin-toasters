@@ -50,6 +50,31 @@ export interface Part {
   tone?: Tone;
   // the player a name stands for, so a line of the log can leave its own player without his portrait
   player?: number | null;
+  // the Skill Card color it names, a type of cards or its deck, which the log shows in that color
+  skillColor?: string | null;
+}
+
+// The Skill Card colors, which are their decks' names too.
+const SKILL_COLORS = new Set(['POLITICS', 'LEADERSHIP', 'TACTICS', 'PILOTING', 'ENGINEERING', 'TREACHERY']);
+
+/** A Skill Card color in words of that color: "Tactics". */
+export function skillColorPart(color: string): Part {
+  return { text: constantLabel('SkillCardColor', color), skillColor: color };
+}
+
+/** A deck by its name, a Skill Card deck's in its color: "Tactics", "Crisis". */
+export function deckNamePart(deck: string): Part {
+  return SKILL_COLORS.has(deck) ? skillColorPart(deck) : { text: constantLabel('DeckId', deck) };
+}
+
+/** A deck in words: "the Tactics deck", its name in its color. */
+export function deckParts(deck: string | null | undefined): Part[] {
+  return deck ? merged([{ text: 'the ' }, deckNamePart(deck), { text: ' deck' }]) : [{ text: 'the deck' }];
+}
+
+/** The words with their first letter in capitals: "A Mutiny Card is drawn". */
+export function capitalizedParts(parts: Part[]): Part[] {
+  return parts.map((part, index) => (index === 0 ? { ...part, text: capitalized(part.text) } : part));
 }
 
 function withIcon(part: Part, icon: PartIcon | null | undefined): Part {
@@ -199,7 +224,11 @@ export function valueParts(value: unknown, type: TypeRef | undefined, context: L
       return [{ text: typeLabel(String(value)) }];
     case 'enum': {
       const part = withIcon({ text: constantLabel(type.name ?? '', value as string), art: context.artOf?.(value, type) ?? null }, context.iconOf?.(type.name ?? '', value));
-      return [type.name === 'Character' ? { ...part, player: context.playerOf?.(value as string) ?? null } : part];
+      if (type.name === 'Character') {
+        return [{ ...part, player: context.playerOf?.(value as string) ?? null }];
+      }
+      // a color of Skill Cards, or the deck of one
+      return [(type.name === 'SkillCardColor' || type.name === 'DeckId') && SKILL_COLORS.has(value as string) ? { ...part, skillColor: value as string } : part];
     }
     case 'list':
     case 'set': {
@@ -256,7 +285,7 @@ function mapParts(value: Record<string, unknown>, type: TypeRef, context: LabelC
     if (total === 0) {
       return [{ text: 'no cards' }];
     }
-    const counts = entries.map(([color, count]) => [{ text: `${count} ` }, { text: constantLabel('SkillCardColor', color) }]);
+    const counts = entries.map(([color, count]) => [{ text: `${count} ` }, skillColorPart(color)]);
     return [...joinParts(counts), { text: total === 1 ? ' card' : ' cards' }];
   }
   return entries.length > 0
@@ -374,7 +403,7 @@ const WITH_ARTICLE = new Set([
   'BASESTAR_BRIDGE',
 ]);
 
-const PLACEHOLDER = /\{(\$?\w+|!?[A-Z]\w*:\w+|!\w+)(?:\|(lower|die)|#([^}]+)|\?([^:}]*):([^}]*)|=([^}]+))?\}/g;
+const PLACEHOLDER = /\{(\$?\w+|!?[A-Z]\w*:\w+|!\w+)(?:\|(lower|die|damage|count)|#([^}]+)|\?([^:}]*):([^}]*)|=([^}]+))?\}/g;
 
 // a constant a template names itself, worded like a field of its enum: {Resource:FUEL}
 const CONSTANT = /^([A-Z]\w*):(\w+)$/;
@@ -430,9 +459,15 @@ function placeholderParts(match: RegExpMatchArray, fill: Fill, before: Part[]): 
     // the die's face in front of the number it shows
     return [withIcon({ text: String(value) }, fill.context.iconOf?.('Die', value))];
   }
+  if (modifier === 'damage') {
+    return galacticaDamageParts(Array.isArray(value) ? value : [value], fill.context);
+  }
+  if (modifier === 'count') {
+    return countedParts(Array.isArray(value) ? value : [value], type, fill.context);
+  }
   const parts = civilianNamed(valueParts(value, type, fill.context, fill.value), /civilian/i.test(name), fill.context);
   if (modifier === 'lower') {
-    return parts.map((part) => ({ ...part, text: part.text.toLowerCase() }));
+    return parts.map((part) => ({ ...part, text: inSentence(part.text) }));
   }
   if (type?.t === 'enum' && (type.name === 'Location' || type.name === 'SkillCheckType') && WITH_ARTICLE.has(value as string)) {
     const text = partsText(before);
@@ -441,6 +476,41 @@ function placeholderParts(match: RegExpMatchArray, fill: Fill, before: Part[]): 
     }
   }
   return parts;
+}
+
+// A label is a sentence's start: inside one its first letter is small, unless it starts with an acronym ("CAG").
+function inSentence(label: string): string {
+  return /^[A-Z]{2,}\b/.test(label) ? label : label.charAt(0).toLowerCase() + label.substring(1);
+}
+
+// Constants counted by kind, each kind as a common noun in the plural its count asks for, with its icon in front:
+// "2 vipers", "a viper and an assault raptor". A short or all-capitals word stays as it is: "viper Mk VII".
+function countedParts(values: unknown[], type: TypeRef | undefined, context: LabelContext): Part[] {
+  const enumName = (typeof type?.of === 'object' && type.of ? type.of.name : type?.name) ?? '';
+  const counts = new Map<unknown, number>();
+  for (const value of values) {
+    counts.set(value, (counts.get(value) ?? 0) + 1);
+  }
+  const kinds = [...counts].map(([value, count]) => {
+    const noun = constantLabel(enumName, value as string).replace(/\b[A-Z][a-z]{2,}\b/g, (word) => word.toLowerCase());
+    const amount = count === 1 ? (/^[aeiou]/i.test(noun) ? 'an ' : 'a ') : `${count} `;
+    return [{ text: amount }, withIcon({ text: count === 1 ? noun : `${noun}s` }, context.iconOf?.(enumName, value))];
+  });
+  return merged(joinParts(kinds));
+}
+
+// What Galactica's damage tokens do, after "to": the locations they damage, by their names to hover, and what the fuel
+// and the food token cost (1 of their resource): "damage the Armory and Command", "damage the Armory and lose 1 fuel".
+function galacticaDamageParts(tokens: unknown[], context: LabelContext): Part[] {
+  const location: TypeRef = { t: 'enum', nullable: false, name: 'Location' };
+  const resource: TypeRef = { t: 'enum', nullable: false, name: 'Resource' };
+  const costs: unknown[] = tokens.filter((token) => token === 'FUEL' || token === 'FOOD');
+  const places = tokens.filter((token) => !costs.includes(token));
+  const named = (place: unknown) => [...(WITH_ARTICLE.has(place as string) ? [{ text: 'the ' }] : []), ...valueParts(place, location, context, {})];
+  const lost = (cost: unknown) => [{ text: '1 ' }, ...valueParts(cost, resource, context, {}).map((part) => ({ ...part, text: part.text.toLowerCase() }))].map((part) => toned(part, 'bad'));
+  const damage = places.length > 0 ? [{ text: 'damage', tone: 'bad' as Tone }, { text: ' ' }, ...joinParts(places.map(named))] : [];
+  const lose = costs.length > 0 ? [{ text: 'lose ' }, ...joinParts(costs.map(lost))] : [];
+  return merged(joinParts([damage, lose].filter((words) => words.length > 0)));
 }
 
 // "[a|b]": a when every field it names has a value, otherwise b, or nothing.
@@ -497,7 +567,7 @@ export function fillTemplate(template: string, value: Record<string, unknown>, r
 // Neighbouring plain words of a tone as one part; a player's name stays a part of its own, which knows its player.
 function merged(parts: Part[]): Part[] {
   const out: Part[] = [];
-  const plain = (part: Part) => !part.art && !part.icon && (part.player ?? null) === null;
+  const plain = (part: Part) => !part.art && !part.icon && (part.player ?? null) === null && !part.skillColor;
   for (const part of parts) {
     const last = out[out.length - 1];
     if (last && plain(last) && plain(part) && last.tone === part.tone) {
@@ -774,14 +844,26 @@ export function shipMovesParts(ships: Part[], move: ShipMove): Part[] {
 
 // The cards of a hidden fact by their kind: "2 Skill Cards (1 Politics, 1 Tactics)", "a Loyalty Card".
 export function hiddenCardsLabel(count: number, deck: string | null | undefined, pile: string | null | undefined, colors: Record<string, number | undefined> | null | undefined): string {
+  return partsText(hiddenCardsParts(count, deck, pile, colors));
+}
+
+/** The cards of a hidden fact in parts, each Skill Card color in its color: "a Tactics card", "2 Skill Cards (…)". */
+export function hiddenCardsParts(count: number, deck: string | null | undefined, pile: string | null | undefined, colors: Record<string, number | undefined> | null | undefined): Part[] {
   const shown = Object.entries(colors ?? {}).filter(([, n]) => (n ?? 0) > 0);
+  const cards = count === 1 ? ' card' : ' cards';
   if (shown.length === 1) {
-    return `${count} ${constantLabel('SkillCardColor', shown[0][0])} ${count === 1 ? 'card' : 'cards'}`;
+    return [{ text: `${count} ` }, skillColorPart(shown[0][0]), { text: cards }];
   }
   const noun = cardNoun(deck, pile);
-  const amount = count === 1 && noun !== 'card' ? `${/^[AEIOU]/i.test(noun) ? 'an' : 'a'} ${noun}` : `${count} ${count === 1 ? noun : `${noun}s`}`;
-  const split = shown.length > 1 ? ` (${shown.map(([color, n]) => `${n} ${constantLabel('SkillCardColor', color)}`).join(', ')})` : '';
-  return `${amount}${split}`;
+  const amount = count === 1 && noun !== 'card' ? `${/^[AEIOU]/i.test(noun) ? 'an' : 'a'} ` : `${count} `;
+  // a Skill Card deck's cards by its color: "an Engineering card"
+  const kind: Part[] = deck && SKILL_COLORS.has(deck) ? [skillColorPart(deck), { text: cards }] : [{ text: count === 1 ? noun : `${noun}s` }];
+  const split = shown.length > 1 ? [{ text: ' (' }, ...joinWith(shown.map(([color, n]) => [{ text: `${n} ` }, skillColorPart(color)]), ', '), { text: ')' }] : [];
+  return merged([{ text: amount }, ...kind, ...split]);
+}
+
+function joinWith(items: Part[][], separator: string): Part[] {
+  return items.flatMap((item, index) => (index > 0 ? [{ text: separator }, ...item] : item));
 }
 
 function cardNoun(deck: string | null | undefined, pile: string | null | undefined): string {
@@ -827,36 +909,38 @@ function cardNoun(deck: string | null | undefined, pile: string | null | undefin
 function hiddenFactParts(fact: Extract<FactProjection, { kind: 'Hidden' }>, context: LabelContext): Part[] {
   const who: Part = fact.playerNumber !== null ? playerPart(fact.playerNumber, context) : { text: 'Someone' };
   const other: Part = fact.otherPlayerNumber !== null ? playerPart(fact.otherPlayerNumber, context) : { text: 'another player' };
-  const cards = hiddenCardsLabel(fact.count, fact.deck, fact.pile, fact.colors);
-  const deck = fact.deck ? `the ${constantLabel('DeckId', fact.deck)} deck` : 'the deck';
+  const cards = hiddenCardsParts(fact.count, fact.deck, fact.pile, fact.colors);
+  const deck = deckParts(fact.deck);
   const many = fact.count !== 1;
+  // the cards first, as the sentence starts with them: "A Mutiny Card is drawn"
+  const first = (...words: Part[]) => merged([...capitalizedParts(cards), ...words]);
   switch (fact.fact) {
     case 'PlayerFact.CardsGained':
-      return [who, { text: ` gets ${cards}` }];
+      return [who, { text: ' gets ' }, ...cards];
     case 'PlayerFact.CardsLost':
-      return [who, { text: ` loses ${cards}` }];
+      return [who, { text: ' loses ' }, ...cards];
     case 'PlayerFact.CardsSeen':
-      return [who, { text: ` looks at ${cards}` }];
+      return [who, { text: ' looks at ' }, ...cards];
     case 'PlayerFact.LoyaltyCardSeen':
       return [who, { text: ' looks at a Loyalty Card of ' }, other];
     case 'DeckFact.CardsDrawn':
-      return [{ text: `${capitalized(cards)} ${many ? 'are' : 'is'} drawn` }];
+      return first({ text: ` ${many ? 'are' : 'is'} drawn` });
     case 'DeckFact.CardsDiscarded':
-      return [{ text: `${capitalized(cards)} ${many ? 'are' : 'is'} discarded face down` }];
+      return first({ text: ` ${many ? 'are' : 'is'} discarded face down` });
     case 'DeckFact.CardsAddedOnTop':
-      return [{ text: `${capitalized(cards)} ${many ? 'go' : 'goes'} on top of ${deck}` }];
+      return first({ text: ` ${many ? 'go' : 'goes'} on top of ` }, ...deck);
     case 'DeckFact.CardsAddedToBottom':
-      return [{ text: `${capitalized(cards)} ${many ? 'go' : 'goes'} to the bottom of ${deck}` }];
+      return first({ text: ` ${many ? 'go' : 'goes'} to the bottom of ` }, ...deck);
     case 'DeckFact.CardsPulled':
-      return [{ text: `${capitalized(cards)} ${many ? 'are' : 'is'} taken out of ${deck}` }];
+      return first({ text: ` ${many ? 'are' : 'is'} taken out of ` }, ...deck);
     case 'DeckFact.DeckShuffled':
-      return [{ text: `${capitalized(deck)} is shuffled` }];
+      return merged([...capitalizedParts(deck), { text: ' is shuffled' }]);
     case 'SkillCheckFact.CardsPlaced':
-      return [{ text: `${capitalized(cards)} ${many ? 'go' : 'goes'} into the skill check face down` }];
+      return first({ text: ` ${many ? 'go' : 'goes'} into the skill check face down` });
     case 'SkillCheckFact.CardsDrawn':
       return [{ text: "The skill check's cards are shuffled" }];
     case 'SkillCheckFact.CardsPlayedBefore':
-      return [who, { text: ` plays ${cards} before the skill check` }];
+      return [who, { text: ' plays ' }, ...cards, { text: ' before the skill check' }];
     case 'SkillCheckFact.CardsLookedAt':
       return [who, { text: ' looks at the cards ' }, other, { text: ' put in' }];
     case 'TitleFact.PresidentQuorumCardGained':
@@ -868,7 +952,7 @@ function hiddenFactParts(fact: Extract<FactProjection, { kind: 'Hidden' }>, cont
     case 'InterruptFact.RollAbilityUsed':
       return [who, { text: ' uses an ability on the roll' }];
     default:
-      return [who, { text: `: ${typeLabel(fact.fact ?? '')}, ${cards}` }];
+      return [who, { text: `: ${typeLabel(fact.fact ?? '')}, ` }, ...cards];
   }
 }
 
