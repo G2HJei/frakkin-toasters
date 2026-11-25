@@ -155,7 +155,7 @@ describe('the board', () => {
         expect(viper?.querySelector('[data-art="Character/piloting-token/KARA_STARBUCK_THRACE"]')).not.toBeNull();
         expect(board.querySelector('[data-location="CYLON_FLEET_SPACE_2"] [data-ship="1019"]')?.getAttribute('aria-label')).toBe('Raider #1019');
         expect(board.querySelector('[data-slot="reserves"] [data-ship="4"]')).not.toBeNull();
-        expect(board.querySelector('[data-supply="RAIDER"]')?.textContent).toContain('×12');
+        expect(board.querySelector('[data-supply="RAIDER"] .count')?.textContent).toBe('12');
     });
 
     it('piles up the ships of a type, and sets a piloted or damaged one apart', () => {

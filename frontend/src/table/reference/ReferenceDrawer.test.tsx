@@ -3,6 +3,8 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { ReferenceDrawer, search, useReference } from './ReferenceDrawer';
 import { schema } from '../../wire/schema';
 import type { ArtRef } from '../../art/images';
+import type { GameProjection } from '../../wire/types';
+import { Table, tableContext } from '../tableContext';
 
 afterEach(() => act(() => useReference.getState().close()));
 
@@ -75,5 +77,35 @@ describe('the reference', () => {
 
     act(() => useReference.getState().show('characters', 'LAURA_ROSLIN'));
     expect(document.querySelector('.reference-grid li.focus img')?.getAttribute('alt')).toBe('Laura Roslin');
+  });
+
+  it('lists what left the game, and counts it on its tab', () => {
+    const ship = (id: number, type: string, cargo: unknown) => ({ id, type, location: null, pilot: null, damage: [], cargo });
+    const game = {
+      players: [],
+      removedCharacters: ['SAUL_TIGH'],
+      destroyedShips: [ship(2012, 'CIVILIAN', { fuel: 0, morale: 1, population: 1 }), ship(11, 'RAPTOR', null)],
+    } as unknown as GameProjection;
+    render(
+      <Table.Provider value={tableContext(game, false, 1)}>
+        <ReferenceDrawer />
+      </Table.Provider>,
+    );
+    act(() => useReference.getState().show('out'));
+
+    expect(screen.getByRole('tab', { name: 'Out of the game 3' })).toHaveAttribute('aria-selected', 'true');
+    expect(document.querySelector('.reference-grid.sheets img')?.getAttribute('alt')).toBe('Saul Tigh');
+    const ships = [...document.querySelectorAll('.reference-ships li')];
+    expect(ships.map((row) => row.querySelector('span')?.textContent)).toEqual(['Civilian ship #2012', 'Raptor #11']);
+    expect(ships[0].querySelector('.cargo')).not.toBeNull();
+    expect(ships[1].querySelector('.cargo')).toBeNull();
+  });
+
+  it('says when nothing left the game', () => {
+    render(<ReferenceDrawer />);
+    act(() => useReference.getState().show('out'));
+
+    expect(screen.getByRole('tab', { name: 'Out of the game' })).toBeInTheDocument();
+    expect(screen.getByText('Nothing has left the game yet.')).toBeInTheDocument();
   });
 });

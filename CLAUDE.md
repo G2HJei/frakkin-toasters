@@ -1141,8 +1141,9 @@ REST (the lobby lists poll), Zustand for the game.
   gets a red edge.
 - Reference (`table/reference/ReferenceDrawer.tsx`, the turn panel's "Reference" or the R key outside a field, which
   closes it too, a mat's portrait for its sheet):
-  every card by deck with a search, the character sheets, the rulebook's sections and cheat sheets (the turn, a skill
-  check, the Attack Table from the schema, the Crisis Card's icons, loyalty). `labels/rules.ts` indexes the in-scope
+  every card by deck with a search, the character sheets, the rulebook's sections, cheat sheets (the turn, a skill
+  check, the Attack Table from the schema, the Crisis Card's icons, loyalty) and what left the game (the executed
+  characters' sheets, the destroyed ships with their cost, counted on the tab). `labels/rules.ts` indexes the in-scope
   articles of the combined rulebook and its Appendix by page (the PDFs ship as Vite assets) and gives each kind of input
   the article to read (`ruleFor`, the link beside the pause line). It names things and points to the article, it never
   repeats the rulebook's text; the section names and the cheat sheets are in our words.

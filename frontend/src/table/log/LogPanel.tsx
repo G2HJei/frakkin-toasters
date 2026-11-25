@@ -95,7 +95,7 @@ export function LogPanel() {
           onClick={toBottom}
         >
           <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M12 4v12M6 10l6 6 6-6M5 20h14" />
+            <path d="M12 5v14M6 13l6 6 6-6" />
           </svg>
         </button>
       )}

@@ -452,7 +452,7 @@ function Tracks({ game, changes, version }: { game: GameProjection; changes: Cha
                 ) : (
                   <circle className="centurion" cx={at.x} cy={at.y} r={30} />
                 )}
-                {count > 1 && <Count x={at.x + 36} y={at.y - 86} value={`×${count}`} size={24} align="end" />}
+                {count > 1 && <Count x={at.x + 36} y={at.y - 86} value={count} size={24} align="end" />}
               </g>
             ) : null;
           })}
@@ -978,7 +978,7 @@ function Piles({ placed }: { placed: PlacedGroup[] }) {
                 const at = Math.min(index, PILE_MAX - 1);
                 return <Ship key={ship.id} ship={ship} x={x + at * step} y={y + (shown - 1 - at) * 6} width={width} height={height} preview={cargo.length === 0} />;
               })}
-              {group.ships.length > 1 && <Count x={right + 8} y={y - 18} value={`×${group.ships.length}`} size={24} align="end" />}
+              {group.ships.length > 1 && <Count x={right + 8} y={y - 18} value={group.ships.length} size={24} align="end" />}
             </g>
           </RevealGroup>
         );
@@ -1030,7 +1030,7 @@ function CountedPile({ type, count, x, y, size }: { type: string; count: number;
         Array.from({ length: shown }, (_, index) => (
           <SvgArt key={index} art={art} x={x + index * step} y={y + (shown - 1 - index) * 5} width={width} height={height} className="piece" preview={false} />
         ))}
-      <Count x={x + width + Math.max(shown - 1, 0) * step + 8} y={y - 18} value={`×${count}`} size={24} align="end" />
+      <Count x={x + width + Math.max(shown - 1, 0) * step + 8} y={y - 18} value={count} size={24} align="end" />
     </g>
   );
 }

@@ -9,14 +9,17 @@ import {
     characterSheetArt,
     damageArt,
     locationArt,
+    shipArt,
     skillCardArt
 } from '../../art/images';
 import {constantLabel} from '../../labels/describe';
 import {rule, type Rule, ruleHref, RULES, ruleText} from '../../labels/rules';
 import {enumValues, schema} from '../../wire/schema';
+import {CargoIcons} from '../board/resources';
+import {useTable} from '../tableContext';
 import {StepIcon, type TurnStep} from '../turn/StepIcon';
 
-type Tab = 'cards' | 'characters' | 'rules' | 'sheets';
+type Tab = 'cards' | 'characters' | 'rules' | 'sheets' | 'out';
 
 interface ReferenceState {
     open: boolean;
@@ -110,15 +113,18 @@ export function search(cards: ArtRef[], query: string): ArtRef[] {
 
 /**
  * The reference beside the table: every card by deck with a search, the character sheets, the rulebook's sections with
- * their pages, and cheat sheets. It names things and points to the article; it doesn't repeat the rulebook.
+ * their pages, cheat sheets, and what left the game. It names things and points to the article; it doesn't repeat the
+ * rulebook.
  */
 export function ReferenceDrawer() {
     const {open, tab, query, focus} = useReference();
+    const game = useTable().game;
     useReferenceKeys();
     const all = useMemo(() => (open ? decks() : []), [open]);
     if (!open) {
         return null;
     }
+    const out = (game?.removedCharacters ?? []).length + (game?.destroyedShips ?? []).length;
     return (
         <aside className="reference" role="dialog" aria-label="reference">
             <header className="reference-head">
@@ -129,11 +135,14 @@ export function ReferenceDrawer() {
                             ['characters', 'Characters'],
                             ['rules', 'Rules'],
                             ['sheets', 'Cheat sheets'],
+                            ['out', 'Out of the game'],
                         ] as [Tab, string][]
                     ).map(([id, label]) => (
                         <button key={id} type="button" role="tab" aria-selected={tab === id}
                                 className={tab === id ? 'on' : ''} onClick={() => useReference.getState().setTab(id)}>
                             {label}
+                            {/* how many left the game, without opening the tab */}
+                            {id === 'out' && out > 0 && <small className="tab-count">{out}</small>}
                         </button>
                     ))}
                 </nav>
@@ -147,6 +156,7 @@ export function ReferenceDrawer() {
                 {tab === 'characters' && <Characters focus={focus} query={query}/>}
                 {tab === 'rules' && <Rules/>}
                 {tab === 'sheets' && <CheatSheets/>}
+                {tab === 'out' && <OutOfTheGame/>}
             </div>
         </aside>
     );
@@ -235,6 +245,48 @@ function Characters({focus, query}: { focus: string | null; query: string }) {
                     </li>
                 ))}
             </ol>
+        </>
+    );
+}
+
+// The executed characters' sheets, and the destroyed ships with what each cost when its player knows it.
+function OutOfTheGame() {
+    const game = useTable().game;
+    const characters = game?.removedCharacters ?? [];
+    const ships = game?.destroyedShips ?? [];
+    if (characters.length === 0 && ships.length === 0) {
+        return <p className="muted">Nothing has left the game yet.</p>;
+    }
+    return (
+        <>
+            {characters.length > 0 && (
+                <section className="reference-deck">
+                    <h3>Characters <small>{characters.length}</small></h3>
+                    <ol className="reference-grid sheets">
+                        {characters.map((character) => {
+                            const art = characterSheetArt(character);
+                            return <li key={character}>{art ? <ArtImg art={art}/> : constantLabel('Character', character)}</li>;
+                        })}
+                    </ol>
+                </section>
+            )}
+            {ships.length > 0 && (
+                <section className="reference-deck">
+                    <h3>Ships <small>{ships.length}</small></h3>
+                    <ul className="reference-ships">
+                        {ships.map((ship) => {
+                            const art = shipArt(ship.type);
+                            return (
+                                <li key={ship.id}>
+                                    {art && <ArtImg art={art}/>}
+                                    <span>{constantLabel('ShipType', ship.type)} #{ship.id}</span>
+                                    {ship.cargo && <CargoIcons cargo={ship.cargo}/>}
+                                </li>
+                            );
+                        })}
+                    </ul>
+                </section>
+            )}
         </>
     );
 }
