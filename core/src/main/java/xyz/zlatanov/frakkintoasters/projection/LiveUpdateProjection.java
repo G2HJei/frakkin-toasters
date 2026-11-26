@@ -58,7 +58,15 @@ public record LiveUpdateProjection(List<LogEntry> entries) {
     public sealed interface FactProjection {
     }
 
-    public record Shown(Fact fact) implements FactProjection {
+    /**
+     * @param revealed for {@code SkillCheckFact.PlayedBeforeRevealed}, the cards it revealed by the player who played
+     *                 them, in the order of the players; {@code null} for every other fact
+     */
+    public record Shown(Fact fact, List<GameProjection.ShownCards> revealed) implements FactProjection {
+
+        public Shown(Fact fact) {
+            this(fact, null);
+        }
     }
 
     /**

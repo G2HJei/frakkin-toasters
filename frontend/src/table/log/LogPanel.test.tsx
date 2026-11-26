@@ -75,6 +75,40 @@ function scrollTo(body: HTMLElement, top: number) {
 }
 
 describe('the log', () => {
+  it('names the cards played before the skill check once they are revealed, by who played them', () => {
+    const played = (scopeId: number, actor: number) =>
+      ({
+        ...scope(scopeId),
+        actor,
+        event: 'PlayCardsBeforeSkillCheckEvent',
+        facts: [{ kind: 'Hidden', fact: 'SkillCheckFact.CardsPlayedBefore', playerNumber: actor, otherPlayerNumber: null, deck: null, pile: null, skillCheckPile: null, count: 1 }],
+      }) as LogEntry;
+    const revealed = {
+      ...scope(4),
+      event: 'RevealCardsBeforeSkillCheckEvent',
+      facts: [
+        {
+          kind: 'Shown',
+          fact: { kind: 'SkillCheckFact.PlayedBeforeRevealed' },
+          revealed: [
+            { player: 1, cards: [{ type: 'INVESTIGATIVE_COMMITTEE', value: 3 }] },
+            { player: 2, cards: [{ type: 'SCIENTIFIC_RESEARCH', value: 2 }, { type: 'DECLARE_EMERGENCY', value: 4 }] },
+          ],
+        },
+      ],
+    } as LogEntry;
+    const body = renderLog([played(2, 1), played(3, 2), revealed], [
+      { number: 1, character: 'WILLIAM_ADAMA' },
+      { number: 2, character: 'LAURA_ROSLIN' },
+    ]);
+
+    expect(lines(body).at(-1)).toBe(
+      "The cards played before the skill check are revealed: William Adama's Investigative Committee 3 and Laura Roslin's Scientific Research 2 and Declare Emergency 4",
+    );
+    // each player's portrait in front of his name
+    expect(body.querySelectorAll('.lines > li:last-child .event img')).toHaveLength(2);
+  });
+
   it('has no title and keeps every turn open', () => {
     const body = renderLog([scope(1), turnStarted(2, 1), scope(3), turnStarted(4, 2), scope(5)]);
     const turns = [...body.querySelectorAll<HTMLDetailsElement>('details.turn')];

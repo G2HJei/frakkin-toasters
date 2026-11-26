@@ -1253,6 +1253,6 @@ export function shortName(label: string): string {
   if (nickname) {
     return nickname[1];
   }
-  const words = label.replace(/\(.*\)/, '').trim().split(' ');
+  const words = label.trim().split(' ');
   return words[words.length - 1];
 }

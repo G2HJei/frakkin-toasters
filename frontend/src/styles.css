@@ -3308,6 +3308,71 @@ button.playable.picked .art {
   border-radius: 5px;
 }
 
+/* the titles' lines of succession: a column per title, a row per character with his portrait and name */
+.succession {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.reference-body .succession section + section {
+  margin-top: 0;
+}
+
+.succession h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.succession-insignia {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+
+.succession ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: succession;
+}
+
+.succession li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+  counter-increment: succession;
+}
+
+/* the rank in front of the portrait */
+.succession li::before {
+  content: counter(succession);
+  flex: none;
+  width: 1.4em;
+  text-align: right;
+  color: var(--muted);
+  font: 12px var(--display, inherit);
+}
+
+/* the portrait as the mats print it, its top corners cut */
+.succession-portrait {
+  flex: none;
+  width: 28px;
+  height: 41px;
+  object-fit: cover;
+  clip-path: polygon(5px 0, calc(100% - 5px) 0, 100% 5px, 100% 100%, 0 100%, 0 5px);
+}
+
+.succession-portrait.empty {
+  display: block;
+  background: #141c29;
+}
+
 /* how many components left the game, on its tab */
 .reference-tabs .tab-count {
   margin-left: 6px;
@@ -3623,11 +3688,11 @@ button.avatar-button {
   margin-top: 8px;
 }
 
+/* one line high: Enter sends, and a line Shift+Enter breaks scrolls inside */
 .table-page .chat-compose textarea {
   flex: 1 1 12rem;
-  resize: vertical;
-  min-height: 2.6em;
-  max-height: 10em;
+  resize: none;
+  overflow-y: auto;
   font: inherit;
   font-size: 14px;
 }
@@ -4551,6 +4616,88 @@ button.avatar-button {
 .host-form {
   display: flex;
   gap: 8px;
+}
+
+/* the play page's chat (pages/LobbyChat.tsx): the last messages, scrolling on their own, and the box to write in */
+.lobby-chat-body {
+  max-height: 22rem;
+  overflow-y: auto;
+  margin: 0 -6px;
+  padding: 0 6px;
+}
+
+.lobby-chat-lines {
+  list-style: none;
+  margin: 0;
+  padding: 8px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lobby-chat-lines li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.lobby-chat-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.lobby-chat-name {
+  color: var(--steel-100);
+  font: 600 14px/1.2 var(--display);
+  letter-spacing: 0.02em;
+}
+
+/* the viewer's own messages under his name in amber */
+.lobby-chat-lines li.mine .lobby-chat-name {
+  color: var(--amber);
+}
+
+.lobby-chat-head time {
+  font-size: 12px;
+}
+
+.lobby-chat-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.lobby-chat-compose {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #ffffff14;
+}
+
+/* one line high, as at the table */
+.site .lobby-chat-compose textarea {
+  flex: 1 1 auto;
+  min-width: 0;
+  resize: none;
+  overflow-y: auto;
+  padding: 8px 10px;
+  border: 1px solid var(--steel-500);
+  border-radius: 0;
+  background: #0b1220;
+  color: var(--steel-100);
+}
+
+.site .lobby-chat-compose textarea:focus-visible {
+  outline: none;
+  border-color: var(--dradis-glow);
+  box-shadow: 0 0 0 1px var(--dradis-glow);
+}
+
+.site .lobby-chat-compose textarea::placeholder {
+  color: var(--steel-500);
 }
 
 .site .host-form input {

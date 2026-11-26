@@ -79,6 +79,22 @@ describe('the reference', () => {
     expect(document.querySelector('.reference-grid li.focus img')?.getAttribute('alt')).toBe('Laura Roslin');
   });
 
+  it("lists each title's line of succession in a column, a portrait and a name on each row", () => {
+    render(<ReferenceDrawer />);
+    act(() => useReference.getState().show('titles'));
+
+    const columns = [...document.querySelectorAll('.succession-line')];
+    expect(columns.map((column) => column.querySelector('h3')?.textContent)).toEqual(['President', 'Admiral', 'CAG']);
+    const rows = (column: Element) => [...column.querySelectorAll('li')];
+    expect(rows(columns[0])).toHaveLength(schema.linesOfSuccession?.PRESIDENT.length ?? -1);
+    expect(rows(columns[0])[0].textContent).toBe('Laura Roslin');
+    expect(rows(columns[0])[0].querySelector('img.succession-portrait')?.getAttribute('alt')).toBe('Laura Roslin');
+    expect(rows(columns[1])[0].textContent).toBe('Helena Cain');
+    expect(rows(columns[2])[0].textContent).toBe('Lee "Apollo" Adama');
+    // an alternate sheet is named like its character
+    expect(columns.flatMap(rows).map((row) => row.textContent).filter((name) => /alternate/i.test(name ?? ''))).toEqual([]);
+  });
+
   it('lists what left the game, and counts it on its tab', () => {
     const ship = (id: number, type: string, cargo: unknown) => ({ id, type, location: null, pilot: null, damage: [], cargo });
     const game = {

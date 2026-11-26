@@ -4,7 +4,7 @@ import { humanizeConstant, humanizeType } from './humanize';
 import { CONSTANT_LABELS, TYPE_LABELS } from './overrides';
 import { CHOSEN_TEMPLATES, EVENT_TEMPLATES, FACT_TEMPLATES, HIDDEN_TEMPLATES, OPTION_TEMPLATES } from './templates';
 import { recordNamed, typeNamed, type SourceRef, type TypeRef } from '../wire/schema';
-import type { FactProjection, Followup } from '../wire/types';
+import type { FactProjection, Followup, ShownCards } from '../wire/types';
 
 export interface LabelContext {
   playerName(playerNumber: number): string;
@@ -1048,7 +1048,22 @@ export function factParts(fact: FactProjection | null | undefined, context: Labe
     return card;
   }
   const template = FACT_TEMPLATES[kind];
-  return template ? fillTemplate(template, shown, kind, context) : [{ text: recordLabel(shown, kind, context) }];
+  const parts = template ? fillTemplate(template, shown, kind, context) : [{ text: recordLabel(shown, kind, context) }];
+  return [...parts, ...revealedParts(fact.revealed, context)];
+}
+
+// The cards a reveal names, by who played them: "…: Laura Roslin's Investigative Committee and Saul Tigh's Declare
+// Emergency".
+function revealedParts(revealed: ShownCards[] | null | undefined, context: LabelContext): Part[] {
+  const played = (revealed ?? []).filter((one) => (one.cards ?? []).length > 0);
+  if (played.length === 0) {
+    return [];
+  }
+  const skillCard: TypeRef = { t: 'ref', nullable: false, name: 'SkillCard' };
+  return [
+    { text: ': ' },
+    ...joinParts(played.map((one) => [playerPart(one.player, context), { text: "'s " }, ...joinParts((one.cards ?? []).map((card) => cardParts(card, skillCard, context)))])),
+  ];
 }
 
 // The interrupt cards and the roll abilities, by who played them.

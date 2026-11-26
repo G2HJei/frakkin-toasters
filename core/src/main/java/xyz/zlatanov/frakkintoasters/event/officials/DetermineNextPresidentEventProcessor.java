@@ -10,35 +10,38 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 
 public class DetermineNextPresidentEventProcessor extends EventProcessor<DetermineNextPresidentEvent> implements LineOfSuccessionSelector {
 
+    // The line of succession for the President title, highest first, which the reference shows as well.
+    public static final List<Character> LINE_OF_SUCCESSION = List.of(
+            LAURA_ROSLIN,
+            GAIUS_BALTAR,
+            LEE_ADAMA,
+            TOM_ZAREK,
+            ROMO_LAMPKIN,
+            TORY_FOSTER,
+            ELLEN_TIGH,
+            LEE_APOLLO_ADAMA,
+            TOM_ZAREK_ALT,
+            FELIX_GAETA,
+            WILLIAM_ADAMA,
+            KARL_HELO_AGATHON,
+            CHIEF_GALEN_TYROL,
+            GAIUS_BALTAR_ALT,
+            CALLANDRA_CALLY_TYROL,
+            SHERMAN_DOC_COTTLE,
+            HELENA_CAIN,
+            ANASTASIA_DEE_DUALLA,
+            LOUIS_HOSHI,
+            KARL_HELO_AGATHON_ALT,
+            SHARON_BOOMER_VALERII,
+            SAUL_TIGH,
+            BRENDAN_HOTDOG_COSTANZA,
+            SAMUEL_T_ANDERS,
+            KARA_STARBUCK_THRACE,
+            LOUANNE_KAT_KATRAINE);
+
     @Override
     public List<Character> lineOfSuccession() {
-        return List.of(
-                LAURA_ROSLIN,
-                GAIUS_BALTAR,
-                LEE_ADAMA,
-                TOM_ZAREK,
-                ROMO_LAMPKIN,
-                TORY_FOSTER,
-                ELLEN_TIGH,
-                LEE_APOLLO_ADAMA,
-                TOM_ZAREK_ALT,
-                FELIX_GAETA,
-                WILLIAM_ADAMA,
-                KARL_HELO_AGATHON,
-                CHIEF_GALEN_TYROL,
-                GAIUS_BALTAR_ALT,
-                CALLANDRA_CALLY_TYROL,
-                SHERMAN_DOC_COTTLE,
-                HELENA_CAIN,
-                ANASTASIA_DEE_DUALLA,
-                LOUIS_HOSHI,
-                KARL_HELO_AGATHON_ALT,
-                SHARON_BOOMER_VALERII,
-                SAUL_TIGH,
-                BRENDAN_HOTDOG_COSTANZA,
-                SAMUEL_T_ANDERS,
-                KARA_STARBUCK_THRACE,
-                LOUANNE_KAT_KATRAINE);
+        return LINE_OF_SUCCESSION;
     }
 
     @Override

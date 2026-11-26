@@ -8,6 +8,7 @@ import {RevealLayer, useReveal} from '../reveal';
 import {Table, tableContext} from '../tableContext';
 import type {GameProjection, LogEntry, ShipProjection} from '../../wire/types';
 import {BOARD_LABELS, type BoardLabel} from '../../labels/board';
+import {constantLabel} from '../../labels/describe';
 import {
     BOARD_HEIGHT,
     BOARD_WIDTH,
@@ -821,6 +822,6 @@ describe('the board', () => {
     it('puts a nickname, or the last name, on a token', () => {
         expect(shortName('Kara "Starbuck" Thrace')).toBe('Starbuck');
         expect(shortName('William Adama')).toBe('Adama');
-        expect(shortName('Gaius Baltar (alternate)')).toBe('Baltar');
+        expect(shortName(constantLabel('Character', 'GAIUS_BALTAR_ALT'))).toBe('Baltar');
     });
 });

@@ -14,12 +14,14 @@ import xyz.zlatanov.frakkintoasters.projection.LiveUpdateProjection.*;
 import xyz.zlatanov.frakkintoasters.state.PlayerPile;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
+import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckPile;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import static xyz.zlatanov.frakkintoasters.engine.journal.Journal.ROOT_SCOPE;
 import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.BASESTAR_DAMAGE;
@@ -43,6 +45,8 @@ final class LiveUpdateProjector {
     // what the rules need to know of the game so far
     private final Map<Character, Integer> playerOf = new HashMap<>();
     private       Character               president;
+    // the cards each player played before the active skill check, face down until it reveals them
+    private final Map<Integer, List<SkillCard>> playedBefore = new TreeMap<>();
 
     private final List<LogEntry>       entries = new ArrayList<>();
     private       ScopeOpened          openScope;
@@ -119,7 +123,7 @@ final class LiveUpdateProjector {
                 List.copyOf(facts), openScopeAutomatic);
     }
 
-    // Who holds which character, and who is President, as the facts go.
+    // Who holds which character, who is President, and the cards played before the skill check, as the facts go.
     private void learn(JournalEntry entry) {
         if (!(entry instanceof FactRecorded(int ignored, Fact fact))) {
             return;
@@ -128,6 +132,10 @@ final class LiveUpdateProjector {
             case PlayerFact.CharacterSelected f -> playerOf.put(f.character(), f.playerNumber());
             case PlayerFact.CharacterRemoved f -> playerOf.remove(f.character());
             case TitleFact.PresidentAssigned f -> president = f.character();
+            case SkillCheckFact.SkillCheckStarted ignoredFact -> playedBefore.clear();
+            case SkillCheckFact.CardsPlayedBefore f -> playedBefore.computeIfAbsent(f.playerNumber(), ignoredPlayer -> new ArrayList<>())
+                    .addAll(f.cards());
+            case SkillCheckFact.SkillCheckEnded ignoredFact -> playedBefore.clear();
             default -> {
             }
         }
@@ -233,7 +241,7 @@ final class LiveUpdateProjector {
 
     private FactProjection skillCheckFact(SkillCheckFact fact) {
         if (seesEverything) {
-            return shown(fact);
+            return fact instanceof SkillCheckFact.PlayedBeforeRevealed ? revealed(fact) : shown(fact);
         }
         return switch (fact) {
             case SkillCheckFact.CardsPlayedBefore f -> sees(f.playerNumber())
@@ -249,7 +257,8 @@ final class LiveUpdateProjector {
             case SkillCheckFact.SkillCheckStarted f -> shown(f);
             case SkillCheckFact.TargetChosen f -> shown(f);
             case SkillCheckFact.PlayedBy f -> shown(f);
-            case SkillCheckFact.PlayedBeforeRevealed f -> shown(f);
+            // the reveal names the cards, by who played them
+            case SkillCheckFact.PlayedBeforeRevealed f -> revealed(f);
             case SkillCheckFact.CardsShown f -> shown(f);
             case SkillCheckFact.CardsLookedAt f -> sees(f.playerNumber())
                     ? shown(f)
@@ -284,6 +293,13 @@ final class LiveUpdateProjector {
             case TitleFact.QuorumCardPutInPlay f -> shown(f);
             case TitleFact.QuorumCardLeftPlay f -> shown(f);
         };
+    }
+
+    private Shown revealed(SkillCheckFact fact) {
+        return new Shown(fact, playedBefore.entrySet().stream()
+                .filter(played -> !played.getValue().isEmpty())
+                .map(played -> new GameProjection.ShownCards(played.getKey(), List.copyOf(played.getValue())))
+                .toList());
     }
 
     private Integer president() {

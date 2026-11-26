@@ -20,7 +20,9 @@ the frontend owns the wording.
   it was his only one can tell what he holds) and the choices (`ChoiceLog`). `LiveUpdateProjector` has an exhaustive switch over every
   fact, so a new fact doesn't compile until it has a rule. A fact the viewer may not see becomes `Hidden` (a count;
   the log names the color of a draw by the Skill Card deck it came from). A shuffle never shows its order, a draw only a count. The scope of a `SecretEvent` shows only to its actor.
-  Followups never show. It reads the whole journal, e.g. for who was President when a Quorum Card was drawn.
+  Followups never show. It reads the whole journal, e.g. for who was President when a Quorum Card was drawn, and for
+  the cards played before the active skill check: the `Shown` of `PlayedBeforeRevealed` names them by who played them
+  (`revealed`, from the check's `CardsPlayedBefore` facts), so the log can say what the reveal showed.
 - `GameReport.of(journal)` tells a finished game whole, for its results (empty while it goes on): the winner and
   winners, every player's character (and the ones he lost), all his Loyalty and Motive Cards, whether he ended a Cylon
   and the turn he revealed it, his turns and statistics (Skill Cards gained, played into checks with their printed

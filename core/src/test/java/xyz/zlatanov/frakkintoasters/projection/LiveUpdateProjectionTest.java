@@ -234,7 +234,7 @@ class LiveUpdateProjectionTest {
             for (val viewer : List.of(HOLDER, OTHER, OBSERVER)) {
                 val projected = lastFact(LiveUpdateProjection.of(journal, viewer));
                 if (seenBy.contains(viewer)) {
-                    assertEquals(new Shown(sample.fact()), projected, viewer.toString());
+                    assertEquals(sample.fact(), assertInstanceOf(Shown.class, projected, viewer.toString()).fact(), viewer.toString());
                 } else {
                     val hidden = assertInstanceOf(Hidden.class, projected, viewer.toString());
                     assertEquals(sample.fact().getClass(), hidden.fact());
@@ -394,7 +394,7 @@ class LiveUpdateProjectionTest {
                 .map(ScopeLog.class::cast)
                 .findFirst()
                 .orElseThrow();
-        assertTrue(divided.facts().stream().anyMatch(fact -> fact instanceof Shown(SkillCheckFact.CardsPlaced placed)
+        assertTrue(divided.facts().stream().anyMatch(fact -> fact instanceof Shown(SkillCheckFact.CardsPlaced placed, var ignored)
                 && placed.pile() != SkillCheckPile.CARDS), divided.toString());
         // the player himself sees his own cards
         val own = LiveUpdateProjection.of(journal.entries(), HOLDER).entries().stream()
@@ -403,6 +403,34 @@ class LiveUpdateProjectionTest {
                 .findFirst()
                 .orElseThrow();
         assertTrue(own.facts().contains(new Shown(new PlayerFact.CardsLost(1, PlayerPile.SKILL, List.of(EXECUTIVE)))));
+    }
+
+    // The cards played before a skill check lie face down until the reveal, which names them to everyone by who played
+    // them; the next check starts with none.
+    @Test
+    void theRevealNamesTheCardsPlayedBeforeTheCheck() {
+        val revealed = new SkillCheckFact.PlayedBeforeRevealed();
+        val journal = List.<JournalEntry>of(
+                new ScopeOpened(1, 0, new NoOpEvent(1), 1),
+                new FactRecorded(1, new SkillCheckFact.SkillCheckStarted(SkillCheckType.ADMIRALS_QUARTERS)),
+                new FactRecorded(1, new SkillCheckFact.CardsPlayedBefore(2, List.of(EXECUTIVE))),
+                new FactRecorded(1, new SkillCheckFact.CardsPlayedBefore(1, List.of(CONSOLIDATE))),
+                new FactRecorded(1, revealed),
+                new FactRecorded(1, new SkillCheckFact.SkillCheckEnded()),
+                new FactRecorded(1, new SkillCheckFact.SkillCheckStarted(SkillCheckType.ADMIRALS_QUARTERS)),
+                new FactRecorded(1, revealed),
+                new ScopeClosed(1, Followup.NONE));
+        for (val viewer : List.of(HOLDER, OTHER, OBSERVER, Viewer.sandbox())) {
+            val shown = facts(LiveUpdateProjection.of(journal, viewer)).stream()
+                    .filter(fact -> fact instanceof Shown shownFact && shownFact.fact() instanceof SkillCheckFact.PlayedBeforeRevealed)
+                    .map(fact -> ((Shown) fact).revealed())
+                    .toList();
+            assertEquals(List.of(
+                    List.of(new GameProjection.ShownCards(1, List.of(CONSOLIDATE)), new GameProjection.ShownCards(2, List.of(EXECUTIVE))),
+                    List.of()), shown, viewer.toString());
+        }
+        // before the reveal, the observer sees only how many
+        assertInstanceOf(Hidden.class, facts(LiveUpdateProjection.of(journal, OBSERVER)).get(1));
     }
 
     private static void playInto(Journal journal, GameOps ops, int player, SkillCard card) {

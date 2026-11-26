@@ -87,7 +87,7 @@ export function ChatPanel({ toggle, writes, seenBefore, send }: ChatPanelProps) 
             ref={input}
             value={draft}
             maxLength={MAX_LENGTH}
-            rows={2}
+            rows={1}
             aria-label="message"
             placeholder="Say something at the table"
             onChange={(event) => setDraft(event.target.value)}
@@ -100,9 +100,6 @@ export function ChatPanel({ toggle, writes, seenBefore, send }: ChatPanelProps) 
               }
             }}
           />
-          <button type="submit" className="primary" disabled={!draft.trim()}>
-            Send
-          </button>
           {draft.length > MAX_LENGTH - 50 && <small className="muted">{MAX_LENGTH - draft.length} left</small>}
         </form>
       ) : (

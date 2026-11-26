@@ -3,10 +3,11 @@ import { Link, useNavigate } from 'react-router';
 import { withTabUser } from '../api/devTab';
 import { useGames, useLobbyAction, type GameSummary } from '../api/queries';
 import { openGameTab } from './gameTab';
+import { LobbyChat } from './LobbyChat';
 
 /**
- * The lobby: my games with hosting, my sandboxes with a new one, open lobbies to join and running games to watch. Each
- * game opens in a tab of its own.
+ * The lobby: my games with hosting, my sandboxes with a new one, open lobbies to join, running games to watch, and the
+ * chat of everyone here. Each game opens in a tab of its own.
  */
 export function PlayPage() {
   const games = useGames();
@@ -18,6 +19,12 @@ export function PlayPage() {
     const tab = openGameTab(navigate);
     action.mutate({ path: `/api/games/${game.id}/join`, body: { as } }, { onSuccess: () => tab.go(game.id), onError: tab.close });
   };
+  // a game of mine opens in a tab of its own, as its name does
+  const open = (game: GameSummary) => (
+    <Link className="button primary" to={withTabUser(`/games/${game.id}`)} target="_blank">
+      Open
+    </Link>
+  );
 
   return (
     <main className="page wide play">
@@ -26,13 +33,15 @@ export function PlayPage() {
         <p className="flavour">The Cylons were created by man. They rebelled. They evolved. … And they have a plan.</p>
       </header>
       {action.error && <p className="error">{action.error.message}</p>}
-      {/* my games and sandboxes on the left, the others' games on the right; one column on a narrow screen */}
+      {/* the chat, my games and my sandboxes on the left, the others' games on the right; one column on a narrow screen */}
       <div className="play-grid">
         <div className="play-column">
+          <LobbyChat />
           <GameList
             title="My games"
             empty="You are in no game. Host one, or join an open lobby."
             games={mine.filter((game) => game.mode === 'STANDARD')}
+            action={open}
             tools={
               <form
                 className="host-form"
@@ -62,6 +71,7 @@ export function PlayPage() {
             title="My sandboxes"
             empty="No sandbox yet."
             games={mine.filter((game) => game.mode === 'SANDBOX')}
+            action={open}
             tools={
               <Link className="button primary" to="/sandbox/new">
                 New sandbox

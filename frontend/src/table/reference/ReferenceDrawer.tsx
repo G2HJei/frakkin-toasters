@@ -6,20 +6,23 @@ import {
     type ArtRef,
     CARD_ENUMS,
     cardArt,
+    characterArt,
     characterSheetArt,
     damageArt,
     locationArt,
     shipArt,
-    skillCardArt
+    skillCardArt,
+    titleIconArt,
+    type TitleName
 } from '../../art/images';
 import {constantLabel} from '../../labels/describe';
 import {rule, type Rule, ruleHref, RULES, ruleText} from '../../labels/rules';
-import {enumValues, schema} from '../../wire/schema';
+import {enumValues, lineOfSuccession, schema} from '../../wire/schema';
 import {CargoIcons} from '../board/resources';
 import {useTable} from '../tableContext';
 import {StepIcon, type TurnStep} from '../turn/StepIcon';
 
-type Tab = 'cards' | 'characters' | 'rules' | 'sheets' | 'out';
+type Tab = 'cards' | 'characters' | 'titles' | 'rules' | 'sheets' | 'out';
 
 interface ReferenceState {
     open: boolean;
@@ -112,8 +115,8 @@ export function search(cards: ArtRef[], query: string): ArtRef[] {
 }
 
 /**
- * The reference beside the table: every card by deck with a search, the character sheets, the rulebook's sections with
- * their pages, cheat sheets, and what left the game. It names things and points to the article; it doesn't repeat the
+ * The reference beside the table: every card by deck with a search, the character sheets, the titles' lines of
+ * succession, the rulebook's sections with their pages, cheat sheets, and what left the game. It names things and points to the article; it doesn't repeat the
  * rulebook.
  */
 export function ReferenceDrawer() {
@@ -133,6 +136,7 @@ export function ReferenceDrawer() {
                         [
                             ['cards', 'Cards'],
                             ['characters', 'Characters'],
+                            ['titles', 'Titles'],
                             ['rules', 'Rules'],
                             ['sheets', 'Cheat sheets'],
                             ['out', 'Out of the game'],
@@ -154,6 +158,7 @@ export function ReferenceDrawer() {
             <div className="reference-body">
                 {tab === 'cards' && <Cards decks={all} query={query}/>}
                 {tab === 'characters' && <Characters focus={focus} query={query}/>}
+                {tab === 'titles' && <Titles/>}
                 {tab === 'rules' && <Rules/>}
                 {tab === 'sheets' && <CheatSheets/>}
                 {tab === 'out' && <OutOfTheGame/>}
@@ -245,6 +250,45 @@ function Characters({focus, query}: { focus: string | null; query: string }) {
                     </li>
                 ))}
             </ol>
+        </>
+    );
+}
+
+const TITLES: TitleName[] = ['PRESIDENT', 'ADMIRAL', 'CAG'];
+
+// Each title's line of succession side by side, highest first: a row per character with his portrait and name.
+function Titles() {
+    return (
+        <>
+            <p className="muted">
+                A title passes to the highest character in its line who is in the game. <RuleLink article="4.4"/>
+            </p>
+            <div className="succession">
+                {TITLES.map((title) => {
+                    const insignia = titleIconArt(title);
+                    const name = constantLabel('Title', title);
+                    return (
+                        <section key={title} className="succession-line" aria-label={`${name} line of succession`}>
+                            <h3>
+                                {insignia && <ArtImg art={insignia} className="succession-insignia"/>}
+                                {name}
+                            </h3>
+                            <ol>
+                                {lineOfSuccession(title).map((character) => {
+                                    const portrait = characterArt(character);
+                                    return (
+                                        <li key={character}>
+                                            {portrait ? <ArtImg art={portrait} className="succession-portrait"/> :
+                                                <span className="succession-portrait empty"/>}
+                                            <span>{constantLabel('Character', character)}</span>
+                                        </li>
+                                    );
+                                })}
+                            </ol>
+                        </section>
+                    );
+                })}
+            </div>
         </>
     );
 }

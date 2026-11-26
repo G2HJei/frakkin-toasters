@@ -68,7 +68,10 @@ stores its journal in Postgres and pushes to every viewer what he may see. It ad
   characters, 5 messages per 10 s per user and game (in memory). The socket's `say` (`text`) posts one and
   `ConnectionPool.broadcast`s `chat` to every connection of the game; a refusal goes back as `chatRejected`. A new
   connection gets `chatLog` (the last 300) after the log, read once it is in the pool, so a message written meanwhile
-  comes twice and the client keeps it once. A sandbox has no chat.
+  comes twice and the client keeps it once. A sandbox has no chat. `LobbyChat`: the play page's chat, for everyone
+  logged in, in memory only (the last 64 messages, gone with a restart): `GET /api/lobby/chat` lists them oldest first,
+  `POST /api/lobby/chat {text}` posts one under the user's name, with the same length and rate limits. No socket: the
+  page polls.
 - `problem/` - `ProblemReports`: `POST /api/games/{id}/problems {text}` ("Report a problem" on the table) stores the
   text (1 to 1000 characters), the game, the user and the journal's last sequence in `problem_report`
   (`V6__problem_report.sql`); whoever can open the table may report, 20 times per game at most.

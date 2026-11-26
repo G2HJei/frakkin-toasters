@@ -125,6 +125,36 @@ export function useGames() {
   return useQuery<Games>({ queryKey: ['games'], queryFn: () => api<Games>('GET', '/api/games'), refetchInterval: 4000 });
 }
 
+// a message of the play page's chat
+export interface LobbyLine {
+  id: number;
+  userId: string;
+  name: string;
+  text: string;
+  at: string;
+}
+
+export const LOBBY_CHAT_MAX_LENGTH = 500;
+const LOBBY_CHAT = ['lobbyChat'];
+
+// The play page's chat has no socket either: it asks every 10 seconds while the tab shows (TanStack Query stops the
+// interval while the tab is hidden, and asks again when it shows).
+export function useLobbyChat() {
+  return useQuery<LobbyLine[]>({ queryKey: LOBBY_CHAT, queryFn: () => api<LobbyLine[]>('GET', '/api/lobby/chat'), refetchInterval: 10_000, refetchIntervalInBackground: false });
+}
+
+// A message shows at once, and the others' since the last ask come with it.
+export function useSayInLobby() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (text: string) => api<LobbyLine>('POST', '/api/lobby/chat', { text }),
+    onSuccess: (line) => {
+      client.setQueryData<LobbyLine[]>(LOBBY_CHAT, (lines = []) => [...lines.filter((one) => one.id !== line.id), line]);
+      return client.invalidateQueries({ queryKey: LOBBY_CHAT });
+    },
+  });
+}
+
 export function useRoom(id: string) {
   return useQuery<Room>({ queryKey: ['room', id], queryFn: () => api<Room>('GET', `/api/games/${id}`), refetchInterval: 3000 });
 }

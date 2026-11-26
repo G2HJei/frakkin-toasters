@@ -44,7 +44,8 @@ and from `IncreaseJumpPreparationEvent` (the track has no "Auto Jump" space, the
   `CylonsWinEvent`.
 - Titles in the "Brig" (rules 4.4.2.3 and 4.4.3.2): `DetermineNextAdmiralEvent` and `DetermineNextCagEvent` pick the
   highest in line outside the "Brig", and when every human is in it, the highest in line there.
-  `LineOfSuccessionSelector.nextInLine` skips revealed Cylons. Leaving the "Brig" (`LeaveBrigEvent`,
+  `LineOfSuccessionSelector.nextInLine` skips revealed Cylons. Each processor's `LINE_OF_SUCCESSION` is the line,
+  highest first, which the wire schema exports for the reference's Titles tab. Leaving the "Brig" (`LeaveBrigEvent`,
   `MoveFromBrigEvent`) queues them again while the Admiral or the CAG is still inside (`BrigTitles.afterLeaving`), so
   the one who left takes the title.
 - The Admiral's and the CAG's Title Card actions are under [Combat](combat.md), the President's under [Quorum Cards](quorum-and-mutiny-cards.md#quorum-cards).

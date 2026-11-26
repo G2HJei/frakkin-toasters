@@ -19,7 +19,11 @@ import xyz.zlatanov.frakkintoasters.event.action.MutinyCardEvent;
 import xyz.zlatanov.frakkintoasters.event.action.MutinyCardEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.action.QuorumCardEvent;
 import xyz.zlatanov.frakkintoasters.event.action.QuorumCardEventProcessor;
+import xyz.zlatanov.frakkintoasters.event.officials.DetermineNextAdmiralEventProcessor;
+import xyz.zlatanov.frakkintoasters.event.officials.DetermineNextCagEventProcessor;
+import xyz.zlatanov.frakkintoasters.event.officials.DetermineNextPresidentEventProcessor;
 import xyz.zlatanov.frakkintoasters.event.sandbox.SandboxEvent;
+import xyz.zlatanov.frakkintoasters.state.Title;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.character.CharacterAbility;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
@@ -55,6 +59,7 @@ import static xyz.zlatanov.frakkintoasters.backend.journal.ValueCodec.typeArgume
  *     that stand for a card or an ability, e.g. what granted a {@code GrantEvent}</li>
  *     <li>the socket messages, told apart by {@code type}</li>
  *     <li>the Attack Table as the game applies it ({@code AttackTable})</li>
+ *     <li>the line of succession of each title, highest first ({@code DetermineNext*EventProcessor})</li>
  * </ul>
  * An int component gets a {@code role} from its name ({@link ComponentRole}): a {@code player}, a {@code ship}, a journal
  * {@code scope}, or a {@code count}.
@@ -114,6 +119,17 @@ public final class WireSchema {
                 .put("to", row.to())
                 .put("effect", row.effect().name()));
         schema.put("structuralDamageBonus", AttackTable.structuralDamageBonus());
+        // the lines of succession as the game follows them, highest first, for the reference
+        val linesOfSuccession = schema.putObject("linesOfSuccession");
+        Map.of(Title.PRESIDENT, DetermineNextPresidentEventProcessor.LINE_OF_SUCCESSION,
+                        Title.ADMIRAL, DetermineNextAdmiralEventProcessor.LINE_OF_SUCCESSION,
+                        Title.CAG, DetermineNextCagEventProcessor.LINE_OF_SUCCESSION)
+                .entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .forEach(entry -> {
+                    val line = linesOfSuccession.putArray(entry.getKey().name());
+                    entry.getValue().forEach(character -> line.add(character.name()));
+                });
         val messages = schema.putObject("messages");
         WireMessages.TYPES.entrySet().stream()
                 .sorted(Map.Entry.comparingByValue())

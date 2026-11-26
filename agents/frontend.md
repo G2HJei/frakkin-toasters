@@ -25,7 +25,8 @@ a field that went away. `GET /api/schema` serves the same JSON. It holds:
 - the `colors` of `SkillCardType` (a hand lies by color, `table/skillCards.ts`), the `characters` of `CharacterAbility`
   (the sheet that prints each, its art) and its `miracles` (`isMiracle`), the `types` and `skillSets` of `Character`
   (the strip beside a mat's portrait), the `attackTable` (`AttackTable` in `core`, read from the attack results'
-  thresholds, for the cheat sheet);
+  thresholds, for the cheat sheet), the `linesOfSuccession` of the titles (the `DetermineNext*EventProcessor`s'
+  `LINE_OF_SUCCESSION`, highest first, `lineOfSuccession(title)`, for the reference);
 - a `role` for each int by its name (`ComponentRole` in `core`): `player`, `ship`, `scope` or `count`.
 
 ## Source layout
@@ -151,7 +152,9 @@ the pages as wide as `--site-width`. A new page follows it.
   (`/about`: what the site is, `#terms` and `#privacy`; registering confirms the user owns the game), `LoginPage`
   (a login lands on `/play`).
 - Logged in (a 401 goes to the login page): `PlayPage` (`/play`, the lobby: my games with hosting, my sandboxes with
-  a new one, open lobbies, games to watch with their vacant seats), `UsersPage` (`/users`, `GET /api/users`),
+  a new one, each of mine with "Open" to its tab, open lobbies, games to watch with their vacant seats, and `LobbyChat`: everyone's chat at the top, above my games,
+  polled every 10 s while the tab shows (`useLobbyChat`), the viewer's own name in amber, a one-line box where Enter sends, no button), `UsersPage`
+  (`/users`, `GET /api/users`),
   `ProfilePage` (`/profile`, the name), `NewSandboxPage`, and in a game's tab `RoomPage` (seats and observers with a
   dot for who is there, join, leave, start; the host removes or bans a user and cancels the game).
 

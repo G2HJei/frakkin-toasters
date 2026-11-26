@@ -54,7 +54,8 @@ The game page (`TablePage`) and what it draws. The rest of the frontend is in [f
   current player, `KEPT_BY_CURRENT_PLAYER`), a pass by what it passed on ("doesn't move"). Left out: the passes on the
   cards every player is asked about, the scopes that only ask, an event about no player that changed nothing. An event
   whose facts say everything (the steps, a skill check's mechanics, a roll, a result) is told by them, each under the
-  player it is about.
+  player it is about. The reveal of the cards played before a skill check names them by who played them (the fact's
+  `revealed`).
 - An only answer the server took has the answers' pass icon in white in front ("automatic" on hover); a tag names the
   card or ability a line comes from when its words don't. The images after the words leave out what the words show
   already and the token that leads the line. A ship the table no longer shows (a raider back in the supply) is named by
@@ -72,7 +73,8 @@ The "Chat" switch floats over the top right of the log and of the chat, where a 
 (`ChatToggle` in `TablePage`): it puts the chat in the log's place and reads "Logs" to go back, in the same look either
 way (unlike "Facts", it is no switch that lights up), and it counts what came since the chat was last open. `table/chat/ChatPanel.tsx` takes the log's place and sizing: one chat for everyone at the
 table; a message shows its writer's portrait (the character of the seat he held), his name, the character or
-"observer", and the time. Enter sends (500 characters at most), Shift+Enter breaks the line; whoever only watches a
+"observer", and the time. The box is one line high, without a button: Enter sends (500 characters at most),
+Shift+Enter breaks the line; whoever only watches a
 finished game reads it with a note. A refusal (too long, too fast) shows under it.
 
 ## Catching up
@@ -176,7 +178,8 @@ cards played before a skill check lie face up there once revealed (`playedBefore
 ## Reference
 
 `table/reference/ReferenceDrawer.tsx`, opened by the turn panel's "Reference", the R key outside a field (which closes
-it too) or a mat's portrait (its sheet): every card by deck with a search, the character sheets, the rulebook's
+it too) or a mat's portrait (its sheet): every card by deck with a search, the character sheets, the titles' lines of
+succession (a column per title from the schema's `linesOfSuccession`, a portrait and a name per row), the rulebook's
 sections, cheat sheets (the turn, a skill check, the Attack Table from the schema, the Crisis Card's icons, loyalty) and
 what left the game (the executed characters' sheets, the destroyed ships with their cost, counted on the tab).
 `labels/rules.ts` indexes the in-scope articles of the combined rulebook and its Appendix by page (the PDFs ship as Vite

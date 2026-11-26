@@ -3315,6 +3315,7 @@ export const ShipZone_VALUES: readonly ShipZone[] = ['CYLON_SUPPLY', 'CENTURION_
 export interface Shown {
   kind: 'Shown';
   fact: Fact | null;
+  revealed: Array<ShownCards> | null;
 }
 
 export interface ShownCards {

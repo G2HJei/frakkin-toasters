@@ -72,6 +72,8 @@ export interface Schema {
   types: Record<string, SchemaType>;
   // anytimeEvents: what a player may do at any pause, without being asked (`AnytimeEvent`)
   lists: { events: string[]; sandboxEvents: string[]; anytimeEvents: string[]; facts: string[] };
+  // each title's line of succession as the game follows it, highest first
+  linesOfSuccession?: Record<string, string[]>;
   messages: Record<string, string>;
 }
 
@@ -130,6 +132,11 @@ export function characterType(character: string | null | undefined): string | nu
 export function characterSkillSet(character: string | null | undefined): SkillSetOption[] {
   const characters = schema.types.Character;
   return character && characters?.kind === 'enum' ? (characters.skillSets?.[character] ?? []) : [];
+}
+
+/** The characters in line for a title, highest first, e.g. LAURA_ROSLIN first for PRESIDENT. */
+export function lineOfSuccession(title: string): string[] {
+  return schema.linesOfSuccession?.[title] ?? [];
 }
 
 /** The color of a Skill Card type, e.g. POLITICS for RED_TAPE. */
