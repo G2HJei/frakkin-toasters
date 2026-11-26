@@ -23,7 +23,7 @@ export function PlayPage() {
     <main className="page wide play">
       <header className="page-head">
         <h1 className="label">Play</h1>
-        <p className="muted">Host a game and wait for players, join an open lobby, watch a running game, or play every seat in a sandbox.</p>
+        <p className="muted">The Cylons were created by man. They rebelled. They evolved. … And they have a plan.</p>
       </header>
       {action.error && <p className="error">{action.error.message}</p>}
       {/* my games and sandboxes on the left, the others' games on the right; one column on a narrow screen */}

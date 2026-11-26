@@ -132,7 +132,7 @@ export function HomePage() {
           <p className="hero-tagline">The Battlestar Galactica board game, at one table in the browser.</p>
           <figure className="quote">
             <blockquote>All of this has happened before, and all of this will happen again.</blockquote>
-            <figcaption>Battlestar Galactica</figcaption>
+            <figcaption>The Book of Pythia</figcaption>
           </figure>
         </div>
       </section>
@@ -141,7 +141,7 @@ export function HomePage() {
         {me.data ? (
           <>
             <div>
-              <p className="cta-kicker">Welcome back, {me.data.name}</p>
+              <p className="cta-kicker">God has a plan for you, {me.data.name}</p>
               <p className="cta-text">The fleet is waiting: host a game, join one, or try a sandbox.</p>
             </div>
             <Link className="button primary cta-play" to="/play">
