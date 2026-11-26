@@ -9,8 +9,8 @@ import { useTable } from '../tableContext';
 export const MAX_LENGTH = 500;
 
 export interface ChatPanelProps {
-  // the switch between the log and the chat, over the panel
-  tabs: ReactNode;
+  // the switch back to the log, over the panel's top right
+  toggle: ReactNode;
   // whether the viewer writes: a player or an observer of the game; whoever only watches a finished game reads
   writes: boolean;
   // the last message the viewer had seen when he opened the chat: the red line goes under it
@@ -23,7 +23,7 @@ export interface ChatPanelProps {
  * seat's character) or "observer", his name and the time; a red line marks where the viewer left off when he opened the
  * chat. Enter sends, Shift+Enter breaks the line.
  */
-export function ChatPanel({ tabs, writes, seenBefore, send }: ChatPanelProps) {
+export function ChatPanel({ toggle, writes, seenBefore, send }: ChatPanelProps) {
   const table = useTable();
   const messages = useChatStore((state) => state.messages);
   const rejected = useChatStore((state) => state.rejected);
@@ -49,7 +49,7 @@ export function ChatPanel({ tabs, writes, seenBefore, send }: ChatPanelProps) {
 
   return (
     <section className="panel cf log chat" aria-label="chat">
-      {tabs}
+      {toggle}
       <div className="log-body chat-body" ref={scrollRef} onScroll={onScroll}>
         <div ref={contentRef}>
           {messages.length === 0 ? (

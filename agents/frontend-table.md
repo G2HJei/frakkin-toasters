@@ -60,7 +60,7 @@ The game page (`TablePage`) and what it draws. The rest of the frontend is in [f
   already and the token that leads the line. A ship the table no longer shows (a raider back in the supply) is named by
   the type a typed field of the log gave it (`raiderShipId`, ...).
 - Facts stay hidden, but a sandbox shows them under each line with the "Facts" switch (floating over the log's top
-  right): the ones that change the table first (`isStoryFact`; a ship destroyed, damaged or launched counts), without
+  right, in the place of the chat's switch): the ones that change the table first (`isStoryFact`; a ship destroyed, damaged or launched counts), without
   the ones the words say already.
 - A click on a line lights what it names on the board for a moment (`table/flash.ts`, `entryTargets`, `useFlash`). The
   log follows the newest entry until the user scrolls up (`useFollowBottom`: only a scroll up leaves the end, since a
@@ -68,8 +68,9 @@ The game page (`TablePage`) and what it draws. The rest of the frontend is in [f
 
 ## The chat
 
-The log panel switches to the chat and back (`TalkTabs` in `TablePage`, not in a sandbox; the chat's tab counts what
-came since it was last open). `table/chat/ChatPanel.tsx` takes the log's place and sizing: one chat for everyone at the
+The "Chat" switch floats over the top right of the log and of the chat, where a sandbox has its "Facts" switch
+(`ChatToggle` in `TablePage`): it puts the chat in the log's place and reads "Logs" to go back, in the same look either
+way (unlike "Facts", it is no switch that lights up), and it counts what came since the chat was last open. `table/chat/ChatPanel.tsx` takes the log's place and sizing: one chat for everyone at the
 table; a message shows its writer's portrait (the character of the seat he held), his name, the character or
 "observer", and the time. Enter sends (500 characters at most), Shift+Enter breaks the line; whoever only watches a
 finished game reads it with a note. A refusal (too long, too fast) shows under it.

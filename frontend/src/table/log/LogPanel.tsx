@@ -21,15 +21,15 @@ import { useFollowBottom } from './useFollowBottom';
  * line until the user scrolls up, and the arrow at its bottom right follows again, lit while new lines came below.
  */
 export interface LogPanelProps {
-  // the switch between the log and the chat, over the panel
-  tabs?: ReactNode;
+  // the switch to the chat, over the panel's top right; a sandbox has no chat and shows its "Facts" switch there
+  toggle?: ReactNode;
   // how many entries the viewer had seen at his last decision: a red line goes above the first one after them
   seenBefore?: number | null;
   // a click on the red line: all is seen
   onSeen?(): void;
 }
 
-export function LogPanel({ tabs, seenBefore = null, onSeen }: LogPanelProps = {}) {
+export function LogPanel({ toggle, seenBefore = null, onSeen }: LogPanelProps = {}) {
   const table = useTable();
   const log = useGameStore((state) => state.log);
   const players = table.game?.players;
@@ -70,18 +70,19 @@ export function LogPanel({ tabs, seenBefore = null, onSeen }: LogPanelProps = {}
   const withFacts = table.sandbox && factsShown;
   return (
     <section className="panel cf log" aria-label="log">
-      {tabs}
       {/* over the top right of the lines, which scroll behind it */}
-      {table.sandbox && (
+      {table.sandbox ? (
         <button
           type="button"
-          className={factsShown ? 'log-facts cf on' : 'log-facts cf'}
+          className={factsShown ? 'log-toggle cf on' : 'log-toggle cf'}
           aria-pressed={factsShown}
           title={factsShown ? 'Hide the facts under each line' : 'Show the facts under each line'}
           onClick={() => setFactsShown(!factsShown)}
         >
           Facts
         </button>
+      ) : (
+        toggle
       )}
       {/* the body scrolls, so the log can take whatever height its column leaves it */}
       <div className="log-body" ref={scrollRef} onScroll={onScroll}>

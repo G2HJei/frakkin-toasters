@@ -20,7 +20,7 @@ function renderPanel(props: Partial<Parameters<typeof ChatPanel>[0]> = {}) {
   const send = vi.fn(() => true);
   render(
     <Table.Provider value={tableContext(game, false, null)}>
-      <ChatPanel tabs={null} writes seenBefore={null} send={send} {...props} />
+      <ChatPanel toggle={null} writes seenBefore={null} send={send} {...props} />
     </Table.Provider>,
   );
   return send;

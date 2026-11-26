@@ -218,6 +218,26 @@ describe('the log', () => {
     expect(sandbox.querySelector('.facts')).toBeNull();
   });
 
+  it('shows the switch to the chat over the log, and the facts switch in its place in a sandbox', () => {
+    const renderWithToggle = (sandbox: boolean) => {
+      const game = { viewer: { kind: 'PlayerViewer', playerNumber: 1 }, players: [] } as unknown as GameProjection;
+      render(
+        <Table.Provider value={tableContext(game, sandbox, 1, {})}>
+          <LogPanel toggle={<button type="button">Chat</button>} />
+        </Table.Provider>,
+      );
+    };
+
+    renderWithToggle(false);
+    expect(screen.getByRole('button', { name: 'Chat' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Facts' })).toBeNull();
+    cleanup();
+
+    renderWithToggle(true);
+    expect(screen.getByRole('button', { name: 'Facts' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Chat' })).toBeNull();
+  });
+
   it("names the player in front of each of his lines, and nobody in front of the game's", () => {
     const draw = (scopeId: number, player: number) =>
       ({ ...scope(scopeId), actor: player, event: 'DrawMutinyCardEvent', details: { kind: 'DrawMutinyCardEvent', playerNumber: player } }) as LogEntry;

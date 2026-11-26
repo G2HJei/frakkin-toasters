@@ -802,16 +802,16 @@ details[open] > summary::before {
   clip-path: var(--chamfer);
 }
 
-/* the mats' badges and the turn's lines: notched, with the edge along the cuts as in .cf (a border would be cut off
-   there). The fill has to be opaque, or the edge shows through it */
-.table-page :is(.badge, .turn-line) {
+/* the mats' badges, the turn's lines and the seats' "you" and presence chips: notched, with the edge along the cuts as
+   in .cf (a border would be cut off there). The fill has to be opaque, or the edge shows through it */
+.table-page :is(.badge, .turn-line, .you, .presence-chip) {
   position: relative;
   isolation: isolate;
   background: var(--edge);
   clip-path: var(--notch);
 }
 
-.table-page :is(.badge, .turn-line)::before {
+.table-page :is(.badge, .turn-line, .you, .presence-chip)::before {
   content: '';
   position: absolute;
   inset: var(--bw);
@@ -1639,9 +1639,10 @@ details[open] > summary::before {
   font-size: 0.9em;
 }
 
-/* the sandbox's switch for the facts under the lines: over the top right of the log, clear of its scrollbar, with the
-   lines scrolling behind it; amber while they show, as an open tab */
-.table-page .log-facts {
+/* the button to the chat and back, or a sandbox's switch for the facts under the lines: over the top right of the log
+   or the chat, clear of its scrollbar, with the lines scrolling behind it; the facts' switch is amber while it is on,
+   as an open tab */
+.table-page .log-toggle {
   --c: 6px;
   --edge: var(--steel-500);
   --fill: #1a2129;
@@ -1658,21 +1659,21 @@ details[open] > summary::before {
   color: var(--steel-100);
 }
 
-.table-page .log-facts:hover,
-.table-page .log-facts:focus-visible {
+.table-page .log-toggle:hover,
+.table-page .log-toggle:focus-visible {
   --edge: var(--dradis-glow);
   --fill: #16263a;
   color: var(--dradis-glow);
   outline: none;
 }
 
-.table-page .log-facts.on {
+.table-page .log-toggle.on {
   --edge: var(--amber);
   --fill: #3b2d10;
   color: var(--amber);
 }
 
-.table-page .log-facts.on:is(:hover, :focus-visible) {
+.table-page .log-toggle.on:is(:hover, :focus-visible) {
   filter: brightness(1.3);
 }
 
@@ -2056,12 +2057,16 @@ details[open] > summary::before {
   font-size: 13px;
 }
 
+/* filled in the edge's color, notched like the badges */
 .table-page .mat .you {
+  --c: 4px;
+  --edge: var(--dradis);
+  --fill: var(--dradis);
+  --bw: 1px;
   font: 600 10px var(--display);
   font-style: normal;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  background: var(--dradis);
   color: #04101e;
   padding: 2px 6px;
 }
@@ -3520,17 +3525,21 @@ button.avatar-button {
   box-shadow: 0 0 6px #57ab5a99;
 }
 
+/* notched like the badges, with their fill; the padding includes the edge's width */
 .presence-chip {
+  --c: 4px;
+  --edge: var(--danger);
+  --fill: #0e1626;
+  --bw: 1px;
   font: 600 10px var(--display, inherit);
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  padding: 1px 6px;
-  border: 1px solid var(--danger);
+  padding: 2px 7px;
   color: var(--danger);
 }
 
 .presence-chip.vacant {
-  border-color: var(--amber, var(--accent));
+  --edge: var(--amber, var(--accent));
   color: var(--amber, var(--accent));
 }
 
@@ -3542,35 +3551,10 @@ button.avatar-button {
   font-size: 13px;
 }
 
-/* the log or the chat: a tab for each over the panel, the chat's with a count of what came since it was last open */
-
-.table-page .talk-tabs {
-  display: flex;
-  gap: 4px;
-  margin: -2px 0 8px;
-  border-bottom: 1px solid #ffffff1f;
-}
-
-.table-page .talk-tabs button {
-  background: none;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  border-radius: 0;
-  padding: 4px 10px;
-  font: 600 12px var(--display);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--steel-300);
-}
-
-.table-page .talk-tabs button.on {
-  color: var(--amber);
-  border-bottom-color: var(--amber);
-}
-
-.table-page .talk-tabs .unread {
+/* the chat's switch counts what came since it was last open */
+.table-page .log-toggle .unread {
   margin-left: 6px;
-  padding: 0 6px;
+  padding: 1px 6px;
   border-radius: 999px;
   background: var(--alert);
   color: #fff;

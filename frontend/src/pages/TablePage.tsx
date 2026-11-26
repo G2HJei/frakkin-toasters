@@ -225,13 +225,13 @@ function LiveTable({ gameId, room, myId, userNames, seatStates }: LiveTableProps
                 {/* the log, or the chat in its place, takes what the panels above leave */}
                 {chat.shown ? (
                   <ChatPanel
-                    tabs={<TalkTabs chat={chat} unread={unread} />}
+                    toggle={<ChatToggle chat={chat} unread={unread} />}
                     writes={writes(room, myId)}
                     seenBefore={chatSeenBefore}
                     send={(text: string) => !!send({ type: 'say', text })}
                   />
                 ) : (
-                  <LogPanel tabs={sandbox ? undefined : <TalkTabs chat={chat} unread={unread} />} seenBefore={sandbox ? null : logSeen} onSeen={markLogSeen} />
+                  <LogPanel toggle={<ChatToggle chat={chat} unread={unread} />} seenBefore={sandbox ? null : logSeen} onSeen={markLogSeen} />
                 )}
               </div>
               <div className={`board ${yourMove ? 'your-move' : ''}`.trim()}>
@@ -277,22 +277,18 @@ interface ChatSwitch {
   show(shown: boolean): void;
 }
 
-// The log or the chat: a tab for each over the panel, the chat's with what came since it was last open.
-function TalkTabs({ chat, unread }: { chat: ChatSwitch; unread: number }) {
+// The chat in the log's place and back: one button over the panel's top right, named for where it goes ("Logs" while
+// the chat shows), with what came since the chat was last open. A sandbox has its "Facts" switch there instead.
+function ChatToggle({ chat, unread }: { chat: ChatSwitch; unread: number }) {
   return (
-    <div className="talk-tabs" role="tablist" aria-label="log or chat">
-      <button type="button" role="tab" aria-selected={!chat.shown} className={!chat.shown ? 'on' : undefined} onClick={() => chat.show(false)}>
-        Log
-      </button>
-      <button type="button" role="tab" aria-selected={chat.shown} className={chat.shown ? 'on' : undefined} onClick={() => chat.show(true)}>
-        Chat
-        {unread > 0 && (
-          <span className="unread" aria-label={`${unread} new`}>
-            {unread}
-          </span>
-        )}
-      </button>
-    </div>
+    <button type="button" className="log-toggle cf" title={chat.shown ? 'Back to the log' : 'Show the chat'} onClick={() => chat.show(!chat.shown)}>
+      {chat.shown ? 'Logs' : 'Chat'}
+      {unread > 0 && (
+        <span className="unread" aria-label={`${unread} new`}>
+          {unread}
+        </span>
+      )}
+    </button>
   );
 }
 

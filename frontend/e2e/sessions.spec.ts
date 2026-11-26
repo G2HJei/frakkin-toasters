@@ -53,13 +53,15 @@ test('a session: presence, chat, a seat handed over to an observer, and an aband
   await expect(host.page.locator('.player[data-player="3"]').getByRole('img', { name: 'connected' })).toBeVisible();
 
   // one chat for everyone at the table: a player's message, then an observer's, reach all of them
-  await roslin.page.getByRole('tab', { name: /^Chat/ }).click();
+  await roslin.page.getByRole('button', { name: /^Chat/ }).click();
   await roslin.page.getByLabel('message').fill('So say we all');
   await roslin.page.getByLabel('message').press('Enter');
-  await expect(host.page.getByRole('tab', { name: /^Chat/ })).toContainText('1');
-  await host.page.getByRole('tab', { name: /^Chat/ }).click();
+  await expect(host.page.getByRole('button', { name: /^Chat/ })).toContainText('1');
+  await host.page.getByRole('button', { name: /^Chat/ }).click();
   await expect(host.page.getByRole('region', { name: 'chat' })).toContainText('So say we all');
-  await dualla.page.getByRole('tab', { name: /^Chat/ }).click();
+  // the switch goes back to the log from the chat
+  await expect(host.page.getByRole('button', { name: 'Logs' })).toBeVisible();
+  await dualla.page.getByRole('button', { name: /^Chat/ }).click();
   await expect(dualla.page.getByRole('region', { name: 'chat' })).toContainText('So say we all');
   await dualla.page.getByLabel('message').fill('Starbuck looks nervous');
   await dualla.page.getByLabel('message').press('Enter');
