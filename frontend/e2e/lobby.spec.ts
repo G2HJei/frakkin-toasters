@@ -32,14 +32,14 @@ test('players host, join, observe, leave and start a game, and nobody sees anoth
 
   // the others find it among the open lobbies, which poll
   for (const joiner of [second, third]) {
-    await joiner.page.goto('/');
+    await joiner.page.goto('/play');
     joiner.page = await openGame(joiner.page, (lobby) => lobbyEntry(lobby, 'Open lobbies', game).getByRole('button', { name: 'Join' }).click());
     await expect(joiner.page.getByRole('heading', { name: game })).toBeVisible();
   }
   await third.page.getByRole('button', { name: 'Leave' }).click();
   await expect(host.page.getByRole('region', { name: 'seats' })).not.toContainText(`Starbuck ${suffix}`);
   await third.page.getByRole('button', { name: 'Take a seat' }).click();
-  await observer.page.goto('/');
+  await observer.page.goto('/play');
   observer.page = await openGame(observer.page, (lobby) => lobbyEntry(lobby, 'Open lobbies', game).getByRole('button', { name: 'Observe' }).click());
   await expect(host.page.getByRole('region', { name: 'seats' })).toContainText(`Dualla ${suffix}`);
 
@@ -48,7 +48,7 @@ test('players host, join, observe, leave and start a game, and nobody sees anoth
     await expect(seat.page.getByRole('region', { name: 'turn' })).toBeVisible();
   }
   // a running game shows under "Watch" for anyone else
-  await watcher.page.goto('/');
+  await watcher.page.goto('/play');
   await expect(lobbyEntry(watcher.page, 'Watch', game)).toBeVisible();
 
   // the characters, picked by whoever is asked, through the UI

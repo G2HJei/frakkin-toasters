@@ -8,6 +8,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import xyz.zlatanov.frakkintoasters.backend.BackendTest;
 import xyz.zlatanov.frakkintoasters.backend.journal.JournalCodec;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,6 +42,7 @@ class LoginTest extends BackendTest {
     void theApiRefusesACallerWhoIsNotLoggedIn() throws Exception {
         mvc.perform(get("/api/me")).andExpect(status().isUnauthorized());
         mvc.perform(get("/api/games")).andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/users")).andExpect(status().isUnauthorized());
         mvc.perform(get("/ws/games/" + UUID.randomUUID())).andExpect(status().isUnauthorized());
         mvc.perform(get("/api/login/providers"))
                 .andExpect(status().isOk())
@@ -72,6 +74,25 @@ class LoginTest extends BackendTest {
                 .andExpect(jsonPath("$.settings.theme").value("dark"));
         mvc.perform(put("/api/me").cookie(session).with(csrf()).contentType(APPLICATION_JSON).content("{\"name\":\" \"}"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void theUsersAreListedByNameWhateverItsCase() throws Exception {
+        val suffix = UUID.randomUUID().toString().substring(0, 6);
+        val session = login("Zarek " + suffix);
+        login("adama " + suffix);
+
+        val users = JournalCodec.parse(mvc.perform(get("/api/users").cookie(session))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString());
+        val names = new ArrayList<String>();
+        for (int i = 0; i < users.size(); i++) {
+            names.add(users.get(i).get("name").stringValue());
+        }
+
+        // by bytes "Zarek" would come first
+        assertTrue(names.indexOf("adama " + suffix) >= 0);
+        assertTrue(names.indexOf("adama " + suffix) < names.indexOf("Zarek " + suffix));
     }
 
     @Test

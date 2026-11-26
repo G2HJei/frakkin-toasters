@@ -39,9 +39,14 @@ export function RoomPage({ room }: { room: Room }) {
 
   return (
     <main className="page room">
-      <Link to="/">← Games</Link>
-      <h1>{room.name}</h1>
-      <section className="panel" aria-label="seats">
+      <Link className="back-link" to="/play">
+        ← Play
+      </Link>
+      <header className="page-head">
+        <h1 className="label">{room.name}</h1>
+        <p className="muted">The lobby: take a seat or observe. The host starts the game with 3 to 7 players.</p>
+      </header>
+      <section className="panel cf" aria-label="seats">
         <h2>Seats</h2>
         <ol className="seats">
           {[1, 2, 3, 4, 5, 6, 7].map((seat) => {
@@ -85,7 +90,6 @@ export function RoomPage({ room }: { room: Room }) {
         )}
       </div>
       {action.error && <p className="error">{action.error.message}</p>}
-      {isHost && room.players.length < 3 && <p className="muted">A game needs 3 to 7 players.</p>}
     </main>
   );
 }

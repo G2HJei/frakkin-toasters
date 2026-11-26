@@ -1,26 +1,35 @@
 import { Navigate, Outlet, Route, Routes } from 'react-router';
 import { useMe } from './api/queries';
-import { GamesPage } from './pages/GamesPage';
+import { AboutPage } from './pages/AboutPage';
+import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 import { NewSandboxPage } from './pages/NewSandboxPage';
-import { SettingsPage } from './pages/SettingsPage';
+import { PlayPage } from './pages/PlayPage';
+import { ProfilePage } from './pages/ProfilePage';
+import { Site } from './pages/Site';
 import { TablePage } from './pages/TablePage';
-import { TopNav } from './pages/TopNav';
+import { UsersPage } from './pages/UsersPage';
 
 export function App() {
   return (
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route element={<LoggedIn />}>
-        <Route element={<WithTopNav />}>
-          <Route path="/" element={<GamesPage />} />
-          <Route path="/games" element={<GamesPage />} />
+      <Route element={<Site />}>
+        {/* anyone may read these */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route element={<LoggedIn />}>
+          <Route path="/play" element={<PlayPage />} />
+          <Route path="/users" element={<UsersPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
           <Route path="/sandbox/new" element={<NewSandboxPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
         </Route>
-        {/* a game's own tab: its room shows the top bar, the table doesn't */}
+      </Route>
+      {/* a game's own tab: its room shows the site's header and footer, the table doesn't */}
+      <Route element={<LoggedIn />}>
         <Route path="/games/:id" element={<TablePage />} />
       </Route>
+      <Route path="/games" element={<Navigate to="/play" replace />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
@@ -36,13 +45,4 @@ function LoggedIn() {
     return <Navigate to="/login" replace />;
   }
   return <Outlet />;
-}
-
-function WithTopNav() {
-  return (
-    <>
-      <TopNav />
-      <Outlet />
-    </>
-  );
 }

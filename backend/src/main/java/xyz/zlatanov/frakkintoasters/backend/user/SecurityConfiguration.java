@@ -96,7 +96,8 @@ public class SecurityConfiguration {
                         val token = (OAuth2AuthenticationToken) authentication;
                         val user = users.login(token.getAuthorizedClientRegistrationId(), token.getName(), defaultName());
                         logIn(user.id(), request, response, contexts);
-                        response.sendRedirect("/");
+                        // to the games, as the dev login goes
+                        response.sendRedirect("/play");
                     }));
         }
         return http.build();

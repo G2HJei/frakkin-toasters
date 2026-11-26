@@ -7,6 +7,12 @@ export interface Me {
   settings: Record<string, unknown>;
 }
 
+// a user as the users page lists him
+export interface ListedUser {
+  id: string;
+  name: string;
+}
+
 export interface Logins {
   providers: string[];
   devLogin: boolean;
@@ -104,6 +110,10 @@ export function useMe() {
       }
     },
   });
+}
+
+export function useUsers() {
+  return useQuery<ListedUser[]>({ queryKey: ['users'], queryFn: () => api<ListedUser[]>('GET', '/api/users') });
 }
 
 export function useLogins() {

@@ -17,14 +17,15 @@ stores its journal in Postgres and pushes to every viewer what he may see. It ad
   [Engine](engine.md#engine)). `JournalStore`, `GameBundles` (with `mode` and `seed`: a seeded game restores with its seed).
 - `user/` - logins through Google and Discord (`LoginProviders`, only those with a client id), the `dev` profile's
   login by name (`POST /api/dev/login`, refused together with a real provider), `AppUserAuthentication` in the HTTP
-  session, which Spring Session keeps in Postgres so a login survives a restart, `GET`/`PUT /api/me`. CSRF through the
+  session, which Spring Session keeps in Postgres so a login survives a restart (a provider's login lands on `/play`),
+  `GET`/`PUT /api/me`, `GET /api/users` (every user's id and name, by name). CSRF through the
   `XSRF-TOKEN` cookie and the `X-XSRF-TOKEN` header.
 - Dev simulation (`dev` profile only, refused with a real provider like the dev login): `DevTabLogin` makes a request
   with `X-Dev-User: <name>` (or `?devUser=<name>`, for the socket's handshake) that dev user's for itself alone,
   nothing in the HTTP session, so one browser plays several users side by side. It sits in the security chain after
   the session's context is loaded; its servlet registration is off. To play a game of several people locally: start
   the app with the `dev` profile, log in in one tab, and in each other tab open `/?as=<name>` (or "Another user in
-  this tab" in the top bar, or "This tab only" on the login page); incognito windows and other browsers work with the
+  this tab" in the user menu, or "This tab only" on the login page); incognito windows and other browsers work with the
   plain dev login too (Chrome's incognito windows share one cookie jar between them).
 - `lobby/` - `/api/games`: host, list (open lobbies, mine, running ones to watch; a cancelled lobby in none), join as a
   player (next free seat, 7 at most) or an observer, leave, and start by the host with 3 to 7 players (the seats close

@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { useCreateSandbox, useImportSandbox } from '../api/queries';
 import { openGameTab } from './gameTab';
 
-/** A new sandbox: 3 to 7 players and an optional seed, or an exported journal to import. It opens in a tab of its own, and this one goes back to the lobby. */
+/** A new sandbox: 3 to 7 players and an optional seed, or an exported journal to import. It opens in a tab of its own, and this one goes back to the games. */
 export function NewSandboxPage() {
   const navigate = useNavigate();
   const create = useCreateSandbox();
@@ -12,11 +12,16 @@ export function NewSandboxPage() {
   const [seed, setSeed] = useState('');
 
   return (
-    <main className="page">
-      <h1>New sandbox</h1>
-      <p className="muted">You play every seat and see everything, and you can undo, set up scenarios and export the journal.</p>
+    <main className="page narrow">
+      <Link className="back-link" to="/play">
+        ← Play
+      </Link>
+      <header className="page-head">
+        <h1 className="label">New sandbox</h1>
+        <p className="muted">You play every seat and see everything, and you can undo, set up scenarios and export the journal.</p>
+      </header>
       <form
-        className="card"
+        className="panel cf form-panel"
         onSubmit={(event) => {
           event.preventDefault();
           const tab = openGameTab(navigate);
@@ -24,7 +29,7 @@ export function NewSandboxPage() {
             { playerCount: players, seed: seed.trim() === '' ? null : Number(seed) },
             {
               onSuccess: ({ id }) => {
-                navigate('/');
+                navigate('/play');
                 tab.go(id);
               },
               onError: tab.close,
@@ -51,7 +56,7 @@ export function NewSandboxPage() {
         </button>
         {create.error && <p className="error">{create.error.message}</p>}
       </form>
-      <div className="card">
+      <div className="panel cf form-panel">
         <label className="field">
           <span className="field-name">Import a journal</span>
           <input
@@ -65,7 +70,7 @@ export function NewSandboxPage() {
                 const tab = openGameTab(navigate);
                 importJournal.mutate(await file.text(), {
                   onSuccess: ({ id }) => {
-                    navigate('/');
+                    navigate('/play');
                     tab.go(id);
                   },
                   onError: tab.close,

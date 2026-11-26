@@ -29,13 +29,13 @@ import { Table, tableContext, type SeatState } from '../table/tableContext';
 import { TurnPanel } from '../table/turn/TurnPanel';
 import type { ClientMessage } from '../wire/types';
 import { RoomPage } from './RoomPage';
-import { TopNav } from './TopNav';
+import { SiteFrame } from './Site';
 
 /**
  * The table of a game, in a tab of its own and with no bar over it: its socket, the board as high as the screen, and
  * the panels on its sides: on the left the game and the turn with its skill check and the input, with the log under
- * them, and on the right the sandbox's tools in a sandbox, above the players. The room before the game starts keeps the
- * top bar.
+ * them, and on the right the sandbox's tools in a sandbox, above the players. The room before the game starts is a page
+ * of the site, with its header and footer.
  */
 export function TablePage() {
   const { id = '' } = useParams();
@@ -59,10 +59,9 @@ export function TablePage() {
   }, [seats, online, playerCount]);
   if (room.data && room.data.status === 'LOBBY') {
     return (
-      <>
-        <TopNav />
+      <SiteFrame>
         <RoomPage room={room.data} />
-      </>
+      </SiteFrame>
     );
   }
   // a game saved by another version can't be opened, so no socket is tried; nor one the host cancelled, nor a running
@@ -76,13 +75,12 @@ export function TablePage() {
     (room.data?.status === 'RUNNING' && room.data.mode === 'STANDARD' && myId && !inGame ? 'You are not in this game: join it from the games to watch.' : null);
   if (unavailable) {
     return (
-      <>
-        <TopNav />
+      <SiteFrame>
         <main className="page">
           <p className="error">{unavailable}</p>
-          <Link to="/">Back</Link>
+          <Link to="/play">Back to the games</Link>
         </main>
-      </>
+      </SiteFrame>
     );
   }
   return <LiveTable gameId={id} room={room.data ?? null} myId={myId} userNames={userNames} seatStates={seatStates} />;

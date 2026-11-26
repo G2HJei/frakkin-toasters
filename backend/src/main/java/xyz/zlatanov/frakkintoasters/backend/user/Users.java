@@ -9,12 +9,19 @@ import org.springframework.transaction.support.TransactionTemplate;
 import tools.jackson.databind.JsonNode;
 import xyz.zlatanov.frakkintoasters.backend.journal.JournalCodec;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
 public class Users {
+
+    /**
+     * A user as the users page lists him: his name alone.
+     */
+    public record Listed(UUID id, String name) {
+    }
 
     private final JdbcClient          jdbc;
     private final TransactionTemplate transaction;
@@ -59,6 +66,15 @@ public class Users {
                         row.getString("name"),
                         JournalCodec.parse(row.getString("settings"))))
                 .optional();
+    }
+
+    /**
+     * Every user, by name.
+     */
+    public List<Listed> list() {
+        return jdbc.sql("SELECT id, name FROM app_user ORDER BY lower(name), id")
+                .query((row, ignored) -> new Listed(row.getObject("id", UUID.class), row.getString("name")))
+                .list();
     }
 
     public AppUser update(UUID id, String name, JsonNode settings) {

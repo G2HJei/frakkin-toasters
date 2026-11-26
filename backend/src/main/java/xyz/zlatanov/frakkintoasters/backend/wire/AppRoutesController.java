@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class AppRoutesController {
 
-    @GetMapping({"/login", "/settings", "/games", "/games/{id}", "/sandbox/new"})
+    @GetMapping({"/login", "/play", "/users", "/about", "/profile", "/games", "/games/{id}", "/sandbox/new"})
     public String app() {
         return "forward:/index.html";
     }

@@ -31,7 +31,7 @@ a field that went away. `GET /api/schema` serves the same JSON. It holds:
 ## Source layout
 
 - `src/api/`: `http.ts` sends the `XSRF-TOKEN` cookie as `X-XSRF-TOKEN`, `queries.ts` the hooks. `devTab.ts`: a
-  tab's own dev user (sessionStorage, set by `?as=<name>`, the login page's "This tab only" or the top bar's "Another
+  tab's own dev user (sessionStorage, set by `?as=<name>`, the login page's "This tab only" or the user menu's "Another
   user in this tab"), sent as `X-Dev-User` and the socket's `?devUser=`, and carried to the game tabs it opens
   (`withTabUser`); its "Log out" forgets it, leaving the browser's session alone.
 - `src/live/`: `GameSocket` reconnects with backoff (at once after a `4001`, the seat changed), pings every 20 s and
@@ -138,14 +138,27 @@ option of a choice, and an option that asks a decision first into one per answer
 
 ## Website
 
-`GamesPage` (the lobby: my sandboxes and games, open lobbies, games to watch with their vacant seats, hosting),
-`RoomPage` (seats and observers with a dot for who is there, join, leave, start; the host removes or bans a user and
-cancels the game),
-`SettingsPage`. The table page shows why it doesn't open a game: saved by another version, cancelled by the host, or a
-running game the user isn't in (a finished one anyone may watch). A 401 goes to the login page. The lobby's pages and a room have the top
-bar (`TopNav`), the table doesn't. A game opens in a tab of its own: the links to it, and hosting, joining, a new or
-imported sandbox go through `openGameTab` (`src/pages/gameTab.ts`), which opens the tab on the click, while the browser
-allows it, and points it at the game when the request answers. A sandbox's "Restart with this seed" stays in its tab.
+Every page but the table is in `SiteFrame` (`src/pages/Site.tsx`): the header (the logo and "Frakkin Toasters" to the
+home page, Play, Users, About, and the user's menu with the profile, the dev profile's "Another user in this tab" and
+the logout, or "Log in" while nobody is) and the footer (the copyright from 2025, About, GitHub, Contact). A game's
+room has it, the table doesn't. The website keeps the table's look: the palette in `:root`, `.cf` panels and
+`--chamfer`/`--notch` cuts under `.site` as under `.table-page`, labels printed like the board's (`h1.label`), steel
+buttons lit dradis blue under the pointer and amber to act. A new page follows it.
+
+- Anyone: `HomePage` (`/`: a line from the series, the way in (register or log in, or Play when logged in), parts of
+  `board.jpg` cut out by `viewBox` with what each offers, the site's features, character sheets), `AboutPage`
+  (`/about`: what the site is, `#terms` and `#privacy`; registering confirms the user owns the game), `LoginPage`
+  (a login lands on `/play`).
+- Logged in (a 401 goes to the login page): `PlayPage` (`/play`, the lobby: my games with hosting, my sandboxes with
+  a new one, open lobbies, games to watch with their vacant seats), `UsersPage` (`/users`, `GET /api/users`),
+  `ProfilePage` (`/profile`, the name), `NewSandboxPage`, and in a game's tab `RoomPage` (seats and observers with a
+  dot for who is there, join, leave, start; the host removes or bans a user and cancels the game).
+
+The table page shows why it doesn't open a game: saved by another version, cancelled by the host, or a running game the
+user isn't in (a finished one anyone may watch). A game opens in a tab of its own: the links to it, and hosting,
+joining, a new or imported sandbox go through `openGameTab` (`src/pages/gameTab.ts`), which opens the tab on the click,
+while the browser allows it, and points it at the game when the request answers. A sandbox's "Restart with this seed"
+stays in its tab.
 
 ## e2e
 
