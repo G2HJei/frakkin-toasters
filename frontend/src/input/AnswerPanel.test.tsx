@@ -430,6 +430,15 @@ describe('the answers', () => {
     expect(images(screen.getByRole('button', { name: 'William Adama' }))).toEqual(['Character/player-token/WILLIAM_ADAMA', 'Token/MIRACLE']);
   });
 
+  it("keep what every answer shows on each of them where it is all they show, e.g. Calculations' card on each change of the roll", () => {
+    const calculations = (modifier: number) => ({ kind: 'PlayInterruptCardEvent', playerNumber: 1, card: card('CALCULATIONS', 3), calculationsModifier: modifier });
+    const { container } = renderPanel(game({ kind: 'Decide', player: 1, action: 'PlayInterruptCardEvent', constraints: [], answers: { events: [calculations(1), calculations(-1)], shapes: [] } }));
+
+    expect(images(container.querySelector('.group-title')!)).toEqual([]);
+    const answers = [...container.querySelectorAll('.chips button')] as HTMLElement[];
+    expect(answers.map(images)).toEqual([['SkillCardType/CALCULATIONS_3'], ['SkillCardType/CALCULATIONS_3']]);
+  });
+
   it('show only what the picks on the board left, with a way back', () => {
     const move = (destination: string) => ({ kind: 'MoveEvent', playerNumber: 1, destination, discardCard: null });
     renderPanel(game({ kind: 'Decide', player: 1, action: 'MoveEvent', constraints: [], answers: { events: [move('ARMORY'), move('ADMIRALS_QUARTERS')], shapes: [] } }));

@@ -70,7 +70,59 @@ describe("an answer's images", () => {
   it('show the back of the deck a draw or a look takes from, a Skill Card color in its color', () => {
     expect(art({ kind: 'DrawQuorumCardEvent' })).toEqual(['DeckId/QUORUM']);
     expect(art({ kind: 'LookAtTopCardEvent', playerNumber: 1, deck: 'CRISIS' })).toEqual(['DeckId/CRISIS']);
-    expect(art({ kind: 'ResearchLabEvent', playerNumber: 1, skillCardColor: 'TACTICS' })).toEqual(['SkillCardColor/TACTICS']);
+    // a location's action at its pin
+    expect(art({ kind: 'ResearchLabEvent', playerNumber: 1, skillCardColor: 'TACTICS' })).toEqual(['Glyph/LOCATION/RESEARCH_LAB', 'SkillCardColor/TACTICS']);
+  });
+
+  it('show a location to pick as the map pin, with its card on hover, but a move and a nuke by their step', () => {
+    const [pin] = moveArt(answer({ kind: 'PlaceInSetupLocationEvent', playerNumber: 1, location: 'COMMAND' }), table);
+
+    expect(pin).toMatchObject({ key: 'Glyph/LOCATION/COMMAND', shape: 'icon', label: 'Command' });
+    expect(pin.preview).toHaveLength(1);
+    expect(art({ kind: 'PlaceCivilianShipEvent', playerNumber: 1, location: 'GALACTICA_SPACE_2_OCLOCK' })).toEqual([
+      'ShipType/CIVILIAN',
+      'Glyph/LOCATION/GALACTICA_SPACE_2_OCLOCK',
+    ]);
+    expect(art({ kind: 'LaunchNukeEvent', playerNumber: 1, area: 'GALACTICA_SPACE_2_OCLOCK' })).toEqual(['TitleIcon/ADMIRAL', 'Token/NUKE', 'StepIcon/ACTIVATE_CYLON_SHIPS']);
+    // a viper's move by the Movement step, its launch at the pin
+    const withShips = { ...table, ship: (id: number) => ({ id, type: 'VIPER' }) as unknown as ShipProjection };
+    const activation = { launchShipType: null, launchLocation: null, humanFighterId: 3, moveLocation: 'GALACTICA_SPACE_4_OCLOCK', attackCylonShipId: null, escortCivilianShipId: null };
+    expect(keys(moveArt(answer({ kind: 'ActivateViperEvent', playerNumber: 1, activation }), withShips))).toEqual(['ShipType/VIPER', 'StepIcon/MOVEMENT']);
+    const launch = { ...activation, launchShipType: 'VIPER', launchLocation: 'GALACTICA_SPACE_4_OCLOCK', humanFighterId: null, moveLocation: null };
+    expect(keys(moveArt(answer({ kind: 'ActivateViperEvent', playerNumber: 1, activation: launch }), withShips))).toEqual([
+      'ShipType/VIPER',
+      'Glyph/LOCATION/GALACTICA_SPACE_4_OCLOCK',
+    ]);
+  });
+
+  it("show the Action step's icon on what takes an action, before or after a move", () => {
+    const decision = (action: string) => ({ kind: 'Single', event: { kind: 'PlayerDecisionEvent', playerNumber: 1, action, eventConstraints: [] } }) as unknown as Followup;
+    const option = (followup: Followup): Move => ({ option: 0, followup, event: null, submits: false, pick: null });
+
+    expect(keys(actionArt({ ...option(decision('ActionEvent')), submits: true }))).toEqual(['StepIcon/ACTION']);
+    const both = { kind: 'AllOf', followups: [decision('MoveEvent'), decision('ActionEvent')] } as unknown as Followup;
+    expect(keys(moveArt(option(both), table))).toEqual(['StepIcon/MOVEMENT', 'StepIcon/ACTION']);
+    const twice = { kind: 'AllOf', followups: [decision('ActionEvent'), decision('ActionEvent')] } as unknown as Followup;
+    expect(keys(moveArt(option(twice), table))).toEqual(['StepIcon/ACTION']);
+    // what a grant lets him do
+    expect(art({ kind: 'GrantEvent', playerNumber: 1, grant: 'MOVE_OR_ACTION', grantedBy: null })).toEqual(['StepIcon/MOVEMENT', 'StepIcon/ACTION']);
+    expect(art({ kind: 'GrantEvent', playerNumber: 1, grant: 'ACTION', grantedBy: null })).toEqual(['StepIcon/ACTION']);
+    // what an ability of the Basestar Bridge acts on
+    expect(art({ kind: 'BasestarBridgeAbilityEvent', playerNumber: 1, ability: 'JUMP_OR_PURSUIT' })).toEqual(['StepIcon/PREPARE_FOR_JUMP']);
+    // a decision's head shows the card or the ability it comes from
+    expect(keys(actionArt({ ...option(decision('AuthorizationOfBrutalForceEvent')), submits: true }))).toEqual(['QuorumCard/AUTHORIZATION_OF_BRUTAL_FORCE']);
+    expect(keys(actionArt({ ...option(decision('HumanDelusionEvent')), submits: true }))).toEqual(['Character/player-token/CAPRICA_SIX']);
+    // an interrupt card of one type by its card, which its answers name each
+    expect(keys(actionArt({ ...option(decision('ChangeOfPlansEvent')), submits: true }))).toEqual(['SkillCardType/CHANGE_OF_PLANS_5']);
+    expect(art({ kind: 'ChangeOfPlansEvent', playerNumber: 1, changeOfPlansCard: { type: 'CHANGE_OF_PLANS', value: 5 } })).toEqual(['SkillCardType/CHANGE_OF_PLANS_5']);
+    expect(keys(actionArt({ ...option(decision('Discard1MutinyCardEvent')), submits: true }))).toEqual(['DeckId/MUTINY']);
+  });
+
+  it('show where a card goes in its deck, and the damage a battlestar takes', () => {
+    expect(art({ kind: 'PlaceDestinationCardOnTopEvent', playerNumber: 1, card: 'GAS_CLOUD' })).toEqual(['Glyph/DECK_TOP', 'DestinationCard/GAS_CLOUD']);
+    expect(art({ kind: 'PlaceCrisisCardOnBottomEvent', playerNumber: 1, card: 'RIOTS_JUMP' })).toEqual(['Glyph/DECK_BOTTOM', 'CrisisCard/RIOTS_JUMP']);
+    expect(art({ kind: 'DamageGalacticaEvent' })).toEqual(['DeckId/GALACTICA_DAMAGE']);
+    expect(art({ kind: 'DamagePegasusEvent' })).toEqual(['DeckId/PEGASUS_DAMAGE']);
   });
 
   it('show the Destination back on the choice of a destination, before the cards it names', () => {

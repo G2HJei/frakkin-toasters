@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { cardArt, characterArt, skillCardArt, titleArt, titleIcon, tokenArt, type ArtRef, type CardEnum, type TitleName, type TokenName } from '../../art/images';
 import { ArtImg, CardBack, CardTile, previewHandlers, SkillCardBack } from '../../art/Art';
+import { Glyph } from '../../art/Glyph';
 import { constantLabel, skillCardLabel } from '../../labels/describe';
 import type { HiddenCards, PlayerProjection, QuorumCardInPlay, SkillCard, SkillHand } from '../../wire/types';
 import { faceDown, useRevealHandlers, type RevealSection } from '../reveal';
@@ -130,7 +131,10 @@ function PlayerMat({ player }: { player: PlayerProjection }) {
           <SeatPresence state={table.seatState(player.number)} />
           {viewerIs(table.game, player.number) && <em className="you">you</em>}
         </header>
-        <p className="where">{player.location ? constantLabel('Location', player.location) : player.character ? 'off the board' : 'no character yet'}</p>
+        <p className="where">
+          <Glyph name="LOCATION" />
+          {player.location ? constantLabel('Location', player.location) : player.character ? 'off the board' : 'no character yet'}
+        </p>
         <Hand hand={player.skillCards} owner={player.number} />
         <div className="piles">
           <Pile label="Loyalty" cards={player.loyaltyCards} enumName="LoyaltyCard" deck="LOYALTY" owner={player.number} seen={seen} />

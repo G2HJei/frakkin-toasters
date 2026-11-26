@@ -597,6 +597,7 @@ details[open] > summary::before {
 .art-strip {
   display: inline-flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 3px;
   vertical-align: middle;
   margin-left: 0.4rem;
@@ -2082,8 +2083,12 @@ details[open] > summary::before {
   margin: 2px 0 6px;
 }
 
-.table-page .mat .where::before {
-  content: '◆ ';
+/* the map pin, as the answers mark a location (art/Glyph) */
+.table-page .mat .where .glyph {
+  width: 13px;
+  height: 13px;
+  margin-right: 3px;
+  vertical-align: -2px;
   color: var(--dradis);
 }
 

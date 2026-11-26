@@ -7,6 +7,7 @@ import cagIcon from '../table/players/icons/CAG.png';
 import presidentIcon from '../table/players/icons/PRESIDENT.png';
 import { RESOURCE_NAMES, resourceIconUrl, resourceLabel, type ResourceName } from '../table/board/resources';
 import { stepIconSvg, type TurnStep } from '../table/turn/StepIcon';
+import { glyphSvg, type GlyphName } from './Glyph';
 
 // only the folders: the full-size board scan at the root isn't for the browser (the table's board is board.jpg)
 const FILES = import.meta.glob<string>('./*/**/*.{png,jpg,gif,svg}', {
@@ -196,9 +197,22 @@ export function skillColorBackArt(color: Constant): ArtRef | null {
  * it has no preview, which would only cover the pile's popover.
  */
 export function deckBackArt(deck: Constant): ArtRef | null {
+  if (deck === 'PEGASUS_DAMAGE') {
+    return pegasusDamageBackArt();
+  }
   // the "You Are Not a Cylon" cards are Loyalty Cards, with their back
   const back = deck === 'LOYALTY_NOT_CYLON' ? 'LOYALTY' : deck;
   return back ? art(`DeckId/${back}`, constantLabel('DeckId', deck), 'back', []) : null;
+}
+
+// Pegasus' damage tokens, which the materials have no back of: drawn round like Galactica's, a fire on black
+function pegasusDamageBackArt(): ArtRef {
+  const svg =
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150">' +
+    '<radialGradient id="f"><stop offset="0" stop-color="#ffd27a"/><stop offset="0.45" stop-color="#e0531f"/><stop offset="1" stop-color="#7a1a0a" stop-opacity="0"/></radialGradient>' +
+    '<circle cx="75" cy="75" r="73" fill="#101215" stroke="#6b7682" stroke-width="2"/><circle cx="75" cy="75" r="46" fill="url(#f)"/>' +
+    '<path d="M75 37 82 62 106 52 90 72 113 80 88 86 98 110 77 94 66 116 64 90 40 98 56 79 36 64 61 64z" fill="#f08a3a" fill-opacity="0.8"/></svg>';
+  return { key: 'DeckId/PEGASUS_DAMAGE', url: `data:image/svg+xml,${encodeURIComponent(svg)}`, label: constantLabel('DeckId', 'PEGASUS_DAMAGE'), shape: 'back', preview: [] };
 }
 
 /** A resource dial set to a value, 0 to 15. */
@@ -216,10 +230,30 @@ export function resourceIconArt(resource: Constant): ArtRef | null {
   return { key: `ResourceIcon/${resource}`, url: resourceIconUrl(own), label: resourceLabel(own), shape: 'icon', preview: [] };
 }
 
+// the line icons in the resource icons' light steel
+const ICON_COLOR = '#cfe0f0';
+
 /** A step of the turn, as the turn panel draws it, in the resource icons' light steel: the step an answer acts in. */
 export function stepIconArt(step: TurnStep): ArtRef {
-  const svg = stepIconSvg(step, '#cfe0f0');
+  const svg = stepIconSvg(step, ICON_COLOR);
   return { key: `StepIcon/${step}`, url: `data:image/svg+xml,${encodeURIComponent(svg)}`, label: constantLabel('GameStep', step), shape: 'icon', preview: [] };
+}
+
+function glyphArt(key: string, name: GlyphName, label: string, preview: string[] = []): ArtRef {
+  return { key, url: `data:image/svg+xml,${encodeURIComponent(glyphSvg(name, ICON_COLOR))}`, label, shape: 'icon', preview };
+}
+
+/** The map pin, as the mats mark where a player stands: a location an answer picks or acts at, its card on hover. */
+export function locationPinArt(location?: Constant): ArtRef {
+  if (!location) {
+    return glyphArt('Glyph/LOCATION', 'LOCATION', 'Location');
+  }
+  return glyphArt(`Glyph/LOCATION/${location}`, 'LOCATION', constantLabel('Location', location), locationArt(location)?.preview);
+}
+
+/** A card put back on top of its deck, or at its bottom. */
+export function deckPlaceArt(place: 'DECK_TOP' | 'DECK_BOTTOM'): ArtRef {
+  return glyphArt(`Glyph/${place}`, place, place === 'DECK_TOP' ? 'On top of the deck' : 'At the bottom of the deck');
 }
 
 /** A track with its token at a position. */

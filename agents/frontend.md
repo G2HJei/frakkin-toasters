@@ -100,17 +100,24 @@ option of a choice, and an option that asks a decision first into one per answer
   portraits: military leader, political leader, pilot, support, Cylon Leader. The Pass is last with its icon (a
   `NoOpEvent`, or an answer that names none of what its group's others do, e.g. no interrupt card; its group then names
   the answer left by what told them apart).
-- Every other answer is a row as high as a card, its images in a slot as wide on every row (`ArtSlot`).
-  `input/answerArt.ts` picks them: what the answer names (`recordArt` with a `ValueArt`: a player as his portrait, a
-  title as its insignia with the card as preview, an ability as its character's portrait, a deck as its back, a Skill
-  Card color as a back in it, a die result as the face, a resource as the board's icon (`resourceIconArt`), ships by id,
-  no location since the board shows it), the event's `@Source`, what its kind does where its fields don't say
-  (`KIND_ART`: the deck a draw takes from, the Skill Card back for a random discard or the Destiny deck, the title a
-  Title Card action is, the Destination back on each destination, whose cards the choice shows once above its options
-  (`choiceArt`; a Crisis Card stays on each option), the Movement step's icon on a move and on the "Movement:" answers:
-  `stepIconArt` draws `StepIcon`'s markup), the back of a shape's cards (the Skill Card back for cards into a check or
-  to discard), and the miracle token last on every answer of a miracle ability. Neither the token nor a step's icon
-  moves to the group's name (`staysOnEachAnswer`).
+- Every other answer is a row as high as a card, its images in a slot as wide on every row (`ArtSlot`), and every
+  answer has one. `input/answerArt.ts` picks them: what the answer names (`recordArt` with a `ValueArt`: a player as
+  his portrait, a title as its insignia with the card as preview, an ability as its character's portrait, a deck as its
+  back, a Skill Card color as a back in it, a die result as the face, a resource as the board's icon
+  (`resourceIconArt`), ships by id, a location as the map pin with its card as preview (`locationPinArt`; not on a move
+  or a nuke, whose step icon says where), a viper's move as the Movement step), the event's `@Source` and the Quorum or
+  Mutiny Card it plays, a location's action at its pin, what its kind does where its fields don't say (`KIND_ART`: the
+  deck a draw takes from, the Skill Card back for a random discard or the Destiny deck, the title a Title Card action
+  is, the damage a battlestar takes as its tokens' back (Pegasus' drawn), a card put on top of or under its deck, the
+  Destination back on each destination, whose cards the choice shows once above its options (`choiceArt`; a Crisis Card
+  stays on each option, and an option left with nothing keeps its first image), the steps' icons (`stepIconArt` draws
+  `StepIcon`'s markup): Movement on a move and the "Movement:" answers, Action on what takes an action, the Activate
+  Cylon Ships reticle on a nuke's target), a decision an option asks by the kind it asks for ("Move, then take an
+  action"), the back of a shape's cards (the Skill Card back for cards into a check or to discard), and the miracle
+  token last on every answer of a miracle ability. Neither the token nor a step's icon moves to the group's name
+  (`staysOnEachAnswer`), and nothing does where an answer would be left without an image. Our own line icons (the pin,
+  the deck's top and bottom) are in `art/Glyph.tsx`, drawn like the steps; the mats mark a player's location with the
+  pin too.
 - A draw is a card per color that a click takes one more of, back to what every answer draws once it has the most an
   answer leaves it. What every answer draws is picked from the start (e.g. a skill set's one-color options), a color
   every answer draws as many of comes first and fixed, a color left no room is disabled in place, one no answer has isn't

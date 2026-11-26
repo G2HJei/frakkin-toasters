@@ -1,10 +1,11 @@
+import { StrokedIcon, strokedSvg } from '../../art/Glyph';
 import type { GameStep } from '../../wire/types';
 
 /** A step of a player's turn: every step but the setup. */
 export type TurnStep = Exclude<GameStep, 'SETUP'>;
 
-// drawn on a 24px grid, stroked in the step's color: markup, which the turn panel draws inline and the answers as an
-// image (`stepIconSvg`)
+// drawn on a 24px grid, stroked in the step's color (`art/Glyph`): markup, which the turn panel draws inline and the
+// answers as an image (`stepIconSvg`)
 const ICONS: Record<TurnStep, string> = {
   // a card on a deck, with a plus
   RECEIVE_SKILLS:
@@ -35,24 +36,9 @@ const ICONS: Record<TurnStep, string> = {
 
 /** A step's icon as a standalone SVG document in one color, for an image. */
 export function stepIconSvg(step: TurnStep, color: string): string {
-  return (
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="${color}" fill="none" ` +
-    `stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[step]}</svg>`
-  );
+  return strokedSvg(ICONS[step], color);
 }
 
 export function StepIcon({ step }: { step: TurnStep }) {
-  return (
-    <svg
-      className="step-icon"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      dangerouslySetInnerHTML={{ __html: ICONS[step] }}
-    />
-  );
+  return <StrokedIcon markup={ICONS[step]} className="step-icon" />;
 }

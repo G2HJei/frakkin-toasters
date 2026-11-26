@@ -151,7 +151,7 @@ function ChoiceAnswers({moves: left, narrowed, onMove}: {
                     return (
                         <section key={option} className={`answer-section ${expanded ? 'open' : ''}`.trim()}>
                             <button type="button" className="option answer-row section-head" aria-expanded={expanded}
-                                    onClick={() => setOpen(expanded ? null : option)}>
+                                    aria-label={typeLabel(action)} onClick={() => setOpen(expanded ? null : option)}>
                                 <ArtSlot refs={actionArt(own[0])}/>
                                 <span>{typeLabel(action)}</span>
                             </button>
@@ -160,7 +160,10 @@ function ChoiceAnswers({moves: left, narrowed, onMove}: {
                     );
                 }
                 const move = own[0];
-                const art = moveArt(move, table).filter((ref) => !common.has(ref.key));
+                // an option that names only what shows above keeps the first of it, e.g. the card it gives away
+                const named = moveArt(move, table);
+                const ownArt = named.filter((ref) => !common.has(ref.key));
+                const art = ownArt.length > 0 ? ownArt : named.slice(0, 1);
                 const pass = isNoOp(move);
                 return (
                     <button key={option} type="button" className={`option answer-row${pass ? ' pass' : ''}`}
@@ -277,8 +280,12 @@ function GroupView({group: listed, varying: before, onMove, untitled = false, na
     const title = groupTitle(group, table);
     const varying = before ?? varyingComponents(group);
     const arts = group.moves.map((move) => moveArt(move, table));
-    // what every answer shows goes with the group's name, but the miracle token and a move's step stay on each button
-    const common = arts[0]?.filter((ref) => !staysOnEachAnswer(ref) && arts.every((refs) => refs.some((candidate) => candidate.key === ref.key))) ?? [];
+    // what every answer shows goes with the group's name, but the miracle token and a move's step stay on each button,
+    // and all of it stays where an answer would be left without an image (e.g. the card of "Calculations" beside each
+    // change of the roll)
+    const shared = arts[0]?.filter((ref) => !staysOnEachAnswer(ref) && arts.every((refs) => refs.some((candidate) => candidate.key === ref.key))) ?? [];
+    const bare = arts.some((refs) => refs.every((ref) => shared.some((candidate) => candidate.key === ref.key)));
+    const common = bare ? [] : shared;
     const own = arts.map((refs) => refs.filter((ref) => !common.some((candidate) => candidate.key === ref.key)));
     const start = (move: Move) => (move.pick ? useSelection.getState().startPick(move) : onMove(move));
 
@@ -534,7 +541,8 @@ function PartsWidget({group, parts, onMove}: { group: MoveGroup; parts: Part[]; 
                                         disabled={!pressed && !allows(group.moves, parts, picks, part, part.values[at])}
                                         onClick={() => toggle(part, at)}
                                     >
-                                        {asTiles ? arts[0] && <ArtImg art={arts[0]}/> : <ArtSlot refs={arts}/>}
+                                        {asTiles ? arts[0] && <ArtImg art={arts[0]}/> :
+                                            <ArtSlot refs={arts} pass={part.values[at] === null}/>}
                                         <span className={asTiles ? 'pick-label' : undefined}>{label}</span>
                                     </button>
                                 );
@@ -551,7 +559,7 @@ function PartsWidget({group, parts, onMove}: { group: MoveGroup; parts: Part[]; 
                         return (
                             <button key={index} type="button" className="chip answer-row" aria-label={label}
                                     title={moveSentence(move, table)} onClick={() => onMove(move)}>
-                                <ArtSlot refs={[]}/>
+                                <ArtSlot refs={moveArt(move, table)}/>
                                 <span>{label}</span>
                             </button>
                         );
