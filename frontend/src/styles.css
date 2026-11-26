@@ -1411,13 +1411,25 @@ details[open] > summary::before {
 
 /* turn and game */
 
-/* the turn's number with the current character, and the acting one beside it when it's another: red names who acts
-   now, amber the current character while another one acts */
-.turn .turn-lines {
-  display: flex;
-  flex-wrap: wrap;
+/* the turn's number with the current character and the steps on one row: the line takes the first 70%, or 40% while
+   another character acts and his line takes the next 30%; the steps always take the last 30% */
+.turn .turn-row {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 3fr) minmax(0, 3fr);
   gap: 6px;
   margin: 0 0 8px;
+}
+
+/* red names who acts now, amber the current character while another one acts */
+.turn .turn-lines {
+  grid-column: 1 / 3;
+  display: grid;
+  grid-template-columns: subgrid;
+  margin: 0;
+}
+
+.turn .turn-line:only-child {
+  grid-column: 1 / -1;
 }
 
 /* the fill as rgba(9, 18, 34, 0.92) over the panel's gunmetal; the padding includes the edge's width */
@@ -1431,7 +1443,7 @@ details[open] > summary::before {
   gap: 8px;
   min-width: 0;
   max-width: 100%;
-  padding: 7px 16px;
+  padding: 7px 12px;
   line-height: 1.3;
 }
 
@@ -1461,34 +1473,42 @@ details[open] > summary::before {
   white-space: nowrap;
 }
 
-/* the steps as chevrons with an icon each, all named in the popover on hover; the step the turn is at takes the room
-   for its name */
+/* the steps as chevrons with an icon each, all named in the popover on hover, as high as the turn's line beside them.
+   Each chevron's notch takes the point of the one before it, 2px apart, so the icons keep the width. The step the
+   turn is at takes the room for its name where the steps have 16rem, and is only lit where they don't */
 .table-page .steps {
+  --cut: 5px;
+  container: steps / inline-size;
+  min-width: 0;
   list-style: none;
-  margin: 0 0 8px;
+  margin: 0;
   padding: 0;
   display: flex;
-  gap: 2px;
   cursor: help;
 }
 
 .table-page .steps li {
   flex: 1 1 0;
+  min-width: 0;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   min-height: 20px;
-  padding: 0 6px 0 12px;
+  padding: 0 calc(var(--cut) / 2) 0 var(--cut);
   background: #141c29;
   color: var(--steel-500);
-  clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 50%, calc(100% - 7px) 100%, 0 100%, 7px 50%);
+  clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% 50%, calc(100% - var(--cut)) 100%, 0 100%, var(--cut) 50%);
+}
+
+.table-page .steps li + li {
+  margin-left: calc(2px - var(--cut));
 }
 
 .table-page .steps li:first-child {
-  padding-left: 6px;
-  clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 50%, calc(100% - 7px) 100%, 0 100%);
+  padding-left: calc(var(--cut) / 2);
+  clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% 50%, calc(100% - var(--cut)) 100%, 0 100%);
 }
 
 .table-page .steps li.done {
@@ -1497,31 +1517,45 @@ details[open] > summary::before {
 }
 
 .table-page .steps li.now {
-  flex: 0 1 auto;
-  padding-right: 13px;
   background: var(--amber);
   color: #1b1305;
 }
 
+/* an icon gets smaller where its chevron is narrower */
 .table-page .steps .step-icon {
-  flex: none;
+  flex: 0 1 14px;
+  min-width: 0;
   width: 14px;
   height: 14px;
 }
 
+/* the names stay for screen readers */
 .table-page .steps .step-label {
-  font: 600 10px/1.05 var(--display);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.table-page .steps li:not(.now) .step-label {
   position: absolute;
   width: 1px;
   height: 1px;
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
+  font: 600 10px/1.05 var(--display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+@container steps (width >= 16rem) {
+  .table-page .steps li.now {
+    flex: 0 1 auto;
+    padding-right: calc(var(--cut) + 6px);
+  }
+
+  .table-page .steps li.now .step-label {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+  }
 }
 
 .table-page .block > small {
@@ -1719,9 +1753,44 @@ details[open] > summary::before {
   }
 }
 
-/* the left column doesn't scroll as a whole: the input panel takes what its answers need while the log keeps 15vh, and
+/* the turn and the decision are one panel drawn by two boxes, so that each sizes itself in the column: the turn keeps
+   its height while the decision gives way (below). The turn is the top, cut at the top corners, the decision the bottom
+   right under it, cut at the bottom corners, with no edge between them; both light up while the viewer is asked */
+.table-side.left > .turn-input {
+  display: contents;
+}
+
+.table-side.left > .turn-input.your-move > .cf {
+  --edge: var(--alert);
+  --bw: 2px;
+}
+
+.table-side.left > .turn-input > .turn {
+  padding-bottom: 2px;
+  clip-path: polygon(var(--c) 0, calc(100% - var(--c)) 0, 100% var(--c), 100% 100%, 0 100%, 0 var(--c));
+}
+
+.table-side.left > .turn-input > .turn::before {
+  inset: var(--bw) var(--bw) 0;
+  clip-path: polygon(var(--c) 0, calc(100% - var(--c)) 0, 100% var(--c), 100% 100%, 0 100%, 0 var(--c));
+}
+
+/* the column's gap taken back, and 1px more: where the boxes met on a fraction of a pixel, the space behind showed
+   through their smoothed edges as a line */
+.table-side.left > .turn-input > .input-panel {
+  margin-top: -13px;
+  padding-top: 5px;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%, var(--c) 100%, 0 calc(100% - var(--c)));
+}
+
+.table-side.left > .turn-input > .input-panel::before {
+  inset: 0 var(--bw) var(--bw);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%, var(--c) 100%, 0 calc(100% - var(--c)));
+}
+
+/* the left column doesn't scroll as a whole: the decision takes what its answers need while the log keeps 15vh, and
    scrolls inside its body past that; the log takes the rest */
-.table-side.left > .input-panel {
+.table-side.left > .turn-input > .input-panel {
   flex: 0 1 auto;
   /* it gives way down to 12rem (its content, when that is less), so a tall turn panel can't squeeze it away; where
      even that doesn't fit, the column scrolls. Without calc-size() it gives way entirely */
@@ -1753,7 +1822,8 @@ details[open] > summary::before {
 }
 
 @media (max-width: 1100px) {
-  .table-side.left > :is(.input-panel, .log) {
+  .table-side.left > .turn-input > .input-panel,
+  .table-side.left > .log {
     flex: none;
   }
 

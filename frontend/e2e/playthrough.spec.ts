@@ -71,13 +71,15 @@ function generator(seed: number): (n: number) => number {
   };
 }
 
-// One answer: now and then another section of a choice, then an answer at random; a counter is counted up to an answer,
-// an answer of parts built part by part and a picker filled until it may be sent.
+// One answer: a section of a choice opened at random while all are closed, as they start, and now and then another,
+// then an answer at random; a counter is counted up to an answer, an answer of parts built part by part and a picker
+// filled until it may be sent.
 async function answer(page: Page, random: (n: number) => number) {
   const answers = input(page).getByRole('group', { name: 'answers' });
   const heads = answers.locator('button.section-head');
   const headCount = await heads.count();
-  if (headCount > 1 && random(3) === 0) {
+  const opened = await answers.locator('button.section-head[aria-expanded="true"]').count();
+  if (headCount > 0 && (opened === 0 || (headCount > 1 && random(3) === 0))) {
     const head = heads.nth(random(headCount));
     if ((await head.getAttribute('aria-expanded')) === 'false') {
       await head.click();

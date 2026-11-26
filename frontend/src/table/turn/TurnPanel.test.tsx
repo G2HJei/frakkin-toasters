@@ -30,16 +30,24 @@ describe('the turn', () => {
   it("names the current character after the turn's number, in red while he acts", () => {
     const panel = renderPanel({ step: 'CRISIS', currentPlayer: 1, actingPlayer: 1 });
 
-    expect(turnLines(panel)).toEqual([['Turn 4William Adama', true]]);
+    expect(turnLines(panel)).toEqual([['T4William Adama', true]]);
   });
 
-  it('names the acting character in red beside the current one, in amber, when it is another', () => {
+  it('names the acting character in red beside the current one, in amber, when it is another, with no word before him', () => {
     const panel = renderPanel({ step: 'ACTION', currentPlayer: 1, actingPlayer: 2 });
 
     expect(turnLines(panel)).toEqual([
-      ['Turn 4William Adama', false],
-      ['ActingLaura Roslin', true],
+      ['T4William Adama', false],
+      ['Laura Roslin', true],
     ]);
+    // the lines share a row with the steps; their titles and the heading's name say what the lines are, and the titles
+    // name the characters where the lines cut the names short
+    expect(panel.querySelector('.turn-row > h2 + .steps')).not.toBeNull();
+    expect([...panel.querySelectorAll('h2 .turn-line')].map((line) => line.getAttribute('title'))).toEqual([
+      'Turn 4, current player: William Adama',
+      'acting player: Laura Roslin',
+    ]);
+    expect(panel.querySelector('h2')).toHaveAttribute('aria-label', 'Turn 4: William Adama, acting: Laura Roslin');
   });
 
   it('names an alternate character without his version', () => {
@@ -50,8 +58,8 @@ describe('the turn', () => {
     const panel = renderPanel({ step: 'ACTION', currentPlayer: 1, actingPlayer: 2 }, { players: alternates });
 
     expect(turnLines(panel)).toEqual([
-      ['Turn 4Tom Zarek', false],
-      ['ActingKarl "Helo" Agathon', true],
+      ['T4Tom Zarek', false],
+      ['Karl "Helo" Agathon', true],
     ]);
   });
 

@@ -112,7 +112,8 @@ function SelectionBar({count}: { count: number }) {
     );
 }
 
-// The options in their order: an option that asks a decision is a section of its answers, the first one open.
+// The options in their order: an option that asks a decision is a section of its answers, every one closed until it is
+// clicked or the board's picks narrow to it.
 function ChoiceAnswers({moves: left, narrowed, onMove}: {
     moves: Move[];
     narrowed: boolean;
@@ -123,8 +124,7 @@ function ChoiceAnswers({moves: left, narrowed, onMove}: {
     const listed = [...new Set(left.map((move) => move.option as number))];
     const passes = (option: number) => left.some((move) => move.option === option && isNoOp(move));
     const options = [...listed.filter((option) => !passes(option)), ...listed.filter(passes)];
-    const sections = options.filter((option) => left.some((move) => move.option === option && move.submits));
-    const [open, setOpen] = useState<number | null>(sections[0] ?? null);
+    const [open, setOpen] = useState<number | null>(null);
     // what every option names shows once above them (the Destination Cards drawn), not on each
     const common = new Set(choiceArt(table.game?.input?.kind === 'Choose' ? (table.game.input.options ?? []) : []).map((ref) => ref.key));
     const products = productOptions(left);

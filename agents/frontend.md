@@ -94,8 +94,8 @@ option of a choice, and an option that asks a decision first into one per answer
   game, the same player, a decision whose answers `cover` it), then keeps it as `sent` until the game after (the input
   panel is `aria-busy` meanwhile). An update with an `automatic` scope of its player drops it: the server took that only
   answer itself.
-- `AnswerPanel` shows a choice's options in order, an option's decision as a section of its answers (the first one
-  open), the answers grouped by kind (`groupMoves`; a group's moves differ in `varyingComponents`, worded by
+- `AnswerPanel` shows a choice's options in order, an option's decision as a section of its answers (all closed
+  until clicked, or until the board's picks narrow to one), the answers grouped by kind (`groupMoves`; a group's moves differ in `varyingComponents`, worded by
   `moveLabels.ts`). The characters to choose (`SelectCharacterEvent`) lie by pool, side by side as large as their
   portraits: military leader, political leader, pilot, support, Cylon Leader. The Pass is last with its icon (a
   `NoOpEvent`, or an answer that names none of what its group's others do, e.g. no interrupt card; its group then names
@@ -148,5 +148,6 @@ allows it, and points it at the game when the request answers. A sandbox's "Rest
   an observer's message, a player who goes away, a vote and the host's hand-over of the seat to the observer, who sees it
   as hers, and the host's abandon, which shows everyone the results.
 - `playthrough.spec.ts` plays a seeded four-player sandbox (`PLAYTHROUGH_SEED`, 7 by default) to an ending through the
-  answers alone, picked at random from a seeded generator (options, answers by kind, counters, parts, pickers), so an
+  answers alone, picked at random from a seeded generator (a choice's sections, which start closed, options, answers by
+  kind, counters, parts, pickers), so an
   input without answers fails it. It takes minutes.

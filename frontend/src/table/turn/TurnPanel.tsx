@@ -17,10 +17,11 @@ const STEPS: TurnStep[] = ['RECEIVE_SKILLS', 'MOVEMENT', 'ACTION', 'CRISIS', 'AC
 
 /**
  * The game, named after the logo on the panel's tab, with the connection beside it while it isn't open, and the turn
- * once one has started: the turn's number with the current character, and the acting one beside it when it's another, the steps
- * as icons (the step the turn is at named beside its icon), then the turn's Crisis Cards and the card of a skill check
- * about none of them at full size, with the rest beside them: the skill check, the die and an open interrupt window.
- * What left the game is in the reference.
+ * once one has started: on one row the turn's number ("T4") with the current character, and the acting one beside it
+ * when it's another, then the steps as icons (the step the turn is at named beside its icon where they have room), then the
+ * turn's Crisis Cards and the card of a skill check about none of them at full size, with the rest beside them: the
+ * skill check, the die and an open interrupt window. What left the game is in the reference. The decision
+ * (`InputPanel`) is the panel's lower part.
  */
 export function TurnPanel({ name, connection }: { name: string; connection: ConnectionState }) {
   const table = useTable();
@@ -54,22 +55,30 @@ export function TurnPanel({ name, connection }: { name: string; connection: Conn
         </span>
       </div>
       {turn && (
-        <>
-          {/* red names the character acting now: the current one, or the other one beside him, who is then amber */}
-          <h2 className="turn-lines">
-            <span className={`turn-line ${otherActs ? '' : 'acting'}`.trim()} title={otherActs ? 'current player' : 'current and acting player'}>
-              <span>Turn {turn.number}</span>
+        // one row: the turn's line, the acting character's beside it when it's another, and the steps
+        <div className="turn-row">
+          {/* red names the character acting now: the current one, or the other one beside him, who is then amber. The
+              lines say only "T4" and the names, so the titles and the heading's name say what they are, and the titles
+              name the character too where his line cuts the name short */}
+          <h2
+            className="turn-lines"
+            aria-label={`Turn ${turn.number}: ${turnName(turn.currentPlayer)}${otherActs ? `, acting: ${turnName(turn.actingPlayer)}` : ''}`}
+          >
+            <span
+              className={`turn-line ${otherActs ? '' : 'acting'}`.trim()}
+              title={`Turn ${turn.number}, ${otherActs ? 'current player' : 'current and acting player'}: ${turnName(turn.currentPlayer)}`}
+            >
+              <span>T{turn.number}</span>
               <strong>{turnName(turn.currentPlayer)}</strong>
             </span>
             {otherActs && (
-              <span className="turn-line acting" title="acting player">
-                <span>Acting</span>
+              <span className="turn-line acting" title={`acting player: ${turnName(turn.actingPlayer)}`}>
                 <strong>{turnName(turn.actingPlayer)}</strong>
               </span>
             )}
           </h2>
           <Steps step={turn.step} />
-        </>
+        </div>
       )}
       {turn && (turn.endedEarly || turn.returnsToCrisisStep) && (
         <p className="note">
@@ -144,7 +153,8 @@ export function TurnPanel({ name, connection }: { name: string; connection: Conn
   );
 }
 
-// The steps as icons, the step the turn is at named beside its icon. Hovering lists every step with its name.
+// The steps as icons, the step the turn is at named beside its icon where they have room. Hovering lists every step
+// with its name.
 function Steps({ step }: { step: string | null }) {
   const at = STEPS.findIndex((stepName) => stepName === step);
   const sections: RevealSection[] = [

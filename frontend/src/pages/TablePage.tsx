@@ -213,8 +213,11 @@ function LiveTable({ gameId, room, myId, userNames, seatStates }: LiveTableProps
           ) : (
             <div className="table-main">
               <div className="table-side left">
-                <TurnPanel name={name} connection={connection} />
-                <InputPanel onMove={sendMove} />
+                {/* the turn and the decision in one panel, red while the game waits for the viewer */}
+                <div className={`turn-input ${yourMove ? 'your-move' : ''}`.trim()}>
+                  <TurnPanel name={name} connection={connection} />
+                  <InputPanel onMove={sendMove} />
+                </div>
                 <AnytimePanel
                   onSubmit={(event) => {
                     decided();

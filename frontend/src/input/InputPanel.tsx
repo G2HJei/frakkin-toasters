@@ -48,7 +48,8 @@ export function InputPanel({ onMove }: InputPanelProps) {
     }
   }, [version]);
   return (
-    <section className={`panel cf input-panel ${yourMove ? 'your-move' : ''} ${sending ? 'sending' : ''}`.trim()} aria-label="input" aria-busy={sending}>
+    // the lower part of the turn's panel, which lights up while the viewer is asked (TablePage)
+    <section className={`panel cf input-panel ${sending ? 'sending' : ''}`.trim()} aria-label="input" aria-busy={sending}>
       <div className="input-head">
         <h2>{pause.heading}</h2>
         {(pause.line || ruleFor(input)) && (

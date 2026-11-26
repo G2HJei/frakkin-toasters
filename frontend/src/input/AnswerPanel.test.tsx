@@ -30,7 +30,7 @@ const decision = (action: string) => ({ kind: 'Single', event: { kind: 'PlayerDe
 beforeEach(() => useSelection.getState().clear());
 
 describe('the answers', () => {
-  it("unfold the Action step's action, and send an answer with its option", () => {
+  it("unfold the Action step's action on a click, and send an answer with its option", () => {
     const order = { kind: 'ExecutiveOrderEvent', playerNumber: 1, card: card('EXECUTIVE_ORDER', 2), targetPlayerNumber: 2 };
     const { onMove } = renderPanel(
       game({
@@ -41,6 +41,10 @@ describe('the answers', () => {
       }),
     );
 
+    // every section starts closed
+    expect(screen.getByRole('button', { name: 'Take an action' })).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByRole('button', { name: /Executive Order/ })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Take an action' }));
     expect(screen.getByRole('button', { name: 'Take an action' })).toHaveAttribute('aria-expanded', 'true');
     fireEvent.click(screen.getByRole('button', { name: /Executive Order/ }));
     expect(onMove).toHaveBeenCalledWith(expect.objectContaining({ option: 0, submits: true, event: order }), order);
@@ -337,6 +341,7 @@ describe('the answers', () => {
     );
 
     expect(images(container.querySelector('button.section-head')!)).toEqual(['StepIcon/MOVEMENT']);
+    fireEvent.click(container.querySelector('button.section-head')!);
     const rows = [...container.querySelectorAll('.answer-section .chips button.answer-row')];
     expect(rows.map(images)).toEqual([['StepIcon/MOVEMENT'], ['StepIcon/MOVEMENT', 'SkillCardType/REPAIR_1']]);
   });
@@ -379,6 +384,7 @@ describe('the answers', () => {
       }),
     );
 
+    fireEvent.click(screen.getByRole('button', { name: 'Take an action' }));
     expect(container.querySelectorAll('button.answer-row.pass')).toHaveLength(1);
     fireEvent.click(screen.getByRole('button', { name: 'Repair' }));
     expect(onMove).toHaveBeenCalledWith(expect.objectContaining({ option: 0, event: repair([]) }), repair([]));

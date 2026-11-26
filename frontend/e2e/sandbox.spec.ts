@@ -29,12 +29,13 @@ test('a seeded sandbox is played through a turn, undone, exported and imported',
 
   // turn 1: Adama draws, moves to the Research Lab, stacks a Crisis Card, draws there, and resolves the stacked card
   // his skill set leaves one draw, which the game takes for him and logs as taken
-  await expectTurn(page, 'Turn 1 · William Adama', 'Movement');
+  await expectTurn(page, 'T1 · William Adama', 'Movement');
   // the line after its player's name
   const automatic = page.getByRole('region', { name: 'log' }).locator('.scope', { has: page.locator('.auto-icon') }).last();
   await expect(automatic).toContainText('draws');
   await expect(automatic.locator('.actor')).toHaveText('William Adama');
-  // the Movement step opens the move: its destinations are the answers
+  // the Movement step's move opens on a click: its destinations are the answers
+  await openSection(page, 'Move');
   await answer(page, 'Research Lab');
   await page.getByRole('region', { name: 'sandbox' }).locator('summary', { hasText: 'Setup' }).click();
   await page.getByLabel('setup').selectOption('PutCrisisCardOnTopEvent');
@@ -43,23 +44,23 @@ test('a seeded sandbox is played through a turn, undone, exported and imported',
   // the sandbox shows the Crisis deck's draw pile on hover, top first
   await page.locator('[data-reveal="deck-CRISIS"]').hover();
   await expect(page.locator('.reveal-pop ol.pile li img').first()).toHaveAttribute('alt', 'Riots No Jump');
-  // the Action step opens the action: the Research Lab's colors
-  await expect(input(page).getByRole('button', { name: 'Take an action' })).toHaveAttribute('aria-expanded', 'true');
+  // the Action step's action opens on a click: the Research Lab's colors
+  await openSection(page, 'Take an action');
   await answer(page, 'Engineering');
   // "Secret Destiny": Starbuck lets the revealed card resolve
   await input(page).getByRole('button', { name: /Let Riots No Jump resolve/ }).click();
   await input(page).getByRole('button', { name: /top option of Riots No Jump/ }).click();
 
-  await expectTurn(page, 'Turn 2 · Laura Roslin', 'Movement');
+  await expectTurn(page, 'T2 · Laura Roslin', 'Movement');
   await expect(resource(page, 'Food')).toHaveAttribute('aria-label', 'Food: 7');
   await expect(resource(page, 'Morale')).toHaveAttribute('aria-label', 'Morale: 9');
 
   // undo goes back to the section, and the same answer gives the same game
   await page.getByRole('button', { name: 'Undo' }).click();
-  await expectTurn(page, 'Turn 1 · William Adama', 'Crisis');
+  await expectTurn(page, 'T1 · William Adama', 'Crisis');
   await expect(resource(page, 'Food')).toHaveAttribute('aria-label', 'Food: 8');
   await input(page).getByRole('button', { name: /top option of Riots No Jump/ }).click();
-  await expectTurn(page, 'Turn 2 · Laura Roslin', 'Movement');
+  await expectTurn(page, 'T2 · Laura Roslin', 'Movement');
   await expect(resource(page, 'Food')).toHaveAttribute('aria-label', 'Food: 7');
 
   // export, then import as a new sandbox: the same game
@@ -69,7 +70,7 @@ test('a seeded sandbox is played through a turn, undone, exported and imported',
   await lobby.goto('/sandbox/new');
   const file = { name: 'sandbox.json', mimeType: 'application/json', buffer: await exported.body() };
   page = await openGame(lobby, (from) => from.getByLabel('journal file').setInputFiles(file));
-  await expectTurn(page, 'Turn 2 · Laura Roslin', 'Movement');
+  await expectTurn(page, 'T2 · Laura Roslin', 'Movement');
   await expect(resource(page, 'Food')).toHaveAttribute('aria-label', 'Food: 7');
   await expect(input(page).getByRole('heading')).toHaveText('Laura Roslin chooses');
 });
@@ -84,6 +85,14 @@ async function answer(page: Page, name: string) {
   await input(page).getByRole('group', { name: 'answers' }).getByRole('button', { name, exact: true }).click();
   await expect(input(page).getByRole('alert')).toHaveCount(0);
   await expect.poll(async () => page.evaluate(() => document.querySelector('[aria-label="input"]')?.innerHTML ?? '')).not.toBe(before);
+}
+
+// opens a choice's section, which starts closed, so its answers show. Its name has its icon's too, so its words find it
+async function openSection(page: Page, name: string) {
+  const head = input(page).getByRole('group', { name: 'answers' }).locator('button.section-head', { hasText: name });
+  await expect(head).toHaveAttribute('aria-expanded', 'false');
+  await head.click();
+  await expect(head).toHaveAttribute('aria-expanded', 'true');
 }
 
 // a draw counts the cards of each color, from what every answer has (e.g. Laura Roslin's 1 Politics of 3), a click on

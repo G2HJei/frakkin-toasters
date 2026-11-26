@@ -8,13 +8,18 @@ The game page (`TablePage`) and what it draws. The rest of the frontend is in [f
   board's width follows its height), and a column on each side that scrolls on its own. Under 1100px the board goes
   across the width and the panels under it. The styles are the "table" section of `styles.css`: the board's palette,
   cut corners (`.cf`, `--chamfer`) and the printed-label look.
-- Left column: the game and the turn (`TurnPanel`: its tab names the game, with the connection beside it while it isn't
-  open; the turn's number and the current character in a banner, red while he acts, otherwise amber with a red one of
-  the acting character beside it; the skill check under the turn's Crisis Card), the decision (`InputPanel`) and its
-  prompts, then the log. The decision takes the height its answers need while the log keeps 15vh, and scrolls inside its
-  body past that (under its heading and pause line, down to 12rem); the log takes the rest and scrolls inside its body.
-  The left column never scrolls as a whole, and the board's "your move" glow is clipped so the page never does. Neither
-  panel has a title.
+- Left column: one panel for the game, the turn and the decision, the "At any time" panel while there is something to
+  do, then the log. The panel's top is `TurnPanel`: its tab names the game, with the connection beside it while it isn't
+  open; one row with the turn's number ("T4") and the current character in a banner (70%), red while he acts, otherwise
+  amber (40%) with a red one of only the acting character's name beside it (30%; the titles and the heading's
+  `aria-label` say which is which), and the steps in the last 30% (only the step the turn is at is lit, named where the
+  steps have 16rem, a container query); the skill check under the turn's Crisis Card. Its bottom is the decision
+  (`InputPanel`) and its prompts. The two are separate boxes drawn as one (`.turn-input` is `display: contents`, each box
+  cut at its own corners), so each sizes itself in the column, and the whole panel's edge is red while the viewer is
+  asked. The decision takes the height its answers need while the log keeps 15vh, and scrolls
+  inside its body past that (under its heading and pause line, down to 12rem); the log takes the rest and scrolls inside
+  its body. The left column never scrolls as a whole, and the board's "your move" glow is clipped so the page never
+  does. No panel has a title.
 - Right column: the sandbox's tools in a sandbox, or the seats of a standard game (`table/session/SessionPanel`, open
   while a seat is vacant or a vote is open: each seat's character and user, "Take this seat" for whoever holds none,
   votes to hand a seat over or to abandon with their tally, the host's "Hand over", "Ban" and "Abandon the game", which
