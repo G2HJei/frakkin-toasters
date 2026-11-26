@@ -150,7 +150,7 @@ only kind left, or the only one naming any; the Action step lights none), the "A
 click picks its kind), and the asked player's cards that start a move (`Playable` on his mat; a sandbox shows the asked
 player's own cards face up). A player target lights his standee and his mat. A click picks the target: the only move
 left is sent, a shape opens its picker in the panel, and several stay in the panel and in `AnswerPopover` next to the
-click (e.g. a viper's activations, a card's targets). A lit target's `<title>` says what clicking does. A group's title
+click (e.g. a viper's activations, a card's targets). A lit target's `<title>` says what clicking does. A group's row
 in the panel picks its kind, so the board lights its targets.
 
 ## Hover

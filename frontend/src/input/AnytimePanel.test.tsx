@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { AnytimePanel } from './AnytimePanel';
+import { useSelection } from './selection';
 import { Table, tableContext } from '../table/tableContext';
 import type { GameProjection } from '../wire/types';
 
@@ -38,6 +39,18 @@ describe('acting at any time', () => {
     fireEvent.click(screen.getByRole('button', { name: /End the Chase/ }));
 
     expect(onSubmit).toHaveBeenCalledWith(reveal);
+  });
+
+  it('opens a group among others in place, where the picks narrow nothing', () => {
+    const both = [{ player: 2, answers: { events: [reveal, { ...reveal, card: 'KEEP_THEM_DOCILE' }, { kind: 'RevealCylonEvent', playerNumber: 2, card: null }], shapes: [] } }];
+    renderPanel(game({ kind: 'PlayerViewer', playerNumber: 2 }, both));
+
+    expect(screen.queryByRole('button', { name: /End the Chase/ })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Reveal a Motive Card' }));
+    expect(useSelection.getState().picked).toEqual([]);
+    expect(screen.getByRole('button', { name: /End the Chase/ })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Back to the answers' }));
+    expect(screen.getByRole('button', { name: 'Reveal a Motive Card' })).toBeTruthy();
   });
 
   it('shows nothing while the engine lists nothing, Motive Cards in hand or not', () => {

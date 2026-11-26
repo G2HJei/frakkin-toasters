@@ -29,7 +29,8 @@ export function AnytimePanel({ onSubmit }: AnytimePanelProps) {
         <div key={player} role="group" aria-label={table.playerName(player)}>
           {/* a sandbox acts for every seat */}
           {sandbox && <p className="pool-name">{table.playerName(player)}</p>}
-          <Groups moves={moves} onMove={(move) => move.event && onSubmit(move.event)} />
+          {/* the picks don't narrow these: a group opens here */}
+          <Groups moves={moves} onMove={(move) => move.event && onSubmit(move.event)} openInPlace />
         </div>
       ))}
     </section>

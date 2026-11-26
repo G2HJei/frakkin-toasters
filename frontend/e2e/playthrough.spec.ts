@@ -72,8 +72,8 @@ function generator(seed: number): (n: number) => number {
 }
 
 // One answer: a section of a choice opened at random while all are closed, as they start, and now and then another,
-// then an answer at random; a counter is counted up to an answer, an answer of parts built part by part and a picker
-// filled until it may be sent.
+// then an answer at random, or a group's row that opens its answers; a counter is counted up to an answer, an answer of
+// parts built part by part and a picker filled until it may be sent.
 async function answer(page: Page, random: (n: number) => number) {
   const answers = input(page).getByRole('group', { name: 'answers' });
   const heads = answers.locator('button.section-head');
@@ -85,8 +85,11 @@ async function answer(page: Page, random: (n: number) => number) {
       await head.click();
     }
   }
-  // a part's value only picks, it sends nothing; a decision's pass stands after its groups
-  const candidates = answers.locator('button.answer, button.chip:not(.part-value), button.pass, .options > button.option:not(.section-head)');
+  // a part's value only picks, it sends nothing; a decision's pass stands after its groups; a group's row opens its
+  // answers, which the next pause picks from
+  const candidates = answers.locator(
+    'button.answer, button.chip:not(.part-value), button.pass, button.group-row, .options > button.option:not(.section-head)',
+  );
   const count = await candidates.count();
   const counters = answers.locator('.counts-widget');
   if ((await counters.count()) > 0 && (count === 0 || random(2) === 0)) {

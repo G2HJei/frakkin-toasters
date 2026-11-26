@@ -74,7 +74,7 @@ describe("an answer's images", () => {
     expect(art({ kind: 'ResearchLabEvent', playerNumber: 1, skillCardColor: 'TACTICS' })).toEqual(['Glyph/LOCATION/RESEARCH_LAB', 'SkillCardColor/TACTICS']);
   });
 
-  it('show a location to pick as the map pin, with its card on hover, but a move and a nuke by their step', () => {
+  it('show a location to pick as the map pin, with its card on hover, but a move by its step', () => {
     const [pin] = moveArt(answer({ kind: 'PlaceInSetupLocationEvent', playerNumber: 1, location: 'COMMAND' }), table);
 
     expect(pin).toMatchObject({ key: 'Glyph/LOCATION/COMMAND', shape: 'icon', label: 'Command' });
@@ -83,7 +83,8 @@ describe("an answer's images", () => {
       'ShipType/CIVILIAN',
       'Glyph/LOCATION/GALACTICA_SPACE_2_OCLOCK',
     ]);
-    expect(art({ kind: 'LaunchNukeEvent', playerNumber: 1, area: 'GALACTICA_SPACE_2_OCLOCK' })).toEqual(['TitleIcon/ADMIRAL', 'Token/NUKE', 'StepIcon/ACTIVATE_CYLON_SHIPS']);
+    // a nuke's target at the pin
+    expect(art({ kind: 'LaunchNukeEvent', playerNumber: 1, area: 'GALACTICA_SPACE_2_OCLOCK' })).toEqual(['Token/NUKE', 'Glyph/LOCATION/GALACTICA_SPACE_2_OCLOCK']);
     // a viper's move by the Movement step, its launch at the pin
     const withShips = { ...table, ship: (id: number) => ({ id, type: 'VIPER' }) as unknown as ShipProjection };
     const activation = { launchShipType: null, launchLocation: null, humanFighterId: 3, moveLocation: 'GALACTICA_SPACE_4_OCLOCK', attackCylonShipId: null, escortCivilianShipId: null };

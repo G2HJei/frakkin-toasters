@@ -36,7 +36,8 @@ export function AnswerPopover({ onMove }: { onMove(move: Move, event: Answer | n
           Clear
         </button>
       </div>
-      <Groups moves={left} onMove={send} />
+      {/* a group opens here, next to the click */}
+      <Groups moves={left} onMove={send} onOpen={(kind) => useSelection.getState().pick({ type: 'kind', kind }, anchor)} />
     </div>
   );
 }

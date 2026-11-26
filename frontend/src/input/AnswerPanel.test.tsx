@@ -439,6 +439,28 @@ describe('the answers', () => {
     expect(answers.map(images)).toEqual([['SkillCardType/CALCULATIONS_3'], ['SkillCardType/CALCULATIONS_3']]);
   });
 
+  it('show a group among other answers as a row that opens it, its answers on the next step', () => {
+    const nuke = (area: string) => ({ kind: 'LaunchNukeEvent', playerNumber: 1, area });
+    const order = { kind: 'ExecutiveOrderEvent', playerNumber: 1, card: card('EXECUTIVE_ORDER', 2), targetPlayerNumber: 2 };
+    const images = (element: Element) => [...element.querySelectorAll('img')].map((image) => image.getAttribute('data-art'));
+    const events = [nuke('GALACTICA_SPACE_2_OCLOCK'), nuke('GALACTICA_SPACE_4_OCLOCK'), order];
+    renderPanel(game({ kind: 'Decide', player: 1, action: 'ActionEvent', constraints: [], answers: { events, shapes: [] } }));
+
+    // no targets yet: the nukes are one row, with what every one shows and the step still to come
+    expect(screen.queryByRole('button', { name: /2 o'clock/ })).toBeNull();
+    const row = screen.getByRole('button', { name: 'Launch a nuke' });
+    expect(images(row)).toEqual(['Token/NUKE']);
+    expect(row.querySelector('.next-icon')).not.toBeNull();
+
+    // its kind is picked, so the board lights the targets too
+    fireEvent.click(row);
+    expect(useSelection.getState().picked).toEqual([{ type: 'kind', kind: 'LaunchNukeEvent' }]);
+    expect(screen.queryByRole('button', { name: /Executive Order/ })).toBeNull();
+    expect(images(screen.getByRole('button', { name: /2 o'clock/ }))).toEqual(['Glyph/LOCATION/GALACTICA_SPACE_2_OCLOCK']);
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    expect(screen.getByRole('button', { name: 'Launch a nuke' })).toBeInTheDocument();
+  });
+
   it('show only what the picks on the board left, with a way back', () => {
     const move = (destination: string) => ({ kind: 'MoveEvent', playerNumber: 1, destination, discardCard: null });
     renderPanel(game({ kind: 'Decide', player: 1, action: 'MoveEvent', constraints: [], answers: { events: [move('ARMORY'), move('ADMIRALS_QUARTERS')], shapes: [] } }));

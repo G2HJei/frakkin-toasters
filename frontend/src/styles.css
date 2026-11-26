@@ -2453,6 +2453,13 @@ details[open] > summary::before {
   text-align: left;
 }
 
+/* a group's row: its answers come next (input/ArtSlot.tsx) */
+.answer-row .next-icon {
+  flex: none;
+  margin-left: auto;
+  color: var(--steel-300, var(--muted));
+}
+
 .art-slot {
   flex: none;
   display: flex;

@@ -44,8 +44,9 @@ test('a seeded sandbox is played through a turn, undone, exported and imported',
   // the sandbox shows the Crisis deck's draw pile on hover, top first
   await page.locator('[data-reveal="deck-CRISIS"]').hover();
   await expect(page.locator('.reveal-pop ol.pile li img').first()).toHaveAttribute('alt', 'Riots No Jump');
-  // the Action step's action opens on a click: the Research Lab's colors
+  // the Action step's action opens on a click, and the Research Lab's row on another: its colors
   await openSection(page, 'Take an action');
+  await openGroup(page, 'Research Lab');
   await answer(page, 'Engineering');
   // "Secret Destiny": Starbuck lets the revealed card resolve
   await input(page).getByRole('button', { name: /Let Riots No Jump resolve/ }).click();
@@ -93,6 +94,12 @@ async function openSection(page: Page, name: string) {
   await expect(head).toHaveAttribute('aria-expanded', 'false');
   await head.click();
   await expect(head).toHaveAttribute('aria-expanded', 'true');
+}
+
+// opens a group's row among the answers: its answers come next
+async function openGroup(page: Page, name: string) {
+  await input(page).getByRole('group', { name: 'answers' }).locator('button.group-row').getByText(name, { exact: true }).click();
+  await expect(input(page).locator('.answer-group .group-title', { hasText: name })).toBeVisible();
 }
 
 // a draw counts the cards of each color, from what every answer has (e.g. Laura Roslin's 1 Politics of 3), a click on

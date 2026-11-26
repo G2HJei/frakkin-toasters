@@ -1,9 +1,9 @@
 import {useState} from 'react';
 import {ArtImg, ArtStrip, CardBack} from '../art/Art';
 import {type ArtRef, CARD_ENUMS, skillCardArt} from '../art/images';
-import {choiceArt} from '../art/refs';
+import {choiceArt, unique} from '../art/refs';
 import {actionArt, isNoOp, moveArt, partValueArt, staysOnEachAnswer} from './answerArt';
-import {ArtSlot} from './ArtSlot';
+import {ArtSlot, NextIcon} from './ArtSlot';
 import {constantLabel, optionEventParts, skillCardLabel, typeLabel, valueLabel} from '../labels/describe';
 import {partArt, Words} from '../art/Words';
 import {useTable} from '../table/tableContext';
@@ -134,6 +134,13 @@ function ChoiceAnswers({moves: left, narrowed, onMove}: {
                 // options that are a product of their parts, e.g. every pair of damage tokens, are picked part by part where
                 // the first of them is
                 const product = products.find((candidate) => candidate.options.has(option));
+                if (product && product.first === option && product.group.kind && options.length > product.options.size) {
+                    // among other options it is a row that opens it
+                    const kind = product.group.kind;
+                    return <GroupRow key={option} group={product.group}
+                                     art={groupArt(product.group.moves.map((move) => moveArt(move, table)))}
+                                     onOpen={() => pickKind(kind)}/>;
+                }
                 if (product) {
                     return product.first === option ? (
                         <div key={option} className="answer-group" data-kind={product.group.kind ?? undefined}>
@@ -202,10 +209,25 @@ function productOptions(left: Move[]): ProductOptions[] {
     });
 }
 
-// A section's lone group doesn't repeat the section's name. The passes come last, after every group, each named after
-// what it passes on when there are several.
-export function Groups({moves: left, onMove, section}: { moves: Move[]; onMove(move: Move): void; section?: string }) {
+// the default way to open a group: its kind is picked, so the panel shows only it and the board lights its targets
+const pickKind = (kind: string) => useSelection.getState().pick({type: 'kind', kind});
+
+/**
+ * The answers by group. A group among others is a row that opens it, and its answers come next; a group alone shows
+ * them. A section's lone group doesn't repeat the section's name. The passes come last, after every group, each named
+ * after what it passes on when there are several.
+ */
+export function Groups({moves: left, onMove, section, onOpen = pickKind, openInPlace = false}: {
+    moves: Move[];
+    onMove(move: Move): void;
+    section?: string;
+    // opens a group by its kind, e.g. with the anchor of the popover that shows it
+    onOpen?(kind: string): void;
+    // opens a group here instead, where the picks don't narrow the answers (the anytime panel)
+    openInPlace?: boolean;
+}) {
     const table = useTable();
+    const [opened, setOpened] = useState<string | null>(null);
     const listed = groupMoves(left);
     const passing = listed.flatMap((group) => passesOf(group, table).map((move) => ({move, title: groupTitle(group, table)})));
     // a group keeps what told its answers apart from its pass, e.g. the card of an interrupt card's play
@@ -216,6 +238,20 @@ export function Groups({moves: left, onMove, section}: { moves: Move[]; onMove(m
         })
         .filter(({group}) => group.moves.length > 0);
     const named = new Set(passing.map((pass) => pass.title)).size > 1;
+    const inPlace = openInPlace ? groups.find(({group}) => group.key === opened) : undefined;
+    if (inPlace) {
+        return (
+            <div className="answer-groups">
+                <div className="selection-bar">
+                    <button type="button" className="link" onClick={() => setOpened(null)}>
+                        Back to the answers
+                    </button>
+                </div>
+                <GroupView group={inPlace.group} varying={inPlace.varying} onMove={onMove}/>
+            </div>
+        );
+    }
+    const open = (group: MoveGroup) => (openInPlace ? setOpened(group.key) : group.kind && onOpen(group.kind));
     return (
         <div className="answer-groups">
             {groups.map(({group, varying}) => (
@@ -225,7 +261,7 @@ export function Groups({moves: left, onMove, section}: { moves: Move[]; onMove(m
                     varying={varying}
                     onMove={onMove}
                     untitled={groups.length === 1 && groupTitle(group, table) === section}
-                    narrowable={groups.length > 1}
+                    onOpen={groups.length > 1 ? () => open(group) : undefined}
                 />
             ))}
             {passing.map(({move, title}, index) => {
@@ -264,13 +300,14 @@ function passesOf(group: MoveGroup, table: ReturnType<typeof useTable>): Move[] 
     return group.moves.filter((move) => moveDetail(move, varying, table) === 'Pass');
 }
 
-function GroupView({group: listed, varying: before, onMove, untitled = false, narrowable = false}: {
+function GroupView({group: listed, varying: before, onMove, untitled = false, onOpen}: {
     group: MoveGroup;
     // what the group's answers differed in before its pass went last
     varying?: string[];
     onMove(move: Move): void;
     untitled?: boolean;
-    narrowable?: boolean
+    // a group among others is a row that opens it
+    onOpen?(): void;
 }) {
     const table = useTable();
     // a pair of cards in either order is one answer
@@ -312,6 +349,9 @@ function GroupView({group: listed, varying: before, onMove, untitled = false, na
             </button>
         );
     }
+    if (onOpen) {
+        return <GroupRow group={group} art={groupArt(arts)} onOpen={onOpen}/>;
+    }
     const counts = countsComponent(group, varying);
     const pools = characterPools(group, varying);
     // the characters to choose stand as large as their portraits, side by side; every other answer is a row
@@ -329,20 +369,12 @@ function GroupView({group: listed, varying: before, onMove, untitled = false, na
     const chipsClass = grid ? 'chips card-grid' : 'chips';
     return (
         <div className="answer-group" data-kind={group.kind ?? undefined}>
-            {!untitled &&
-                (narrowable && group.kind ? (
-                    // keeps this kind only, so the board lights its targets
-                    <button type="button" className="group-title link" title="Show only these, on the board too"
-                            onClick={() => useSelection.getState().pick({type: 'kind', kind: group.kind!})}>
-                        <ArtStrip refs={common}/>
-                        <span>{title}</span>
-                    </button>
-                ) : (
-                    <div className="group-title">
-                        <ArtStrip refs={common}/>
-                        <span>{title}</span>
-                    </div>
-                ))}
+            {!untitled && (
+                <div className="group-title">
+                    <ArtStrip refs={common}/>
+                    <span>{title}</span>
+                </div>
+            )}
             {counts ? (
                 <CountsWidget group={group} component={counts} onMove={onMove}/>
             ) : product ? (
@@ -359,6 +391,27 @@ function GroupView({group: listed, varying: before, onMove, untitled = false, na
             )}
         </div>
     );
+}
+
+/** A group among other answers, as a row like theirs that opens it: one more step, to its answers. */
+function GroupRow({group, art, onOpen}: { group: MoveGroup; art: ArtRef[]; onOpen(): void }) {
+    const table = useTable();
+    const title = groupTitle(group, table);
+    return (
+        <button type="button" className="option answer-row group-row" data-kind={group.kind ?? undefined}
+                aria-label={title} title={`Open its ${group.moves.length} answers`} onClick={onOpen}>
+            <ArtSlot refs={art}/>
+            <span>{title}</span>
+            <NextIcon/>
+        </button>
+    );
+}
+
+// the images of a group's row: what every answer shows, or else the first image of a few of them, e.g. the portraits of
+// the players to choose
+function groupArt(arts: ArtRef[][]): ArtRef[] {
+    const everyOne = arts[0]?.filter((ref) => arts.every((refs) => refs.some((candidate) => candidate.key === ref.key))) ?? [];
+    return everyOne.length > 0 ? everyOne : unique(arts.flatMap((refs) => refs.slice(0, 1))).slice(0, 3);
 }
 
 // the pools of character types, as the setup deals them out

@@ -37,8 +37,6 @@ const title = (name: TitleName): Found => titleIconArt(name);
 const back = (deck: string): Found => deckBackArt(deck);
 const movement = (): Found => stepIconArt('MOVEMENT');
 const action = (): Found => stepIconArt('ACTION');
-// the reticle of the Activate Cylon Ships step: a target in space
-const target = (): Found => stepIconArt('ACTIVATE_CYLON_SHIPS');
 
 // What an event, or a decision on it, does that its fields don't name: the deck it draws from, the Skill Cards it takes
 // without naming them, the title it acts with, a move as the turn panel's Movement step, an action as its Action step,
@@ -65,8 +63,8 @@ const KIND_ART: Record<string, () => Found[]> = {
   MakePresidentEvent: () => [title('PRESIDENT')],
   MakeAdmiralEvent: () => [title('ADMIRAL')],
   MakeCagEvent: () => [title('CAG')],
-  // the area it hits as the reticle, in place of the pin
-  LaunchNukeEvent: () => [title('ADMIRAL'), tokenArt('NUKE'), target()],
+  // the area it hits at its pin; only the Admiral holds nukes
+  LaunchNukeEvent: () => [tokenArt('NUKE')],
   DiscardNukeTokenEvent: () => [tokenArt('NUKE')],
   PassCagTitleEvent: () => [title('CAG')],
   CagPilotActionEvent: () => [title('CAG')],
@@ -92,8 +90,8 @@ const BRIDGE_ABILITY_ART: Record<string, () => Found[]> = {
   GALACTICA_DAMAGE: () => [back('GALACTICA_DAMAGE')],
 };
 
-// The kinds whose image says what their location is for, so it shows no pin: a move, a nuke's target.
-const PLACED_BY_KIND = new Set(['MoveEvent', 'LeaveBrigEvent', 'LaunchNukeEvent']);
+// The kinds whose image says what their location is for, so it shows no pin: a move.
+const PLACED_BY_KIND = new Set(['MoveEvent', 'LeaveBrigEvent']);
 
 // A decision that an option of a choice asks, as the head of its answers: the activation of a viper, a "Movement:"
 // card or ability, a location's action, an interrupt card of one type, a discard of Mutiny or Quorum Cards (each answer
@@ -181,7 +179,7 @@ export function isMiracleArt(art: ArtRef): boolean {
  * the step a move acts in, which a section's lone group, without a name, would otherwise lose.
  */
 export function staysOnEachAnswer(art: ArtRef): boolean {
-  return isMiracleArt(art) || art.key.startsWith('StepIcon/');
+  return isMiracleArt(art) || art.key === movement()?.key;
 }
 
 /** The images of a value a part of an answer picks, e.g. a target player, an ability or a die's result. */
