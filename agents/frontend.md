@@ -140,10 +140,11 @@ option of a choice, and an option that asks a decision first into one per answer
 
 Every page but the table is in `SiteFrame` (`src/pages/Site.tsx`): the header (the logo and "Frakkin Toasters" to the
 home page, Play, Users, About, and the user's menu with the profile, the dev profile's "Another user in this tab" and
-the logout, or "Log in" while nobody is) and the footer (the copyright from 2025, About, GitHub, Contact). A game's
-room has it, the table doesn't. The website keeps the table's look: the palette in `:root`, `.cf` panels and
-`--chamfer`/`--notch` cuts under `.site` as under `.table-page`, labels printed like the board's (`h1.label`), steel
-buttons lit dradis blue under the pointer and amber to act. A new page follows it.
+the logout, or "Log in" while nobody is) and the footer (the copyright from 2025, About, GitHub, Contact). A game's room
+has it, the table doesn't. The website keeps the table's look: the palette in `:root`, `.cf` panels and
+`--chamfer`/`--notch` cuts under `.site` as under `.table-page`, labels notched like the turn's line (titles `h1.label`,
+badges, the games' status), steel buttons lit dradis blue under the pointer and amber to act, the header's content and
+the pages as wide as `--site-width`. A new page follows it.
 
 - Anyone: `HomePage` (`/`: a line from the series, the way in (register or log in, or Play when logged in), parts of
   `board.jpg` cut out by `viewBox` with what each offers, the site's features, character sheets), `AboutPage`

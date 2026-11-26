@@ -33,25 +33,28 @@ export function SiteHeader() {
   const me = useMe();
   return (
     <header className="site-header">
-      <Link to="/" className="brand">
-        <img src="/logo.svg" alt="" />
-        <span>Frakkin Toasters</span>
-      </Link>
-      <nav className="site-nav" aria-label="site">
-        <NavLink to="/play">Play</NavLink>
-        <NavLink to="/users">Users</NavLink>
-        <NavLink to="/about">About</NavLink>
-      </nav>
-      <span className="spacer" />
-      {me.data ? (
-        <UserMenu me={me.data} />
-      ) : (
-        !me.isPending && (
-          <Link className="button primary" to="/login">
-            Log in
-          </Link>
-        )
-      )}
+      {/* as wide as the pages under it */}
+      <div className="site-header-inner">
+        <Link to="/" className="brand">
+          <img src="/logo.svg" alt="" />
+          <span>Frakkin Toasters</span>
+        </Link>
+        <nav className="site-nav" aria-label="site">
+          <NavLink to="/play">Play</NavLink>
+          <NavLink to="/users">Users</NavLink>
+          <NavLink to="/about">About</NavLink>
+        </nav>
+        <span className="spacer" />
+        {me.data ? (
+          <UserMenu me={me.data} />
+        ) : (
+          !me.isPending && (
+            <Link className="button primary" to="/login">
+              Log in
+            </Link>
+          )
+        )}
+      </div>
     </header>
   );
 }

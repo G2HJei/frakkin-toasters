@@ -825,20 +825,7 @@ details[open] > summary::before {
   margin: -4px 0 12px;
 }
 
-/* like the board's printed labels */
-.table-page .tab span {
-  display: inline-block;
-  font: 600 12px/1 var(--display);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: #151b25;
-  background: linear-gradient(#eef1f4, #b8c0c9);
-  padding: 6px 18px;
-  clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0 50%);
-}
-
-/* the game's name on the turn panel, after the logo: a heading rather than a printed label, and the connection beside
-   it while it isn't open */
+/* the game's name on the turn panel, after the logo, and the connection beside it while it isn't open */
 .table-page .turn .tab {
   align-items: center;
   gap: 10px;
@@ -854,11 +841,7 @@ details[open] > summary::before {
 .table-page .turn .tab span {
   font: 700 22px/1.2 var(--display);
   letter-spacing: 0.01em;
-  text-transform: none;
   color: var(--steel-100);
-  background: none;
-  padding: 0;
-  clip-path: none;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -4067,6 +4050,8 @@ button.avatar-button {
 
 .site {
   --c: 14px;
+  /* the content's width: the header's, the pages' and the home page's sections' */
+  --site-width: 1200px;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
@@ -4096,22 +4081,27 @@ button.avatar-button {
   scroll-margin-top: 84px;
 }
 
-/* the header: brushed gunmetal, the brand, the pages as printed tabs, the user's menu */
+/* the header: brushed gunmetal across the screen, and in the site's width the brand, the pages as tabs and the user's
+   menu */
 
 .site-header {
   position: sticky;
   top: 0;
   z-index: 30;
-  display: flex;
-  align-items: center;
-  gap: 32px;
-  min-height: 62px;
-  padding: 0 24px;
   background:
     repeating-linear-gradient(90deg, #ffffff05 0 1px, transparent 1px 3px),
     linear-gradient(#2f373f, #1e242a);
   border-bottom: 1px solid #5d6773;
   box-shadow: 0 1px 0 #000, 0 10px 28px #0008;
+}
+
+.site-header-inner {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  width: min(100% - 48px, var(--site-width));
+  min-height: 62px;
+  margin: 0 auto;
 }
 
 .site-header .brand {
@@ -4359,28 +4349,18 @@ button.avatar-button {
   color: var(--steel-300);
 }
 
-/* the badges: notched like the mats', with the edge along the cuts */
-.site .badge {
-  --c: 5px;
-  --edge: var(--amber);
-  --fill: #2a2010;
-  --bw: 1px;
+/* labels notched like the table's (the turn's line, the mats' badges), cut at the top left and the bottom right, with
+   the edge along the cuts: the badges, the games' status, the titles */
+.site :is(.badge, .status-chip, h1.label, .section-title span) {
   position: relative;
   isolation: isolate;
-  margin: 0;
-  padding: 4px 8px;
   border: 0;
   border-radius: 0;
   background: var(--edge);
   clip-path: var(--notch);
-  color: var(--amber);
-  font: 600 10px/1 var(--display);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  white-space: nowrap;
 }
 
-.site .badge::before {
+.site :is(.badge, .status-chip, h1.label, .section-title span)::before {
   content: '';
   position: absolute;
   inset: var(--bw);
@@ -4389,25 +4369,40 @@ button.avatar-button {
   clip-path: var(--notch);
 }
 
+.site .badge {
+  --c: 5px;
+  --edge: var(--amber);
+  --fill: #2a2010;
+  --bw: 1px;
+  margin: 0;
+  padding: 4px 8px;
+  color: var(--amber);
+  font: 600 10px/1 var(--display);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
 .site .badge.alert {
   --edge: var(--alert);
   --fill: #2a1210;
   color: #ff8a80;
 }
 
-/* the pages: a printed label for the title, gunmetal panels */
+/* the pages: as wide as the header, their content starting under its brand and as wide as it reads well; a notched
+   label for the title, gunmetal panels */
 
 .site .page {
-  max-width: 960px;
+  max-width: calc(var(--site-width) + 48px);
   margin: 0 auto;
   padding: 12px 24px 48px;
 }
 
-.site .page.wide {
-  max-width: 1240px;
+.site .page:not(.wide) > * {
+  max-width: 960px;
 }
 
-.site .page.narrow {
+.site .page.narrow > * {
   max-width: 640px;
 }
 
@@ -4420,22 +4415,24 @@ button.avatar-button {
   max-width: 72ch;
 }
 
-/* like the board's printed labels */
+/* like the turn's line on the table */
 .site h1.label,
 .section-title span {
+  --c: 12px;
+  --edge: var(--amber);
+  --fill: #0b1423;
+  --bw: 2px;
   display: inline-block;
   max-width: 100%;
   margin: 0 0 12px;
-  padding: 10px 30px;
+  padding: 11px 24px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   vertical-align: top;
-  background: linear-gradient(#eef1f4, #b8c0c9);
-  clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 14px 100%, 0 50%);
-  color: #151b25;
-  font: 700 22px/1 var(--display);
-  letter-spacing: 0.18em;
+  color: var(--amber);
+  font: 700 22px/1.1 var(--display);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
@@ -4615,25 +4612,26 @@ button.avatar-button {
   font-size: 11px;
 }
 
+/* its edge in the color of its words */
 .status-chip {
+  --c: 5px;
+  --edge: var(--steel-500);
+  --fill: #0b1423;
+  --bw: 1px;
   flex: none;
-  padding: 3px 6px;
-  border: 1px solid;
+  padding: 4px 8px;
+  color: var(--edge);
   font: 600 10px/1 var(--display);
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
 .status-chip.lobby {
-  color: var(--dradis-glow);
+  --edge: var(--dradis-glow);
 }
 
 .status-chip.running {
-  color: var(--amber);
-}
-
-.status-chip.finished {
-  color: var(--steel-500);
+  --edge: var(--amber);
 }
 
 /* the users: a tag each, with the initial on a printed plate */
@@ -5016,7 +5014,7 @@ button.avatar-button {
 .showcase {
   display: grid;
   gap: 80px;
-  width: min(100% - 48px, 1200px);
+  width: min(100% - 48px, var(--site-width));
   margin: 96px auto 0;
 }
 
@@ -5092,8 +5090,10 @@ button.avatar-button {
 }
 
 .section-title span {
+  --c: 10px;
+  padding: 9px 22px;
   font-size: 16px;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.16em;
 }
 
 .section-lead {
@@ -5105,7 +5105,7 @@ button.avatar-button {
 }
 
 .features {
-  width: min(100% - 48px, 1200px);
+  width: min(100% - 48px, var(--site-width));
   margin: 112px auto 0;
 }
 
@@ -5157,7 +5157,7 @@ button.avatar-button {
 }
 
 .crew {
-  width: min(100% - 48px, 1200px);
+  width: min(100% - 48px, var(--site-width));
   margin: 112px auto 0;
   text-align: center;
 }
@@ -5227,10 +5227,11 @@ button.avatar-button {
 }
 
 @media (max-width: 720px) {
-  .site-header {
+  .site-header-inner {
     flex-wrap: wrap;
     gap: 8px 16px;
-    padding: 10px 16px 0;
+    width: calc(100% - 32px);
+    padding-top: 10px;
   }
 
   .site-nav {
