@@ -429,7 +429,7 @@ describe('the log', () => {
   it('colors a type of Skill Cards by its deck, and keeps a card a name to hover', () => {
     const selection = { kind: 'DrawSkillCardsEvent', playerNumber: 1, selection: { POLITICS: 1, TACTICS: 2 }, drawLimit: null };
     const draw = { ...scope(1), event: 'DrawSkillCardsEvent', details: selection } as LogEntry;
-    const hidden = { kind: 'Hidden', playerNumber: 1, otherPlayerNumber: null, skillCheckPile: null, colors: { PILOTING: 2 } };
+    const hidden = { kind: 'Hidden', playerNumber: 1, otherPlayerNumber: null, skillCheckPile: null };
     const unseen = {
       ...scope(2),
       event: 'ResolveCrisisSectionThenEvent',
@@ -499,7 +499,7 @@ describe('the log', () => {
     ];
     const assigned = (scopeId: number, character: string) =>
       ({ ...scope(scopeId), event: 'MakePresidentEvent', details: null, facts: [{ kind: 'Shown', fact: { kind: 'TitleFact.PresidentAssigned', character } }] }) as LogEntry;
-    const gained = { kind: 'Hidden', fact: 'TitleFact.PresidentQuorumCardGained', playerNumber: null, otherPlayerNumber: null, deck: null, pile: null, skillCheckPile: null, count: 1, colors: null };
+    const gained = { kind: 'Hidden', fact: 'TitleFact.PresidentQuorumCardGained', playerNumber: null, otherPlayerNumber: null, deck: null, pile: null, skillCheckPile: null, count: 1 };
     const draws = (scopeId: number) => ({ ...scope(scopeId), event: 'DrawQuorumCardEvent', details: { kind: 'DrawQuorumCardEvent' }, facts: [gained] }) as LogEntry;
     const body = renderLog([assigned(1, 'LAURA_ROSLIN'), draws(2), assigned(3, 'KARA_STARBUCK_THRACE'), draws(4)], players);
     const drawn = [...body.querySelectorAll('.lines > li')].filter((line) => line.querySelector('.actor') === null);

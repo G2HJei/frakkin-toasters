@@ -53,16 +53,16 @@ describe('the changes of a game message', () => {
     expect(changes.damaged).toEqual(['ARMORY']);
   });
 
-  it('are the cards that came into a hand, face up or by color, and a new roll', () => {
-    const before = game({}, [{ number: 1, skillCards: { count: 1, colors: { POLITICS: 1 }, cards: [card('RED_TAPE', 1)] } }]);
+  it('are the cards that came into a hand, face up or counted, and a new roll', () => {
+    const before = game({}, [{ number: 1, skillCards: { count: 1, cards: [card('RED_TAPE', 1)] } }]);
     const after = game({ turn: { number: 3, dieRoll: { value: 6 } } }, [
-      { number: 1, skillCards: { count: 3, colors: { POLITICS: 2, TACTICS: 1 }, cards: [card('RED_TAPE', 1), card('RED_TAPE', 1), card('LAUNCH_SCOUT', 1)] } },
+      { number: 1, skillCards: { count: 3, cards: [card('RED_TAPE', 1), card('RED_TAPE', 1), card('LAUNCH_SCOUT', 1)] } },
     ]);
 
     const changes = changesBetween(before, after);
 
     expect(changes.gained.get(1)).toEqual([card('RED_TAPE', 1), card('LAUNCH_SCOUT', 1)]);
-    expect(changes.gainedColors.get(1)).toEqual({ POLITICS: 1, TACTICS: 1 });
+    expect(changes.gainedBacks.get(1)).toBe(2);
     expect(changes.rolled).toBe(true);
     expect(changesBetween(after, after).rolled).toBe(false);
   });

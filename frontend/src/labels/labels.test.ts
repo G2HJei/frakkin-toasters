@@ -497,11 +497,11 @@ describe('labels', () => {
     });
   });
 
-  it('words a hidden fact by who, how many and their colors', () => {
-    const hidden = { kind: 'Hidden', fact: 'PlayerFact.CardsGained', playerNumber: 2, otherPlayerNumber: null, deck: null, pile: 'SKILL', skillCheckPile: null, count: 2, colors: { POLITICS: 1, TACTICS: 1 } };
-    const loyalty = { ...hidden, fact: 'PlayerFact.LoyaltyCardSeen', otherPlayerNumber: 1, pile: 'LOYALTY', count: 1, colors: null };
+  it('words a hidden fact by who and how many', () => {
+    const hidden = { kind: 'Hidden', fact: 'PlayerFact.CardsGained', playerNumber: 2, otherPlayerNumber: null, deck: null, pile: 'SKILL', skillCheckPile: null, count: 2 };
+    const loyalty = { ...hidden, fact: 'PlayerFact.LoyaltyCardSeen', otherPlayerNumber: 1, pile: 'LOYALTY', count: 1 };
 
-    expect(factLabel(hidden as never, names)).toBe('Laura Roslin gets 2 Skill Cards (1 Politics, 1 Tactics)');
+    expect(factLabel(hidden as never, names)).toBe('Laura Roslin gets 2 Skill Cards');
     expect(factLabel(loyalty as never, names)).toBe('Laura Roslin looks at a Loyalty Card of William Adama');
   });
 });

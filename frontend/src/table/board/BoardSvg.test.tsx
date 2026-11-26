@@ -66,7 +66,7 @@ const game = {
         difficulty: 9,
         playedBefore: [],
         playedBeforeRevealed: false,
-        cards: {count: 3, colors: {}, cards: null},
+        cards: {count: 3, cards: null},
         matchingPile: [],
         nonMatchingPile: [],
         resolvedAbilities: [],
@@ -475,6 +475,31 @@ describe('the board', () => {
         } as unknown as GameProjection;
         const table = renderBoard(undefined, unknown);
         expect(table.querySelector('[data-reveal^="cargo-"]')).toBeNull();
+    });
+
+    it('lays a halo under a pile of civilian ships that holds one the viewer looked at, and still shows its cost on hover', () => {
+        const civilians = [
+            inSpace(30, 'CIVILIAN', 'GALACTICA_SPACE_2_OCLOCK', {cargo: {fuel: 1, morale: 0, population: 1}}),
+            inSpace(31, 'CIVILIAN', 'GALACTICA_SPACE_2_OCLOCK'),
+            inSpace(32, 'CIVILIAN', 'GALACTICA_SPACE_8_OCLOCK'),
+        ];
+        const looked = {
+            ...game,
+            viewer: {kind: 'PlayerViewer', playerNumber: 1},
+            players: [{number: 1, character: 'WILLIAM_ADAMA', knownCivilianShips: [30]}],
+            galactica: {...game.galactica!, ships: civilians},
+        } as unknown as GameProjection;
+        const board = renderBoard(undefined, looked);
+
+        const halo = (location: string) => board.querySelector(`[data-location="${location}"] .known-halo`);
+        expect(halo('GALACTICA_SPACE_2_OCLOCK')).not.toBeNull();
+        expect(halo('GALACTICA_SPACE_8_OCLOCK')).toBeNull();
+        fireEvent.mouseEnter(board.querySelector('[data-reveal="cargo-30"]')!);
+        expect([...document.querySelectorAll('.reveal-pop ol.pile li')].map((line) => line.textContent)).toEqual(['11Civilian ship #30']);
+
+        // an observer looked at none
+        const observer = renderBoard(undefined, {...looked, viewer: {kind: 'Observer'}} as unknown as GameProjection);
+        expect(observer.querySelector('.known-halo')).toBeNull();
     });
 
     it("names what each civilian ship of the deck costs, in a sandbox's draw pile", () => {

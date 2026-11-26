@@ -9,7 +9,7 @@ const context: FactContext = {
 };
 const shown = (fact: object) => ({ kind: 'Shown', fact }) as unknown as FactProjection;
 const hidden = (fact: string, fields: object) =>
-  ({ kind: 'Hidden', fact, playerNumber: null, otherPlayerNumber: null, deck: null, pile: null, skillCheckPile: null, count: 0, colors: null, ...fields }) as unknown as FactProjection;
+  ({ kind: 'Hidden', fact, playerNumber: null, otherPlayerNumber: null, deck: null, pile: null, skillCheckPile: null, count: 0, ...fields }) as unknown as FactProjection;
 const card = (type: string, value: number) => ({ type, value });
 const words = (facts: FactProjection[], actor: number | null = null) => factSentences(facts, context).map((one) => partsText(sentenceParts(one, actor, context)));
 
@@ -59,16 +59,24 @@ describe('the facts of a scope', () => {
     expect(words(piles)).toEqual(['Matching: Repair 1 and Repair 2', 'Not matching: Bait 0']);
   });
 
-  it('counts the cards the viewer may not see, by their kind and colors', () => {
+  it('counts the cards the viewer may not see, by their kind', () => {
     const facts = [
-      hidden('PlayerFact.CardsLost', { playerNumber: 2, pile: 'SKILL', count: 2, colors: { POLITICS: 1, TACTICS: 1 } }),
+      hidden('PlayerFact.CardsLost', { playerNumber: 2, pile: 'SKILL', count: 2 }),
       hidden('SkillCheckFact.CardsPlaced', { skillCheckPile: 'CARDS', count: 2 }),
     ];
 
-    expect(words(facts)).toEqual(['Laura Roslin puts 2 Skill Cards (1 Politics, 1 Tactics) into the skill check']);
+    expect(words(facts)).toEqual(['Laura Roslin puts 2 Skill Cards into the skill check']);
     expect(words([hidden('DeckFact.CardsDrawn', { deck: 'LOYALTY', count: 1 }), hidden('PlayerFact.CardsGained', { playerNumber: 1, pile: 'LOYALTY', count: 1 })])).toEqual([
       'William Adama draws a Loyalty Card',
     ]);
+  });
+
+  it("names the colors of another player's draws by the decks, and none of the cards he gets otherwise", () => {
+    const draw = (deck: string) => [hidden('DeckFact.CardsDrawn', { deck, count: 1 }), hidden('PlayerFact.CardsGained', { playerNumber: 2, pile: 'SKILL', count: 1 })];
+
+    expect(words([...draw('POLITICS'), ...draw('POLITICS'), ...draw('TACTICS')])).toEqual(['Laura Roslin draws 3 Skill Cards (2 Politics, 1 Tactics)']);
+    expect(words([...draw('DESTINY'), ...draw('DESTINY')])).toEqual(['Laura Roslin draws 2 Destiny cards']);
+    expect(words([hidden('PlayerFact.CardsGained', { playerNumber: 2, pile: 'SKILL', count: 2 })])).toEqual(['Laura Roslin gets 2 Skill Cards']);
   });
 
   it('counts a card that comes three times or more', () => {

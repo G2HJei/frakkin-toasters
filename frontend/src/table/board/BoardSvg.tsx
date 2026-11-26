@@ -27,7 +27,7 @@ import { moveSentence } from '../../input/moveLabels';
 import type { Move, Target } from '../../input/answers';
 import type { LabelContext } from '../../labels/describe';
 import { useRevealHandlers, type RevealCard, type RevealSection } from '../reveal';
-import { useTable } from '../tableContext';
+import { knowingPlayer, useTable } from '../tableContext';
 import boardUrl from './board.jpg';
 import boardingPartyUrl from './boarding-party.png';
 import {
@@ -544,6 +544,8 @@ const TRACK_SPACE_CUT = 12;
 // at a usual height
 const LOCATION_CUT = 15;
 const RING_CUT = 12;
+// how far the halo of a civilian ship the viewer looked at reaches past its pile
+const HALO_GAP = 7;
 
 // the portraits' top corners are cut by 14 of their 87 pixels, their bottom is square. The ring around a standee lies
 // this far out, the middle of its stroke, which is twice as wide (styles.css)
@@ -1034,15 +1036,18 @@ function ShipPiles({ box, ships }: { box: Box; ships: ShipProjection[] }) {
 }
 
 // Each pile with its count on it. Hovering civilian ships shows what each costs when destroyed, to whoever knows it:
-// the players who looked at it, and a sandbox.
+// the players who looked at it, and a sandbox. A halo lies under a pile that holds a ship the viewer looked at (the
+// asked player in a sandbox).
 function Piles({ placed }: { placed: PlacedGroup[] }) {
   const table = useTable();
+  const looked = new Set(knowingPlayer(table)?.knownCivilianShips ?? []);
   return (
     <>
       {placed.map(({ group, x, y, width, height, step }) => {
         const shown = Math.min(group.ships.length, PILE_MAX);
         const right = x + width + (shown - 1) * step;
         const known = group.ships.filter((ship) => ship.cargo);
+        const halo = group.ships.some((ship) => looked.has(ship.id));
         const cargo: RevealSection[] =
           known.length === 0
             ? []
@@ -1050,6 +1055,7 @@ function Piles({ placed }: { placed: PlacedGroup[] }) {
         return (
           <RevealGroup key={group.ships[0].id} id={`cargo-${group.ships[0].id}`} title={group.ships.length > 1 ? 'Civilian ships' : 'Civilian ship'} sections={cargo}>
             <g className={`ship-group ship-${group.type.toLowerCase()}`}>
+              {halo && <polygon className="known-halo" points={cutBox(x - HALO_GAP, y - HALO_GAP, right - x + 2 * HALO_GAP, height + (shown - 1) * 6 + 2 * HALO_GAP, RING_CUT)} />}
               {group.ships.map((ship, index) => {
                 const at = Math.min(index, PILE_MAX - 1);
                 return <Ship key={ship.id} ship={ship} x={x + at * step} y={y + (shown - 1 - at) * 6} width={width} height={height} preview={cargo.length === 0} />;

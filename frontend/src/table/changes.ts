@@ -31,8 +31,8 @@ export interface Changes {
   rolled: boolean;
   // the face-up cards new in each player's hand, by player number
   gained: Map<number, SkillCard[]>;
-  // the backs new in each hidden hand, by color
-  gainedColors: Map<number, Record<string, number>>;
+  // how many more cards each hand holds, for a hand that lies face down
+  gainedBacks: Map<number, number>;
 }
 
 export const NO_CHANGES: Changes = {
@@ -46,7 +46,7 @@ export const NO_CHANGES: Changes = {
   shieldsSpent: [],
   rolled: false,
   gained: new Map(),
-  gainedColors: new Map(),
+  gainedBacks: new Map(),
 };
 
 // the damaged Galactica locations from which the board warns of critical damage; at 6 the Cylons win
@@ -95,7 +95,7 @@ export function changesBetween(previous: GameProjection | null, next: GameProjec
   const rolled = roll(next)?.value != null && (roll(previous)?.value == null || roll(previous)?.value !== roll(next)?.value || previous.turn?.number !== next.turn?.number);
 
   const gained = new Map<number, SkillCard[]>();
-  const gainedColors = new Map<number, Record<string, number>>();
+  const gainedBacks = new Map<number, number>();
   for (const player of next.players ?? []) {
     const old = previous.players?.find((candidate) => candidate.number === player.number)?.skillCards;
     const hand = player.skillCards;
@@ -112,13 +112,8 @@ export function changesBetween(previous: GameProjection | null, next: GameProjec
         gained.set(player.number, fresh);
       }
     }
-    const added = Object.fromEntries(
-      Object.entries(hand.colors ?? {})
-        .map(([color, count]) => [color, (count ?? 0) - ((old.colors ?? {})[color as keyof typeof old.colors] ?? 0)])
-        .filter(([, delta]) => (delta as number) > 0),
-    ) as Record<string, number>;
-    if (Object.keys(added).length > 0) {
-      gainedColors.set(player.number, added);
+    if (hand.count > old.count) {
+      gainedBacks.set(player.number, hand.count - old.count);
     }
   }
   return {
@@ -132,7 +127,7 @@ export function changesBetween(previous: GameProjection | null, next: GameProjec
     shieldsSpent,
     rolled,
     gained,
-    gainedColors,
+    gainedBacks,
   };
 }
 

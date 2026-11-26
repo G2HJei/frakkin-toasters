@@ -113,7 +113,7 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   AdministrationEvent: '{playerNumber} draws a Mutiny Card at {Location:ADMINISTRATION}',
   ReplaceMutinousPresidentEvent: '{playerNumber} may replace the {Title:PRESIDENT}',
   DefendPresidencyEvent: '{playerNumber} [{!discardAcceptProphecy}discards {QuorumCard:ACCEPT_PROPHECY} to stay {Title:PRESIDENT}|gives up the {!Title:PRESIDENT}presidency rather than discard {QuorumCard:ACCEPT_PROPHECY}]',
-  PresidentsOfficeEvent: "{playerNumber} draws {SkillCardColor:POLITICS} cards at {Location:PRESIDENTS_OFFICE}",
+  PresidentsOfficeEvent: "{playerNumber} draws 2 {SkillCardColor:POLITICS} cards at {Location:PRESIDENTS_OFFICE}",
   PressRoomEvent: '{playerNumber} has {targetPlayer} draw a Mutiny Card at {Location:PRESS_ROOM}',
   QuorumChamberEvent: '{playerNumber} draws a Quorum Card at {Location:QUORUM_CHAMBER}',
   CapricaDrawAndResolveCrisisCardsEvent: '{playerNumber} draws Crisis Cards at {Location:CAPRICA}',

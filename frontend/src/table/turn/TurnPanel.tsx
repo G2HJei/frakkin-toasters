@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import { cardArt, dieArt, skillBackArt, skillCardArt, skillCheckArt, skillTypeArt } from '../../art/images';
-import { ArtImg, CardBack, CardTile } from '../../art/Art';
+import { cardArt, dieArt, skillCardArt, skillCheckArt, skillTypeArt } from '../../art/images';
+import { ArtImg, CardBack, CardTile, SkillCardBack } from '../../art/Art';
 import { constantLabel, skillCardLabel, windowLabel } from '../../labels/describe';
 import type { ConnectionState } from '../../live/GameSocket';
 import type { SkillCard, SkillHand } from '../../wire/types';
@@ -289,18 +289,10 @@ function Cards({ id, title, hand, faceUp = false }: { id: string; title: string;
   if (hand.cards && (faceUp || !table.sandbox)) {
     return <CardList cards={hand.cards} />;
   }
-  const colors = Object.entries(hand.colors ?? {});
-  const back = skillBackArt();
+  // a face down card doesn't show its color
   return (
     <span className="hidden-cards" {...handlers}>
-      {colors.length > 0 ? (
-        colors.map(([color, count]) => <CardBack key={color} color={color} count={count ?? 0} size="xs" />)
-      ) : (
-        <span className="tile back card-back size-xs" title={`${hand.count} face down`}>
-          {back && <ArtImg art={back} />}
-          <span className="back-count">×{hand.count}</span>
-        </span>
-      )}
+      <SkillCardBack count={hand.count} size="xs" />
     </span>
   );
 }

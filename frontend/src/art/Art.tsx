@@ -2,7 +2,7 @@
 // follows the pointer.
 import { useEffect, useRef, type ReactNode } from 'react';
 import { create } from 'zustand';
-import { deckBackArt, type ArtRef } from './images';
+import { deckBackArt, skillBackArt, type ArtRef } from './images';
 import { usePlaceNear, type Point } from './nearPointer';
 import { constantLabel } from '../labels/describe';
 
@@ -139,6 +139,20 @@ export function CardBack({ deck, color, count, size = 'sm', label }: {
       {back && <ArtImg art={back} />}
       <span className="back-count" aria-label={words}>
         {back || color ? `×${count}` : words}
+      </span>
+    </span>
+  );
+}
+
+/** Skill Cards face down whose colors don't show, e.g. another player's hand: the back of every Skill Card, with how many. */
+export function SkillCardBack({ count, size = 'sm' }: { count: number; size?: CardSize }) {
+  const back = skillBackArt();
+  const words = `${count} Skill Card${count === 1 ? '' : 's'}`;
+  return (
+    <span className={`tile back card-back size-${size}`} title={words}>
+      {back && <ArtImg art={back} />}
+      <span className="back-count" aria-label={words}>
+        {back ? `×${count}` : words}
       </span>
     </span>
   );

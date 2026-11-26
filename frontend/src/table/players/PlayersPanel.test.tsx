@@ -8,7 +8,7 @@ import { usePreview } from '../../art/Art';
 import { Table, tableContext } from '../tableContext';
 import type { GameProjection } from '../../wire/types';
 
-// Player 1's view: his own cards face up, player 2's only counted, by color and by deck.
+// Player 1's view: his own cards face up, player 2's only counted, his Skill Cards in all and the others by deck.
 const game = {
   viewer: { kind: 'PlayerViewer', playerNumber: 1 },
   titles: { president: 'LAURA_ROSLIN', admiral: 'WILLIAM_ADAMA', cag: null },
@@ -19,7 +19,7 @@ const game = {
       number: 1,
       character: 'WILLIAM_ADAMA',
       location: 'ADMIRALS_QUARTERS',
-      skillCards: { count: 2, colors: { LEADERSHIP: 1, TACTICS: 1 }, cards: [{ type: 'EXECUTIVE_ORDER', value: 2 }, { type: 'LAUNCH_SCOUT', value: 1 }] },
+      skillCards: { count: 2, cards: [{ type: 'EXECUTIVE_ORDER', value: 2 }, { type: 'LAUNCH_SCOUT', value: 1 }] },
       loyaltyCards: { count: 1, revealed: [], cards: ['NOT_CYLON'] },
       turns: 1,
       handLimit: 10,
@@ -28,7 +28,7 @@ const game = {
       number: 2,
       character: 'LAURA_ROSLIN',
       location: 'PRESIDENTS_OFFICE',
-      skillCards: { count: 3, colors: { POLITICS: 2, LEADERSHIP: 1 }, cards: null },
+      skillCards: { count: 3, cards: null },
       loyaltyCards: { count: 1, revealed: [], cards: null },
       turns: 0,
       handLimit: 10,
@@ -72,6 +72,62 @@ describe('the players', () => {
       'You Are Not a Cylon',
     ]);
     expect(own?.querySelector('img.avatar')?.getAttribute('alt')).toBe('William Adama');
+  });
+
+  it("shows another player's hand as a single Skill Card back with how many", () => {
+    const hand = renderPanel().querySelector('[data-player="2"] .hand');
+
+    expect(hand?.querySelectorAll('.card-back')).toHaveLength(1);
+    expect(hand?.querySelector('.back-count')?.getAttribute('aria-label')).toBe('3 Skill Cards');
+  });
+
+  it("rings another player's Loyalty Cards when the viewer looked at one, and lists the cards he looked at on hover", () => {
+    const looked = {
+      ...game,
+      players: game.players!.map((player) =>
+        player.number === 1
+          ? { ...player, seenLoyaltyCards: [{ ownerPlayerNumber: 2, card: 'NOT_CYLON_SELFISH' }] }
+          : { ...player, loyaltyCards: { count: 2, revealed: [], cards: null } },
+      ),
+    } as unknown as GameProjection;
+    const loyalty = (projection: GameProjection) =>
+      render(
+        <Table.Provider value={tableContext(projection, false, null)}>
+          <PlayersPanel />
+          <RevealLayer />
+        </Table.Provider>,
+      ).container.querySelector('[data-player="2"] .pile');
+
+    const seen = loyalty(looked);
+    // every card stays face down in the halo, which doesn't tell which one he looked at
+    expect(seen?.querySelector('.known .card-back')?.getAttribute('title')).toBe('2 face down');
+    expect(seen?.querySelectorAll('.tile:not(.back)')).toHaveLength(0);
+    fireEvent.mouseEnter(seen!.querySelector('.known')!);
+    expect([...document.querySelectorAll('.reveal-pop .reveal-section-title')].map((heading) => heading.textContent)).toEqual(['Loyalty Cards looked at · 1']);
+    expect([...document.querySelectorAll('.reveal-pop ol.pile li img')].map((image) => image.getAttribute('alt'))).toEqual(['Personal Goal: Selfish']);
+    useReveal.getState().hide();
+
+    const observed = loyalty({ ...looked, viewer: { kind: 'Observer' } } as unknown as GameProjection);
+    expect(observed?.querySelector('.known')).toBeNull();
+    expect(observed?.querySelector('[data-reveal]')).toBeNull();
+  });
+
+  it("keeps the halo and the cards looked at once the player holds none of his Loyalty Cards", () => {
+    const empty = {
+      ...game,
+      players: game.players!.map((player) =>
+        player.number === 1
+          ? { ...player, seenLoyaltyCards: [{ ownerPlayerNumber: 2, card: 'NOT_CYLON' }] }
+          : { ...player, loyaltyCards: { count: 0, revealed: [], cards: null } },
+      ),
+    } as unknown as GameProjection;
+    const pile = render(
+      <Table.Provider value={tableContext(empty, false, null)}>
+        <PlayersPanel />
+      </Table.Provider>,
+    ).container.querySelector('[data-player="2"] .pile .known');
+
+    expect(pile?.querySelector('.card-back')?.getAttribute('title')).toBe('0 face down');
   });
 
   it('names a player by his character first, and the user in the seat under it', () => {
@@ -192,14 +248,13 @@ describe('the players', () => {
     expect(used.querySelector('.nukes')).toBeNull();
   });
 
-  it('shows only the backs of another player\'s cards: a back per Skill Card color, and the backs of his piles', () => {
+  it('shows only the backs of another player\'s cards: one for his Skill Cards, and the backs of his piles', () => {
     const panel = renderPanel();
     const other = panel.querySelector('[data-player="2"]');
 
     expect(other?.querySelectorAll('.tile:not(.back)')).toHaveLength(0);
     expect([...(other?.querySelectorAll('.tile.back') ?? [])].map((back) => back.getAttribute('title'))).toEqual([
-      '2 politics',
-      '1 leadership',
+      '3 Skill Cards',
       '1 face down',
       '2 face down',
     ]);

@@ -243,16 +243,20 @@ class LiveUpdateProjectionTest {
         }));
     }
 
+    // A face down Skill Card doesn't show its color, in a hand or in a skill check.
     @Test
-    void hiddenSkillCardsShowTheirCountAndColors() {
+    void hiddenSkillCardsShowOnlyTheirCount() {
         val journal = List.<JournalEntry>of(
                 new ScopeOpened(1, 0, new NoOpEvent(1), 1),
                 new FactRecorded(1, new PlayerFact.CardsGained(1, PlayerPile.SKILL, List.of(CONSOLIDATE, EXECUTIVE, EXECUTIVE))),
+                new FactRecorded(1, new SkillCheckFact.CardsPlaced(SkillCheckPile.CARDS, List.of(CONSOLIDATE, EXECUTIVE), true)),
                 new ScopeClosed(1, Followup.NONE));
 
-        assertEquals(new Hidden(PlayerFact.CardsGained.class, 1, null, null, PlayerPile.SKILL, null, 3,
-                        Map.of(POLITICS, 1, LEADERSHIP, 2)),
-                lastFact(LiveUpdateProjection.of(journal, OBSERVER)));
+        val facts = facts(LiveUpdateProjection.of(journal, OBSERVER));
+        assertEquals(new Hidden(PlayerFact.CardsGained.class, 1, null, null, PlayerPile.SKILL, null, 3),
+                facts.get(facts.size() - 2));
+        assertEquals(new Hidden(SkillCheckFact.CardsPlaced.class, null, null, null, null, SkillCheckPile.CARDS, 2),
+                facts.getLast());
     }
 
     @Test

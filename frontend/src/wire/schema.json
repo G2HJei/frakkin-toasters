@@ -6108,22 +6108,6 @@
           "nullable" : false,
           "role" : "count"
         }
-      }, {
-        "name" : "colors",
-        "type" : {
-          "nullable" : true,
-          "t" : "map",
-          "key" : {
-            "nullable" : false,
-            "t" : "enum",
-            "name" : "SkillCardColor"
-          },
-          "value" : {
-            "t" : "int",
-            "nullable" : false,
-            "role" : "count"
-          }
-        }
       } ]
     },
     "HiddenCards" : {
@@ -12091,22 +12075,6 @@
           "t" : "int",
           "nullable" : false,
           "role" : "count"
-        }
-      }, {
-        "name" : "colors",
-        "type" : {
-          "nullable" : true,
-          "t" : "map",
-          "key" : {
-            "nullable" : false,
-            "t" : "enum",
-            "name" : "SkillCardColor"
-          },
-          "value" : {
-            "t" : "int",
-            "nullable" : false,
-            "role" : "count"
-          }
         }
       }, {
         "name" : "cards",

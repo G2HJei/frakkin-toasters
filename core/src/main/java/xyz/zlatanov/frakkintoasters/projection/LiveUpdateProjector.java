@@ -14,12 +14,9 @@ import xyz.zlatanov.frakkintoasters.projection.LiveUpdateProjection.*;
 import xyz.zlatanov.frakkintoasters.state.PlayerPile;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
-import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
-import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckPile;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +28,8 @@ import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.PEGASUS_DAMAGE;
 
 /**
  * Builds a {@link LiveUpdateProjection}. Most facts are public and pass as they are. A fact with cards follows the rules
- * of {@link GameProjector}: a player's cards show to him, the others see how many (and the colors of Skill Cards). A
+ * of {@link GameProjector}: a player's cards show to him, the others see how many (a draw from a Skill Card deck names
+ * its color by the deck). A
  * shuffle never shows its order, and a draw only a count, because the fact that says where the cards went decides who
  * sees them. An event shows its name and its actor, and its fields when they are public ({@link Disclosure}). The scope
  * of a secret event shows only to its actor, and so does that the engine took an answer itself. Followups never show. Once the game has ended, everything shows.
@@ -302,14 +300,7 @@ final class LiveUpdateProjector {
 
     private static Hidden hidden(Fact fact, Integer player, Integer otherPlayer, DeckId deck, PlayerPile pile,
                                  SkillCheckPile skillCheckPile, List<?> cards) {
-        Map<SkillCardColor, Integer> colors = null;
-        if (!cards.isEmpty() && cards.stream().allMatch(SkillCard.class::isInstance)) {
-            colors = new EnumMap<>(SkillCardColor.class);
-            for (val card : cards) {
-                colors.merge(((SkillCard) card).type().color(), 1, Integer::sum);
-            }
-        }
-        return new Hidden(fact.getClass(), player, otherPlayer, deck, pile, skillCheckPile, cards.size(), colors);
+        return new Hidden(fact.getClass(), player, otherPlayer, deck, pile, skillCheckPile, cards.size());
     }
 
 }

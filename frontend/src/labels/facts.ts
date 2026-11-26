@@ -16,6 +16,7 @@ import {
   shipMove,
   shipMovesParts,
   shipPart,
+  SKILL_COLORS,
   withoutSubject,
   type LabelContext,
   type Part,
@@ -89,7 +90,7 @@ export function factKind(fact: FactProjection): string {
   return fact.kind === 'Shown' ? String((fact.fact as unknown as { kind: string } | null)?.kind ?? '') : (fact.fact ?? '');
 }
 
-// Cards a fact moves: the list where the viewer sees them, otherwise how many and their colors.
+// Cards a fact moves: the list where the viewer sees them, otherwise how many, and the colors of a draw by its decks.
 interface Cards {
   list: unknown[] | null;
   count: number;
@@ -120,7 +121,7 @@ const SKILL_CARD: TypeRef = { t: 'ref', nullable: false, name: 'SkillCard' };
 
 function cardsOf(fact: FactProjection, list: unknown, type: TypeRef, deck: string | null, pile: string | null): Cards {
   if (fact.kind === 'Hidden') {
-    return { list: null, count: fact.count, colors: (fact.colors as Record<string, number> | null) ?? null, type, deck, pile };
+    return { list: null, count: fact.count, colors: null, type, deck, pile };
   }
   const cards = Array.isArray(list) ? list : list === null || list === undefined ? [] : [list];
   return { list: cards, count: cards.length, colors: null, type, deck, pile };
@@ -250,7 +251,8 @@ function pair(moves: Move[], facts: FactProjection[], at: number, out: Draft[], 
       const list = drawnList(drawn, fits ? into.cards : null);
       const deck = drawn[0].deck;
       if (fits && into.t === 'gained') {
-        return told(draft('draws', used, { who: into.who, cards: { ...into.cards, list, deck } }));
+        // a face down card doesn't show its color, the decks drawn from do
+        return told(draft('draws', used, { who: into.who, cards: { ...into.cards, list, deck, colors: deckColors(drawn) } }));
       }
       if (fits && (into.t === 'onTop' || into.t === 'toBottom')) {
         return told(draft(into.t, used, { deck: into.deck, cards: { ...into.cards, list } }));
@@ -386,6 +388,18 @@ function known(...all: Cards[]): Cards {
   const list = all.find((cards) => cards.list !== null)?.list ?? null;
   const colors = all.find((cards) => cards.colors !== null)?.colors ?? null;
   return { ...all[0], list, colors, count: list ? list.length : all[0].count };
+}
+
+// The colors of cards drawn from the Skill Card decks, which their decks name; none when one of them is another deck.
+function deckColors(drawn: DeckMove[]): Record<string, number> | null {
+  if (!drawn.every((one) => SKILL_COLORS.has(one.deck ?? ''))) {
+    return null;
+  }
+  const colors: Record<string, number> = {};
+  for (const one of drawn) {
+    colors[one.deck!] = (colors[one.deck!] ?? 0) + one.cards.count;
+  }
+  return colors;
 }
 
 function drawnList(drawn: DeckMove[], into: Cards | null): unknown[] | null {

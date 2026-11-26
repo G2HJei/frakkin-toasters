@@ -89,8 +89,8 @@ describe('the turn', () => {
       type: 'CRIPPLED_RAIDER',
       targetPlayer: null,
       difficulty: 10,
-      playedBefore: [{ player: 2, cards: { count: 1, colors: { TACTICS: 1 }, cards: null } }],
-      cards: { count: 3, colors: { POLITICS: 1, TACTICS: 1, ENGINEERING: 1 }, cards: null },
+      playedBefore: [{ player: 2, cards: { count: 1, cards: null } }],
+      cards: { count: 3, cards: null },
       totalStrength: null,
     };
     const panel = renderPanel({ step: 'CRISIS', currentPlayer: 1, actingPlayer: 1, crisisCards: ['CRIPPLED_RAIDER'] }, { skillCheck });
@@ -128,7 +128,7 @@ describe('the turn', () => {
       targetPlayer: 2,
       difficulty: 7,
       shownCards: [{ player: 2, cards: [{ value: 2, type: 'EXECUTIVE_ORDER' }] }],
-      cards: { count: 3, colors: { LEADERSHIP: 1, TACTICS: 2 }, cards: null },
+      cards: { count: 3, cards: null },
       totalStrength: null,
     };
     const panel = renderPanel({ step: 'ACTION', currentPlayer: 1, actingPlayer: 1 }, { skillCheck });
@@ -150,7 +150,6 @@ describe('the turn', () => {
           player: 2,
           cards: {
             count: 2,
-            colors: { POLITICS: 1, ENGINEERING: 1 },
             cards: [
               { value: 3, type: 'INVESTIGATIVE_COMMITTEE' },
               { value: 3, type: 'SCIENTIFIC_RESEARCH' },
@@ -159,7 +158,7 @@ describe('the turn', () => {
         },
       ],
       playedBeforeRevealed,
-      cards: { count: 0, colors: null, cards: null },
+      cards: { count: 0, cards: null },
       totalStrength: null,
     };
   }
@@ -174,7 +173,8 @@ describe('the turn', () => {
   it('keeps the cards played before the check face down in a sandbox until they are revealed', () => {
     const panel = renderPanel({ step: 'ACTION', currentPlayer: 1, actingPlayer: 1 }, { skillCheck: playedBeforeCheck(false) }, true);
 
-    expect(beforeTheCheck(panel)).toEqual({ faceUp: 0, backs: 2 });
+    // one back with how many: face down, the cards don't show their colors
+    expect(beforeTheCheck(panel)).toEqual({ faceUp: 0, backs: 1 });
   });
 
   it('shows the cards played before the check face up once they are revealed, in a sandbox too', () => {
@@ -192,7 +192,7 @@ describe('the turn', () => {
   }
 
   it("shows a location's skill check beside its location at full size, without its name", () => {
-    const skillCheck = { type: 'ADMIRALS_QUARTERS', targetPlayer: 2, difficulty: 7, cards: { count: 0, colors: null, cards: null }, totalStrength: 8, result: 'PASS' };
+    const skillCheck = { type: 'ADMIRALS_QUARTERS', targetPlayer: 2, difficulty: 7, cards: { count: 0, cards: null }, totalStrength: 8, result: 'PASS' };
     const panel = renderPanel({ step: 'ACTION', currentPlayer: 1, actingPlayer: 1 }, { skillCheck });
     const check = panel.querySelector('section.turn [aria-label="skill check"]')!;
 
@@ -204,7 +204,7 @@ describe('the turn', () => {
   });
 
   it("shows a Super Crisis Card's skill check beside the card at full size", () => {
-    const skillCheck = { type: 'CYLON_INTRUDERS', targetPlayer: null, difficulty: 18, cards: { count: 0, colors: null, cards: null }, totalStrength: null };
+    const skillCheck = { type: 'CYLON_INTRUDERS', targetPlayer: null, difficulty: 18, cards: { count: 0, cards: null }, totalStrength: null };
     const panel = renderPanel({ step: 'ACTION', currentPlayer: 1, actingPlayer: 1 }, { skillCheck });
 
     expect(turnCards(panel)).toEqual(['Cylon Intruders']);
@@ -213,14 +213,14 @@ describe('the turn', () => {
   });
 
   it("shows a skill check about none of the turn's Crisis Cards with its card after them", () => {
-    const skillCheck = { type: 'BRIG', targetPlayer: 1, difficulty: 7, cards: { count: 0, colors: null, cards: null }, totalStrength: null };
+    const skillCheck = { type: 'BRIG', targetPlayer: 1, difficulty: 7, cards: { count: 0, cards: null }, totalStrength: null };
     const panel = renderPanel({ step: 'ACTIVATE_CYLON_SHIPS', currentPlayer: 1, actingPlayer: 1, crisisCards: ['CRIPPLED_RAIDER'] }, { skillCheck });
 
     expect(turnCards(panel)).toEqual(['Crippled Raider', 'Brig']);
   });
 
   it('says when the Politics Cards count positive', () => {
-    const skillCheck = { type: 'BRIG', targetPlayer: 1, difficulty: 7, cards: { count: 0, colors: null, cards: null }, totalStrength: null, politicsCountPositive: true };
+    const skillCheck = { type: 'BRIG', targetPlayer: 1, difficulty: 7, cards: { count: 0, cards: null }, totalStrength: null, politicsCountPositive: true };
     const panel = renderPanel({ step: 'ACTION', currentPlayer: 1, actingPlayer: 1 }, { skillCheck });
     const check = panel.querySelector('section.turn [aria-label="skill check"]')!;
 

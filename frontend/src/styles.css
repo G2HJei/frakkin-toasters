@@ -764,6 +764,8 @@ details[open] > summary::before {
   --gunmetal: #252c32;
   --dradis: #4fa3e0;
   --dradis-glow: #8fd0ff;
+  /* what only the viewer knows, apart from the answers' amber and the dradis blue */
+  --known: #4fd6c0;
   --steel-100: #e2e6eb;
   --steel-300: #aeb6c0;
   --steel-500: #6d7783;
@@ -2099,13 +2101,6 @@ details[open] > summary::before {
   color: var(--steel-300);
 }
 
-.table-page .learned .art {
-  width: 22px;
-  height: 22px;
-  object-fit: cover;
-  border-radius: 3px;
-}
-
 /* what a sandbox shows on hover: a hint that there is more */
 .table-page .hidden-cards[data-reveal] {
   display: inline-flex;
@@ -2759,6 +2754,25 @@ details[open] > summary::before {
 
 .board-svg .ship.target:hover .target-ring {
   fill: rgba(242, 180, 65, 0.4);
+}
+
+/* what only the viewer knows, in its green blue (--known): the halo under a civilian ship (or its pile) he looked
+   at, and around the Loyalty Cards of another player whose card he looked at */
+.board-svg .known-halo {
+  fill: rgba(79, 214, 192, 0.14);
+  stroke: rgba(79, 214, 192, 0.5);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 9px rgba(79, 214, 192, 0.75));
+  pointer-events: none;
+}
+
+/* the halo says there is more to see on hover, so no dashed hint around it */
+.table-page .mat .hidden-cards.known {
+  padding: 3px;
+  border-radius: 5px;
+  background: rgba(79, 214, 192, 0.14);
+  box-shadow: 0 0 0 2px rgba(79, 214, 192, 0.5), 0 0 9px rgba(79, 214, 192, 0.75);
+  outline: none;
 }
 
 .board-svg .character.target .token-ring {

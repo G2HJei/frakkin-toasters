@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react';
 import { constantLabel, NO_CONTEXT, type LabelContext } from '../labels/describe';
-import type { GameProjection, ShipProjection, SkillCard } from '../wire/types';
+import type { GameProjection, PlayerProjection, ShipProjection, SkillCard } from '../wire/types';
 
 // whether the user who holds a seat is there, or nobody holds it; unknown in a sandbox
 export type SeatState = 'online' | 'away' | 'vacant';
@@ -83,4 +83,14 @@ export const Table = createContext<TableContext>({
 
 export function useTable(): TableContext {
   return useContext(Table);
+}
+
+/**
+ * The player whose own knowledge the table shows: the viewer, or the asked player in a sandbox, which answers for him as
+ * he would. Nobody for an observer.
+ */
+export function knowingPlayer(table: Pick<TableContext, 'game' | 'sandbox' | 'askedPlayer'>): PlayerProjection | null {
+  const viewer = table.game?.viewer;
+  const number = table.sandbox ? table.askedPlayer : viewer?.kind === 'PlayerViewer' ? viewer.playerNumber : null;
+  return number === null ? null : (table.game?.players?.find((player) => player.number === number) ?? null);
 }

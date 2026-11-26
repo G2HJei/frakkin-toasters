@@ -4,8 +4,8 @@
 the frontend owns the wording.
 
 - `GameProjection.of(view, pendingInput, viewer)` is the game. What lies open on the table is public. A hidden card is a
-  count, with the colors of Skill Cards (their backs show them), and a field holding cards is `null` for a viewer who
-  may not see them (`SkillHand`, `HiddenCards<T>`). `GameProjector`'s javadoc lists the rules: hands, Loyalty and other
+  count (a face down Skill Card doesn't show its color either, in a hand or in a skill check), and a field holding
+  cards is `null` for a viewer who may not see them (`SkillHand`, `HiddenCards<T>`). `GameProjector`'s javadoc lists the rules: hands, Loyalty and other
   player cards, the President's Quorum hand (the Quorum Cards in play are public), looked-at Loyalty Cards and civilian
   ship cargo, face down discard piles (`Disclosure.FACEDOWN_DISCARDS`), cards played before a skill check, an open
   interrupt window's cards (the others count them in the hand), the pending input (backend decision 6) with its
@@ -18,8 +18,8 @@ the frontend owns the wording.
 - `LiveUpdateProjection.of(journal, from, viewer)` is what happened: the scopes (`ScopeLog`: actor, event type, its
   fields when public, the facts, and `automatic` for the only answer the engine took, which only its actor sees: that
   it was his only one can tell what he holds) and the choices (`ChoiceLog`). `LiveUpdateProjector` has an exhaustive switch over every
-  fact, so a new fact doesn't compile until it has a rule. A fact the viewer may not see becomes `Hidden` (count,
-  colors). A shuffle never shows its order, a draw only a count. The scope of a `SecretEvent` shows only to its actor.
+  fact, so a new fact doesn't compile until it has a rule. A fact the viewer may not see becomes `Hidden` (a count;
+  the log names the color of a draw by the Skill Card deck it came from). A shuffle never shows its order, a draw only a count. The scope of a `SecretEvent` shows only to its actor.
   Followups never show. It reads the whole journal, e.g. for who was President when a Quorum Card was drawn.
 - `GameReport.of(journal)` tells a finished game whole, for its results (empty while it goes on): the winner and
   winners, every player's character (and the ones he lost), all his Loyalty and Motive Cards, whether he ended a Cylon

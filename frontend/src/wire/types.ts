@@ -1729,7 +1729,6 @@ export interface Hidden {
   pile: PlayerPile | null;
   skillCheckPile: SkillCheckPile | null;
   count: number;
-  colors: Partial<Record<SkillCardColor, number>> | null;
 }
 
 export interface HiddenCards<T> {
@@ -3504,7 +3503,6 @@ export const SkillCheckType_VALUES: readonly SkillCheckType[] = ['ADMIRALS_QUART
 
 export interface SkillHand {
   count: number;
-  colors: Partial<Record<SkillCardColor, number>> | null;
   cards: Array<SkillCard> | null;
 }
 

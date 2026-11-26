@@ -59,7 +59,7 @@ export interface Part {
 }
 
 // The Skill Card colors, which are their decks' names too.
-const SKILL_COLORS = new Set(['POLITICS', 'LEADERSHIP', 'TACTICS', 'PILOTING', 'ENGINEERING', 'TREACHERY']);
+export const SKILL_COLORS = new Set(['POLITICS', 'LEADERSHIP', 'TACTICS', 'PILOTING', 'ENGINEERING', 'TREACHERY']);
 
 /** A Skill Card color in words of that color: "Tactics". */
 export function skillColorPart(color: string): Part {
@@ -975,7 +975,7 @@ function cardNoun(deck: string | null | undefined, pile: string | null | undefin
 function hiddenFactParts(fact: Extract<FactProjection, { kind: 'Hidden' }>, context: LabelContext): Part[] {
   const who: Part = fact.playerNumber !== null ? playerPart(fact.playerNumber, context) : { text: 'Someone' };
   const other: Part = fact.otherPlayerNumber !== null ? playerPart(fact.otherPlayerNumber, context) : { text: 'another player' };
-  const cards = hiddenCardsParts(fact.count, fact.deck, fact.pile, fact.colors);
+  const cards = hiddenCardsParts(fact.count, fact.deck, fact.pile, null);
   const deck = deckParts(fact.deck);
   const many = fact.count !== 1;
   // the cards first, as the sentence starts with them: "A Mutiny Card is drawn"

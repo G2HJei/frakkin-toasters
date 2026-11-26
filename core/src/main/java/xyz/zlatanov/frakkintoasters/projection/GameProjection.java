@@ -44,8 +44,8 @@ import java.util.Optional;
 
 /**
  * The game as one viewer may see it, as plain records. What lies open on the table is public. What is hidden shows only
- * to who may know it, see {@link GameProjector}: a hidden card is a count (and the color of a Skill Card, which its back
- * shows), and a field that holds cards is {@code null} for a viewer who may not see them.
+ * to who may know it, see {@link GameProjector}: a hidden card is a count, its back doesn't show even the color of a
+ * Skill Card, and a field that holds cards is {@code null} for a viewer who may not see them.
  *
  * @param input   what the game waits for, as this viewer may know it. {@code null} once the game has ended
  * @param anytime what the players the viewer acts for may do now without being asked: his own, every player's in a
@@ -148,11 +148,11 @@ public record GameProjection(
     }
 
     /**
-     * A hand of Skill Cards. Everyone sees how many of each color, because the back of a card shows it.
+     * Skill Cards face down: a player's hand, or the cards of a skill check. The others see only how many there are.
      *
      * @param cards {@code null} for a viewer who may not see them
      */
-    public record SkillHand(int count, Map<SkillCardColor, Integer> colors, List<SkillCard> cards) {
+    public record SkillHand(int count, List<SkillCard> cards) {
     }
 
     /**

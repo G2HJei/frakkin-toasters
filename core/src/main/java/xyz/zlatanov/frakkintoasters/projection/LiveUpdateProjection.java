@@ -6,11 +6,9 @@ import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.state.PlayerPile;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
-import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckPile;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * What happened, as one viewer may see it: the scopes of the journal in order, each with its actor, its event and its
@@ -64,12 +62,12 @@ public record LiveUpdateProjection(List<LogEntry> entries) {
     }
 
     /**
-     * A fact about cards the viewer may not see: how many, and the colors of Skill Cards, whose backs show them.
+     * A fact about cards the viewer may not see: how many. A face down card doesn't show even the color of a Skill
+     * Card.
      *
      * @param fact              the type of the fact
      * @param playerNumber      the player the fact is about, if any
      * @param otherPlayerNumber the other player of the fact, e.g. the one whose Loyalty Card was looked at
-     * @param colors            {@code null} unless the cards are Skill Cards
      */
     public record Hidden(Class<? extends Fact> fact,
                          Integer playerNumber,
@@ -77,7 +75,6 @@ public record LiveUpdateProjection(List<LogEntry> entries) {
                          DeckId deck,
                          PlayerPile pile,
                          SkillCheckPile skillCheckPile,
-                         int count,
-                         Map<SkillCardColor, Integer> colors) implements FactProjection {
+                         int count) implements FactProjection {
     }
 }

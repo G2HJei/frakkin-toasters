@@ -18,12 +18,10 @@ import xyz.zlatanov.frakkintoasters.state.card.QuorumCard;
 import xyz.zlatanov.frakkintoasters.state.character.Character;
 import xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage;
 import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
-import xyz.zlatanov.frakkintoasters.state.interrupt.PlayedInterruptCard;
 import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
 import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 import xyz.zlatanov.frakkintoasters.state.ship.ShipType;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
-import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 import xyz.zlatanov.frakkintoasters.state.view.BasestarView;
 import xyz.zlatanov.frakkintoasters.state.view.BattlestarBoardView;
 import xyz.zlatanov.frakkintoasters.state.view.BoardView;
@@ -46,14 +44,14 @@ import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.*;
 /**
  * Builds a {@link GameProjection}. What lies open on the table is public. The rest:
  * <ul>
- *     <li>Skill Cards: the holder sees them, the others how many of each color</li>
+ *     <li>Skill Cards: the holder sees them, the others how many he holds. A face down card doesn't show its color</li>
  *     <li>Loyalty, Mutiny, Super Crisis and Motive Cards: the holder sees them, the others the count and the revealed
  *     ones. The Mutineer card is faceup once someone holds it ("immediately reveal this card")</li>
  *     <li>the President's Quorum Cards: the President sees them, the others the count</li>
  *     <li>the Loyalty Cards a player looked at, and the cargo of the civilian ships he looked at: only he</li>
  *     <li>decks: the counts, and the cards of a discard pile that lies faceup</li>
- *     <li>the cards played before a skill check: the count and the colors per player, until they are revealed. The pile
- *     the cards are played into: the count and the colors</li>
+ *     <li>the cards played before a skill check: the count per player, until they are revealed. The pile the cards are
+ *     played into: the count</li>
  *     <li>the cards in an open interrupt window: the player who played them. The others count them in his hand</li>
  *     <li>the pending input: the player who answers it, with its legal answers. The others learn who is asked, but
  *     not while it is secret</li>
@@ -186,18 +184,12 @@ final class GameProjector {
         if (sees(owner)) {
             return skillHand(hand.cards(), true);
         }
-        val counted = new ArrayList<>(hand.cards());
-        game.turn().windowCards().stream()
-                .filter(card -> card.playerNumber() == owner)
-                .map(PlayedInterruptCard::card)
-                .forEach(counted::add);
-        return skillHand(counted, false);
+        val inWindow = game.turn().windowCards().stream().filter(card -> card.playerNumber() == owner).count();
+        return new SkillHand(hand.size() + (int) inWindow, null);
     }
 
     private static SkillHand skillHand(List<SkillCard> cards, boolean faceUp) {
-        val colors = new EnumMap<SkillCardColor, Integer>(SkillCardColor.class);
-        cards.forEach(card -> colors.merge(card.type().color(), 1, Integer::sum));
-        return new SkillHand(cards.size(), colors, faceUp ? List.copyOf(cards) : null);
+        return new SkillHand(cards.size(), faceUp ? List.copyOf(cards) : null);
     }
 
     // "You Are the Mutineer": "Immediately reveal this card", and whoever passes it on gives it faceup.

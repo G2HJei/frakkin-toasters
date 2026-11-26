@@ -67,7 +67,7 @@ class GameProjectionTest extends TestHarness {
     }
 
     @Test
-    void skillCardsShowToTheHolderAndTheirColorsToEveryone() {
+    void skillCardsShowToTheHolderAndOnlyHowManyToEveryoneElse() {
         ops.player(1).receiveSkillCard(CONSOLIDATE);
         ops.player(1).receiveSkillCard(EXECUTIVE);
         ops.player(1).receiveSkillCard(new SkillCard(4, EXECUTIVE_ORDER));
@@ -78,7 +78,6 @@ class GameProjectionTest extends TestHarness {
             val hand = player(viewer, 1).skillCards();
             assertNull(hand.cards());
             assertEquals(3, hand.count());
-            assertEquals(Map.of(POLITICS, 1, LEADERSHIP, 2), hand.colors());
         }
     }
 
@@ -167,10 +166,10 @@ class GameProjectionTest extends TestHarness {
         ops.player(1).receiveSkillCard(CONSOLIDATE);
         ops.skillCheck().playBeforeSkillCheck(1, List.of(CONSOLIDATE));
 
-        assertEquals(List.of(new PlayedBefore(1, new SkillHand(1, Map.of(POLITICS, 1), List.of(CONSOLIDATE)))),
+        assertEquals(List.of(new PlayedBefore(1, new SkillHand(1, List.of(CONSOLIDATE)))),
                 projection(HOLDER).skillCheck().playedBefore());
         for (val viewer : List.of(OTHER, OBSERVER)) {
-            assertEquals(List.of(new PlayedBefore(1, new SkillHand(1, Map.of(POLITICS, 1), null))),
+            assertEquals(List.of(new PlayedBefore(1, new SkillHand(1, null))),
                     projection(viewer).skillCheck().playedBefore());
         }
 
@@ -191,7 +190,7 @@ class GameProjectionTest extends TestHarness {
         assertEquals(List.of(CONSOLIDATE), player(HOLDER, 1).skillCards().cards());
         for (val viewer : List.of(OTHER, OBSERVER)) {
             assertEquals(List.of(), projection(viewer).turn().windowCards());
-            assertEquals(new SkillHand(2, Map.of(TACTICS, 1, POLITICS, 1), null), player(viewer, 1).skillCards());
+            assertEquals(new SkillHand(2, null), player(viewer, 1).skillCards());
         }
     }
 

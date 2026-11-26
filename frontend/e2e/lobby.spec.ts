@@ -64,12 +64,13 @@ test('players host, join, observe, leave and start a game, and nobody sees anoth
     await expect(asked.page.getByRole('region', { name: 'players' }).locator('.who strong', { hasText: characterName(character) })).toHaveCount(1);
   }
 
-  // after the starting Skill Cards, each player sees his own cards and only the colors of the others'
+  // after the starting Skill Cards, each player sees his own cards and only how many the others hold, not their colors
   const asked = await whoIsAsked(players);
   await expect(asked.page.getByRole('region', { name: 'input' })).toContainText('Draw 3 cards');
   for (const [index, seat] of players.entries()) {
     const others = seat.page.locator(`.player:not([data-player="${index + 1}"])`);
     await expect(others.locator('.tile:not(.back)')).toHaveCount(0);
+    await expect(others.locator('.hand [class*=" back-"]')).toHaveCount(0);
   }
   // an observer never gets an input
   await expect(observer.page.getByRole('region', { name: 'input' }).getByRole('button')).toHaveCount(0);

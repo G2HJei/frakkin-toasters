@@ -21,7 +21,12 @@ The game page (`TablePage`) and what it draws. The rest of the frontend is in [f
   pass at once, "Leave my seat", "Leave the table"), above the players' mats (`PlayersPanel`): title badges with the
   insignia cut out of the card (`table/players/icons/`, the card as their preview), the nukes beside the Admiral, and
   right of the portrait a strip with a cell per card of the sheet's skill set in its colors (split along the diagonal for
-  "either"), for everyone but a revealed Cylon, who draws 2 of any colors.
+  "either"), for everyone but a revealed Cylon, who draws 2 of any colors. Another player's hand is one Skill Card back
+  with how many (`SkillCardBack`), like the face down cards of a skill check. When the viewer looked at one of a
+  player's Loyalty Cards, that player's Loyalty pile lies in a halo in the green blue of what only the viewer knows
+  (`--known`; `knowingPlayer`: the viewer, the asked player in a sandbox), and hovering it lists "Loyalty Cards looked
+  at": every look, whether he still holds the card or not, never which of his face down cards it was. A sandbox keeps
+  each player's looks out of sight until hovered (`Learned`).
 - A player is named by his character everywhere (`playerName`), "Player n" before he has one; the user in the seat shows
   only on his mat (`userName`, from the room's seats), with a dot for whether he is connected, "away" when he isn't and
   "vacant seat" when nobody holds it (`seatState`, `SeatPresence`). The input panel says so under the pause when the
@@ -130,7 +135,7 @@ the free starfield (`SLOTS`).
   (only the tokens in play show) and the nukes (the Admiral's mat).
 - Hovering a location shows its card, a standee its character sheet with its player's mat beside it (`PlayerMatOf`, the
   preview's `extra`), and a pile of civilian ships what each costs when destroyed, to whoever knows it (a sandbox, the
-  players who looked).
+  players who looked). A pile that holds a civilian ship the viewer looked at lies on a soft halo in `--known`.
 
 ## Board answers
 

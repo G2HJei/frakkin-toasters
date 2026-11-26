@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react';
 import { cardArt, characterArt, skillCardArt, titleArt, titleIcon, tokenArt, type ArtRef, type CardEnum, type TitleName, type TokenName } from '../../art/images';
-import { ArtImg, CardBack, CardTile, previewHandlers } from '../../art/Art';
+import { ArtImg, CardBack, CardTile, previewHandlers, SkillCardBack } from '../../art/Art';
 import { constantLabel, skillCardLabel } from '../../labels/describe';
 import type { HiddenCards, PlayerProjection, QuorumCardInPlay, SkillCard, SkillHand } from '../../wire/types';
 import { faceDown, useRevealHandlers, type RevealSection } from '../reveal';
-import { useTable, type SeatState } from '../tableContext';
+import { knowingPlayer, useTable, type SeatState } from '../tableContext';
 import { sortSkillCards } from '../skillCards';
 import { signed, useChanges } from '../changes';
 import { useReference } from '../reference/ReferenceDrawer';
@@ -16,7 +16,8 @@ import { characterSkillSet, characterType } from '../../wire/schema';
  * Every player's mat: his portrait with his skill set's colors beside it and the titles and tokens in front of him
  * under it (the nukes with the Admiral),
  * his character and the user in the seat, where he is, and his cards: face up for the viewer they belong to,
- * otherwise their backs. A sandbox shows the backs too, like a live game, and what they hide on hover.
+ * otherwise their backs, his Loyalty Cards in a halo when the viewer looked at one. A sandbox shows the backs too, like
+ * a live game, and what they hide on hover.
  */
 export function PlayersPanel() {
   const table = useTable();
@@ -65,6 +66,12 @@ function PlayerMat({ player }: { player: PlayerProjection }) {
   const user = table.userName(player.number);
   const current = turn?.currentPlayer === player.number;
   const acting = turn?.actingPlayer === player.number;
+  // the Loyalty Cards of his that the viewer looked at, whether he still holds them or not
+  const knowing = knowingPlayer(table);
+  const seen =
+    knowing && knowing.number !== player.number
+      ? (knowing.seenLoyaltyCards ?? []).flatMap((look) => (look.ownerPlayerNumber === player.number && look.card ? [look.card] : []))
+      : [];
   const { offer, onTarget } = useAnswering();
   const key = `player:${player.number}`;
   const lit = offer.targets.has(key);
@@ -126,7 +133,7 @@ function PlayerMat({ player }: { player: PlayerProjection }) {
         <p className="where">{player.location ? constantLabel('Location', player.location) : player.character ? 'off the board' : 'no character yet'}</p>
         <Hand hand={player.skillCards} owner={player.number} />
         <div className="piles">
-          <Pile label="Loyalty" cards={player.loyaltyCards} enumName="LoyaltyCard" deck="LOYALTY" owner={player.number} />
+          <Pile label="Loyalty" cards={player.loyaltyCards} enumName="LoyaltyCard" deck="LOYALTY" owner={player.number} seen={seen} />
           <Pile label="Motive" cards={player.motiveCards} enumName="MotiveCard" deck="MOTIVE" owner={player.number} />
           <Pile label="Mutiny" cards={player.mutinyCards} enumName="MutinyCard" deck="MUTINY" owner={player.number} />
           <Pile label="Super Crisis" cards={player.superCrisisCards} enumName="SuperCrisisCard" deck="SUPER_CRISIS" owner={player.number} />
@@ -258,7 +265,7 @@ function drawnFlags(cards: SkillCard[], gained: SkillCard[]): boolean[] {
   });
 }
 
-/** A hand of Skill Cards: the cards face up for who may see them, otherwise a back per color with how many. */
+/** A hand of Skill Cards: the cards face up for who may see them, otherwise the back of a Skill Card with how many. */
 export function Hand({ hand, owner }: { hand: SkillHand | null; owner: number }) {
   const table = useTable();
   const { changes, version } = useChanges();
@@ -286,24 +293,28 @@ export function Hand({ hand, owner }: { hand: SkillHand | null; owner: number })
   ];
   return (
     <Hidden id={`hand-${owner}`} title={`${table.playerName(owner)}: Skill Cards`} sections={sections} className="hand">
-      {Object.entries(hand.colors ?? {}).map(([color, count]) => {
-        const drawn = (changes.gainedColors.get(owner)?.[color] ?? 0) > 0;
+      {(() => {
+        // the backs don't show the colors: one back with how many, which slides in when the hand grew
+        const drawn = (changes.gainedBacks.get(owner) ?? 0) > 0;
         return (
-          <span key={drawn ? `${color}-${version}` : color} className={drawn ? 'drawn' : undefined}>
-            <CardBack color={color} count={count ?? 0} size="xs" />
+          <span key={drawn ? `back-${version}` : 'back'} className={drawn ? 'drawn' : undefined}>
+            <SkillCardBack count={hand.count} size="xs" />
           </span>
         );
-      })}
+      })()}
     </Hidden>
   );
 }
 
-function Pile<T extends string>({ label, cards, enumName, deck, owner }: {
+function Pile<T extends string>({ label, cards, enumName, deck, owner, seen = [] }: {
   label: string;
   cards: HiddenCards<T> | null;
   enumName: CardEnum;
   deck: string;
   owner: number;
+  // the cards of his the viewer looked at, whether he still holds them or not: the face down cards lie in a halo, and
+  // their popover lists them without telling which of the face down cards they are
+  seen?: T[];
 }) {
   const table = useTable();
   if (!cards) {
@@ -313,7 +324,9 @@ function Pile<T extends string>({ label, cards, enumName, deck, owner }: {
   // who may see the pile gets all of it, the revealed cards among them
   const down = cards.cards ? faceDown(cards.cards, revealed) : null;
   const downCount = down ? down.length : cards.count;
-  if (revealed.length === 0 && downCount === 0) {
+  const open = faceUp(down, table.sandbox, table.askedPlayer === owner);
+  const looked = open ? [] : seen;
+  if (revealed.length === 0 && downCount === 0 && looked.length === 0) {
     return null;
   }
   const tile = (card: T, key: string) => (
@@ -321,18 +334,19 @@ function Pile<T extends string>({ label, cards, enumName, deck, owner }: {
       <CardTile art={cardArt(enumName, card)} label={constantLabel(enumName, card)} size="xs" />
     </Playable>
   );
+  const asTiles = (list: T[]) => list.map((card) => ({ art: cardArt(enumName, card), label: constantLabel(enumName, card) }));
+  const sections: RevealSection[] = [
+    { title: label, cards: asTiles(down ?? []), hidden: true },
+    { title: `${label} Cards looked at`, cards: asTiles(looked) },
+  ];
   return (
     <div className="pile">
       <span className="pile-cards">
         {revealed.map((card, index) => tile(card, `revealed-${index}`))}
-        {faceUp(down, table.sandbox, table.askedPlayer === owner)
+        {open
           ? down.map((card, index) => tile(card, `down-${index}`))
-          : downCount > 0 && (
-              <Hidden
-                id={`${deck}-${owner}`}
-                title={`${table.playerName(owner)}: ${label}`}
-                sections={[{ title: label, cards: (down ?? []).map((card) => ({ art: cardArt(enumName, card), label: constantLabel(enumName, card) })), hidden: true }]}
-              >
+          : (downCount > 0 || looked.length > 0) && (
+              <Hidden id={`${deck}-${owner}`} title={`${table.playerName(owner)}: ${label}`} sections={sections} className={looked.length > 0 ? 'known' : ''}>
                 <CardBack deck={deck} count={downCount} size="xs" label={`${downCount} face down`} />
               </Hidden>
             )}
@@ -342,50 +356,25 @@ function Pile<T extends string>({ label, cards, enumName, deck, owner }: {
   );
 }
 
-// What the player alone knows: the Loyalty Cards he looked at, and the cargo of the civilian ships he looked at.
+// What the player alone knows in a sandbox, where everyone's looks are known: they stay out of sight until hovered,
+// like the cards. A live table shows the viewer's in a halo: the Loyalty Cards of a player he looked at, and the
+// civilian ships on the board.
 function Learned({ player }: { player: PlayerProjection }) {
   const table = useTable();
   const seen = player.seenLoyaltyCards ?? [];
   const known = player.knownCivilianShips ?? [];
-  if (seen.length === 0 && known.length === 0) {
+  if (!table.sandbox || (seen.length === 0 && known.length === 0)) {
     return null;
   }
-  const ships = [...(table.game?.galactica?.ships ?? []), ...(table.game?.galactica?.reserves ?? [])];
-  const lines = (
-    <>
-      {seen.map((look, index) => {
-        const art = cardArt('LoyaltyCard', look.card);
-        return (
-          <span key={`seen-${index}`} className="learned">
-            {art && <ArtImg art={art} />}
-            Saw {table.playerName(look.ownerPlayerNumber)}'s Loyalty Card: {constantLabel('LoyaltyCard', look.card)}
-          </span>
-        );
-      })}
-      {known.map((id) => {
-        const cargo = ships.find((ship) => ship.id === id)?.cargo;
-        return (
-          <span key={`ship-${id}`} className="learned">
-            Civilian ship #{id}
-            {cargo ? `: ${cargo.fuel} fuel, ${cargo.morale} morale, ${cargo.population} population` : ''}
-          </span>
-        );
-      })}
-    </>
+  const sections: RevealSection[] = [
+    { title: 'Loyalty Cards looked at', cards: seen.map((look) => ({ art: cardArt('LoyaltyCard', look.card), label: `${table.playerName(look.ownerPlayerNumber)}: ${constantLabel('LoyaltyCard', look.card)}` })), hidden: true },
+    { title: 'Civilian ships looked at', cards: known.map((id) => ({ art: null, label: `Civilian ship #${id}` })), hidden: true },
+  ];
+  return (
+    <Hidden id={`learned-${player.number}`} title={`${table.playerName(player.number)} knows`} sections={sections} className="learned-row">
+      <span className="learned muted">knows {seen.length + known.length} hidden thing{seen.length + known.length > 1 ? 's' : ''}</span>
+    </Hidden>
   );
-  // in a sandbox everyone's looks are known: they stay out of sight until hovered, like the cards
-  if (table.sandbox) {
-    const sections: RevealSection[] = [
-      { title: 'Loyalty Cards looked at', cards: seen.map((look) => ({ art: cardArt('LoyaltyCard', look.card), label: `${table.playerName(look.ownerPlayerNumber)}: ${constantLabel('LoyaltyCard', look.card)}` })), hidden: true },
-      { title: 'Civilian ships looked at', cards: known.map((id) => ({ art: null, label: `Civilian ship #${id}` })), hidden: true },
-    ];
-    return (
-      <Hidden id={`learned-${player.number}`} title={`${table.playerName(player.number)} knows`} sections={sections} className="learned-row">
-        <span className="learned muted">knows {seen.length + known.length} hidden thing{seen.length + known.length > 1 ? 's' : ''}</span>
-      </Hidden>
-    );
-  }
-  return <div className="learned-row">{lines}</div>;
 }
 
 // Something the table can't see, which a sandbox shows on hover.
