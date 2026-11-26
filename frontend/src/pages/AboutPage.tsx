@@ -19,6 +19,7 @@ export function AboutPage() {
         <main className="page about">
             <header className="page-head">
                 <h1 className="label">About</h1>
+                <p className="flavour">So say we all.</p>
             </header>
 
             <section className="panel cf prose" aria-labelledby="about-site">

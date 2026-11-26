@@ -10,7 +10,7 @@ export function UsersPage() {
     <main className="page wide">
       <header className="page-head">
         <h1 className="label">Users</h1>
-        {users.data && <p className="muted">{`${list.length} survivors in search of a home.`}</p>}
+        {users.data && <p className="flavour">{`${list.length} survivors in search of a home.`}</p>}
       </header>
       {users.isPending && <p className="muted">Loading…</p>}
       {users.error && <p className="error">{users.error.message}</p>}

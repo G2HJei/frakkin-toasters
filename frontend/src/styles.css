@@ -4415,6 +4415,29 @@ button.avatar-button {
   max-width: 72ch;
 }
 
+/* a line from the series stands at the right of the title, set apart from the copy like an epigraph; under it on a
+   narrow screen */
+.page-head:has(.flavour) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 22px;
+}
+
+.site .page-head:has(.flavour) h1.label {
+  margin: 0;
+}
+
+.page-head .flavour {
+  max-width: none;
+  padding: 2px 0 2px 16px;
+  border-left: 2px solid #ffffff26;
+  color: var(--steel-300);
+  font-style: italic;
+  letter-spacing: 0.01em;
+  text-wrap: balance;
+}
+
 /* like the turn's line on the table */
 .site h1.label,
 .section-title span {
@@ -4928,6 +4951,8 @@ button.avatar-button {
   font: 300 clamp(20px, 2.6vw, 30px)/1.35 var(--display);
   letter-spacing: 0.02em;
   text-shadow: 0 2px 12px #000;
+  /* lines of even length, not a long one and a stub */
+  text-wrap: balance;
 }
 
 .quote blockquote::before {
