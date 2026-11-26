@@ -107,7 +107,7 @@ function renderBoard(offer?: Offer, projection: GameProjection = game, sandbox =
 
 afterEach(() => {
     useReveal.getState().hide();
-    usePreview.setState({art: null, pointer: null, extra: null});
+    usePreview.setState({art: null, pointer: null, extra: null, hints: []});
     useGameStore.getState().reset();
 });
 
@@ -693,14 +693,19 @@ describe('the board', () => {
 
         const armory = board.querySelector('[data-location="ARMORY"]')!;
         expect(armory.getAttribute('role')).toBe('button');
-        expect(armory.querySelector('title')?.textContent).toBe('Move to the Armory');
+        // the hint describes it, and comes up at once instead of a tooltip
+        expect(armory.querySelector('desc')?.textContent).toBe('Move to the Armory');
+        expect(armory.querySelector('title')).toBeNull();
         expect(board.querySelector('[data-location="RESEARCH_LAB"]')?.getAttribute('role')).toBeNull();
         fireEvent.click(armory);
         expect(onTarget).toHaveBeenLastCalledWith({type: 'location', location: 'ARMORY'}, expect.anything());
 
         const viper = board.querySelector('[data-ship="3"]')!;
         expect(viper.classList).toContain('target');
-        expect(viper.querySelector('title')?.textContent).toBe('2 answers');
+        expect(viper.querySelector('desc')?.textContent).toBe('2 answers');
+        // the images in it name themselves without a tooltip
+        expect(viper.querySelector('title')).toBeNull();
+        expect(viper.querySelector('image')?.getAttribute('aria-label')).toBe('Viper #3 · Starbuck');
         fireEvent.click(viper);
         expect(onTarget).toHaveBeenLastCalledWith({type: 'ship', id: 3}, expect.anything());
 
@@ -709,6 +714,56 @@ describe('the board', () => {
 
         fireEvent.click(board.querySelector('[data-location="RESEARCH_LAB"] .act')!);
         expect(onTarget).toHaveBeenLastCalledWith({type: 'kind', kind: 'ResearchLabEvent'}, expect.anything());
+    });
+
+    it('says at once on hover what a click on a target does, over the preview of what is under the pointer', () => {
+        const move = (destination: string) => ({
+            option: null,
+            followup: null,
+            event: {kind: 'MoveEvent', playerNumber: 1, destination, discardCard: null},
+            submits: true,
+            pick: null
+        }) as Move;
+        const offerOfLab = (lit: boolean): Offer => ({
+            targets: new Map(lit ? [['location:RESEARCH_LAB', [move('RESEARCH_LAB')]], ['player:1', [move('ARMORY'), move('BRIG')]]] : []),
+            acts: new Map(),
+            picked: new Set(),
+        });
+        const board = (offer: Offer) => (
+            <Table.Provider value={tableContext(game, false, null)}>
+                <AnsweringContext.Provider value={{offer, onTarget: vi.fn()}}>
+                    <BoardSvg/>
+                    <ArtPreview/>
+                </AnsweringContext.Provider>
+            </Table.Provider>
+        );
+        const view = render(board(offerOfLab(true)));
+        const lab = view.container.querySelector('[data-location="RESEARCH_LAB"]')!;
+        const hotspot = lab.querySelector('.location-hotspot')!;
+        const standee = lab.querySelector('[data-character="WILLIAM_ADAMA"]')!;
+        const popovers = () => [...document.querySelectorAll('.hover-pop > *')].map((popover) =>
+            popover.classList.contains('target-hint') ? popover.textContent : popover.querySelector('img')?.getAttribute('src'));
+
+        // the pointer enters the location and its card: the hint, and the card's preview under it
+        fireEvent.mouseEnter(lab, {clientX: 10, clientY: 10});
+        expect(popovers()).toEqual(['Move to the Research Lab']);
+        fireEvent.mouseEnter(hotspot, {clientX: 10, clientY: 10});
+        expect(popovers()).toEqual(['Move to the Research Lab', expect.stringContaining('RESEARCH_LAB')]);
+
+        // onto the standee in it, which takes the click: its hint, over the character sheet; its name is no tooltip
+        fireEvent.mouseLeave(hotspot);
+        fireEvent.mouseEnter(standee, {clientX: 12, clientY: 12});
+        fireEvent.mouseEnter(standee.querySelector('image')!, {clientX: 12, clientY: 12});
+        expect(popovers()).toEqual(['2 answers', expect.stringContaining('WILLIAM_ADAMA')]);
+        expect(lab.querySelector('title')).toBeNull();
+        fireEvent.mouseLeave(standee.querySelector('image')!);
+        fireEvent.mouseLeave(standee);
+        expect(popovers()).toEqual(['Move to the Research Lab']);
+
+        // a target that stops being one takes its hint with it, and the tooltips are back
+        view.rerender(board(offerOfLab(false)));
+        expect(document.querySelector('.hover-pop')).toBeNull();
+        expect(standee.querySelector('title')?.textContent).toBe('William Adama');
     });
 
     it('lights a space area as the whole of it the sector lines cut out, fading towards the centre, cut off at the ship model, and only while lit', () => {

@@ -4,7 +4,7 @@ import { AnsweringContext } from '../../input/boardAnswers';
 import type { Move } from '../../input/answers';
 import { PlayersPanel } from './PlayersPanel';
 import { RevealLayer, useReveal } from '../reveal';
-import { usePreview } from '../../art/Art';
+import { ArtPreview, usePreview } from '../../art/Art';
 import { Table, tableContext } from '../tableContext';
 import type { GameProjection } from '../../wire/types';
 
@@ -270,7 +270,7 @@ describe('the players', () => {
     const onTarget = vi.fn();
     const offer = {
       targets: new Map([
-        ['card:SkillCard:EXECUTIVE_ORDER:2', [move]],
+        ['card:SkillCard:EXECUTIVE_ORDER:2', [move, move]],
         ['player:2', [move]],
       ]),
       acts: new Map(),
@@ -280,12 +280,22 @@ describe('the players', () => {
       <Table.Provider value={tableContext(game, false, 1)}>
         <AnsweringContext.Provider value={{ offer, onTarget }}>
           <PlayersPanel />
+          <ArtPreview />
         </AnsweringContext.Provider>
       </Table.Provider>,
     );
 
     const playable = container.querySelectorAll('[data-player="1"] button.playable');
     expect([...playable].map((button) => button.querySelector('img')?.getAttribute('alt'))).toEqual(['Executive Order 2']);
+    // on hover, what a click does, over the card's preview
+    fireEvent.mouseEnter(playable[0], { clientX: 10, clientY: 10 });
+    fireEvent.mouseEnter(playable[0].querySelector('img')!, { clientX: 10, clientY: 10 });
+    const popovers = [...document.querySelectorAll('.hover-pop > *')];
+    expect(popovers.map((popover) => popover.className)).toEqual(['target-hint', expect.stringContaining('art-preview')]);
+    expect(popovers[0].textContent).toBe('2 answers');
+    fireEvent.mouseLeave(playable[0].querySelector('img')!);
+    fireEvent.mouseLeave(playable[0]);
+    expect(document.querySelector('.hover-pop')).toBeNull();
     fireEvent.click(playable[0]);
     expect(onTarget).toHaveBeenLastCalledWith({ type: 'card', deck: 'SkillCard', card: { type: 'EXECUTIVE_ORDER', value: 2 } }, expect.anything());
 

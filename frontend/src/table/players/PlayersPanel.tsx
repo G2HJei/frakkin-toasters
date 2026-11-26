@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { cardArt, characterArt, skillCardArt, titleArt, titleIcon, tokenArt, type ArtRef, type CardEnum, type TitleName, type TokenName } from '../../art/images';
-import { ArtImg, CardBack, CardTile, previewHandlers, SkillCardBack } from '../../art/Art';
+import { ArtImg, CardBack, CardTile, previewHandlers, SkillCardBack, TargetHint } from '../../art/Art';
 import { Glyph } from '../../art/Glyph';
 import { constantLabel, skillCardLabel } from '../../labels/describe';
 import type { HiddenCards, PlayerProjection, QuorumCardInPlay, SkillCard, SkillHand } from '../../wire/types';
@@ -9,7 +9,7 @@ import { knowingPlayer, useTable, type SeatState } from '../tableContext';
 import { sortSkillCards } from '../skillCards';
 import { signed, useChanges } from '../changes';
 import { useReference } from '../reference/ReferenceDrawer';
-import { anchorOf, useAnswering } from '../../input/boardAnswers';
+import { anchorOf, hintOf, useAnswering } from '../../input/boardAnswers';
 import { targetKey, type Target } from '../../input/answers';
 import { characterSkillSet, characterType } from '../../wire/schema';
 
@@ -228,11 +228,13 @@ function faceUp<T>(cards: T[] | null, sandbox: boolean, asked = false): cards is
   return cards !== null && (!sandbox || asked);
 }
 
-/** A card that starts a move of the pending input lights up, and a click picks it. */
+/** A card that starts a move of the pending input lights up, says on hover what a click does, and a click picks it. */
 function Playable({ target, children }: { target: Target; children: ReactNode }) {
+  const table = useTable();
   const { offer, onTarget } = useAnswering();
   const key = targetKey(target);
-  if (!offer.targets.has(key) && !offer.picked.has(key)) {
+  const lit = offer.targets.get(key);
+  if (!lit && !offer.picked.has(key)) {
     return <>{children}</>;
   }
   return (
@@ -245,6 +247,7 @@ function Playable({ target, children }: { target: Target; children: ReactNode })
         onTarget(target, anchorOf(event));
       }}
     >
+      {lit && <TargetHint text={hintOf(lit, table)} html />}
       {children}
     </button>
   );

@@ -707,12 +707,21 @@ details[open] > summary::before {
   font-weight: 700;
 }
 
-/* next to the pointer (nearPointer.ts), over everything: the pile popover, the answers popover and the reference */
-.art-preview {
+/* the hover layer, next to the pointer (nearPointer.ts), over everything: the pile popover, the answers popover and the
+   reference. A target's hint and under it the image's preview, each a popover of its own */
+.hover-pop {
   position: fixed;
   left: 0;
   top: 0;
   z-index: 80;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.art-preview {
   display: flex;
   align-items: flex-start;
   gap: 0.6rem;
@@ -721,7 +730,6 @@ details[open] > summary::before {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.7);
-  pointer-events: none;
 }
 
 .art-preview-art {
@@ -745,6 +753,11 @@ details[open] > summary::before {
   min-width: 0;
   max-height: calc(100vh - 4rem);
   border-radius: 8px;
+}
+
+/* the hint above takes a line of the window's height */
+.hover-pop.with-hint .art-preview-images img {
+  max-height: calc(100vh - 7rem);
 }
 
 /* with a player's mat beside it */
@@ -2227,7 +2240,8 @@ details[open] > summary::before {
 /* the popovers are cut at the top left and the bottom right, which cuts their border off along the cuts: a line just
    inside each cut draws it on there. It is a background, which stays in place while the answers popover scrolls */
 .reveal-pop,
-.answer-pop {
+.answer-pop,
+.target-hint {
   --pop-cut: 12px;
   --pop-fill: rgba(9, 18, 34, 0.97);
   background:
@@ -2831,6 +2845,17 @@ details[open] > summary::before {
   max-height: calc(100vh - 16px);
   overflow: auto;
   padding: 10px 12px;
+}
+
+/* what a click on the target under the pointer does, in the hover layer: edged like the answers popover */
+.target-hint {
+  --pop-edge: var(--amber, var(--accent));
+  --pop-cut: 8px;
+  max-width: min(360px, calc(100vw - 16px));
+  padding: 6px 12px;
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--steel-100, var(--text));
 }
 
 .answer-pop .answer-groups {

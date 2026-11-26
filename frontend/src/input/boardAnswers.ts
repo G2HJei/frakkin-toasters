@@ -3,7 +3,9 @@
 // target (selection.ts): one move left is sent, several stay in the panel and a popover next to the click.
 import { createContext, useContext } from 'react';
 import { recordNamed } from '../wire/schema';
+import type { LabelContext } from '../labels/describe';
 import { narrow, targetKey, targetsOf, type Move, type Target } from './answers';
+import { moveSentence } from './moveLabels';
 import type { Anchor } from './selection';
 
 export interface Offer {
@@ -78,6 +80,11 @@ function boardTargets(move: Move, kind: string): Target[] {
 export function afterPick(all: Move[], picked: Target[], target: Target): { left: Move[]; send: Move | null } {
   const left = narrow(all, [...picked, target]);
   return { left, send: left.length === 1 ? left[0] : null };
+}
+
+/** What a click on a lit target does, its hover hint: the move it sends, or how many it leaves to choose from. */
+export function hintOf(moves: Move[], context: LabelContext): string {
+  return moves.length === 1 ? moveSentence(moves[0], context) : `${moves.length} answers`;
 }
 
 export interface Answering {

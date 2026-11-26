@@ -1,29 +1,46 @@
 // The images on the table. A thumbnail is too small to read, so hovering one shows it large in the preview, which
-// follows the pointer.
-import { useEffect, useRef, type ReactNode } from 'react';
+// follows the pointer. A target of the pending input says there at once what a click on it does (`TargetHint`), over
+// the preview of what is under the pointer.
+import { createContext, useContext, useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { create } from 'zustand';
 import { deckBackArt, skillBackArt, type ArtRef } from './images';
 import { usePlaceNear, type Point } from './nearPointer';
 import { constantLabel } from '../labels/describe';
 
+interface Hint {
+  id: string;
+  text: string;
+  // the target the hint is of
+  element: Element;
+}
+
 interface PreviewState {
   art: ArtRef | null;
-  pointer: Point | null;
   // shown beside the images, e.g. a player's mat by his character sheet
   extra: ReactNode;
+  // the hints of the targets under the pointer: a target can lie in another, e.g. a standee in a location
+  hints: Hint[];
+  // one for the hint and the preview, which show together
+  pointer: Point | null;
   show(art: ArtRef, pointer: Point, extra?: ReactNode): void;
-  move(art: ArtRef, pointer: Point): void;
+  move(pointer: Point): void;
   hide(art: ArtRef): void;
   hideKey(key: string): void;
+  hint(hint: Hint, pointer: Point): void;
+  rehint(id: string, text: string): void;
+  unhint(id: string): void;
 }
 
 export const usePreview = create<PreviewState>((set, get) => ({
   art: null,
-  pointer: null,
   extra: null,
+  hints: [],
+  pointer: null,
   show: (art, pointer, extra = null) => set({ art, pointer, extra }),
-  move: (art, pointer) => {
-    if (get().art?.key === art.key) {
+  move: (pointer) => {
+    const { art, hints, pointer: before } = get();
+    // the hint's target and the image in it both follow the pointer: one place a move
+    if ((art || hints.length > 0) && (before?.x !== pointer.x || before?.y !== pointer.y)) {
       set({ pointer });
     }
   },
@@ -31,10 +48,27 @@ export const usePreview = create<PreviewState>((set, get) => ({
   hide: (art) => get().hideKey(art.key),
   hideKey: (key) => {
     if (get().art?.key === key) {
-      set({ art: null, pointer: null, extra: null });
+      set({ art: null, extra: null, pointer: get().hints.length > 0 ? get().pointer : null });
+    }
+  },
+  hint: (hint, pointer) => set({ hints: [...get().hints.filter((other) => other.id !== hint.id), hint], pointer }),
+  rehint: (id, text) => {
+    if (get().hints.some((hint) => hint.id === id && hint.text !== text)) {
+      set({ hints: get().hints.map((hint) => (hint.id === id ? { ...hint, text } : hint)) });
+    }
+  },
+  unhint: (id) => {
+    const hints = get().hints.filter((hint) => hint.id !== id);
+    if (hints.length !== get().hints.length) {
+      set({ hints, pointer: hints.length > 0 || get().art ? get().pointer : null });
     }
   },
 }));
+
+// of targets that lie in one another, the click goes to the innermost, and so does the hint
+function innermost(hints: Hint[]): Hint | null {
+  return hints.find((hint) => !hints.some((other) => other !== hint && hint.element.contains(other.element))) ?? null;
+}
 
 export function previewHandlers(art: ArtRef, extra?: ReactNode) {
   if (art.preview.length === 0) {
@@ -42,30 +76,88 @@ export function previewHandlers(art: ArtRef, extra?: ReactNode) {
   }
   return {
     onMouseEnter: (event: React.MouseEvent) => usePreview.getState().show(art, { x: event.clientX, y: event.clientY }, extra),
-    onMouseMove: (event: React.MouseEvent) => usePreview.getState().move(art, { x: event.clientX, y: event.clientY }),
+    onMouseMove: (event: React.MouseEvent) => usePreview.getState().move({ x: event.clientX, y: event.clientY }),
     onMouseLeave: () => usePreview.getState().hide(art),
   };
 }
 
+/**
+ * Inside a target of the pending input, whose hint says what a click does: an image there names itself to a screen
+ * reader only, so no tooltip of its name comes up over the hint.
+ */
+export const InTarget = createContext(false);
+
+/**
+ * What a click on a target of the pending input does, shown at once on hover, over the preview of what is under the
+ * pointer. Like an SVG `<title>`, it is the hint of the element it lies in: in the board's SVG a `<desc>`, which
+ * describes its target to a screen reader too, and in HTML (`html`) a hidden span. Of targets in one another, the
+ * innermost shows. A target that stops being one takes its hint with it: no mouse leaves it.
+ */
+export function TargetHint({ text, html = false }: { text: string; html?: boolean }) {
+  const id = useId();
+  const [element, setElement] = useState<Element | null>(null);
+  // what a pointer entering the target finds, also after the moves changed under it
+  const current = useRef(text);
+  useEffect(() => {
+    current.current = text;
+    usePreview.getState().rehint(id, text);
+  }, [id, text]);
+  useEffect(() => {
+    const target = element?.parentElement;
+    if (!target) {
+      return;
+    }
+    const enter = (event: MouseEvent) => usePreview.getState().hint({ id, text: current.current, element: target }, { x: event.clientX, y: event.clientY });
+    const move = (event: MouseEvent) => usePreview.getState().move({ x: event.clientX, y: event.clientY });
+    const leave = () => usePreview.getState().unhint(id);
+    target.addEventListener('mouseenter', enter);
+    target.addEventListener('mousemove', move);
+    target.addEventListener('mouseleave', leave);
+    return () => {
+      target.removeEventListener('mouseenter', enter);
+      target.removeEventListener('mousemove', move);
+      target.removeEventListener('mouseleave', leave);
+      leave();
+    };
+  }, [element, id]);
+  return html ? (
+    <span ref={setElement} hidden>
+      {text}
+    </span>
+  ) : (
+    <desc ref={setElement}>{text}</desc>
+  );
+}
+
+/**
+ * The hover layer, next to the pointer: the hint of the target under it, and under the hint the preview of the image
+ * under it, each a popover of its own.
+ */
 export function ArtPreview() {
   const art = usePreview((state) => state.art);
   const pointer = usePreview((state) => state.pointer);
   const extra = usePreview((state) => state.extra);
+  const hint = innermost(usePreview((state) => state.hints));
   const ref = useRef<HTMLDivElement>(null);
   usePlaceNear(ref, pointer);
-  if (!art) {
+  if (!art && !hint) {
     return null;
   }
   return (
-    <div ref={ref} className={`art-preview preview-${art.shape}${extra ? ' with-extra' : ''}`} aria-hidden="true">
-      <div className="art-preview-art">
-        <div className="art-preview-images">
-          {art.preview.map((url) => (
-            <img key={url} src={url} alt="" />
-          ))}
+    <div ref={ref} className={`hover-pop${hint ? ' with-hint' : ''}`} aria-hidden="true">
+      {hint && <div className="target-hint">{hint.text}</div>}
+      {art && (
+        <div className={`art-preview preview-${art.shape}${extra ? ' with-extra' : ''}`}>
+          <div className="art-preview-art">
+            <div className="art-preview-images">
+              {art.preview.map((url) => (
+                <img key={url} src={url} alt="" />
+              ))}
+            </div>
+          </div>
+          {extra && <div className="art-preview-extra">{extra}</div>}
         </div>
-      </div>
-      {extra && <div className="art-preview-extra">{extra}</div>}
+      )}
     </div>
   );
 }
@@ -77,7 +169,18 @@ export function ArtPreview() {
 export function ArtImg({ art, className = '', preview = true }: { art: ArtRef; className?: string; preview?: boolean }) {
   // by its key: a render makes new refs of the same image
   const { key } = art;
-  useEffect(() => () => usePreview.getState().hideKey(key), [key]);
+  // only the preview this image showed: a preview can show the same image again (a standee's, with his mat), which
+  // StrictMode mounts twice
+  const showing = useRef(false);
+  useEffect(
+    () => () => {
+      if (showing.current) {
+        usePreview.getState().hideKey(key);
+      }
+    },
+    [key],
+  );
+  const handlers = preview ? previewHandlers(art) : {};
   return (
     <img
       src={art.url}
@@ -86,7 +189,19 @@ export function ArtImg({ art, className = '', preview = true }: { art: ArtRef; c
       draggable={false}
       className={`art art-${art.shape} ${className}`.trim()}
       data-art={art.key}
-      {...(preview ? previewHandlers(art) : {})}
+      {...handlers}
+      {...(handlers.onMouseEnter
+        ? {
+            onMouseEnter: (event: React.MouseEvent) => {
+              showing.current = true;
+              handlers.onMouseEnter(event);
+            },
+            onMouseLeave: () => {
+              showing.current = false;
+              handlers.onMouseLeave();
+            },
+          }
+        : {})}
     />
   );
 }
@@ -174,7 +289,7 @@ export function ArtStrip({ refs, className = '' }: { refs: ArtRef[]; className?:
 
 /**
  * An image inside the board's SVG, with the same preview unless what it is part of shows more on hover, and what the
- * preview shows beside it.
+ * preview shows beside it. Its name is a tooltip, but inside a target, whose hint shows instead.
  */
 export function SvgArt({ art, x, y, width, height, className, title, preview = true, previewExtra, transform }: {
   art: ArtRef;
@@ -188,6 +303,8 @@ export function SvgArt({ art, x, y, width, height, className, title, preview = t
   previewExtra?: ReactNode;
   transform?: string;
 }) {
+  const inTarget = useContext(InTarget);
+  const name = title ?? art.label;
   return (
     <image
       href={art.url}
@@ -199,9 +316,10 @@ export function SvgArt({ art, x, y, width, height, className, title, preview = t
       className={className}
       transform={transform}
       data-art={art.key}
+      aria-label={inTarget ? name : undefined}
       {...(preview ? previewHandlers(art, previewExtra) : {})}
     >
-      <title>{title ?? art.label}</title>
+      {!inTarget && <title>{name}</title>}
     </image>
   );
 }

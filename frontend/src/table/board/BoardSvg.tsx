@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, type ReactNode } from 'react';
+import { useContext, useLayoutEffect, useRef, type ReactNode } from 'react';
 import { isCriticallyDamaged, lossReduction, signed, trackPosition, TRACKS, useChanges, type Changes, type Track } from '../changes';
 import { useGameStore } from '../../live/gameStore';
 import {
@@ -16,16 +16,14 @@ import {
   tokenArt,
   type ArtRef,
 } from '../../art/images';
-import { previewHandlers, SvgArt } from '../../art/Art';
+import { InTarget, previewHandlers, SvgArt, TargetHint } from '../../art/Art';
 import { BOARD_LABELS, CRITICAL_DAMAGE_EXPLAINED, CRITICAL_DAMAGE_LABEL, LOSS_REDUCTION_CARD, lossReductionExplained, type BoardLabel } from '../../labels/board';
 import { cardLabel, constantLabel } from '../../labels/describe';
 import type { CivilianShip, Character, DeckProjection, GameProjection, Location, ShipProjection } from '../../wire/types';
 import { PlayerMatOf } from '../players/PlayersPanel';
-import { anchorOf, useAnswering } from '../../input/boardAnswers';
+import { anchorOf, hintOf, useAnswering } from '../../input/boardAnswers';
 import { useFlash } from '../flash';
-import { moveSentence } from '../../input/moveLabels';
-import type { Move, Target } from '../../input/answers';
-import type { LabelContext } from '../../labels/describe';
+import type { Target } from '../../input/answers';
 import { useRevealHandlers, type RevealCard, type RevealSection } from '../reveal';
 import { knowingPlayer, useTable } from '../tableContext';
 import boardUrl from './board.jpg';
@@ -133,36 +131,38 @@ export function BoardSvg() {
             role={isTarget ? 'button' : undefined}
             aria-label={isTarget ? constantLabel('Location', name) : undefined}
           >
-            {lit && <title>{hint(lit, table)}</title>}
-            {/* a space area has no frame: it lights as a whole while it is a target, picked or flashed */}
-            {!space && <polygon className="frame" points={cutBox(place.x - 6, place.y - 6, place.width + 12, place.height + 12, outsideCut(LOCATION_CUT, 6))} />}
-            {space && (isTarget || picked || flash) && <SpaceSector name={name} model={place.area === 'cylonFleetSpace' ? 'basestar' : 'galactica'} />}
-            {space ? (
-              <Ships place={place} ships={ships.filter((ship) => ship.location === name)} toMiss={game.turn?.raidersToMiss?.[name] ?? 0} avoid={LAUNCH_TUBES[name]} />
-            ) : (
-              <LocationMarks place={place} destroyed={destroyed} engineRoom={name === 'ENGINE_ROOM' && (game.pegasus?.engineRoomActivated ?? false)} />
-            )}
-            {/* under the standees, which show their own cards */}
-            {card && <rect className="location-hotspot" x={place.x} y={place.y} width={place.width} height={place.height} {...previewHandlers(card)} />}
-            <Standees place={place} title={TITLES[name]} characters={(location.characters ?? []) as Character[]} acting={actingCharacter} nameOf={table.playerName} game={game} />
-            {!space && location.damaged && <DamagedLabel place={place} title={TITLES[name]} />}
-            {act && (
-              <g
-                className="act"
-                role="button"
-                aria-label="Act"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  onTarget({ type: 'kind', kind: act.kind }, anchorOf(event));
-                }}
-              >
-                <title>{hint(act.moves, table)}</title>
-                <rect x={place.x + place.width - 96} y={place.y - 22} width={110} height={52} rx={6} />
-                <text x={place.x + place.width - 41} y={place.y + 14} textAnchor="middle">
-                  Act
-                </text>
-              </g>
-            )}
+            {lit && <TargetHint text={hintOf(lit, table)} />}
+            <InTarget value={isTarget}>
+              {/* a space area has no frame: it lights as a whole while it is a target, picked or flashed */}
+              {!space && <polygon className="frame" points={cutBox(place.x - 6, place.y - 6, place.width + 12, place.height + 12, outsideCut(LOCATION_CUT, 6))} />}
+              {space && (isTarget || picked || flash) && <SpaceSector name={name} model={place.area === 'cylonFleetSpace' ? 'basestar' : 'galactica'} />}
+              {space ? (
+                <Ships place={place} ships={ships.filter((ship) => ship.location === name)} toMiss={game.turn?.raidersToMiss?.[name] ?? 0} avoid={LAUNCH_TUBES[name]} />
+              ) : (
+                <LocationMarks place={place} destroyed={destroyed} engineRoom={name === 'ENGINE_ROOM' && (game.pegasus?.engineRoomActivated ?? false)} />
+              )}
+              {/* under the standees, which show their own cards */}
+              {card && <rect className="location-hotspot" x={place.x} y={place.y} width={place.width} height={place.height} {...previewHandlers(card)} />}
+              <Standees place={place} title={TITLES[name]} characters={(location.characters ?? []) as Character[]} acting={actingCharacter} nameOf={table.playerName} game={game} />
+              {!space && location.damaged && <DamagedLabel place={place} title={TITLES[name]} />}
+              {act && (
+                <g
+                  className="act"
+                  role="button"
+                  aria-label="Act"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onTarget({ type: 'kind', kind: act.kind }, anchorOf(event));
+                  }}
+                >
+                  <TargetHint text={hintOf(act.moves, table)} />
+                  <rect x={place.x + place.width - 96} y={place.y - 22} width={110} height={52} rx={6} />
+                  <text x={place.x + place.width - 41} y={place.y + 14} textAnchor="middle">
+                    Act
+                  </text>
+                </g>
+              )}
+            </InTarget>
           </g>
         );
       })}
@@ -225,11 +225,6 @@ function useGlidingShips(svg: React.RefObject<SVGSVGElement | null>, version: nu
     });
     places.current = next;
   }, [svg, version]);
-}
-
-// What a click on a lit target does: the move it sends, or how many it leaves to choose from.
-function hint(moves: Move[], context: LabelContext): string {
-  return moves.length === 1 ? moveSentence(moves[0], context) : `${moves.length} answers`;
 }
 
 // A lit piece takes the click before the location under it.
@@ -917,6 +912,7 @@ function Standees({ place, title, characters, acting, nameOf, game }: {
   const table = useTable();
   const { offer, onTarget } = useAnswering();
   const flashed = useFlash((state) => state.keys);
+  const inTarget = useContext(InTarget);
   if (characters.length === 0) {
     return null;
   }
@@ -944,23 +940,25 @@ function Standees({ place, title, characters, acting, nameOf, game }: {
             data-character={character}
             {...(lit && player ? { ...targetHandlers({ type: 'player', playerNumber: player.number }, onTarget), 'aria-label': name } : {})}
           >
-            {lit && <title>{hint(lit, table)}</title>}
-            {art ? (
-              <>
-                <polygon
-                  className="token-ring"
-                  points={topCutBox(x - TOKEN_RING_OUT, top - TOKEN_RING_OUT, width + 2 * TOKEN_RING_OUT, height + 2 * TOKEN_RING_OUT, outsideCut(width * PORTRAIT_CUT, TOKEN_RING_OUT))}
-                />
-                <SvgArt art={art} x={x} y={top} width={width} height={height} title={name} previewExtra={player ? <PlayerMatOf playerNumber={player.number} /> : undefined} />
-              </>
-            ) : (
-              <>
-                <rect x={place.x + 6} y={top + index * 40} width={place.width - 12} height={34} rx={14} />
-                <text x={place.x + place.width / 2} y={top + 24 + index * 40} textAnchor="middle">
-                  {shortName(constantLabel('Character', character))}
-                </text>
-              </>
-            )}
+            {lit && <TargetHint text={hintOf(lit, table)} />}
+            <InTarget value={inTarget || lit !== undefined}>
+              {art ? (
+                <>
+                  <polygon
+                    className="token-ring"
+                    points={topCutBox(x - TOKEN_RING_OUT, top - TOKEN_RING_OUT, width + 2 * TOKEN_RING_OUT, height + 2 * TOKEN_RING_OUT, outsideCut(width * PORTRAIT_CUT, TOKEN_RING_OUT))}
+                  />
+                  <SvgArt art={art} x={x} y={top} width={width} height={height} title={name} previewExtra={player ? <PlayerMatOf playerNumber={player.number} /> : undefined} />
+                </>
+              ) : (
+                <>
+                  <rect x={place.x + 6} y={top + index * 40} width={place.width - 12} height={34} rx={14} />
+                  <text x={place.x + place.width / 2} y={top + 24 + index * 40} textAnchor="middle">
+                    {shortName(constantLabel('Character', character))}
+                  </text>
+                </>
+              )}
+            </InTarget>
           </g>
         );
       })}
@@ -1150,25 +1148,28 @@ function Ship({ ship, x, y, width, height, preview = true }: { ship: ShipProject
   const label = boardShipLabel(ship);
   const pilot = ship.pilot ? pilotArt(ship.pilot) : null;
   const flashed = useFlash((state) => state.keys);
+  const inTarget = useContext(InTarget);
   const key = `ship:${ship.id}`;
   const lit = offer.targets.get(key);
   const classes = ['ship', `ship-${(ship.type ?? '').toLowerCase()}`, lit ? 'target' : '', offer.picked.has(key) ? 'picked' : '', flashed.has(key) ? 'flash' : ''].join(' ').trim();
   return (
     <g className={classes} data-ship={ship.id} aria-label={label} {...(lit ? targetHandlers({ type: 'ship', id: ship.id }, onTarget) : {})}>
-      {lit && <title>{hint(lit, table)}</title>}
-      {(lit || flashed.has(key)) && <polygon className="target-ring" points={cutBox(x - 4, y - 4, width + 8, height + 8, RING_CUT)} />}
-      {art ? (
-        <SvgArt art={art} x={x} y={y} width={width} height={height} title={label} className="piece" preview={preview} />
-      ) : (
-        <text x={x} y={y + 30}>
-          {label}
-        </text>
-      )}
-      {pilot && <SvgArt art={pilot} x={x + width - 30} y={y - 30} width={50} height={50} className="pilot-token" title={label} />}
-      {(ship.damage ?? []).map((damage, index) => {
-        const token = damageArt('BasestarDamage', damage);
-        return token ? <SvgArt key={index} art={token} x={x + 8 + index * 46} y={y + height + 2} width={42} height={42} className="piece" /> : null;
-      })}
+      {lit && <TargetHint text={hintOf(lit, table)} />}
+      <InTarget value={inTarget || lit !== undefined}>
+        {(lit || flashed.has(key)) && <polygon className="target-ring" points={cutBox(x - 4, y - 4, width + 8, height + 8, RING_CUT)} />}
+        {art ? (
+          <SvgArt art={art} x={x} y={y} width={width} height={height} title={label} className="piece" preview={preview} />
+        ) : (
+          <text x={x} y={y + 30}>
+            {label}
+          </text>
+        )}
+        {pilot && <SvgArt art={pilot} x={x + width - 30} y={y - 30} width={50} height={50} className="pilot-token" title={label} />}
+        {(ship.damage ?? []).map((damage, index) => {
+          const token = damageArt('BasestarDamage', damage);
+          return token ? <SvgArt key={index} art={token} x={x + 8 + index * 46} y={y + height + 2} width={42} height={42} className="piece" /> : null;
+        })}
+      </InTarget>
     </g>
   );
 }

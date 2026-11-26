@@ -153,15 +153,20 @@ player's own cards face up). A space area lights as the whole sector its printed
 glows from its outer side and fades out towards the centre the areas converge on, cut off at the Galactica or basestar
 model (a clip of the board minus `SHIP_OUTLINES`, so a click there reaches the location under it). A player target lights his standee and his mat. A click picks the target: the only move
 left is sent, a shape opens its picker in the panel, and several stay in the panel and in `AnswerPopover` next to the
-click (e.g. a viper's activations, a card's targets). A lit target's `<title>` says what clicking does. A group's row
-in the panel picks its kind, so the board lights its targets.
+click (e.g. a viper's activations, a card's targets). Hovering a lit target (a location, the "Act" chip, a standee, a
+ship, a `Playable` card) says at once what clicking does (`TargetHint`, `hintOf`: the move it sends or "n answers"),
+as a popover over the preview of what is under the pointer (see [Hover](#hover)); a standee in a lit location shows the
+location's, the innermost lit target its own. A group's row in the panel picks its kind, so the board lights its
+targets.
 
 ## Hover
 
 `src/table/reveal.tsx`: a pile shows what it holds in one fixed popover (`RevealLayer`), its cards as large as their
 images (no preview of their own) in rows of up to 860px, scrolling when they don't fit the window. The preview of a
 single image (`ArtPreview`) shows it as large as it is, scaled down only by a smaller window; a card back has none, so
-it never covers its pile's popover. Neither, nor the reference's grids, puts a name under an image (it stays the
+it never covers its pile's popover. A lit target's hint is the first popover of the same layer (`.hover-pop`), the
+preview a second one under it, placed together by the pointer; inside a lit target the board's images drop their
+`<title>` tooltip (`InTarget`). Neither, nor the reference's grids, puts a name under an image (it stays the
 image's `alt`); a pile keeps a label that says more, e.g. who played the card. A face-up discard pile shows to everyone.
 A sandbox looks like a live table, every hand and deck face down, and shows on hover what the players can't see
 (`hidden` sections: hands, Loyalty and other player cards, draw piles, face-down discards, a skill check's cards); the
@@ -190,5 +195,6 @@ a dial as `RESOURCE_value`; for what no enum names, `Title/`, `Token/`, `Die/` a
   constant.
 - `refs.ts` finds what an event, a fact or an option names through the schema, for the log and the input.
 - `Art.tsx`: `CardTile` (a face-up card is a `tile`, a face-down one a `tile back`, which the lobby e2e checks),
-  `CardBack`, `ArtStrip`, `SvgArt`, and the hover preview (`ArtPreview`), which an image takes with it when it goes away
-  under the pointer.
+  `CardBack`, `ArtStrip`, `SvgArt`, and the hover layer (`ArtPreview`: a target's hint over the image's preview), which
+  an image and a target take with them when they go away under the pointer (an image only the preview it showed itself:
+  a standee's preview shows his mat, whose portrait is the same image, and StrictMode mounts it twice).

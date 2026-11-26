@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import { StrictMode } from 'react';
 import { describe, expect, it } from 'vitest';
-import { ArtImg, usePreview } from './Art';
+import { ArtImg, ArtPreview, previewHandlers, usePreview } from './Art';
 import { characterArt } from './images';
 
 describe('an image', () => {
@@ -15,5 +16,19 @@ describe('an image', () => {
     expect(usePreview.getState().art?.key).toBe(art.key);
     view.unmount();
     expect(usePreview.getState().art).toBeNull();
+  });
+
+  it('keeps a preview that shows the same image again, e.g. a standee with his mat, also in StrictMode', () => {
+    const art = characterArt('LAURA_ROSLIN')!;
+    render(
+      <StrictMode>
+        <span data-testid="standee" {...previewHandlers(art, <ArtImg art={art} />)} />
+        <ArtPreview />
+      </StrictMode>,
+    );
+
+    fireEvent.mouseEnter(screen.getByTestId('standee'));
+    expect(usePreview.getState().art?.key).toBe(art.key);
+    expect(document.querySelector('.art-preview-extra img')?.getAttribute('data-art')).toBe(art.key);
   });
 });
