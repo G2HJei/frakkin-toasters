@@ -1,7 +1,8 @@
 // Where everything lies on board.jpg, in the image's own pixels (2003×2317). board.layout.json, measured with the
-// image, has what is printed: the location cards and the panels their names are printed in, the space areas, the
-// tracks, the resources, the deck rack and the reserves. The free starfield for the little that has no printed slot is
-// below. A test checks that every Location of the schema has a place here.
+// image, has what is printed: the location cards and the panels their names are printed in, the space areas (the box
+// their ships lie in, and the whole sector the printed lines cut out), the outlines of the Galactica and basestar models,
+// the tracks, the resources, the deck rack and the reserves. The free starfield for the little that has no printed slot
+// is below. A test checks that every Location of the schema has a place here.
 //
 // Galactica's bow points left: the area in front of it (8 o'clock, where Cylon ships appear) is the strip at the bow,
 // the one behind it (2 o'clock, where civilian ships appear) the strip at the stern, the others clockwise. The Cylon
@@ -55,6 +56,13 @@ export const LAYOUT = {
 
 // the panel each location's name is printed in, under its picture
 export const TITLES = byName(printed.locationTitles, printedBox) as Partial<Record<Location, Box>>;
+
+// the whole of each space area, as the printed sector lines cut it out of its board: polygon points
+export const SPACE_SECTORS = printed.spaceSectors as Partial<Record<Location, string>>;
+
+// the outline of the ship model a board's space areas lie around, which a lit area stops at: SVG paths
+export type ShipModel = keyof typeof printed.shipOutlines;
+export const SHIP_OUTLINES: Record<ShipModel, string> = printed.shipOutlines;
 
 // the centre of each printed position of a track
 export const JUMP_TRACK: Record<string, Point> = printed.tracks.jump;

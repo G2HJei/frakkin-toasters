@@ -42,11 +42,14 @@ import {
   LAYOUT,
   PURSUIT_TRACK,
   RESOURCES,
+  SHIP_OUTLINES,
   SLOTS,
+  SPACE_SECTORS,
   TITLES,
   type Box,
   type Place,
   type Point,
+  type ShipModel,
 } from './layout';
 import { CargoIcons, cargoText, inRedZone, RESOURCE_NAMES, resourceIconUrl, resourceLabel, type ResourceName } from './resources';
 
@@ -63,8 +66,8 @@ const FACEDOWN_DISCARDS = new Set(['CIVILIAN_SHIPS', 'GALACTICA_DAMAGE', 'PEGASU
  * play lie on the free starfield. The card being resolved, its skill check and the die are the turn panel's, and the
  * nukes the Admiral's mat's. Hovering a deck shows its discard pile, and in a sandbox what the players can't see;
  * hovering a location shows its card, and hovering a standee its character sheet with its player's mat. What the
- * pending input's moves name lights up and takes a click (`input/boardAnswers.ts`): locations, ships, standees, and the
- * "Act" chip of a location action.
+ * pending input's moves name lights up and takes a click (`input/boardAnswers.ts`): locations, space areas (the whole
+ * sector, up to the ship model), ships, standees, and the "Act" chip of a location action.
  */
 export function BoardSvg() {
   const table = useTable();
@@ -85,6 +88,7 @@ export function BoardSvg() {
   return (
     <svg ref={svg} className="board-svg" viewBox={`0 0 ${BOARD_WIDTH} ${BOARD_HEIGHT}`} role="img" aria-label="the board">
       <image href={boardUrl} x={0} y={0} width={BOARD_WIDTH} height={BOARD_HEIGHT} className="board-image" />
+      <SpaceSectorDefs />
       <SectionLabels />
       <Resources game={game} changes={changes} version={version} />
       <Tracks game={game} changes={changes} version={version} />
@@ -103,6 +107,8 @@ export function BoardSvg() {
         const targetKey = `location:${name}`;
         const lit = offer.targets.get(targetKey);
         const isTarget = lit !== undefined;
+        const picked = offer.picked.has(targetKey);
+        const flash = flashed.has(targetKey);
         const act = offer.acts.get(name);
         const space = place.area === 'galacticaSpace' || place.area === 'cylonFleetSpace';
         const destroyed = (place.area === 'colonialOne' && (galactica?.colonialOneDestroyed ?? false))
@@ -118,8 +124,8 @@ export function BoardSvg() {
               location.damaged ? 'damaged' : '',
               destroyed ? 'destroyed' : '',
               isTarget ? 'target' : '',
-              offer.picked.has(targetKey) ? 'picked' : '',
-              flashed.has(targetKey) ? 'flash' : '',
+              picked ? 'picked' : '',
+              flash ? 'flash' : '',
               changes.damaged.includes(name) ? 'just-damaged' : '',
             ].join(' ')}
             data-location={name}
@@ -128,7 +134,9 @@ export function BoardSvg() {
             aria-label={isTarget ? constantLabel('Location', name) : undefined}
           >
             {lit && <title>{hint(lit, table)}</title>}
-            <polygon className={space ? 'space-frame' : 'frame'} points={cutBox(place.x - 6, place.y - 6, place.width + 12, place.height + 12, outsideCut(LOCATION_CUT, 6))} />
+            {/* a space area has no frame: it lights as a whole while it is a target, picked or flashed */}
+            {!space && <polygon className="frame" points={cutBox(place.x - 6, place.y - 6, place.width + 12, place.height + 12, outsideCut(LOCATION_CUT, 6))} />}
+            {space && (isTarget || picked || flash) && <SpaceSector name={name} model={place.area === 'cylonFleetSpace' ? 'basestar' : 'galactica'} />}
             {space ? (
               <Ships place={place} ships={ships.filter((ship) => ship.location === name)} toMiss={game.turn?.raidersToMiss?.[name] ?? 0} avoid={LAUNCH_TUBES[name]} />
             ) : (
@@ -809,6 +817,71 @@ function FreeSpace({ game }: { game: GameProjection }) {
 }
 
 // ---------------------------------------------------------------- the locations
+
+// The ship cuts: everything on the board but its model, once for every space area.
+function SpaceSectorDefs() {
+  return (
+    <defs>
+      {(Object.keys(SHIP_OUTLINES) as ShipModel[]).map((model) => (
+        <clipPath key={model} id={`ship-cut-${model}`}>
+          <path clipRule="evenodd" d={`M0,0H${BOARD_WIDTH}V${BOARD_HEIGHT}H0Z${SHIP_OUTLINES[model]}`} />
+        </clipPath>
+      ))}
+    </defs>
+  );
+}
+
+// a lit space area's glow from its outer side (0) to the centre its lines converge on (1): most of it near the outside
+const SECTOR_FADE: [offset: number, opacity: number][] = [
+  [0, 1],
+  [0.3, 0.35],
+  [0.6, 0.08],
+  [1, 0],
+];
+
+/**
+ * Where a space area's glow starts and where it ends: on its outer side, and at the centre its lines converge on (the
+ * polygon's first point). The outer side runs between the two lines' ends (its second and last points), and the glow
+ * crosses it square, so the whole side is as bright.
+ */
+function sectorAxis(points: string): { outside: Point; centre: Point } {
+  const corners = points.split(' ').map((point) => point.split(',').map(Number));
+  const [[cx, cy], [x1, y1], [x2, y2]] = [corners[0], corners[1], corners[corners.length - 1]];
+  const [dx, dy] = [x2 - x1, y2 - y1];
+  const along = ((cx - x1) * dx + (cy - y1) * dy) / (dx * dx + dy * dy);
+  return { outside: { x: x1 + along * dx, y: y1 + along * dy }, centre: { x: cx, y: cy } };
+}
+
+/**
+ * A lit space area: the whole of it the sector lines cut out, glowing from its outer side and fading out towards the
+ * centre the areas converge on, cut off at the ship model it lies around. Its fill takes the click.
+ */
+function SpaceSector({ name, model }: { name: Location; model: ShipModel }) {
+  const points = SPACE_SECTORS[name];
+  if (!points) {
+    return null;
+  }
+  const { outside, centre } = sectorAxis(points);
+  const fade = `url(#space-sector-fade-${name})`;
+  return (
+    <g className={`space-sector ${model}`} clipPath={`url(#ship-cut-${model})`}>
+      {/* inside the group, so its stops take the group's colour */}
+      <linearGradient id={`space-sector-fade-${name}`} gradientUnits="userSpaceOnUse" x1={outside.x} y1={outside.y} x2={centre.x} y2={centre.y}>
+        {SECTOR_FADE.map(([offset, opacity]) => (
+          <stop key={offset} offset={offset} stopColor="currentColor" stopOpacity={opacity} />
+        ))}
+      </linearGradient>
+      <clipPath id={`space-sector-${name}`}>
+        <polygon points={points} />
+      </clipPath>
+      {/* the area clips the edge to its inner half */}
+      <g clipPath={`url(#space-sector-${name})`}>
+        <polygon className="sector-fill" points={points} fill={fade} />
+        <polygon className="sector-edge" points={points} stroke={fade} />
+      </g>
+    </g>
+  );
+}
 
 // A destroyed Colonial One or Pegasus gets a veil, and the Engine Room a label once activated.
 function LocationMarks({ place, destroyed, engineRoom }: { place: Place; destroyed: boolean; engineRoom: boolean }) {

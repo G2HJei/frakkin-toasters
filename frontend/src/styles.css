@@ -1180,8 +1180,7 @@ details[open] > summary::before {
   stroke-width: 3;
 }
 
-.board-svg .location .frame,
-.board-svg .location .space-frame {
+.board-svg .location .frame {
   fill: none;
 }
 
@@ -1189,17 +1188,41 @@ details[open] > summary::before {
   cursor: pointer;
 }
 
-.board-svg .location.target .frame,
-.board-svg .location.target .space-frame {
-  fill: rgba(242, 180, 65, 0.12);
+/* the board's highlights are thin, in the board's pixels (about 2.3 a screen pixel at a usual height), and glow softly */
+.board-svg .location.target .frame {
+  fill: rgba(242, 180, 65, 0.1);
   stroke: var(--amber);
-  stroke-width: 8;
-  filter: drop-shadow(0 0 14px rgba(242, 180, 65, 0.9));
+  stroke-opacity: 0.8;
+  stroke-width: 4;
+  filter: drop-shadow(0 0 8px rgba(242, 180, 65, 0.5));
 }
 
-.board-svg .location.target:hover .frame,
-.board-svg .location.target:hover .space-frame {
-  fill: rgba(242, 180, 65, 0.3);
+.board-svg .location.target:hover .frame {
+  fill: rgba(242, 180, 65, 0.24);
+  stroke-opacity: 1;
+}
+
+/* a lit space area (SpaceSector): it glows from its outer side and fades out towards the centre, in its colour; the
+   fill takes the click */
+.board-svg .space-sector {
+  color: var(--amber);
+}
+
+.board-svg .space-sector .sector-fill {
+  fill-opacity: 0.35;
+}
+
+/* half of it shows: the area clips it */
+.board-svg .space-sector .sector-edge {
+  fill: none;
+  stroke-opacity: 0.8;
+  stroke-width: 6;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.board-svg .location.target:hover .sector-fill {
+  fill-opacity: 0.55;
 }
 
 .board-svg .destroyed-veil {
@@ -2816,10 +2839,13 @@ details[open] > summary::before {
 }
 
 /* what the pending input's moves name, lit on the board and the mats (input/boardAnswers.ts) */
-.board-svg .location.picked .frame,
-.board-svg .location.picked .space-frame {
+.board-svg .location.picked .frame {
   stroke: var(--dradis-glow);
-  stroke-width: 8;
+  stroke-width: 4;
+}
+
+.board-svg .location.picked .space-sector {
+  color: var(--dradis-glow);
 }
 
 .board-svg .ship.target,
@@ -2828,14 +2854,16 @@ details[open] > summary::before {
 }
 
 .board-svg .ship .target-ring {
-  fill: rgba(242, 180, 65, 0.18);
+  fill: rgba(242, 180, 65, 0.14);
   stroke: var(--amber);
-  stroke-width: 4;
-  filter: drop-shadow(0 0 10px rgba(242, 180, 65, 0.9));
+  stroke-opacity: 0.8;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 6px rgba(242, 180, 65, 0.5));
 }
 
 .board-svg .ship.target:hover .target-ring {
-  fill: rgba(242, 180, 65, 0.4);
+  fill: rgba(242, 180, 65, 0.32);
+  stroke-opacity: 1;
 }
 
 /* what only the viewer knows, in its green blue (--known): the halo under a civilian ship (or its pile) he looked
@@ -2859,8 +2887,9 @@ details[open] > summary::before {
 
 .board-svg .character.target .token-ring {
   stroke: var(--amber);
-  stroke-width: 7;
-  filter: drop-shadow(0 0 12px rgba(242, 180, 65, 0.95));
+  stroke-opacity: 0.85;
+  stroke-width: 4;
+  filter: drop-shadow(0 0 7px rgba(242, 180, 65, 0.55));
 }
 
 .board-svg .character.picked .token-ring,
@@ -3076,18 +3105,22 @@ button.playable.picked .art {
   }
 }
 
-.board-svg .location.flash .frame,
-.board-svg .location.flash .space-frame {
-  fill: rgba(143, 208, 255, 0.18);
+.board-svg .location.flash .frame {
+  fill: rgba(143, 208, 255, 0.14);
   stroke: var(--dradis-glow);
-  stroke-width: 8;
+  stroke-width: 4;
+  animation: flash-on-board 0.6s ease-in-out 3;
+}
+
+.board-svg .location.flash .space-sector {
+  color: var(--dradis-glow);
   animation: flash-on-board 0.6s ease-in-out 3;
 }
 
 .board-svg .ship.flash .target-ring,
 .board-svg .character.flash .token-ring {
   stroke: var(--dradis-glow);
-  stroke-width: 7;
+  stroke-width: 4;
   animation: flash-on-board 0.6s ease-in-out 3;
 }
 

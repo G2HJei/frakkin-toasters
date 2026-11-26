@@ -114,8 +114,9 @@ reconnect, an undo: `expectSnapshot`) leaves no previous game, so it animates no
 
 `src/table/board/`: `board.jpg` is the surface, and `BoardSvg` lays the components on its printed slots, in the image's
 pixels. `board.layout.json`, measured with the image, holds what is printed; `layout.ts` reads it (a place for every
-`Location`, which a test checks, the title panels, the tracks, the resources, the deck rack, the launch tubes) and adds
-the free starfield (`SLOTS`).
+`Location`, which a test checks, the title panels, the space areas' sectors (`SPACE_SECTORS`), the outlines of the
+Galactica and basestar models traced from the image (`SHIP_OUTLINES`), the tracks, the resources, the deck rack, the
+launch tubes) and adds the free starfield (`SLOTS`).
 
 - Section names (`labels/board.ts`) aren't printed: the board draws each where the picture once printed it (`LABELS`),
   a chip like the mats' badges in greys, on the top edge of a box that has one.
@@ -148,7 +149,9 @@ The board and the mats answer the pending input (`src/input/boardAnswers.ts`, `A
 lights what the moves left name: the locations, ships (a ring) and standees of one kind of move at a time (the
 only kind left, or the only one naming any; the Action step lights none), the "Act" chip of each location action (a
 click picks its kind), and the asked player's cards that start a move (`Playable` on his mat; a sandbox shows the asked
-player's own cards face up). A player target lights his standee and his mat. A click picks the target: the only move
+player's own cards face up). A space area lights as the whole sector its printed lines cut out (`SpaceSector`): it
+glows from its outer side and fades out towards the centre the areas converge on, cut off at the Galactica or basestar
+model (a clip of the board minus `SHIP_OUTLINES`, so a click there reaches the location under it). A player target lights his standee and his mat. A click picks the target: the only move
 left is sent, a shape opens its picker in the panel, and several stay in the panel and in `AnswerPopover` next to the
 click (e.g. a viper's activations, a card's targets). A lit target's `<title>` says what clicking does. A group's row
 in the panel picks its kind, so the board lights its targets.

@@ -8,7 +8,21 @@ import {RevealLayer, useReveal} from '../reveal';
 import {Table, tableContext} from '../tableContext';
 import type {GameProjection, LogEntry, ShipProjection} from '../../wire/types';
 import {BOARD_LABELS, type BoardLabel} from '../../labels/board';
-import {DECK_SLOTS, DISTANCE, JUMP_TRACK, LABELS, LAUNCH_TUBES, LAYOUT, RESOURCES, SLOTS, TITLES} from './layout';
+import {
+    BOARD_HEIGHT,
+    BOARD_WIDTH,
+    DECK_SLOTS,
+    DISTANCE,
+    JUMP_TRACK,
+    LABELS,
+    LAUNCH_TUBES,
+    LAYOUT,
+    RESOURCES,
+    SHIP_OUTLINES,
+    SLOTS,
+    SPACE_SECTORS,
+    TITLES
+} from './layout';
 import {resourceIconUrl} from './resources';
 import {useGameStore} from '../../live/gameStore';
 
@@ -695,6 +709,58 @@ describe('the board', () => {
 
         fireEvent.click(board.querySelector('[data-location="RESEARCH_LAB"] .act')!);
         expect(onTarget).toHaveBeenLastCalledWith({type: 'kind', kind: 'ResearchLabEvent'}, expect.anything());
+    });
+
+    it('lights a space area as the whole of it the sector lines cut out, fading towards the centre, cut off at the ship model, and only while lit', () => {
+        const move = {
+            option: null,
+            followup: null,
+            event: {kind: 'LaunchNukeEvent', playerNumber: 1, area: 'GALACTICA_SPACE_8_OCLOCK'},
+            submits: true,
+            pick: null
+        } as Move;
+        const offer: Offer = {
+            targets: new Map([['location:GALACTICA_SPACE_8_OCLOCK', [move]], ['location:CYLON_FLEET_SPACE_2', [move]]]),
+            acts: new Map(),
+            picked: new Set(),
+        };
+        const onTarget = vi.fn();
+        const board = renderBoard(offer, game, false, onTarget);
+
+        const area = board.querySelector('[data-location="GALACTICA_SPACE_8_OCLOCK"]')!;
+        expect(area.querySelector('.sector-fill')?.getAttribute('points')).toBe(SPACE_SECTORS.GALACTICA_SPACE_8_OCLOCK);
+        expect(area.querySelector('.space-sector')?.getAttribute('clip-path')).toBe('url(#ship-cut-galactica)');
+        expect(board.querySelector('[data-location="CYLON_FLEET_SPACE_2"] .space-sector')?.getAttribute('clip-path')).toBe('url(#ship-cut-basestar)');
+        expect(board.querySelector('#ship-cut-galactica path')?.getAttribute('d')).toContain(SHIP_OUTLINES.galactica);
+        // from the board's left edge, square across the outer side, to where the lines converge
+        const fade = area.querySelector('linearGradient')!;
+        expect(area.querySelector('.sector-fill')?.getAttribute('fill')).toBe(`url(#${fade.id})`);
+        expect(['x1', 'y1', 'x2', 'y2'].map((name) => Number(fade.getAttribute(name)))).toEqual([0, 1845, 1001.5, 1845]);
+        const opacities = [...fade.querySelectorAll('stop')].map((stop) => Number(stop.getAttribute('stop-opacity')));
+        expect(opacities[0]).toBe(1);
+        expect(opacities[opacities.length - 1]).toBe(0);
+        expect(area.querySelector('.frame')).toBeNull();
+        expect(board.querySelector('[data-location="GALACTICA_SPACE_4_OCLOCK"] .space-sector')).toBeNull();
+
+        fireEvent.click(area.querySelector('.sector-fill')!);
+        expect(onTarget).toHaveBeenLastCalledWith({type: 'location', location: 'GALACTICA_SPACE_8_OCLOCK'}, expect.anything());
+    });
+
+    it("draws each space area's sector around the middle of the box its ships lie in, its corners on the board", () => {
+        const inside = ([x, y]: number[], polygon: number[][]) =>
+            polygon.reduce((odd, [x1, y1], index) => {
+                const [x2, y2] = polygon[(index + 1) % polygon.length];
+                return (y1 > y) !== (y2 > y) && x < x1 + ((y - y1) * (x2 - x1)) / (y2 - y1) ? !odd : odd;
+            }, false);
+        const spaceAreas = Object.entries(LAYOUT).filter(([, place]) => place.area === 'galacticaSpace' || place.area === 'cylonFleetSpace');
+        expect(spaceAreas).toHaveLength(12);
+        for (const [name, place] of spaceAreas) {
+            const polygon = SPACE_SECTORS[name as keyof typeof SPACE_SECTORS]!.split(' ').map((point) => point.split(',').map(Number));
+            expect(inside([place.x + place.width / 2, place.y + place.height / 2], polygon), name).toBe(true);
+            for (const [x, y] of polygon) {
+                expect(x >= 0 && x <= BOARD_WIDTH && y >= 0 && y <= BOARD_HEIGHT, name).toBe(true);
+            }
+        }
     });
 
     it('puts a nickname, or the last name, on a token', () => {
