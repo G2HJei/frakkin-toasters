@@ -979,8 +979,8 @@ const SHIP_SIZE: Record<string, [number, number]> = {
   VIPER: [104, 52],
   VIPER_MARK_VII: [104, 58],
   RAPTOR: [88, 54],
-  ASSAULT_RAPTOR: [88, 64],
-  CIVILIAN: [104, 52],
+  ASSAULT_RAPTOR: [72, 80],
+  CIVILIAN: [84, 81],
   CENTURION: [44, 68],
 };
 const SHIP_ORDER = Object.keys(SHIP_SIZE);
@@ -993,7 +993,7 @@ const SPACE_SCALE: Record<'galacticaSpace' | 'cylonFleetSpace', number> = { gala
 const RESERVE_SCALE = 0.7;
 // the civilian ships' pile at the end of the reserves: as many as it shows, and its width
 const CIVILIAN_SHOWN = 3;
-const CIVILIAN_PILE = (104 + (CIVILIAN_SHOWN - 1) * PILE_STEP) * RESERVE_SCALE;
+const CIVILIAN_PILE = (SHIP_SIZE.CIVILIAN[0] + (CIVILIAN_SHOWN - 1) * PILE_STEP) * RESERVE_SCALE;
 
 interface ShipGroup {
   type: string;
