@@ -31,10 +31,7 @@ export interface ResultsDialogProps {
 }
 
 /**
- * The results of a finished game, over the table: the ending and the winners by name (every user who held a winning
- * seat), every player's Loyalty and Motive Cards with his statistics, the game's, the resources over the turns and the
- * story. An abandoned game has no report: it names its players. The table's URL is the read-only link to share, and the
- * host opens the rematch, which every player then finds here.
+ * An abandoned game has no report: it names its players. The table's URL is the read-only link to share.
  */
 export function ResultsDialog({ gameId, room, myId }: ResultsDialogProps) {
   const open = useResults((state) => state.open);
@@ -74,7 +71,6 @@ export function ResultsDialog({ gameId, room, myId }: ResultsDialogProps) {
   );
 }
 
-// the users who held the seat, in the order they took it
 function holdersOf(room: Room | null, seat: number): string {
   const names: string[] = [];
   for (const holder of room?.seatHistory ?? []) {

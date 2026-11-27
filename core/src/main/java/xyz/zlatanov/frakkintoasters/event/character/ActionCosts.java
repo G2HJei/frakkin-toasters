@@ -20,9 +20,8 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.CYLON_FLEET;
 import static xyz.zlatanov.frakkintoasters.state.character.CharacterAbility.*;
 
 /**
- * The Skill Cards a negative ability makes a player discard to take an action. He pays first, then the action follows:
- * its processor records {@code ActionCostPaid} and queues the discard and the same event again. An action he can't pay
- * for isn't offered. A cost is a choice he makes, so "For Love" and "Headstrong" don't touch it.
+ * A negative ability's cost is paid first, then the action follows. A cost is a choice he makes, so "For Love" and
+ * "Headstrong" don't touch it.
  */
 @NoArgsConstructor(access = PRIVATE)
 public final class ActionCosts {
@@ -34,9 +33,6 @@ public final class ActionCosts {
     // Louis Hoshi's "Reluctant": 1 to use a Skill Card's "Action:".
     static final int RELUCTANT_CARDS            = 1;
 
-    /**
-     * @return the Skill Cards the player discards before activating the location
-     */
     public static int locationCost(PlayerView player, Location location) {
         int cost = player.hasAbility(TERMINAL_ILLNESS) ? TERMINAL_ILLNESS_CARDS : 0;
         if (location == CYLON_FLEET && player.hasAbility(CONFLICTED_LOYALTIES)) {
@@ -45,24 +41,15 @@ public final class ActionCosts {
         return cost;
     }
 
-    /**
-     * @return whether the player can pay for activating the location, or already did
-     */
     public static boolean canPayLocationCost(GameView game, PlayerView player, Location location) {
         return game.turn().actionCostPaid(player.number())
                 || player.skillCards().size() >= locationCost(player, location);
     }
 
-    /**
-     * @return the Skill Cards the player discards besides the card he plays for its "Action:"
-     */
     public static int skillCardCost(PlayerView player, SkillCardType type) {
         return type.isAction() && player.hasAbility(RELUCTANT) ? RELUCTANT_CARDS : 0;
     }
 
-    /**
-     * @return whether the player can pay for playing a card of the type, or already did: other cards than the one he plays
-     */
     public static boolean canPaySkillCardCost(GameView game, PlayerView player, SkillCardType type) {
         return game.turn().actionCostPaid(player.number())
                 || player.skillCards().size() - 1 >= skillCardCost(player, type);

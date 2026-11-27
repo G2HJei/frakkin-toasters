@@ -75,17 +75,12 @@ public class Deck<T> implements DeckView<T> {
         return cards.removeFirst();
     }
 
-    /**
-     * @return whether the discard pile is shuffled back in when a draw empties the draw pile
-     */
     public boolean autoShuffle() {
         return autoShuffle;
     }
 
     /**
-     * Removes the top n cards from the draw pile.
-     *
-     * @return the removed cards (first = top)
+     * @return the removed cards, the first on top
      */
     @Mutates
     public List<T> removeTop(int n) {
@@ -95,7 +90,7 @@ public class Deck<T> implements DeckView<T> {
     }
 
     /**
-     * @return the top n cards (first = top) without drawing them.
+     * @return the top n cards, the first on top, without drawing them
      */
     public List<T> top(int n) {
         return new ArrayList<>(cards.subList(0, n));

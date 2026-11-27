@@ -11,9 +11,6 @@ public class CodecConfiguration {
         return new JournalCodec();
     }
 
-    /**
-     * Writes what clients get: the projections, with the events and facts they hold.
-     */
     @Bean
     WireCodec wireCodec() {
         return new WireCodec();

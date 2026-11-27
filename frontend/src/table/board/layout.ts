@@ -64,7 +64,6 @@ export const SPACE_SECTORS = printed.spaceSectors as Partial<Record<Location, st
 export type ShipModel = keyof typeof printed.shipOutlines;
 export const SHIP_OUTLINES: Record<ShipModel, string> = printed.shipOutlines;
 
-// the centre of each printed position of a track
 export const JUMP_TRACK: Record<string, Point> = printed.tracks.jump;
 export const PURSUIT_TRACK: Record<string, Point> = printed.tracks.pursuit;
 export const BOARDING_TRACK: Record<string, Point> = printed.tracks.boarding;
@@ -97,7 +96,6 @@ export const LAUNCH_TUBES: Partial<Record<Location, Box>> = Object.fromEntries(
 // the destinations tuck under the objective, a strip of each showing its distance below it
 export const DISTANCE = printed.slots.distanceTraveled;
 
-/** The printed slots, and the free starfield for what has none. */
 export const SLOTS = {
   objective: printedBox(printed.slots.objective),
   cylonReserves: printedBox(printed.slots.cylonReserves),

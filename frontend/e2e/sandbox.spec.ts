@@ -80,7 +80,6 @@ function input(page: Page) {
   return page.getByRole('region', { name: 'input' });
 }
 
-// clicks an answer, and waits for the game to ask the next thing
 async function answer(page: Page, name: string) {
   const before = await page.evaluate(() => document.querySelector('[aria-label="input"]')?.innerHTML ?? '');
   await input(page).getByRole('group', { name: 'answers' }).getByRole('button', { name, exact: true }).click();
@@ -124,7 +123,6 @@ async function expectTurn(page: Page, line: string, step: string) {
   await expect(turn.locator('.steps [aria-current="step"]')).toHaveText(step);
 }
 
-// a resource's gauge on the board, which names its amount
 function resource(page: Page, name: string) {
   return page.locator(`svg.board-svg [data-gauge="${name.toLowerCase()}"]`);
 }

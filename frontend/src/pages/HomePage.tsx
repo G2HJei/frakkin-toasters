@@ -18,7 +18,6 @@ const BOARD_PARTS = {
 
 type BoardPart = keyof typeof BOARD_PARTS;
 
-/** A part of the board, cut out of board.jpg. */
 function BoardCrop({part, label, className}: { part: BoardPart; label?: string; className?: string }) {
     const [x, y, width, height] = BOARD_PARTS[part];
     return (
@@ -117,7 +116,6 @@ const FEATURES: { art: ArtRef | null; title: string; text: ReactNode }[] = [
 
 const CHARACTERS = ['LAURA_ROSLIN', 'KARA_STARBUCK_THRACE', 'WILLIAM_ADAMA', 'GAIUS_BALTAR', 'SHARON_BOOMER_VALERII'];
 
-/** The landing page: a line from the series, the way in, and what the game and the site offer. */
 export function HomePage() {
     const me = useMe();
     const characters = CHARACTERS.map(characterSheetArt).filter((art): art is ArtRef => art !== null);

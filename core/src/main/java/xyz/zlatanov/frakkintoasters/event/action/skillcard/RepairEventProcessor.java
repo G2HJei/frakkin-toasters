@@ -46,9 +46,6 @@ public class RepairEventProcessor extends SkillCardEventProcessor<RepairEvent> {
         return location.filter(HANGAR_DECK::equals).isPresent() && areDamagedVipers(game, viperIds);
     }
 
-    /**
-     * @return whether the ids name up to 2 different damaged vipers, e.g. for "Resources for Galactica"
-     */
     public static boolean areDamagedVipers(GameView game, List<Integer> viperIds) {
         val damaged = game.boards().galactica().damagedShips().stream().map(Ship::id).collect(toSet());
         return viperIds.size() <= 2
@@ -73,9 +70,6 @@ public class RepairEventProcessor extends SkillCardEventProcessor<RepairEvent> {
                 || game.boards().pegasus().isDamaged(location) && !game.boards().pegasus().destroyed();
     }
 
-    /**
-     * Repairs a damaged location of Galactica or of Pegasus.
-     */
     public static void repairLocation(GameView game, GameOps ops, Location location) {
         if (game.boards().galactica().locations().contains(location)) {
             ops.galactica().repairLocation(location);

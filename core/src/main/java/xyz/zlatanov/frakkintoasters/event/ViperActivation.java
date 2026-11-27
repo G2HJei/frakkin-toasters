@@ -25,7 +25,6 @@ public record ViperActivation(ShipType launchShipType,
         return new ViperActivation(null, null, humanFighterId, null, attackCylonShipId, null);
     }
 
-    // The viper escorts a civilian ship in its own space area.
     public static ViperActivation escort(int humanFighterId, int escortCivilianShipId) {
         return new ViperActivation(null, null, humanFighterId, null, null, escortCivilianShipId);
     }

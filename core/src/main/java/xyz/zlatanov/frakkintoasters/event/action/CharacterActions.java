@@ -11,16 +11,13 @@ import static lombok.AccessLevel.PRIVATE;
 import static xyz.zlatanov.frakkintoasters.state.character.AbilityKind.ACTION;
 
 /**
- * Which "Action:" abilities of his character sheet a player can use now. An ability is offered only when it can
- * happen, as a Skill Card is ({@link SkillCardPlays}), so a decision to use one always has an answer. A Cylon Leader
- * uses them instead of his location's action (rule 6.2.1.2), a revealed Cylon's are ignored (rule 6.1.2.2).
+ * An ability is offered only when it can happen, as a Skill Card is ({@link SkillCardPlays}), so a decision to use one
+ * always has an answer. A Cylon Leader uses them instead of his location's action (rule 6.2.1.2), a revealed Cylon's are
+ * ignored (rule 6.1.2.2).
  */
 @NoArgsConstructor(access = PRIVATE)
 public final class CharacterActions {
 
-    /**
-     * @return whether the ability is an action of the player's sheet that is in effect, with the miracle tokens it spends
-     */
     public static boolean isAvailable(GameView game, PlayerView player, CharacterAbility ability) {
         return ability != null
                 && ability.kind() == ACTION
@@ -28,9 +25,6 @@ public final class CharacterActions {
                 && (!ability.isMiracle() || CharacterAbilities.canUseMiracle(game, player, ability));
     }
 
-    /**
-     * @return whether the player can use the ability now. Each ability's own rules are in its processor
-     */
     public static boolean canUse(GameView game, PlayerView player, CharacterAbility ability) {
         if (!isAvailable(game, player, ability)) {
             return false;
@@ -75,17 +69,11 @@ public final class CharacterActions {
         };
     }
 
-    /**
-     * @return whether the player can use an action of his sheet now
-     */
     public static boolean canUseAny(GameView game, PlayerView player) {
         return player.character() != null
                 && CharacterAbility.of(player.character()).stream().anyMatch(ability -> canUse(game, player, ability));
     }
 
-    /**
-     * @return the event that uses the ability, {@code null} for an ability that isn't an action
-     */
     public static Class<? extends CharacterActionEvent> eventClass(CharacterAbility ability) {
         return switch (ability) {
             case PRIMACY -> PrimacyEvent.class;

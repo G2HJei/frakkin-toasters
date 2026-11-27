@@ -226,8 +226,6 @@ input[type='number'] {
   padding-left: 1.4rem;
 }
 
-/* the table */
-
 .table-page {
   padding: 0.6rem 1rem 2rem;
 }
@@ -414,8 +412,6 @@ details[open] > summary::before {
   color: var(--muted);
 }
 
-/* the art: cards, tokens, backs and the preview */
-
 .art {
   display: block;
   max-width: none;
@@ -451,7 +447,6 @@ details[open] > summary::before {
   height: 150px;
 }
 
-/* as large as the image, smaller only where its place is narrower */
 .size-full .art {
   max-width: 100%;
   height: auto;
@@ -745,7 +740,6 @@ details[open] > summary::before {
   max-height: calc(100vh - 7rem);
 }
 
-/* with a player's mat beside it */
 .art-preview.with-extra .art-preview-images {
   max-width: calc(100vw - 2rem - 360px);
 }
@@ -753,8 +747,6 @@ details[open] > summary::before {
 .art-preview-extra .mat {
   width: 340px;
 }
-
-/* the table: board.jpg with the components on it, as high as the screen, and the panels on its sides ------------ */
 
 .table-page {
   --c: 14px;
@@ -895,8 +887,6 @@ details[open] > summary::before {
   scrollbar-width: thin;
   scrollbar-color: var(--steel-500) transparent;
 }
-
-/* the board */
 
 .table-main > .board {
   position: relative;
@@ -1308,8 +1298,6 @@ details[open] > summary::before {
   letter-spacing: 0.1em;
 }
 
-/* the panels */
-
 .table-page .panel {
   margin: 0;
   border: 0;
@@ -1398,8 +1386,6 @@ details[open] > summary::before {
   --edge: var(--dradis);
   color: var(--dradis-glow);
 }
-
-/* turn and game */
 
 /* the turn's number with the current character and the steps on one row: the line takes the first 70%, or 40% while
    another character acts and his line takes the next 30%; the steps always take the last 30% */
@@ -1618,8 +1604,6 @@ details[open] > summary::before {
 .table-page .die-face {
   width: 40px;
 }
-
-/* the log */
 
 .table-page .log summary {
   font: 600 12px var(--display);
@@ -2180,8 +2164,6 @@ details[open] > summary::before {
   outline-offset: 2px;
 }
 
-/* the skill check, in the turn panel */
-
 .table-page .check-figure strong {
   font: 700 20px var(--display);
   color: var(--amber);
@@ -2349,9 +2331,6 @@ details[open] > summary::before {
 .cargo-none {
   color: var(--steel-500);
 }
-
-/* the answers of the input (input/AnswerPanel.tsx): a choice's options, an option's decision unfolded, the answers by
-   what they do, the pickers */
 
 .answers {
   display: flex;
@@ -2627,7 +2606,6 @@ details[open] > summary::before {
   grid-column: 1 / -1;
 }
 
-/* inside the cut corner */
 .pick-widget .order {
   position: absolute;
   top: 4px;
@@ -3208,7 +3186,6 @@ button.playable.picked .art {
   animation: damaged-pulse 0.7s ease-in-out 3;
 }
 
-/* the reference beside the table (table/reference/ReferenceDrawer.tsx) */
 .reference {
   position: fixed;
   top: 0;
@@ -3499,8 +3476,6 @@ button.avatar-button {
   opacity: 0.5;
   pointer-events: none;
 }
-
-/* the session: the room's host tools, and the table's seats with their votes */
 
 .observers {
   list-style: none;
@@ -4278,8 +4253,6 @@ button.avatar-button {
   outline: none;
 }
 
-/* the footer */
-
 .site-footer {
   display: flex;
   flex-wrap: wrap;
@@ -4523,7 +4496,6 @@ button.avatar-button {
   border-radius: 0;
 }
 
-/* brushed gunmetal */
 .site .panel.cf {
   --bw: 1.5px;
   --fill: linear-gradient(#ffffff0a, transparent 120px), repeating-linear-gradient(90deg, #ffffff04 0 1px, transparent 1px 4px), var(--gunmetal);
@@ -4836,8 +4808,6 @@ button.avatar-button {
   margin-left: auto;
 }
 
-/* a game's room */
-
 .site .seats {
   display: grid;
   gap: 6px;
@@ -4875,8 +4845,6 @@ button.avatar-button {
   gap: 8px;
   padding: 4px 0;
 }
-
-/* the login */
 
 .site .login {
   display: grid;
@@ -4940,8 +4908,6 @@ button.avatar-button {
   color: var(--steel-300);
   line-height: 1.5;
 }
-
-/* the about page */
 
 .prose {
   font-size: 15px;

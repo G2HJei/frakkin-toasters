@@ -28,7 +28,6 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   GrantEvent: '{playerNumber} may {grant=ACTION:take an action|MOVE:move|MOVE_OR_ACTION:move or take an action}',
   ResetActingPlayerEvent: 'The current player acts again',
 
-  /* setup and the turn */
   StartGameEvent: 'The game is set up',
   CreateDestinyDeckEvent: 'The Destiny deck is built',
   CreateLoyaltyDeckEvent: 'The Loyalty Cards are dealt',
@@ -54,7 +53,6 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   ReturnToCrisisStepEvent: 'The turn goes back to the Crisis step',
   EndTurnEvent: 'The turn ends',
 
-  /* moving and the hand */
   MoveEvent: '{playerNumber} moves to {destination}[, discarding {discardCard}]',
   LeaveBrigEvent: '{playerNumber} leaves {Location:BRIG} for {destination}',
   MoveFromBrigEvent: '{targetPlayerNumber} leaves {Location:BRIG} for {destination}',
@@ -76,7 +74,6 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   ExecuteEvent: '{playerNumber} is <-executed>',
   FinishExecutionEvent: '{playerNumber} replaces the executed {executedCharacter}',
 
-  /* vipers and the titles' actions */
   ActivateViperEvent: '{playerNumber} {activation}',
   ActivateUnmannedViperEvent: '{playerNumber} {activation}, unmanned',
   GrantedViperActivationEvent: '{playerNumber} {activation}',
@@ -92,7 +89,6 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   PassCagTitleEvent: '{playerNumber} {activation} and passes the {Title:CAG} title to {targetPlayerNumber}',
   CagPilotActionEvent: '{playerNumber} {activation} and acts again',
 
-  /* the locations */
   FTLControlEvent: '{playerNumber} jumps the fleet from {Location:FTL_CONTROL}',
   FTLControlResultEvent: 'The jump from {Location:FTL_CONTROL} is resolved',
   WeaponsControlEvent: '{playerNumber} has Galactica fire at {cylonShipId}',
@@ -132,7 +128,6 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   ChooseGalacticaDamageTokensEvent: '{playerNumber} chooses to {resolved|damage}',
   PlaceCivilianShipEvent: '{playerNumber} places a {!ShipType:CIVILIAN}civilian ship at {location}',
 
-  /* a skill check */
   MakeSkillCheckEvent: 'The skill check begins',
   OfferPlayOrPassEvent: '{playerNumber} may play {card}',
   PoliticalProwessEvent: '{playerNumber} plays {politicalProwessCard}: the check {pass?<+passes>:<-fails>}',
@@ -173,7 +168,6 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   ProtectTheFleetEvent: '{playerNumber} [{activation}|activates no viper] with Protect the Fleet',
   ExploitAWeaknessEvent: '{playerNumber} has {targetHumanPlayer} draw a Mutiny Card',
 
-  /* Skill Cards played for their abilities */
   ConsolidatePowerEvent: '{playerNumber} plays {card}',
   CriticalSituationEvent: '{playerNumber} plays {card}',
   ExecutiveOrderEvent: '{playerNumber} plays {card} on {targetPlayerNumber}',
@@ -201,7 +195,6 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   DiscardFromDestinyDeckEvent: '{playerNumber} discards {cards} from the Destiny deck',
   PopularInfluenceChoiceEvent: '{playerNumber} gives {given} to the {Holder:PRESIDENT} and keeps {other}',
 
-  /* Quorum Cards: each record is its card */
   AcceptProphecyEvent: '{playerNumber} plays {$card}',
   ArrestOrderEvent: '{playerNumber} plays {$card} on {targetPlayerNumber}',
   AssignArbitratorEvent: '{playerNumber} plays {$card} and gives it to {holderPlayerNumber}',
@@ -235,7 +228,6 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   SetTheAgendaLookEvent: "{playerNumber} looks at the {Holder:PRESIDENT}'s Quorum Cards",
   SetTheAgendaChoiceEvent: '{playerNumber} puts {cards} at the bottom of the Quorum deck',
 
-  /* Mutiny Cards: each record is its card */
   ArmedResistanceEvent: '{playerNumber} plays {$card}',
   AssumeCommandEvent: '{playerNumber} plays {$card}, discarding {discards}',
   BaitAndSwitchEvent: '{playerNumber} plays {$card}',
@@ -265,7 +257,6 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   DiscardPlayedMutinyCardEvent: '{card} goes to the discard pile',
   RemoveMutinyCardFromGameEvent: '{card} leaves the game',
 
-  /* Crisis Cards */
   ResolveCrisisCardEvent: 'Crisis: {card}',
   ChooseCrisisSectionEvent: '{playerNumber} chooses the {section|lower} option of {card}',
   ResolveCrisisSectionEvent: 'The {section|lower} option of {card} takes effect',
@@ -292,7 +283,6 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   RiskShipsEvent: '{playerNumber} risks ships at {risk}',
   RiskResultEvent: 'The risk at {risk} is resolved',
 
-  /* Super Crisis Cards */
   ResolveSuperCrisisCardEvent: 'Super Crisis: {card}',
   ChooseSuperCrisisSectionEvent: '{playerNumber} chooses the {section|lower} option of {card}',
   DiscardSuperCrisisCardEvent: '{card} goes to the discard pile',
@@ -300,7 +290,6 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   HumanPrisonerFailEvent: 'Human Prisoner <-fails>',
   FootageTransmittedFailEvent: 'Footage Transmitted <-fails>',
 
-  /* the Cylon ships and combat */
   ActivateRaidersEvent: 'The {!ShipType:RAIDER}raiders activate',
   ActivateRaiderAreasEvent: 'The {!ShipType:RAIDER}raiders activate one space area at a time',
   ActivateRaiderAreaEvent: 'The {!ShipType:RAIDER}raiders at {area} activate',
@@ -346,7 +335,6 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   IncreaseJumpPreparationEvent: 'The jump preparation track <+advances>',
   DecreaseJumpPreparationEvent: 'The jump preparation track <-moves back>',
 
-  /* the jump and the destinations */
   JumpingTheFleetEvent: 'The fleet <+jumps>{blindJump? blind:}',
   ReturnVipersToReservesEvent: 'The {!ShipType:VIPER}vipers return to the Reserves',
   ReturnAssaultRaptorEvent: '{playerNumber} brings {shipId} back to the Reserves',
@@ -371,7 +359,6 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   EndGameEvent: '<+The fleet makes its final jump>',
   CylonsWinEvent: '<-The Cylons win>',
 
-  /* Loyalty Cards and the Cylons */
   RevealCylonEvent: '{playerNumber} reveals {card}',
   RevealCylonOnExecutionEvent: '{playerNumber} reveals {card}',
   FinishCylonRevealEvent: '{playerNumber} goes to {Location:RESURRECTION_SHIP}',
@@ -393,7 +380,6 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   CylonPowerSendToBrigEvent: '{playerNumber} sends {targetPlayerNumber} to {Location:BRIG}',
   CylonPowerSendToSickbayEvent: '{playerNumber} sends {targetPlayerNumber} to {Location:SICKBAY}',
 
-  /* the interrupt windows and the die */
   OpenInterruptWindowEvent: 'Interrupt cards may be played',
   PlayInterruptCardEvent: '{playerNumber} plays [{card}|no interrupt card]',
   UseRollAbilityEvent: '{playerNumber} picks [{ability}|no ability] for the roll',
@@ -401,7 +387,6 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   TiebreakInterruptCardsEvent: 'The current player keeps {keptCards}',
   RollDieEvent: 'The die is rolled',
 
-  /* the character abilities */
   PrimacyEvent: '{playerNumber} [takes {removedBasestarId} off the board|places a {!ShipType:BASESTAR}basestar in front of Galactica][, then {!placeRaidersAndCivilianShip}places 3 {!ShipType:RAIDER}raiders in front and a {!ShipType:CIVILIAN}civilian ship behind]',
   VisionsEvent: '{playerNumber} looks at a Loyalty Card of {targetPlayerNumber} and ends the Infiltration',
   DontTrustAnyoneEvent: '{playerNumber} draws Super Crisis Cards',
@@ -482,7 +467,6 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   EndRemoteActionEvent: '{playerNumber} is done acting from afar',
   EndInfiltrationEvent: '{playerNumber} goes back to {Location:RESURRECTION_SHIP}',
 
-  /* the sandbox's setup */
   PutCrisisCardOnTopEvent: 'Setup: {card} on top of the Crisis deck',
   PutDestinationCardOnTopEvent: 'Setup: {card} on top of the Destination deck',
   PutSkillCardOnTopEvent: 'Setup: {card} on top of its deck',

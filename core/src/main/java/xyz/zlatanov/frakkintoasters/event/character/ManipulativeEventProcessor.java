@@ -36,10 +36,6 @@ public class ManipulativeEventProcessor extends EventProcessor<ManipulativeEvent
         };
     }
 
-    /**
-     * @return at the start of the current player's turn, the choice of a title to take or none, {@link Followup#NONE}
-     * when he can't take any
-     */
     public static Followup offer(GameView game) {
         val current = game.currentPlayer();
         val options = new ArrayList<Event>();
@@ -58,8 +54,6 @@ public class ManipulativeEventProcessor extends EventProcessor<ManipulativeEvent
     /**
      * At the end of the turn, the titles taken with "Manipulative" go back to their previous holders. One who can't hold
      * it any more, e.g. executed or in the "Brig", is passed over: the title goes to the next in line.
-     *
-     * @return the successions that are left to do
      */
     public static Followup giveTitlesBack(GameView game, GameOps ops) {
         val current = game.currentPlayer();

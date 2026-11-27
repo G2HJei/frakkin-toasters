@@ -7,24 +7,17 @@ import java.util.Set;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 
 /**
- * A moment when players may play a Skill Card in response to something, outside their Action step, and the cards it
- * takes. A player may use a character ability there too (`RollAbilities`). Players who want to play at the same time answer one at a time, and the current player settles conflicts
- * (rule 13.3).
+ * A player may use a character ability there too ({@code RollAbilities}). Players who want to play at the same time
+ * answer one at a time, and the current player settles conflicts (rule 13.3).
  */
 public sealed interface InterruptWindow {
 
     Set<SkillCardType> cards();
 
-    /**
-     * @return whether a die roll follows the window, so the window starts it
-     */
     default boolean startsDieRoll() {
         return false;
     }
 
-    /**
-     * @return whether the window comes right after a die roll, so a reroll can be asked in it
-     */
     default boolean followsDieRoll() {
         return false;
     }

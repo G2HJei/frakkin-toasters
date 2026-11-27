@@ -31,18 +31,11 @@ import type { ClientMessage } from '../wire/types';
 import { RoomPage } from './RoomPage';
 import { SiteFrame } from './Site';
 
-/**
- * The table of a game, in a tab of its own and with no bar over it: its socket, the board as high as the screen, and
- * the panels on its sides: on the left the game and the turn with its skill check and the input, with the log under
- * them, and on the right the sandbox's tools in a sandbox, above the players. The room before the game starts is a page
- * of the site, with its header and footer.
- */
 export function TablePage() {
   const { id = '' } = useParams();
   const room = useRoom(id);
   const me = useMe();
   const seats = room.data?.players;
-  // the user in each seat, which only the players panel names, and whether he is there
   const userNames = useMemo(
     () => Object.fromEntries((seats ?? []).filter((seat) => seat.playerNumber !== null).map((seat) => [seat.playerNumber as number, seat.name])),
     [seats],
@@ -108,7 +101,6 @@ function LiveTable({ gameId, room, myId, userNames, seatStates }: LiveTableProps
     const store = useGameStore.getState();
     store.reset();
     useChatStore.getState().reset();
-    // the chat's messages go to its own store
     const live = new GameSocket(
       gameId,
       (message) => (isChatMessage(message) ? useChatStore.getState().receive(message) : useGameStore.getState().receive(message)),

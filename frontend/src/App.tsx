@@ -35,7 +35,6 @@ export function App() {
   );
 }
 
-// A user who isn't logged in goes to the login page.
 function LoggedIn() {
   const me = useMe();
   if (me.isPending) {

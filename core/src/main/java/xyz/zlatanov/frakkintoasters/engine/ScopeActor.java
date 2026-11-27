@@ -13,10 +13,6 @@ public final class ScopeActor {
     private ScopeActor() {
     }
 
-    /**
-     * @return for an event that was queued, not submitted: the player of a {@link PlayerEvent}, otherwise the acting
-     * player
-     */
     public static int ofQueued(GameView game, Event event) {
         return event instanceof PlayerEvent playerEvent
                 ? playerEvent.playerNumber()

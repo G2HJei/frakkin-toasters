@@ -26,17 +26,9 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.NONE;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.BRIG;
 
-/**
- * What a player can do now, for the Action step and everything else that gives an action: the action of his location,
- * or another action, the "Action:" of a Skill Card, a Quorum Card or a Mutiny Card he holds, or of his Title Card. A
- * pilot may activate his viper instead.
- */
 @NoArgsConstructor(access = PRIVATE)
 public final class Actions {
 
-    /**
-     * @return whether the player has an action to take: the action of his location, or another one
-     */
     public static boolean canTakeAction(GameView game, PlayerView player) {
         return LocationEvent.canAct(game, player) || canTakeOtherAction(game, player);
     }
@@ -58,17 +50,11 @@ public final class Actions {
                 || CharacterActions.canUseAny(game, player);
     }
 
-    /**
-     * @return whether {@link #offerAction} would offer the player anything
-     */
     public static boolean hasAnAction(GameView game, PlayerView player) {
         return game.locate(player.character()).isPresent()
                 && (isPilot(game, player) || canTakeAction(game, player));
     }
 
-    /**
-     * @return the player's choice of an action or a pass, {@link Followup#NONE} when he has nothing to choose
-     */
     public static Followup offerAction(GameView game, int playerNumber) {
         return choice(playerNumber, actionDecisions(game, playerNumber));
     }
@@ -81,9 +67,6 @@ public final class Actions {
         return choice(playerNumber, moveDecisions(game, playerNumber));
     }
 
-    /**
-     * @return the player's choice of a move, an action or a pass, e.g. for a "State of Emergency"
-     */
     public static Followup offerMoveOrAction(GameView game, int playerNumber) {
         val decisions = new ArrayList<Event>(moveDecisions(game, playerNumber));
         decisions.addAll(actionDecisions(game, playerNumber));
@@ -136,7 +119,6 @@ public final class Actions {
                 : List.of();
     }
 
-    // The decisions, or doing nothing instead.
     private static Followup choice(int playerNumber, List<Event> decisions) {
         if (decisions.isEmpty()) {
             return NONE;

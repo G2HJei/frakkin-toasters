@@ -6,9 +6,7 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import java.util.List;
 
 /**
- * The component of a shaped answer that the player fills: between {@code min} and {@code max} of the elements it
- * lists, by position (a hand holds equal cards), in the order he puts them or in any order. A pick on a component that
- * holds a single element, such as a move's discard, has {@code min = max = 1}.
+ * By position, because a hand holds equal cards.
  */
 public sealed interface Pick {
 
@@ -22,9 +20,6 @@ public sealed interface Pick {
         return false;
     }
 
-    /**
-     * @return the elements to pick from
-     */
     List<?> elements();
 
     /**

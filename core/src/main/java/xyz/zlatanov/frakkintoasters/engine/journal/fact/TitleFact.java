@@ -5,9 +5,6 @@ import xyz.zlatanov.frakkintoasters.state.character.Character;
 
 import java.util.List;
 
-/**
- * Facts about President, Admiral and CAG.
- */
 public sealed interface TitleFact extends Fact {
 
     record PresidentAssigned(Character character) implements TitleFact {
@@ -32,7 +29,6 @@ public sealed interface TitleFact extends Fact {
     record QuorumCardPutInPlay(QuorumCard card, Integer holderPlayerNumber) implements TitleFact {
     }
 
-    // A Quorum Card leaves play. CardsDiscarded follows.
     record QuorumCardLeftPlay(QuorumCard card) implements TitleFact {
     }
 }

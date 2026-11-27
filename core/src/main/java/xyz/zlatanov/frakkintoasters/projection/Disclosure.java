@@ -32,9 +32,6 @@ import java.util.Set;
 import static java.util.Map.entry;
 import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.*;
 
-/**
- * Who may see what, shared by the projections.
- */
 public final class Disclosure {
 
     /**
@@ -43,9 +40,6 @@ public final class Disclosure {
     public static final Set<DeckId> FACEDOWN_DISCARDS = EnumSet.of(CIVILIAN_SHIPS, GALACTICA_DAMAGE, PEGASUS_DAMAGE,
             BASESTAR_DAMAGE, DESTINATION, DESTINY, LOYALTY, LOYALTY_NOT_CYLON, MOTIVE);
 
-    /**
-     * The types that are a card, or hold one.
-     */
     public static final Set<Class<?>> CARD_TYPES = Set.of(SkillCard.class, PlayedCard.class, PlayedInterruptCard.class,
             LoyaltyCard.class, MotiveCard.class, MutinyCard.class, QuorumCard.class, CrisisCard.class,
             SuperCrisisCard.class, DestinationCard.class, GalacticaDamage.class, PegasusDamage.class,
@@ -174,9 +168,6 @@ public final class Disclosure {
     private Disclosure() {
     }
 
-    /**
-     * @return whether everyone may see the event's fields: it isn't secret, and every card it holds is public
-     */
     public static boolean isPublic(Event event) {
         if (event instanceof SecretEvent) {
             return false;
@@ -186,9 +177,6 @@ public final class Disclosure {
                 .allMatch(component -> CARD_COMPONENTS.getOrDefault(name(component), false));
     }
 
-    /**
-     * @return whether everyone may see the events of the option
-     */
     public static boolean isPublic(Followup option) {
         return switch (option) {
             case Followup.None ignored -> true;
@@ -212,7 +200,6 @@ public final class Disclosure {
             case ParameterizedType parameterized -> Arrays.stream(parameterized.getActualTypeArguments())
                     .anyMatch(Disclosure::holdsCard);
             case WildcardType wildcard -> {
-                // List<?>: the cards of a deck or a pile
                 val bound = wildcard.getUpperBounds()[0];
                 yield bound == Object.class || holdsCard(bound);
             }

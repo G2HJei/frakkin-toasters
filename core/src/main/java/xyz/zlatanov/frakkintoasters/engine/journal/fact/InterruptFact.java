@@ -5,10 +5,6 @@ import xyz.zlatanov.frakkintoasters.state.interrupt.InterruptWindow;
 import xyz.zlatanov.frakkintoasters.state.interrupt.PlayedInterruptCard;
 import xyz.zlatanov.frakkintoasters.state.interrupt.UsedRollAbility;
 
-/**
- * Facts about the interrupt windows of the turn and the effects of the cards played into them that outlast the window.
- * Moving a card from a hand or into a discard pile is a separate fact.
- */
 public sealed interface InterruptFact extends Fact {
 
     record InterruptWindowOpened(InterruptWindow window) implements InterruptFact {
@@ -27,7 +23,6 @@ public sealed interface InterruptFact extends Fact {
     record InterruptWindowClosed() implements InterruptFact {
     }
 
-    // A character ability used in the window, secret until it closes.
     record RollAbilityUsed(UsedRollAbility ability) implements InterruptFact {
     }
 

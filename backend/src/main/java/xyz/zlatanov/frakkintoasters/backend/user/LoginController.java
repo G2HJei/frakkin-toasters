@@ -9,9 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/**
- * Tells the login page which logins there are.
- */
 @RestController
 @RequiredArgsConstructor
 public class LoginController {
@@ -19,10 +16,6 @@ public class LoginController {
     private final LoginProviders providers;
     private final Environment    environment;
 
-    /**
-     * @param providers the registration ids, each logs in at {@code /oauth2/authorization/{id}}
-     * @param devLogin  whether {@code POST /api/dev/login} is there
-     */
     public record Logins(List<String> providers, boolean devLogin) {
     }
 

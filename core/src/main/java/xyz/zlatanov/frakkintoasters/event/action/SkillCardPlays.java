@@ -20,10 +20,6 @@ import static lombok.AccessLevel.PRIVATE;
 @NoArgsConstructor(access = PRIVATE)
 public final class SkillCardPlays {
 
-    /**
-     * @return whether the player could play a card of the type now, if he held one. Each card's own rules are in its
-     * processor
-     */
     public static boolean canPlay(GameView game, PlayerView player, SkillCardType type) {
         // Revealed Cylons, and Cylon Leaders who aren't Infiltrating, can't use them (rules 6.1.2.3, 6.2.1).
         if (!player.isHuman()) {
@@ -59,16 +55,10 @@ public final class SkillCardPlays {
         };
     }
 
-    /**
-     * @return whether the player holds an "Action:" card he can play now
-     */
     public static boolean canPlayAction(GameView game, PlayerView player) {
         return held(player).filter(SkillCardType::isAction).anyMatch(type -> canPlay(game, player, type));
     }
 
-    /**
-     * @return whether the player holds a "Movement:" card he can play now
-     */
     public static boolean canPlayMovementAbility(GameView game, PlayerView player) {
         return held(player).filter(SkillCardType::isMovementAbility).anyMatch(type -> canPlay(game, player, type));
     }

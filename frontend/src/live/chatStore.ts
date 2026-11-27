@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import type { ChatLine, ServerMessage } from '../wire/types';
 
 export interface ChatState {
-  // the messages of the channels the viewer reads, oldest first, each once
   messages: ChatLine[];
   // why the server refused the viewer's last message, until the next one goes out
   rejected: string | null;

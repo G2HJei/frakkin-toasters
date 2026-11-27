@@ -16,16 +16,9 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.allOf;
 
-/**
- * What happens between drawing a Crisis Card and resolving it: the abilities that act on a draw or on a revealed card.
- * The card is already in the turn ({@code GameOps.playCrisisCard}).
- */
 @NoArgsConstructor(access = PRIVATE)
 public final class CrisisCardReveals {
 
-    /**
-     * @return "Delusional Intuition" when the player who drew the card has it, then {@link #revealed}
-     */
     public static Followup drawn(GameView game, CrisisCard card, int drawerPlayerNumber) {
         val intuition = DelusionalIntuitionEventProcessor.canUse(game, game.player(drawerPlayerNumber))
                 ? single(new DelusionalIntuitionEvent(drawerPlayerNumber))
@@ -34,8 +27,7 @@ public final class CrisisCardReveals {
     }
 
     /**
-     * @return the card's resolution, or "Secret Destiny" instead. The resolution names nobody, so the choice is the
-     * player's who can use the ability
+     * The resolution names nobody, so the choice is the player's who can use "Secret Destiny".
      */
     public static Followup revealed(GameView game, CrisisCard card) {
         val resolve = new ResolveCrisisCardEvent(card);

@@ -31,9 +31,8 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 
 /**
- * Pegasus' destruction (rule 11.7.2.4), played through {@code submit} and {@code choose} alone, restoring the game at
- * every pause. Laura Roslin is player 1 and the current player, "Chief" Galen Tyrol player 2, William Adama (Admiral) player 3,
- * Kara "Starbuck" Thrace player 4.
+ * Pegasus' destruction (rule 11.7.2.4). Laura Roslin is player 1 and the current player, "Chief" Galen Tyrol player 2,
+ * William Adama (Admiral) player 3, Kara "Starbuck" Thrace player 4.
  */
 class PegasusDestructionTest {
 

@@ -30,7 +30,6 @@ export interface GameState {
   version: number;
   // an answer to send once the option just chosen asks its decision (answers.ts)
   intent: Intent | null;
-  // the ended game told whole, for its results
   report: GameReport | null;
   receive(message: ServerMessage): void;
   setIntent(intent: Intent | null): void;
@@ -56,8 +55,7 @@ const initial = {
 };
 
 /**
- * The state of the open table, fed by the socket: the latest game with its token, the log, the connection and the last
- * rejection, which stays until the next game. Commands always carry the token of the latest game.
+ * The last rejection stays until the next game. Commands always carry the token of the latest game.
  */
 export const useGameStore = create<GameState>((set) => ({
   ...initial,
@@ -103,8 +101,6 @@ export const useGameStore = create<GameState>((set) => ({
 function answeredByTheServer(intent: Intent | null, entries: LogEntry[]): boolean {
   return intent !== null && entries.some((entry) => entry.kind === 'ScopeLog' && entry.automatic && entry.actor === intent.player);
 }
-
-/* the commands, each with the token of the latest game */
 
 export function submitMessage(token: string | null, event: Event | Record<string, unknown>): ClientMessage {
   return { type: 'submit', token, event: event as Event };

@@ -5,7 +5,6 @@ import {REPOSITORY_URL} from './Site';
 const FANTASY_FLIGHT_URL = 'https://www.fantasyflightgames.com';
 const UPDATED = '26 November 2026';
 
-/** What the site is, its Terms of Service (#terms) and its Privacy Policy (#privacy). */
 export function AboutPage() {
     const {hash} = useLocation();
     // the router doesn't scroll to an anchor by itself: the login page links to both

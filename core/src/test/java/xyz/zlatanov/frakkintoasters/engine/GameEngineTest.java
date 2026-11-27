@@ -159,8 +159,6 @@ class GameEngineTest {
         assertEquals(List.of(expected, expected, expected), List.of(engine.status(1), engine.status(2), engine.status(3)));
     }
 
-    /* rejected input */
-
     @Test
     void onlyThePlayerOfTheDecisionCanAnswerIt() {
         assertRejected(() -> engine.submit(2, new SelectCharacterEvent(2, HELENA_CAIN)));
@@ -247,8 +245,6 @@ class GameEngineTest {
         assertThrows(InvalidActionException.class, () -> engine.choose(1, single(new NoOpEvent(1))));
     }
 
-    /* anytime */
-
     // An anytime event answers nothing: the decision stays pending, and the journal marks it as run ahead of it.
     @Test
     void anAnytimeEventRunsAheadOfThePendingDecision() {
@@ -322,8 +318,6 @@ class GameEngineTest {
         assertThrows(InvalidActionException.class, () -> engine.submit(1, new AnytimeTestEvent(1)));
     }
 
-    /* restore */
-
     @Test
     void restoreGivesTheSameGameAtEveryPause() {
         assertRestoresTheSameGame();
@@ -361,8 +355,6 @@ class GameEngineTest {
         assertThrows(IllegalArgumentException.class, () -> GameEngine.restore(upToTheChoice));
     }
 
-    /* rollback: a bug after the input was accepted */
-
     @Test
     void anEventThatThrowsInTheMiddleOfAChainRollsBackTheWholeInput() {
         engine = start(all(single(PLAYER_1_SELECTS), single(new LoseResourceEvent(FOOD, 1)), single(new FailingEvent())));
@@ -397,8 +389,6 @@ class GameEngineTest {
 
         assertEquals(new Finished(CYLONS), engine.status(1));
     }
-
-    /* the end of the game */
 
     // "If six or more locations on Galactica have damage tokens on them at the same time, then Galactica is destroyed and
     // the Cylons immediately win." (rule 16.1)
@@ -455,8 +445,6 @@ class GameEngineTest {
         assertEquals(new Finished(CYLONS), engine.status(1));
     }
 
-    /* bugs before the first pause */
-
     @Test
     void aDecisionCanHaveConstraintsOnlyOnAConstrainedEvent() {
         assertThrows(FrakCallTheAdmiralException.class,
@@ -481,8 +469,6 @@ class GameEngineTest {
         assertInstanceOf(StartGameEvent.class, engine.pendingScope().orElseThrow().event());
         assertEquals(engine.pendingScope(), GameEngine.restore(engine.journal(), 42L).pendingScope());
     }
-
-    /* only answers */
 
     private static final PlayerDecisionEvent<NoOpEvent> PLAYER_1_PASSES = new PlayerDecisionEvent<>(1, NoOpEvent.class);
     private static final Followup                       PASS_THEN_SELECT = all(single(PLAYER_1_SELECTS),
@@ -587,7 +573,6 @@ class GameEngineTest {
         INPUTS.forEach(input -> input.accept(engine));
     }
 
-    // Damages Galactica until all six of its locations are damaged, then would ask player 2 to select.
     private void destroyGalactica() {
         val damage = Collections.nCopies(DAMAGE_DRAWS, new DamageGalacticaEvent()).toArray(Event[]::new);
         engine = start(all(single(PLAYER_1_SELECTS), all(damage), single(PLAYER_2_SELECTS)));
@@ -620,7 +605,6 @@ class GameEngineTest {
         return assertNothingChanges(FrakCallTheAdmiralException.class, input);
     }
 
-    // The game and the journal are as before the input, and the same input stays pending.
     private <T extends RuntimeException> T assertNothingChanges(Class<T> thrown, Executable input) {
         val entries = engine.journal().entries();
         val snapshot = snapshot(engine);

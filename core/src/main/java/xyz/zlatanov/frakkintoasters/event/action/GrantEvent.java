@@ -10,9 +10,6 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCardType;
 /**
  * Lets the player act now, e.g. the target of an "Executive Order". It is queued, never submitted. When it runs, the
  * player becomes the acting player, and his choice is offered as the game stands then, so grants can nest.
- *
- * @param grant     what he may do
- * @param grantedBy what lets him, whose rules apply
  */
 public record GrantEvent(int playerNumber, Grant grant, GrantedBy grantedBy) implements PlayerEvent {
 

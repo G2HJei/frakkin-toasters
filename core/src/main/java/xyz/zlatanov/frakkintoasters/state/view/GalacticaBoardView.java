@@ -34,9 +34,6 @@ public interface GalacticaBoardView extends BattlestarBoardView, SpaceLocationsB
 
     Set<Ship> reserves();
 
-    /**
-     * The vipers in the damaged vipers box.
-     */
     Set<Viper> damagedShips();
 
     /**

@@ -18,9 +18,6 @@ import static xyz.zlatanov.frakkintoasters.state.character.AbilityKind.MOVEMENT;
 @NoArgsConstructor(access = PRIVATE)
 public final class CharacterMovements {
 
-    /**
-     * @return whether the player can use the ability now. Each ability's own rules are in its processor
-     */
     public static boolean canUse(GameView game, PlayerView player, CharacterAbility ability) {
         if (ability == null
                 || ability.kind() != MOVEMENT
@@ -50,17 +47,11 @@ public final class CharacterMovements {
         };
     }
 
-    /**
-     * @return whether the player can use a "Movement:" ability of his sheet now
-     */
     public static boolean canUseAny(GameView game, PlayerView player) {
         return player.character() != null
                 && CharacterAbility.of(player.character()).stream().anyMatch(ability -> canUse(game, player, ability));
     }
 
-    /**
-     * @return the event that uses the ability, {@code null} for an ability that isn't a "Movement:"
-     */
     public static Class<? extends CharacterMovementEvent> eventClass(CharacterAbility ability) {
         return switch (ability) {
             case INTIMATE -> IntimateEvent.class;

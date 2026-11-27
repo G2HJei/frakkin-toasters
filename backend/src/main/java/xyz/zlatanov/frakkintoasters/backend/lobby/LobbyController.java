@@ -37,9 +37,6 @@ public class LobbyController {
     public record TakeSeat(int playerNumber) {
     }
 
-    /**
-     * @param playerNumber the seat to vacate, ignored for an abandon
-     */
     public record Ballot(VoteKind kind, int playerNumber) {
     }
 

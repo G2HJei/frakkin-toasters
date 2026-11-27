@@ -3,10 +3,6 @@ package xyz.zlatanov.frakkintoasters.engine;
 import xyz.zlatanov.frakkintoasters.event.Event;
 import xyz.zlatanov.frakkintoasters.state.Randomness;
 
-/**
- * Starts an engine with a first event of the test's choice, e.g. a {@link ScriptEvent} or a
- * {@link StackedStartGameEvent}, for tests outside this package.
- */
 public final class TestEngines {
 
     private TestEngines() {

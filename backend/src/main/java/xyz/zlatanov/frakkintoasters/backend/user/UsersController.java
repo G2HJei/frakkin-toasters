@@ -7,9 +7,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/**
- * The users of the site, for the users page. Logged in users only, like the rest of the API.
- */
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor

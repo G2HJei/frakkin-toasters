@@ -3,7 +3,6 @@ import { GameSocket, type SocketLike } from './GameSocket';
 import { chooseMessage, useGameStore } from './gameStore';
 import type { GameProjection, LogEntry, ServerMessage } from '../wire/types';
 
-// A socket the test drives by hand.
 class FakeSocket implements SocketLike {
   readyState = 0;
   sent: string[] = [];

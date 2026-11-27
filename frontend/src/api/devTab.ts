@@ -25,7 +25,6 @@ export function setTabUser(name: string | null): void {
   }
 }
 
-/** The path with the tab's user, for a tab it opens. */
 export function withTabUser(path: string): string {
   const name = tabUser();
   return name ? `${path}${path.includes('?') ? '&' : '?'}as=${encodeURIComponent(name)}` : path;

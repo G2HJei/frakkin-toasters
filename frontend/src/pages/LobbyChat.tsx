@@ -2,10 +2,6 @@ import { useState } from 'react';
 import { LOBBY_CHAT_MAX_LENGTH, useLobbyChat, useMe, useSayInLobby, type LobbyLine } from '../api/queries';
 import { useFollowBottom } from '../table/log/useFollowBottom';
 
-/**
- * The play page's chat, for everyone logged in there: the server keeps its last messages while it runs, and the page
- * asks for them every 10 seconds while its tab shows. Enter sends, Shift+Enter breaks the line.
- */
 export function LobbyChat() {
   const chat = useLobbyChat();
   const say = useSayInLobby();

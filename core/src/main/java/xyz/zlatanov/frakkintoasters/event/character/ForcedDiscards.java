@@ -46,9 +46,6 @@ public final class ForcedDiscards {
         return discard(game, playerNumber, RANDOM, count);
     }
 
-    /**
-     * @return the discard as it is, nobody asked
-     */
     public static Event plain(int playerNumber, DiscardKind kind, int count) {
         return switch (kind) {
             case CHOSEN -> FollowupUtils.discard(playerNumber, count);
@@ -67,15 +64,11 @@ public final class ForcedDiscards {
             return NONE;
         }
         if (kind == HAND) {
-            // he keeps 1 card of his hand, of his choice
             return single(new PlayerDecisionEvent<>(playerNumber, DiscardSkillCardsEvent.class, discardDownTo(1)));
         }
         return single(discard(game, playerNumber, kind, smaller));
     }
 
-    /**
-     * @return how many cards the discard takes from the hand he holds now
-     */
     static int cardsTaken(GameView game, int playerNumber, DiscardKind kind, int count) {
         int hand = game.player(playerNumber).skillCards().size();
         return kind == HAND ? hand : Math.min(count, hand);

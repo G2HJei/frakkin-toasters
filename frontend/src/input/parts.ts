@@ -23,7 +23,6 @@ export type PartPicks = Record<string, unknown[] | undefined>;
 
 const SIBLING = /^(.*\D)\d+$/;
 
-/** The parts of a group: the components its moves differ in, not a shape's pick, numbered siblings as one part. */
 export function partsOf(group: MoveGroup): Part[] {
   const record = group.kind ? recordNamed(group.kind) : undefined;
   if (!record) {
@@ -73,7 +72,6 @@ export function optionGroups(moves: Move[]): MoveGroup[] {
   return [...groups.values()];
 }
 
-/** A move's value of a part: the component's value, or for a part of several its elements. */
 export function partValue(move: Move, part: Part): unknown {
   const event: Record<string, unknown> = move.event ?? {};
   if (!part.many) {
@@ -86,7 +84,6 @@ export function partValue(move: Move, part: Part): unknown {
   return Array.isArray(value) ? value : [];
 }
 
-/** The moves without repeats: one per value of each part, e.g. one of the two orders of a pair of cards. */
 export function distinct(moves: Move[], parts: Part[]): Move[] {
   if (parts.length === 0) {
     return moves;
@@ -114,7 +111,6 @@ export function isProduct(moves: Move[], parts: Part[]): boolean {
   return ways.size > Math.max(...parts.map((part) => part.values.length));
 }
 
-/** The moves that have what is picked: the value of a single part, the elements of a part of several among theirs. */
 export function fitting(moves: Move[], parts: Part[], picks: PartPicks): Move[] {
   return moves.filter((move) =>
     parts.every((part) => {
@@ -128,13 +124,11 @@ export function fitting(moves: Move[], parts: Part[], picks: PartPicks): Move[] 
   );
 }
 
-/** Whether a value may be picked: some move still fits with it, in place of a single part's pick or added to the others. */
 export function allows(moves: Move[], parts: Part[], picks: PartPicks, part: Part, value: unknown): boolean {
   const next = part.many ? [...(picks[part.key] ?? []), value] : [value];
   return fitting(moves, parts, { ...picks, [part.key]: next }).length > 0;
 }
 
-/** The value of a part that every move shares, null when they differ. */
 export function shared(moves: Move[], part: Part): { value: unknown } | null {
   if (moves.length === 0) {
     return null;
@@ -161,7 +155,6 @@ export function settled(moves: Move[], parts: Part[], picks: PartPicks): Move[] 
   );
 }
 
-/** The sizes a part of several takes in the moves, smallest and largest. */
 export function sizes(moves: Move[], part: Part): { min: number; max: number } {
   const counts = moves.map((move) => (partValue(move, part) as unknown[]).length);
   return { min: Math.min(...counts), max: Math.max(...counts) };

@@ -32,13 +32,8 @@ import java.util.UUID;
 import java.util.stream.IntStream;
 
 /**
- * Hosting, joining and starting games, and the seats of a running game. A user is in a game once, as a player or an
- * observer. Players take the next free seat, 7 at most, until the game starts; observers can join any time. The start
- * closes the seats up to 1..n, because the engine numbers the players that way and the numbers are the clockwise order.
- * <p>
- * Once the game runs, a seat belongs to the game and a user holds it: he can leave it, the host can kick him from it,
- * and the players can vote him out of it. A vacant seat waits for anyone to take it, see {@link #takeSeat}. The host or
- * a vote of the players abandons the game.
+ * The start closes the seats up to 1..n, because the engine numbers the players that way and the numbers are the
+ * clockwise order.
  */
 @Service
 @RequiredArgsConstructor
@@ -61,14 +56,6 @@ public class Lobby {
         OBSERVER
     }
 
-    /**
-     * @param playerCount the seats of a running game, {@code null} before the start
-     * @param vacantSeats the seats of a running game that nobody holds
-     * @param votes       the open votes, each with the votes it needs
-     * @param seatHistory every holder of every seat, in the order they took it
-     * @param rematchId   the lobby the host opened after the game
-     * @param online      the participants who are there, see {@link Presence}
-     */
     public record Room(UUID id, String name, GameStatus status, GameMode mode, UUID hostUserId,
                        List<Participant> players, List<Participant> observers, Team winnerTeam,
                        boolean openable, String unavailableReason, Long seed, EndReason endReason,
@@ -76,30 +63,15 @@ public class Lobby {
                        UUID rematchId, List<UUID> online) {
     }
 
-    /**
-     * @param playerNumber the seat to vacate, 0 for an abandon
-     * @param voters       the seated players who voted for it
-     * @param needed       how many votes pass it
-     */
     public record Vote(VoteKind kind, int playerNumber, List<UUID> voters, int needed) {
     }
 
-    /**
-     * @param myPlayerNumber the user's seat, {@code null} when he observes or isn't in the game
-     * @param waitingForMe   the game waits for the user
-     * @param vacantSeats    the seats of a running game that nobody holds
-     */
     public record GameSummary(UUID id, String name, GameStatus status, GameMode mode, int turn, String hostName,
                               int players, Team winnerTeam, boolean participant, Integer myPlayerNumber,
                               boolean waitingForMe, Instant updatedAt, boolean openable, EndReason endReason,
                               int vacantSeats) {
     }
 
-    /**
-     * @param open    the lobbies the user can join
-     * @param mine    the games the user is in, his sandboxes included
-     * @param running the games under way the user can watch
-     */
     public record Games(List<GameSummary> open, List<GameSummary> mine, List<GameSummary> running) {
     }
 
@@ -197,10 +169,6 @@ public class Lobby {
         return room(gameBundleId);
     }
 
-    /**
-     * Before the start a user leaves the game, the host excepted. Once it runs, a player leaves his seat and watches
-     * on, and an observer leaves the game.
-     */
     public Room leave(UUID gameBundleId, UUID userId) {
         return change(gameBundleId, () -> {
             val bundle = lock(gameBundleId);
@@ -229,9 +197,6 @@ public class Lobby {
         });
     }
 
-    /**
-     * The host removes a user: from the lobby, or from the game and his seat once it runs. A ban keeps him out.
-     */
     public Room kick(UUID gameBundleId, UUID hostId, UUID userId, boolean ban) {
         return change(gameBundleId, () -> {
             val bundle = lock(gameBundleId);
@@ -268,10 +233,6 @@ public class Lobby {
         return room(gameBundleId);
     }
 
-    /**
-     * A user takes a vacant seat of a running game, and sees from then on what the seat sees: its hand and secrets are
-     * the seat's. A user who held a seat of the game before may only take that one back.
-     */
     public Room takeSeat(UUID gameBundleId, UUID userId, int playerNumber) {
         return change(gameBundleId, () -> {
             val bundle = lock(gameBundleId);
@@ -308,12 +269,6 @@ public class Lobby {
         });
     }
 
-    /**
-     * A seated player votes to vacate another seat, or to abandon the game; the host's vote passes at once. A vote to
-     * vacate needs more than half of the other seated players, an abandon more than half of all of them.
-     *
-     * @param playerNumber the seat to vacate, ignored for an abandon
-     */
     public Room vote(UUID gameBundleId, UUID userId, VoteKind kind, int playerNumber) {
         return change(gameBundleId, () -> {
             val bundle = lock(gameBundleId);
@@ -355,11 +310,6 @@ public class Lobby {
         return room(gameBundleId);
     }
 
-    /**
-     * The host opens a new lobby for a finished game, with the users who held the seats at its end in the same seats.
-     *
-     * @return the new lobby
-     */
     public Room rematch(UUID gameBundleId, UUID hostId) {
         val id = transaction.execute(ignored -> {
             val bundle = lock(gameBundleId);
@@ -445,8 +395,6 @@ public class Lobby {
                 summaries.stream().filter(game -> !game.participant() && game.status() == GameStatus.RUNNING).toList());
     }
 
-    /* the steps of a change */
-
     // The change runs in a transaction that locks the game's row; what it leaves to do runs once it is committed.
     private Room change(UUID gameBundleId, java.util.function.Supplier<Change> change) {
         val done = transaction.execute(ignored -> change.get());
@@ -472,7 +420,6 @@ public class Lobby {
         return vote.isPresent() && vote.get().voters().size() >= vote.get().needed();
     }
 
-    // Only the votes of the seated players count; the holder of a seat to vacate has none on it.
     private List<Vote> votes(UUID gameBundleId, List<Participant> players) {
         val seated = new HashSet<UUID>();
         players.forEach(player -> seated.add(player.userId()));

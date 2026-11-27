@@ -35,9 +35,6 @@ public class GameBundles {
         return id;
     }
 
-    /**
-     * A sandbox: one user plays every seat. It starts {@code RUNNING} once its journal is stored.
-     */
     public UUID createSandbox(String name, UUID userId, int formatVersion) {
         var id = UUID.randomUUID();
         var now = Timestamp.from(Instant.now());
@@ -70,9 +67,6 @@ public class GameBundles {
                 .optional();
     }
 
-    /**
-     * The summary after a command. A game that came to an ending is {@code FINISHED} as {@code WON}.
-     */
     public void updateSummary(UUID id, GameStatus status, int turn, Team winnerTeam, Integer waitingForPlayerNumber) {
         jdbc.sql("""
                         UPDATE game_bundle
@@ -89,9 +83,6 @@ public class GameBundles {
                 .update();
     }
 
-    /**
-     * Ends a game without an ending of its own: abandoned, or a lobby cancelled.
-     */
     public void end(UUID id, EndReason reason) {
         jdbc.sql("""
                         UPDATE game_bundle

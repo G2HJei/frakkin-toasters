@@ -41,9 +41,8 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 
 /**
- * An Infiltrating Cylon Leader's return to the "Resurrection Ship" (rule 6.2.3.5), played through {@code submit} and
- * {@code choose} alone, restoring the game at every pause. Caprica Six is player 1 and the current player, Kara
- * "Starbuck" Thrace player 2, William Adama (Admiral) player 3, Laura Roslin (President) player 4.
+ * An Infiltrating Cylon Leader's return to the "Resurrection Ship" (rule 6.2.3.5). Caprica Six is player 1 and the
+ * current player, Kara "Starbuck" Thrace player 2, William Adama (Admiral) player 3, Laura Roslin (President) player 4.
  */
 class CylonLeaderTest {
 
@@ -125,7 +124,6 @@ class CylonLeaderTest {
         assertRestoresTheSameGame();
     }
 
-    // The player chooses to take an action.
     private void act(int player) {
         val option = single(new PlayerDecisionEvent<>(player, ActionEvent.class));
         val choice = (PendingInput.AwaitingChoice) engine.pendingInput().orElseThrow();
@@ -136,8 +134,6 @@ class CylonLeaderTest {
     private Game game() {
         return (Game) engine.view();
     }
-
-    /* assertions */
 
     private void assertWaitingFor(PendingInput expected) {
         assertEquals(EngineStatus.waiting(expected), engine.status(expected.player()));

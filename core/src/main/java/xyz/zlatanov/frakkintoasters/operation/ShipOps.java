@@ -64,9 +64,6 @@ public class ShipOps extends GameOps {
         destroyCivilianShip(civilianShip, CIVILIAN_DECK);
     }
 
-    /**
-     * Puts a damaged or destroyed ship back in the "Reserves".
-     */
     public void repair() {
         if (galacticaBoard().damagedShips().stream().anyMatch(ship -> ship.id() == shipId)) {
             record(new ShipMoved(shipId, DAMAGED, RESERVES, null));

@@ -13,7 +13,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-// The dev login per tab: a request with a dev user's name is that user's, for itself alone.
 class DevTabLoginTest extends BackendTest {
 
     @Autowired

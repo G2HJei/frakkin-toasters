@@ -64,8 +64,7 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.TREACHERY;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.CONSOLIDATE_POWER;
 
 /**
- * The character abilities that answer something wherever it happens, through {@code submit} and {@code choose},
- * restoring at every pause. Player 1 is the current player. Each script ends the game after its events.
+ * Player 1 is the current player. Each script ends the game after its events.
  */
 class CharacterTriggersTest {
 
@@ -165,8 +164,6 @@ class CharacterTriggersTest {
         assertEquals(2, engine.view().turn().currentPlayerNumber());
     }
 
-    /* inputs */
-
     private void answerZareksStartingCard() {
         val choice = (AwaitingChoice) engine.pendingInput().orElseThrow();
         assertInstanceOf(NecessaryStepsEvent.class, ((Followup.Single) choice.options().iterator().next()).event());
@@ -195,8 +192,6 @@ class CharacterTriggersTest {
         input.accept(engine);
         assertRestoresTheSameGame();
     }
-
-    /* assertions */
 
     private void assertWaitingFor(PendingInput expected) {
         assertEquals(EngineStatus.waiting(expected), engine.status(expected.player()));

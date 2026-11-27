@@ -16,9 +16,6 @@ public interface DecksHolderView {
 
     int civilianShipsLeft();
 
-    /**
-     * @return the Loyalty Cards that nobody has been dealt
-     */
     int loyaltyCardsLeft();
 
     DeckView<LoyaltyCard> loyalty();

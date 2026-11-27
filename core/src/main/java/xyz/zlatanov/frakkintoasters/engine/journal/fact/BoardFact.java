@@ -3,9 +3,6 @@ package xyz.zlatanov.frakkintoasters.engine.journal.fact;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.board.Resource;
 
-/**
- * Facts about the boards and their tracks.
- */
 public sealed interface BoardFact extends Fact {
 
     record ResourceDecreased(Resource resource, int amount) implements BoardFact {

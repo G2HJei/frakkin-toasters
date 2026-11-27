@@ -17,9 +17,6 @@ import static xyz.zlatanov.frakkintoasters.event.crisis.ChooseCrisisSectionEvent
 
 public class ChooseCrisisSectionEventProcessor extends EventProcessor<ChooseCrisisSectionEvent> {
 
-    /**
-     * @return the section's effects: the skill check on the top of a skill check crisis, otherwise what it says
-     */
     public static Followup resolve(GameView game, GameOps ops, CrisisCard card, Section section) {
         if (section == TOP && card.skillCheck() != null) {
             // The skill check is the top of the card, the alternate instruction below it is the other section.

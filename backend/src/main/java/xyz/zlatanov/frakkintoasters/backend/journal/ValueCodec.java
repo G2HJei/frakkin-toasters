@@ -30,12 +30,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Writes the records of the game to JSON and reads them back, by their record components. A value whose declared type is
- * an interface carries its type name in {@link #KIND}, from the {@link TypeRegistry}. A concrete record, an enum, a
- * {@code Class} (as its type name), a list, a set and a map are written as their content.
- * <p>
- * A {@code List<?>} of cards takes its card type from the {@link DeckId} or {@link PlayerPile} beside it in the record.
- * Any other component type fails, so a new shape can't slip through unnoticed.
+ * A component type the codec doesn't know fails, so a new shape can't slip through unnoticed.
  */
 public final class ValueCodec {
 
@@ -188,9 +183,6 @@ public final class ValueCodec {
         throw new CodecException("Can't read a " + type.getTypeName());
     }
 
-    /**
-     * @return the type of the component in this record, with the card type of a {@code List<?>} filled in
-     */
     public static Type componentType(RecordComponent component, Map<String, Object> siblings) {
         val type = component.getGenericType();
         if (!isWildcardList(type)) {
@@ -233,9 +225,6 @@ public final class ValueCodec {
         return parameterized.getActualTypeArguments()[index];
     }
 
-    /**
-     * @return whether a value of the type carries its type name: an interface or an abstract class
-     */
     public static boolean isPolymorphic(Class<?> raw) {
         return (raw.isInterface() || Modifier.isAbstract(raw.getModifiers())) && !raw.isPrimitive() && !raw.isArray()
                 && raw != List.class && raw != Set.class && raw != Map.class && raw != Collection.class;
@@ -359,7 +348,6 @@ public final class ValueCodec {
         return new EnumMap(keyType);
     }
 
-    // Class<T>, Class<? extends T> or a raw Class: the type the named class has to be.
     private static Type classBound(Type type) {
         return type instanceof ParameterizedType ? typeArgument(type, 0) : Object.class;
     }
@@ -377,7 +365,6 @@ public final class ValueCodec {
         }
     }
 
-    // The type arguments of a generic record, e.g. T = QuorumCard for a HiddenCards<QuorumCard>.
     private static Map<TypeVariable<?>, Type> bindings(Type type) {
         if (!(type instanceof ParameterizedType parameterized)) {
             return Map.of();
@@ -406,7 +393,6 @@ public final class ValueCodec {
         return type;
     }
 
-    // A generic type with its arguments filled in, e.g. the List<?> of a record with its card type.
     private record Parameterized(Class<?> rawType, List<Type> arguments) implements ParameterizedType {
 
         @Override

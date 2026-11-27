@@ -14,16 +14,11 @@ import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.allOf;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 
 /**
- * Plays a Skill Card for its ability. The card has to be of the processor's {@link #type()} and in the player's hand,
- * and the player human. Subclasses check the details of the event in {@link #isValidPlay()}, and {@link #resolve()}
- * the ability once the card is discarded. A player whose ability puts a cost on the card ({@link ActionCosts}) pays it
- * first: the discard, then the same event again, which plays the card.
+ * A player whose ability puts a cost on the card ({@link ActionCosts}) pays it first: the discard, then the same event
+ * again, which plays the card.
  */
 public abstract class SkillCardEventProcessor<T extends SkillCardEvent> extends EventProcessor<T> {
 
-    /**
-     * @return the type of the cards the event plays
-     */
     public abstract SkillCardType type();
 
     @Override

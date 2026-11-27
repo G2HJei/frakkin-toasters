@@ -1,6 +1,5 @@
 import { useMe, useUsers } from '../api/queries';
 
-/** Every user of the site, by name. */
 export function UsersPage() {
   const users = useUsers();
   const me = useMe();

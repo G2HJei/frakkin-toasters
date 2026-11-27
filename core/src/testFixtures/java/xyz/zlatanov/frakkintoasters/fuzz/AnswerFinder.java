@@ -35,9 +35,6 @@ public final class AnswerFinder {
     private AnswerFinder() {
     }
 
-    /**
-     * @return a legal answer, as {@code submit} would take it, or empty when the decision has no legal answer
-     */
     public static Optional<Event> find(GameView game, PlayerDecisionEvent<?> decision, Random random,
                                        Consumer<Finding> findings) {
         return find(game, decision, answers(game, decision, findings), random, findings);
@@ -71,9 +68,6 @@ public final class AnswerFinder {
         return Optional.of(shape.example());
     }
 
-    /**
-     * @return the legal answers, with what their search couldn't judge reported as findings
-     */
     public static LegalAnswers answers(GameView game, PlayerDecisionEvent<?> decision, Consumer<Finding> findings) {
         try {
             return LegalAnswers.of(game, decision, new LegalAnswers.Listener() {
@@ -96,9 +90,6 @@ public final class AnswerFinder {
         }
     }
 
-    /**
-     * @return the candidate with the decision's constraints, as {@code submit} takes it, when it is a legal answer
-     */
     public static Optional<Event> legal(GameView game, PlayerDecisionEvent<?> decision, Event candidate,
                                         Consumer<Finding> findings) {
         val name = candidate.getClass().getSimpleName();
@@ -131,8 +122,6 @@ public final class AnswerFinder {
                 : candidate;
     }
 
-    // A random filling of the pick: a size between its bounds, random elements by position, in a random order if it
-    // counts.
     static Event fill(ShapedAnswer shape, Random random) {
         val pick = shape.pick();
         val type = shape.example().getClass();

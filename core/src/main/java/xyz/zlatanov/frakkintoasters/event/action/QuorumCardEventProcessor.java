@@ -13,11 +13,6 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.NONE;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.allOf;
 
-/**
- * Plays a Quorum Card. The player has to be human and hold the card, and subclasses check the details of the event in
- * {@link #isValidPlay()}. The card leaves the hand, then {@link #resolve()} resolves it and puts it where its text
- * says, usually last: the discard pile, out of the game, or in play.
- */
 public abstract class QuorumCardEventProcessor<T extends QuorumCardEvent> extends EventProcessor<T> {
 
     public abstract QuorumCard card();

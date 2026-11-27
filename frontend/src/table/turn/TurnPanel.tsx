@@ -12,17 +12,8 @@ import { useReference } from '../reference/ReferenceDrawer';
 import { NotifyButton } from '../notify';
 import { ProblemLink } from '../problem/ProblemDrawer';
 
-// the steps of a player's turn, in order
 const STEPS: TurnStep[] = ['RECEIVE_SKILLS', 'MOVEMENT', 'ACTION', 'CRISIS', 'ACTIVATE_CYLON_SHIPS', 'PREPARE_FOR_JUMP', 'DISCARD'];
 
-/**
- * The game, named after the logo on the panel's tab, with the connection beside it while it isn't open, and the turn
- * once one has started: on one row the turn's number ("T4") with the current character, and the acting one beside it
- * when it's another, then the steps as icons (the step the turn is at named beside its icon where they have room), then the
- * turn's Crisis Cards and the card of a skill check about none of them at full size, with the rest beside them: the
- * skill check, the die and an open interrupt window. What left the game is in the reference. The decision
- * (`InputPanel`) is the panel's lower part.
- */
 export function TurnPanel({ name, connection }: { name: string; connection: ConnectionState }) {
   const table = useTable();
   const game = table.game;
@@ -45,7 +36,6 @@ export function TurnPanel({ name, connection }: { name: string; connection: Conn
         <img src="/logo.svg" alt="" className="logo" />
         <span title={name}>{name || 'Game'}</span>
         {connection !== 'open' && <small className={`connection ${connection}`}>{connection}</small>}
-        {/* the reference, and under it the report of a problem */}
         <span className="tab-links">
           <button type="button" className="link reference-open" aria-keyshortcuts="R" onClick={() => useReference.getState().show()}>
             Reference <kbd aria-hidden="true">R</kbd>
@@ -55,7 +45,6 @@ export function TurnPanel({ name, connection }: { name: string; connection: Conn
         </span>
       </div>
       {turn && (
-        // one row: the turn's line, the acting character's beside it when it's another, and the steps
         <div className="turn-row">
           {/* red names the character acting now: the current one, or the other one beside him, who is then amber. The
               lines say only "T4" and the names, so the titles and the heading's name say what they are, and the titles
@@ -153,8 +142,6 @@ export function TurnPanel({ name, connection }: { name: string; connection: Conn
   );
 }
 
-// The steps as icons, the step the turn is at named beside its icon where they have room. Hovering lists every step
-// with its name.
 function Steps({ step }: { step: string | null }) {
   const at = STEPS.findIndex((stepName) => stepName === step);
   const sections: RevealSection[] = [
@@ -203,11 +190,6 @@ function InterruptWindow() {
   );
 }
 
-/**
- * The skill check, beside its card: the difficulty, who played before it (face up once revealed, in a sandbox too), the cards an "Investigative Committee" shows
- * face up, the face-down pile (counted; a sandbox shows it on hover), the piles once revealed, the strength and the
- * result.
- */
 function SkillCheck() {
   const table = useTable();
   const check = table.game?.skillCheck;
@@ -275,7 +257,6 @@ function SkillCheck() {
   );
 }
 
-// what the skill check's result is, after its strength
 const RESULTS: Record<string, string> = { PASS: 'passes', PARTIAL_PASS: 'partially passes', FAIL: 'fails' };
 
 function Row({ label, children }: { label: string; children: ReactNode }) {

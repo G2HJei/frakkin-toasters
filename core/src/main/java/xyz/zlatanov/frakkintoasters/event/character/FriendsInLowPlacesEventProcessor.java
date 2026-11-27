@@ -25,9 +25,6 @@ public class FriendsInLowPlacesEventProcessor extends EventProcessor<FriendsInLo
                 && skillCheck.totalStrength() == null;
     }
 
-    /**
-     * @return the choice to raise, lower or keep the difficulty, as the "Brig" is activated
-     */
     public static Followup offer(GameView game) {
         return game.players().stream()
                 .filter(player -> canUse(game, player))

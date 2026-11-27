@@ -8,8 +8,7 @@ import xyz.zlatanov.frakkintoasters.engine.journal.JournalEntry;
 import xyz.zlatanov.frakkintoasters.event.Event;
 
 /**
- * A {@link JournalEntry} to JSON and back. What comes back equals what was written, because the agenda replay compares
- * events with {@code equals}.
+ * What comes back equals what was written, because the agenda replay compares events with {@code equals}.
  */
 public final class JournalCodec {
 
@@ -47,9 +46,6 @@ public final class JournalCodec {
         return codec.write(event, Event.class);
     }
 
-    /**
-     * @param expected the type the event has to be
-     */
     public <E extends Event> E readEvent(JsonNode node, Class<E> expected) {
         val event = codec.read(node, Event.class);
         if (!expected.isInstance(event)) {

@@ -11,9 +11,6 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.HANGAR_DECK;
 
 public class ReturnAssaultRaptorEventProcessor extends EventProcessor<ReturnAssaultRaptorEvent> {
 
-    /**
-     * @return who decides whether the assault raptor stays: its pilot, or the current player when it has none
-     */
     static int decidingPlayer(GameView game, HumanFighterView raptor) {
         return raptor.pilot() == null ? game.turn().currentPlayerNumber() : game.playerNumber(raptor.pilot());
     }

@@ -29,39 +29,26 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * Where the elements of a list component come from: the cards of the hand, the President's hand, the ships of one
- * place. The search judges which sizes are legal, so a source says nothing of the rules but where to look and, where a
- * rule reads the elements, in which order to try them. A list with few values is tried as it is instead.
+ * The search judges which sizes are legal, so a source says nothing of the rules but where to look and, where a rule
+ * reads the elements, in which order to try them.
  */
 final class Shapes {
 
     private static final int MAX_DRAW  = 5;
     private static final int MAX_ENUMS = 2; // "Treatment"'s 2 colors, "Launch Reserves"' 2 fighters
 
-    /**
-     * The values of a list component, tried one by one.
-     */
     sealed interface Source {
     }
 
     record Values(List<Object> values) implements Source {
     }
 
-    /**
-     * Elements to pick from, by position, for a pick whose legal sizes the search finds.
-     *
-     * @param minStrength the strength the picked cards have to reach, 0 when it doesn't matter
-     */
     record Elements(List<?> from, boolean ordered, int minStrength) implements Source {
     }
 
     private Shapes() {
     }
 
-    /**
-     * @return the component the player picks: the record's only list, or a move's discard; {@code -1} for a record of
-     * scalars, {@code -2} for one with more than one list
-     */
     static int pickedComponent(Class<?> type) {
         val components = type.getRecordComponents();
         var picked = -1;
@@ -87,9 +74,6 @@ final class Shapes {
         return type == List.class || type == Set.class || type == Collection.class || type == Map.class;
     }
 
-    /**
-     * @return the sources of the component's values, {@code null} when the search has none for it
-     */
     static List<Source> of(Asked asked, Class<?> type, RecordComponent component) {
         if (!isCollection(component.getType())) {
             // a move's discard: any card of the hand, or none when the move stays on its ship
@@ -168,9 +152,6 @@ final class Shapes {
         return new Elements(cards, false, 0);
     }
 
-    /**
-     * @return the component's element type: {@code index} 0 for a list's element or a map's key
-     */
     static Class<?> elementType(RecordComponent component, int index) {
         if (component.getGenericType() instanceof ParameterizedType parameterized
                 && parameterized.getActualTypeArguments()[index] instanceof Class<?> element) {
@@ -220,9 +201,6 @@ final class Shapes {
         return result;
     }
 
-    /**
-     * @return every list of up to {@code size} of the values, each value as often as it likes, in the values' order
-     */
     static List<Object> multisets(List<Object> values, int size) {
         val result = new ArrayList<Object>();
         collect(values.stream().filter(Objects::nonNull).toList(), size, 0, new ArrayList<>(), result);
@@ -241,9 +219,6 @@ final class Shapes {
         }
     }
 
-    /**
-     * @return one element of each group, every way
-     */
     static <T> List<List<T>> oneOfEach(List<List<T>> groups) {
         List<List<T>> result = List.of(List.of());
         for (val group : groups) {

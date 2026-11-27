@@ -166,9 +166,6 @@ public enum CrisisCard {
     UNSETTLING_STORIES(SkillCheckType.UNSETTLING_STORIES, CURRENT_PLAYER, ACTIVATE_RAIDERS, true);
     // The 136 different cards. The deck has 141 (Appendix A2.3.9): DecksHolder adds the base game's extra copies.
 
-    /**
-     * The skill check of a skill check crisis, {@code null} for an event crisis.
-     */
     private final SkillCheckType  skillCheck;
     /**
      * Who chooses: between the two sections of an event crisis, or between the skill check and the alternate instruction

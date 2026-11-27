@@ -22,7 +22,6 @@ function renderPanel(turn: { step: string; currentPlayer: number; actingPlayer: 
 }
 
 describe('the turn', () => {
-  // each line with its text and whether it names the character acting now (red) or not (amber)
   function turnLines(panel: HTMLElement) {
     return [...panel.querySelectorAll('h2 .turn-line')].map((line) => [line.textContent, line.classList.contains('acting')]);
   }
@@ -171,7 +170,6 @@ describe('the turn', () => {
     };
   }
 
-  // the "Before the check" row: its face-up cards and its backs
   function beforeTheCheck(panel: HTMLElement) {
     const row = panel.querySelector('section.turn [aria-label="skill check"] .row')!;
     expect(row.querySelector('.row-name')?.textContent).toBe('Played before by Laura Roslin');
@@ -194,7 +192,6 @@ describe('the turn', () => {
     expect(beforeTheCheck(sandbox)).toEqual({ faceUp: 2, backs: 0 });
   });
 
-  // the images of the cards of the turn, by their names
   function turnCards(panel: HTMLElement) {
     return [...panel.querySelectorAll('section.turn [aria-label="cards of the turn"] .card-tile.size-full img')].map((image) => image.getAttribute('alt'));
   }

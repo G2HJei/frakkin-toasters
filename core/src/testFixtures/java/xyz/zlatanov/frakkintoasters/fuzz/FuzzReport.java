@@ -47,12 +47,6 @@ public final class FuzzReport {
     private static final Pattern           ID       = Pattern.compile("F-[0-9a-f]{6}");
     private static final DateTimeFormatter MINUTE   = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-    /**
-     * @param changedFiles the paths {@code git status} lists, the report left out
-     * @param players      the player counts as they were asked for, e.g. {@code 3-7}
-     * @param roundCap     the run's round cap, for the command that plays a game again
-     * @param traces       the folder of the traces, relative to the report
-     */
     public record Run(LocalDateTime started, Duration duration, String commit, int changedFiles, long firstSeed,
                       int games, String players, int roundCap, String traces) {
     }
@@ -266,7 +260,6 @@ public final class FuzzReport {
         return text.replace("|", "\\|").replace("\n", " ");
     }
 
-    // The lines under a "## name" heading, up to the next heading of that level.
     static String section(String text, String name) {
         val result = new StringBuilder();
         var inside = false;
@@ -291,7 +284,6 @@ public final class FuzzReport {
         return result;
     }
 
-    // The rows of the history table, without its header.
     static List<String> historyRows(String block) {
         val lines = Arrays.asList(block.split("\n", -1));
         val start = lines.indexOf("### History");

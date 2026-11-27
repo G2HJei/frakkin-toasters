@@ -12,7 +12,6 @@ const GLYPHS = {
 
 export type GlyphName = keyof typeof GLYPHS;
 
-/** Line icon markup as a standalone SVG document in one color, for an image. */
 export function strokedSvg(markup: string, color: string): string {
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="${color}" fill="none" ` +
@@ -20,12 +19,10 @@ export function strokedSvg(markup: string, color: string): string {
   );
 }
 
-/** A glyph as a standalone SVG document in one color, for an image. */
 export function glyphSvg(name: GlyphName, color: string): string {
   return strokedSvg(GLYPHS[name], color);
 }
 
-/** Line icon markup drawn inline, in the color of its text. */
 export function StrokedIcon({ markup, className }: { markup: string; className: string }) {
   return (
     <svg

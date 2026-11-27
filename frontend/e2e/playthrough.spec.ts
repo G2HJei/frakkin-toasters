@@ -112,7 +112,6 @@ async function answer(page: Page, random: (n: number) => number) {
   await fillPicker(answers, random);
 }
 
-// the picker a shape opened
 async function fillPicker(answers: Locator, random: (n: number) => number) {
   const picker = answers.locator('.pick-widget');
   if ((await picker.count()) > 0) {

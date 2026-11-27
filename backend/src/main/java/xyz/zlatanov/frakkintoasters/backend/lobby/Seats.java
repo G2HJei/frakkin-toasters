@@ -9,10 +9,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * The seats of a running game beside the participants: who held each seat and why he left it, the users banned from the
- * game, and the open votes.
- */
 @Repository
 @RequiredArgsConstructor
 public class Seats {
@@ -31,16 +27,9 @@ public class Seats {
         ABANDON
     }
 
-    /**
-     * @param until  {@code null} while he holds it
-     * @param reason why he left it, {@code null} while he holds it
-     */
     public record SeatHolder(int playerNumber, UUID userId, String name, Instant since, Instant until, LeaveReason reason) {
     }
 
-    /**
-     * @param playerNumber the seat to vacate, 0 for an abandon
-     */
     public record Ballot(VoteKind kind, int playerNumber, UUID userId) {
     }
 
@@ -70,9 +59,6 @@ public class Seats {
                 .update();
     }
 
-    /**
-     * @return every holder of every seat, in the order they took it
-     */
     public List<SeatHolder> history(UUID gameBundleId) {
         return jdbc.sql("""
                         SELECT s.*, u.name FROM seat_holder s JOIN app_user u ON u.id = s.user_id

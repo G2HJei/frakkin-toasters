@@ -16,7 +16,6 @@ export function isServerFilled(component: Component): boolean {
   );
 }
 
-/** The value a field starts with. */
 export function emptyValue(type: TypeRef): Value {
   switch (type.t) {
     case 'int':
@@ -43,7 +42,6 @@ export function emptyValue(type: TypeRef): Value {
   }
 }
 
-/** A record with every component at its empty value, with `kind` when the record carries it. */
 export function emptyRecord(name: string, playerNumber?: number | null): Record<string, Value> {
   const record = recordNamed(name);
   const value: Record<string, Value> = {};
@@ -60,7 +58,6 @@ export function emptyEvent(kind: string, playerNumber?: number | null): EventVal
   return { ...emptyRecord(kind, playerNumber), kind } as EventValue;
 }
 
-/** The fields of a record a form asks for. */
 export function askedComponents(kind: string): Component[] {
   return (recordNamed(kind)?.components ?? []).filter((component) => !isServerFilled(component));
 }
@@ -78,7 +75,6 @@ export function toWire(event: EventValue): EventValue {
   return wire as EventValue;
 }
 
-/** What is missing before the event can be sent, for a hint next to the submit button. */
 export function missingFields(event: EventValue): string[] {
   return askedComponents(event.kind)
     .filter((component) => !component.type.nullable && (event[component.name] === null || event[component.name] === undefined))

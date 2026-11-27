@@ -64,7 +64,6 @@ final class Domains {
     private Domains() {
     }
 
-    // The moves, attacks and escorts of each fighter in space, and every launch.
     private static List<Object> viperActivations(Asked asked) {
         val game = asked.game();
         val result = new ArrayList<Object>();
@@ -131,8 +130,7 @@ final class Domains {
     }
 
     /**
-     * Values a client could send that the agent never would: any card of the decks, players and ships that aren't
-     * there, nulls. A type without values gets null alone; the normal domains report it.
+     * A type without values gets null alone: the normal domains report it.
      */
     static List<Object> wide(Asked asked, RecordComponent component) {
         return wide(asked, component.getName(), component.getType(), component.getGenericType(), 0);
@@ -218,7 +216,6 @@ final class Domains {
         return result;
     }
 
-    // Maps of an enum to counts, the shape of a draw's colors, in the enum's order.
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static List<Object> wideMaps(Type generic, Random random) {
         if (!(generic instanceof ParameterizedType parameterized)
@@ -238,7 +235,6 @@ final class Domains {
         return result;
     }
 
-    // Records of the wide values of their components, e.g. a viper activation of a ship that isn't there.
     private static List<Object> wideRecords(Asked asked, Class<?> type) {
         val components = type.getRecordComponents();
         val domains = Arrays.stream(components)

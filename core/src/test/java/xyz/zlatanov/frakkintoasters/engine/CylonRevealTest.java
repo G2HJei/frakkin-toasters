@@ -47,10 +47,9 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.TREACHERY;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 
 /**
- * The Cylon reveal (rule 6.1.1) and an executed Cylon's reveal (rule 7.1), played through {@code submit} and
- * {@code choose} alone, restoring the game at every pause. The Loyalty Cards are dealt from a stacked Loyalty deck,
- * which a seeded game can't choose. Kara "Starbuck" Thrace is player 1 and the current player, William Adama (Admiral)
- * player 2, Laura Roslin (President) player 3.
+ * The Cylon reveal (rule 6.1.1) and an executed Cylon's reveal (rule 7.1). The Loyalty Cards are dealt from a stacked
+ * Loyalty deck, which a seeded game can't choose. Kara "Starbuck" Thrace is player 1 and the current player, William
+ * Adama (Admiral) player 2, Laura Roslin (President) player 3.
  */
 class CylonRevealTest {
 
@@ -160,7 +159,6 @@ class CylonRevealTest {
         assertRestoresTheSameGame();
     }
 
-    // The player chooses to take an action.
     private void act(int player) {
         choose(player, single(new PlayerDecisionEvent<>(player, ActionEvent.class)));
     }
@@ -174,8 +172,6 @@ class CylonRevealTest {
     private Game game() {
         return (Game) engine.view();
     }
-
-    /* assertions */
 
     private void assertWaitingFor(PendingInput expected) {
         assertEquals(EngineStatus.waiting(expected), engine.status(expected.player()));

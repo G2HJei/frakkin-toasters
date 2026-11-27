@@ -12,8 +12,6 @@ import java.util.List;
 
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.MUST_LAUNCH_IN_VIPER;
 
-// The player launches a viper, unmanned or piloted by his own character. Supports the MUST_LAUNCH_IN_VIPER
-// constraint, as the mustLaunchInViper flag.
 public record LaunchViperEvent(int playerNumber, ShipType shipType, Location location, Character pilot,
                                Integer unmannedViperId,
                                boolean mustLaunchInViper) implements PlayerEvent, ConstrainedEvent {

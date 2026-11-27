@@ -19,9 +19,6 @@ public class ReconEventProcessor extends EventProcessor<ReconEvent> {
         return player.hasAbility(RECON) && game.decks().crisisCardsLeft() > 0;
     }
 
-    /**
-     * @return the current player's look at the top Crisis Card at the end of his turn, or a pass
-     */
     public static Followup offer(GameView game) {
         val current = game.currentPlayer();
         return canUse(game, current) ? optional(current.number(), new ReconEvent(current.number())) : NONE;

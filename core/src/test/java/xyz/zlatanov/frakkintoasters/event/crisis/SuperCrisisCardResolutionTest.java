@@ -124,8 +124,6 @@ class SuperCrisisCardResolutionTest extends TestHarness {
         resolve(card, FAIL);
     }
 
-    /* the cards */
-
     @Test
     void shouldPlaceCenturions() {
         resolve(FIGHTING_BLIND, TOP);
@@ -209,15 +207,12 @@ class SuperCrisisCardResolutionTest extends TestHarness {
         assertTrue(superCrisisDeck.discardedCards().isEmpty());
     }
 
-    /* resolving */
-
     private long damagedGalacticaLocations() {
         return Arrays.stream(xyz.zlatanov.frakkintoasters.state.board.Location.values())
                 .filter(galacticaBoard::isDamaged)
                 .count();
     }
 
-    // Plays the card at "Caprica" and picks the section.
     private void resolve(SuperCrisisCard card, Section section) {
         val resolveAndDiscard = play(card);
         val choice = execute(((Followup.Single) resolveAndDiscard.followups().getFirst()).event());
@@ -229,7 +224,6 @@ class SuperCrisisCardResolutionTest extends TestHarness {
         run(resolveAndDiscard.followups().getLast());
     }
 
-    // Plays the card at "Caprica", starts its skill check and resolves the result, as if the check had come to it.
     private void resolve(SuperCrisisCard card, SkillCheckResult result) {
         val resolveAndDiscard = play(card);
         execute(((Followup.Single) resolveAndDiscard.followups().getFirst()).event());
@@ -262,7 +256,6 @@ class SuperCrisisCardResolutionTest extends TestHarness {
         }
     }
 
-    // The first legal answer.
     private Event answer(PlayerDecisionEvent<?> decision) {
         val action = decision.action();
         if (action == DiscardSkillCardsEvent.class) {

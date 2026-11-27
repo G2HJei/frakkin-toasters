@@ -36,17 +36,10 @@ public final class MotiveCards {
             HARVEST_THEIR_RESOURCES, SAVOR_THEIR_DEMISE, SUBJECTS_TO_STUDY, IMPROVE_EFFICIENCY, KEEP_THEM_DOCILE,
             LEARN_TO_CHERISH, PRESSURE_THEIR_LEADERS);
 
-    /**
-     * @return whether the player can reveal the card while the game goes on: it doesn't wait for the end, and its
-     * requirement is met now
-     */
     public static boolean canReveal(GameView game, PlayerView player, MotiveCard card) {
         return !ONLY_AT_THE_END.contains(card) && canRevealAtTheEnd(game, player, card);
     }
 
-    /**
-     * @return whether the player can reveal the card now that the game is over
-     */
     public static boolean canRevealAtTheEnd(GameView game, PlayerView player, MotiveCard card) {
         val galactica = game.boards().galactica();
         val distance = game.distanceTraveled();

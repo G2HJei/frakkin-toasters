@@ -28,11 +28,6 @@ import java.util.stream.Stream;
  */
 public final class FuzzRun {
 
-    /**
-     * @param players     the player counts, from {@code 3-7} or {@code 4,6}
-     * @param seed        the one seed to play, {@code null} for a run of {@code games} seeds from {@code firstSeed}
-     * @param traces      the folder the traces go to
-     */
     record Arguments(int games, List<Integer> players, String playersText, long firstSeed, Long seed, int threads,
                      int rounds, Path report, Path traces) {
 

@@ -85,7 +85,6 @@ class GameReportTest {
         return report.story().stream().filter(moment -> moment.kind() == kind).toList();
     }
 
-    // A seeded game with random legal answers to its end.
     private static GameEngine played(int players, long seed) {
         val engine = GameEngine.start(players, seed);
         val random = new Random(seed);

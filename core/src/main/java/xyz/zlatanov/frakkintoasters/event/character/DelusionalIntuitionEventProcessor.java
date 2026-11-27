@@ -17,8 +17,7 @@ import static xyz.zlatanov.frakkintoasters.state.character.CharacterAbility.DELU
 public class DelusionalIntuitionEventProcessor extends EventProcessor<DelusionalIntuitionEvent> {
 
     /**
-     * @return whether the player draws a Skill Card after drawing a Crisis Card: he has the ability and a card is left to
-     * draw, so the draw has an answer
+     * A card has to be left to draw, so the draw has an answer.
      */
     public static boolean canUse(GameView game, PlayerView player) {
         return player.hasAbility(DELUSIONAL_INTUITION)

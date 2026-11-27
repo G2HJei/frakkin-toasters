@@ -8,14 +8,8 @@ import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * A logged in user, however he logged in. It lives in the HTTP session, which the web socket handshake uses too.
- */
 public class AppUserAuthentication extends AbstractAuthenticationToken {
 
-    /**
-     * The principal of a logged in user: his id.
-     */
     public record AppUserPrincipal(UUID id) implements Principal, Serializable {
 
         @Override

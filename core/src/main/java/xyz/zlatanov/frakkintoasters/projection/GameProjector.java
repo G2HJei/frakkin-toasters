@@ -112,8 +112,6 @@ final class GameProjector {
                 game.outcome().map(winner -> new Outcome(winner, game.winners())).orElse(null));
     }
 
-    /* who sees what */
-
     private boolean seesEverything() {
         return ended || viewer instanceof Viewer.Sandbox;
     }
@@ -121,8 +119,6 @@ final class GameProjector {
     private boolean sees(int owner) {
         return seesEverything() || viewer.is(owner);
     }
-
-    /* the turn */
 
     private TurnProjection turn() {
         val turn = game.turn();
@@ -151,8 +147,6 @@ final class GameProjector {
         resources.forEach(resource -> reductions.put(resource, 1));
         return reductions;
     }
-
-    /* the players */
 
     private PlayerProjection player(PlayerView player) {
         val number = player.number();
@@ -217,8 +211,6 @@ final class GameProjector {
         return new HiddenCards<>(hand.size(), List.of(), sees ? hand.cards() : null);
     }
 
-    /* the boards */
-
     private GalacticaProjection galactica() {
         val board = game.boards().galactica();
         return new GalacticaProjection(
@@ -279,8 +271,6 @@ final class GameProjector {
                 && game.player(number).revealedCivilianShipIds().contains(shipId);
     }
 
-    /* the decks */
-
     private List<DeckProjection> decks() {
         val result = new ArrayList<DeckProjection>();
         for (val id : DeckId.values()) {
@@ -292,8 +282,6 @@ final class GameProjector {
         }
         return result;
     }
-
-    /* the skill check */
 
     private SkillCheckProjection skillCheck() {
         val check = game.activeSkillCheck();
@@ -335,8 +323,6 @@ final class GameProjector {
                 check.failResultPrevented());
     }
 
-    /* the pending input */
-
     private InputProjection input() {
         if (ended) {
             return null;
@@ -354,7 +340,6 @@ final class GameProjector {
         }).orElse(null);
     }
 
-    // The answers come with each option that asks the chooser for a decision at once.
     private Choose choose(int player, List<Followup> options) {
         val answers = new ArrayList<OptionAnswers>();
         for (int option = 0; option < options.size(); option++) {

@@ -1,10 +1,6 @@
 import { Link } from 'react-router';
 import { useLobbyAction, useMe, type Participant, type Room } from '../api/queries';
 
-/**
- * A game before it starts: seats 1 to 7 and the observers, join, leave and switch, and the host's tools: start, remove
- * or ban a user, cancel the game.
- */
 export function RoomPage({ room }: { room: Room }) {
   const me = useMe();
   const action = useLobbyAction();
@@ -19,7 +15,6 @@ export function RoomPage({ room }: { room: Room }) {
     return <span className={`presence ${online ? 'online' : 'away'}`} role="img" aria-label={online ? 'here' : 'away'} title={online ? 'Here' : 'Away'} />;
   };
 
-  // the host's tools beside every other user
   const hostTools = (participant: Participant) =>
     isHost &&
     participant.userId !== myId && (

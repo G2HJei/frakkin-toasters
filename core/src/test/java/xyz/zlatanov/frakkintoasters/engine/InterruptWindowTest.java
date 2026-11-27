@@ -42,8 +42,7 @@ import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.VIPER;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 
 /**
- * Interrupt windows played through {@code submit} alone, restoring the game at every pause. "Keep Tabs on Visitor" fails
- * with a die roll: "If 4 or lower, -2 population."
+ * "Keep Tabs on Visitor" fails with a die roll: "If 4 or lower, -2 population."
  */
 class InterruptWindowTest {
 
@@ -157,8 +156,6 @@ class InterruptWindowTest {
         assertWaitingFor(new AwaitingDecision(new PlayerDecisionEvent<>(2, PlayInterruptCardEvent.class)));
     }
 
-    /* the game */
-
     // William Adama, Laura Roslin and Kara Thrace, with empty hands. Player 1 is the current player.
     private static Followup setUp() {
         return all(
@@ -177,8 +174,6 @@ class InterruptWindowTest {
         input.accept(engine);
         assertRestoresTheSameGame();
     }
-
-    /* assertions */
 
     private void assertPopulationAfterKeepTabsOnVisitor() {
         val lost = engine.view().turn().dieRoll().result() <= 4 ? 2 : 0;

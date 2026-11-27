@@ -110,7 +110,6 @@ export function concreteEvents(action: string): string[] {
   return [];
 }
 
-/** The character whose sheet prints an ability, e.g. LEE_APOLLO_ADAMA for ALERT_VIPER_PILOT. */
 export function abilityCharacter(ability: string | null | undefined): string | null {
   const characterAbility = schema.types.CharacterAbility;
   return ability && characterAbility?.kind === 'enum' ? (characterAbility.characters?.[ability] ?? null) : null;
@@ -122,24 +121,20 @@ export function isMiracle(ability: string | null | undefined): boolean {
   return !!ability && characterAbility?.kind === 'enum' && (characterAbility.miracles?.[ability] ?? 0) > 0;
 }
 
-/** The type of a character, e.g. CYLON_LEADER for CAVIL. */
 export function characterType(character: string | null | undefined): string | null {
   const characters = schema.types.Character;
   return character && characters?.kind === 'enum' ? (characters.types?.[character] ?? null) : null;
 }
 
-/** The skill set a character's sheet prints, e.g. 3 LEADERSHIP and 2 TACTICS for WILLIAM_ADAMA. */
 export function characterSkillSet(character: string | null | undefined): SkillSetOption[] {
   const characters = schema.types.Character;
   return character && characters?.kind === 'enum' ? (characters.skillSets?.[character] ?? []) : [];
 }
 
-/** The characters in line for a title, highest first, e.g. LAURA_ROSLIN first for PRESIDENT. */
 export function lineOfSuccession(title: string): string[] {
   return schema.linesOfSuccession?.[title] ?? [];
 }
 
-/** The color of a Skill Card type, e.g. POLITICS for RED_TAPE. */
 export function skillCardColor(type: string | null | undefined): string | null {
   const skillCardType = schema.types.SkillCardType;
   return type && skillCardType?.kind === 'enum' ? (skillCardType.colors?.[type] ?? null) : null;

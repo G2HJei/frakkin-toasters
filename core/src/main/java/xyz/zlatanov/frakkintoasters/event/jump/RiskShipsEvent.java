@@ -32,9 +32,6 @@ public record RiskShipsEvent(int playerNumber, Risk risk) implements PlayerEvent
             this.amount = amount;
         }
 
-        /**
-         * @return whether the risked ships are vipers, otherwise raptors
-         */
         public boolean vipers() {
             return vipers;
         }

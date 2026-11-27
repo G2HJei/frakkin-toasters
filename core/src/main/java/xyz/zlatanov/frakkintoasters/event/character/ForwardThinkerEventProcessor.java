@@ -23,9 +23,6 @@ public class ForwardThinkerEventProcessor extends EventProcessor<ForwardThinkerE
         return player.hasAbility(FORWARD_THINKER) && LocationEvent.canAct(game, player);
     }
 
-    /**
-     * @return the choice to activate his location or not, {@link Followup#NONE} when he can't
-     */
     public static Followup offer(GameView game, PlayerView player) {
         return canUse(game, player)
                 ? one(new ForwardThinkerEvent(player.number()), new NoOpEvent(player.number()))

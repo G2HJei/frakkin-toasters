@@ -57,16 +57,13 @@ public abstract class AbstractOps {
     }
 
     /**
-     * Applies the fact to the game and appends it to the journal. The only way ops change state: ops compute a fact
-     * from the current state and record it, and nothing else writes to the components.
+     * The only way ops change state: ops compute a fact from the current state and record it, and nothing else writes to
+     * the components.
      */
     protected void record(Fact fact) {
         recorder.record(fact);
     }
 
-    /**
-     * Combines the draw and discard piles of the deck and shuffles them. Logged as a {@code DeckShuffled} fact.
-     */
     protected void shuffle(DeckId id) {
         Deck<Object> deck = game.decks().deck(id);
         List<Object> all = new ArrayList<>(deck.cards());
@@ -91,8 +88,7 @@ public abstract class AbstractOps {
     }
 
     /**
-     * Draws the top card. The card is in no pile afterwards, so the caller has to record where it went. When the draw
-     * empties a deck that reshuffles its discard pile, the reshuffle is logged too.
+     * The card is in no pile afterwards, so the caller has to record where it went.
      */
     protected <T> T draw(DeckId id) {
         Deck<T> deck = game.decks().deck(id);
@@ -116,8 +112,7 @@ public abstract class AbstractOps {
     }
 
     /**
-     * Puts a card back in the deck it belongs to. Skill and mutiny cards go to the discard pile. Damage cards go on top
-     * of their deck, and the caller shuffles it.
+     * Damage cards go on top of their deck, and the caller shuffles it.
      */
     protected void discardToDeck(Object card) {
         switch (card) {
@@ -151,10 +146,8 @@ public abstract class AbstractOps {
     }
 
     /**
-     * Loses the resource, as every loss does (rule 13.2). "Preventative Policy" makes the next loss of a resource this
-     * turn 1 smaller.
-     *
-     * @return how much was lost
+     * Every loss goes through here (rule 13.2): "Preventative Policy" makes the next loss of a resource this turn 1
+     * smaller.
      */
     protected int loseResource(Resource resource, int amount) {
         if (amount > 0 && game.turn().lossReductions().contains(resource)) {

@@ -9,18 +9,14 @@ import xyz.zlatanov.frakkintoasters.projection.LiveUpdateProjection;
 import java.util.List;
 
 /**
- * The messages of the game socket, as records, so the wire schema lists them. They are told apart by {@code type},
- * which is the name in {@link #TYPES}: {@code Messages} and {@code GameSocketHandler} write and read them with these
- * fields.
+ * The messages of the game socket as records, so the wire schema lists them: {@code Messages} and
+ * {@code GameSocketHandler} write and read them with these fields.
  */
 public final class WireMessages {
 
     private WireMessages() {
     }
 
-    /**
-     * Server to client.
-     */
     public sealed interface ServerMessage {
     }
 
@@ -33,42 +29,30 @@ public final class WireMessages {
     public record LogMessage(LiveUpdateProjection log) implements ServerMessage {
     }
 
-    /**
-     * @param reason {@code STALE}, {@code INVALID}, {@code FAILURE} or {@code UNAVAILABLE}
-     */
     public record RejectedMessage(String reason, String message) implements ServerMessage {
     }
 
     public record PongMessage() implements ServerMessage {
     }
 
-    // The ended game told whole, for its results: on a new connection, and with the command that ended it.
     public record ReportMessage(GameReport report) implements ServerMessage {
     }
 
-    // A chat message, to every connection of the game.
     public record ChatMessage(Chat.ChatLine message) implements ServerMessage {
     }
 
-    // The last chat messages, after the log on a new connection.
     public record ChatLogMessage(List<Chat.ChatLine> messages) implements ServerMessage {
     }
 
-    // Why the chat refused the sender's message.
     public record ChatRejectedMessage(String message) implements ServerMessage {
     }
 
-    /**
-     * Client to server.
-     */
     public sealed interface ClientMessage {
     }
 
-    // The client is there; it pings while it has nothing else to say.
     public record PingMessage() implements ClientMessage {
     }
 
-    // A message in the game's chat, from a player or an observer.
     public record SayMessage(String text) implements ClientMessage {
     }
 
@@ -90,9 +74,6 @@ public final class WireMessages {
     public record InjectMessage(String token, Event event) implements ClientMessage {
     }
 
-    /**
-     * The {@code type} of each message.
-     */
     public static final java.util.Map<Class<?>, String> TYPES = java.util.Map.ofEntries(
             java.util.Map.entry(GameMessage.class, "game"),
             java.util.Map.entry(UpdateMessage.class, "update"),

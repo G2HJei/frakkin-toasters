@@ -81,9 +81,6 @@ public class DrawSkillCardsEventProcessor extends EventProcessor<DrawSkillCardsE
         return fits(player.character(), colors, extraCards());
     }
 
-    /**
-     * @return whether the cards fit the skill set of the character, e.g. for Sherman "Doc" Cottle's "Treatment"
-     */
     public static boolean fitsSkillSet(Character character, List<SkillCardColor> colors) {
         return fits(character, colors, 0);
     }
@@ -127,7 +124,6 @@ public class DrawSkillCardsEventProcessor extends EventProcessor<DrawSkillCardsE
         return colors.size() <= 2 && new HashSet<>(colors).size() == colors.size();
     }
 
-    // The cards to draw, in the order of the colors, or null when the event names no proper selection.
     private List<SkillCardColor> colorsToDraw() {
         val selection = event.selection();
         if (selection == null || selection.entrySet().stream().anyMatch(e -> e.getKey() == null || e.getValue() == null || e.getValue() < 0)) {

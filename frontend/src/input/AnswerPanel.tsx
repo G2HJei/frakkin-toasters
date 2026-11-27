@@ -49,15 +49,9 @@ import {
 import {useSelection} from './selection';
 
 export interface AnswerPanelProps {
-    // sends a move, with its pick filled in
     onMove(move: Move, event: Answer | null): void;
 }
 
-/**
- * The answers of the pending input, for the viewer it asks: a choice's options, an option that asks a decision unfolded
- * into its answers, and a decision's answers grouped by what they do. A shape opens its picker. What the board and
- * the mats picked narrows them, and "Back" and "Clear" take picks away.
- */
 export function AnswerPanel({onMove}: AnswerPanelProps) {
     const table = useTable();
     const input = table.game?.input;
@@ -112,8 +106,6 @@ function SelectionBar({count}: { count: number }) {
     );
 }
 
-// The options in their order: an option that asks a decision is a section of its answers, every one closed until it is
-// clicked or the board's picks narrow to it.
 function ChoiceAnswers({moves: left, narrowed, onMove}: {
     moves: Move[];
     narrowed: boolean;
@@ -176,7 +168,6 @@ function ChoiceAnswers({moves: left, narrowed, onMove}: {
                     <button key={option} type="button" className={`option answer-row${pass ? ' pass' : ''}`}
                             aria-label={moveSentence(move, table)} onClick={() => onMove(move)}>
                         <ArtSlot refs={art} pass={pass}/>
-                        {/* a card it names shows on hover */}
                         <span>{move.event ? <Words parts={optionEventParts(move.event, {
                             ...table,
                             artOf: partArt
@@ -189,10 +180,8 @@ function ChoiceAnswers({moves: left, narrowed, onMove}: {
 }
 
 interface ProductOptions {
-    // its options without repeats
     group: MoveGroup;
     parts: Part[];
-    // every option it stands for, and the first of them, where it shows
     options: Set<number>;
     first: number;
 }
@@ -212,16 +201,10 @@ function productOptions(left: Move[]): ProductOptions[] {
 // the default way to open a group: its kind is picked, so the panel shows only it and the board lights its targets
 const pickKind = (kind: string) => useSelection.getState().pick({type: 'kind', kind});
 
-/**
- * The answers by group. A group among others is a row that opens it, and its answers come next; a group alone shows
- * them. A section's lone group doesn't repeat the section's name. The passes come last, after every group, each named
- * after what it passes on when there are several.
- */
 export function Groups({moves: left, onMove, section, onOpen = pickKind, openInPlace = false}: {
     moves: Move[];
     onMove(move: Move): void;
     section?: string;
-    // opens a group by its kind, e.g. with the anchor of the popover that shows it
     onOpen?(kind: string): void;
     // opens a group here instead, where the picks don't narrow the answers (the anytime panel)
     openInPlace?: boolean;
@@ -302,11 +285,9 @@ function passesOf(group: MoveGroup, table: ReturnType<typeof useTable>): Move[] 
 
 function GroupView({group: listed, varying: before, onMove, untitled = false, onOpen}: {
     group: MoveGroup;
-    // what the group's answers differed in before its pass went last
     varying?: string[];
     onMove(move: Move): void;
     untitled?: boolean;
-    // a group among others is a row that opens it
     onOpen?(): void;
 }) {
     const table = useTable();
@@ -393,7 +374,6 @@ function GroupView({group: listed, varying: before, onMove, untitled = false, on
     );
 }
 
-/** A group among other answers, as a row like theirs that opens it: one more step, to its answers. */
 function GroupRow({group, art, onOpen}: { group: MoveGroup; art: ArtRef[]; onOpen(): void }) {
     const table = useTable();
     const title = groupTitle(group, table);
@@ -407,8 +387,6 @@ function GroupRow({group, art, onOpen}: { group: MoveGroup; art: ArtRef[]; onOpe
     );
 }
 
-// the images of a group's row: what every answer shows, or else the first image of a few of them, e.g. the portraits of
-// the players to choose
 function groupArt(arts: ArtRef[][]): ArtRef[] {
     const everyOne = arts[0]?.filter((ref) => arts.every((refs) => refs.some((candidate) => candidate.key === ref.key))) ?? [];
     return everyOne.length > 0 ? everyOne : unique(arts.flatMap((refs) => refs.slice(0, 1))).slice(0, 3);
@@ -440,7 +418,6 @@ function distinctArt(own: ArtRef[][]): boolean {
     return own.length > 2 && own.every((refs) => refs.length > 0) && new Set(own.map((refs) => refs.map((ref) => ref.key).join())).size === own.length;
 }
 
-// A draw: the moves differ only in a count per color.
 function countsComponent(group: MoveGroup, varying: string[]): string | null {
     if (varying.length !== 1 || group.moves.some((move) => move.pick)) {
         return null;
@@ -553,7 +530,6 @@ function CountsWidget({group, component, onMove}: { group: MoveGroup; component:
  */
 function PartsWidget({group, parts, onMove}: { group: MoveGroup; parts: Part[]; onMove(move: Move): void }) {
     const table = useTable();
-    // the positions picked among each part's values
     const [positions, setPositions] = useState<Record<string, number[]>>({});
     const picks: PartPicks = Object.fromEntries(parts.map((part) => [part.key, (positions[part.key] ?? []).map((at) => part.values[at])]));
     const left = fitting(group.moves, parts, picks);
@@ -634,7 +610,6 @@ function PartsWidget({group, parts, onMove}: { group: MoveGroup; parts: Part[]; 
     );
 }
 
-// the positions of a part's values that a shared value takes: its value, or each of its elements once
 function impliedPositions(part: Part, found: { value: unknown } | null): number[] {
     if (!found) {
         return [];
@@ -662,10 +637,6 @@ function isSkillCard(type: TypeRef): boolean {
     return type.t === 'ref' && type.name === 'SkillCard';
 }
 
-/**
- * A shape's part to pick: its cards or ships as tiles to toggle, how many are picked against the pick's bounds, the
- * strength against its minimum, and the order of the clicks when the order counts.
- */
 function PickWidget({move, onSend}: { move: Move; onSend(event: Answer | null): void }) {
     const table = useTable();
     const pick = move.pick!;
@@ -739,7 +710,6 @@ function PickWidget({move, onSend}: { move: Move; onSend(event: Answer | null): 
     );
 }
 
-// the type of a pick's elements
 function pickType(pick: Pick): TypeRef {
     switch (pick.kind) {
         case 'SkillCardPick':
@@ -751,15 +721,10 @@ function pickType(pick: Pick): TypeRef {
     }
 }
 
-// the values that lie as tiles to pick, as a hand lies: cards and damage tokens
 function isCardLike(type: TypeRef): boolean {
     return isSkillCard(type) || (type.t === 'enum' && ((CARD_ENUMS as readonly string[]).includes(type.name ?? '') || /Damage$/.test(type.name ?? '')));
 }
 
-/**
- * A value to pick: a card, a token, a ship, a player's character, an ability or a die's face with its image, anything
- * else by its name. A location is on the board.
- */
 function valueTile(value: unknown, type: TypeRef, table: ReturnType<typeof useTable>, name: string): {
     arts: ArtRef[];
     label: string

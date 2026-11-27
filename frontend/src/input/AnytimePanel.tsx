@@ -7,12 +7,6 @@ export interface AnytimePanelProps {
   onSubmit(event: EventValue): void;
 }
 
-/**
- * What a player may do at any pause without being asked (`AnytimeEvent`), e.g. a Cylon Leader reveals a Motive Card
- * whose requirement is met, even while the game waits for someone else. The engine lists them with the game
- * (`anytime`): a player gets his own, a sandbox every player's, and the panel shows only while there is one. The pending
- * input stays as it is.
- */
 export function AnytimePanel({ onSubmit }: AnytimePanelProps) {
   const table = useTable();
   const actors = (table.game?.anytime ?? [])

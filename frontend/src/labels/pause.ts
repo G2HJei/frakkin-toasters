@@ -79,7 +79,6 @@ export function pauseOf(input: InputProjection | null | undefined, context: Labe
   }
 }
 
-/** The pause's line as plain text, null without one. */
 export function pauseLineText(pause: Pause): string | null {
   return pause.line ? partsText(pause.line) : null;
 }

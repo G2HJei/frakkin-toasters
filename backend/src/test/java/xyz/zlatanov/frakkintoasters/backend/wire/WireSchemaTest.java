@@ -28,7 +28,6 @@ class WireSchemaTest {
                 "frontend/src/wire/schema.json is stale: run ./gradlew :backend:exportSchema, then npm run gen");
     }
 
-    // The table reads an int by its role: a player, a ship, a scope or a count.
     @Test
     void everyIntHasARole() {
         val missing = new ArrayList<String>();

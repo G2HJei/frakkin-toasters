@@ -32,9 +32,6 @@ public class OfferPlayOrPassEventProcessor extends EventProcessor<OfferPlayOrPas
         return new Followup.OneOf(Set.of(pass));
     }
 
-    /**
-     * @return whether the player holds a card of the type and the skill check allows its play now
-     */
     public static boolean canPlay(GameView game, PlayerView player, SkillCardType card) {
         val holds = player.skillCards().cards().stream().anyMatch(c -> c.type() == card);
         return holds && switch (card) {

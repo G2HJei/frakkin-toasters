@@ -19,10 +19,6 @@ public interface LineOfSuccessionSelector {
                 .orElseGet(this::noNextInLine);
     }
 
-    /**
-     * @return the character highest in line whose player can hold a title and who passes the filter, {@code null} when
-     * there is none
-     */
     default Character nextInLine(GameView game, Integer excludedPlayerNumber, Predicate<Character> eligible) {
         val lineOfSuccession = lineOfSuccession();
         Character nextInLine = null;

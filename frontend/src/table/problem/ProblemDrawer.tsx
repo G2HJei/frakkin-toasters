@@ -17,7 +17,6 @@ export const useProblem = create<ProblemState>((set) => ({
   hide: () => set({ open: false }),
 }));
 
-/** The link under "Reference" that opens the drawer. */
 export function ProblemLink() {
   return (
     <button type="button" className="link problem-open" onClick={() => useProblem.getState().show()}>
@@ -26,10 +25,6 @@ export function ProblemLink() {
   );
 }
 
-/**
- * "Report a problem": a small drawer with a box for what went wrong, 1000 characters at most. Sending stores it with
- * the game and where the game stood; the drawer then thanks and closes with Escape or its button.
- */
 export function ProblemDrawer({ gameId }: { gameId: string }) {
   const open = useProblem((state) => state.open);
   const [text, setText] = useState('');

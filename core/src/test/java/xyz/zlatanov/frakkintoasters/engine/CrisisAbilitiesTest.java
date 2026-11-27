@@ -52,7 +52,6 @@ import static xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard.RIOTS_NO_JUMP
 import static xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard.WATER_SABOTAGED;
 
 /**
- * The character abilities that act on Crisis Cards, through {@code submit} and {@code choose}, restoring at every pause.
  * Player 1 is the current player. Each script ends the game after the step, as only the end of the game empties the
  * agenda.
  */
@@ -161,8 +160,6 @@ class CrisisAbilitiesTest {
         assertEquals(EngineStatus.finished(Team.CYLONS), engine.status(1));
     }
 
-    /* inputs */
-
     // The characters by seat, the titles, and the Crisis Cards stacked from the top.
     private static Followup setUp(List<Character> characters, CrisisCard... topToBottom) {
         val events = new ArrayList<Followup>();
@@ -189,8 +186,6 @@ class CrisisAbilitiesTest {
     private DeckView<CrisisCard> crisisDeck() {
         return engine.view().decks().deck(DeckId.CRISIS);
     }
-
-    /* assertions */
 
     private void assertWaitingFor(PendingInput expected) {
         assertEquals(EngineStatus.waiting(expected), engine.status(expected.player()));

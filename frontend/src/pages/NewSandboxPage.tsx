@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router';
 import { useCreateSandbox, useImportSandbox } from '../api/queries';
 import { openGameTab } from './gameTab';
 
-/** A new sandbox: 3 to 7 players and an optional seed, or an exported journal to import. It opens in a tab of its own, and this one goes back to the games. */
 export function NewSandboxPage() {
   const navigate = useNavigate();
   const create = useCreateSandbox();

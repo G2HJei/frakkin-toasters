@@ -82,7 +82,6 @@ const KIND_ART: Record<string, () => Found[]> = {
   GasCloudPlaceEvent: () => [deckPlaceArt('DECK_TOP')],
 };
 
-// What each ability of the "Basestar Bridge" acts on.
 const BRIDGE_ABILITY_ART: Record<string, () => Found[]> = {
   CAG_PLACES_CIVILIAN_SHIP: () => [title('CAG'), shipArt('CIVILIAN')],
   JUMP_OR_PURSUIT: () => [stepIconArt('PREPARE_FOR_JUMP')],
@@ -116,13 +115,11 @@ export function kindArt(kind: string | null | undefined): ArtRef[] {
   return present(kind ? (KIND_ART[kind]?.() ?? []) : []);
 }
 
-/** The images of an option that asks a decision first, e.g. "Activate a viper", "Take an action". */
 export function actionArt(move: Move | undefined): ArtRef[] {
   const asked = move ? decisionAction(move) : null;
   return asked ? decisionArt(asked) : [];
 }
 
-// a decision by the kind it asks for: what the kind does, the card or ability it comes from, the card it plays
 function decisionArt(asked: string): ArtRef[] {
   return present([...(ACTION_ART[asked]?.() ?? []), ...kindArt(asked), ...sourceArt(asked), ...playedCardArt(asked)]);
 }
@@ -182,7 +179,6 @@ export function staysOnEachAnswer(art: ArtRef): boolean {
   return isMiracleArt(art) || art.key === movement()?.key;
 }
 
-/** The images of a value a part of an answer picks, e.g. a target player, an ability or a die's result. */
 export function partValueArt(value: unknown, name: string, type: TypeRef, table: TableContext): ArtRef[] {
   if (value === null || value === undefined) {
     return [];
@@ -252,7 +248,6 @@ function sourceArt(kind: string): ArtRef[] {
   return present([source.enum === 'CharacterAbility' ? characterArt(abilityCharacter(source.constant)) : enumArt(source.enum, source.constant)]);
 }
 
-// the Quorum Card or the Mutiny Card an event plays
 function playedCardArt(kind: string): ArtRef[] {
   const record = recordNamed(kind);
   return present([record?.quorumCard ? cardArt('QuorumCard', record.quorumCard) : null, record?.mutinyCard ? cardArt('MutinyCard', record.mutinyCard) : null]);
@@ -264,7 +259,6 @@ function locationActionArt(kind: string): ArtRef[] {
   return location ? [locationPinArt(location)] : [];
 }
 
-// an event of a miracle ability: its source, or an ability it names
 function fromMiracle(event: Answer): boolean {
   const record = recordNamed(event.kind);
   if (record?.source?.enum === 'CharacterAbility' && isMiracle(record.source.constant)) {
@@ -273,7 +267,6 @@ function fromMiracle(event: Answer): boolean {
   return (record?.components ?? []).some((component) => component.type.t === 'enum' && component.type.name === 'CharacterAbility' && isMiracle(event[component.name] as string | null));
 }
 
-// the events an option of a choice runs, a decision too: it shows the kind it asks for
 function followupEvents(followup: Followup | null | undefined): Answer[] {
   switch (followup?.kind) {
     case 'Single': {
@@ -291,7 +284,6 @@ function present(found: Found[]): ArtRef[] {
   return unique(found.filter((art): art is ArtRef => art !== null));
 }
 
-/** The Pass of a choice or a decision: a `NoOpEvent`. */
 export function isNoOp(move: Move): boolean {
   return move.event?.kind === 'NoOpEvent';
 }

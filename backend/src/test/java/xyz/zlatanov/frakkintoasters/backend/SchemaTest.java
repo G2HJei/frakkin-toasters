@@ -45,7 +45,6 @@ class SchemaTest {
                 columns("participant"));
         assertEquals(List.of("game_bundle_id uuid NO", "sequence integer NO", "entry jsonb NO"),
                 columns("journal_entry"));
-        // the session around a game: the seats' holders, the bans, the votes, the chat and the problem reports
         assertEquals(List.of("game_bundle_id uuid NO", "player_number integer NO", "user_id uuid NO",
                 "since timestamp with time zone NO", "until timestamp with time zone YES", "reason text YES"),
                 columns("seat_holder"));

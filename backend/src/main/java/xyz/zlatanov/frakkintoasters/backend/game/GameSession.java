@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * A game in memory. It asks the engine for the journal and the view on every use, because a rollback replaces both.
+ * It asks the engine for the journal and the view on every use, because a rollback replaces both.
  */
 public final class GameSession {
 
@@ -23,7 +23,6 @@ public final class GameSession {
     // The last game each viewer was sent after a command, so a viewer for whom nothing changed gets nothing.
     private final Map<Viewer, GameProjection> published = new HashMap<>();
 
-    // abandoned: the game takes no command, and shows no input
     private boolean closed;
 
     // the report of the ended game, and the sequence it was read at: an undo can take the ending back
@@ -51,16 +50,10 @@ public final class GameSession {
         return engine.view();
     }
 
-    /**
-     * @return the number of journal entries, which names the state of the game
-     */
     public int sequence() {
         return engine.journal().size();
     }
 
-    /**
-     * @return the report of the game once it has ended, read once from the journal
-     */
     public Optional<GameReport> report() {
         if (engine.view().outcome().isEmpty()) {
             return Optional.empty();

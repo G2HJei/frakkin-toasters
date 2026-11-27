@@ -49,14 +49,10 @@ public final class CylonRevealPowers {
         };
     }
 
-    /**
-     * @return whether the character is on a Galactica location, not on Colonial One, Pegasus or in space
-     */
     public static boolean isOnGalactica(GameView game, PlayerView player) {
         return game.locate(player.character()).filter(LocationsArea.GALACTICA.locations()::contains).isPresent();
     }
 
-    // The characters he may choose, or none of them. Nobody to choose: nothing to ask.
     private static Followup targets(GameView game, int revealer, IntPredicate canTarget, IntFunction<Event> event) {
         val options = new ArrayList<Event>();
         playersFrom(game, revealer).stream()

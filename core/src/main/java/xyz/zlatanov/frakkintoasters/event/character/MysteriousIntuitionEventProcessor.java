@@ -25,10 +25,6 @@ public class MysteriousIntuitionEventProcessor extends EventProcessor<Mysterious
                 && skillCheck.cards().isEmpty();
     }
 
-    /**
-     * @return the choice of a pass, a fail or neither, before a Crisis Card's skill check is made, for the player who can
-     * use the ability
-     */
     public static Followup offer(GameView game) {
         return game.players().stream()
                 .filter(player -> canUse(game, player))

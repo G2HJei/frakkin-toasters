@@ -25,7 +25,6 @@ import {
 import { recordNamed, type TypeRef } from '../wire/schema';
 import type { FactProjection } from '../wire/types';
 
-/** A fact as one line under its event. */
 export interface Sentence {
   parts: Part[];
   // the player it is about, whom a line under his name leaves out
@@ -38,7 +37,6 @@ export interface Sentence {
   ships?: { names: Part[]; move: ShipMove };
 }
 
-/** What the facts of a scope are worded with: the labels' context, which can name a character's player. */
 export type FactContext = LabelContext;
 
 // Facts that only keep the books, or that a header or the event's line says already.
@@ -74,7 +72,6 @@ const QUIET = new Set([
 // The damage token piles: the damage a token does says what it was.
 const DAMAGE_DECKS = new Set(['GALACTICA_DAMAGE', 'PEGASUS_DAMAGE', 'BASESTAR_DAMAGE']);
 
-/** Whether a fact says nothing a reader wants: bookkeeping, or what a header says. */
 export function isQuiet(fact: FactProjection): boolean {
   const kind = factKind(fact);
   if (kind.startsWith('DeckFact.')) {
@@ -186,17 +183,14 @@ interface Draft {
   target: number | null;
   deck: string | null;
   cards: Cards | null;
-  // the names of the shuffled decks
   decks: string[];
   facts: FactProjection[];
   ships?: { names: Part[]; move: ShipMove };
-  // the civilian ships looked at
   seen?: number[];
 }
 
 const draft = (verb: string, facts: FactProjection[], fields: Partial<Draft> = {}): Draft => ({ verb, who: null, target: null, deck: null, cards: null, decks: [], facts, ...fields });
 
-/** The facts of a scope as sentences, the mechanics told as moves of cards and the bookkeeping left out. */
 export function factSentences(facts: FactProjection[], context: FactContext): Sentence[] {
   const shown = facts.filter((fact) => !isQuiet(fact) && !emptyCards(fact));
   const moves = shown.map(moveOf);
@@ -458,7 +452,6 @@ function combine(drafts: Draft[]): Draft[] {
   return out;
 }
 
-/** Whether two ships moved alike: the same verb to the same place. */
 export function sameShipMove(first: ShipMove, second: ShipMove): boolean {
   return first.one === second.one && partsText(first.tail) === partsText(second.tail);
 }
@@ -474,7 +467,6 @@ function mergeColors(first: Record<string, number> | null, second: Record<string
   return merged;
 }
 
-// The cards of a sentence: their names with their images, or how many of what kind.
 function cardsParts(cards: Cards, context: LabelContext): Part[] {
   if (cards.list === null) {
     return hiddenCardsParts(cards.count, cards.deck, cards.pile, cards.colors);
@@ -601,9 +593,6 @@ function subjectOf(fact: FactProjection, context: FactContext): number | null {
   return typeof shown?.character === 'string' ? (context.playerOf?.(shown.character) ?? null) : null;
 }
 
-/**
- * A sentence as a line under the player the log names above it: without his name where it starts with it.
- */
 export function sentenceParts(one: Sentence, actor: number | null, context: LabelContext): Part[] {
   if (actor === null) {
     return one.parts;
@@ -641,7 +630,6 @@ export function sameCard(first: unknown, second: unknown): boolean {
   return !!a && !!b && a.type === b.type && a.value === b.value;
 }
 
-/** Whether a sentence only says what the line says: the same words, or the cards the event names moving. */
 export function repeats(one: Sentence, line: Part[], named: unknown[], actor: number | null, context: LabelContext): boolean {
   const text = partsText(sentenceParts(one, actor, context)).toLowerCase();
   const said = partsText(line).toLowerCase();

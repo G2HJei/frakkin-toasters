@@ -43,14 +43,8 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * The game as one viewer may see it, as plain records. What lies open on the table is public. What is hidden shows only
- * to who may know it, see {@link GameProjector}: a hidden card is a count, its back doesn't show even the color of a
- * Skill Card, and a field that holds cards is {@code null} for a viewer who may not see them.
- *
- * @param input   what the game waits for, as this viewer may know it. {@code null} once the game has ended
- * @param anytime what the players the viewer acts for may do now without being asked: his own, every player's in a
- *                sandbox, only the players who can do something. Empty once the game has ended
- * @param outcome {@code null} while the game goes on
+ * What is hidden shows only to who may know it, see {@link GameProjector}: a hidden card is a count, its back doesn't
+ * show even the color of a Skill Card, and a field that holds cards is {@code null} for a viewer who may not see them.
  */
 public record GameProjection(
         Viewer viewer,
@@ -80,21 +74,14 @@ public record GameProjection(
         return of(game, pendingInput, Optional.empty(), viewer);
     }
 
-    /**
-     * @param asking the scope of the event that queued the pending input ({@code GameEngine.pendingScope()}), which the
-     *               input names as its {@link Topic}
-     */
     public static GameProjection of(GameView game, Optional<PendingInput> pendingInput, Optional<ScopeOpened> asking,
                                     Viewer viewer) {
         return new GameProjector(game, pendingInput, asking, viewer).project();
     }
 
     /**
-     * @param interruptWindow the open window, {@code null} for a viewer who may not know of it: it opens only when
-     *                        someone holds a card for it
-     * @param windowCards     the cards in the open window that the viewer played
-     * @param windowAbilities the abilities used in the open window that the viewer used
-     * @param lossReductions  how much smaller "Preventative Policy" makes the next loss of each resource this turn
+     * @param interruptWindow {@code null} for a viewer who may not know of it: it opens only when someone holds a card
+     *                        for it
      */
     public record TurnProjection(int number,
                                  GameStep step,
@@ -113,20 +100,12 @@ public record GameProjection(
     }
 
     /**
-     * @param value     {@code null} until the die is rolled
-     * @param abilities the character abilities used on the roll
-     * @param fixed     "Longshot" chose the result, which nothing modifies
+     * @param fixed "Longshot" chose the result, which nothing modifies
      */
     public record DieRollProjection(Integer value, List<SkillCardType> cards, int modifier, Integer result,
                                     List<CharacterAbility> abilities, boolean fixed) {
     }
 
-    /**
-     * @param location           {@code null} while the character is not on the board, or before one is chosen
-     * @param human              {@code null} before a character is chosen
-     * @param seenLoyaltyCards   the Loyalty Cards of others this player looked at, {@code null} for anyone else
-     * @param knownCivilianShips the civilian ships this player looked at, {@code null} for anyone else
-     */
     public record PlayerProjection(int number,
                                    Character character,
                                    Location location,
@@ -148,20 +127,11 @@ public record GameProjection(
     }
 
     /**
-     * Skill Cards face down: a player's hand, or the cards of a skill check. The others see only how many there are.
-     *
-     * @param cards {@code null} for a viewer who may not see them
+     * The others see only how many there are.
      */
     public record SkillHand(int count, List<SkillCard> cards) {
     }
 
-    /**
-     * Cards that lie face down, and those that were revealed.
-     *
-     * @param count    the face down cards
-     * @param revealed the cards everyone sees
-     * @param cards    the face down cards, {@code null} for a viewer who may not see them
-     */
     public record HiddenCards<T>(int count, List<T> revealed, List<T> cards) {
     }
 
@@ -191,10 +161,7 @@ public record GameProjection(
     }
 
     /**
-     * @param location {@code null} off the board, e.g. in the "Reserves"
-     * @param pilot    the pilot of a viper or a raptor, otherwise {@code null}
-     * @param damage   the damage of a basestar
-     * @param cargo    what a civilian ship costs when it is destroyed, {@code null} for a viewer who didn't look
+     * @param cargo {@code null} for a viewer who didn't look
      */
     public record ShipProjection(int id, ShipType type, Location location, Character pilot, List<BasestarDamage> damage,
                                  Cargo cargo) {
@@ -209,18 +176,9 @@ public record GameProjection(
     public record CylonSupply(int basestars, int raiders, int heavyRaiders, int centurions) {
     }
 
-    /**
-     * @param discarded the discard pile, {@code null} when it lies face down
-     * @param drawPile  the draw pile in order, {@code null} for every viewer of a game
-     */
     public record DeckProjection(DeckId deck, int size, int discardSize, List<?> discarded, List<?> drawPile) {
     }
 
-    /**
-     * @param playedBefore the cards each player played before the check
-     * @param cards        the face down pile of the cards played into the check, before they are shuffled and divided
-     * @param difficulty   the difficulty with what reduces it so far
-     */
     public record SkillCheckProjection(SkillCheckType type,
                                        Integer targetPlayer,
                                        int difficulty,
@@ -253,37 +211,23 @@ public record GameProjection(
     public sealed interface InputProjection {
     }
 
-    /**
-     * The viewer has to answer with an event of the action's type.
-     *
-     * @param answers the answers the game takes
-     */
     public record Decide(int player, Class<? extends Event> action, List<EventConstraint> constraints,
                          LegalAnswers answers, Topic topic) implements InputProjection {
     }
 
     /**
-     * The viewer has to pick one of the options, by its index.
-     *
-     * @param answers the answers of the decision each option that asks one asks first, e.g. the action of the Action
-     *                step, so the table can show what the option leads to before it is picked
+     * @param answers so the table can show what the option leads to before it is picked
      */
     public record Choose(int player, List<Followup> options, List<OptionAnswers> answers, Topic topic)
             implements InputProjection {
     }
 
-    /**
-     * @param option the index of the option in {@link Choose#options()}
-     */
     public record OptionAnswers(int option, LegalAnswers answers) {
     }
 
     public record WaitingFor(int player, Topic topic) implements InputProjection {
     }
 
-    /**
-     * The {@code AnytimeEvent}s a player may submit now, at any pause and whoever is asked.
-     */
     public record AnytimeAnswers(int player, LegalAnswers answers) {
     }
 

@@ -10,10 +10,6 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 
 import java.util.List;
 
-/**
- * The game socket. The handshake checks the {@code Origin}: the same origin, and the ones in
- * {@code frakkin.allowed-origins}, e.g. the Vite dev server in the {@code dev} profile.
- */
 @Configuration(proxyBeanMethods = false)
 @EnableWebSocket
 @EnableScheduling // the sweep of silent connections

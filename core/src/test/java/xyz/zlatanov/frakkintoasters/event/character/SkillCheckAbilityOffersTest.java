@@ -20,9 +20,6 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.LAUNCH_SCOU
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckResult.PASS;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType.WATER_SABOTAGED;
 
-/**
- * When the skill check abilities are offered, and how many cards a player may put into a check.
- */
 class SkillCheckAbilityOffersTest extends TestHarness {
 
     private final SkillCard leadership = new SkillCard(3, EXECUTIVE_ORDER);

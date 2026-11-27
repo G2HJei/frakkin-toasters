@@ -8,13 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * One random game.
- *
- * @param rounds     the player turns played, divided by the players
- * @param stoppedBy  the finding that ended the game before its end, {@code null} when it ran to its end
- * @param findings   every finding of the game once, the one that stopped it included, in the order they came
- * @param inputs     the inputs given, the last ones unless the whole trace was asked for
- * @param eventTypes the simple names of the events that ran
+ * @param rounds the player turns played, divided by the players
  */
 public record PlayoutResult(int players,
                             long seed,

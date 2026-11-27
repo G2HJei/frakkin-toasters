@@ -50,7 +50,6 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.*;
 
-// A seeded game from its start, played through submit and choose alone. Restore has to give the same game at every pause.
 class TurnLoopTest {
 
     // Simple Crisis Cards, one a turn: nothing to ask but the chooser's section, and no die rolls or interrupt windows. "Riots"
@@ -237,8 +236,6 @@ class TurnLoopTest {
         assertRestoresTheSameGame();
     }
 
-    /* assertions */
-
     private void assertTurn(int number, int currentPlayer, GameStep step) {
         val turn = engine.view().turn();
         assertEquals(List.of(number, currentPlayer, step), List.of(turn.number(), turn.currentPlayerNumber(), turn.step()));
@@ -254,8 +251,6 @@ class TurnLoopTest {
         assertEquals(snapshot(engine), snapshot(restored));
         assertEquals(statuses(engine), statuses(restored));
     }
-
-    /* helpers */
 
     private static <T extends Event> AwaitingDecision awaiting(int player, Class<T> action, EventConstraint... constraints) {
         return new AwaitingDecision(new PlayerDecisionEvent<>(player, action, constraints));

@@ -16,10 +16,6 @@ public class CriticalSituationEventProcessor extends SkillCardEventProcessor<Cri
         return !criticalSituationOrExecutiveOrderPlayed(game) && Actions.hasAnAction(game, player);
     }
 
-    /**
-     * @return whether a "Critical Situation" or an "Executive Order" was played this turn. Only 1 of them may be used per
-     * turn ("Critical Situation")
-     */
     public static boolean criticalSituationOrExecutiveOrderPlayed(GameView game) {
         return game.turn().playedSkillCards().stream()
                 .anyMatch(type -> type == CRITICAL_SITUATION || type == EXECUTIVE_ORDER);

@@ -200,8 +200,6 @@ class SelectCharacterEventProcessorTest extends EventTestHarness<SelectCharacter
         assertInvalid(select(SAUL_TIGH));
     }
 
-    /* after an execution */
-
     // "He may choose any character without regard to character type" (rule 7.1). With 3 political leaders taken, the
     // type isn't the most plentiful any more.
     @Test

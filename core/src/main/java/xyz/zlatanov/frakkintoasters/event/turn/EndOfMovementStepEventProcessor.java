@@ -24,9 +24,6 @@ public class EndOfMovementStepEventProcessor extends EventProcessor<EndOfMovemen
 
     static final int KLEPTOMANIA_DISCARDS = 2;
 
-    /**
-     * @return whether the player has an ability that acts at the end of his Movement step
-     */
     public static boolean actsThen(PlayerView player) {
         return player.hasAbility(POLITICALLY_ADROIT) || player.hasAbility(KLEPTOMANIA);
     }

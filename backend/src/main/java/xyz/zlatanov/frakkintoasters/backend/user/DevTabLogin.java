@@ -14,10 +14,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 /**
- * The {@code dev} profile's login per browser tab, so one browser plays several users side by side: a tab that logged
- * in "for this tab only" sends its user's name with every request, as the {@code X-Dev-User} header, and with its game
- * socket's handshake, as the {@code devUser} parameter. The request is that dev user's, for itself alone: nothing goes
- * into the HTTP session, which the browser's other tabs share. Like the dev login, it can't be on with a real provider.
+ * The {@code dev} profile's login per browser tab, so one browser plays several users side by side. Nothing goes into
+ * the HTTP session, which the browser's other tabs share. Like the dev login, it can't be on with a real provider.
  */
 @Profile("dev")
 @Component

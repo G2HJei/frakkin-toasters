@@ -15,9 +15,6 @@ public final class GameReplayer {
         return replay(journal, new Randomness());
     }
 
-    /**
-     * @param randomness the randomness the replayed game gets. It has no effect on the result
-     */
     public static Game replay(Journal journal, Randomness randomness) {
         val facts = journal.facts();
         if (facts.isEmpty() || !(facts.getFirst() instanceof GameStarted started)) {

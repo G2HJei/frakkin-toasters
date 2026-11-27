@@ -3,8 +3,7 @@ package xyz.zlatanov.frakkintoasters.fuzz;
 import lombok.val;
 
 /**
- * The text files of a run: one per finding, of its example game, and with a single seed one of the whole game. They
- * hold nothing that changes between two runs of the same seed.
+ * They hold nothing that changes between two runs of the same seed.
  */
 final class Traces {
 

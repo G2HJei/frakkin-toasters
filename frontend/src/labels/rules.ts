@@ -96,7 +96,6 @@ export function rule(article: string): Rule | null {
   return RULES.find((candidate) => candidate.article === article) ?? null;
 }
 
-/** The PDF page a rule is on. */
 export function ruleHref(found: Rule): string {
   return `${found.appendix ? appendixUrl : rulebookUrl}#page=${found.page}`;
 }

@@ -22,24 +22,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * {@code /ws/games/{gameBundleId}}. A new connection gets the game and the whole log. The client sends JSON with a
- * {@code type}:
- * <ul>
- *     <li>{@code ping}: the client is there, the server answers {@code pong}; a connection silent for a minute is
- *     closed</li>
- *     <li>{@code status}: the game again</li>
- *     <li>{@code history}: the game and the whole log again</li>
- *     <li>{@code submit}: the token and an {@code event}, which answers the pending decision, or, an
- *     {@code AnytimeEvent}, runs ahead of it</li>
- *     <li>{@code choose}: the token and the index of an {@code option} of the pending choice</li>
- *     <li>{@code undo}: the token; a sandbox goes back to the pause before its last input</li>
- *     <li>{@code inject}: the token and a setup {@code event}, which a sandbox runs ahead of the pending input</li>
- *     <li>{@code say}: a chat message, its {@code text}, see {@link Chat}</li>
- * </ul>
- * After a command, every connection with something new gets the update and then the game. A rejection goes only to the
- * sender, with the current game when the command was stale.
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor

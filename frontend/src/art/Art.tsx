@@ -10,13 +10,11 @@ import { constantLabel } from '../labels/describe';
 interface Hint {
   id: string;
   text: string;
-  // the target the hint is of
   element: Element;
 }
 
 interface PreviewState {
   art: ArtRef | null;
-  // shown beside the images, e.g. a player's mat by his character sheet
   extra: ReactNode;
   // the hints of the targets under the pointer: a target can lie in another, e.g. a standee in a location
   hints: Hint[];
@@ -129,10 +127,6 @@ export function TargetHint({ text, html = false }: { text: string; html?: boolea
   );
 }
 
-/**
- * The hover layer, next to the pointer: the hint of the target under it, and under the hint the preview of the image
- * under it, each a popover of its own.
- */
 export function ArtPreview() {
   const art = usePreview((state) => state.art);
   const pointer = usePreview((state) => state.pointer);
@@ -259,7 +253,6 @@ export function CardBack({ deck, color, count, size = 'sm', label }: {
   );
 }
 
-/** Skill Cards face down whose colors don't show, e.g. another player's hand: the back of every Skill Card, with how many. */
 export function SkillCardBack({ count, size = 'sm' }: { count: number; size?: CardSize }) {
   const back = skillBackArt();
   const words = `${count} Skill Card${count === 1 ? '' : 's'}`;
@@ -273,7 +266,6 @@ export function SkillCardBack({ count, size = 'sm' }: { count: number; size?: Ca
   );
 }
 
-/** A row of small images: what a log entry or an option names. */
 export function ArtStrip({ refs, className = '' }: { refs: ArtRef[]; className?: string }) {
   if (refs.length === 0) {
     return null;

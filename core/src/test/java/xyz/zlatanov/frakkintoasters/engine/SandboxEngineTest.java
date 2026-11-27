@@ -30,7 +30,6 @@ import static xyz.zlatanov.frakkintoasters.state.board.Location.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.LAURA_ROSLIN;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.WILLIAM_ADAMA;
 
-// The sandbox's engine: undo, a seed that reproduces a game, and setup events injected ahead of the pending input.
 class SandboxEngineTest {
 
     @Test
@@ -163,7 +162,6 @@ class SandboxEngineTest {
         assertThrows(InvalidActionException.class, () -> engine.submit(asked, new ChangeResourceEvent(Resource.FUEL, 1)));
     }
 
-    // The three characters are chosen, and the players draw their starting Skill Cards.
     private static GameEngine afterTheCharacters() {
         val engine = ScriptedTurns.start();
         for (val input : ScriptedTurns.inputs().subList(0, 3)) {

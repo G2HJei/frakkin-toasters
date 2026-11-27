@@ -83,7 +83,6 @@ public class CloseInterruptWindowEventProcessor extends EventProcessor<CloseInte
         return allOf(effects.toArray(Followup[]::new));
     }
 
-    // Every way to keep one card of each group.
     private static List<List<PlayedInterruptCard>> tiebreaks(List<List<PlayedInterruptCard>> conflicts) {
         List<List<PlayedInterruptCard>> kept = List.of(List.of());
         for (val group : conflicts) {

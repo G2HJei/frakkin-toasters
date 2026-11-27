@@ -7,8 +7,7 @@ import { useDevLogin, useLogins, useMe } from '../api/queries';
 const PROVIDER_NAMES: Record<string, string> = { google: 'Google', discord: 'Discord' };
 
 /**
- * The logins: a full-page redirect to a provider, or in the dev profile a login by name. A first login registers the user,
- * who accepts the terms with it.
+ * A first login registers the user, who accepts the terms with it.
  */
 export function LoginPage() {
   const me = useMe();

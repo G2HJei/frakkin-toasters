@@ -19,7 +19,6 @@ public abstract class EventProcessor<T extends Event> {
     protected T        event;
     protected GameOps  ops; //set by run(), so init() and isValid() can't change state
 
-    //utility fields improving event processors' readability
     protected PlayerView          player;
     protected GalacticaBoardView  galacticaBoard;
     protected PegasusBoardView    pegasusBoard;
@@ -28,11 +27,7 @@ public abstract class EventProcessor<T extends Event> {
     private boolean prepared;
 
     /**
-     * Sets the context and validates the event. It has no ops, so a rejected event changes nothing.
-     *
-     * @param game the game the event runs in
-     * @return this processor, for {@link #run}
-     * @throws InvalidActionException if the event isn't valid
+     * It has no ops, so a rejected event changes nothing.
      */
     public final EventProcessor<T> prepare(GameView game, T event) {
         setContext(game, event);
@@ -42,12 +37,6 @@ public abstract class EventProcessor<T extends Event> {
         return this;
     }
 
-    /**
-     * Processes the event that {@link #prepare} accepted.
-     *
-     * @param ops game ops bound to the game {@link #prepare} got
-     * @return what the event queued
-     */
     public final Followup run(GameOps ops) {
         if (!prepared || this.ops != null) {
             throw new FrakCallTheAdmiralException();

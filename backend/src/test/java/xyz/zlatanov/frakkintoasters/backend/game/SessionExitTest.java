@@ -80,7 +80,6 @@ class SessionExitTest extends BackendTest {
                 restarts++;
             }
             if (!replaced && input == 150) {
-                // Roslin is gone: two of the three others vote her seat over, and Dualla takes it
                 lobby.vote(game, users.get(2), VoteKind.VACATE, 2);
                 val voted = lobby.vote(game, users.get(3), VoteKind.VACATE, 2);
                 assertEquals(List.of(2), voted.vacantSeats());
@@ -102,7 +101,6 @@ class SessionExitTest extends BackendTest {
         val report = session.report().orElseThrow();
         assertEquals(outcome, report.winner());
         assertEquals(session.view().winners(), report.winners());
-        // a new connection gets it, after the game is restored from the rows once more
         sessions.evict(game);
         assertEquals(outcome, sessions.history(game, Viewer.observer()).report().winner());
         val second = lobby.room(game).seatHistory().stream().filter(holder -> holder.playerNumber() == 2).toList();
@@ -110,7 +108,6 @@ class SessionExitTest extends BackendTest {
         assertEquals(LeaveReason.VOTED_OUT, second.getFirst().reason());
     }
 
-    // The asked seat answers with a random legal answer, as its holder's connection would send it.
     private void answer(UUID game, Random random) {
         val status = sessions.status(game, Viewer.observer());
         val engine = sessions.cached(game).orElseThrow().engine();

@@ -93,24 +93,15 @@ public class CylonShips implements CylonShipsView {
         };
     }
 
-    /**
-     * @return the ship that the matching remover (e.g. {@link #raider()}) would hand out next, without removing it
-     */
     public <T extends CylonShip> Optional<T> next(Class<T> type) {
         val supply = supplyOf(type);
         return supply.isEmpty() ? Optional.empty() : Optional.of(supply.getLast());
     }
 
-    /**
-     * @return the centurion that {@link #centurion()} would hand out next, without removing it
-     */
     public Optional<Centurion> nextCenturion() {
         return centurions.isEmpty() ? Optional.empty() : Optional.of(centurions.getLast());
     }
 
-    /**
-     * Removes the ship with this id from the supply.
-     */
     @Mutates
     public CylonShip take(int id) {
         for (val supply : List.of(basestars, raiders, heavyRaiders)) {
@@ -124,9 +115,6 @@ public class CylonShips implements CylonShipsView {
         throw new FrakCallTheAdmiralException();
     }
 
-    /**
-     * Removes the centurion with this id from the supply.
-     */
     @Mutates
     public Centurion takeCenturion(int id) {
         val centurion = centurions.stream()

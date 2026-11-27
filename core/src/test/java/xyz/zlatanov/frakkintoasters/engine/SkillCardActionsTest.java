@@ -95,8 +95,7 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.TREACHERY;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 
 /**
- * Skill Cards played for their "Action:" or "Movement:" through {@code submit} and {@code choose} alone, restoring the
- * game at every pause. The cards are dealt with {@link GiveSkillCardEvent}, which a seeded game can't choose.
+ * The cards are dealt with {@link GiveSkillCardEvent}, which a seeded game can't choose.
  */
 class SkillCardActionsTest {
 
@@ -460,8 +459,6 @@ class SkillCardActionsTest {
         assertThrows(InvalidActionException.class, () -> engine.submit(1, new BuildNukeEvent(1, BUILD_NUKE_6)));
     }
 
-    /* the game */
-
     // Player 1 is the current player, with an empty hand. Each of the three plays a character of another type, as the
     // selection allows (rule A3.7.2).
     private static Followup setUp(Character first) {
@@ -481,7 +478,6 @@ class SkillCardActionsTest {
         assertRestoresTheSameGame();
     }
 
-    // The player chooses to take an action.
     private void act(int player) {
         choose(player, single(new PlayerDecisionEvent<>(player, ActionEvent.class)));
     }
@@ -495,8 +491,6 @@ class SkillCardActionsTest {
         assertTrue(choice.options().contains(option), choice.options().toString());
         play(engine -> engine.choose(player, option));
     }
-
-    /* assertions */
 
     private void assertWaitingFor(PendingInput expected) {
         assertEquals(EngineStatus.waiting(expected), engine.status(expected.player()));

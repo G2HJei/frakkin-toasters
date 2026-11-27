@@ -35,10 +35,6 @@ public class EscortEventProcessor extends EventProcessor<EscortEvent> {
         return vipers;
     }
 
-    /**
-     * @return the choice to escort the civilian ship or to let it be destroyed, for the player who can use "Escort" now,
-     * {@link Followup#NONE} when nobody can
-     */
     public static Followup offer(GameView game, int civilianShipId) {
         val vipers = vipers(game);
         if (vipers.isEmpty()) {

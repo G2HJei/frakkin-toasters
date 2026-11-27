@@ -246,9 +246,6 @@ public class Turn implements TurnView {
         return actingPlayerNumber != null ? actingPlayerNumber : currentPlayerNumber;
     }
 
-    /**
-     * @param actingPlayerNumber the player acting out of turn, or {@code null} when the current player is acting
-     */
     @Mutates
     public Turn actingPlayerNumber(Integer actingPlayerNumber) {
         this.actingPlayerNumber = actingPlayerNumber;

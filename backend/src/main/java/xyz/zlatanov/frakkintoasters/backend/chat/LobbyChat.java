@@ -24,9 +24,7 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * The chat of the play page, for everyone logged in there. It lives in memory while the app runs: the last
- * {@value #HISTORY} messages, gone with a restart. No socket: the page asks for them every few seconds. Messages are
- * short, and a user writes only so many in a row, as at a table ({@link Chat}).
+ * In memory only, so the messages are gone with a restart. No socket: the page polls every few seconds.
  */
 @RestController
 @RequestMapping("/api/lobby/chat")
@@ -36,14 +34,10 @@ public class LobbyChat {
 
     private final Users                     users;
     private final Clock                     clock;
-    // the last messages, oldest first, and the times of each user's last messages, for the rate limit
     private final Deque<LobbyLine>          lines  = new ArrayDeque<>();
     private final Map<UUID, Deque<Instant>> recent = new HashMap<>();
     private       long                      lastId;
 
-    /**
-     * @param at when it was written, as an ISO instant
-     */
     public record LobbyLine(long id, String userId, String name, String text, String at) {
     }
 
@@ -60,17 +54,11 @@ public class LobbyChat {
         this.clock = clock;
     }
 
-    /**
-     * @return the last messages, oldest first
-     */
     @GetMapping
     public synchronized List<LobbyLine> lines() {
         return List.copyOf(lines);
     }
 
-    /**
-     * Keeps the user's message under his name now, dropping the oldest past {@value #HISTORY}.
-     */
     @PostMapping
     public synchronized LobbyLine post(@AuthenticationPrincipal AppUserPrincipal principal, @RequestBody Message message) {
         val name = users.find(principal.id()).map(AppUser::name)
@@ -92,7 +80,6 @@ public class LobbyChat {
         return line;
     }
 
-    // At most Chat.BURST messages in any Chat.WINDOW. A user who wrote nothing in the window is forgotten.
     private void throttle(UUID userId, Instant now) {
         recent.values().forEach(times -> forgetBefore(times, now));
         recent.values().removeIf(Deque::isEmpty);

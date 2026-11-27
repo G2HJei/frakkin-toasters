@@ -4,10 +4,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-/**
- * What an int component of a record names, told by its name: a player, a ship, a journal scope or a count. The wire
- * schema gives it to the clients, and the random playouts pick a value by it.
- */
 public enum ComponentRole {
 
     PLAYER, SHIP, SCOPE, COUNT;
@@ -31,9 +27,6 @@ public enum ComponentRole {
             "distance", "crisisCards", "jumps", "vipersDamaged", "locationsDamaged", "nukesUsed", "revealedOnTurn",
             "skillCardsGained", "cardsIntoChecks", "strengthIntoChecks", "skillCardsPlayed", "abilitiesUsed", "sentToBrig");
 
-    /**
-     * @return the role of an int component by its name, empty when the name can't be placed
-     */
     public static Optional<ComponentRole> of(String name) {
         if (PLAYER_NAMES.contains(name)) {
             return Optional.of(PLAYER);

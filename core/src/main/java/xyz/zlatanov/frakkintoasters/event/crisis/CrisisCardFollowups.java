@@ -131,7 +131,6 @@ public class CrisisCardFollowups {
     // The top of an event crisis. The top of a skill check crisis is its skill check, which the section's processor starts.
     private Followup top(CrisisCard card) {
         return switch (card) {
-            // resources only
             case AMBUSHED_BY_THE_PRESS, CONTROVERSIAL_MANUSCRIPT, QUESTION_PROCEDURE -> single(lose(MORALE, 1));
             case LABOR_DISPUTE -> single(lose(MORALE, 2));
             case WATER_SHORTAGE_BASESTAR_AND_JUMP, WATER_SHORTAGE_BASESTAR_NO_JUMP, WATER_SHORTAGE_RAIDERS ->
@@ -140,9 +139,7 @@ public class CrisisCardFollowups {
             case RIOTS_JUMP, RIOTS_NO_JUMP -> all(lose(FOOD, 1), lose(MORALE, 1));
             case RESCUE_CAPRICA_SURVIVORS -> all(lose(FUEL, 1), lose(FOOD, 1), gain(POPULATION, 1));
             case RESCUE_THE_FLEET -> single(lose(POPULATION, 2));
-            // galactica
             case RAIDERS_INBOUND -> all(lose(POPULATION, 1), new DamageBattlestarEvent());
-            // sickbay
             case RESCUE_MISSION_BASESTAR, RESCUE_MISSION_RAIDER ->
                     allOf(single(lose(MORALE, 1)), onCurrentPlayer(new SendToSickbayEvent(currentPlayer())));
             case HIDDEN_EXPLOSIVES ->
@@ -185,7 +182,6 @@ public class CrisisCardFollowups {
             case PRESSURE_SUPPLY_SHIPS ->
                     all(gain(FOOD, 1), lose(MORALE, 1), discard(admiral(), 2), treachery(admiral(), 2));
             case SUSPICIOUS_ELECTION_RESULTS -> single(new DetermineNextPresidentEvent(president()));
-            // the Crisis Cards with a skill check
             default -> throw new FrakCallTheAdmiralException("The top of " + card + " is its skill check");
         };
     }
@@ -193,7 +189,6 @@ public class CrisisCardFollowups {
     // The bottom of an event crisis, or the alternate instruction of a skill check crisis.
     private Followup bottom(CrisisCard card) {
         return switch (card) {
-            // resources only
             case HIDDEN_EXPLOSIVES, RESCUE_CAPRICA_SURVIVORS, MEDAL_OF_DISTINCTION, SLEEP_DEPRIVATION,
                  FAMILIAR_FACE, HERA_RESCUED, MYSTERIOUS_GUIDE, ADMIRAL_GRILLED, COLONIAL_DAY, UNSETTLING_STORIES ->
                     single(lose(MORALE, 1));
@@ -205,22 +200,18 @@ public class CrisisCardFollowups {
             case ABANDON_GALACTICA -> all(lose(FOOD, 1), treachery(admiral(), 2));
             case NETWORK_COMPUTERS -> all(lose(POPULATION, 1), new DecreaseJumpPreparationEvent());
             case EARTH_IN_RUINS -> allOf(single(lose(FOOD, 1)), onCurrentPlayer(new DrawMutinyCardEvent(currentPlayer())));
-            // galactica and jump preparation
             case CONTROVERSIAL_MANUSCRIPT ->
                     all(gain(MORALE, 1), new DamageBattlestarEvent(), new DamageBattlestarEvent());
             case LABOR_DISPUTE -> all(lose(FUEL, 1), new DecreaseJumpPreparationEvent());
             case APPOINT_HEAD_OF_SECURITY, UNWELCOME_FACES -> all(lose(MORALE, 1), new DamageBattlestarEvent());
             case A_GUILTY_VERDICT, ENEMY_OF_MY_ENEMY -> all(new DamageBattlestarEvent(), new DamageBattlestarEvent());
             case RESCUE_THE_FLEET -> all(lose(MORALE, 1), new PlaceShipsEvent(1, 3, 3));
-            // ships
             case RESCUE_MISSION_BASESTAR, RESCUE_MISSION_RAIDER -> all(lose(FUEL, 1), new DestroyRaptorEvent());
             case TRAINING_A_ROOKIE -> single(new DamageVipersEvent(2, SPACE_OR_RESERVES));
             case CIVILIAN_SHIP_NUKED -> single(new DrawAndDestroyCivilianShipsEvent(2));
-            // Cylon ships
             case DETENTE -> all(new ActivateCylonBasestarsEvent(), new ActivateRaidersEvent(),
                     new ActivateHeavyRaidersAndCenturionsEvent());
             case RETURN_TO_DUTY, MYSTERIOUS_MESSAGE -> single(new ActivateCylonBasestarsEvent());
-            // skill cards
             case AMBUSHED_BY_THE_PRESS -> single(discardAll(president()));
             case QUESTION_PROCEDURE -> all(new DamageBattlestarEvent(), discard(president(), 3));
             case RAIDERS_INBOUND -> all(discard(cag(), 3), discard(admiral(), 3));
@@ -243,7 +234,6 @@ public class CrisisCardFollowups {
                     allOf(onCurrentPlayer(discard(currentPlayer(), 1)), single(new ReturnToCrisisStepEvent()));
             case REQUISITION_FOR_DEMETRIUS -> all(new DrawMutinyCardEvent(admiral()), treachery(admiral(), 2));
             case SUSPICIOUS_ELECTION_RESULTS -> all(discardRandom(admiral(), 1), treachery(admiral(), 1));
-            // each player
             case CYLON_SCREENINGS -> eachHuman(player -> single(discard(player, 2)));
             case CODE_BLUE -> eachHuman(player -> all(discard(player, 2), treachery(player, 2)));
             case THE_BLACK_MARKET -> allOf(single(lose(FOOD, 1)),
@@ -253,7 +243,6 @@ public class CrisisCardFollowups {
             case ASSASSINATION_PLOT -> single(new ExecuteEvent(admiral()));
             case DISHONEST_TACTICS -> all(lose(FUEL, 1), new DrawQuorumCardEvent(), new DrawQuorumCardEvent());
             case SECRET_MEETINGS -> allOf(onCurrentPlayer(new DrawMutinyCardEvent(currentPlayer())), chooseTarget(card));
-            // the die rolls
             case AN_AMBITIOUS_OPERATION, STARVATION_IN_DOGSVILLE, GALACTICA_FALLING_APART, ONE_LAST_COCKTAIL,
                  RELIGIOUS_TURMOIL, CYLON_GENOCIDE, THE_PASSAGE, SET_A_TRAP, ANALYZE_ENEMY_FIGHTER, BOMB_THREAT,
                  CRIPPLED_RAIDER, INFORMING_THE_PUBLIC, SCOUTING_FOR_FUEL, SEND_SURVEY_TEAM ->
@@ -263,12 +252,6 @@ public class CrisisCardFollowups {
         };
     }
 
-    /**
-     * @return what a die roll of a section does, the roll being its result after all modifiers
-     */
-    /**
-     * @return whether the section has a part that {@link ResolveCrisisSectionThenEvent} resolves after the first
-     */
     public static boolean hasSecondPart(CrisisCard card, Section section) {
         return section == TOP && switch (card) {
             case DISHONEST_TACTICS, TRUTH_AND_RECONCILIATION, UNWELCOME_FACES, DECLARE_MARTIAL_LAW -> true;
@@ -276,9 +259,6 @@ public class CrisisCardFollowups {
         };
     }
 
-    /**
-     * @return the second part of a section, as the game is once the first is done
-     */
     public Followup secondPart(CrisisCard card, Section section) {
         return switch (card) {
             case DISHONEST_TACTICS -> presidentMovesSomeoneFromTheBrig();
@@ -318,8 +298,6 @@ public class CrisisCardFollowups {
         };
     }
 
-    /* players */
-
     private int chooser(CrisisCard card) {
         return switch (card.chooser()) {
             case CURRENT_PLAYER -> currentPlayer();
@@ -353,8 +331,6 @@ public class CrisisCardFollowups {
                 .map(player -> followup.apply(player.number()))
                 .toArray(Followup[]::new));
     }
-
-    /* events */
 
     private Event discard(int playerNumber, int count) {
         return deceitful.discard(playerNumber, count);
@@ -391,7 +367,6 @@ public class CrisisCardFollowups {
         return allOf(single(discard(holder, holderCards)), onCurrentPlayer(discard(currentPlayer(), 3)));
     }
 
-    // The player the card names picks one, if there is anyone to pick.
     private Followup chooseTarget(CrisisCard card) {
         return ChooseCrisisTargetEventProcessor.legalTargets(game, card).isEmpty() ? NONE
                 : single(new PlayerDecisionEvent<>(ChooseCrisisTargetEventProcessor.chooser(game, card),

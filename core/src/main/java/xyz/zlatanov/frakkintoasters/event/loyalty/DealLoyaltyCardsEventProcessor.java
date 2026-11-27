@@ -17,7 +17,6 @@ public class DealLoyaltyCardsEventProcessor extends EventProcessor<DealLoyaltyCa
 
     @Override
     public Followup process() {
-        // Fewer cards are dealt when the deck has fewer left.
         val count = Math.min(event.count(), game.decks().loyaltyCardsLeft());
         if (count == 0) {
             return NONE;

@@ -25,9 +25,6 @@ public class AdaptableEventProcessor extends EventProcessor<AdaptableEvent> {
                 && Arrays.stream(SkillCardColor.values()).anyMatch(color -> game.decks().skillCardsLeft(color) > 0);
     }
 
-    /**
-     * @return whether a player has "Adaptable", so a Quorum Card's play asks after it ({@link OfferAdaptableEvent})
-     */
     public static boolean mayBeOffered(GameView game) {
         return game.players().stream().anyMatch(player -> player.hasAbility(ADAPTABLE));
     }

@@ -38,7 +38,6 @@ class WireCodecTest {
                 Viewer.player(first))));
 
         assertTrue(json.contains("\"viewer\":{\"kind\":\"PlayerViewer\",\"playerNumber\":" + first + "}"), json);
-        // and so are the legal answers, events of the action
         assertTrue(json.contains("\"input\":{\"kind\":\"Decide\",\"player\":" + first
                 + ",\"action\":\"SelectCharacterEvent\",\"constraints\":[],"
                 + "\"answers\":{\"events\":[{\"kind\":\"SelectCharacterEvent\""), json);

@@ -50,9 +50,8 @@ import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.VIPER;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.TACTICS;
 
 /**
- * Mutiny Cards played through {@code submit} and {@code choose} alone, restoring the game at every pause. Kara "Starbuck"
- * Thrace, player 1, gets her cards with {@link GiveMutinyCardToPlayerEvent}, which a seeded game can't choose. Laura
- * Roslin is President and William Adama Admiral.
+ * Kara "Starbuck" Thrace, player 1, gets her cards with {@link GiveMutinyCardToPlayerEvent}, which a seeded game can't
+ * choose. Laura Roslin is President and William Adama Admiral.
  */
 class MutinyCardActionsTest {
 
@@ -172,7 +171,6 @@ class MutinyCardActionsTest {
         assertRestoresTheSameGame();
     }
 
-    // The player chooses to take an action.
     private void act(int player) {
         choose(player, single(new PlayerDecisionEvent<>(player, ActionEvent.class)));
     }
@@ -190,8 +188,6 @@ class MutinyCardActionsTest {
     private GalacticaBoardView galactica() {
         return engine.view().boards().galactica();
     }
-
-    /* assertions */
 
     private void assertWaitingFor(PendingInput expected) {
         assertEquals(EngineStatus.waiting(expected), engine.status(expected.player()));

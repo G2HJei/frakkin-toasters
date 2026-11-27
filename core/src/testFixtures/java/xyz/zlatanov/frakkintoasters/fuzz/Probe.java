@@ -12,10 +12,6 @@ import xyz.zlatanov.frakkintoasters.state.exception.InvalidActionException;
  */
 public final class Probe {
 
-    /**
-     * @param taken   whether the engine took the input, so the game went on
-     * @param finding what went wrong, {@code null} for nothing
-     */
     public record Result(boolean taken, Finding finding) {
     }
 

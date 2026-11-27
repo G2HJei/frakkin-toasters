@@ -30,8 +30,7 @@ public class BlindDevotionEventProcessor extends EventProcessor<BlindDevotionEve
     }
 
     /**
-     * @return the choice of a skill type or nothing, for the player who can use "Blind Devotion". He names it without
-     * seeing the cards, so every type is offered
+     * He names the type without seeing the cards, so every type is offered.
      */
     public static Followup offer(GameView game) {
         return game.players().stream()

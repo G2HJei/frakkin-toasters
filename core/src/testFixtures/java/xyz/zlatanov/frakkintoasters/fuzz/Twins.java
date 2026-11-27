@@ -20,9 +20,6 @@ import java.util.TreeSet;
  */
 final class Twins {
 
-    /**
-     * What an engine shows: the game as plain values, every player's status, the pending input and the journal's size.
-     */
     record State(Map<String, Object> snapshot, List<EngineStatus> statuses, Optional<PendingInput> pending,
                  int journalSize) {
 

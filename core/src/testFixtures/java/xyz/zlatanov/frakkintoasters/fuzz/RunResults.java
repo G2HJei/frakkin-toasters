@@ -53,9 +53,6 @@ final class RunResults {
                 .orElseThrow();
     }
 
-    /**
-     * @return every finding once, as its example game showed it
-     */
     synchronized List<Finding> findings() {
         return examples.keySet().stream().sorted().map(this::exampleFinding).toList();
     }

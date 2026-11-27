@@ -121,7 +121,6 @@ class FinalFiveTest {
                 new MoveCharacterEvent(LAURA_ROSLIN, PRESIDENTS_OFFICE));
     }
 
-    // The sandbox's setup event, out of the Loyalty deck.
     private static Followup give(int playerNumber, LoyaltyCard... cards) {
         return all(single(new StackDeckEvent(LOYALTY, List.of(cards))), all(List.of(cards).stream()
                 .map(card -> single(new GiveLoyaltyCardToPlayerEvent(playerNumber, card)))
@@ -139,7 +138,6 @@ class FinalFiveTest {
         return single(new StackDeckEvent(LOYALTY_NOT_CYLON, List.of(NOT_CYLON)));
     }
 
-    // Each Galactica damage token is resolved by its own choice, if any.
     private void resolveDamage() {
         while (engine.pendingInput().orElse(null) instanceof PendingInput.AwaitingChoice choice) {
             choose(choice.player(), choice.options().iterator().next());
@@ -165,8 +163,6 @@ class FinalFiveTest {
     private Game game() {
         return (Game) engine.view();
     }
-
-    /* assertions */
 
     private void assertWaitingFor(PendingInput expected) {
         assertEquals(EngineStatus.waiting(expected), engine.status(expected.player()));

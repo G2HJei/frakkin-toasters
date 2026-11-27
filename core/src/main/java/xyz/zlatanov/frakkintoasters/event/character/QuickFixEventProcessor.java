@@ -19,15 +19,12 @@ public class QuickFixEventProcessor extends EventProcessor<QuickFixEvent> {
     public static boolean canUse(GameView game, PlayerView player) {
         val skillCheck = game.activeSkillCheck();
         return player.hasAbility(QUICK_FIX)
-                && player.number() == game.turn().currentPlayerNumber() // on her turn
+                && player.number() == game.turn().currentPlayerNumber()
                 && CharacterAbilities.canAffectSkillCheck(game)
                 && skillCheck.totalStrength() == null
                 && !skillCheck.dividedCards().isEmpty();
     }
 
-    /**
-     * @return the choice of a revealed card to discard or nothing, for the player who can use "Quick Fix"
-     */
     public static Followup offer(GameView game) {
         val cally = game.currentPlayer();
         if (!canUse(game, cally)) {

@@ -27,9 +27,6 @@ import static xyz.zlatanov.frakkintoasters.state.character.CharacterAbility.DUTI
 
 public class DutifulEventProcessor extends EventProcessor<DutifulEvent> {
 
-    /**
-     * @return the decision on the location's action, for the 3 locations "Dutiful" takes again
-     */
     static Optional<Class<? extends LocationEvent>> locationAction(Location location) {
         return switch (location) {
             case COMMAND -> Optional.of(CommandEvent.class);
@@ -51,8 +48,8 @@ public class DutifulEventProcessor extends EventProcessor<DutifulEvent> {
     }
 
     /**
-     * @return after the player activated the location, the offer of "Dutiful", queued only when he has it on his turn
-     * and hasn't used it yet. Whether he can use it is known once the action is done
+     * Queued only when he has "Dutiful" on his turn and hasn't used it yet: whether he can use it is known once the action
+     * is done.
      */
     public static Followup after(GameView game, PlayerView player, Location location) {
         return player.hasAbility(DUTIFUL)
@@ -62,9 +59,6 @@ public class DutifulEventProcessor extends EventProcessor<DutifulEvent> {
                 : NONE;
     }
 
-    /**
-     * @return the choice of the card to discard for another activation, or none
-     */
     public static Followup offer(GameView game, PlayerView player, Location location) {
         if (!canUse(game, player, location)) {
             return NONE;

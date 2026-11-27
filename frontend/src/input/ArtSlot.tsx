@@ -13,7 +13,6 @@ export function ArtSlot({ refs, pass = false }: { refs: ArtRef[]; pass?: boolean
   );
 }
 
-/** One more step: a chevron at the end of a row whose answers come next, in the color of its text. */
 export function NextIcon() {
   return (
     <svg className="next-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
@@ -22,7 +21,6 @@ export function NextIcon() {
   );
 }
 
-/** Skip ahead: two arrowheads against a bar, in the color of its text. A pass, and the log's automatic answer. */
 export function PassIcon() {
   return (
     <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">

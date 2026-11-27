@@ -85,7 +85,6 @@ public class SacrificeEventProcessor extends CharacterActionEventProcessor<Sacri
         return allOf(all(civilianShips.stream().map(DestroyCivilianShipEvent::new).toArray(Event[]::new)), window);
     }
 
-    // Her space area, while she pilots.
     private static Optional<Location> area(GameView game, PlayerView player) {
         return game.boards().galactica().pilotedFighter(player.character()).flatMap(ignored -> game.locate(player.character()));
     }

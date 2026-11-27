@@ -18,7 +18,6 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-// The chat over real sockets: one for everyone at the table, players and observers.
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles("dev")
 @Import(TestcontainersConfiguration.class)
@@ -72,7 +71,6 @@ class ChatLiveTest {
         }
         adama.say("one too many");
         assertTrue(adama.nextChat("chatRejected").get("message").stringValue().contains("Slow down"));
-        // the others got the five, none of the refused
         for (int i = 0; i < 5; i++) {
             clients.get(1).nextChat("chat");
         }
@@ -100,7 +98,6 @@ class ChatLiveTest {
         return texts;
     }
 
-    // Three players and an observer, started through the lobby, each with a socket.
     private UUID startedGame() {
         for (val name : List.of("Adama", "Roslin", "Starbuck", "Dualla")) {
             val client = new TestClient(port);

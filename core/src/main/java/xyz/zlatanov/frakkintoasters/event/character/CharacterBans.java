@@ -12,15 +12,11 @@ import static xyz.zlatanov.frakkintoasters.state.character.CharacterAbility.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.ENGINEERING;
 
 /**
- * What the negative abilities forbid a player. Each applies only while the ability is in effect
- * ({@link PlayerView#hasAbility}), and the checks that offer an action ask them, so a decision always has an answer.
+ * The checks that offer an action ask them, so a decision always has an answer.
  */
 @NoArgsConstructor(access = PRIVATE)
 public final class CharacterBans {
 
-    /**
-     * @return whether the player may activate the location, as far as his abilities go, from wherever he does it
-     */
     public static boolean canActivate(GameView game, PlayerView player, Location location) {
         // William Adama's "Emotionally Attached"
         if (location == ADMIRALS_QUARTERS && player.hasAbility(EMOTIONALLY_ATTACHED)) {

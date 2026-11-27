@@ -49,9 +49,6 @@ public class SkillCheckOps extends GameOps {
         return this;
     }
 
-    /**
-     * Starts the skill check of a Super Crisis Card that a revealed Cylon played.
-     */
     public SkillCheckOps startSuperCrisis(SkillCheckType type, int playedBy) {
         record(new SkillCheckStarted(type));
         record(new PlayedBy(playedBy));

@@ -46,7 +46,6 @@ public final class ScriptedScenario {
                 .build();
         val ops = new GameOps(game, new FactRecorder(game, journal));
 
-        // setup
         ops.startGame();
         ops.player(1).selectCharacter(LOUANNE_KAT_KATRAINE);
         ops.player(2).selectCharacter(FELIX_GAETA);
@@ -73,7 +72,6 @@ public final class ScriptedScenario {
         ops.startTurn();
         ops.changeStep(RECEIVE_SKILLS);
 
-        // draws
         ops.player(1).drawSkillCards(POLITICS, LEADERSHIP, TACTICS, PILOTING, ENGINEERING);
         ops.player(2).drawSkillCards(POLITICS, POLITICS, TACTICS, ENGINEERING, TREACHERY);
         ops.player(3).drawMotiveCards();
@@ -93,7 +91,6 @@ public final class ScriptedScenario {
         ops.player(2).play(game.player(2).skillCards().cards().getFirst());
         ops.player(1).discard(game.player(1).mutinyCards().cards().getFirst());
 
-        // what a Crisis Card leaves behind
         ops.keepCrisisCardInPlay(SkillCheckType.DETECTOR_SABOTAGE);
         ops.returnToCrisisStep(true);
         ops.discardNuke();
@@ -116,7 +113,6 @@ public final class ScriptedScenario {
         ops.player(2).lookAtLoyaltyCard(1);
         ops.player(1).showFinalFiveCard(xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.FINAL_FIVE_DAMAGE_GALACTICA_TWICE);
 
-        // a skill check, in an event scope, then a choice the event queued
         val scope = journal.openScope(null, 1, Journal.ROOT_SCOPE);
         ops.skillCheck().start(SkillCheckType.values()[0], 2);
         val played = game.player(1).skillCards().cards().getFirst();
@@ -151,7 +147,6 @@ public final class ScriptedScenario {
         ops.skillCheck().revealAndDiscardTreacheryCard();
         ops.skillCheck().shuffleIntoDestinyDeck(TREACHERY, TREACHERY, POLITICS);
 
-        // ships
         val galactica = game.boards().galactica();
         val viperIds = galactica.shipsInSpace(Viper.class).stream().map(Ship::id).sorted().toList();
         ops.player(1).pilot(viperIds.get(0));
@@ -181,7 +176,6 @@ public final class ScriptedScenario {
         ops.galactica().placeRaider(GALACTICA_SPACE_6_OCLOCK);
         ops.ship(basestar).destroy();
 
-        // the boards and resources
         for (int i = 0; i < 4; i++) {
             ops.galactica().damage();
         }
@@ -212,7 +206,6 @@ public final class ScriptedScenario {
         val newViper = ops.galactica().launchHumanFighter(ShipType.VIPER, GALACTICA_SPACE_6_OCLOCK, null);
         ops.player(1).pilot(newViper); // stays alive with its pilot
 
-        // players
         ops.player(3).infiltrateGalactica(BRIG);
         ops.player(2).lookAtShip(2005);
         ops.player(2).useAbility(CharacterAbility.CYLON_DETECTOR); // a miracle: the token goes
@@ -227,7 +220,6 @@ public final class ScriptedScenario {
         ops.rollDie();
         ops.changeStep(CRISIS);
 
-        // an interrupt window: one card goes back to the hand, the other takes effect
         val hand = game.player(1).skillCards().cards();
         val returned = new PlayedInterruptCard(1, hand.get(0), null);
         val resolved = new PlayedInterruptCard(1, hand.get(1), null);
@@ -237,7 +229,6 @@ public final class ScriptedScenario {
         ops.interrupts().returnToHand(returned);
         ops.interrupts().resolve(resolved);
         ops.interrupts().closeWindow();
-        // abilities on the roll: a reroll withdrawn, another one resolved, then a face set instead of the die
         val withdrawn = new UsedRollAbility(3, CharacterAbility.FTL_OPERATOR, null, null);
         val usedAbility = new UsedRollAbility(2, CharacterAbility.ECO_OFFICER, null, null);
         ops.interrupts().openWindow(new AfterDieRoll());
@@ -250,7 +241,6 @@ public final class ScriptedScenario {
         ops.interrupts().raidersWillMiss(GALACTICA_SPACE_6_OCLOCK, 2);
         ops.interrupts().raiderMissed(GALACTICA_SPACE_6_OCLOCK);
 
-        // an execution's facts
         ops.player(3).endInfiltration();
         ops.player(1).loseMiracleTokens();
         ops.player(1).revealLoyaltyCard(game.player(1).loyaltyCards().cards().getFirst());
@@ -258,7 +248,6 @@ public final class ScriptedScenario {
         ops.player(2).removeCharacter();
         ops.endTurnEarly();
 
-        // a jump: the fleet reaches a destination and the Jump Preparation track is reset
         ops.galactica().reachDestination(DestinationCard.DEEP_SPACE);
         ops.galactica().resetJumpPreparation();
         ops.endGame(Team.CYLONS, List.of());

@@ -19,18 +19,11 @@ import static xyz.zlatanov.frakkintoasters.backend.journal.ValueCodec.isInt;
 import static xyz.zlatanov.frakkintoasters.backend.journal.ValueCodec.raw;
 import static xyz.zlatanov.frakkintoasters.backend.journal.ValueCodec.typeArgument;
 
-/**
- * Walks the types of a {@link TypeRegistry} and every record, enum and interface their components reach, in the shapes
- * the {@link ValueCodec} writes them. The format lock prints them, and the wire schema of the frontend is built from them.
- */
 public final class TypeWalker {
 
     private TypeWalker() {
     }
 
-    /**
-     * @return the registered types and the types they reach, sorted by name
-     */
     public static List<Class<?>> reachable(Collection<Class<?>> roots) {
         val seen = new LinkedHashSet<Class<?>>();
         val queue = new ArrayDeque<Class<?>>(roots);
@@ -44,7 +37,6 @@ public final class TypeWalker {
                     queue.addAll(named(component.getGenericType()));
                 }
             }
-            // the card lists beside a deck or a pile
             if (type == DeckId.class) {
                 Arrays.stream(DeckId.values()).map(DeckId::cardType).forEach(queue::add);
             }
@@ -57,13 +49,10 @@ public final class TypeWalker {
                 .toList();
     }
 
-    /**
-     * @return the records, enums and interfaces a component type names, e.g. {@code SkillCard} for a {@code List<SkillCard>}
-     */
     public static Set<Class<?>> named(Type type) {
         val result = new LinkedHashSet<Class<?>>();
         if (ValueCodec.isWildcardList(type)) {
-            return result; // the cards of a deck or a pile: DeckId and PlayerPile name the card types
+            return result;
         }
         val raw = raw(type);
         if (raw == List.class || raw == Set.class || raw == Collection.class) {
@@ -81,10 +70,6 @@ public final class TypeWalker {
         return result;
     }
 
-    /**
-     * @return the type as the codec writes it, e.g. {@code List<SkillCard>}, {@code Integer?} for a nullable int, or
-     * {@code List<card of deck>} for the cards of a deck or a pile
-     */
     public static String describe(Type type) {
         if (ValueCodec.isWildcardList(type)) {
             return "List<card of deck or pile>";
@@ -120,22 +105,15 @@ public final class TypeWalker {
         return raw.getSimpleName();
     }
 
-    /**
-     * @return whether the type is part of the application, not a test fixture
-     */
     public static boolean isProduction(Class<?> type) {
         val source = type.getProtectionDomain().getCodeSource();
         if (source == null) {
-            return true; // the JDK
+            return true;
         }
         val location = source.getLocation().toString();
         return !location.contains("testFixtures") && !location.contains("test-fixtures") && !location.contains("/test/");
     }
 
-    /**
-     * @return the fingerprint lines of the types: a record with its type name and components, an enum with its
-     * constants, an interface with its name
-     */
     public static List<String> fingerprint(TypeRegistry registry) {
         val roots = registry.types().stream().filter(TypeWalker::isProduction).toList();
         return reachable(roots).stream()

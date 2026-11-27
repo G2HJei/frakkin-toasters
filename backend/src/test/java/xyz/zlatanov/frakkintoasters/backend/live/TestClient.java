@@ -23,10 +23,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-/**
- * A browser, as far as the server can tell: it logs in with the {@code dev} login, sending the CSRF token from the
- * {@code XSRF-TOKEN} cookie, calls the REST API with its session cookie, and opens the game socket with it.
- */
 final class TestClient implements AutoCloseable {
 
     private static final JsonNodeFactory NODES = JsonNodeFactory.instance;
@@ -39,9 +35,9 @@ final class TestClient implements AutoCloseable {
     private final List<JsonNode>               received = new ArrayList<>();
     private       int                          port;
     private       WebSocket                    socket;
-    private       String                       token; // of the last game message read
+    private       String                       token;
     private       JsonNode                     game;
-    private       CompletableFuture<Integer>   closeCode = new CompletableFuture<>(); // of the current connection
+    private       CompletableFuture<Integer>   closeCode = new CompletableFuture<>();
 
     TestClient(int port) {
         this.port = port;
@@ -68,9 +64,6 @@ final class TestClient implements AutoCloseable {
         return check(response);
     }
 
-    /**
-     * Opens the game socket, on another server than before after a restart.
-     */
     @SneakyThrows
     void connect(UUID game, int serverPort) {
         inbox.clear(); // what the old connection had left
@@ -119,9 +112,6 @@ final class TestClient implements AutoCloseable {
         send(message);
     }
 
-    /**
-     * @return the next message, which has to be of the type
-     */
     @SneakyThrows
     JsonNode next(String type) {
         val message = inbox.poll(10, TimeUnit.SECONDS);
@@ -142,9 +132,6 @@ final class TestClient implements AutoCloseable {
         send(message);
     }
 
-    /**
-     * @return the next message of the chat, which has to be of the type
-     */
     @SneakyThrows
     JsonNode nextChat(String type) {
         val message = chats.poll(10, TimeUnit.SECONDS);
@@ -157,9 +144,6 @@ final class TestClient implements AutoCloseable {
         return message;
     }
 
-    /**
-     * Waits a little, and fails if a chat message came.
-     */
     @SneakyThrows
     void assertNoChat() {
         val message = chats.poll(500, TimeUnit.MILLISECONDS);
@@ -168,9 +152,6 @@ final class TestClient implements AutoCloseable {
         }
     }
 
-    /**
-     * Reads messages up to the next game, and returns it.
-     */
     @SneakyThrows
     JsonNode nextGame() {
         while (true) {
@@ -188,9 +169,6 @@ final class TestClient implements AutoCloseable {
         }
     }
 
-    /**
-     * Waits a little, and fails if anything came.
-     */
     @SneakyThrows
     void assertNothingCame() {
         val message = inbox.poll(500, TimeUnit.MILLISECONDS);
@@ -207,25 +185,16 @@ final class TestClient implements AutoCloseable {
         }
     }
 
-    /**
-     * Reads messages until the game with the token.
-     */
     void awaitToken(String expected) {
         while (!expected.equals(token)) {
             nextGame();
         }
     }
 
-    /**
-     * @return the game of the last game message read
-     */
     JsonNode game() {
         return game;
     }
 
-    /**
-     * @return the status code the server closed the connection with
-     */
     @SneakyThrows
     int awaitClose() {
         return closeCode.get(10, TimeUnit.SECONDS);

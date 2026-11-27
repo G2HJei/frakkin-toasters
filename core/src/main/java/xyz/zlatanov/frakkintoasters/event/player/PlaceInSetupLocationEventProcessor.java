@@ -21,9 +21,6 @@ public class PlaceInSetupLocationEventProcessor extends EventProcessor<PlaceInSe
                 && startLocations(game, player.character()).contains(event.location());
     }
 
-    /**
-     * @return where the character may start: his setup locations that still exist, empty for a special setup
-     */
     public static List<Location> startLocations(GameView game, Character character) {
         val setup = List.of(character.setup());
         val open = setup.stream().filter(location -> !game.isDestroyed(location)).toList();

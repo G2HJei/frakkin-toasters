@@ -29,12 +29,12 @@ import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.GALACTICA_DAMAGE;
 import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.PEGASUS_DAMAGE;
 
 /**
- * Builds a {@link LiveUpdateProjection}. Most facts are public and pass as they are. A fact with cards follows the rules
- * of {@link GameProjector}: a player's cards show to him, the others see how many (a draw from a Skill Card deck names
- * its color by the deck). A
- * shuffle never shows its order, and a draw only a count, because the fact that says where the cards went decides who
- * sees them. An event shows its name and its actor, and its fields when they are public ({@link Disclosure}). The scope
- * of a secret event shows only to its actor, and so does that the engine took an answer itself. Followups never show. Once the game has ended, everything shows.
+ * Most facts are public and pass as they are. A fact with cards follows the rules of {@link GameProjector}: a player's
+ * cards show to him, the others see how many (a draw from a Skill Card deck names its color by the deck). A shuffle never
+ * shows its order, and a draw only a count, because the fact that says where the cards went decides who sees them. An
+ * event shows its name and its actor, and its fields when they are public ({@link Disclosure}). The scope of a secret
+ * event shows only to its actor, and so does that the engine took an answer itself. Followups never show. Once the game
+ * has ended, everything shows.
  */
 final class LiveUpdateProjector {
 
@@ -42,10 +42,8 @@ final class LiveUpdateProjector {
     private final Viewer             viewer;
     private final boolean            seesEverything;
 
-    // what the rules need to know of the game so far
     private final Map<Character, Integer> playerOf = new HashMap<>();
     private       Character               president;
-    // the cards each player played before the active skill check, face down until it reveals them
     private final Map<Integer, List<SkillCard>> playedBefore = new TreeMap<>();
 
     private final List<LogEntry>       entries = new ArrayList<>();
@@ -123,7 +121,6 @@ final class LiveUpdateProjector {
                 List.copyOf(facts), openScopeAutomatic);
     }
 
-    // Who holds which character, who is President, and the cards played before the skill check, as the facts go.
     private void learn(JournalEntry entry) {
         if (!(entry instanceof FactRecorded(int ignored, Fact fact))) {
             return;

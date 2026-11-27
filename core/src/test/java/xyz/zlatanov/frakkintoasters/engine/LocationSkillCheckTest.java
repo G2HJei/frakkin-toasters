@@ -60,8 +60,7 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckResult.PASS;
 
 /**
- * The skill checks that game board locations start (rule 10.3.3), each run from the action to the end of the check
- * through {@code submit} and {@code choose} alone, restoring the game at every pause.
+ * The skill checks that game board locations start (rule 10.3.3), each run from the action to the end of the check.
  */
 class LocationSkillCheckTest {
 
@@ -244,8 +243,6 @@ class LocationSkillCheckTest {
         assertSkillCheckEnded();
     }
 
-    /* the skill check, step by step */
-
     // Before a skill check triggered by a location, each player may play "Political Prowess".
     private void passPoliticalProwess() {
         for (int player = 1; player <= 3; player++) {
@@ -299,8 +296,6 @@ class LocationSkillCheckTest {
         }
     }
 
-    /* the game */
-
     // Gaius Baltar (alt.) at the "Admiral's Quarters", Laura Roslin at the "President's Office", Kara Thrace on the "Hangar
     // Deck". Player 1 is the current player.
     private static Followup setUp() {
@@ -328,8 +323,6 @@ class LocationSkillCheckTest {
         input.accept(engine);
         assertRestoresTheSameGame();
     }
-
-    /* assertions */
 
     private void assertSkillCheckEnded() {
         assertNull(engine.view().activeSkillCheck());

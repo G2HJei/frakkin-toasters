@@ -23,10 +23,6 @@ public class HumanDelusionEventProcessor extends EventProcessor<HumanDelusionEve
                 && !player.skillCards().cards().isEmpty();
     }
 
-    /**
-     * @return the choice of cards to add or nothing, once the cards of the check are revealed, for the player who can
-     * use "Human Delusion"
-     */
     public static Followup offer(GameView game) {
         return game.players().stream()
                 .filter(player -> canUse(game, player))

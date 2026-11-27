@@ -11,9 +11,6 @@ import static xyz.zlatanov.frakkintoasters.state.character.CharacterAbility.SECR
 
 public class SecretDestinyEventProcessor extends EventProcessor<SecretDestinyEvent> {
 
-    /**
-     * @return whether the player can replace a Crisis Card that was just revealed: a new one has to be left to draw
-     */
     public static boolean canUse(GameView game, PlayerView player) {
         return CharacterAbilities.canUseMiracle(game, player, SECRET_DESTINY) && game.decks().crisisCardsLeft() > 0;
     }

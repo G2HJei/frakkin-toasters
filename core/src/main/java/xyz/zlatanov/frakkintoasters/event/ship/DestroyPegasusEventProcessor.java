@@ -9,9 +9,6 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.NONE;
 
 public class DestroyPegasusEventProcessor extends EventProcessor<DestroyPegasusEvent> {
 
-    /**
-     * @return whether every location of a Pegasus still in play is damaged
-     */
     public static boolean isWrecked(GameView game) {
         val pegasus = game.boards().pegasus();
         return !pegasus.destroyed() && pegasus.damagedLocations().containsAll(pegasus.locations());

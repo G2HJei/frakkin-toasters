@@ -67,7 +67,7 @@ public class Game implements GameView {
     @Builder.Default
     private List<DestinationCard> destinations     = new ArrayList<>(); // the cards next to the Objective Card
     @Getter(AccessLevel.NONE)
-    private Team                 winner; // null while the game goes on
+    private Team                 winner;
     @Getter(AccessLevel.NONE)
     @Builder.Default
     private List<Integer>        winners           = List.of();
@@ -190,7 +190,7 @@ public class Game implements GameView {
 
     @Mutates
     public void end(Team winner, List<Integer> winners) {
-        assert this.winner == null; // a game ends once
+        assert this.winner == null;
         this.winner = winner;
         this.winners = List.copyOf(winners);
     }

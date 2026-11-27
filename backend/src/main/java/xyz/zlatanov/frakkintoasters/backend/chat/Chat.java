@@ -21,9 +21,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * The public chat of a game: one for everyone at the table, players and observers, who all write and read it; whoever
- * watches a finished game without being in it only reads. No private messages: the rules forbid them. A sandbox has no
- * chat. Messages are short, and a user writes only so many in a row.
+ * One chat for everyone at the table, players and observers: no private messages, the rules forbid them.
  */
 @Service
 public class Chat {
@@ -37,19 +35,11 @@ public class Chat {
     private final GameBundles                 bundles;
     private final Participants                participants;
     private final Clock                       clock;
-    // the times of each user's last messages in each game, for the rate limit
     private final Map<String, Deque<Instant>> recent = new ConcurrentHashMap<>();
 
-    /**
-     * @param playerNumber the seat the writer held then, {@code null} for an observer
-     * @param at           when it was written, as an ISO instant
-     */
     public record ChatLine(long id, String userId, String name, Integer playerNumber, String text, String at) {
     }
 
-    /**
-     * A message the chat refused, with the reason for its writer.
-     */
     public static final class Refused extends RuntimeException {
 
         public Refused(String message) {
@@ -69,18 +59,10 @@ public class Chat {
         this.clock = clock;
     }
 
-    /**
-     * @return whether the viewer reads the chat: everyone but the user of a sandbox, which has none
-     */
     public static boolean reads(Viewer viewer) {
         return !(viewer instanceof Viewer.Sandbox);
     }
 
-    /**
-     * Stores the user's message, with the seat he holds now.
-     *
-     * @throws Refused if he isn't in the game, or the message is empty, too long or one too many
-     */
     public ChatLine post(UUID gameBundleId, UUID userId, String text) {
         val bundle = bundles.find(gameBundleId).orElseThrow(() -> new Refused("No such game"));
         if (bundle.mode() == GameMode.SANDBOX) {
@@ -111,9 +93,6 @@ public class Chat {
         return new ChatLine(id, userId.toString(), participant.name(), participant.playerNumber(), message, at.toString());
     }
 
-    /**
-     * @return the last messages, oldest first, for a viewer who reads the chat
-     */
     public List<ChatLine> history(UUID gameBundleId, Viewer viewer) {
         if (!reads(viewer)) {
             return List.of();
@@ -132,7 +111,6 @@ public class Chat {
                 .list();
     }
 
-    // At most BURST messages in any WINDOW.
     private void throttle(UUID gameBundleId, UUID userId) {
         val now = clock.instant();
         val times = recent.computeIfAbsent(gameBundleId + ":" + userId, ignored -> new ArrayDeque<>());

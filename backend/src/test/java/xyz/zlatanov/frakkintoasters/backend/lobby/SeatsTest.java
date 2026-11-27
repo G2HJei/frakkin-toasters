@@ -24,7 +24,6 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-// The seats of a running game, the host's tools, the votes and the rematch.
 class SeatsTest extends BackendTest {
 
     @Autowired
@@ -80,7 +79,7 @@ class SeatsTest extends BackendTest {
         val left = lobby.leave(game.id(), roslin);
 
         assertEquals(List.of(2), left.vacantSeats());
-        assertTrue(users(left.observers()).contains(roslin)); // he watches on
+        assertTrue(users(left.observers()).contains(roslin));
         assertEquals(1, summary(dualla, game.id()).vacantSeats());
         assertRefused(() -> lobby.takeSeat(game.id(), dualla, 5)); // no such seat
         assertRefused(() -> lobby.takeSeat(game.id(), game.users().get(2), 2)); // holds one already

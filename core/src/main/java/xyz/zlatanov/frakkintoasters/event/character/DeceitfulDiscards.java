@@ -23,9 +23,6 @@ public class DeceitfulDiscards {
     private final boolean  applies;
     private       boolean  used;
 
-    /**
-     * @param applies whether the discards come from a Crisis Card, not a location or a Super Crisis Card
-     */
     public static DeceitfulDiscards of(GameView game, boolean applies) {
         return new DeceitfulDiscards(game, applies);
     }

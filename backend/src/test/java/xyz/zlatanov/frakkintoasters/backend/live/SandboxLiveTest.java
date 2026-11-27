@@ -43,7 +43,6 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.STRATEGIC_PLANNING;
 
-// A sandbox over the web socket: one user plays every seat, undoes, exports, imports and sets up scenarios.
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = "frakkin.take-only-answers=false")
 @ActiveProfiles("dev")
 @Import(TestcontainersConfiguration.class)
@@ -91,7 +90,7 @@ class SandboxLiveTest {
         assertEquals(2, client.game().get("turn").get("number").intValue());
         assertEquals(List.of(CrisisCard.RIOTS_NO_JUMP), inMemory.view().decks().<CrisisCard>deck(
                 xyz.zlatanov.frakkintoasters.state.deck.DeckId.CRISIS).discardedCards());
-        assertTrue(client.game().get("decks").get(0).get("drawPile").isArray()); // the sandbox sees the draw piles
+        assertTrue(client.game().get("decks").get(0).get("drawPile").isArray());
     }
 
     @Test
@@ -107,7 +106,7 @@ class SandboxLiveTest {
 
         client.send(message("undo", client.token()));
         client.next("game");
-        assertEquals("log", client.next("log").get("type").stringValue()); // the client replaces its log
+        assertEquals("log", client.next("log").get("type").stringValue());
         assertNotEquals(after, client.game());
         send(client, second);
         client.nextGame();
@@ -135,7 +134,6 @@ class SandboxLiveTest {
         client.next("log");
 
         assertEquals(original, client.game());
-        // another version's journal is refused, with a message
         file.put("formatVersion", JournalCodec.FORMAT_VERSION + 1);
         val refused = assertThrows(AssertionError.class, () -> client.post("/api/sandbox/import", JournalCodec.stringify(file)));
         assertTrue(refused.getMessage().startsWith("400"), refused.getMessage());
@@ -159,15 +157,15 @@ class SandboxLiveTest {
         client.next("log");
         val input = client.game().get("input");
         assertEquals(List.of("Decide", "PlayInterruptCardEvent", "2"), List.of(input.get("kind").stringValue(),
-                input.get("action").stringValue(), input.get("player").asString())); // the sandbox sees it in full
+                input.get("action").stringValue(), input.get("player").asString()));
         val food = client.game().get("galactica").get("food").intValue();
 
         client.send(withEvent("inject", client.token(), codec.writeEvent(new ChangeResourceEvent(Resource.FOOD, -1))));
         client.nextGame();
 
         assertEquals(food - 1, client.game().get("galactica").get("food").intValue());
-        assertEquals(input, client.game().get("input")); // the window still waits
-        client.submit(codec.writeEvent(PlayInterruptCardEvent.pass(2))); // the sandbox answers for player 2
+        assertEquals(input, client.game().get("input"));
+        client.submit(codec.writeEvent(PlayInterruptCardEvent.pass(2)));
         assertEquals("CYLONS", client.nextGame().get("game").get("outcome").get("winner").stringValue());
     }
 
@@ -192,7 +190,6 @@ class SandboxLiveTest {
         assertEquals("INVALID", host.next("rejected").get("reason").stringValue());
         val export = assertThrows(AssertionError.class, () -> host.get("/api/games/" + game + "/journal"));
         assertTrue(export.getMessage().startsWith("403"), export.getMessage());
-        // nobody else joins a sandbox
         val sandbox = startSandbox(others.get(0), 3);
         val join = assertThrows(AssertionError.class, () -> host.post("/api/games/" + sandbox + "/join", "{\"as\":\"OBSERVER\"}"));
         assertTrue(join.getMessage().startsWith("403"), join.getMessage());
@@ -210,8 +207,6 @@ class SandboxLiveTest {
         assertEquals(token, client.next("game").get("token").stringValue());
         assertFalse(client.next("log").get("log").get("entries").isEmpty());
     }
-
-    /* helpers */
 
     private TestClient client() {
         val client = new TestClient(port);
@@ -231,7 +226,6 @@ class SandboxLiveTest {
         return game;
     }
 
-    // Plays the input in memory and over the socket, as the sandbox, which answers for every seat.
     private void play(TestClient client, GameEngine inMemory, ScriptedTurns.Input input) {
         val options = client.game().get("input").get("options");
         input.applyTo(inMemory);

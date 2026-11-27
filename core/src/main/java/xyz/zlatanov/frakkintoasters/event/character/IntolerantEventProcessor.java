@@ -19,9 +19,6 @@ public class IntolerantEventProcessor extends EventProcessor<IntolerantEvent> {
 
     static final int STRENGTH = 10;
 
-    /**
-     * @return the player who may execute the target of the "Admiral's Quarters" check that just passed instead
-     */
     public static Optional<PlayerView> user(GameView game) {
         val skillCheck = game.activeSkillCheck();
         // A pass the check reached, not one "Political Prowess" decided: it has a strength.

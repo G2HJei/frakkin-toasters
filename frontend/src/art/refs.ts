@@ -1,5 +1,3 @@
-// The components an event, a fact or an option names, found through their types in the schema: the cards, characters,
-// locations, ships and damage that have an image. The log and the input show them next to the words.
 import { deckBackArt, deckCardArt, deckCards, enumArt, pileDeck, skillCardArt, type ArtRef } from './images';
 import { recordNamed, type Component, type RecordType, type TypeRef } from '../wire/schema';
 import type { FactProjection, Followup } from '../wire/types';
@@ -14,7 +12,6 @@ export type ValueArt = (value: unknown, component: Component, record: RecordType
 
 const MAX_DEPTH = 4;
 
-/** The images a record names, the record known by its `kind` or by the given name. */
 export function recordArt(value: Fields | null | undefined, recordName?: string, override?: ValueArt): ArtRef[] {
   return walk(value, recordName, override, 0);
 }
@@ -69,7 +66,6 @@ function pileCards(pile: string | undefined): string | null {
   return pile === 'SKILL' ? 'SkillCard' : deckCards(pileDeck(pile));
 }
 
-/** The images of a fact: what a shown fact names, or the back of the cards a hidden fact counts. */
 export function factArt(fact: FactProjection | null | undefined): ArtRef[] {
   if (!fact) {
     return [];
@@ -81,7 +77,6 @@ export function factArt(fact: FactProjection | null | undefined): ArtRef[] {
   return recordArt(fact.fact as unknown as Fields | null);
 }
 
-/** The images an option of a choice names: its events, a decision's none. */
 export function optionArt(option: Followup | null | undefined): ArtRef[] {
   if (!option) {
     return [];

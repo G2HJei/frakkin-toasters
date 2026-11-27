@@ -14,8 +14,7 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.TREACHERY;
 public class ForLoveEventProcessor extends EventProcessor<ForLoveEvent> {
 
     /**
-     * @return whether another player than the one who discards has "For Love", so the discard asks. Whether she can
-     * use it is checked when it happens
+     * Whether she can use "For Love" is checked when the discard happens.
      */
     public static boolean mayBeOffered(GameView game, int discarderPlayerNumber) {
         return game.players().stream()

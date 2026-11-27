@@ -9,7 +9,6 @@ import type { GameProjection, LogEntry, Resource, SkillCard } from '../wire/type
 
 export const RESOURCES = ['fuel', 'food', 'morale', 'population'] as const;
 
-// the tracks with a marker on the board, by the enum of their spaces
 export const TRACKS = ['JumpPreparation', 'Pursuit'] as const;
 export type Track = (typeof TRACKS)[number];
 
@@ -57,12 +56,10 @@ export function isCriticallyDamaged(game: GameProjection): boolean {
   return (game.galactica?.locations ?? []).filter((location) => location.damaged).length >= CRITICAL_DAMAGE;
 }
 
-/** How much smaller "Preventive Policy" makes the next loss of the resource this turn, 0 when it doesn't. */
 export function lossReduction(game: GameProjection, resource: ResourceKey): number {
   return game.turn?.lossReductions?.[resource.toUpperCase() as Resource] ?? 0;
 }
 
-/** The changes from the previous game to the next, and what the log entries that came with the next one did. */
 export function changesBetween(previous: GameProjection | null, next: GameProjection | null, fresh: LogEntry[] = []): Changes {
   if (!previous || !next) {
     return NO_CHANGES;
@@ -131,7 +128,6 @@ export function changesBetween(previous: GameProjection | null, next: GameProjec
   };
 }
 
-/** Where a track's marker is. */
 export function trackPosition(game: GameProjection, track: Track): string | null {
   return (track === 'JumpPreparation' ? game.galactica?.jumpPreparation : game.cylonFleet?.pursuit) ?? null;
 }
@@ -146,7 +142,6 @@ export function useChanges(): { changes: Changes; version: number } {
   return { changes, version };
 }
 
-/** "+2", "−1": a delta as the table floats it. */
 export function signed(delta: number): string {
   return delta > 0 ? `+${delta}` : `−${Math.abs(delta)}`;
 }

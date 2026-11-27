@@ -8,18 +8,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Who is in a game: the players by their seat, and the observers, who have none.
- */
 @Repository
 @RequiredArgsConstructor
 public class Participants {
 
     private final JdbcClient jdbc;
 
-    /**
-     * @param playerNumber the seat, {@code null} for an observer
-     */
     public record Participant(UUID userId, String name, Integer playerNumber) {
 
         public boolean isPlayer() {

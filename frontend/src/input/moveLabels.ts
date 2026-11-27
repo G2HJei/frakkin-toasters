@@ -34,10 +34,6 @@ export function groupTitle(group: MoveGroup, context: LabelContext): string {
   return typeLabel(group.kind);
 }
 
-/**
- * What sets a move apart in its group: the values of the components the group's moves differ in, "Pass" when they are
- * all empty, and a shape's pick to come.
- */
 export function moveDetail(move: Move, components: string[], context: LabelContext): string {
   const event = move.event;
   if (!event) {
@@ -67,7 +63,6 @@ function takesAction(interfaces: string[] | undefined): boolean {
   return !!interfaces?.some((name) => name === 'ActionEvent' || name === 'MovementAbilityEvent');
 }
 
-/** The components of a lone move worth naming: what it targets or chooses, the played card left to its image. */
 export function shownComponents(move: Move): string[] {
   const kind = move.event?.kind;
   return (recordNamed(kind ?? '')?.components ?? [])
@@ -76,7 +71,6 @@ export function shownComponents(move: Move): string[] {
     .map((component) => component.name);
 }
 
-/** "discard 1 card", "choose 1 to 3 cards", "choose 2 ships": a discard by its component's name. */
 export function pickHint(pick: Pick): string {
   const things = pick.kind === 'ShipPick' ? 'ship' : 'card';
   const count = pick.min === pick.max ? `${pick.min}` : `${pick.min} to ${pick.max}`;
@@ -84,19 +78,16 @@ export function pickHint(pick: Pick): string {
   return `${verb} ${count} ${things}${pick.max === 1 ? '' : 's'}`;
 }
 
-/** A pick's component as a heading, e.g. "Discard card". */
 export function pickName(pick: Pick): string {
   const name = humanizeType(pick.component ?? '');
   return name.charAt(0).toUpperCase() + name.substring(1);
 }
 
-/** A part as a heading: "Discard card", "Target player", "Civilian ship". */
 export function partName(part: Part): string {
   const name = humanizeType(part.key.replace(/(Number|Ids?)$/, ''));
   return name.charAt(0).toUpperCase() + name.substring(1);
 }
 
-/** How many elements a part of several takes: "discard 2 cards", "choose 2 tokens", "choose 0 to 2". */
 export function partHint(part: Part, size: { min: number; max: number }): string {
   const count = size.min === size.max ? `${size.min}` : `${size.min} to ${size.max}`;
   const verb = /^discard/i.test(part.key) ? 'discard' : 'choose';
@@ -117,7 +108,6 @@ function partThing(type: TypeRef): string | null {
   return null;
 }
 
-/** The whole move as its button says it, for a title on hover. */
 export function moveSentence(move: Move, context: LabelContext): string {
   return move.event ? partsText(optionEventParts(move.event, context)) : optionLabel(move.followup, context);
 }

@@ -29,8 +29,8 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 
 /**
- * Builds a value of a record type from its components, by reflection. It fails on a component type it doesn't know, so
- * a new shape in an event or a fact has to be taught to the codec and to this builder.
+ * It fails on a component type it doesn't know, so a new shape in an event or a fact has to be taught to the codec and
+ * to this builder.
  */
 final class SampleValues {
 

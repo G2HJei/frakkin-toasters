@@ -29,10 +29,6 @@ public class FastLearnerEventProcessor extends EventProcessor<FastLearnerEvent> 
                 && skillCheck.totalStrength() == null;
     }
 
-    /**
-     * @return the choice of a Skill deck or nothing, before cards go into the active check, for the player who can use
-     * "Fast Learner"
-     */
     public static Followup offer(GameView game) {
         return game.players().stream()
                 .filter(player -> canUse(game, player))

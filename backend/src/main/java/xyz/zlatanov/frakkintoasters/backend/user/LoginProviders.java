@@ -10,12 +10,6 @@ import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * The login providers: Google and Discord, each only when its client id is set. No passwords.
- *
- * @param google  {@code frakkin.login.google.client-id} and {@code client-secret}
- * @param discord {@code frakkin.login.discord.client-id} and {@code client-secret}
- */
 @ConfigurationProperties("frakkin.login")
 public record LoginProviders(Client google, Client discord) {
 

@@ -84,9 +84,6 @@ public interface GameView {
         return quorumCardsInPlay().stream().anyMatch(inPlay -> inPlay.card() == card);
     }
 
-    /**
-     * @return the player the card in play was given to, empty when it isn't in play or has no holder
-     */
     default Optional<Integer> quorumCardHolder(QuorumCard card) {
         return quorumCardsInPlay().stream()
                 .filter(inPlay -> inPlay.card() == card)
@@ -112,9 +109,6 @@ public interface GameView {
      */
     List<Integer> winners();
 
-    /**
-     * The Destination Cards next to the Objective Card, in the order the fleet reached them.
-     */
     List<DestinationCard> destinations();
 
     /**
@@ -126,8 +120,5 @@ public interface GameView {
         return destinations().stream().mapToInt(DestinationCard::distance).sum() + (int) legendaryDiscoveries;
     }
 
-    /**
-     * The components out of the game, e.g. destroyed ships and executed characters.
-     */
     RemovedComponents removedComponents();
 }

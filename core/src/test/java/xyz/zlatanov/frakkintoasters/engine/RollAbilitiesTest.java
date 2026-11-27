@@ -43,9 +43,7 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.CALCULATION
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.CONSOLIDATE_POWER;
 
 /**
- * The character abilities used on die rolls, played through {@code submit} and {@code choose}, restoring the game at
- * every pause. "Keep Tabs on Visitor" fails with a die roll: on 4 or lower, -2 population. Player 1 is the current
- * player.
+ * "Keep Tabs on Visitor" fails with a die roll: on 4 or lower, -2 population. Player 1 is the current player.
  */
 class RollAbilitiesTest {
 
@@ -171,8 +169,6 @@ class RollAbilitiesTest {
         assertEquals(10, engine.view().boards().galactica().population());
     }
 
-    /* the game */
-
     private static Followup setUp(Character first, Character second, Character third) {
         return all(
                 new SelectCharacterEvent(1, first),
@@ -190,8 +186,6 @@ class RollAbilitiesTest {
         input.accept(engine);
         assertRestoresTheSameGame();
     }
-
-    /* assertions */
 
     private void assertPopulationAfterKeepTabsOnVisitor() {
         val lost = engine.view().turn().dieRoll().result() <= 4 ? 2 : 0;

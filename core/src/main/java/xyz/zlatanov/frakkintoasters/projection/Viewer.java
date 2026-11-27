@@ -1,9 +1,5 @@
 package xyz.zlatanov.frakkintoasters.projection;
 
-/**
- * Who looks at a game: a player, who sees what is public and what he holds, an observer, who sees what is public, or the
- * user of a sandbox, who sees everything.
- */
 public sealed interface Viewer {
 
     record PlayerViewer(int playerNumber) implements Viewer {
@@ -31,9 +27,6 @@ public sealed interface Viewer {
         return new Sandbox();
     }
 
-    /**
-     * @return whether the viewer is the player
-     */
     default boolean is(int playerNumber) {
         return this instanceof PlayerViewer(int number) && number == playerNumber;
     }

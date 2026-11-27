@@ -8,9 +8,6 @@ import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
 import java.util.Random;
 import java.util.function.Consumer;
 
-/**
- * A decision being answered: the game it is asked in, the randomness that picks the answer, and where the findings go.
- */
 record Asked(GameView game, PlayerDecisionEvent<?> decision, Random random, Consumer<Finding> findings) {
 
     int playerNumber() {

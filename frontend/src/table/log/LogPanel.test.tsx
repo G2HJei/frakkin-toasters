@@ -54,12 +54,10 @@ function renderLog(entries: LogEntry[], players = [{ number: 1, character: 'WILL
   return container.querySelector('.log-body') as HTMLElement;
 }
 
-// the lines' words
 function lines(body: HTMLElement): string[] {
   return [...body.querySelectorAll('.lines > li .event')].map((line) => line.textContent ?? '');
 }
 
-// each line's player, or null, and its words
 function rows(body: HTMLElement): [string | null, string][] {
   return [...body.querySelectorAll('.lines > li')].map((line) => [line.querySelector('.actor')?.textContent ?? null, line.querySelector('.event')?.textContent ?? '']);
 }

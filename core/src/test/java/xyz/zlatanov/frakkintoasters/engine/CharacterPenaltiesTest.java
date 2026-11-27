@@ -48,8 +48,7 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.EXECUTIVE_O
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.LAUNCH_SCOUT;
 
 /**
- * The negative abilities that cost a player cards or his character, through {@code submit} and {@code choose},
- * restoring at every pause. Player 1 is the current player. Each script ends the game after its events.
+ * Player 1 is the current player. Each script ends the game after its events.
  */
 class CharacterPenaltiesTest {
 
@@ -147,8 +146,6 @@ class CharacterPenaltiesTest {
         input.accept(engine);
         assertRestoresTheSameGame();
     }
-
-    /* assertions */
 
     private void assertWaitingFor(PendingInput expected) {
         assertEquals(EngineStatus.waiting(expected), engine.status(expected.player()));

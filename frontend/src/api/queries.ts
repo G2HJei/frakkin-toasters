@@ -7,7 +7,6 @@ export interface Me {
   settings: Record<string, unknown>;
 }
 
-// a user as the users page lists him
 export interface ListedUser {
   id: string;
   name: string;
@@ -20,7 +19,6 @@ export interface Logins {
 
 export type GameStatus = 'LOBBY' | 'RUNNING' | 'FINISHED';
 export type GameMode = 'STANDARD' | 'SANDBOX';
-// why a finished game ended: a team won, the players or the host abandoned it, the host cancelled the lobby
 export type EndReason = 'WON' | 'ABANDONED' | 'CANCELLED';
 export type VoteKind = 'VACATE' | 'ABANDON';
 export type LeaveReason = 'LEFT' | 'VOTED_OUT' | 'KICKED' | 'BANNED';
@@ -68,14 +66,11 @@ export interface Room {
   unavailableReason: string | null;
   seed: number | null;
   endReason: EndReason | null;
-  // the seats of a running game, and those nobody holds
   playerCount: number | null;
   vacantSeats: number[];
   votes: Vote[];
-  // every holder of every seat, in the order they took it
   seatHistory: SeatHolder[];
   rematchId: string | null;
-  // the participants who are there: polling the room in a lobby, connected once the game runs
   online: string[];
 }
 
@@ -125,7 +120,6 @@ export function useGames() {
   return useQuery<Games>({ queryKey: ['games'], queryFn: () => api<Games>('GET', '/api/games'), refetchInterval: 4000 });
 }
 
-// a message of the play page's chat
 export interface LobbyLine {
   id: number;
   userId: string;

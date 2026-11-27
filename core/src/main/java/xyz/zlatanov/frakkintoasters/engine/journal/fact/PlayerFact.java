@@ -10,9 +10,6 @@ import xyz.zlatanov.frakkintoasters.state.deck.DeckId;
 
 import java.util.List;
 
-/**
- * Facts about players and their characters.
- */
 public sealed interface PlayerFact extends Fact {
 
     record CharacterSelected(int playerNumber, Character character) implements PlayerFact {
@@ -24,7 +21,6 @@ public sealed interface PlayerFact extends Fact {
     record CharacterRemovedFromBoards(Character character) implements PlayerFact {
     }
 
-    // The character leaves the game, e.g. when executed: the player has none until he chooses a new one.
     record CharacterRemoved(int playerNumber, Character character) implements PlayerFact {
     }
 
@@ -80,7 +76,6 @@ public sealed interface PlayerFact extends Fact {
     record OwnTurnStarted(int playerNumber) implements PlayerFact {
     }
 
-    // A random Loyalty Card of the target that the player looked at: only he knows it.
     record LoyaltyCardSeen(int playerNumber, int targetPlayerNumber, LoyaltyCard card) implements PlayerFact {
     }
 

@@ -26,8 +26,8 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Sandboxes: one user plays every seat, sees everything, can undo and set up scenarios. A sandbox is stored like any
- * game, so it survives a restart, shows in the lobby and can be exported, and a seed reproduces it.
+ * Stored like any game, so a sandbox survives a restart, shows in the lobby and can be exported, and a seed reproduces
+ * it.
  */
 @Service
 @RequiredArgsConstructor
@@ -39,9 +39,6 @@ public class Sandboxes {
     private final JournalCodec        codec;
     private final TransactionTemplate transaction;
 
-    /**
-     * @param seed {@code null} for a random one
-     */
     public UUID start(UUID userId, int playerCount, Long seed, String name) {
         if (playerCount < Lobby.MIN_PLAYERS || playerCount > Lobby.MAX_PLAYERS) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -52,9 +49,6 @@ public class Sandboxes {
         return store(userId, name(name, "Sandbox, seed " + actualSeed), engine);
     }
 
-    /**
-     * {@code formatVersion}, {@code seed}, {@code playerCount} and the {@code entries} as the codec writes them.
-     */
     public JsonNode export(UUID gameBundleId, UUID userId) {
         val bundle = sandbox(gameBundleId, userId);
         val journal = sessions.journal(gameBundleId);
@@ -67,9 +61,6 @@ public class Sandboxes {
         return export;
     }
 
-    /**
-     * Stores an exported journal as a new sandbox, once the engine restores it.
-     */
     public UUID importJournal(UUID userId, JsonNode file, String name) {
         if (file == null || !file.isObject()) {
             throw invalid("Not an exported journal");

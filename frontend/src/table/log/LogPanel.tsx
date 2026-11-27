@@ -11,15 +11,6 @@ import { useTable } from '../tableContext';
 import { logStory, type LogLine } from './story';
 import { useFollowBottom } from './useFollowBottom';
 
-/**
- * The story of the game: grouped by turn, every turn open, and by step within a turn. Each line is what an event did,
- * in words, after the portrait and name of the player it is about, every time; what happens to the game has none. A
- * sandbox can show the facts that tell more under each line, the ones that change the table first. Card and character
- * names show their image on hover; resources, ships, titles and the die have an icon in front of their words, and good
- * and bad news (a resource gained or lost, a skill check's result) are green or red. A click on a line lights what it
- * touched on the board. The log follows the newest
- * line until the user scrolls up, and the arrow at its bottom right follows again, lit while new lines came below.
- */
 export interface LogPanelProps {
   // the switch to the chat, over the panel's top right; a sandbox has no chat and shows its "Facts" switch there
   toggle?: ReactNode;
@@ -130,7 +121,6 @@ export function LogPanel({ toggle, seenBefore = null, onSeen }: LogPanelProps = 
   );
 }
 
-// The red line over the first line the viewer hadn't seen at his last decision; a click on it marks all seen.
 function LineWithMark({ line, withFacts, unseenFromHere, onSeen }: { line: LogLine; withFacts: boolean; unseenFromHere: boolean; onSeen?(): void }) {
   return (
     <>
@@ -146,7 +136,6 @@ function LineWithMark({ line, withFacts, unseenFromHere, onSeen }: { line: LogLi
   );
 }
 
-// The player's token and name, then what happened; what happens to the game has neither.
 function Line({ line, withFacts }: { line: LogLine; withFacts: boolean }) {
   const table = useTable();
   const flash = () => useFlash.getState().flash(entryTargets(line.entry, table.game));

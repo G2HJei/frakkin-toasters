@@ -1,7 +1,6 @@
 import { StrokedIcon, strokedSvg } from '../../art/Glyph';
 import type { GameStep } from '../../wire/types';
 
-/** A step of a player's turn: every step but the setup. */
 export type TurnStep = Exclude<GameStep, 'SETUP'>;
 
 // drawn on a 24px grid, stroked in the step's color (`art/Glyph`): markup, which the turn panel draws inline and the
@@ -34,7 +33,6 @@ const ICONS: Record<TurnStep, string> = {
   DISCARD: '<path d="M4 7h16M9.5 7V4.5h5V7M6 7l1 13h10l1-13M10 11v5.5M14 11v5.5"/>',
 };
 
-/** A step's icon as a standalone SVG document in one color, for an image. */
 export function stepIconSvg(step: TurnStep, color: string): string {
   return strokedSvg(ICONS[step], color);
 }

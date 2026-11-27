@@ -98,40 +98,28 @@ public class GameEngine {
     }
 
     /**
-     * Rebuilds a game from its journal. The engine gets a copy of the journal, so the two games go on independently. The
-     * facts hold every random result, so the restored game needs no randomness of the original.
-     *
-     * @throws IllegalArgumentException if the journal doesn't start with {@code GameStarted}, doesn't match the moves of
-     *                                  the run loop or ends neither at a pause nor with the end of the game
+     * The engine gets a copy of the journal, so the two games go on independently. The facts hold every random result,
+     * so the restored game needs no randomness of the original.
      */
     public static GameEngine restore(Journal journal) {
         return new GameEngine(new Journal(journal.entries()), null);
     }
 
-    /**
-     * Rebuilds a seeded game from its journal. It goes on as the original would with the same inputs.
-     */
     public static GameEngine restore(Journal journal, long seed) {
         return new GameEngine(new Journal(journal.entries()), seed);
     }
 
     /**
-     * From the next input on, the engine answers a decision that has only one legal answer itself, logged under the
-     * decision's player after an {@link JournalEntry.OnlyAnswerTaken}. Undo goes back past it to the pause before. A
-     * choice is always asked: {@code one(...)} collapses a single option, so a choice of one is built on purpose to ask,
-     * e.g. so nobody learns that a player holds no card to play. The pause the engine stands at stays, so turning it on
-     * after a restore changes no journal.
-     *
-     * @return this engine
+     * From the next input on, the engine answers a decision that has only one legal answer itself. A choice is always
+     * asked: {@code one(...)} collapses a single option, so a choice of one is built on purpose to ask, e.g. so nobody
+     * learns that a player holds no card to play. The pause the engine stands at stays, so turning it on after a restore
+     * changes no journal.
      */
     public GameEngine takeOnlyAnswers() {
         takesOnlyAnswers = true;
         return this;
     }
 
-    /**
-     * @return the seed of a seeded game
-     */
     public Optional<Long> seed() {
         return Optional.ofNullable(seed);
     }
@@ -149,15 +137,6 @@ public class GameEngine {
                 : EngineStatus.waiting(input);
     }
 
-    /**
-     * Answers the pending decision, then runs the game to the next input. An {@link AnytimeEvent} answers nothing: it
-     * runs ahead of the pending input, a decision or a choice, which stays pending.
-     *
-     * @throws InvalidActionException      if the event doesn't answer the decision or isn't valid. Nothing changes, and
-     *                                     the decision stays pending
-     * @throws FrakCallTheAdmiralException if anything fails after the event was accepted. The game rolls back to before
-     *                                     the call, and the decision stays pending
-     */
     public void submit(int player, Event event) {
         if (event instanceof AnytimeEvent anytime) {
             if (anytime.playerNumber() != player) {
@@ -179,14 +158,6 @@ public class GameEngine {
         });
     }
 
-    /**
-     * Picks an option of the pending choice, then runs the game to the next input.
-     *
-     * @throws InvalidActionException      if there is no such option for the player. Nothing changes, and the choice
-     *                                     stays pending
-     * @throws FrakCallTheAdmiralException if anything fails after the option was picked. The game rolls back to before
-     *                                     the call, and the choice stays pending
-     */
     public void choose(int player, Followup option) {
         val frame = agenda.top().orElseThrow(() -> new InvalidActionException("The game is over"));
         if (!(frame.followup() instanceof OneOf oneOf)) {
@@ -206,24 +177,12 @@ public class GameEngine {
     }
 
     /**
-     * Runs a sandbox setup event at once, ahead of the pending input, then runs the game to the next input, with the
-     * win checks of the run loop. A pending choice keeps the options it was built with, even when the setup makes them
-     * stale.
-     *
-     * @throws InvalidActionException      if the game is over or the event isn't valid. Nothing changes
-     * @throws FrakCallTheAdmiralException if anything fails after the event was accepted. The game rolls back
+     * A pending choice keeps the options it was built with, even when the setup makes them stale.
      */
     public void inject(SandboxEvent event) {
         runAhead(event);
     }
 
-    /**
-     * Goes back to the pause before the last input: a decision answered, an option picked, an event injected or an
-     * {@link AnytimeEvent}, not an answer the engine took itself ({@link #takeOnlyAnswers()}). A
-     * choice that led to a decision is undone on its own, and a finished game can be undone too.
-     *
-     * @throws InvalidActionException if there was no input yet
-     */
     public void undo() {
         if (inputStarts.isEmpty()) {
             throw new InvalidActionException("Nothing to undo");
@@ -244,16 +203,10 @@ public class GameEngine {
         });
     }
 
-    /**
-     * @return the game. A rollback replaces it, so ask again after a {@link FrakCallTheAdmiralException}
-     */
     public GameView view() {
         return game;
     }
 
-    /**
-     * @return the journal. A rollback replaces it, so ask again after a {@link FrakCallTheAdmiralException}
-     */
     public Journal journal() {
         return journal;
     }
@@ -396,17 +349,10 @@ public class GameEngine {
         }
     }
 
-    /**
-     * @return the scope of the event that queued the pending input, e.g. the Crisis Card whose section is chosen. Empty
-     * once the game has ended, and for an input queued by no event
-     */
     public Optional<JournalEntry.ScopeOpened> pendingScope() {
         return agenda.top().flatMap(frame -> journal.scope(frame.parentScope()));
     }
 
-    /**
-     * @return what the game waits for, a secret input included. Empty once the game has ended
-     */
     public Optional<PendingInput> pendingInput() {
         return agenda.top().map(frame -> switch (frame.followup()) {
             case Single(PlayerDecisionEvent<?> decision) -> new AwaitingDecision(decision);

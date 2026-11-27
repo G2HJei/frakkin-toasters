@@ -14,9 +14,6 @@ import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCard;
 import xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor;
 
-/**
- * Names every deck of the game, so facts can refer to one.
- */
 public enum DeckId {
     CIVILIAN_SHIPS,
     GALACTICA_DAMAGE,

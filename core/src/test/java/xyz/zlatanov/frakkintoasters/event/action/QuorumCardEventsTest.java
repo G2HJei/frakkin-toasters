@@ -12,9 +12,6 @@ import java.util.List;
 import static java.util.stream.Collectors.groupingBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * Every Quorum Card has exactly one {@link QuorumCardEvent}.
- */
 class QuorumCardEventsTest {
 
     @Test

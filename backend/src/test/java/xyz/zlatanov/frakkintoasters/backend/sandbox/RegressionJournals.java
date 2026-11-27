@@ -40,9 +40,6 @@ public final class RegressionJournals {
         }
     }
 
-    /**
-     * @return the game of the exported journal, restored with its seed, so it goes on as the sandbox would
-     */
     public static GameEngine engine(Path file) {
         return repro(file).restore();
     }
@@ -51,9 +48,6 @@ public final class RegressionJournals {
         return engine(DIRECTORY.resolve(fileName));
     }
 
-    /**
-     * @return the journal with its seed, and the input and the expectation when it has them
-     */
     @SneakyThrows
     public static Repro repro(Path file) {
         val export = JournalCodec.parse(Files.readString(file));
@@ -79,11 +73,6 @@ public final class RegressionJournals {
                 present(expect) ? Repro.Expectation.ofJson(expect.stringValue()) : null);
     }
 
-    /**
-     * Writes the journal like a sandbox export, with the repro's input and expectation when it has them.
-     *
-     * @param finding what the fuzzer found, for whoever reads the file; {@code null} for none
-     */
     @SneakyThrows
     public static void write(Path file, Repro repro, String finding) {
         val export = JsonNodeFactory.instance.objectNode();

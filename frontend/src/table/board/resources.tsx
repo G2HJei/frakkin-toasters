@@ -45,13 +45,11 @@ function amounts(costs: Costs): [ResourceName, number][] {
   return values.filter(([, amount]) => amount > 0);
 }
 
-/** What a civilian ship costs when destroyed, in words: "1 population, 1 fuel", or "nothing". */
 export function cargoText(costs: Costs): string {
   const lost = amounts(costs);
   return lost.length === 0 ? 'nothing' : lost.map(([resource, amount]) => `${amount} ${resource}`).join(', ');
 }
 
-/** What a civilian ship costs when destroyed, as the resources' icons with the amounts. */
 export function CargoIcons({ cargo }: { cargo: Cargo }) {
   const lost = amounts(cargo);
   return (

@@ -23,16 +23,12 @@ import static xyz.zlatanov.frakkintoasters.engine.journal.Journal.ROOT_SCOPE;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 
 /**
- * Rebuilds the agenda of a game from its journal, with the moves the run loop made. Of the facts only the end of the
- * game matters here, {@link xyz.zlatanov.frakkintoasters.engine.journal.GameReplayer} applies them.
+ * Of the facts only the end of the game matters here: {@link xyz.zlatanov.frakkintoasters.engine.journal.GameReplayer}
+ * applies them.
  */
 @NoArgsConstructor(access = PRIVATE)
 public final class AgendaReplayer {
 
-    /**
-     * @param inputStarts the index of the first entry of each input, in order: the scope of an event that answered a
-     *                    decision, a choice, and an injected event. An answer the engine took itself is none
-     */
     public record Replay(Agenda agenda, List<Integer> inputStarts) {
     }
 
@@ -44,19 +40,10 @@ public final class AgendaReplayer {
     // the engine answers the pending decision: the scope that opens next is that answer
     private       boolean       onlyAnswer;
 
-    /**
-     * @return the agenda at the end of the journal
-     * @throws IllegalArgumentException if the journal doesn't match the moves of a run loop, or ends neither at a pause
-     *                                  nor with the end of the game
-     */
     public static Agenda replay(Journal journal) {
         return replayWithInputs(journal).agenda();
     }
 
-    /**
-     * @return the agenda at the end of the journal, and where each input began
-     * @throws IllegalArgumentException as {@link #replay(Journal)}
-     */
     public static Replay replayWithInputs(Journal journal) {
         val replayer = new AgendaReplayer();
         val entries = journal.entries();
@@ -85,7 +72,7 @@ public final class AgendaReplayer {
             val frame = agenda.top().orElseThrow(() -> new IllegalArgumentException("Nothing was pending for " + opened));
             require(frame.parentScope() == opened.parentId() && runs(frame, opened.event()), opened + " doesn't run " + frame);
             if (frame.followup() instanceof Single(PlayerDecisionEvent<?> ignored) && !onlyAnswer) {
-                inputStarts.add(index); // a player answered the decision
+                inputStarts.add(index);
             }
             agenda.take();
             onlyAnswer = false;
@@ -93,7 +80,6 @@ public final class AgendaReplayer {
         openScope = lastScope = opened.scopeId();
     }
 
-    // A decision runs the event that answered it, any other frame its own event.
     private static boolean runs(Agenda.Frame frame, Event event) {
         return switch (frame.followup()) {
             case Single(PlayerDecisionEvent<?> decision) -> decision.action().isInstance(event);

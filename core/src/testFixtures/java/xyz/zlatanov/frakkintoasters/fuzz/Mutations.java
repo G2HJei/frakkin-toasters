@@ -49,9 +49,6 @@ final class Mutations {
         }
     }
 
-    /**
-     * @return the finding for an input the game takes and the legal answers don't cover
-     */
     static Finding missing(Event taken, String component) {
         val name = taken.getClass().getSimpleName() + (component == null ? "" : "." + component);
         return Finding.of(Finding.Kind.HINT_MISSING, "missing " + name,

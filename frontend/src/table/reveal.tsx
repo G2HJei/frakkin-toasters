@@ -72,7 +72,6 @@ export const useReveal = create<RevealState>((set, get) => ({
   hide: () => set({ open: null, closing: null }),
 }));
 
-/** The sections this viewer may see on hover: the public ones, and in a sandbox the hidden ones too. */
 export function visibleSections(sections: RevealSection[], sandbox: boolean): RevealSection[] {
   return sections.filter((section) => section.cards.length > 0 && (!section.hidden || sandbox));
 }
@@ -98,7 +97,6 @@ export function useRevealHandlers(id: string, title: string, sections: RevealSec
 // a Crisis Card with the popover's padding, border and scrollbar
 const ONE_CARD = 330;
 
-// cards in rows, icons or names in a list
 function pileClass(section: RevealSection): string {
   if (section.cards.some((card) => card.icon)) {
     return 'pile icons';

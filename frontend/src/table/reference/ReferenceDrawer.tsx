@@ -45,14 +45,12 @@ export const useReference = create<ReferenceState>((set) => ({
     tab: 'sheets',
     query: '',
     focus: null,
-    // the turn panel's link opens the cheat sheets
     show: (tab = 'sheets', focus = null) => set({open: true, tab, focus, query: ''}),
     setTab: (tab) => set({tab, focus: null}),
     setQuery: (query) => set({query}),
     close: () => set({open: false, focus: null}),
 }));
 
-/** A link to the page of the rulebook where an article is. */
 export function RuleLink({article, found = rule(article)}: { article: string; found?: Rule | null }) {
     if (!found) {
         return null;
@@ -108,16 +106,13 @@ function constantLabelOfEnum(enumName: string): string {
     }[enumName] ?? enumName;
 }
 
-/** The cards whose names have every word of the query. */
 export function search(cards: ArtRef[], query: string): ArtRef[] {
     const words = query.toLowerCase().split(/\s+/).filter((word) => word.length > 0);
     return words.length === 0 ? cards : cards.filter((card) => words.every((word) => card.label.toLowerCase().includes(word)));
 }
 
 /**
- * The reference beside the table: every card by deck with a search, the character sheets, the titles' lines of
- * succession, the rulebook's sections with their pages, cheat sheets, and what left the game. It names things and points to the article; it doesn't repeat the
- * rulebook.
+ * It names things and points to the article: it doesn't repeat the rulebook.
  */
 export function ReferenceDrawer() {
     const {open, tab, query, focus} = useReference();
@@ -256,7 +251,6 @@ function Characters({focus, query}: { focus: string | null; query: string }) {
 
 const TITLES: TitleName[] = ['PRESIDENT', 'ADMIRAL', 'CAG'];
 
-// Each title's line of succession side by side, highest first: a row per character with his portrait and name.
 function Titles() {
     return (
         <>
@@ -335,7 +329,6 @@ function OutOfTheGame() {
     );
 }
 
-// The sections by what they are about.
 const RULE_GROUPS: [string, string[]][] = [
     ['Winning and secrecy', ['1.3', '2.1', '2.2', '2.3', '3.1', '3.2', '16.1', '16.2', '16.3']],
     ['Loyalty and the Cylons', ['5.1', '5.2', '5.3', '5.4', '5.5', '6.1', '6.2', '7.1', 'A3.8']],

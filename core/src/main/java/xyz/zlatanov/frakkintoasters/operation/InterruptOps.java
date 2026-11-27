@@ -33,7 +33,7 @@ public class InterruptOps extends GameOps {
     }
 
     /**
-     * The card takes effect: it leaves the window and goes to the discard pile. The caller applies its effect.
+     * The caller applies its effect.
      */
     public void resolve(PlayedInterruptCard card) {
         record(new InterruptCardResolved(card));
@@ -49,8 +49,7 @@ public class InterruptOps extends GameOps {
     }
 
     /**
-     * The ability takes effect: it leaves the window, and its player uses it (a miracle spends its token). The caller
-     * applies its effect.
+     * Its player uses the ability (a miracle spends its token); the caller applies its effect.
      */
     public void resolve(UsedRollAbility ability) {
         record(new RollAbilityResolved(ability));

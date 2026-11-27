@@ -27,11 +27,6 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
 
-/**
- * Builds the candidates of every class that may answer and keeps those its processor accepts. A record of scalars is
- * tried with every tuple of its components' values. A list is tried per size with a few witnesses of that size: size
- * 0 is a concrete answer, and each run of legal sizes a shaped one.
- */
 final class AnswerSearch {
 
     // Far above any class of the game, which has at most a few thousand candidates.
@@ -170,8 +165,7 @@ final class AnswerSearch {
     }
 
     /**
-     * @return the first and the last {@code size} positions out of {@code count}, each in their order. A source puts
-     * its elements in the order that makes the first ones legal when any of that size are
+     * A source puts its elements in the order that makes the first ones legal when any of that size are.
      */
     static List<List<Integer>> witnesses(int count, int size) {
         if (size == 0 || size == count) {

@@ -39,7 +39,6 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.STRATEGIC_PLANNING;
 
-// Real web socket clients against the running application: three players and an observer.
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = "frakkin.take-only-answers=false")
 @ActiveProfiles("dev")
 @Import(TestcontainersConfiguration.class)
@@ -75,11 +74,10 @@ class LiveGameTest {
             val input = next.apply(inMemory.view());
             input.applyTo(inMemory);
             val sender = clients.get(input.player() - 1);
-            sender.awaitToken(tokens.getLast()); // the state the input answers
+            sender.awaitToken(tokens.getLast());
             tokens.add(send(sender, input));
         }
 
-        // everyone ends at the last state, and got the states in the order of the commands
         for (val client : clients) {
             client.awaitToken(tokens.getLast());
             val received = client.received().stream()
@@ -89,7 +87,6 @@ class LiveGameTest {
             assertEquals(received, tokens.stream().filter(received::contains).toList());
         }
         assertEquals(5, clients.getLast().game().get("turn").get("number").intValue());
-        // no frame of a client holds a card that only another player knows
         for (int viewer = 1; viewer <= 4; viewer++) {
             assertNoCardsOfOthers(clients.get(viewer - 1), viewer);
         }
@@ -118,7 +115,7 @@ class LiveGameTest {
         sender.submit(oldToken, codec.writeEvent(second.submit()));
 
         assertEquals("STALE", sender.next("rejected").get("reason").stringValue());
-        assertEquals(firstToken, sender.next("game").get("token").stringValue()); // the current game
+        assertEquals(firstToken, sender.next("game").get("token").stringValue());
         clients.stream().filter(client -> client != sender).forEach(TestClient::assertNothingCame);
     }
 
@@ -134,7 +131,6 @@ class LiveGameTest {
         val holder = clients.get(1);
         assertEquals("Decide", holder.game().get("input").get("kind").stringValue());
         assertEquals("Waiting", clients.get(0).game().get("input").get("kind").stringValue());
-        // the holder's answers come with his input, the play and the pass; nobody else's input holds any
         assertEquals(2, holder.game().get("input").get("answers").get("events").size());
         assertNull(clients.get(0).game().get("input").get("answers"));
 
@@ -142,7 +138,6 @@ class LiveGameTest {
 
         holder.next("update");
         holder.next("game");
-        // the next holder is asked in secret, and nobody else hears of it
         assertEquals("Decide", clients.get(2).nextGame().get("game").get("input").get("kind").stringValue());
         List.of(clients.get(0), clients.get(3)).forEach(TestClient::assertNothingCame);
 
@@ -178,7 +173,6 @@ class LiveGameTest {
                         "--spring.datasource.password=" + postgres.getPassword())) {
             val restartedPort = Integer.parseInt(restarted.getEnvironment().getProperty("local.server.port"));
             val game = currentGame;
-            // the logins survive, and so does the game
             for (val client : clients) {
                 client.connect(game, restartedPort);
                 client.next("game");
@@ -219,11 +213,8 @@ class LiveGameTest {
         assertEquals(1008, client.awaitClose()); // the client doesn't reconnect after it
     }
 
-    /* setup */
-
     private UUID currentGame;
 
-    // The players join through the lobby, and the game starts with the scripted turns' seeded engine.
     private UUID scriptedGame() {
         return startGame(ScriptedTurns.start());
     }
@@ -249,9 +240,6 @@ class LiveGameTest {
         return currentGame;
     }
 
-    /* helpers */
-
-    // Sends the input and waits for the game that follows it, whose token it returns.
     private String send(TestClient client, ScriptedTurns.Input input) {
         if (input.submit() != null) {
             client.submit(codec.writeEvent(input.submit()));
@@ -271,7 +259,7 @@ class LiveGameTest {
 
 
 
-    // A player sees only his own cards. An observer (viewer 4) sees nobody's.
+    // An observer (viewer 4) sees nobody's.
     private static void assertNoCardsOfOthers(TestClient client, int viewer) {
         for (val message : client.received()) {
             val type = message.get("type").stringValue();

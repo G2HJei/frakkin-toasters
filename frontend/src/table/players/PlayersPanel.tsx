@@ -14,11 +14,7 @@ import { targetKey, type Target } from '../../input/answers';
 import { characterSkillSet, characterType } from '../../wire/schema';
 
 /**
- * Every player's mat: his portrait with his skill set's colors beside it and the titles and tokens in front of him
- * under it (the nukes with the Admiral),
- * his character and the user in the seat, where he is, and his cards: face up for the viewer they belong to,
- * otherwise their backs, his Loyalty Cards in a halo when the viewer looked at one. A sandbox shows the backs too, like
- * a live game, and what they hide on hover.
+ * A sandbox shows the backs too, like a live game, and what they hide on hover.
  */
 export function PlayersPanel() {
   const table = useTable();
@@ -34,7 +30,6 @@ export function PlayersPanel() {
   );
 }
 
-// Whether the user in the seat is there: a dot by his name, and a chip when he isn't, or nobody holds the seat.
 export function SeatPresence({ state }: { state: SeatState | null }) {
   if (!state) {
     return null;
@@ -50,7 +45,6 @@ export function SeatPresence({ state }: { state: SeatState | null }) {
   );
 }
 
-/** A player's mat as the game stands, e.g. beside his character sheet when the pointer is on his standee. */
 export function PlayerMatOf({ playerNumber }: { playerNumber: number }) {
   const player = useTable().game?.players?.find((candidate) => candidate.number === playerNumber);
   return player ? <PlayerMat player={player} /> : null;
@@ -88,7 +82,6 @@ function PlayerMat({ player }: { player: PlayerProjection }) {
       <div className="mat-side">
         <div className="portrait">
           {portrait ? (
-            // the character sheet in the reference, a click away
             <button
               type="button"
               className="avatar-frame avatar-button"
@@ -228,7 +221,6 @@ function faceUp<T>(cards: T[] | null, sandbox: boolean, asked = false): cards is
   return cards !== null && (!sandbox || asked);
 }
 
-/** A card that starts a move of the pending input lights up, says on hover what a click does, and a click picks it. */
 function Playable({ target, children }: { target: Target; children: ReactNode }) {
   const table = useTable();
   const { offer, onTarget } = useAnswering();
@@ -253,7 +245,6 @@ function Playable({ target, children }: { target: Target; children: ReactNode })
   );
 }
 
-// The nukes the Admiral gained or spent with the last game message, floating up once.
 function NukesDelta() {
   const { changes, version } = useChanges();
   return changes.nukes !== 0 ? (
@@ -272,7 +263,6 @@ function drawnFlags(cards: SkillCard[], gained: SkillCard[]): boolean[] {
   });
 }
 
-/** A hand of Skill Cards: the cards face up for who may see them, otherwise the back of a Skill Card with how many. */
 export function Hand({ hand, owner }: { hand: SkillHand | null; owner: number }) {
   const table = useTable();
   const { changes, version } = useChanges();
@@ -384,7 +374,6 @@ function Learned({ player }: { player: PlayerProjection }) {
   );
 }
 
-// Something the table can't see, which a sandbox shows on hover.
 function Hidden({ id, title, sections, className = '', children }: { id: string; title: string; sections: RevealSection[]; className?: string; children: ReactNode }) {
   const handlers = useRevealHandlers(id, title, sections);
   return (

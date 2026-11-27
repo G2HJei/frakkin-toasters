@@ -58,7 +58,6 @@ class ProbeTest {
         assertEquals(RESEARCH_LAB, engine.view().locate(engine.view().player(player).character()).orElseThrow());
     }
 
-    // The Movement step of turn 1: William Adama is asked where he moves.
     private static GameEngine atAdamasMove() {
         val engine = ScriptedTurns.start();
         ScriptedTurns.inputs().subList(0, 7).forEach(input -> input.apply(engine.view()).applyTo(engine));

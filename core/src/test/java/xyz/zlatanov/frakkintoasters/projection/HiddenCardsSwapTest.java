@@ -58,7 +58,6 @@ class HiddenCardsSwapTest {
         return viewers;
     }
 
-    // Each Skill Card for another of its color, and each face down Loyalty Card for another one.
     private static int swapHiddenCards(Game game, int owner) {
         var swaps = 0;
         val hand = game.player(owner).skillCards();

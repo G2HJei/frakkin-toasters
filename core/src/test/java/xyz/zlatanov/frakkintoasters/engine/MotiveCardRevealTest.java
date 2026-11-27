@@ -38,9 +38,9 @@ import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.MOTIVE;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.TACTICS;
 
 /**
- * A Cylon Leader reveals a Motive Card while the game waits for something else (rule 6.2.2.1), through {@code submit}
- * alone, restoring the game at every pause. Cavil is player 1 and the current player, with "End the Chase" and "Make an
- * Ally"; Kara "Starbuck" Thrace is player 2, William Adama (Admiral) player 3, Laura Roslin (President) player 4.
+ * A Cylon Leader reveals a Motive Card while the game waits for something else (rule 6.2.2.1). Cavil is player 1 and the
+ * current player, with "End the Chase" and "Make an Ally"; Kara "Starbuck" Thrace is player 2, William Adama (Admiral)
+ * player 3, Laura Roslin (President) player 4.
  */
 class MotiveCardRevealTest {
 
@@ -128,8 +128,6 @@ class MotiveCardRevealTest {
     private Game game() {
         return (Game) engine.view();
     }
-
-    /* assertions */
 
     private void assertWaitingFor(PendingInput expected) {
         assertEquals(EngineStatus.waiting(expected), engine.status(expected.player()));

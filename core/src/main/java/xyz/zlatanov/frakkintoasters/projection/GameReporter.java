@@ -41,15 +41,13 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
- * Reads a finished game from its journal: it applies the facts one by one to a game of its own, as a restore does, and
- * tallies what each tells on the way, with the game as it stood then (who held a character, the resources at a turn's
- * start). Nothing it reads is hidden once the game has ended.
+ * It applies the facts one by one to a game of its own, as a restore does, so each fact is read with the game as it
+ * stood then. Nothing it reads is hidden once the game has ended.
  */
 final class GameReporter {
 
     private final List<JournalEntry> journal;
 
-    // what the facts so far told
     private int                             turn;
     private Integer                         currentPlayer;
     private final Map<Integer, int[]>       statistics      = new HashMap<>();
@@ -67,7 +65,6 @@ final class GameReporter {
     // a Skill Card that just left a hand: placed into the check next, it was played into it
     private PlayerFact.CardsLost            leftHand;
 
-    // the indexes into a player's statistics
     private static final int GAINED = 0, INTO_CHECKS = 1, STRENGTH = 2, PLAYED = 3, CRISIS = 4, ABILITIES = 5, BRIG = 6;
 
     GameReporter(List<JournalEntry> journal) {
@@ -89,7 +86,6 @@ final class GameReporter {
                 .die(new Die(randomness))
                 .build();
         for (val fact : facts.subList(1, facts.size())) {
-            // who a character is, as the fact finds him
             val brigged = fact instanceof PlayerFact.CharacterMoved(var character, var to) && to == Location.BRIG
                     ? playerOf(game, character)
                     : null;

@@ -14,27 +14,17 @@ import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.view.GameView;
 import xyz.zlatanov.frakkintoasters.state.view.PlayerView;
 
-/**
- * The action of a location. The player has to be at the location, and {@link #canAct} has to allow the action.
- */
 public interface LocationEvent extends ActionEvent {
 
-    /**
-     * @return the location whose action this is
-     */
     Location location();
 
     /**
-     * @return whether the player can take the action of his location at all, whatever he then chooses. The Action step
-     * asks for a location action only then, so the decision always has a legal answer
+     * The Action step asks for a location action only then, so the decision always has a legal answer.
      */
     static boolean canAct(GameView game, PlayerView player) {
         return game.locate(player.character()).filter(location -> canAct(game, player, location)).isPresent();
     }
 
-    /**
-     * @return whether the player can take the action of the location. Each location's own rules are in its processor
-     */
     static boolean canAct(GameView game, PlayerView player, Location location) {
         // Characters may move into a damaged location, but may not use its action (rule 11.7.2.2).
         if (game.boards().galactica().isDamaged(location) || game.boards().pegasus().isDamaged(location)) {
@@ -51,7 +41,6 @@ public interface LocationEvent extends ActionEvent {
      * "Unorthodox Plan"
      */
     static boolean canActIgnoringDamage(GameView game, PlayerView player, Location location) {
-        // The negative abilities that forbid a location, or make him pay to activate it, wherever he does it from.
         if (!CharacterBans.canActivate(game, player, location) || !ActionCosts.canPayLocationCost(game, player, location)) {
             return false;
         }

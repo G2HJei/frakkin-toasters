@@ -19,7 +19,6 @@ export function SiteFrame({ children }: { children: ReactNode }) {
   );
 }
 
-/** The frame as a layout route. */
 export function Site() {
   return (
     <SiteFrame>
@@ -28,12 +27,10 @@ export function Site() {
   );
 }
 
-/** The brand to the home page, the site's pages, and the user's menu, or the login while nobody is logged in. */
 export function SiteHeader() {
   const me = useMe();
   return (
     <header className="site-header">
-      {/* as wide as the pages under it */}
       <div className="site-header-inner">
         <Link to="/" className="brand">
           <img src="/logo.svg" alt="" />
@@ -59,7 +56,6 @@ export function SiteHeader() {
   );
 }
 
-/** The user's name, opening the profile, another user in this tab (the dev profile) and the logout. */
 function UserMenu({ me }: { me: Me }) {
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
@@ -69,7 +65,6 @@ function UserMenu({ me }: { me: Me }) {
   const navigate = useNavigate();
   const ownUser = tabUser() !== null;
 
-  // a click anywhere else or Escape closes it
   useEffect(() => {
     if (!open) {
       return;

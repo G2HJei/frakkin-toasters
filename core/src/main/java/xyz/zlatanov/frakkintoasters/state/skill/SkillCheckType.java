@@ -139,9 +139,6 @@ public enum SkillCheckType {
      * The printed difficulty. Cards like "Declare Emergency" and "Jury Rigged" reduce it only for the active skill check.
      */
     private final int                  difficulty;
-    /**
-     * The printed partial pass number, {@code null} when the skill check has no partial pass result.
-     */
     private final Integer              partialPass;
     private final List<SkillCardColor> skillCheckColors;
 
@@ -173,9 +170,6 @@ public enum SkillCheckType {
         return SUPER_CRISES.contains(this);
     }
 
-    /**
-     * @return whether this is the skill check of a Crisis Card: not a location's, not a Super Crisis Card's
-     */
     public boolean onCrisisCard() {
         return !triggeredByLocation() && !isSuperCrisis();
     }

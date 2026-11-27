@@ -45,9 +45,6 @@ import static xyz.zlatanov.frakkintoasters.event.player.SendToSickbayEventProces
 @NoArgsConstructor(access = PRIVATE)
 public class FollowupUtils {
 
-    /**
-     * Like {@link Followup#all(Followup...)}, but skips the parts without effect, e.g. when nobody is in a location.
-     */
     public static Followup allOf(Followup... followups) {
         return all(Arrays.stream(followups)
                 .filter(followup -> !NONE.equals(followup))
@@ -73,10 +70,6 @@ public class FollowupUtils {
                 .toList();
     }
 
-    /**
-     * @return a die roll with the interrupt windows around it, then the event that reads its result from
-     * {@code TurnView.dieRoll()}
-     */
     public static Followup rollDie(Event result) {
         return rollDie(new BeforeDieRoll(), new AfterDieRoll(), result);
     }
@@ -101,9 +94,6 @@ public class FollowupUtils {
         return new DrawSkillCardsOfColorEvent(playerNumber, TREACHERY, count);
     }
 
-    /**
-     * @return the decision, or doing nothing instead
-     */
     public static Followup optional(int playerNumber, Event decision) {
         return one(decision, new NoOpEvent(playerNumber));
     }
@@ -148,9 +138,6 @@ public class FollowupUtils {
         return all(followups.toArray(Followup[]::new));
     }
 
-    /**
-     * Each player may play cards before the skill check, then they are revealed together.
-     */
     public static Followup playCardsBeforeSkillCheck(GameView game) {
         return all(
                 eachPlayerFromTheLeft(game, PlayCardsBeforeSkillCheckEvent.class),
@@ -165,10 +152,6 @@ public class FollowupUtils {
         return eachPlayerFromTheLeft(game, eventClass, player -> true);
     }
 
-    /**
-     * @return {@link #eachPlayerFromTheLeft(GameView, Class)} for the players who are asked, e.g. those who may put
-     * cards into the check
-     */
     public static Followup eachPlayerFromTheLeft(GameView game, Class<? extends PlayerEvent> eventClass,
                                                  Predicate<PlayerView> asked) {
         val fromTheCurrent = playersFrom(game, game.turn().currentPlayerNumber());

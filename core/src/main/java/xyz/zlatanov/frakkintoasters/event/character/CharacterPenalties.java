@@ -14,10 +14,6 @@ import static xyz.zlatanov.frakkintoasters.event.player.DiscardKind.HAND;
 import static xyz.zlatanov.frakkintoasters.event.player.DiscardKind.RANDOM;
 import static xyz.zlatanov.frakkintoasters.state.character.CharacterAbility.*;
 
-/**
- * The negative abilities that make a player lose something when something happens. Each applies only while the
- * ability is in effect ({@link PlayerView#hasAbility}), and adds nothing to a game without its character.
- */
 @NoArgsConstructor(access = PRIVATE)
 public final class CharacterPenalties {
 

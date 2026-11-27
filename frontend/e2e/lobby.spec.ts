@@ -134,7 +134,6 @@ async function whoIsAsked<T extends { page: Page }>(players: T[]): Promise<T> {
   throw new Error('Nobody is asked');
 }
 
-// the answer that picks a character is named after him
 function answerName(constant: string): string {
   return { WILLIAM_ADAMA: 'William Adama', LAURA_ROSLIN: 'Laura Roslin', KARA_STARBUCK_THRACE: 'Kara "Starbuck" Thrace' }[constant] ?? constant;
 }

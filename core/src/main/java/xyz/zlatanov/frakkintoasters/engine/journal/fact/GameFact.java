@@ -79,7 +79,6 @@ public sealed interface GameFact extends Fact {
     record LossReductionAdded(Resource resource) implements GameFact {
     }
 
-    // A loss of the resource was reduced, which used the reduction up.
     record LossReduced(Resource resource) implements GameFact {
     }
 
@@ -87,7 +86,6 @@ public sealed interface GameFact extends Fact {
     record CylonShipsHeld() implements GameFact {
     }
 
-    // A player did something limited to once a turn, e.g. the CAG's action while piloting.
     record TurnLimitUsed(int playerNumber, TurnLimit limit) implements GameFact {
     }
 

@@ -34,16 +34,11 @@ public class AlertViperPilotEventProcessor extends EventProcessor<AlertViperPilo
                 .isPresent();
     }
 
-    // The viper that was placed, still in space and unmanned.
     public static boolean canPilot(GameView game, int viperId) {
         return game.boards().galactica().shipsInSpace(HumanFighterView.class).stream()
                 .anyMatch(fighter -> fighter.id() == viperId && fighter.pilot() == null);
     }
 
-    /**
-     * @return right after vipers were placed from the "Reserves", the choice of one to pilot or none, for the player who
-     * can use "Alert Viper Pilot", {@link Followup#NONE} when nobody can
-     */
     public static Followup offer(GameView game, List<Integer> viperIds) {
         return game.players().stream()
                 .filter(player -> canUse(game, player))
@@ -62,10 +57,6 @@ public class AlertViperPilotEventProcessor extends EventProcessor<AlertViperPilo
                 .orElse(NONE);
     }
 
-    /**
-     * @return whether a player has "Alert Viper Pilot", so a launch of several vipers asks after them
-     * ({@link OfferAlertViperPilotEvent})
-     */
     public static boolean mayBeOffered(GameView game) {
         return game.players().stream()
                 .anyMatch(player -> player.hasAbility(CharacterAbility.ALERT_VIPER_PILOT));

@@ -4,9 +4,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * The wire schema, the same JSON as the frontend's {@code src/wire/schema.json}.
- */
 @RestController
 public class SchemaController {
 

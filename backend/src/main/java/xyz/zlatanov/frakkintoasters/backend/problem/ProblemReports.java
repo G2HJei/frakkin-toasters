@@ -21,9 +21,8 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * "Report a problem" from a game's table: a user's words about the game, stored with the game and the journal's last
- * sequence, so the report can be looked at where the game stood (a bug report with the journal is milestone E).
- * Whoever can open the table may report: a participant, or anyone watching a finished game.
+ * Stored with the journal's last sequence, so the report can be looked at where the game stood (a bug report with the
+ * journal is milestone E).
  */
 @RestController
 @RequiredArgsConstructor

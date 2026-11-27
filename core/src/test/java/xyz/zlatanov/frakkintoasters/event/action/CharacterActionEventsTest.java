@@ -14,9 +14,6 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.groupingBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * Every "Action:" ability of a character sheet has exactly one {@link CharacterActionEvent}.
- */
 class CharacterActionEventsTest {
 
     @Test

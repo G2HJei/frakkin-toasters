@@ -36,9 +36,6 @@ public final class RemoteActions {
                 .toList();
     }
 
-    /**
-     * @return the action at the location, then its end
-     */
     public static Followup actAt(GameOps ops, int playerNumber, Location location) {
         ops.allowRemoteAction(playerNumber, location);
         return all(new PlayerDecisionEvent<>(playerNumber, LocationEvent.class), new EndRemoteActionEvent(playerNumber));

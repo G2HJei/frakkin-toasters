@@ -12,9 +12,6 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.discard;
 
 /**
- * Runs the action of a location. The player has to be at the location, or an ability lets him act there from anywhere
- * ({@code TurnView.remoteActionLocation}), and {@link LocationEvent#canAct} has to allow it, e.g. the location can't be
- * damaged. Subclasses check the details of the event in {@link #isValidAction()} and take the action in {@link #act()}.
  * A player whose ability puts a cost on activating a location ({@link ActionCosts#locationCost}) pays it first: the
  * discard, then the same event again, which takes the action.
  */

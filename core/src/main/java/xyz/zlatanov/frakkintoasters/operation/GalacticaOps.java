@@ -38,7 +38,7 @@ public class GalacticaOps extends BattlestarOps {
     }
 
     /**
-     * @return the drawn damage tokens, which are in no pile until resolved or returned
+     * The drawn tokens are in no pile until resolved or returned.
      */
     public List<GalacticaDamage> drawDamage(int count) {
         return draw(GALACTICA_DAMAGE, count);
@@ -63,9 +63,6 @@ public class GalacticaOps extends BattlestarOps {
         }
     }
 
-    /**
-     * Places the starting ships.
-     */
     public void setUp() {
         val vipers = galacticaBoard().reserves().stream()
                 .filter(s -> s.getClass() == Viper.class)
@@ -85,9 +82,6 @@ public class GalacticaOps extends BattlestarOps {
         loseResource(POPULATION, populationLost);
     }
 
-    /**
-     * @return how much morale was lost
-     */
     public int decreaseMorale(int moraleLost) {
         return loseResource(MORALE, moraleLost);
     }
@@ -113,7 +107,7 @@ public class GalacticaOps extends BattlestarOps {
     }
 
     /**
-     * @return the drawn Destination Cards, which are in no pile until placed or returned
+     * The drawn cards are in no pile until placed or returned.
      */
     public List<DestinationCard> drawDestinationCards(int count) {
         return draw(DESTINATION, count);
@@ -127,9 +121,6 @@ public class GalacticaOps extends BattlestarOps {
         record(new CardsDiscarded(DESTINATION, List.of(card)));
     }
 
-    /**
-     * Places the card next to the Objective Card, where its distance counts.
-     */
     public void reachDestination(DestinationCard card) {
         record(new DestinationReached(card));
     }
@@ -192,9 +183,6 @@ public class GalacticaOps extends BattlestarOps {
         return takeFromSupply(Basestar.class, location);
     }
 
-    /**
-     * Places a centurion at the start of the Boarding Party track, if one is left.
-     */
     public void placeCenturion() {
         game.cylonShips().nextCenturion()
                 .ifPresent(centurion -> record(new ShipMoved(centurion.id(), CENTURION_SUPPLY, BOARDING_PARTY, null)));

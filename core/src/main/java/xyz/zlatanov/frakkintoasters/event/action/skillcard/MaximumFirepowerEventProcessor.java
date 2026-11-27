@@ -13,7 +13,6 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.MAXIMUM_FIR
 
 public class MaximumFirepowerEventProcessor extends SkillCardEventProcessor<MaximumFirepowerEvent> {
 
-    // He pilots a viper with a Cylon ship to attack in its space area.
     public static boolean canPlay(GameView game, PlayerView player) {
         return game.boards().galactica().pilotedFighter(player.character())
                 .filter(fighter -> !ActivateViperEventProcessor.activations(game, fighter, true).isEmpty())

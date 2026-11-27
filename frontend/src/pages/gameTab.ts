@@ -4,7 +4,6 @@ import { withTabUser } from '../api/devTab';
 export interface GameTab {
   /** Shows the game in the tab, or in this one when the browser blocked the tab. */
   go(id: string): void;
-  /** Closes the tab, when the request failed. */
   close(): void;
 }
 

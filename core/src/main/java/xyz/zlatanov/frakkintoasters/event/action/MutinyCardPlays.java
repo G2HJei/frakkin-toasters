@@ -15,9 +15,6 @@ import static lombok.AccessLevel.PRIVATE;
 @NoArgsConstructor(access = PRIVATE)
 public final class MutinyCardPlays {
 
-    /**
-     * @return whether the player could play the card now, if he held it. Each card's own rules are in its processor
-     */
     public static boolean canPlay(GameView game, PlayerView player, MutinyCard card) {
         // Revealed Cylons never play them, Cylon Leaders only while Infiltrating (rules 5.2.3.4 and 5.2.3.5).
         if (!player.isHuman()) {
@@ -38,9 +35,6 @@ public final class MutinyCardPlays {
         };
     }
 
-    /**
-     * @return the event that plays the card
-     */
     public static Class<? extends MutinyCardEvent> eventClass(MutinyCard card) {
         return switch (card) {
             case ARMED_RESISTANCE -> ArmedResistanceEvent.class;
@@ -68,9 +62,6 @@ public final class MutinyCardPlays {
         };
     }
 
-    /**
-     * @return whether the player holds a Mutiny Card he can play now
-     */
     public static boolean canPlayAny(GameView game, PlayerView player) {
         return player.mutinyCards().cards().stream().distinct().anyMatch(card -> canPlay(game, player, card));
     }

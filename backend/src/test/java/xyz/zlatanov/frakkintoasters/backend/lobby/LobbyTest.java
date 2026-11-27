@@ -63,7 +63,7 @@ class LobbyTest extends BackendTest {
         lobby.join(room.id(), starbuck, Role.PLAYER);
         val apollo = createUser("Apollo");
         lobby.join(room.id(), apollo, Role.PLAYER);
-        lobby.leave(room.id(), roslin); // seats 1, 3 and 4 are left
+        lobby.leave(room.id(), roslin);
         assertConflict(() -> lobby.start(room.id(), starbuck)); // not the host
 
         val started = lobby.start(room.id(), host);

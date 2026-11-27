@@ -16,10 +16,6 @@ import static xyz.zlatanov.frakkintoasters.state.character.CharacterAbility.POLI
 
 public class PoliticallyAdroitEventProcessor extends EventProcessor<PoliticallyAdroitEvent> {
 
-    /**
-     * @return whether the player can give a Skill Card to the other one: he has the ability and a card, and the other is
-     * another human at his location
-     */
     public static boolean canGive(GameView game, PlayerView player, PlayerView target) {
         val location = game.locate(player.character());
         return player.hasAbility(POLITICALLY_ADROIT)
@@ -31,9 +27,6 @@ public class PoliticallyAdroitEventProcessor extends EventProcessor<PoliticallyA
                 && game.locate(target.character()).equals(location);
     }
 
-    /**
-     * @return whether the player can give a Skill Card to anyone
-     */
     public static boolean canGiveToAnyone(GameView game, PlayerView player) {
         return game.players().stream().anyMatch(other -> canGive(game, player, other));
     }

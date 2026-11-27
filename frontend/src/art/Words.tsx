@@ -32,7 +32,6 @@ function Icon({ icon }: { icon: PartIcon }) {
   return <img className={`part-icon icon-${icon.shape}`} src={icon.url} alt="" draggable={false} data-icon={icon.key} aria-hidden="true" />;
 }
 
-/** The image a value of the schema names: a card, a character, a location, a Skill Card. For `LabelContext.artOf`. */
 export function partArt(value: unknown, type: TypeRef): ArtRef | null {
   if (type.t === 'enum' && typeof value === 'string') {
     return enumArt(type.name ?? '', value);
@@ -43,11 +42,6 @@ export function partArt(value: unknown, type: TypeRef): ArtRef | null {
   return null;
 }
 
-/**
- * The icon in front of a value's words: a resource's (tinted, like the board's gauges), a ship's, a title's insignia,
- * a token, the die's face ("Die"), or a character's portrait, the token that leads a line of the log. For
- * `LabelContext.iconOf`.
- */
 export function partIcon(enumName: string, constant: unknown): PartIcon | null {
   const icon = (art: ArtRef | null, shape: string, tint = false): PartIcon | null => (art ? { key: art.key, url: art.url, shape, tint } : null);
   switch (enumName) {

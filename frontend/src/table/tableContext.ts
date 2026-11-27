@@ -18,7 +18,6 @@ export interface TableContext extends LabelContext {
   userName(playerNumber: number): string | null;
   seatState(playerNumber: number): SeatState | null;
   players(): { number: number; label: string }[];
-  // a ship anywhere on the boards, or out of the game
   ship(id: number): ShipProjection | null;
   // the Skill Cards of the draw piles, which a sandbox sees
   deckSkillCards(): SkillCard[];

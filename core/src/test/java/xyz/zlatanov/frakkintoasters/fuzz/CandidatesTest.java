@@ -31,7 +31,6 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.LAURA_ROSLI
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.CONSOLIDATE_POWER;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.EXECUTIVE_ORDER;
 
-// The fuzzer's answers to decisions whose answers have a shape, found through the game's legal answers.
 class CandidatesTest extends TestHarness {
 
     private final List<Finding> findings = new ArrayList<>();

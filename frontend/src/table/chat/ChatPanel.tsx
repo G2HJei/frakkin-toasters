@@ -9,7 +9,6 @@ import { useTable } from '../tableContext';
 export const MAX_LENGTH = 500;
 
 export interface ChatPanelProps {
-  // the switch back to the log, over the panel's top right
   toggle: ReactNode;
   // whether the viewer writes: a player or an observer of the game; whoever only watches a finished game reads
   writes: boolean;
@@ -18,11 +17,6 @@ export interface ChatPanelProps {
   send(text: string): boolean;
 }
 
-/**
- * The public chat, in place of the log: one for everyone at the table. A message shows its writer's portrait (his
- * seat's character) or "observer", his name and the time; a red line marks where the viewer left off when he opened the
- * chat. Enter sends, Shift+Enter breaks the line.
- */
 export function ChatPanel({ toggle, writes, seenBefore, send }: ChatPanelProps) {
   const table = useTable();
   const messages = useChatStore((state) => state.messages);

@@ -131,8 +131,6 @@ class CrisisCardFollowupsTest extends TestHarness {
         assertEquals(new ActivateCylonBasestarsEvent(), CrisisCardFollowups.activation(CylonActivation.ACTIVATE_BASESTARS));
     }
 
-    /* the Cylon Fleet crises */
-
     @Test
     void shouldResolveDetente() {
         assertEquals(all(new ReturnVipersToReservesEvent(), new AdvancePursuitTrackEvent()), followup(DETENTE, TOP));
@@ -163,8 +161,6 @@ class CrisisCardFollowupsTest extends TestHarness {
     private static Event launchHimself(int playerNumber) {
         return new PlayerDecisionEvent<>(playerNumber, LaunchViperEvent.class, EventConstraint.MUST_LAUNCH_IN_VIPER);
     }
-
-    /* alternate instructions and die rolls */
 
     @Test
     void shouldResolveTheAlternateInstructionsOnTheCurrentPlayer() {
@@ -272,8 +268,6 @@ class CrisisCardFollowupsTest extends TestHarness {
                 followup(FULFILLER_OF_PROPHECY, BOTTOM));
     }
 
-    /* resources */
-
     @Test
     void shouldResolveWidespreadStarvation() {
         assertEquals(single(lose(FOOD, 2)), followup(WIDESPREAD_STARVATION, TOP));
@@ -294,8 +288,6 @@ class CrisisCardFollowupsTest extends TestHarness {
         assertEquals(all(lose(POPULATION, 1), lose(FUEL, 1)), followup(card, BOTTOM));
     }
 
-    /* galactica and jump preparation */
-
     @Test
     void shouldResolveControversialManuscript() {
         assertEquals(single(lose(MORALE, 1)), followup(CONTROVERSIAL_MANUSCRIPT, TOP));
@@ -309,8 +301,6 @@ class CrisisCardFollowupsTest extends TestHarness {
         assertEquals(all(lose(FUEL, 1), new DecreaseJumpPreparationEvent()), followup(LABOR_DISPUTE, BOTTOM));
     }
 
-    /* ships and sickbay */
-
     @Test
     void shouldResolveHiddenExplosives() {
         assertEquals(all(new DestroyRaptorEvent(), new SendToSickbayEvent(CURRENT)), followup(HIDDEN_EXPLOSIVES, TOP));
@@ -323,8 +313,6 @@ class CrisisCardFollowupsTest extends TestHarness {
         assertEquals(all(lose(MORALE, 1), new SendToSickbayEvent(CURRENT)), followup(card, TOP));
         assertEquals(all(lose(FUEL, 1), new DestroyRaptorEvent()), followup(card, BOTTOM));
     }
-
-    /* skill cards */
 
     @Test
     void shouldResolveAmbushedByThePress() {
@@ -375,8 +363,6 @@ class CrisisCardFollowupsTest extends TestHarness {
 
         assertEquals(presidentThenCurrentPlayerDiscard(CURRENT), followup(WATER_SHORTAGE_RAIDERS, BOTTOM));
     }
-
-    /* revealed Cylons */
 
     @ParameterizedTest
     @EnumSource(value = CrisisCard.class, names = {"RESCUE_MISSION_BASESTAR", "RESCUE_MISSION_RAIDER"})

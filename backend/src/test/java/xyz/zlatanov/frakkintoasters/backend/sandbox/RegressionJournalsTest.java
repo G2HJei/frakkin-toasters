@@ -34,7 +34,6 @@ class RegressionJournalsTest {
                 () -> RegressionJournals.engine(file)));
     }
 
-    // A journal of the fuzzer: its input does what the fix made it do.
     @TestFactory
     Stream<DynamicTest> everyJournalInputDoesWhatItExpects() {
         record Exported(Path file, Repro repro) {
@@ -46,7 +45,6 @@ class RegressionJournalsTest {
                         exported.file().getFileName() + " " + exported.repro().expect().json(), exported.repro()::check));
     }
 
-    // The scripted turns as an example: they end at the second player's Receive Skills step of turn 5.
     @Test
     void theScriptedTurnsEndInTurn5() {
         val engine = RegressionJournals.engine("scripted-turns.json");
@@ -54,7 +52,6 @@ class RegressionJournalsTest {
         assertEquals(5, engine.view().turn().number());
     }
 
-    // The scripted turns but the last, a discard, with that discard as the input that has to run.
     @Test
     void aJournalWithItsLastInputGoesThroughWriteReadAndApply(@TempDir Path folder) {
         val engine = ScriptedTurns.start();
@@ -77,7 +74,6 @@ class RegressionJournalsTest {
         assertEquals(GameSnapshot.of((Game) ScriptedTurns.play().view()), GameSnapshot.of((Game) played.view()));
     }
 
-    // An option as the input: the scripted turns up to the choice of the first Crisis Card's section.
     @Test
     void anOptionGoesThroughWriteAndRead(@TempDir Path folder) {
         val engine = ScriptedTurns.start();

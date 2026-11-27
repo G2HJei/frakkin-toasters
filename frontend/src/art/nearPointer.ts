@@ -1,4 +1,3 @@
-// Where a popover goes: next to the pointer, never off the window.
 import { useLayoutEffect, type RefObject } from 'react';
 
 export interface Point {
@@ -20,7 +19,6 @@ function along(pointer: number, size: number, room: number): number {
   return Math.max(MARGIN, Math.min(pointer + GAP, room - MARGIN - size));
 }
 
-/** The widest a popover can be and still go beside the point, after or before it, without covering it. */
 export function roomBeside(point: Point): number {
   return Math.max(window.innerWidth - point.x, point.x) - GAP - MARGIN;
 }

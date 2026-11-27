@@ -51,9 +51,6 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipZone.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 
-/**
- * Applies each kind of fact to a prepared state and checks the result.
- */
 class FactApplierTest {
 
     Game      game              = Game.builder().build();
@@ -67,8 +64,6 @@ class FactApplierTest {
     void apply(Fact fact) {
         FactApplier.apply(game, fact);
     }
-
-    /* BoardFact */
 
     @Test
     void resourceDecreasedLowersTheResourceButNotBelowZero() {
@@ -171,8 +166,6 @@ class FactApplierTest {
         assertTrue(game.boards().pegasus().engineRoomActivated());
     }
 
-    /* DeckFact */
-
     @Test
     void deckShuffledSetsTheDrawOrderAndClearsTheDiscardPile() {
         val deck = game.decks().<SkillCard>deck(DeckId.POLITICS);
@@ -244,8 +237,6 @@ class FactApplierTest {
         assertEquals(copies - 1, deck.cards().stream().filter(pulled::equals).count());
         assertEquals(List.of(), deck.discardedCards());
     }
-
-    /* GameFact */
 
     @Test
     void gameStartedChangesNothing() {
@@ -512,8 +503,6 @@ class FactApplierTest {
         assertEquals(Optional.of(CYLONS), game.outcome());
     }
 
-    /* InterruptFact */
-
     @Test
     void interruptCardsGoIntoTheOpenWindowAndLeaveItWhenReturnedOrResolved() {
         val returned = new PlayedInterruptCard(1, strategicPlanning, null);
@@ -595,8 +584,6 @@ class FactApplierTest {
         apply(new RaiderMissed(GALACTICA_SPACE_4_OCLOCK));
         assertEquals(Map.of(), game.turn().raidersToMiss());
     }
-
-    /* PlayerFact */
 
     @Test
     void characterSelectedSetsTheCharacter() {
@@ -757,8 +744,6 @@ class FactApplierTest {
         assertFalse(game.player(1).isInfiltrating());
     }
 
-    /* ShipFact */
-
     @Test
     void shipMovedFromTheCylonSupplyToSpace() {
         val raider = game.cylonShips().raiders().getLast();
@@ -861,8 +846,6 @@ class FactApplierTest {
         apply(new BasestarDamageCleared(basestar.id()));
         assertTrue(basestar.damage().isEmpty());
     }
-
-    /* SkillCheckFact */
 
     SkillCheck startCheck() {
         apply(new SkillCheckFact.SkillCheckStarted(SkillCheckType.values()[0]));
@@ -998,8 +981,6 @@ class FactApplierTest {
 
         assertNull(game.activeSkillCheck());
     }
-
-    /* TitleFact */
 
     @Test
     void titleFactsAssignTheTitlesAndTheQuorumCard() {

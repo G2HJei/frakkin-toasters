@@ -30,9 +30,6 @@ public class SandboxController {
 
     private final Sandboxes sandboxes;
 
-    /**
-     * @param seed {@code null} for a random one
-     */
     public record NewSandbox(int playerCount, Long seed, String name) {
     }
 

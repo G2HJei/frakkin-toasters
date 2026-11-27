@@ -21,8 +21,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-// Who is there: the room page's polls in a lobby, the connections once the game runs, and a connection that stops
-// pinging is closed. The silence is short here, so the sweep comes within the test.
+// The silence is short, so the sweep comes within the test.
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"frakkin.socket-silence=3s", "frakkin.socket-sweep=250ms"})
 @ActiveProfiles("dev")
 @Import(TestcontainersConfiguration.class)
@@ -82,7 +81,6 @@ class PresenceLiveTest {
         pinging.next("pong");
     }
 
-    // Three users in a lobby the first hosts.
     private UUID lobby() {
         for (val name : List.of("Adama", "Roslin", "Starbuck")) {
             val client = new TestClient(port);

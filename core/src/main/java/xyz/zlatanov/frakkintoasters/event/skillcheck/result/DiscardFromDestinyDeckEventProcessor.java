@@ -17,8 +17,8 @@ public class DiscardFromDestinyDeckEventProcessor extends EventProcessor<Discard
     private static final Comparator<SkillCard> BY_CARD  = Comparator.comparing(SkillCard::type).thenComparing(SkillCard::value);
 
     /**
-     * @return a discard for every distinct pair of the Destiny cards, or the whole deck when it holds fewer. The player
-     * looked at the deck, so the cards are his options: only he sees them, and the browser doesn't know the deck
+     * The player looked at the deck, so the cards are his options: only he sees them, and the browser doesn't know the
+     * deck.
      */
     public static List<DiscardFromDestinyDeckEvent> options(GameView game, int playerNumber) {
         val cards = game.decks().destiny().cards();

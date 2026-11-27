@@ -20,7 +20,6 @@ export function gameSummary(report: GameReport): string {
   ].join(' · ');
 }
 
-/** A turning point in a sentence. */
 export function momentLabel(moment: Moment, context: LabelContext): string {
   const who = moment.character ? constantLabel('Character', moment.character) : moment.playerNumber !== null ? context.playerName(moment.playerNumber) : 'Someone';
   switch (moment.kind) {

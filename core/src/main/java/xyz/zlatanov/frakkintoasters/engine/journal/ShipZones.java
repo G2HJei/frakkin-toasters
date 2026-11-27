@@ -8,9 +8,6 @@ import xyz.zlatanov.frakkintoasters.state.ship.*;
 
 import java.util.Collection;
 
-/**
- * Takes a ship (or a centurion) out of a zone by id and puts it in another zone. Used by {@link FactApplier}.
- */
 final class ShipZones {
 
     private ShipZones() {

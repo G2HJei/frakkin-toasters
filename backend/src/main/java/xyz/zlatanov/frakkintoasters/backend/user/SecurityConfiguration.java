@@ -32,9 +32,8 @@ import java.io.IOException;
 import java.util.UUID;
 
 /**
- * Logins through Google and Discord, with a server-side HTTP session whose cookie the web socket handshake uses too.
- * CSRF protection stays on for the REST calls: the client sends the {@code XSRF-TOKEN} cookie back in the
- * {@code X-XSRF-TOKEN} header.
+ * A server-side HTTP session, whose cookie the web socket handshake uses too. CSRF protection stays on for the REST
+ * calls: the client sends the {@code XSRF-TOKEN} cookie back in the {@code X-XSRF-TOKEN} header.
  */
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(LoginProviders.class)
@@ -103,9 +102,6 @@ public class SecurityConfiguration {
         return http.build();
     }
 
-    /**
-     * Puts the user in the HTTP session, for the REST calls and the web socket handshake alike.
-     */
     static void logIn(UUID userId, HttpServletRequest request, HttpServletResponse response, SecurityContextRepository contexts) {
         // a session from before the login gets a new id, against session fixation; saving the context creates one otherwise
         if (request.getSession(false) != null) {

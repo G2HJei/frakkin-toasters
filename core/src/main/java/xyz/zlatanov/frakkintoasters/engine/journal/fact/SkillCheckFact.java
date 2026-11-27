@@ -9,9 +9,6 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType;
 
 import java.util.List;
 
-/**
- * Facts about the active skill check.
- */
 public sealed interface SkillCheckFact extends Fact {
 
     record SkillCheckStarted(SkillCheckType type) implements SkillCheckFact {
@@ -20,7 +17,6 @@ public sealed interface SkillCheckFact extends Fact {
     record TargetChosen(int playerNumber) implements SkillCheckFact {
     }
 
-    // The revealed Cylon who played the Super Crisis Card of the check.
     record PlayedBy(int playerNumber) implements SkillCheckFact {
     }
 

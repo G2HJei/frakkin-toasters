@@ -80,10 +80,6 @@ public class ChooseCrisisTargetEventProcessor extends EventProcessor<ChooseCrisi
         };
     }
 
-    /**
-     * @return the players the chooser can pick, and {@code null} when he can give the card's other answer. Empty when
-     * there is nothing to choose, so no decision is asked
-     */
     public static List<Integer> legalTargets(GameView game, CrisisCard card) {
         val chooser = chooser(game, card);
         val targets = new ArrayList<Integer>();

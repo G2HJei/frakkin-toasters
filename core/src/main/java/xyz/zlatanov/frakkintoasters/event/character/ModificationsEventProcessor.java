@@ -23,8 +23,7 @@ import static xyz.zlatanov.frakkintoasters.state.character.CharacterAbility.MODI
 public class ModificationsEventProcessor extends EventProcessor<ModificationsEvent> {
 
     /**
-     * @return the card's activation, or the activation the player who can use the ability picks instead. The card's
-     * names nobody, so the choice is his
+     * The card's activation names nobody, so the choice is the player's who can use "Modifications".
      */
     public static Followup offer(GameView game, Event cardActivation) {
         return simon(game)

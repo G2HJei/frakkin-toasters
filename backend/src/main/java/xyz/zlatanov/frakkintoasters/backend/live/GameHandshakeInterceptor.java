@@ -19,11 +19,6 @@ import xyz.zlatanov.frakkintoasters.projection.Viewer;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * The handshake of {@code /ws/games/{gameBundleId}} needs a logged in user who is a participant of the game, or any user
- * but a banned one for a finished game, which he watches: its URL is a read-only link. That gives the connection its
- * user, its game and its viewer: player n, an observer, or the sandbox.
- */
 @Component
 @RequiredArgsConstructor
 public class GameHandshakeInterceptor implements HandshakeInterceptor {

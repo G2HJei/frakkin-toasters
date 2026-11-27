@@ -33,39 +33,17 @@ import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.CYLON_FLEET
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.CYLON_SEND_TO_BRIG;
 
 /**
- * Base test class for event-related tests.
- * <p>
- * This class provides a test harness that replaces production game components with fake/testable versions
- * to streamline testing of game events. It maintains references to all major game components including
- * boards, ships, and various decks of cards.
- * <p>
- * Test classes should extend this class and use {@link #setUpGame(Game)} to initialize the test environment
- * with a game template. All deck implementations and the die are automatically replaced with fake versions
- * that allow precise control over randomness during testing.
- *
- * @see FakeDie
- * @see FakeDeck
+ * Replaces the decks and the die of the game with fakes ({@link FakeDeck}, {@link FakeDie}), so a test controls every
+ * draw and roll.
  */
 public abstract class TestHarness {
 
-    /**
-     * the game under test
-     */
     protected Game game;
 
-    /**
-     * the journal of the game under test: every fact the ops record ends up here
-     */
     protected Journal journal;
 
-    /**
-     * applies facts to the game under test and appends them to {@link #journal}
-     */
     protected FactRecorder recorder;
 
-    /**
-     * game ops bound to the game under test
-     */
     protected GameOps ops;
 
     protected GalacticaBoard  galacticaBoard;
@@ -94,14 +72,6 @@ public abstract class TestHarness {
     protected FakeDeck<LoyaltyCard>     loyaltyNotCylonDeck;
     protected FakeDeck<MutinyCard>      mutinyDeck;
 
-    /**
-     * Sets up the game under test with default settings. All production components (decks, die) will be
-     * replaced with fake/testable versions.
-     * <p>
-     * Equivalent to calling {@code setUpGame(Game.builder().build())}.
-     *
-     * @see #setUpGame(Game)
-     */
     @BeforeEach
     protected void setUpGame() {
         setUpGame(Game.builder().build());
@@ -111,12 +81,6 @@ public abstract class TestHarness {
         setUpGame(Game.builder(playerCount).build());
     }
 
-    /**
-     * Sets up the game under test. All production components (decks, die) will be replaced with fake/testable versions
-     * while preserving the game state (players, boards, current player, etc.)
-     *
-     * @param template the game instance to use as a template for initializing the test game
-     */
     protected void setUpGame(Game template) {
         this.galacticaBoard = template.boards().galactica();
         this.pegasusBoard = template.boards().pegasus();
@@ -181,8 +145,6 @@ public abstract class TestHarness {
         this.ops = new GameOps(game, recorder);
     }
 
-    /* === UTILITY METHODS === */
-    /*  General */
     protected void nextRoll(int result) {
         die.nextRoll(result);
     }
@@ -206,7 +168,6 @@ public abstract class TestHarness {
         return galacticaBoard.locate(ship);
     }
 
-    /* Player */
     protected Player player(int playerNumber) {
         return game.player(playerNumber);
     }
@@ -225,7 +186,6 @@ public abstract class TestHarness {
                 .reveal(CYLON_SEND_TO_BRIG);
     }
 
-    /* Ships */
     protected Basestar basestar() {
         return cylonShips.basestar().orElseThrow();
     }
@@ -320,8 +280,6 @@ public abstract class TestHarness {
                 ? cylonFleetBoard
                 : galacticaBoard;
     }
-
-    /* Titles */
 
     protected Character admiral() {
         return game.admiral();

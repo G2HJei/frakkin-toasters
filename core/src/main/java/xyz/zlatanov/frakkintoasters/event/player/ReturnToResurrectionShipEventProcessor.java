@@ -36,10 +36,7 @@ public class ReturnToResurrectionShipEventProcessor extends EventProcessor<Retur
     }
 
     /**
-     * Ends the Infiltration that the action ends, at the destination.
-     *
-     * @return the discard down to 3 Skill Cards when he was in the "Brig" ("If you were in the "Brig", you must then
-     * discard down to 3 cards.")
+     * "If you were in the "Brig", you must then discard down to 3 cards."
      */
     public static Followup endInfiltration(GameView game, GameOps ops, PlayerView player, Location destination) {
         val inBrig = game.locate(player.character()).filter(BRIG::equals).isPresent();

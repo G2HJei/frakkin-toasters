@@ -52,9 +52,6 @@ public class PlayCardsIntoSkillCheckEventProcessor extends EventProcessor<PlayCa
         return max;
     }
 
-    /**
-     * @return whether the player may put that many cards into the active skill check
-     */
     public static boolean canContribute(GameView game, PlayerView player, int count) {
         if (count == 0) {
             return true;

@@ -58,7 +58,6 @@ class LobbyChatTest extends BackendTest {
             chat.post(roslin, new Message("So say we all"));
         }
         assertEquals(HttpStatus.TOO_MANY_REQUESTS, refusal(() -> chat.post(roslin, new Message("One more"))));
-        // another user still writes, and so does she once the window has passed
         chat.post(new AppUserPrincipal(createUser("Tigh")), new Message("Frak"));
         clock.advance(Chat.WINDOW);
         chat.post(roslin, new Message("One more"));

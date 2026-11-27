@@ -17,19 +17,6 @@ import xyz.zlatanov.frakkintoasters.projection.LiveUpdateProjection;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * The messages the server sends, as JSON with a {@code type}:
- * <ul>
- *     <li>{@code game}: the token and a {@code GameProjection}</li>
- *     <li>{@code update}: a {@code LiveUpdateProjection} of what a command did</li>
- *     <li>{@code log}: the {@code LiveUpdateProjection} of the whole journal, which replaces the client's log</li>
- *     <li>{@code rejected}: why a command was refused: stale, invalid (the engine's message), or a server failure</li>
- *     <li>{@code report}: the {@code GameReport} of an ended game, after its game and log</li>
- *     <li>{@code pong}: the answer to a {@code ping}</li>
- *     <li>{@code chat}: a chat message; {@code chatLog}: the last ones, on a new connection; {@code chatRejected}: why
- *     the sender's message was refused</li>
- * </ul>
- */
 @Component
 @RequiredArgsConstructor
 public class Messages {
@@ -38,10 +25,6 @@ public class Messages {
 
     private final WireCodec codec;
 
-    /**
-     * @return the messages of the frames in the order they go: a command's update before its game, and the whole log
-     * after the game, as a new connection gets them
-     */
     public List<String> of(Frames frames) {
         val messages = new ArrayList<String>();
         if (frames.update() != null) {

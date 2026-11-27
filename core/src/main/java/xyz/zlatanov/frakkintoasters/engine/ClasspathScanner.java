@@ -16,8 +16,7 @@ import java.util.Map;
 import static lombok.AccessLevel.PRIVATE;
 
 /**
- * Lists the top-level classes under the root package, for {@link ProcessorRegistry} and {@link EventCatalog}. It walks
- * the classpath as directories or as jars, a jar nested in the Spring Boot jar included.
+ * It walks the classpath as directories or as jars, a jar nested in the Spring Boot jar included.
  */
 @NoArgsConstructor(access = PRIVATE)
 final class ClasspathScanner {

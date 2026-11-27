@@ -15,7 +15,6 @@ interface SelectionState {
   picked: Target[];
   // where the last click was, for the popover of the moves it left
   anchor: Anchor | null;
-  // a shape whose part is being picked
   picking: Move | null;
   pick(target: Target, anchor?: Anchor | null): void;
   back(): void;

@@ -28,9 +28,6 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.EVASIVE_MANOEUVRES;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.STRATEGIC_PLANNING;
 
-/**
- * The answers of decisions as a game asks them: the scripted turns and an interrupt window.
- */
 class LegalAnswersEngineTest {
 
     // Every input of the scripted turns is among the answers, which are all taken; a choice's options have theirs.

@@ -8,24 +8,18 @@ import type { FactProjection, Followup, ShownCards } from '../wire/types';
 
 export interface LabelContext {
   playerName(playerNumber: number): string;
-  // a ship by its type and id, e.g. "Viper #1", where the table knows it
   shipName?(id: number): string;
-  // a ship's type by its id (a ShipType constant, or CENTURION), where the table knows it
   shipType?(id: number): string | null;
   // the image a value names, for a name to hover (`Words`); the labels don't load images themselves
   artOf?(value: unknown, type: TypeRef): PartArt | null;
-  // the small picture in front of a value's words: a resource, a ship type, a title, a token, a die's face ("Die"), a
-  // character's portrait
   iconOf?(enumName: string, constant: unknown): PartIcon | null;
   // the character a player plays, where his name shows its portrait and sheet (the log)
   characterOf?(playerNumber: number): string | null;
-  // the player who plays a character, where the table knows it
   playerOf?(character: string): number | null;
   // the player who held a title (PRESIDENT, ADMIRAL, CAG) when the words happened, where the log knows him
   titleHolder?(title: string): number | null;
 }
 
-/** An image a part of a label names, as `art/images.ts` gives it. */
 export interface PartArt {
   key: string;
   url: string;
@@ -41,10 +35,8 @@ export interface PartIcon {
   tint?: boolean;
 }
 
-/** Words that are good or bad news for the fleet. */
 export type Tone = 'good' | 'bad';
 
-/** A piece of a label: its words, the image of what it names, the icon in front of it and its tone. */
 export interface Part {
   text: string;
   art?: PartArt | null;
@@ -61,22 +53,18 @@ export interface Part {
 // The Skill Card colors, which are their decks' names too.
 export const SKILL_COLORS = new Set(['POLITICS', 'LEADERSHIP', 'TACTICS', 'PILOTING', 'ENGINEERING', 'TREACHERY']);
 
-/** A Skill Card color in words of that color: "Tactics". */
 export function skillColorPart(color: string): Part {
   return { text: constantLabel('SkillCardColor', color), skillColor: color };
 }
 
-/** A deck by its name, a Skill Card deck's in its color: "Tactics", "Crisis". */
 export function deckNamePart(deck: string): Part {
   return SKILL_COLORS.has(deck) ? skillColorPart(deck) : { text: constantLabel('DeckId', deck) };
 }
 
-/** A deck in words: "the Tactics deck", its name in its color. */
 export function deckParts(deck: string | null | undefined): Part[] {
   return deck ? merged([{ text: 'the ' }, deckNamePart(deck), { text: ' deck' }]) : [{ text: 'the deck' }];
 }
 
-/** The words with their first letter in capitals: "A Mutiny Card is drawn". */
 export function capitalizedParts(parts: Part[]): Part[] {
   return parts.map((part, index) => (index === 0 ? { ...part, text: capitalized(part.text) } : part));
 }
@@ -92,7 +80,6 @@ function toned(part: Part, tone: Tone | undefined): Part {
 // "<+passes>" is good news, "<-fails>" bad news: the markers of a template's words
 const TONE_MARK = /<([+-])|>/g;
 
-// Words with their tone markers as parts, starting in a tone and saying the tone they end in.
 function marked(text: string, tone: Tone | undefined): { parts: Part[]; tone: Tone | undefined } {
   const parts: Part[] = [];
   let current = tone;
@@ -110,7 +97,6 @@ function marked(text: string, tone: Tone | undefined): { parts: Part[]; tone: To
   return { parts, tone: current };
 }
 
-/** Words with tone markers as parts: "is <-destroyed>". */
 export function markedParts(text: string): Part[] {
   return marked(text, undefined).parts;
 }
@@ -161,7 +147,6 @@ export function joinWords(words: string[]): string {
   return partsText(joinParts(words.map((text) => [{ text }])));
 }
 
-/** Items of words joined like `joinWords`. */
 export function joinParts(items: Part[][]): Part[] {
   const parts: Part[] = [];
   items.forEach((item, index) => {
@@ -173,7 +158,6 @@ export function joinParts(items: Part[][]): Part[] {
   return parts;
 }
 
-/** A value worded by its type in the schema. */
 export function valueLabel(value: unknown, type: TypeRef | undefined, context: LabelContext): string {
   return partsText(valueParts(value, type, context, {}));
 }
@@ -193,7 +177,6 @@ const DECK_CARDS: Record<string, string> = {
   BASESTAR_DAMAGE: 'BasestarDamage',
 };
 
-/** The type of one card of a deck or a pile: a Skill Card, a card enum, or a civilian ship. */
 export function cardType(deck: string | null | undefined, pile?: string | null): TypeRef {
   const name = DECK_CARDS[deck ?? ''] ?? (pile && pile !== 'SKILL' ? DECK_CARDS[pile] : undefined);
   if (name) {
@@ -202,7 +185,6 @@ export function cardType(deck: string | null | undefined, pile?: string | null):
   return deck === 'CIVILIAN_SHIPS' ? { t: 'ref', nullable: false, name: 'CivilianShip' } : { t: 'ref', nullable: false, name: 'SkillCard' };
 }
 
-/** A value in parts, a card or a name with its image. */
 export function valueParts(value: unknown, type: TypeRef | undefined, context: LabelContext, siblings: Record<string, unknown>): Part[] {
   if (value === null || value === undefined) {
     return [{ text: '—' }];
@@ -330,7 +312,6 @@ function mapParts(value: Record<string, unknown>, type: TypeRef, context: LabelC
     : [{ text: 'none' }];
 }
 
-/** A card of a deck or a pile, whatever its kind. */
 export function cardLabel(card: unknown): string {
   if (typeof card === 'string') {
     return humanizeConstant(card);
@@ -344,7 +325,6 @@ export function cardLabel(card: unknown): string {
   return JSON.stringify(card);
 }
 
-/** A card as a name with its image, by the type of the cards it lies among. */
 export function cardParts(card: unknown, type: TypeRef, context: LabelContext): Part[] {
   if (typeof card === 'string' && type.t === 'enum') {
     return [{ text: constantLabel(type.name ?? '', card), art: context.artOf?.(card, type) ?? null }];
@@ -393,7 +373,6 @@ export function activationLabel(activation: Record<string, unknown>, context: La
   return partsText(activationParts(activation, context, form));
 }
 
-/** An activation of a viper in parts, each ship with its icon. */
 export function activationParts(activation: Record<string, unknown>, context: LabelContext, form: 'order' | 'third' = 'order'): Part[] {
   const verb = (order: string, third: string) => (form === 'order' ? order : third);
   const ship = (id: unknown, civilian = false) => shipPart(id as number, context, civilian);
@@ -417,8 +396,6 @@ export function activationParts(activation: Record<string, unknown>, context: La
   }
   return merged([{ text: `${verb('Activate', 'activates')} ` }, fighter]);
 }
-
-/* templates */
 
 // The locations a sentence names with "the": "moves to the Armory", "to Sickbay".
 const WITH_ARTICLE = new Set([
@@ -603,7 +580,6 @@ function chooseAlternative(segment: string, fill: Fill): string {
   return alternatives.length > 1 ? alternatives[alternatives.length - 1] : '';
 }
 
-/** A template's words, each field a part of its own with the image of what it names. */
 export function fillTemplate(template: string, value: Record<string, unknown>, recordName: string, context: LabelContext): Part[] {
   const fill: Fill = { value, recordName, context };
   // the optional segments first, so their placeholders fill like the others
@@ -668,14 +644,10 @@ export function withoutSubject(parts: Part[], subject: string): Part[] | null {
   return merged([...(head !== '' ? [{ ...first, text: head, art: null }] : []), ...after]);
 }
 
-/* events */
-
-/** An event with its fields, by its template, or its name and fields. */
 export function eventLabel(event: Record<string, unknown> | null | undefined, context: LabelContext): string {
   return partsText(eventParts(event, context));
 }
 
-/** An event's sentence in parts, the names it fills in with their images. */
 export function eventParts(event: Record<string, unknown> | null | undefined, context: LabelContext): Part[] {
   if (!event) {
     return [{ text: '—' }];
@@ -732,7 +704,6 @@ export function chosenParts(event: Record<string, unknown>, context: LabelContex
   return template ? fillTemplate(template, event, String(event.kind), context) : null;
 }
 
-/** The words of an event whose fields are hidden, about the player the log names, or its type. */
 export function hiddenEventParts(kind: string, actor: number | null, context: LabelContext): Part[] {
   const template = HIDDEN_TEMPLATES[kind];
   if (template && actor !== null) {
@@ -740,8 +711,6 @@ export function hiddenEventParts(kind: string, actor: number | null, context: La
   }
   return [{ text: typeLabel(kind) }];
 }
-
-/* sources */
 
 /**
  * The card or ability an event exists for, where its fields don't name it: its record's `source`, or the source of a
@@ -767,7 +736,6 @@ export function eventSource(kind: string, event: Record<string, unknown> | null 
   return null;
 }
 
-/** A source as a name to hover: the card, or the character sheet that prints the ability. */
 export function sourcePart(source: SourceRef, context: LabelContext): Part {
   const type: TypeRef = { t: 'enum', nullable: false, name: source.enum };
   return { text: constantLabel(source.enum, source.constant), art: context.artOf?.(source.constant, type) ?? null };
@@ -785,8 +753,6 @@ export function unnamedSource(kind: string, event: Record<string, unknown> | nul
   const part = sourcePart(source, context);
   return partsText(words).toLowerCase().includes(part.text.toLowerCase()) ? null : part;
 }
-
-/* options of a choice */
 
 /**
  * An option of a choice, as a button says it: "Pass" for a NoOpEvent, the action a decision asks for, the parts of
@@ -821,8 +787,6 @@ const LOWER_AFTER_THEN = new Set(['Take', 'Move', 'Pass', 'Choose', 'Play', 'Dra
 function lowerFirst(text: string): string {
   return LOWER_AFTER_THEN.has(text.split(' ')[0]) ? text.charAt(0).toLowerCase() + text.substring(1) : text;
 }
-
-/* facts */
 
 export function factLabel(fact: FactProjection | null | undefined, context: LabelContext): string {
   return partsText(factParts(fact, context));
@@ -903,7 +867,6 @@ export function shipMove(fact: Record<string, unknown>, context: LabelContext): 
   }
 }
 
-/** Ship moves of one kind as one sentence: "Raider #1016 and Raider #1017 move to Space 6 o'clock". */
 export function shipMovesParts(ships: Part[], move: ShipMove): Part[] {
   return merged([...joinParts(ships.map((ship) => [ship])), ...markedParts(` ${ships.length === 1 ? move.one : move.many}`), ...move.tail]);
 }
@@ -913,7 +876,6 @@ export function hiddenCardsLabel(count: number, deck: string | null | undefined,
   return partsText(hiddenCardsParts(count, deck, pile, colors));
 }
 
-/** The cards of a hidden fact in parts, each Skill Card color in its color: "a Tactics card", "2 Skill Cards (…)". */
 export function hiddenCardsParts(count: number, deck: string | null | undefined, pile: string | null | undefined, colors: Record<string, number | undefined> | null | undefined): Part[] {
   const shown = Object.entries(colors ?? {}).filter(([, n]) => (n ?? 0) > 0);
   const cards = count === 1 ? ' card' : ' cards';
@@ -971,7 +933,6 @@ function cardNoun(deck: string | null | undefined, pile: string | null | undefin
   }
 }
 
-// A fact about cards the viewer may not see, in words: who, how many and of what kind.
 function hiddenFactParts(fact: Extract<FactProjection, { kind: 'Hidden' }>, context: LabelContext): Part[] {
   const who: Part = fact.playerNumber !== null ? playerPart(fact.playerNumber, context) : { text: 'Someone' };
   const other: Part = fact.otherPlayerNumber !== null ? playerPart(fact.otherPlayerNumber, context) : { text: 'another player' };
@@ -1026,7 +987,6 @@ function capitalized(text: string): string {
   return text.charAt(0).toUpperCase() + text.substring(1);
 }
 
-/** A fact's sentence in parts, the names it fills in with their images. */
 export function factParts(fact: FactProjection | null | undefined, context: LabelContext): Part[] {
   if (!fact) {
     return [{ text: '—' }];
@@ -1066,7 +1026,6 @@ function revealedParts(revealed: ShownCards[] | null | undefined, context: Label
   ];
 }
 
-// The interrupt cards and the roll abilities, by who played them.
 function interruptCardParts(kind: string, fact: Record<string, unknown>, context: LabelContext): Part[] | null {
   const played = (fact.card ?? fact.ability) as Record<string, unknown> | undefined;
   if (!played) {

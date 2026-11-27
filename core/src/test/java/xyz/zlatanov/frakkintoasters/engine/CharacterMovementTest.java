@@ -50,8 +50,7 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.EXECUTIVE_O
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.LAUNCH_SCOUT;
 
 /**
- * The "Movement:" abilities of character sheets, and the abilities that act on moving or at the end of a step, through
- * {@code submit} and {@code choose} alone, restoring the game at every pause. Player 1 has the ability.
+ * Player 1 has the ability.
  */
 class CharacterMovementTest {
 
@@ -204,8 +203,6 @@ class CharacterMovementTest {
     private int galacticaBasestars() {
         return engine.view().boards().galactica().shipsInSpace(Basestar.class).size();
     }
-
-    /* assertions */
 
     private void assertRestoresTheSameGame() {
         val restored = GameEngine.restore(engine.journal());

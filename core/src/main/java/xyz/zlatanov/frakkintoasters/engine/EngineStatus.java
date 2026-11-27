@@ -7,7 +7,7 @@ import java.util.Optional;
 public sealed interface EngineStatus {
 
     /**
-     * @param input what the game waits for, empty while it waits for another player's secret input
+     * @param input empty while the game waits for another player's secret input
      */
     record Waiting(Optional<PendingInput> input) implements EngineStatus {
     }

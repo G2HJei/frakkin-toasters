@@ -104,7 +104,7 @@ class GameSessionsTest extends BackendTest {
         assertEquals(1, results.stream().filter(Accepted.class::isInstance).count(), results.toString());
         val stale = (Rejected) results.stream().filter(Rejected.class::isInstance).findFirst().orElseThrow();
         assertEquals(Reason.STALE, stale.reason());
-        assertNotNull(stale.game()); // the sender gets the current game
+        assertNotNull(stale.game());
     }
 
     @Test
@@ -150,7 +150,6 @@ class GameSessionsTest extends BackendTest {
         assertEquals(sequence, session.sequence());
     }
 
-    // Player 2 acts while player 1 is asked: the choice stays pending, and the event's player is the connection's.
     @Test
     void anAnytimeEventRunsAheadOfAnotherPlayersInput() {
         val choice = one(single(new NoOpEvent(1)), single(new CylonsWinEvent()));
@@ -172,7 +171,6 @@ class GameSessionsTest extends BackendTest {
         assertEquals(Reason.INVALID, ((Rejected) again).reason());
     }
 
-    // In a sandbox the user answers for everyone, so the event names the player who acts.
     @Test
     void aSandboxSubmitsAnAnytimeEventForThePlayerItNames() {
         sessions.start(game, TestEngines.start(3, Randomness.seeded(1),
@@ -211,8 +209,6 @@ class GameSessionsTest extends BackendTest {
         json.put("playerNumber", input.player() % 3 + 1);
         assertInstanceOf(Accepted.class, sessions.submit(game, Viewer.player(input.player()), token, json));
     }
-
-    /* helpers */
 
     private CommandResult send(ScriptedTurns.Input input) {
         val viewer = Viewer.player(input.player());

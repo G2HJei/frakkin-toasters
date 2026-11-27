@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useMe, useUpdateMe } from '../api/queries';
 
-/** The user's profile: his name, which everyone else sees, through PUT /api/me. */
 export function ProfilePage() {
   const me = useMe();
   const update = useUpdateMe();

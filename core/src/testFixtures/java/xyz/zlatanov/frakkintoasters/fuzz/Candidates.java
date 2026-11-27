@@ -16,10 +16,6 @@ final class Candidates {
     private Candidates() {
     }
 
-    /**
-     * @return one event of the class built from the wide domains, an input a client could send but the agent never
-     * would; {@code null} when the record refuses every set of values it is tried with
-     */
     static Event hostile(Asked asked, Class<? extends Event> type) {
         val components = type.getRecordComponents();
         val domains = Arrays.stream(components).map(component -> Domains.wide(asked, component)).toList();

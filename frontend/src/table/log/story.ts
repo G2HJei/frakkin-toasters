@@ -236,7 +236,6 @@ const TITLES_ASSIGNED: Record<string, string> = { 'TitleFact.PresidentAssigned':
 // The damage tokens a player chooses among: his words say what they damage, so no token is pictured after them.
 const DAMAGE_CHOSEN = new Set(['ChooseGalacticaDamageEvent', 'ChooseGalacticaDamageTokensEvent']);
 
-/** The log by turn and step. */
 export function logStory(entries: LogEntry[], table: FactContext): TurnStory[] {
   const learned = withLearnedShips(table, learnedShips(entries));
   // who held each title when each line happened, by the facts that gave it; before the first, the table's holder
@@ -378,7 +377,6 @@ function learnedShips(entries: LogEntry[]): Map<number, string> {
   return types;
 }
 
-// The table's names of the ships, and the learned type of a ship it doesn't show.
 function withLearnedShips(context: FactContext, learned: Map<number, string>): FactContext {
   if (learned.size === 0) {
     return context;
@@ -489,7 +487,6 @@ function scopeLines(entry: ScopeLog, index: number, chosenBy: number | null, sco
   ];
 }
 
-// A fact as a line of its own, under the player it is about.
 function toldLine(one: Sentence, key: string, base: { entry: LogEntry; automatic: boolean }, context: FactContext): LogLine {
   return { ...base, key, actor: one.subject, words: sentenceParts(one, one.subject, context), source: null, facts: [], art: unique(one.facts.flatMap(lineArt)), ships: one.ships };
 }
@@ -505,7 +502,6 @@ const ASKED_EVERYONE = new Set([
   'AirlockEvent',
 ]);
 
-// A pass, by what it passed on.
 function noOpWords(parent: string | null, details: Record<string, unknown> | null, offered: boolean): string {
   switch (parent) {
     case 'MovementStepEvent':
@@ -536,7 +532,6 @@ function shows(one: Sentence): boolean {
   return one.facts.every((fact) => factKind(fact) === 'SkillCheckFact.CardsShown');
 }
 
-// What changes the table first, the mechanics after.
 function storyFirst(sentences: Sentence[]): Sentence[] {
   return [...sentences.filter((one) => one.facts.some(isStoryFact)), ...sentences.filter((one) => !one.facts.some(isStoryFact))];
 }
@@ -567,7 +562,6 @@ function activationMove(one: Sentence, details: Record<string, unknown> | null, 
   return fact.location ? Object.values(details).includes(fact.location) : /destroy/.test(partsText(line));
 }
 
-/** A line's words as plain text, e.g. for a title. */
 export function lineText(line: LogLine): string {
   return partsText(line.words);
 }

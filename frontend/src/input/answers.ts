@@ -19,7 +19,6 @@ export interface Move {
   pick: Pick | null;
 }
 
-/** The moves of the pending input, for the viewer it asks. */
 export function moves(input: InputProjection | null | undefined): Move[] {
   if (input?.kind === 'Decide') {
     return answerMoves(input.answers, null, null);
@@ -42,7 +41,6 @@ export function moves(input: InputProjection | null | undefined): Move[] {
   });
 }
 
-/** What a player may do at any pause (`AnytimeEvent`): answers to no decision, each submitted as it is. */
 export function anytimeMoves(answers: LegalAnswers | null | undefined): Move[] {
   // a shape's picker belongs to the pending input's panel, and no anytime event has a part to pick
   return answerMoves(answers, null, null).filter((move) => !move.pick);
@@ -58,13 +56,10 @@ function answerMoves(answers: LegalAnswers | null | undefined, option: number | 
   return [...events, ...shapes];
 }
 
-/** The option of a decision a move picks first, e.g. the Action step's "take an action". */
 export function decisionAction(move: Move): string | null {
   const event = move.followup?.kind === 'Single' ? (move.followup.event as unknown as Answer | null) : null;
   return event?.kind === 'PlayerDecisionEvent' ? String(event.action) : null;
 }
-
-/* what a move names */
 
 export type Target =
   | { type: 'kind'; kind: string }
@@ -171,7 +166,6 @@ function target(field: unknown, type: TypeRef, found: Target[], depth: number) {
   }
 }
 
-/** The moves that name every picked target. */
 export function narrow(all: Move[], picked: Target[]): Move[] {
   if (picked.length === 0) {
     return all;
@@ -183,8 +177,6 @@ export function narrow(all: Move[], picked: Target[]): Move[] {
   });
 }
 
-/* groups for the panel */
-
 export interface MoveGroup {
   key: string;
   // the event kind its moves share, null for an option that isn't one event
@@ -192,7 +184,6 @@ export interface MoveGroup {
   moves: Move[];
 }
 
-/** The moves by event kind, in the order they come, an option that isn't one event alone. */
 export function groupMoves(all: Move[]): MoveGroup[] {
   const groups: MoveGroup[] = [];
   for (const move of all) {
@@ -208,7 +199,6 @@ export function groupMoves(all: Move[]): MoveGroup[] {
   return groups;
 }
 
-/** The components the events of a group differ in, the part of a shape still to pick left out. */
 export function varyingComponents(group: MoveGroup): string[] {
   const kind = group.kind;
   if (!kind || group.moves.length < 2) {
@@ -223,8 +213,6 @@ export function varyingComponents(group: MoveGroup): string[] {
     });
 }
 
-/* sending */
-
 /** The event of a shape with its part picked: one element for a single component, the list for a list. */
 export function fillPick(move: Move, picked: unknown[]): Answer | null {
   if (!move.event || !move.pick?.component) {
@@ -235,7 +223,6 @@ export function fillPick(move: Move, picked: unknown[]): Answer | null {
   return { ...move.event, [move.pick.component]: list ? picked : (picked[0] ?? null) };
 }
 
-/** What to send for a move: the option to choose, and the event to submit now or once the option's decision asks. */
 export interface Plan {
   choose: number | null;
   submit: Answer | null;
@@ -261,7 +248,6 @@ export function intentDue(intent: { player: number; event: unknown; afterVersion
   return covers(input.answers, event) ? event : null;
 }
 
-/** Whether the answers take the event: one of the concrete answers, or a shape with its part picked from the pick. */
 export function covers(answers: LegalAnswers | null | undefined, event: Answer): boolean {
   const wanted = canonical(event);
   if ((answers?.events ?? []).some((candidate) => canonical(candidate) === wanted)) {

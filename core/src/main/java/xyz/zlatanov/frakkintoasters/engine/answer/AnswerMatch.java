@@ -49,9 +49,6 @@ final class AnswerMatch {
         return true;
     }
 
-    /**
-     * @return whether every filling of the inner shape fits the outer one
-     */
     static boolean holds(ShapedAnswer outer, ShapedAnswer inner) {
         val outerPick = outer.pick();
         val innerPick = inner.pick();

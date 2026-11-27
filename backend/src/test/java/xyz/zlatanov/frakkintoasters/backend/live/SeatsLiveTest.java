@@ -16,7 +16,6 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-// A seat changing hands over real sockets: the connections of both users reconnect with their new viewer.
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles("dev")
 @Import(TestcontainersConfiguration.class)
@@ -68,7 +67,6 @@ class SeatsLiveTest {
         stranger.next("log");
     }
 
-    // Three players and an observer, started through the lobby, each with a socket.
     private UUID startedGame() {
         for (val name : List.of("Adama", "Roslin", "Starbuck", "Dualla")) {
             client(name);

@@ -46,23 +46,8 @@ import static xyz.zlatanov.frakkintoasters.backend.journal.ValueCodec.raw;
 import static xyz.zlatanov.frakkintoasters.backend.journal.ValueCodec.typeArgument;
 
 /**
- * The wire schema: every type a client reads or writes, as the codec writes it. The frontend generates its TypeScript
- * types from it, and the sandbox's setup makes a form of each setup event from it. Nothing copies a Java record by
- * hand.
- * <ul>
- *     <li>a record: its components with their types, the interfaces it implements, whether it carries {@code kind},
- *     the {@code location} of a location's action, the {@code quorumCard} or {@code mutinyCard} a card's event
- *     plays, and the {@code source} of an event that exists for a card or an ability ({@code Source})</li>
- *     <li>an interface: the records that implement it, a union told apart by {@code kind}</li>
- *     <li>an enum: its constants, for {@code SkillCardType} the color of each, for {@code CharacterAbility} the
- *     character of each and the miracle tokens of the miracle ones, for {@code Character} the type and skill set of each, and the {@code sources} of constants
- *     that stand for a card or an ability, e.g. what granted a {@code GrantEvent}</li>
- *     <li>the socket messages, told apart by {@code type}</li>
- *     <li>the Attack Table as the game applies it ({@code AttackTable})</li>
- *     <li>the line of succession of each title, highest first ({@code DetermineNext*EventProcessor})</li>
- * </ul>
- * An int component gets a {@code role} from its name ({@link ComponentRole}): a {@code player}, a {@code ship}, a journal
- * {@code scope}, or a {@code count}.
+ * The frontend generates its TypeScript types from the wire schema, and the sandbox's setup makes a form of each setup
+ * event from it, so nothing copies a Java record by hand.
  */
 public final class WireSchema {
 
@@ -71,9 +56,6 @@ public final class WireSchema {
     private WireSchema() {
     }
 
-    /**
-     * @return the role of an int component by its name, {@code null} when the name can't be placed
-     */
     public static String role(String name) {
         return ComponentRole.of(name).map(role -> role.name().toLowerCase()).orElse(null);
     }
@@ -137,7 +119,6 @@ public final class WireSchema {
         return schema;
     }
 
-    // The codec's name of a registered type, the simple name of any other. Two types can't share one.
     private static Map<Class<?>, String> names(TypeRegistry registry, List<Class<?>> types) {
         val names = new LinkedHashMap<Class<?>, String>();
         val taken = new LinkedHashMap<String, Class<?>>();
@@ -165,7 +146,6 @@ public final class WireSchema {
                 Arrays.stream(SkillCardType.values()).forEach(card -> colors.put(card.name(), card.color().name()));
             }
             if (type == CharacterAbility.class) {
-                // the character sheet an ability is printed on
                 val characters = node.putObject("characters");
                 Arrays.stream(CharacterAbility.values()).forEach(ability -> characters.put(ability.name(), ability.character().name()));
                 // the miracle tokens a use spends, for the miracle abilities only: the answers show the token
@@ -286,7 +266,7 @@ public final class WireSchema {
             node.set("key", element(typeRef(typeArgument(type, 0), component, names)));
             val value = element(typeRef(typeArgument(type, 1), component, names));
             if (value.has("role")) {
-                value.put("role", "count"); // how many of each key
+                value.put("role", "count");
             }
             node.set("value", value);
         } else {
@@ -308,7 +288,6 @@ public final class WireSchema {
         ref.put("nullable", false);
         return ref;
     }
-    // The action's location is a constant of the record, whatever its fields.
     private static String location(Class<?> type) {
         try {
             val components = type.getRecordComponents();
@@ -321,7 +300,6 @@ public final class WireSchema {
         }
     }
 
-    // The card or the ability, as the enum the schema names and its constant.
     private static ObjectNode sourceRef(Enum<?> source, Map<Class<?>, String> names) {
         val enumName = names.get(source.getDeclaringClass());
         if (enumName == null) {
@@ -330,7 +308,6 @@ public final class WireSchema {
         return NODES.objectNode().put("enum", enumName).put("constant", source.name());
     }
 
-    // What the constants of an enum stand for, e.g. the card that granted a GrantEvent. Empty for most enums.
     private static ObjectNode sources(Class<?> type, Map<Class<?>, String> names) {
         val sources = NODES.objectNode();
         for (val constant : type.getEnumConstants()) {
@@ -340,7 +317,6 @@ public final class WireSchema {
         return sources;
     }
 
-    // The record is the card, and its processor names it.
     private static String quorumCard(Class<?> type) {
         try {
             val processor = Class.forName(type.getName() + "Processor").getDeclaredConstructor().newInstance();
@@ -350,7 +326,6 @@ public final class WireSchema {
         }
     }
 
-    // The record is the card, and its processor names it.
     private static String mutinyCard(Class<?> type) {
         try {
             val processor = Class.forName(type.getName() + "Processor").getDeclaredConstructor().newInstance();

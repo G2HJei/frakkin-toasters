@@ -13,14 +13,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * Something a random game showed that is wrong. The signature leaves out line numbers and the values of the game, so
- * the same bug has the same ID in every game and after its code moves.
- *
- * @param signature what tells this bug from another: the kind, the exception and where it was thrown, the event
- * @param summary   one line for the report
- * @param detail    the message and the stack, for the trace
- * @param event     the event that was checked or run, when the finding is about one a client could send
- * @param pause     where the game first showed it, {@code null} until the playout notes it
+ * The signature leaves out line numbers and the values of the game, so the same bug has the same ID in every game and
+ * after its code moves.
  */
 public record Finding(Kind kind, String signature, String summary, String detail, Event event, Pause pause) {
 
@@ -46,14 +40,6 @@ public record Finding(Kind kind, String signature, String summary, String detail
         }
     }
 
-    /**
-     * The pause a game first showed a finding at.
-     *
-     * @param where   the turn, the step and what was asked, for the report
-     * @param pending the pending input in full
-     * @param inputs  the inputs given before it, the last ones unless the whole trace was asked for
-     * @param repro   the journal at the pause and the input that failed, when the playout keeps them
-     */
     public record Pause(String where, String pending, List<String> inputs, Repro repro) {
     }
 
@@ -61,9 +47,6 @@ public record Finding(Kind kind, String signature, String summary, String detail
         return new Finding(kind, signature, summary, "", null, null);
     }
 
-    /**
-     * @param event the simple name of the event that was checked or run
-     */
     public static Finding of(Kind kind, Throwable thrown, String event) {
         val queued = QUEUED.matcher(String.valueOf(thrown.getMessage()));
         if (queued.find()) {

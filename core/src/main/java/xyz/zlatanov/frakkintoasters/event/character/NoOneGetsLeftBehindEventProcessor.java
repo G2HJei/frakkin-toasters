@@ -16,9 +16,6 @@ import static xyz.zlatanov.frakkintoasters.state.character.CharacterAbility.NO_O
 
 public class NoOneGetsLeftBehindEventProcessor extends EventProcessor<NoOneGetsLeftBehindEvent> {
 
-    /**
-     * @return the choice to use it or not, for the player who can, {@link Followup#NONE} when nobody can
-     */
     public static Followup offer(GameView game) {
         return game.players().stream()
                 .filter(player -> CharacterAbilities.canUseMiracle(game, player, NO_ONE_GETS_LEFT_BEHIND))

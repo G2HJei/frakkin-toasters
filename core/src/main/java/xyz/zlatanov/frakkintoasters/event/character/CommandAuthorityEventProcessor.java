@@ -22,9 +22,6 @@ public class CommandAuthorityEventProcessor extends EventProcessor<CommandAuthor
                 && !skillCheck.dividedCards().isEmpty();
     }
 
-    /**
-     * @return the choice to take the cards or not, for the player who can use "Command Authority" now
-     */
     public static Followup offer(GameView game) {
         return game.players().stream()
                 .filter(player -> canUse(game, player))
@@ -33,10 +30,6 @@ public class CommandAuthorityEventProcessor extends EventProcessor<CommandAuthor
                 .orElse(NONE);
     }
 
-    /**
-     * @return whether a player has "Command Authority" with the tokens to use it, so the end of a skill check asks
-     * whether he can use it ({@link OfferCommandAuthorityEvent}). Games without him are left alone
-     */
     public static boolean mayBeOffered(GameView game) {
         return game.players().stream()
                 .anyMatch(player -> CharacterAbilities.canUseMiracle(game, player, COMMAND_AUTHORITY));

@@ -20,9 +20,6 @@ import java.util.Set;
 
 public interface TurnView {
 
-    /**
-     * Counts player turns. It is 0 during setup.
-     */
     int number();
 
     GameStep step();
@@ -37,8 +34,7 @@ public interface TurnView {
     int actingPlayerNumber();
 
     /**
-     * The Crisis Cards resolved this turn, in the order they were played. They stay with the turn until it ends, when
-     * they are discarded (rule 8.8).
+     * They stay with the turn until it ends, when they are discarded (rule 8.8).
      */
     List<CrisisCard> crisisCards();
 
@@ -54,25 +50,12 @@ public interface TurnView {
      */
     boolean returnsToCrisisStep();
 
-    /**
-     * The latest die roll of the turn, {@code null} before the first. The window before a roll starts it, and its result
-     * event reads it.
-     */
     DieRollView dieRoll();
 
-    /**
-     * The interrupt window that is open, while its players answer.
-     */
     Optional<InterruptWindow> interruptWindow();
 
-    /**
-     * The cards played into the open window. They stay face down until the window closes.
-     */
     List<PlayedInterruptCard> windowCards();
 
-    /**
-     * The character abilities used in the open window on its die roll, secret until the window closes.
-     */
     List<UsedRollAbility> windowAbilities();
 
     /**
@@ -101,9 +84,6 @@ public interface TurnView {
      */
     boolean cylonShipsHeld();
 
-    /**
-     * What each player did this turn of what is limited to once a turn, e.g. the CAG's action while piloting.
-     */
     Map<Integer, Set<TurnLimit>> usedTurnLimits();
 
     default boolean hasUsed(int playerNumber, TurnLimit limit) {

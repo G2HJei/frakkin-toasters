@@ -37,7 +37,6 @@ public abstract class EventTestHarness<E extends Event> extends TestHarness {
         }
     }
 
-    /* Event execution utility methods */
     protected void assertFollowup(Followup expected) {
         followupAsserted = true;
         assertEquals(expected, followup);

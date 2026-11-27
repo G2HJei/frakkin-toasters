@@ -17,10 +17,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-/**
- * The live connections of each game. It queues what each connection's viewer gets after a command; each connection
- * sends from its own queue.
- */
 @Component
 public class ConnectionPool implements ProjectionSink {
 
@@ -54,10 +50,6 @@ public class ConnectionPool implements ProjectionSink {
         return Set.copyOf(games.getOrDefault(gameBundleId, Set.of()));
     }
 
-    /**
-     * Sends the message to every connection of the game whose viewer may have it, e.g. a chat message to the readers of
-     * its channel.
-     */
     public void broadcast(UUID gameBundleId, Predicate<Viewer> to, String json) {
         for (val connection : of(gameBundleId)) {
             if (to.test(connection.viewer())) {
@@ -71,7 +63,6 @@ public class ConnectionPool implements ProjectionSink {
         return of(gameBundleId).stream().map(LiveConnection::userId).collect(Collectors.toSet());
     }
 
-    // A connection the client stopped pinging: the close tells the handler, which removes it.
     @Scheduled(fixedDelayString = "${frakkin.socket-sweep:15s}")
     void closeSilent() {
         games.values().forEach(connections -> connections.stream()

@@ -4,8 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 /**
- * The frontend's routes, which the browser asks the server for on a reload: they all get the app, which routes itself.
- * The jar serves the built app from {@code static/}.
+ * A reload asks the server for a frontend route: they all get the app, which routes itself.
  */
 @Controller
 public class AppRoutesController {

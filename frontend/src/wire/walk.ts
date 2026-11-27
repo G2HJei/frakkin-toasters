@@ -1,4 +1,3 @@
-// Every value of a record, found through its type in the schema, nested records and lists included.
 import { recordNamed, type TypeRef } from './schema';
 
 export function walkRecord(value: Record<string, unknown> | null | undefined, recordName: string | null, visit: (field: unknown, type: TypeRef, name: string) => void, depth = 0) {

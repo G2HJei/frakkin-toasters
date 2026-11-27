@@ -11,9 +11,6 @@ import static xyz.zlatanov.frakkintoasters.event.player.SendToBrigEventProcessor
 
 public class ChooseCharacterForBrigEventProcessor extends EventProcessor<ChooseCharacterForBrigEvent> {
 
-    /**
-     * @return the chooser's decision, {@link Followup#NONE} when there is nobody he could choose
-     */
     public static Followup offer(GameView game, int chooser) {
         return game.players().stream().anyMatch(player -> canBeChosen(game, player.number()))
                 ? single(new PlayerDecisionEvent<>(chooser, ChooseCharacterForBrigEvent.class))

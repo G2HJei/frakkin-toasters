@@ -49,8 +49,7 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.TACTICS;
 
 /**
- * "Action:" abilities of character sheets used through {@code submit} and {@code choose} alone, restoring the game at
- * every pause. Player 1 has the ability, player 2 is President and Admiral.
+ * Player 1 has the ability, player 2 is President and Admiral.
  */
 class CharacterActionsTest {
 
@@ -152,7 +151,6 @@ class CharacterActionsTest {
         assertRestoresTheSameGame();
     }
 
-    // The player chooses to take an action.
     private void act(int player) {
         choose(player, single(new PlayerDecisionEvent<>(player, ActionEvent.class)));
     }
@@ -170,8 +168,6 @@ class CharacterActionsTest {
     private GalacticaBoardView galactica() {
         return engine.view().boards().galactica();
     }
-
-    /* assertions */
 
     private void assertWaitingFor(PendingInput expected) {
         assertEquals(EngineStatus.waiting(expected), engine.status(expected.player()));

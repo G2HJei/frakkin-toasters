@@ -14,9 +14,6 @@ import static xyz.zlatanov.frakkintoasters.state.character.CharacterAbility.STIM
 
 public class EndOfActionStepEventProcessor extends EventProcessor<EndOfActionStepEvent> {
 
-    /**
-     * @return whether the player has an ability that acts at the end of his Action step
-     */
     public static boolean actsThen(PlayerView player) {
         return player.hasAbility(STIM_JUNKIE);
     }

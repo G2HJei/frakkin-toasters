@@ -84,16 +84,10 @@ public class GameOps extends AbstractOps {
         return new SandboxOps(game, recorder);
     }
 
-    /**
-     * Lets a player other than the current one act (e.g. the target of an "Executive Order" card).
-     */
     public void actingPlayer(int playerNumber) {
         record(new ActingPlayerChanged(playerNumber == game.turn().currentPlayerNumber() ? null : playerNumber));
     }
 
-    /**
-     * Lets the player take the action of the location from wherever he is, e.g. through Louis Hoshi's "Organized".
-     */
     public void allowRemoteAction(int playerNumber, Location location) {
         record(new RemoteActionAllowed(playerNumber, location));
     }
@@ -104,15 +98,12 @@ public class GameOps extends AbstractOps {
         }
     }
 
-    /**
-     * The current player acts again.
-     */
     public void resetActingPlayer() {
         record(new ActingPlayerChanged(null));
     }
 
     /**
-     * Starts the journal and shuffles the decks that exist from the start. Destiny and loyalty decks are created later.
+     * Destiny and loyalty decks are created later.
      */
     public void startGame() {
         record(new GameStarted(game.players().size(), game.objective()));
@@ -221,16 +212,10 @@ public class GameOps extends AbstractOps {
         record(new StartLocationNoted(location));
     }
 
-    /**
-     * The player goes to the "Brig" at the end of the turn, e.g. by "Kleptomania".
-     */
     public void sendToBrigAtEndOfTurn(int playerNumber) {
         record(new SentToBrigAtEndOfTurn(playerNumber));
     }
 
-    /**
-     * The player paid the cost of his action, e.g. "Terminal Illness": the action follows.
-     */
     public void payActionCost(int playerNumber) {
         record(new ActionCostPaid(playerNumber));
     }
@@ -250,11 +235,8 @@ public class GameOps extends AbstractOps {
         record(new LossReductionAdded(resource));
     }
 
-    /**
-     * @return the first player
-     */
     public int chooseFirstPlayer() {
-        // The current player token is a random player(rule A3 .7 .1).
+        // The current player token is a random player (rule A3.7.1).
         int first = game.randomness().nextInt(1, game.players().size() + 1);
         changeCurrentPlayer(first);
         return first;
@@ -264,16 +246,12 @@ public class GameOps extends AbstractOps {
         record(new GameEnded(winner, winners));
     }
 
-    /**
-     * Starts a new die roll, before the cards played on it. The window before the roll does it.
-     */
     public void startDieRoll() {
         record(new DieRollStarted());
     }
 
     /**
-     * Rolls the die of the roll that was started, or rerolls it. Only {@code RollDieEventProcessor} calls it, so no roll
-     * skips the interrupt windows around it.
+     * Only {@code RollDieEventProcessor} calls it, so no roll skips the interrupt windows around it.
      */
     public int rollDie() {
         int value = game.die().roll();

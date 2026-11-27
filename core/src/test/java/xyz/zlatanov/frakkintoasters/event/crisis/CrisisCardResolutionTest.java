@@ -90,8 +90,6 @@ class CrisisCardResolutionTest extends TestHarness {
         resolve(card, BOTTOM);
     }
 
-    /* skill check crises */
-
     @Test
     void shouldStartTheSkillCheckOfACardWithoutAlternative() {
         resolve(WITCH_HUNT, TOP);
@@ -128,8 +126,6 @@ class CrisisCardResolutionTest extends TestHarness {
         assertTrue(game.turn().returnsToCrisisStep());
     }
 
-    /* die rolls */
-
     @Test
     void shouldLoseTheResourceOnALowRoll() {
         nextRoll(6);
@@ -161,8 +157,6 @@ class CrisisCardResolutionTest extends TestHarness {
         assertEquals(7, galacticaBoard.food());
     }
 
-    /* the Cylon Fleet crises */
-
     @Test
     void shouldReturnTheVipersAndAdvanceThePursuit() {
         val unmanned = viperAt(GALACTICA_SPACE_4_OCLOCK);
@@ -190,8 +184,6 @@ class CrisisCardResolutionTest extends TestHarness {
         assertEquals(before + 2, galacticaBoard.damagedShips().size());
     }
 
-    /* nuke tokens */
-
     @Test
     void shouldDiscardANukeToken() {
         resolve(ABANDON_GALACTICA, TOP);
@@ -205,8 +197,6 @@ class CrisisCardResolutionTest extends TestHarness {
         assertEquals(Followup.single(new ChooseCrisisSectionEvent(ADMIRAL, ABANDON_GALACTICA, BOTTOM)),
                 new CrisisCardFollowups(game).choice(ABANDON_GALACTICA));
     }
-
-    /* executions and titles */
 
     @Test
     void shouldExecuteTheCurrentPlayer() {
@@ -231,8 +221,6 @@ class CrisisCardResolutionTest extends TestHarness {
         assertEquals(7, galacticaBoard.fuel());
         assertTrue(player(CAG).hasMiracleToken());
     }
-
-    /* the Crisis Cards a player keeps */
 
     @Test
     void shouldKeepACardInPlayOutOfTheDiscardPile() {
@@ -348,8 +336,6 @@ class CrisisCardResolutionTest extends TestHarness {
         assertEquals(3, player(CURRENT).skillCards().size());
     }
 
-    /* a minimal engine */
-
     private void resolve(CrisisCard card, Section section) {
         this.card = card;
         ops.playCrisisCard(card); // as the Crisis step does, so the card is the one being resolved
@@ -386,7 +372,6 @@ class CrisisCardResolutionTest extends TestHarness {
         }
     }
 
-    // The first legal answer.
     private Event answer(PlayerDecisionEvent<?> decision) {
         val player = decision.playerNumber();
         val action = decision.action();

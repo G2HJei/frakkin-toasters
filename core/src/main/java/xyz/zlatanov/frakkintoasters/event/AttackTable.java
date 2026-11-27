@@ -23,12 +23,6 @@ public final class AttackTable {
         DESTROYED, DAMAGED, HIT
     }
 
-    /**
-     * @param attacker a {@code ShipType}, or {@code GALACTICA} (Weapons Control) or {@code ARMORY}
-     * @param target   a {@code ShipType}, or {@code GALACTICA}, or {@code CENTURION}
-     * @param from     the lowest roll that has the effect
-     * @param to       the highest roll that has it
-     */
     public record Row(String attacker, String target, int from, int to, Effect effect) {
     }
 
@@ -52,9 +46,6 @@ public final class AttackTable {
                 new Row("ARMORY", "CENTURION", LOWEST_ROLL_TO_DESTROY, 8, DESTROYED));
     }
 
-    /**
-     * @return what "Structural Damage" adds to every attack roll on its basestar
-     */
     public static int structuralDamageBonus() {
         return STRUCTURAL_DAMAGE_BONUS;
     }

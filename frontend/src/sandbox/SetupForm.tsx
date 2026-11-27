@@ -11,7 +11,6 @@ import type { SkillCard } from '../wire/types';
 import { useTable } from '../table/tableContext';
 
 export interface SetupFormProps {
-  // the setup event, one of the schema's sandbox events
   kind: string;
   onSubmit(event: EventValue): void;
 }

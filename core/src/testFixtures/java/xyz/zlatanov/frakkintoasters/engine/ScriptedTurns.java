@@ -34,10 +34,8 @@ import static xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard.RIOTS_NO_JUMP
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.*;
 
 /**
- * A seeded 3 player game from its start through four turns, as the inputs its players give: the characters, the
- * starting Skill Cards, a move and an action, the Crisis Cards' sections, a civilian ship and a discard. The Crisis
- * Cards are stacked, so nothing but the section is asked. The inputs depend on the first player the seed picks, so each
- * one is computed from the game as it stands.
+ * A seeded 3 player game from its start through four turns. The Crisis Cards are stacked, so nothing but the section is
+ * asked. The inputs depend on the first player the seed picks, so each one is computed from the game as it stands.
  */
 public final class ScriptedTurns {
 
@@ -46,9 +44,6 @@ public final class ScriptedTurns {
             RIOTS_NO_JUMP);
     public static final long             SEED         = 42;
 
-    /**
-     * An answer to the pending input: an event to submit, or an option to choose.
-     */
     public record Input(int player, Event submit, Followup choose) {
 
         public void applyTo(GameEngine engine) {
@@ -71,9 +66,6 @@ public final class ScriptedTurns {
         return new StackedStartGameEvent(CRISIS_CARDS);
     }
 
-    /**
-     * @return the inputs in order. Each is computed from the game when it is its turn
-     */
     public static List<Function<GameView, Input>> inputs() {
         val inputs = new ArrayList<Function<GameView, Input>>();
         // the seats clockwise from the first player
@@ -126,7 +118,7 @@ public final class ScriptedTurns {
     }
 
     /**
-     * Plays every input. The game then waits for the second player's Receive Skills step of turn 5.
+     * The game then waits for the second player's Receive Skills step of turn 5.
      */
     public static GameEngine play() {
         val engine = start();

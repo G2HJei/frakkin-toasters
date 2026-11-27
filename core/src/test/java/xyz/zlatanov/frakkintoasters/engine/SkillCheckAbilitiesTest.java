@@ -43,9 +43,7 @@ import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckResult.PASS;
 
 /**
- * The character abilities that act in a skill check, played through {@code submit} and {@code choose} alone from the
- * location action that starts the check to its end, restoring the game at every pause. The cards that decide each check
- * are dealt, not drawn.
+ * The cards that decide each check are dealt, not drawn.
  */
 class SkillCheckAbilitiesTest {
 
@@ -212,9 +210,6 @@ class SkillCheckAbilitiesTest {
         assertEquals(0, engine.view().player(2).miracleTokens());
     }
 
-    /* the routine of a check: nobody plays "Political Prowess", "Declare Emergency" or "Change of Plans", nobody plays
-       before the check, and each player puts in the cards the test gave him */
-
     private void answerTheRoutine() {
         while (engine.pendingInput().isPresent()) {
             val input = engine.pendingInput().get();
@@ -250,8 +245,6 @@ class SkillCheckAbilitiesTest {
                 && options.contains(single(option))
                 && options.contains(single(new NoOpEvent(chooser)));
     }
-
-    /* the game */
 
     private static Followup select(Character... characters) {
         val events = new java.util.ArrayList<Event>();

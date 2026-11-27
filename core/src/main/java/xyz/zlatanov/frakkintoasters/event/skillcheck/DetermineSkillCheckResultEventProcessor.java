@@ -31,9 +31,6 @@ public class DetermineSkillCheckResultEventProcessor extends EventProcessor<Dete
     private static final int IRON_WILL_MARGIN            = 4;
     private static final int A_SECOND_CHANCE_MARGIN      = 4;
 
-    /**
-     * @return the difficulty of the active skill check, with what changed it so far
-     */
     public static int difficulty(GameView game) {
         val skillCheck = game.activeSkillCheck();
         // "Declare Emergency" and "Jury Rigged" reduce the difficulty, but never the partial pass number.

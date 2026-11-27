@@ -26,23 +26,14 @@ public class Randomness {
         return new Randomness(new Random(seed));
     }
 
-    /**
-     * Starts the sequence of random results again from the seed, as {@link #seeded(long)} would.
-     */
     public void reseed(long seed) {
         random.setSeed(seed);
     }
 
-    /**
-     * @return a random int in [origin, bound)
-     */
     public int nextInt(int origin, int bound) {
         return random.nextInt(origin, bound);
     }
 
-    /**
-     * @return the elements in a new random order. The argument is not changed
-     */
     public <T> List<T> shuffled(Collection<? extends T> elements) {
         List<T> result = new ArrayList<>(elements);
         Collections.shuffle(result, random);

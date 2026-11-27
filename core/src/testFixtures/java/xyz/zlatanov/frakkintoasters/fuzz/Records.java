@@ -31,9 +31,6 @@ final class Records {
         return values;
     }
 
-    /**
-     * @return the event with one component changed, {@code null} when the record refuses the value
-     */
     static Event with(Event event, int index, Object value) {
         val values = values(event);
         values[index] = value;

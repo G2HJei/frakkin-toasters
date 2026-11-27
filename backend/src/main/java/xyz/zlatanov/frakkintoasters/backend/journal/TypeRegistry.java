@@ -20,8 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * The closed set of type names a codec writes into {@code kind}. A name only ever maps to a class registered here, so
- * JSON can't make the codec load a class.
+ * A name only ever maps to a class registered here, so JSON can't make the codec load a class.
  */
 public final class TypeRegistry {
 
@@ -29,8 +28,7 @@ public final class TypeRegistry {
     private final Map<Class<?>, String> byType = new LinkedHashMap<>();
 
     /**
-     * The types of a journal: every event (records and interfaces), every fact as {@code Area.Name} (two areas have a
-     * {@code CardsDrawn}), the journal entries, the followups and the interrupt windows.
+     * Facts are named {@code Area.Name}: two areas have a {@code CardsDrawn}.
      */
     public static TypeRegistry journal() {
         val registry = new TypeRegistry();
@@ -51,9 +49,6 @@ public final class TypeRegistry {
         return registry;
     }
 
-    /**
-     * The types a client gets: those of the journal, and the sealed types of the projections and their legal answers.
-     */
     public static TypeRegistry wire() {
         val registry = journal();
         for (val sealed : List.of(Viewer.class, InputProjection.class, LogEntry.class, FactProjection.class, Pick.class)) {
@@ -95,9 +90,6 @@ public final class TypeRegistry {
         return Optional.ofNullable(byName.get(name));
     }
 
-    /**
-     * @return the registered types, in the order they were registered
-     */
     public Collection<Class<?>> types() {
         return Collections.unmodifiableCollection(byType.keySet());
     }

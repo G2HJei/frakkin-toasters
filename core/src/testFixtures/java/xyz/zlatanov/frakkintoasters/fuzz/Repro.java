@@ -17,10 +17,7 @@ import java.util.Random;
 /**
  * A finding as a regression journal keeps it: the journal at the pause before it, and the input that failed there.
  *
- * @param seed   the seed the game was played with, which a restore needs to go on as it did
- * @param player the player who gives the input
- * @param option the option he picks first, {@code null} for none
- * @param event  the event he submits then, {@code null} for none
+ * @param seed   a restore needs it to go on as the game did
  * @param expect what the input has to do once the bug is fixed, {@code null} when the journal only has to restore
  */
 public record Repro(Journal journal, long seed, int player, Followup option, Event event, Expectation expect) {

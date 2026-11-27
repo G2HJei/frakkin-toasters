@@ -56,16 +56,8 @@ import { CargoIcons, cargoText, inRedZone, RESOURCE_NAMES, resourceIconUrl, reso
 const FACEDOWN_DISCARDS = new Set(['CIVILIAN_SHIPS', 'GALACTICA_DAMAGE', 'PEGASUS_DAMAGE', 'BASESTAR_DAMAGE', 'DESTINATION', 'DESTINY', 'LOYALTY', 'LOYALTY_NOT_CYLON', 'MOTIVE']);
 
 /**
- * The board as it lies on the table: board.jpg, with every component on its printed slot. The characters stand on the
- * printed names of their locations, the ships fly in the middle of the space areas, the resources lie in a row of
- * gauges (an icon and a strip of pips, the amount on hover; a shield around one whose next loss this turn is smaller),
- * the markers sit on the tracks, the decks lie in the rack with their counts and the top of their discard piles, the
- * civilian ships lie with the ship reserves, and the destinations tuck under the objective. The cards kept in
- * play lie on the free starfield. The card being resolved, its skill check and the die are the turn panel's, and the
- * nukes the Admiral's mat's. Hovering a deck shows its discard pile, and in a sandbox what the players can't see;
- * hovering a location shows its card, and hovering a standee its character sheet with its player's mat. What the
- * pending input's moves name lights up and takes a click (`input/boardAnswers.ts`): locations, space areas (the whole
- * sector, up to the ship model), ships, standees, and the "Act" chip of a location action.
+ * board.jpg, with every component on its printed slot. The card being resolved, its skill check and the die are the turn
+ * panel's, and the nukes the Admiral's mat's.
  */
 export function BoardSvg() {
   const table = useTable();
@@ -238,8 +230,6 @@ function targetHandlers(target: Target, onTarget: (target: Target, anchor: { x: 
   };
 }
 
-// ---------------------------------------------------------------- the section labels
-
 // like the badges on the players' mats: a chip with its top left and bottom right corners cut, in greys here so it stays
 // out of the way; the board's font is about 0.62 of its size a letter, its letters 0.08 of it apart
 const LABEL_HEIGHT = 30;
@@ -248,7 +238,6 @@ const LABEL_LETTER = 0.7;
 const LABEL_PAD = 12;
 const LABEL_CUT = 7;
 
-/** Each section's name, where the picture once printed it: on the starfield, or on the top edge of its box. */
 function SectionLabels() {
   return (
     <g className="section-labels">
@@ -277,8 +266,6 @@ function SectionLabels() {
     </g>
   );
 }
-
-// ---------------------------------------------------------------- critical damage
 
 // a section label's chip in red, its corners cut deeper, and at each end a band of the hazard stripes that the printed
 // frames of the Sickbay and the Brig have, in red and black
@@ -345,8 +332,6 @@ function CriticalDamagePlate({ critical }: { critical: boolean }) {
 }
 
 const svgPoints = (points: number[][]) => points.map(([x, y]) => `${x},${y}`).join(' ');
-
-// ---------------------------------------------------------------- the resources and the tracks
 
 function Resources({ game, changes, version }: { game: GameProjection; changes: Changes; version: number }) {
   return (
@@ -417,7 +402,6 @@ function ShieldDefs() {
   );
 }
 
-/** A faint force field around a gauge: clear in the middle, its cells and its rim lit at the edge. */
 function Shield({ resource, box, className, label }: { resource: ResourceName; box: Box; className: string; label?: string }) {
   const [x, y, width, height] = [box.x - SHIELD_PAD_X, box.y - SHIELD_PAD_Y, box.width + 2 * SHIELD_PAD_X, box.height + 2 * SHIELD_PAD_Y];
   const radius = height / 2;
@@ -482,7 +466,6 @@ function Gauge({ resource, value, box }: { resource: ResourceName; value: number
   );
 }
 
-// the printed spaces of each track with a marker
 const TRACK_SPACES: Record<Track, Record<string, Point>> = { JumpPreparation: JUMP_TRACK, Pursuit: PURSUIT_TRACK };
 
 function Tracks({ game, changes, version }: { game: GameProjection; changes: Changes; version: number }) {
@@ -555,7 +538,6 @@ const HALO_GAP = 7;
 const PORTRAIT_CUT = 14 / 87;
 const TOKEN_RING_OUT = 2.5;
 
-/** The points of a box with its top corners cut at 45 degrees and its bottom square, like the portraits. */
 function topCutBox(left: number, top: number, width: number, height: number, cut: number): string {
   const [right, bottom] = [left + width, top + height];
   return [
@@ -575,7 +557,6 @@ function outsideCut(cut: number, out: number): number {
   return cut + out * (2 - Math.SQRT2);
 }
 
-/** The points of a box with its corners cut at 45 degrees, like the printed spaces and the table's buttons. */
 function cutBox(left: number, top: number, width: number, height: number, cut: number): string {
   const [right, bottom] = [left + width, top + height];
   return [
@@ -615,8 +596,6 @@ function Marker(props: { track: string; at: Point; size: number } & ({ leaving: 
     </g>
   );
 }
-
-// ---------------------------------------------------------------- the reserves and the Cylon supply
 
 // The supply in the Cylon reserves, a pile per kind side by side: where the pile lies and the size of its pieces.
 const SUPPLY: { type: string; x: number; size: [number, number] }[] = [
@@ -660,8 +639,6 @@ function inset(box: Box, dx: number, dy: number): Box {
   return { x: box.x + dx, y: box.y + dy, width: box.width - 2 * dx, height: box.height - dy };
 }
 
-// ---------------------------------------------------------------- the deck rack, the objective, the tokens
-
 function DeckRack({ game }: { game: GameProjection }) {
   const deck = (id: string) => game.decks?.find((candidate) => candidate.deck === id);
   const rack = Object.entries(DECK_SLOTS).filter(([id]) => id !== 'MOTIVE' || (deck(id)?.size ?? 0) > 0);
@@ -680,7 +657,6 @@ function DeckRack({ game }: { game: GameProjection }) {
   );
 }
 
-/** The objective, and the destinations reached tucked under it with their distance showing, first first. */
 function Objective({ game }: { game: GameProjection }) {
   const slot = SLOTS.objective;
   const objective = cardArt('ObjectiveCard', game.objective);
@@ -712,7 +688,6 @@ function Objective({ game }: { game: GameProjection }) {
 function pileCards(cards: unknown[], kind: string | null): RevealCard[] {
   return cards.map((card) => ({
     art: deckCardArt(card, kind),
-    // a civilian ship with what it costs when destroyed
     label: kind === 'CivilianShip' ? `${cardLabel(card)}: ${cargoText(card as CivilianShip)}` : cardLabel(card),
   }));
 }
@@ -730,7 +705,6 @@ export function deckSections(deck: DeckProjection | undefined): RevealSection[] 
   ];
 }
 
-/** A deck in its slot: its back (a card, or a pile of ships like the reserves'), its count, and its piles on hover. */
 function DeckPile({ deck, slot, back, ships = false, extra }: {
   deck: DeckProjection | undefined;
   slot: Box;
@@ -773,7 +747,6 @@ function DeckPile({ deck, slot, back, ships = false, extra }: {
   );
 }
 
-/** A discard pile: its top card face up, the pile on hover. */
 function Discard({ deck, slot }: { deck: DeckProjection | undefined; slot: Box }) {
   if (!deck) {
     return null;
@@ -794,9 +767,6 @@ function Discard({ deck, slot }: { deck: DeckProjection | undefined; slot: Box }
   );
 }
 
-// ---------------------------------------------------------------- the free starfield
-
-/** The Crisis Cards kept in play, by the jump track, the later ones on top. */
 function FreeSpace({ game }: { game: GameProjection }) {
   const slot = SLOTS.inPlay;
   return (
@@ -810,8 +780,6 @@ function FreeSpace({ game }: { game: GameProjection }) {
     </g>
   );
 }
-
-// ---------------------------------------------------------------- the locations
 
 // The ship cuts: everything on the board but its model, once for every space area.
 function SpaceSectorDefs() {
@@ -878,7 +846,6 @@ function SpaceSector({ name, model }: { name: Location; model: ShipModel }) {
   );
 }
 
-// A destroyed Colonial One or Pegasus gets a veil, and the Engine Room a label once activated.
 function LocationMarks({ place, destroyed, engineRoom }: { place: Place; destroyed: boolean; engineRoom: boolean }) {
   return (
     <>
@@ -966,8 +933,6 @@ function Standees({ place, title, characters, acting, nameOf, game }: {
   );
 }
 
-// ---------------------------------------------------------------- the ships
-
 // The size of each ship's image on the board, in the proportions of the scans, and the order the ships of a space area
 // lie in: the Cylon ships first.
 const SHIP_SIZE: Record<string, [number, number]> = {
@@ -1039,10 +1004,6 @@ interface SizedPile {
   pilot: number;
 }
 
-/**
- * The piles in rows, as many as fit the box's width, in the order they come. Centred, the rows lie in the middle of the
- * box and each pile in the middle of its row; otherwise they start at its top left.
- */
 export function layOut(box: Box, groups: ShipGroup[], { scale = 1, centred = false }: { scale?: number; centred?: boolean } = {}): PlacedGroup[] {
   const step = PILE_STEP * scale;
   const gap = 18 * scale;
@@ -1140,7 +1101,6 @@ function Piles({ placed }: { placed: PlacedGroup[] }) {
   );
 }
 
-// A ship, with its image large on hover unless its pile shows more.
 function Ship({ ship, x, y, width, height, preview = true }: { ship: ShipProjection; x: number; y: number; width: number; height: number; preview?: boolean }) {
   const table = useTable();
   const { offer, onTarget } = useAnswering();
@@ -1201,8 +1161,6 @@ export function boardShipLabel(ship: ShipProjection): string {
     .join(' · ');
 }
 
-// ---------------------------------------------------------------- small parts
-
 /**
  * A number on the board in a chip with cut corners: a count, a difficulty, a value. `y` is its top, and `x` its left
  * edge, its middle or its right edge.
@@ -1241,7 +1199,6 @@ function Count({ x, y, value, size = 36, align = 'start', accent = false, classN
   );
 }
 
-// A group of the board that shows what it hides on hover.
 function RevealGroup({ id, title, sections, children }: { id: string; title: string; sections: RevealSection[]; children: ReactNode }) {
   const handlers = useRevealHandlers(id, title, sections);
   return <g {...handlers}>{children}</g>;

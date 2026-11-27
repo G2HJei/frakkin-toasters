@@ -20,14 +20,12 @@ const FILES = import.meta.glob<string>('./*/**/*.{png,jpg,gif,svg}', {
 // "./CrisisCard/WATER_SABOTAGED.png" -> "CrisisCard/WATER_SABOTAGED"
 const URLS = new Map<string, string>(Object.entries(FILES).map(([path, url]) => [path.replace(/^\.\//, '').replace(/\.\w+$/, ''), url]));
 
-/** Every image by its path without the extension, e.g. `Character/player-token/LAURA_ROSLIN`. */
 export function artPaths(): string[] {
   return [...URLS.keys()];
 }
 
 export type ArtShape = 'card' | 'token' | 'pilot' | 'location' | 'ship' | 'damage' | 'dial' | 'track' | 'back' | 'icon';
 
-/** An image of a component: its file, its name as alt text, and what the preview shows large. */
 export interface ArtRef {
   key: string;
   url: string;
@@ -82,7 +80,6 @@ export function skillTypeArt(type: Constant): ArtRef | null {
   return path ? art(path, constantLabel('SkillCardType', type), 'card') : null;
 }
 
-/** A character's standee, with the character sheet as its preview. */
 export function characterArt(character: Constant): ArtRef | null {
   return character
     ? art(`Character/player-token/${character}`, constantLabel('Character', character), 'token', [`Character/card/${character}`])
@@ -126,7 +123,6 @@ export type TitleName = 'PRESIDENT' | 'ADMIRAL' | 'CAG' | 'INFILTRATING';
 
 const TITLE_LABELS: Record<TitleName, string> = { PRESIDENT: 'President', ADMIRAL: 'Admiral', CAG: 'CAG', INFILTRATING: 'Infiltrating' };
 
-/** A title card, which lies in front of the player who holds it. */
 export function titleArt(title: TitleName): ArtRef | null {
   return art(`Title/${title}`, TITLE_LABELS[title], 'card');
 }
@@ -139,7 +135,6 @@ export function titleIcon(title: TitleName): string | undefined {
   return TITLE_ICONS[title];
 }
 
-/** A title's insignia, with its card as the preview; the card where it has none. */
 export function titleIconArt(title: TitleName): ArtRef | null {
   const icon = TITLE_ICONS[title];
   const card = titleArt(title);
@@ -158,12 +153,10 @@ export function tokenArt(token: TokenName): ArtRef | null {
   return art(`Token/${token}`, TOKEN_LABELS[token], 'token', []);
 }
 
-/** The die showing a value, 1 to 8. */
 export function dieArt(value: number | null | undefined): ArtRef | null {
   return value ? art(`Die/${value}`, `Die: ${value}`, 'token', []) : null;
 }
 
-/** The back of every Skill Card, whatever its color. */
 export function skillBackArt(): ArtRef | null {
   return art('Back/SKILL', 'Skill Card', 'back', []);
 }
@@ -178,7 +171,6 @@ const SKILL_COLORS: Record<string, string> = {
   TREACHERY: '#6d4a3a',
 };
 
-/** A Skill Card back in a color, hatched as the table draws a color's backs (`.card-back`), e.g. for a draw of it. */
 export function skillColorBackArt(color: Constant): ArtRef | null {
   const fill = color ? SKILL_COLORS[color] : undefined;
   if (!color || !fill) {
@@ -215,12 +207,10 @@ function pegasusDamageBackArt(): ArtRef {
   return { key: 'DeckId/PEGASUS_DAMAGE', url: `data:image/svg+xml,${encodeURIComponent(svg)}`, label: constantLabel('DeckId', 'PEGASUS_DAMAGE'), shape: 'back', preview: [] };
 }
 
-/** A resource dial set to a value, 0 to 15. */
 export function resourceArt(resource: Constant, value: number): ArtRef | null {
   return resource ? art(`Resource/${resource}_${value}`, `${constantLabel('Resource', resource)} ${value}`, 'dial', []) : null;
 }
 
-/** A resource's icon, as the board's gauges draw it: what an answer gains or loses. */
 export function resourceIconArt(resource: Constant): ArtRef | null {
   const name = resource?.toLowerCase();
   if (!(RESOURCE_NAMES as string[]).includes(name ?? '')) {
@@ -233,7 +223,6 @@ export function resourceIconArt(resource: Constant): ArtRef | null {
 // the line icons in the resource icons' light steel
 const ICON_COLOR = '#cfe0f0';
 
-/** A step of the turn, as the turn panel draws it, in the resource icons' light steel: the step an answer acts in. */
 export function stepIconArt(step: TurnStep): ArtRef {
   const svg = stepIconSvg(step, ICON_COLOR);
   return { key: `StepIcon/${step}`, url: `data:image/svg+xml,${encodeURIComponent(svg)}`, label: constantLabel('GameStep', step), shape: 'icon', preview: [] };
@@ -243,7 +232,6 @@ function glyphArt(key: string, name: GlyphName, label: string, preview: string[]
   return { key, url: `data:image/svg+xml,${encodeURIComponent(glyphSvg(name, ICON_COLOR))}`, label, shape: 'icon', preview };
 }
 
-/** The map pin, as the mats mark where a player stands: a location an answer picks or acts at, its card on hover. */
 export function locationPinArt(location?: Constant): ArtRef {
   if (!location) {
     return glyphArt('Glyph/LOCATION', 'LOCATION', 'Location');
@@ -251,22 +239,18 @@ export function locationPinArt(location?: Constant): ArtRef {
   return glyphArt(`Glyph/LOCATION/${location}`, 'LOCATION', constantLabel('Location', location), locationArt(location)?.preview);
 }
 
-/** A card put back on top of its deck, or at its bottom. */
 export function deckPlaceArt(place: 'DECK_TOP' | 'DECK_BOTTOM'): ArtRef {
   return glyphArt(`Glyph/${place}`, place, place === 'DECK_TOP' ? 'On top of the deck' : 'At the bottom of the deck');
 }
 
-/** A track with its token at a position. */
 export function trackArt(enumName: 'JumpPreparation' | 'Pursuit', position: Constant): ArtRef | null {
   return position ? art(`${enumName}/${position}`, constantLabel(enumName, position), 'track') : null;
 }
 
-/** The card a skill check comes from: a Crisis Card, a Super Crisis Card, or the location of a location's check. */
 export function skillCheckArt(type: Constant): ArtRef | null {
   return cardArt('CrisisCard', type) ?? cardArt('SuperCrisisCard', type) ?? locationArt(type);
 }
 
-/** The image of a constant of an enum, for the enums that have images. */
 export function enumArt(enumName: string, constant: Constant): ArtRef | null {
   if ((CARD_ENUMS as readonly string[]).includes(enumName)) {
     return cardArt(enumName as CardEnum, constant);
@@ -285,12 +269,10 @@ export function enumArt(enumName: string, constant: Constant): ArtRef | null {
     case 'SkillCheckType':
       return skillCheckArt(constant);
     case 'Risk':
-      // the Destination Card the ships are risked at
       return cardArt('DestinationCard', constant);
     case 'SkillCardType':
       return skillTypeArt(constant);
     case 'CharacterAbility':
-      // the character sheet that prints it
       return characterSheetArt(abilityCharacter(constant));
     case 'Title':
       return isTitleName(constant) && constant !== 'INFILTRATING' ? titleArt(constant) : null;
@@ -299,7 +281,6 @@ export function enumArt(enumName: string, constant: Constant): ArtRef | null {
   }
 }
 
-/** The kind of card a deck holds: a card enum, a Skill Card, or a civilian ship. */
 export function deckCards(deck: Constant): string | null {
   switch (deck) {
     case 'CRISIS':
@@ -333,7 +314,6 @@ export function deckCards(deck: Constant): string | null {
   }
 }
 
-/** The deck a player's pile comes from, for the back of its hidden cards. */
 export function pileDeck(pile: Constant): string | null {
   switch (pile) {
     case 'SKILL':
@@ -351,7 +331,6 @@ export function pileDeck(pile: Constant): string | null {
   }
 }
 
-/** A card of a deck or a pile, whatever its kind: an enum's constant, a Skill Card, or a civilian ship. */
 export function deckCardArt(card: unknown, kind: string | null): ArtRef | null {
   if (card && typeof card === 'object' && 'type' in card && 'value' in card) {
     return skillCardArt(card as SkillCardLike);

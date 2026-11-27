@@ -6,7 +6,6 @@ import java.util.Map;
 import static xyz.zlatanov.frakkintoasters.state.board.LocationsArea.*;
 
 public enum Location {
-    //galactica
     FTL_CONTROL,
     WEAPONS_CONTROL,
     COMMUNICATIONS,
@@ -18,13 +17,11 @@ public enum Location {
     SICKBAY,
     BRIG,
 
-    //colonial one
     QUORUM_CHAMBER,
     PRESS_ROOM,
     PRESIDENTS_OFFICE,
     ADMINISTRATION,
 
-    //galactica space
     GALACTICA_SPACE_12_OCLOCK,
     GALACTICA_SPACE_2_OCLOCK,
     GALACTICA_SPACE_4_OCLOCK,
@@ -32,19 +29,16 @@ public enum Location {
     GALACTICA_SPACE_8_OCLOCK,
     GALACTICA_SPACE_10_OCLOCK,
 
-    //pegasus
     PEGASUS_CIC,
     AIRLOCK,
     MAIN_BATTERIES,
     ENGINE_ROOM,
 
-    //cylon
     CAPRICA,
     CYLON_FLEET,
     HUMAN_FLEET,
     RESURRECTION_SHIP,
 
-    //cylon fleet
     BASESTAR_BRIDGE,
     CYLON_FLEET_SPACE_1,
     CYLON_FLEET_SPACE_2,

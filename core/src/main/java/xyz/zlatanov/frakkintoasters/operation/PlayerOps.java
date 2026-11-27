@@ -46,9 +46,6 @@ public class PlayerOps extends GameOps {
         record(new CharacterSelected(player.number(), selectedCharacter));
     }
 
-    /**
-     *  the cards drawn
-     */
     public List<LoyaltyCard> drawLoyaltyCards(int cardsToDraw) {
         List<LoyaltyCard> loyaltyCards = draw(DeckId.LOYALTY, cardsToDraw);
         gain(PlayerPile.LOYALTY, loyaltyCards);
@@ -72,9 +69,6 @@ public class PlayerOps extends GameOps {
         drawSkillCards(Arrays.stream(colors).toList());
     }
 
-    /**
-     * @return the cards drawn, in the order of the colors
-     */
     public List<SkillCard> drawSkillCards(List<SkillCardColor> colors) {
         val drawn = new ArrayList<SkillCard>();
         for (val color : colors) {
@@ -152,8 +146,7 @@ public class PlayerOps extends GameOps {
     }
 
     /**
-     * Plays a Skill Card from the hand for its ability, e.g. its "Action:". It goes to its discard pile before the
-     * ability resolves.
+     * It goes to its discard pile before the ability resolves.
      */
     public void play(SkillCard card) {
         record(new CardsLost(player.number(), PlayerPile.SKILL, List.of(card)));
@@ -161,19 +154,11 @@ public class PlayerOps extends GameOps {
         discardToDeck(card);
     }
 
-    /**
-     * Discards random Skill Cards from his hand, as many as he has up to {@code count}.
-     */
     public void discardRandomSkillCards(int count) {
         val hand = game.randomness().shuffled(player.skillCards().cards());
         discard(hand.stream().limit(count).toArray(SkillCard[]::new));
     }
 
-    /**
-     * Looks at 1 random Loyalty Card of the target that isn't revealed, if he has one.
-     *
-     * @return the card seen, empty when he has none
-     */
     public Optional<LoyaltyCard> lookAtLoyaltyCard(int targetPlayerNumber) {
         val cards = game.player(targetPlayerNumber).loyaltyCards().cards();
         if (cards.isEmpty()) {
@@ -184,11 +169,6 @@ public class PlayerOps extends GameOps {
         return Optional.of(card);
     }
 
-    /**
-     * Looks at every Loyalty Card of the target that isn't revealed, e.g. for "Cylon Detector".
-     *
-     * @return the cards seen
-     */
     public List<LoyaltyCard> lookAtAllLoyaltyCards(int targetPlayerNumber) {
         val cards = game.player(targetPlayerNumber).loyaltyCards().cards();
         cards.forEach(card -> record(new LoyaltyCardSeen(player.number(), targetPlayerNumber, card)));
@@ -216,9 +196,6 @@ public class PlayerOps extends GameOps {
         gain(PlayerPile.QUORUM, List.of(card));
     }
 
-    /**
-     * Takes a Quorum Card the player holds himself out of his pile to play it.
-     */
     public void playHeldQuorumCard(QuorumCard card) {
         record(new CardsLost(player.number(), PlayerPile.QUORUM, List.of(card)));
     }
@@ -229,7 +206,7 @@ public class PlayerOps extends GameOps {
     }
 
     /**
-     * Gives Skill Cards from his hand to another player. Each of them sees the cards, the others only how many.
+     * Each of the two players sees the cards, the others only how many.
      */
     public void giveSkillCards(int recipientPlayerNumber, List<SkillCard> cards) {
         if (!cards.isEmpty()) {
@@ -238,39 +215,32 @@ public class PlayerOps extends GameOps {
         }
     }
 
-    /**
-     * Takes random Skill Cards from another player's hand, as many as he has up to {@code count}.
-     */
     public void takeRandomSkillCards(int fromPlayerNumber, int count) {
         val hand = game.randomness().shuffled(game.player(fromPlayerNumber).skillCards().cards());
         player(fromPlayerNumber).giveSkillCards(player.number(), hand.stream().limit(count).toList());
     }
 
     /**
-     * Takes a Mutiny Card out of his hand to play it. It is in no pile until its text says where it goes.
+     * It is in no pile until its text says where it goes.
      */
     public void playMutinyCard(MutinyCard card) {
         record(new CardsLost(player.number(), PlayerPile.MUTINY, List.of(card)));
     }
 
     /**
-     * Takes a Super Crisis Card out of his hand to play it at "Caprica". It is in no pile while it resolves.
+     * It is in no pile while it resolves.
      */
     public void playSuperCrisisCard(SuperCrisisCard card) {
         record(new CardsLost(player.number(), PlayerPile.SUPER_CRISIS, List.of(card)));
     }
 
-    /**
-     * Discards a Super Crisis Card from his hand without playing it, e.g. for D'Anna Biers' "Heretic".
-     */
     public void discardSuperCrisisCard(SuperCrisisCard card) {
         playSuperCrisisCard(card);
         record(new CardsDiscarded(DeckId.SUPER_CRISIS, List.of(card)));
     }
 
     /**
-     * Draws cards from the top of the Destiny deck into his hand, e.g. for Leoben Conoy's "Glimpse the Face of God". An
-     * empty Destiny deck is built anew before the next card, as after a skill check.
+     * An empty Destiny deck is built anew before the next card, as after a skill check.
      */
     public void drawFromDestinyDeck(int count) {
         for (int i = 0; i < count; i++) {
@@ -286,7 +256,7 @@ public class PlayerOps extends GameOps {
     }
 
     /**
-     * Puts Skill Cards from his hand on top of the Destiny deck, the first one on top.
+     * The first card ends on top.
      */
     public void placeOnDestinyDeck(List<SkillCard> cards) {
         if (!cards.isEmpty()) {
@@ -327,32 +297,23 @@ public class PlayerOps extends GameOps {
         gain(PlayerPile.SKILL, List.of(card));
     }
 
-    // "He can do so only if he does not currently have one" (rule 4.3.1), up to three for Gaius Baltar (alt.), and never
-    // as a revealed Cylon (rule 4.3.2).
-    /**
-     * The ability that was triggered for this player has been offered, e.g. "Memento".
-     */
     public void clearAbilityTrigger(CharacterAbility ability) {
         record(new AbilityTriggerCleared(player.number(), ability));
     }
 
     public void gainMiracleToken() {
+        // "He can do so only if he does not currently have one" (rule 4.3.1), up to three for Gaius Baltar (alt.), and
+        // never as a revealed Cylon (rule 4.3.2).
         if (player.canGainMiracleToken()) {
             record(new MiracleTokenGained(player.number()));
         }
     }
 
-    /**
-     * Gives one of his miracle tokens to another player, who has room for it, e.g. Gaius Baltar (alt.)'s "Cult Leader".
-     */
     public void giveMiracleToken(int recipientPlayerNumber) {
         record(new MiracleTokenLost(player.number()));
         player(recipientPlayerNumber).gainMiracleToken();
     }
 
-    /**
-     * Discards all of his miracle tokens, e.g. when he reveals as a Cylon or is executed.
-     */
     public void loseMiracleTokens() {
         val tokens = player.miracleTokens(); // each fact applies at once
         for (int i = 0; i < tokens; i++) {
@@ -391,7 +352,7 @@ public class PlayerOps extends GameOps {
     }
 
     /**
-     * Takes the character out of the game, e.g. after an execution. A viper he pilots goes back to the "Reserves".
+     * A viper he pilots goes back to the "Reserves".
      */
     public void removeCharacter() {
         val character = player.character();

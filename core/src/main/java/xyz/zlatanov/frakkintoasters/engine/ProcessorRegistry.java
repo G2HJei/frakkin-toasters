@@ -20,7 +20,7 @@ public final class ProcessorRegistry {
     private static final Map<Class<?>, Constructor<?>> CONSTRUCTORS = findConstructors();
 
     /**
-     * @return a new processor for the event. A processor holds the context of one event, so it should not be reused
+     * A processor holds the context of one event, so it should not be reused.
      */
     @SneakyThrows
     @SuppressWarnings("unchecked")
@@ -33,14 +33,10 @@ public final class ProcessorRegistry {
         return (EventProcessor<E>) constructor.newInstance();
     }
 
-    /**
-     * @return whether the event class has a processor
-     */
     public static boolean hasProcessor(Class<?> eventClass) {
         return CONSTRUCTORS.containsKey(eventClass);
     }
 
-    // The top-level classes named XxxEventProcessor.
     private static Map<Class<?>, Constructor<?>> findConstructors() {
         return ClasspathScanner.topLevelClassNames().stream()
                 .filter(name -> name.endsWith("EventProcessor"))

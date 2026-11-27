@@ -41,9 +41,6 @@ public final class Endings {
     private Endings() {
     }
 
-    /**
-     * @return the ending that explains the outcome, empty when none does (or the game hasn't ended)
-     */
     public static Optional<Ending> classify(GameView game) {
         val winner = game.outcome();
         if (winner.isEmpty()) {

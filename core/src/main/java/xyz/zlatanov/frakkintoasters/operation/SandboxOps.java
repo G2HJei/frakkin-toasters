@@ -37,27 +37,17 @@ public class SandboxOps extends AbstractOps {
         super(game, recorder);
     }
 
-    /**
-     * Takes the card out of the deck's draw pile and puts it on top, so the next draw gives it.
-     */
     public void stackOnTop(DeckId deck, Object card) {
         record(new CardsPulled(deck, List.of(card)));
         record(new CardsAddedOnTop(deck, List.of(card)));
     }
 
-    /**
-     * Puts a Skill Card on top of the Destiny deck: from the Destiny deck when it is there, otherwise from its color's
-     * draw pile.
-     */
     public void stackDestiny(SkillCard card) {
         val from = game.decks().destiny().cards().contains(card) ? DeckId.DESTINY : DeckId.of(card.type().color());
         record(new CardsPulled(from, List.of(card)));
         record(new CardsAddedOnTop(DeckId.DESTINY, List.of(card)));
     }
 
-    /**
-     * Gives the player a Skill Card out of its color's draw pile.
-     */
     // A setup, not a loss, so no "Preventative Policy" applies.
     public void decreaseResource(Resource resource, int amount) {
         record(new ResourceDecreased(resource, amount));
@@ -74,8 +64,7 @@ public class SandboxOps extends AbstractOps {
     }
 
     /**
-     * Gives a Loyalty Card out of the deck it is in, {@code null} for a "You Are a Cylon" card, which isn't in a deck
-     * before it is dealt.
+     * @param from {@code null} for a "You Are a Cylon" card, which isn't in a deck before it is dealt
      */
     public void giveLoyaltyCard(int playerNumber, LoyaltyCard card, DeckId from) {
         if (from != null) {

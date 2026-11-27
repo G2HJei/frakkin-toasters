@@ -68,7 +68,6 @@ class FootageTransmittedFailEventProcessorTest extends EventTestHarness<FootageT
         game.players().forEach(p -> assertTrue(p.superCrisisCards().isEmpty()));
     }
 
-    // Every player without a character gets a human one.
     private void characters() {
         val humans = HUMANS.iterator();
         for (val player : game.players()) {

@@ -29,9 +29,9 @@ class GalacticaBoardTest {
 
     @Test
     void shouldSendCharactersFromDestroyedColonialOneToSickbay() {
-        board.place(PRESIDENTS_OFFICE, GAIUS_BALTAR); //hehe
-        board.destroyColonialOne(); //oops
-        assertEquals(Optional.of(SICKBAY), board.locate(GAIUS_BALTAR)); // poor Gaius
+        board.place(PRESIDENTS_OFFICE, GAIUS_BALTAR);
+        board.destroyColonialOne();
+        assertEquals(Optional.of(SICKBAY), board.locate(GAIUS_BALTAR));
     }
 
     @Test

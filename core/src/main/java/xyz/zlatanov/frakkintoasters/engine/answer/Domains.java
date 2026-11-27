@@ -41,9 +41,8 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
- * The values a scalar component of a candidate answer is tried with, by its type and name: the player who is asked,
- * the cards he holds, the ships on the boards, every constant of an enum. Null is tried for every reference, because
- * many answers mean something by it (no discard, the card's other instruction, no unmanned viper).
+ * Null is tried for every reference, because many answers mean something by it (no discard, the card's other
+ * instruction, no unmanned viper).
  */
 final class Domains {
 
@@ -52,10 +51,6 @@ final class Domains {
     private Domains() {
     }
 
-    /**
-     * @param skillCardType the card the event plays, which narrows its {@code card} component to it
-     * @return the values in a fixed order, {@code null} when the search has none for the component
-     */
     static List<Object> of(Asked asked, Class<?> record, RecordComponent component, SkillCardType skillCardType) {
         val type = component.getType();
         val name = component.getName();
@@ -126,7 +121,6 @@ final class Domains {
         return List.copyOf(cards);
     }
 
-    // The moves, attacks and escorts of each fighter in space, and every launch.
     private static List<Object> viperActivations(Asked asked) {
         val game = asked.game();
         val result = new ArrayList<Object>();
@@ -158,10 +152,6 @@ final class Domains {
         };
     }
 
-    /**
-     * @return the constants of an enum a component may name: the cards of the pile they come from, every constant
-     * otherwise
-     */
     static List<Object> constants(Asked asked, Class<?> record, String name, Class<?> type) {
         val player = asked.player();
         val game = asked.game();
@@ -200,18 +190,13 @@ final class Domains {
         return List.of(type.getEnumConstants());
     }
 
-    /**
-     * @return the ids of the ships a component may name: the kind its name says (a civilian ship, a raider, a
-     * basestar, a Cylon ship, a viper or fighter, a centurion), any ship otherwise
-     */
     static List<Integer> shipIds(Asked asked, String name) {
         return shipGroups(asked, name).values().stream().flatMap(List::stream).distinct().sorted().toList();
     }
 
     /**
-     * @return the ships of the kind the name says by where they are, and by their kind there, because a list of ships
-     * comes from one place (a space area, the "Reserves") and often of one kind: in space by area, by area and kind,
-     * and by kind in any area
+     * By where the ships are and by their kind there, because a list of ships comes from one place (a space area, the
+     * "Reserves") and often of one kind.
      */
     static Map<String, List<Integer>> shipGroups(Asked asked, String name) {
         val kind = kindOf(name);

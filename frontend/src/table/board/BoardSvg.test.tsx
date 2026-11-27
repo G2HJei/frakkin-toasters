@@ -112,7 +112,6 @@ afterEach(() => {
     useGameStore.getState().reset();
 });
 
-// where the images of a space area's ships lie
 function shipBoxes(board: HTMLElement, location: string) {
     return [...board.querySelectorAll(`[data-location="${location}"] .ship > image`)].map((image) => ({
         art: image.getAttribute('data-art'),

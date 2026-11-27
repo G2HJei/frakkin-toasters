@@ -18,10 +18,6 @@ final class ProductionEvents {
     private ProductionEvents() {
     }
 
-    /**
-     * @return the simple names of the events a game can run: the records of the rules with a processor, not the
-     * sandbox's setup events
-     */
     static List<String> types() {
         return EventCatalog.types().stream()
                 .filter(Class::isRecord)

@@ -47,9 +47,8 @@ import static xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard.*;
 import static xyz.zlatanov.frakkintoasters.state.track.Pursuit.POSITION_2;
 
 /**
- * The Crisis step from the card to the end of the Activate Cylon Ships step, through {@code submit} and {@code choose}
- * alone, restoring the game at every pause. Nobody holds a card and there are no ships on the main game board, so that
- * no interrupt window and no attack asks anything.
+ * Nobody holds a card and there are no ships on the main game board, so that no interrupt window and no attack asks
+ * anything.
  */
 class CrisisStepTest {
 
@@ -148,8 +147,6 @@ class CrisisStepTest {
         assertWaitingFor(sectionChoice(1, RIOTS_NO_JUMP));
     }
 
-    /* inputs */
-
     // Kara "Starbuck" Thrace may replace each revealed card ("Secret Destiny"). Here she lets it resolve.
     private void letItResolve(CrisisCard card) {
         assertWaitingFor(new AwaitingChoice(3, Set.of(
@@ -176,8 +173,6 @@ class CrisisStepTest {
         input.accept(engine);
         assertRestoresTheSameGame();
     }
-
-    /* assertions */
 
     private void assertWaitingFor(PendingInput expected) {
         assertEquals(EngineStatus.waiting(expected), engine.status(expected.player()));

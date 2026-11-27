@@ -47,9 +47,6 @@ public interface SkillCheckView {
                 .anyMatch(card -> card.type() == SkillCardType.INVESTIGATIVE_COMMITTEE);
     }
 
-    /**
-     * The cards the player put into an investigated check, which everyone sees.
-     */
     List<SkillCard> shownCards(int playerNumber);
 
     List<SkillCardType> resolvedAbilities();

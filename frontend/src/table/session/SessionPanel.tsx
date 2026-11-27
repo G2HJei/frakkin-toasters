@@ -10,9 +10,7 @@ export interface SessionPanelProps {
 }
 
 /**
- * The seats of a running game and who holds them: a vacant seat to take, a vote to hand a seat over or to abandon the
- * game (the host's passes at once), and leaving the seat or the table. The game waits at a vacant seat like at anyone's;
- * the server decides who may do what and says why it refuses. Open while a seat is vacant or a vote is open.
+ * The game waits at a vacant seat like at anyone's; the server decides who may do what and says why it refuses.
  */
 export function SessionPanel({ room, myId }: SessionPanelProps) {
   const table = useTable();

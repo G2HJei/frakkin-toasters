@@ -15,9 +15,6 @@ import static lombok.AccessLevel.PRIVATE;
 @NoArgsConstructor(access = PRIVATE)
 public final class QuorumCardPlays {
 
-    /**
-     * @return whether the player could play the card now, if he held it. Each card's own rules are in its processor
-     */
     public static boolean canPlay(GameView game, PlayerView player, QuorumCard card) {
         // Revealed Cylons can't use them (rule 6.1.2.3).
         if (!player.isHuman()) {
@@ -78,9 +75,6 @@ public final class QuorumCardPlays {
         };
     }
 
-    /**
-     * @return whether the player is President and holds a Quorum Card he can play now
-     */
     public static boolean canPlayAny(GameView game, PlayerView player) {
         return player.character() != null
                 && player.character() == game.president()

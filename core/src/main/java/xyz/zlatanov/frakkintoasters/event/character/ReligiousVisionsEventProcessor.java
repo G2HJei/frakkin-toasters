@@ -11,9 +11,6 @@ import static xyz.zlatanov.frakkintoasters.state.character.CharacterAbility.RELI
 
 public class ReligiousVisionsEventProcessor extends EventProcessor<ReligiousVisionsEvent> {
 
-    /**
-     * @return whether the player draws 2 Crisis Cards instead of 1: two have to be left to draw
-     */
     public static boolean drawsTwo(GameView game, PlayerView player) {
         return player.hasAbility(RELIGIOUS_VISIONS) && game.decks().crisisCardsLeft() >= 2;
     }

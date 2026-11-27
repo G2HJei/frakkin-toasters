@@ -39,9 +39,9 @@ import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.DESTINATION;
 import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.LOYALTY;
 
 /**
- * The jumps of a seeded game up to the Kobol end game, through {@code submit} and {@code choose} alone, restoring the
- * game at every pause: the Admiral's choice of the destination, the Sleeper Agent phase at 4 distance, and the final jump
- * after 8. The Destination deck is stacked so that each jump offers known cards: 3, 2, 2 and 1 distance.
+ * The jumps of a seeded game up to the Kobol end game: the Admiral's choice of the destination, the Sleeper Agent phase
+ * at 4 distance, and the final jump after 8. The Destination deck is stacked so that each jump offers known cards: 3, 2,
+ * 2 and 1 distance.
  */
 class JumpAndKobolTest {
 
@@ -120,8 +120,6 @@ class JumpAndKobolTest {
         assertEquals(List.of(), engine.view().winners());
     }
 
-    /* inputs */
-
     private static Followup jumps(int count) {
         return all(java.util.Collections.nCopies(count, single(new JumpingTheFleetEvent())).toArray(Followup[]::new));
     }
@@ -149,8 +147,6 @@ class JumpAndKobolTest {
     private List<Integer> loyaltyCards() {
         return engine.view().players().stream().map(player -> player.loyaltyCards().size()).toList();
     }
-
-    /* assertions */
 
     private void assertWaitingFor(PendingInput expected) {
         assertEquals(EngineStatus.waiting(expected), engine.status(expected.player()));

@@ -28,10 +28,6 @@ public final class TreacheryDiscards {
 
     private static final Set<SkillCardType> DRAW_MUTINY_CARD_WHEN_CHOSEN = Set.of(BAIT, DRADIS_CONTACT);
 
-    /**
-     * @return the Mutiny Card the player draws for the cards he chose to discard, {@link Followup#NONE} when none of
-     * them asks for one or he drew one this way this turn
-     */
     public static Followup mutinyCardFor(GameView game, GameOps ops, int playerNumber, Collection<SkillCard> discarded) {
         // Revealed Cylons never draw Mutiny Cards (rule 5.2.3.4), so they don't use up the turn's draw either.
         val draws = discarded.stream().map(SkillCard::type).anyMatch(DRAW_MUTINY_CARD_WHEN_CHOSEN::contains)

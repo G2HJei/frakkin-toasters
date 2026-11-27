@@ -1,8 +1,5 @@
 package xyz.zlatanov.frakkintoasters.state.character;
 
-/**
- * When a character ability is used, as its sheet prints it.
- */
 public enum AbilityKind {
     // "Action:", taken instead of another action
     ACTION,

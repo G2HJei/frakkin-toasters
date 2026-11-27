@@ -59,8 +59,7 @@ public class TitleOps extends GameOps {
     }
 
     /**
-     * @return Quorum Cards drawn for a player who isn't drawing into the President's hand, e.g. for "Popular
-     * Influence". They are in no pile yet
+     * The drawn cards are in no pile yet.
      */
     public List<QuorumCard> drawQuorumCards(int count) {
         return draw(QUORUM, count);
@@ -70,9 +69,6 @@ public class TitleOps extends GameOps {
         record(new PresidentQuorumCardGained(card));
     }
 
-    /**
-     * The President discards random Quorum Cards, as many as he has up to {@code count}.
-     */
     public void discardRandomQuorumCards(int count) {
         val cards = game.randomness().shuffled(game.presidentHand().cards()).stream().limit(count).toList();
         if (!cards.isEmpty()) {
@@ -86,7 +82,7 @@ public class TitleOps extends GameOps {
     }
 
     /**
-     * Takes the card out of the President's hand to play it. It is in no pile until its text says where it goes.
+     * It is in no pile until its text says where it goes.
      */
     public void play(QuorumCard card) {
         record(new PresidentQuorumCardsLost(List.of(card)));
@@ -117,14 +113,6 @@ public class TitleOps extends GameOps {
                 .forEach(this::discardFromPlay);
     }
 
-    /**
-     * Puts Quorum Cards from the President's hand at the bottom of the Quorum deck, in the order given ("Set the
-     * Agenda").
-     */
-    /**
-     * Puts drawn Quorum Cards, which are in no pile, at the bottom of the deck, e.g. after Laura Roslin's "Skilled
-     * Politician".
-     */
     public void putDrawnQuorumCardsAtBottom(List<QuorumCard> cards) {
         if (!cards.isEmpty()) {
             record(new CardsAddedToBottom(QUORUM, cards));
@@ -139,8 +127,7 @@ public class TitleOps extends GameOps {
     }
 
     /**
-     * Puts the top Quorum Cards back in another order, the first on top, e.g. Tory Foster's "Influential". The cards
-     * come off without a draw, so an emptied deck doesn't take its discard pile in.
+     * The cards come off without a draw, so an emptied deck doesn't take its discard pile in.
      */
     public void reorderTopQuorumCards(List<QuorumCard> order) {
         if (!order.isEmpty()) {

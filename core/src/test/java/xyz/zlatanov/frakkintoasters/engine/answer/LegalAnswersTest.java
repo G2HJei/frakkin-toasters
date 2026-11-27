@@ -53,8 +53,6 @@ class LegalAnswersTest extends TestHarness {
     private final SkillCard repair        = new SkillCard(5, REPAIR);
     private final SkillCard maneuvers     = new SkillCard(2, EVASIVE_MANOEUVRES);
 
-    /* moves */
-
     @Test
     void aMoveOnItsShipNeedsNoDiscardAndAMoveToAnotherShipPicksOneCardOfTheHand() {
         player(1).character(KARA_STARBUCK_THRACE);
@@ -80,8 +78,6 @@ class LegalAnswersTest extends TestHarness {
         assertTrue(answers(1, MoveEvent.class).isEmpty());
     }
 
-    /* the Action step */
-
     @Test
     void theActionOfTheLocationListsItsChoices() {
         player(1).character(KARA_STARBUCK_THRACE);
@@ -94,8 +90,6 @@ class LegalAnswersTest extends TestHarness {
                 sorted(locationActions));
         assertFalse(answers.covers(new ResearchLabEvent(1, SkillCardColor.POLITICS)));
     }
-
-    /* draws and discards */
 
     @Test
     void aDrawOfAnyColorListsEveryColorWithCardsLeft() {
@@ -159,8 +153,6 @@ class LegalAnswersTest extends TestHarness {
         assertEquals(List.of(24, 24), List.of(pick.min(), pick.max()));
     }
 
-    /* skill checks */
-
     @Test
     void cardsIntoACheckAreNoneOrAnyNumberOfTheHand() {
         player(1).character(KARA_STARBUCK_THRACE);
@@ -204,8 +196,6 @@ class LegalAnswersTest extends TestHarness {
         assertFalse(answers.covers(new PlayCardsIntoSkillCheckEvent(1, List.of(planning))));
     }
 
-    /* the character choice */
-
     @Test
     void theCharacterChoiceListsTheCharactersLeft() {
         player(1).character(KARA_STARBUCK_THRACE);
@@ -216,8 +206,6 @@ class LegalAnswersTest extends TestHarness {
         assertFalse(answers.covers(new SelectCharacterEvent(2, KARA_STARBUCK_THRACE)), "taken");
         assertFalse(answers.covers(new SelectCharacterEvent(2, null)));
     }
-
-    /* orders */
 
     @Test
     void setTheAgendaPutsTwoOfThePresidentsCardsInOrder() {
@@ -244,8 +232,6 @@ class LegalAnswersTest extends TestHarness {
         assertEquals(List.of(5, 5), List.of(pick.min(), pick.max()));
         assertTrue(pick.ordered());
     }
-
-    /* cards that read what is picked */
 
     // "Selfish": discards of 20 strength, tried strongest first.
     @Test
@@ -283,8 +269,6 @@ class LegalAnswersTest extends TestHarness {
         assertFalse(answers.covers(new AuthorizationOfBrutalForceEvent(1, raiders.subList(0, 2))));
     }
 
-    /* choices */
-
     @Test
     void anOptionHasTheAnswersOfTheDecisionItAsksFirst() {
         player(1).character(KARA_STARBUCK_THRACE);
@@ -295,8 +279,6 @@ class LegalAnswersTest extends TestHarness {
         assertEquals(decision, LegalAnswers.decisionOf(Followup.all(decision, new NoOpEvent(1))));
         assertEquals(LegalAnswers.NONE, LegalAnswers.forOption(game, Followup.single(new NoOpEvent(1))));
     }
-
-    /* at any time */
 
     @Test
     void aCylonLeaderMayRevealTheMotiveCardsWhoseRequirementIsMet() {
@@ -317,8 +299,6 @@ class LegalAnswersTest extends TestHarness {
         assertFalse(LegalAnswers.answerTypes(PlayerEvent.class).contains(RevealMotiveCardEvent.class));
         assertTrue(LegalAnswers.answerTypes(AnytimeEvent.class).contains(RevealMotiveCardEvent.class));
     }
-
-    /* every list */
 
     // A record with a list that no source covers would never be offered: it has to be one that only a choice offers,
     // which lists the concrete events itself.
@@ -343,8 +323,6 @@ class LegalAnswersTest extends TestHarness {
         // the reveal power's pairs of damage tokens, and the tiebreak of an interrupt window: options of a choice
         assertEquals(new TreeSet<>(List.of("ChooseGalacticaDamageTokensEvent", "TiebreakInterruptCardsEvent")), withoutSource);
     }
-
-    /* the domains and the shapes */
 
     @Test
     void calculationsIsTriedWithOneMoreAndOneLess() {
@@ -382,8 +360,6 @@ class LegalAnswersTest extends TestHarness {
         assertEquals(List.of(List.of()), AnswerSearch.witnesses(4, 0));
         assertEquals(List.of(List.of(0, 1, 2)), AnswerSearch.witnesses(3, 3));
     }
-
-    /* the helpers */
 
     // The classes of the rules, not of the tests, which the catalog finds on the classpath too.
     private static final class GameEngineCodeSource {

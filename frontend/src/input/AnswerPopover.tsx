@@ -5,10 +5,6 @@ import { Groups } from './AnswerPanel';
 import { moves, narrow, type Answer, type Move } from './answers';
 import { useSelection } from './selection';
 
-/**
- * The moves a click on the board or a mat left, next to the click: a viper's activations, a card's targets, a location's
- * actions. Picking one sends it, a shape opens its picker in the panel, and the board keeps lighting what is left.
- */
 export function AnswerPopover({ onMove }: { onMove(move: Move, event: Answer | null): void }) {
   const table = useTable();
   const picked = useSelection((state) => state.picked);

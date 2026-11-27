@@ -51,20 +51,6 @@ import java.util.function.Supplier;
 import static xyz.zlatanov.frakkintoasters.backend.game.CommandResult.accepted;
 import static xyz.zlatanov.frakkintoasters.backend.game.CommandResult.rejected;
 
-/**
- * Runs the commands of the games, one at a time per game. A command is a {@code submit} or a {@code choose} from a
- * player's connection:
- * <ol>
- *     <li>lock the game</li>
- *     <li>get the session: from the cache, or restored from the journal's rows</li>
- *     <li>check the token: a command that names an old state is stale</li>
- *     <li>run the engine, which changes nothing when it refuses the input or fails</li>
- *     <li>store the new entries and the summary in one transaction</li>
- *     <li>if that failed, evict the session, which is ahead of the stored journal</li>
- *     <li>publish what each viewer may see to the sink, still under the lock</li>
- *     <li>unlock</li>
- * </ol>
- */
 @Slf4j
 @Service
 public class GameSessions {
@@ -84,10 +70,6 @@ public class GameSessions {
             .build();
     private final ConcurrentHashMap<UUID, ReentrantLock> locks = new ConcurrentHashMap<>();
 
-    /**
-     * @param takeOnlyAnswers every engine answers a decision with a single legal answer itself, see
-     *                        {@link GameEngine#takeOnlyAnswers()}
-     */
     public GameSessions(GameBundles bundles, JournalStore store, JournalCodec codec, StateTokens tokens,
                         RandomnessSource randomness, TransactionTemplate transaction,
                         ObjectProvider<ProjectionSink> sinks,
@@ -102,16 +84,10 @@ public class GameSessions {
         this.takeOnlyAnswers = takeOnlyAnswers;
     }
 
-    /**
-     * Starts the game of a lobby: the entries up to the first pause and the status {@code RUNNING}, in one transaction.
-     */
     public void start(UUID gameBundleId, int playerCount) {
         start(gameBundleId, GameEngine.start(playerCount, randomness.next()));
     }
 
-    /**
-     * Starts the game with an engine that already ran to its first pause.
-     */
     public void start(UUID gameBundleId, GameEngine engine) {
         withLock(gameBundleId, () -> {
             val session = new GameSession(gameBundleId, withOptions(engine));
@@ -126,19 +102,13 @@ public class GameSessions {
         });
     }
 
-    /**
-     * @return the game as the viewer may see it, with the token for his next command
-     * @throws GameNotAvailableException if the game can't be opened
-     */
     public GameMessage status(UUID gameBundleId, Viewer viewer) {
         return withLock(gameBundleId, () -> handOut(session(gameBundleId), viewer));
     }
 
     /**
-     * Hands a new connection what it gets first, the game and the whole log, under the game's lock, so it neither misses
-     * a command nor gets one before them. The consumer must only queue, not send.
-     *
-     * @throws GameNotAvailableException if the game can't be opened
+     * Under the game's lock, so the connection neither misses a command nor gets one before them. The consumer must only
+     * queue, not send.
      */
     public void connect(UUID gameBundleId, Viewer viewer, Consumer<Frames> register) {
         withLock(gameBundleId, () -> {
@@ -149,9 +119,6 @@ public class GameSessions {
         });
     }
 
-    /**
-     * @return the whole log as the viewer may see it, with the game
-     */
     public Frames history(UUID gameBundleId, Viewer viewer) {
         return withLock(gameBundleId, () -> {
             val session = session(gameBundleId);
@@ -160,11 +127,6 @@ public class GameSessions {
         });
     }
 
-    /**
-     * Answers the pending decision with the event. The event is read only if its type fits the decision, and its
-     * player is the viewer's. An {@link AnytimeEvent} answers nothing: it runs ahead of the pending input, whoever is
-     * asked.
-     */
     public CommandResult submit(UUID gameBundleId, Viewer viewer, String token, JsonNode event) {
         if (isAnytime(event)) {
             return anytime(gameBundleId, viewer, token, event);
@@ -184,7 +146,6 @@ public class GameSessions {
         });
     }
 
-    // A player's event is his; in a sandbox the event names the player who acts.
     private CommandResult anytime(UUID gameBundleId, Viewer viewer, String token, JsonNode json) {
         return command(gameBundleId, viewer, token, (session, ignoredAsked) -> {
             final Event event;
@@ -206,9 +167,6 @@ public class GameSessions {
                 .isPresent();
     }
 
-    /**
-     * Picks an option of the pending choice by its index.
-     */
     public CommandResult choose(UUID gameBundleId, Viewer viewer, String token, int option) {
         return command(gameBundleId, viewer, token, (session, player) -> {
             if (!(session.engine().pendingInput().orElse(null) instanceof AwaitingChoice(int chooser, var options))
@@ -223,10 +181,6 @@ public class GameSessions {
         });
     }
 
-    /**
-     * Goes back to the pause before the last input of a sandbox: the journal rows after it are deleted, in the
-     * transaction that updates the summary. Every connection then gets the game and the whole log again.
-     */
     public CommandResult undo(UUID gameBundleId, Viewer viewer, String token) {
         if (!(viewer instanceof Viewer.Sandbox)) {
             return rejected(Reason.INVALID, "Undo is only for a sandbox");
@@ -253,9 +207,6 @@ public class GameSessions {
         });
     }
 
-    /**
-     * Runs a sandbox setup event ahead of the pending input. The event is read only if its type is a setup event.
-     */
     public CommandResult inject(UUID gameBundleId, Viewer viewer, String token, JsonNode event) {
         if (!(viewer instanceof Viewer.Sandbox)) {
             return rejected(Reason.INVALID, "Setup is only for a sandbox");
@@ -291,8 +242,7 @@ public class GameSessions {
     }
 
     /**
-     * Ends a running game without a winner: it is {@code FINISHED} as {@code ABANDONED}, takes no command any more, and
-     * every connection gets the game without its input. The engine stays as it was, so nothing is revealed.
+     * The engine stays as it was, so nothing is revealed.
      */
     public void abandon(UUID gameBundleId) {
         withLock(gameBundleId, () -> {
@@ -310,28 +260,17 @@ public class GameSessions {
         });
     }
 
-    /**
-     * The users' connections to the game open again, with the viewer of the seat each holds now.
-     */
     public void reconnect(UUID gameBundleId, Set<UUID> userIds) {
         sinks.getIfAvailable(() -> ProjectionSink.NONE).reconnect(gameBundleId, userIds);
     }
 
-    /**
-     * @return the journal of the game as it is stored, with what a restore needs
-     */
     public Journal journal(UUID gameBundleId) {
         return withLock(gameBundleId, () -> session(gameBundleId).journal());
     }
 
-    /**
-     * Drops the game from the cache. The next command restores it from the journal's rows.
-     */
     public void evict(UUID gameBundleId) {
         cache.invalidate(gameBundleId);
     }
-
-    /* the steps of a command */
 
     private interface PlayerCommand {
         CommandResult apply(GameSession session, int player);
@@ -357,7 +296,6 @@ public class GameSessions {
             if (viewer instanceof Viewer.PlayerViewer(int player)) {
                 return command.apply(session, player);
             }
-            // the user of a sandbox answers for whoever is asked
             val pending = session.engine().pendingInput();
             if (pending.isEmpty()) {
                 return rejected(Reason.INVALID, "The game is over");
@@ -451,7 +389,6 @@ public class GameSessions {
                 session.engine().pendingInput().map(input -> input.player()).orElse(null));
     }
 
-    // An abandoned game shows what it waited for no more, and offers nothing.
     private GameMessage message(GameSession session, Viewer viewer) {
         val token = tokens.token(session.gameBundleId(), session.sequence());
         if (session.closed()) {
@@ -479,10 +416,7 @@ public class GameSessions {
     }
 
     /**
-     * Hands what each viewer may see of the entries from the sequence on to the sink. A viewer for whom nothing visible
-     * changed gets nothing, so a secret interrupt window stays silent for the others.
-     *
-     * @param replacesLog the viewers get the whole log instead of an update, e.g. after an undo
+     * A viewer for whom nothing visible changed gets nothing, so a secret interrupt window stays silent for the others.
      */
     void publish(GameSession session, int fromSequence, boolean replacesLog) {
         val entries = session.journal().entries();
@@ -490,7 +424,6 @@ public class GameSessions {
         if (replacesLog) {
             session.forgetPublished();
         }
-        // the report goes with the command that ended the game, or with a whole log
         val report = replacesLog || endsIn(entries, fromSequence) ? session.report().orElse(null) : null;
         sinks.getIfAvailable(() -> ProjectionSink.NONE).publish(session.gameBundleId(), new Publication() {
             @Override

@@ -7,9 +7,6 @@ import java.util.List;
 
 public interface DieRollView {
 
-    /**
-     * @return the face of the die, {@code null} until it is rolled. A reroll replaces it
-     */
     Integer value();
 
     /**
@@ -17,9 +14,6 @@ public interface DieRollView {
      */
     List<SkillCardType> cards();
 
-    /**
-     * @return what the cards add to the face
-     */
     int modifier();
 
     /**

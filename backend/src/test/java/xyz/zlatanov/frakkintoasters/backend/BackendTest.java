@@ -10,8 +10,7 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 import java.util.UUID;
 
 /**
- * A test against the application and a Testcontainers Postgres. The context, and with it the database, is shared by the
- * tests, so each test makes its own users and games.
+ * The context, and with it the database, is shared by the tests, so each test makes its own users and games.
  */
 @SpringBootTest
 @AutoConfigureMockMvc

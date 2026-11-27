@@ -17,22 +17,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class Users {
 
-    /**
-     * A user as the users page lists him: his name alone.
-     */
     public record Listed(UUID id, String name) {
     }
 
     private final JdbcClient          jdbc;
     private final TransactionTemplate transaction;
 
-    /**
-     * Finds the user of the identity, or creates him on his first login.
-     *
-     * @param provider    e.g. {@code google}, {@code discord} or {@code dev}
-     * @param subject     the provider's id of the user
-     * @param defaultName the name of a new user
-     */
     public AppUser login(String provider, String subject, String defaultName) {
         val existing = findByIdentity(provider, subject);
         if (existing.isPresent()) {
@@ -68,9 +58,6 @@ public class Users {
                 .optional();
     }
 
-    /**
-     * Every user, by name.
-     */
     public List<Listed> list() {
         return jdbc.sql("SELECT id, name FROM app_user ORDER BY lower(name), id")
                 .query((row, ignored) -> new Listed(row.getObject("id", UUID.class), row.getString("name")))

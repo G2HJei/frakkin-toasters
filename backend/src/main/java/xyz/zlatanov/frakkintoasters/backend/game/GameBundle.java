@@ -6,14 +6,10 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * A game as the lobby knows it. Only the journal is the game's state; the rest is a summary, written with the entries.
+ * Only the journal is the game's state; the rest is a summary, written with the entries.
  *
- * @param seed                   the seed of a seeded game, which a restore needs to go on like the original
- * @param waitingForPlayerNumber the player the game waits for, a secret input's too: the lobby only tells a user whether
- *                               a game waits for him
- * @param endReason              why a finished game ended, {@code null} before
- * @param rematchId              the lobby the host opened after the game, if any
- * @param playerCount            the seats, once the game has started
+ * @param seed                   a restore needs it to go on like the original
+ * @param waitingForPlayerNumber a secret input's too: the lobby only tells a user whether a game waits for him
  */
 public record GameBundle(UUID id,
                          String name,
@@ -43,17 +39,8 @@ public record GameBundle(UUID id,
     }
 
     public enum EndReason {
-        /**
-         * The game came to an ending: a team won.
-         */
         WON,
-        /**
-         * The host or a vote of the players ended it without a winner.
-         */
         ABANDONED,
-        /**
-         * The host cancelled the lobby.
-         */
         CANCELLED
     }
 

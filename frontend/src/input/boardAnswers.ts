@@ -13,7 +13,6 @@ export interface Offer {
   targets: Map<string, Move[]>;
   // the location actions, by location: the "Act" chip, which picks the action's kind
   acts: Map<string, { kind: string; moves: Move[] }>;
-  // what is picked already, by targetKey
   picked: Set<string>;
 }
 
@@ -76,20 +75,17 @@ function boardTargets(move: Move, kind: string): Target[] {
   );
 }
 
-/** What a click on a target does: the moves it keeps, and the one move to send when only one is left. */
 export function afterPick(all: Move[], picked: Target[], target: Target): { left: Move[]; send: Move | null } {
   const left = narrow(all, [...picked, target]);
   return { left, send: left.length === 1 ? left[0] : null };
 }
 
-/** What a click on a lit target does, its hover hint: the move it sends, or how many it leaves to choose from. */
 export function hintOf(moves: Move[], context: LabelContext): string {
   return moves.length === 1 ? moveSentence(moves[0], context) : `${moves.length} answers`;
 }
 
 export interface Answering {
   offer: Offer;
-  // picks a target where it was clicked; sends the move when it is the only one left
   onTarget(target: Target, anchor: Anchor | null): void;
 }
 
@@ -99,7 +95,6 @@ export function useAnswering(): Answering {
   return useContext(AnsweringContext);
 }
 
-/** The anchor of a click, for the popover. */
 export function anchorOf(event: { clientX: number; clientY: number }): Anchor {
   return { x: event.clientX, y: event.clientY };
 }

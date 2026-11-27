@@ -53,10 +53,9 @@ import static xyz.zlatanov.frakkintoasters.state.deck.DeckId.SUPER_CRISIS;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.REPAIR;
 
 /**
- * A revealed Cylon plays Super Crisis Cards at "Caprica", through {@code submit} and {@code choose} alone, restoring the
- * game at every pause. Kara "Starbuck" Thrace is player 1, the current player and a Cylon, who reveals and then acts
- * again through a "State of Emergency" grant. William Adama (Admiral) is player 2, Laura Roslin (President) player 3.
- * The Destiny deck is stacked with two Engineering cards, so every check fails.
+ * A revealed Cylon plays Super Crisis Cards at "Caprica". Kara "Starbuck" Thrace is player 1, the current player and a
+ * Cylon, who reveals and then acts again through a "State of Emergency" grant. William Adama (Admiral) is player 2, Laura
+ * Roslin (President) player 3. The Destiny deck is stacked with two Engineering cards, so every check fails.
  */
 class SuperCrisisCardTest {
 
@@ -122,8 +121,6 @@ class SuperCrisisCardTest {
         play(engine -> engine.submit(2, new MoveEvent(2, ARMORY, null)));
         assertEquals(new Finished(CYLONS), engine.status(1));
     }
-
-    /* the game */
 
     // Kara Thrace holds the card, reveals as a Cylon (declining the power), which ends her turn, and is moved to
     // "Caprica".

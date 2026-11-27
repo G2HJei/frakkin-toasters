@@ -35,9 +35,8 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 
 /**
- * Revealing a Personal Goal as an action (rule 5.3.1), played through {@code submit} and {@code choose} alone, restoring
- * the game at every pause. Kara "Starbuck" Thrace is player 1 and the current player, William Adama (Admiral) player 2,
- * Laura Roslin (President) player 3.
+ * Revealing a Personal Goal as an action (rule 5.3.1). Kara "Starbuck" Thrace is player 1 and the current player,
+ * William Adama (Admiral) player 2, Laura Roslin (President) player 3.
  */
 class PersonalGoalTest {
 
@@ -108,7 +107,6 @@ class PersonalGoalTest {
         assertRestoresTheSameGame();
     }
 
-    // The player chooses to take an action.
     private void act(int player) {
         val option = single(new PlayerDecisionEvent<>(player, ActionEvent.class));
         val choice = (PendingInput.AwaitingChoice) engine.pendingInput().orElseThrow();

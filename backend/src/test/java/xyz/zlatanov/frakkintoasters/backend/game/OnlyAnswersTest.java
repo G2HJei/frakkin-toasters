@@ -27,12 +27,10 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.Team.CYLONS;
 
-// The sessions take the only answer of a decision, as the application is configured.
 class OnlyAnswersTest extends BackendTest {
 
     private static final Followup PASS_OR_PASS_TWICE = one(single(new NoOpEvent(1)),
             all(new NoOpEvent(1), new NoOpEvent(1)));
-    // a pass is the only answer of player 1's decision
     private static final Followup PASS               = single(new PlayerDecisionEvent<>(1, NoOpEvent.class));
 
     @Autowired
@@ -50,7 +48,6 @@ class OnlyAnswersTest extends BackendTest {
 
         assertInstanceOf(AwaitingChoice.class, sessions.cached(game).orElseThrow().engine().pendingInput().orElseThrow());
         assertEquals(1, onlyAnswers(game));
-        // that it was his only answer shows only to him
         assertEquals(1, automaticScopes(game, Viewer.player(1)));
         assertEquals(0, automaticScopes(game, Viewer.player(2)));
 

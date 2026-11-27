@@ -14,7 +14,6 @@ export interface SandboxToolbarProps {
   onInject(event: EventValue): void;
 }
 
-/** The sandbox's tools: undo, export, the seed and a restart with it, scenario setup, and the raw projection. */
 export function SandboxToolbar({ gameId, seed, onUndo, onInject }: SandboxToolbarProps) {
   const game = useGameStore((state) => state.game);
   const version = useGameStore((state) => state.version);

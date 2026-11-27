@@ -38,9 +38,6 @@ public class ActivateRaiderAreasEventProcessor extends EventProcessor<ActivateRa
                 .toArray(Event[]::new));
     }
 
-    /**
-     * @return the space areas of the raiders that are still on the main game board, clockwise
-     */
     static Set<Location> areasOf(GameView game, List<Integer> raiderShipIds) {
         val galactica = game.boards().galactica();
         val inSpace = galactica.shipsInSpace(Raider.class).stream().map(Raider::id).toList();

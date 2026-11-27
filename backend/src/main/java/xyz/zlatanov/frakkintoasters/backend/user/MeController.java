@@ -13,9 +13,6 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.JsonNodeFactory;
 import xyz.zlatanov.frakkintoasters.backend.user.AppUserAuthentication.AppUserPrincipal;
 
-/**
- * "Register / update settings": the logged in user's name and settings.
- */
 @RestController
 @RequestMapping("/api/me")
 @RequiredArgsConstructor

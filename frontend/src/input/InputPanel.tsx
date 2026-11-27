@@ -12,16 +12,9 @@ import { AnswerPanel } from './AnswerPanel';
 import type { Answer, Move } from './answers';
 
 export interface InputPanelProps {
-  // sends a move of the answers, its pick filled in
   onMove(move: Move, event: Answer | null): void;
 }
 
-/**
- * What the game waits for. The asked player gets the input's answers (`AnswerPanel`): a choice's options, a decision's
- * answers by what they do, a picker for a shape. The others see who is asked, or a plain "waiting" while it is secret.
- * What every option of a choice names, e.g. the Destination Cards the Admiral chooses from, shows once above them,
- * large enough to read.
- */
 export function InputPanel({ onMove }: InputPanelProps) {
   const table = useTable();
   const rejected = useGameStore((state) => state.rejected);
@@ -35,7 +28,6 @@ export function InputPanel({ onMove }: InputPanelProps) {
 
   // the viewer is asked: a Choose or a Decide only reaches the one who answers
   const yourMove = input?.kind === 'Choose' || input?.kind === 'Decide';
-  // its names show their images on hover, like the log's
   const pause = pauseOf(input, { ...table, artOf: partArt });
   // the game waits for a seat whose user isn't there, or that nobody holds
   const waitingFor = input?.kind === 'WaitingFor' ? input.player : null;
@@ -55,7 +47,6 @@ export function InputPanel({ onMove }: InputPanelProps) {
         {(pause.line || ruleFor(input)) && (
           <p className="pause-line">
             {pause.line && <Words parts={pause.line} />}
-            {/* where to read up on it */}
             {ruleFor(input) && <RuleLink article={ruleFor(input)!.article} found={ruleFor(input)} />}
           </p>
         )}

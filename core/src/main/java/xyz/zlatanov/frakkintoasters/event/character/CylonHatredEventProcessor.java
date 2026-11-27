@@ -26,9 +26,6 @@ public class CylonHatredEventProcessor extends EventProcessor<CylonHatredEvent> 
                 && skillCheck.totalStrength() == null;
     }
 
-    /**
-     * @return the choice to lower the difficulty or not, as the "Admiral's Quarters" is activated
-     */
     public static Followup offer(GameView game) {
         return game.players().stream()
                 .filter(player -> canUse(game, player))

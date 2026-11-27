@@ -113,9 +113,6 @@ public class DecksHolder implements DecksHolderView {
         }
     }
 
-    /**
-     * @return the deck with this id. The caller picks the card type
-     */
     @SuppressWarnings("unchecked")
     @Override
     public int skillCardsLeft(SkillCardColor color) {

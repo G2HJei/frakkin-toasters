@@ -44,9 +44,6 @@ final class AnswerClasses {
 
     private static final Map<Class<?>, List<AnswerClass>> BY_ACTION = new ConcurrentHashMap<>();
 
-    /**
-     * @param skillCardType the card a Skill Card's event plays, {@code null} for any other event
-     */
     record AnswerClass(Class<? extends Event> type, Gate gate, SkillCardType skillCardType) {
     }
 

@@ -30,7 +30,6 @@ public class OpenInterruptWindowEventProcessor extends EventProcessor<OpenInterr
         } else if (window.followsDieRoll() && game.turn().dieRoll().fixed()) {
             return NONE; // "Longshot": nothing modifies or rerolls the result he chose
         }
-        // A player is asked for a card when he holds one for the window, then for an ability when he has one for it.
         val decisions = playersFrom(game, game.turn().currentPlayerNumber()).stream()
                 .flatMap(player -> Stream.of(
                                 holdsCardFor(game, player, window) ? PlayInterruptCardEvent.class : null,

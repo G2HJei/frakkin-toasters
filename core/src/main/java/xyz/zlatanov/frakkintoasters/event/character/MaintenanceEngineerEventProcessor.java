@@ -16,16 +16,11 @@ import static xyz.zlatanov.frakkintoasters.event.action.GrantEvent.GrantedBy.MAI
 
 public class MaintenanceEngineerEventProcessor extends EventProcessor<MaintenanceEngineerEvent> {
 
-    // during his own turn
     public static boolean canUse(GameView game, PlayerView player) {
         return player.number() == game.turn().currentPlayerNumber()
                 && CharacterAbilities.canUseOncePerTurn(game, player, CharacterAbility.MAINTENANCE_ENGINEER);
     }
 
-    /**
-     * @return after the player's "Repair", the choice to take another action or not, {@link Followup#NONE} when he
-     * can't
-     */
     public static Followup offer(GameView game, PlayerView player) {
         return canUse(game, player)
                 ? one(new MaintenanceEngineerEvent(player.number()), new NoOpEvent(player.number()))

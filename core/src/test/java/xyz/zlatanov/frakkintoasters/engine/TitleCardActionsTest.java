@@ -45,10 +45,6 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.BASESTAR;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.VIPER;
 
-/**
- * The Admiral's and the CAG's Title Card actions through {@code submit} and {@code choose} alone, restoring the game at
- * every pause.
- */
 class TitleCardActionsTest {
 
     // Only the end of the game empties the agenda, so the script ends it.
@@ -142,7 +138,6 @@ class TitleCardActionsTest {
         assertRestoresTheSameGame();
     }
 
-    // The player chooses to take an action.
     private void act(int player) {
         val option = single(new PlayerDecisionEvent<>(player, ActionEvent.class));
         val choice = (AwaitingChoice) engine.pendingInput().orElseThrow();

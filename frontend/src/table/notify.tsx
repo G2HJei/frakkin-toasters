@@ -7,12 +7,8 @@ function notificationsSupported(): boolean {
 }
 
 /**
- * "Your move", while the table's tab is in the background: a browser notification when the viewer becomes asked (if he
- * allowed them), and the tab's title flashing until the tab shows again. Nothing while the tab is in front, and nothing
- * in a sandbox, whose user is always asked. The favicon changes too, see `TablePage`.
- *
- * @param title the tab's title while nothing flashes
- * @param body  what the game asks, for the notification
+ * Nothing while the tab is in front, and nothing in a sandbox, whose user is always asked. The favicon changes too, see
+ * `TablePage`.
  */
 export function useYourMoveNotice(yourMove: boolean, title: string, body: string | null, tag: string, sandbox: boolean) {
   const was = useRef(yourMove);

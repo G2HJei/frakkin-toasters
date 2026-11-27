@@ -13,14 +13,12 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * One browser's web socket to a game, as one viewer. It sends from its own queue with one writer, so a slow browser
- * holds up only itself, never the game. One that falls behind is closed, and can reconnect.
+ * It sends from its own queue with one writer, so a slow browser holds up only itself, never the game.
  */
 @Slf4j
 public final class LiveConnection {
 
     static final int     MAX_QUEUED = 512;
-    static final Integer CLOSED     = null;
 
     private final WebSocketSession      session;
     private final UUID                  gameBundleId;
@@ -28,10 +26,8 @@ public final class LiveConnection {
     private final Viewer                viewer;
     private final BlockingQueue<Outgoing> queue = new LinkedBlockingQueue<>(MAX_QUEUED);
     private final Thread                  writer;
-    // when the client last sent anything: it pings while it has nothing else to say
     private volatile long                 heardAt = System.nanoTime();
 
-    // what the writer takes from the queue: a message, or the close that follows the messages queued before it
     private sealed interface Outgoing {
     }
 
@@ -70,7 +66,7 @@ public final class LiveConnection {
     }
 
     /**
-     * Queues a message. Never blocks: a connection whose queue is full is closed.
+     * Never blocks: a connection whose queue is full is closed.
      */
     public void send(String json) {
         if (!queue.offer(new Text(json))) {
@@ -79,17 +75,11 @@ public final class LiveConnection {
         }
     }
 
-    /**
-     * Closes at once, dropping what is still queued.
-     */
     public void close(CloseStatus status) {
         writer.interrupt();
         closeSession(status);
     }
 
-    /**
-     * Closes once the messages queued before have gone out, e.g. the rejection that says why.
-     */
     public void closeAfterSending(CloseStatus status) {
         if (!queue.offer(new Close(status))) {
             close(status);

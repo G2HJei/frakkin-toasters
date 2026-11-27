@@ -42,9 +42,6 @@ public class PressRoomEventProcessor extends LocationActionProcessor<PressRoomEv
         return allOf(keepOneMutinyCard(game, event.targetPlayer()), mayDiscardAMutinyCard());
     }
 
-    /**
-     * @return the choice of the one Mutiny Card the target keeps, when he holds more
-     */
     public static Followup keepOneMutinyCard(GameView game, int targetPlayer) {
         val keepOne = game.player(targetPlayer).mutinyCards().size() > 1
                 ? single(new PlayerDecisionEvent<>(targetPlayer, DiscardDownTo1MutinyCardEvent.class))
