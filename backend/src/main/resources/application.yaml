@@ -13,6 +13,9 @@ spring:
     error:
       # The reasons of a refused lobby or sandbox call are for the user, e.g. "The game is full".
       include-message: always
+    resources:
+      # StaticResources maps the frontend, with its caching.
+      add-mappings: false
   threads:
     virtual:
       enabled: true

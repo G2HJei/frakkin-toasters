@@ -2,7 +2,9 @@
 
 `frontend/` is React 19 + TypeScript (strict) + Vite, built by Gradle through node-gradle (its own Node 24, `npm ci`):
 `./gradlew build` type checks, builds and tests it, and the backend's `bootJar` packs `frontend/dist` under `static/`,
-with `AppRoutesController` forwarding the app's routes to `index.html`. React Router, TanStack Query for REST (the lobby
+with `AppRoutesController` forwarding the app's routes to `index.html`. `StaticResources` serves them: `assets/` (Vite's
+hashed names) cached for a year as immutable, the rest (`index.html`, `public/`) `no-cache` with an ETag of the content,
+since a file's modification time is the jar's (fixed in a reproducible image). React Router, TanStack Query for REST (the lobby
 lists poll), Zustand for the game. The table, the board and the art are in [frontend-table.md](frontend-table.md).
 
 The browser holds no game rules: a picker only narrows to plausible answers, the engine judges them.
