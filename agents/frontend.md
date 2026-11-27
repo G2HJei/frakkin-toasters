@@ -150,6 +150,10 @@ has it, the table doesn't. The website keeps the table's look: the palette in `:
 badges, the games' status), steel buttons lit dradis blue under the pointer and amber to act, the header's content and
 the pages as wide as `--site-width`. A new page follows it.
 
+On a phone (720px and less) the header is two rows that scroll away: the brand with the user's menu or "Log in", then
+the pages; the user's name gives way to the brand. The pages are one column, a label wraps rather than lose its end,
+and at 480px and less a game's actions go under its name and the dev profile's "this tab" marker is hidden.
+
 - Anyone: `HomePage` (`/`: a line from the series, the way in (register or log in, or Play when logged in), parts of
   `board.jpg` cut out by `viewBox` with what each offers, the site's features, character sheets), `AboutPage`
   (`/about`: what the site is, `#terms` and `#privacy`; registering confirms the user owns the game), `LoginPage`

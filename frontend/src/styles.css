@@ -4494,9 +4494,8 @@ button.avatar-button {
   max-width: 100%;
   margin: 0 0 12px;
   padding: 11px 24px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  /* wraps on a narrow screen instead of losing its end, a room's long name too */
+  overflow-wrap: anywhere;
   vertical-align: top;
   color: var(--amber);
   font: 700 22px/1.1 var(--display);
@@ -5114,6 +5113,7 @@ button.avatar-button {
 
 .cta-kicker {
   margin: 0 0 6px;
+  overflow-wrap: anywhere;
   color: var(--amber);
   font: 700 22px/1.1 var(--display);
   letter-spacing: 0.12em;
@@ -5239,6 +5239,7 @@ button.avatar-button {
   padding: 9px 22px;
   font-size: 16px;
   letter-spacing: 0.16em;
+  text-wrap: balance;
 }
 
 .section-lead {
@@ -5353,7 +5354,7 @@ button.avatar-button {
   transform: translateY(-14px) scale(1.06);
 }
 
-/* a narrow screen: one column, the header wraps */
+/* a narrow screen: one column, the header in two rows */
 
 @media (max-width: 900px) {
   .play-grid,
@@ -5372,21 +5373,71 @@ button.avatar-button {
 }
 
 @media (max-width: 720px) {
+  /* the brand with the user's menu or "Log in", the pages under them. It scrolls away: two rows held on top would
+     take too much of a phone's height */
+  .site-header {
+    position: static;
+  }
+
+  .site [id] {
+    scroll-margin-top: 16px;
+  }
+
   .site-header-inner {
-    flex-wrap: wrap;
-    gap: 8px 16px;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas: 'brand account' 'nav nav';
+    align-items: center;
+    gap: 0 12px;
     width: calc(100% - 32px);
-    padding-top: 10px;
+  }
+
+  .site-header-inner > .spacer {
+    display: none;
+  }
+
+  .site-header .brand {
+    grid-area: brand;
+    min-height: 54px;
+    gap: 8px;
+    font-size: clamp(14px, 4vw, 18px);
+    letter-spacing: 0.08em;
+  }
+
+  .site-header .brand img {
+    width: 32px;
+    height: 32px;
+  }
+
+  /* the user's name gives way to the brand, cut short where both don't fit */
+  .site-header-inner > :is(.user-menu, .button) {
+    grid-area: account;
+    justify-self: end;
+    max-width: 100%;
+  }
+
+  .site .user-menu-button {
+    max-width: 100%;
   }
 
   .site-nav {
-    order: 3;
-    width: 100%;
+    grid-area: nav;
     min-height: 40px;
   }
 
   .site-nav a:first-child {
     padding-left: 0;
+  }
+
+  /* no dashes left dangling at the end of a line */
+  .site-footer {
+    gap: 8px 18px;
+    padding: 18px 16px 22px;
+    letter-spacing: 0.1em;
+  }
+
+  .site-footer .separator {
+    display: none;
   }
 
   .site .page {
@@ -5398,13 +5449,52 @@ button.avatar-button {
     padding: 22px 22px;
   }
 
+  /* the host form on a line of its own, its field taking what the button leaves */
+  .panel-tools:has(> .host-form) {
+    flex: 1 1 100%;
+  }
+
   .host-form {
     width: 100%;
   }
 
   .site .host-form input {
     flex: 1;
-    width: auto;
+    width: 0;
     min-width: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  /* the user's name, not the dev profile's marker, in the little room beside the brand */
+  .user-menu-tab {
+    display: none;
+  }
+
+  .site-header-inner .user-menu-button:not(.link) {
+    padding-inline: 10px;
+  }
+
+  /* a game's actions under its name and facts, so a long name keeps the panel's width, and wraps rather than lose
+     its end */
+  .site .games li {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'name' 'facts' 'actions';
+  }
+
+  .game-name > :first-child {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .game-actions {
+    justify-content: flex-start;
+    margin-top: 4px;
+  }
+
+  /* the five sheets overlap more to stay inside the screen */
+  .crew-fan img {
+    width: 26vw;
+    margin: 0 -5vw;
   }
 }
