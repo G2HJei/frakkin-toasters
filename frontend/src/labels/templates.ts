@@ -541,8 +541,6 @@ export const HIDDEN_TEMPLATES: Record<string, string> = {
   PlaceDestinationCardAtBottomEvent: '{playerNumber} puts the card at the bottom of the Destination deck',
   PlayCardsBeforeSkillCheckEvent: '{playerNumber} plays cards before the skill check',
   PlayCardsIntoSkillCheckEvent: '{playerNumber} puts cards into the skill check',
-  PlayInterruptCardEvent: '{playerNumber} answers the interrupt window',
-  UseRollAbilityEvent: '{playerNumber} answers the interrupt window',
   PoliticallyAdroitEvent: '{playerNumber} gives a Skill Card away',
   PopularInfluenceChoiceEvent: '{playerNumber} gives the {Holder:PRESIDENT} a Quorum Card',
   ReligiousVisionsEvent: '{playerNumber} picks a Crisis Card',

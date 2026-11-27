@@ -4,7 +4,7 @@ import { LogPanel } from './LogPanel';
 import { useFlash } from '../flash';
 import { useGameStore } from '../../live/gameStore';
 import { Table, tableContext } from '../tableContext';
-import type { GameProjection, LogEntry } from '../../wire/types';
+import type { FactProjection, GameProjection, LogEntry } from '../../wire/types';
 
 const scope = (scopeId: number) => ({ kind: 'ScopeLog', scopeId, parentId: 0, actor: 1, event: 'NoOpEvent', details: null, facts: [], automatic: false }) as LogEntry;
 const turnStarted = (scopeId: number, turn: number) =>
@@ -522,6 +522,89 @@ describe('the log', () => {
     const body = renderLog([turnStarted(1, 4), { ...scope(2), event: 'TiebreakCardsBeforeSkillCheckEvent', details: kept } as LogEntry], players);
 
     expect(rows(body)).toEqual([['William Adama', "keeps Laura Roslin's Investigative Committee 3"]]);
+  });
+
+  describe('an interrupt window', () => {
+    const players = [
+      { number: 1, character: 'WILLIAM_ADAMA' },
+      { number: 2, character: 'HELENA_CAIN' },
+      { number: 3, character: 'FELIX_GAETA' },
+      { number: 4, character: 'LOUANNE_KAT_KATRAINE' },
+    ];
+    const card = (type: string, value: number) => ({ type, value });
+    const played = (playerNumber: number, skillCard: { type: string; value: number }) => ({ playerNumber, card: skillCard, calculationsModifier: null });
+    const used = (playerNumber: number, ability: string, skillCard: { type: string; value: number } | null = null) => ({ playerNumber, ability, card: skillCard, result: null });
+    const shown = (fact: Record<string, unknown>) => ({ kind: 'Shown', fact, revealed: null }) as unknown as FactProjection;
+    // the viewer's own answers: the log gets their scopes, but not what they hold
+    const answers = [
+      {
+        ...scope(2),
+        event: 'PlayInterruptCardEvent',
+        facts: [
+          shown({ kind: 'PlayerFact.CardsLost', playerNumber: 1, pile: 'SKILL', cards: [card('STRATEGIC_PLANNING', 3)] }),
+          shown({ kind: 'InterruptFact.InterruptCardPlayed', card: played(1, card('STRATEGIC_PLANNING', 3)) }),
+        ],
+      },
+      { ...scope(3), event: 'UseRollAbilityEvent' },
+    ] as LogEntry[];
+
+    it("tells nobody's answer while it is secret, and each card once the window closes as its player's play", () => {
+      const closed = {
+        ...scope(5),
+        event: 'CloseInterruptWindowEvent',
+        details: { kind: 'CloseInterruptWindowEvent' },
+        facts: [
+          shown({ kind: 'InterruptFact.InterruptCardResolved', card: played(2, card('STRATEGIC_PLANNING', 4)) }),
+          shown({ kind: 'DeckFact.CardsDiscarded', deck: 'TACTICS', cards: [card('STRATEGIC_PLANNING', 4)] }),
+          shown({ kind: 'GameFact.DieRollCardPlayed', card: 'STRATEGIC_PLANNING', modifier: 2 }),
+          shown({ kind: 'InterruptFact.RollAbilityResolved', ability: used(4, 'HOTSHOT', card('LAUNCH_SCOUT', 2)) }),
+          shown({ kind: 'PlayerFact.AbilityUsed', playerNumber: 4, ability: 'HOTSHOT' }),
+          shown({ kind: 'GameFact.DieRollAbilityUsed', ability: 'HOTSHOT' }),
+          shown({ kind: 'InterruptFact.InterruptWindowClosed' }),
+        ],
+      } as LogEntry;
+      const body = renderLog([turnStarted(1, 4), ...answers, closed], players);
+
+      expect(rows(body)).toEqual([
+        ['Helena Cain', 'plays Strategic Planning 4'],
+        [null, 'Strategic Planning changes the roll by 2'],
+        ['Louanne "Kat" Katraine', 'uses Hotshot'],
+      ]);
+    });
+
+    it('tells a card that goes back to the hand and an ability that waits for the next roll as played', () => {
+      const kept = { kind: 'TiebreakInterruptCardsEvent', keptCards: [played(2, card('STRATEGIC_PLANNING', 4))] };
+      const tiebreak = {
+        ...scope(4),
+        event: 'TiebreakInterruptCardsEvent',
+        details: kept,
+        facts: [
+          shown({ kind: 'InterruptFact.InterruptCardReturned', card: played(1, card('STRATEGIC_PLANNING', 3)) }),
+          shown({ kind: 'PlayerFact.CardsGained', playerNumber: 1, pile: 'SKILL', cards: [card('STRATEGIC_PLANNING', 3)] }),
+        ],
+      } as LogEntry;
+      const closed = {
+        ...scope(5),
+        event: 'CloseInterruptWindowEvent',
+        details: { kind: 'CloseInterruptWindowEvent' },
+        facts: [
+          shown({ kind: 'InterruptFact.InterruptCardResolved', card: played(2, card('STRATEGIC_PLANNING', 4)) }),
+          shown({ kind: 'DeckFact.CardsDiscarded', deck: 'TACTICS', cards: [card('STRATEGIC_PLANNING', 4)] }),
+          shown({ kind: 'GameFact.DieRollCardPlayed', card: 'STRATEGIC_PLANNING', modifier: 2 }),
+          shown({ kind: 'InterruptFact.RollAbilityWithdrawn', ability: used(3, 'FTL_OPERATOR') }),
+          shown({ kind: 'InterruptFact.InterruptWindowClosed' }),
+        ],
+      } as LogEntry;
+      const body = renderLog([turnStarted(1, 4), ...answers, tiebreak, closed], players);
+
+      expect(rows(body)).toEqual([
+        ['William Adama', "keeps Helena Cain's Strategic Planning 4"],
+        ['William Adama', 'plays Strategic Planning 3, which goes back to the hand'],
+        ['Helena Cain', 'plays Strategic Planning 4'],
+        [null, 'Strategic Planning changes the roll by 2'],
+        ['Felix Gaeta', 'uses FTL Operator'],
+      ]);
+    });
   });
 
   it('says what damage a player chose for Galactica, in red, and pictures no damage token', () => {

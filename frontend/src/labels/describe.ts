@@ -1037,16 +1037,17 @@ function interruptCardParts(kind: string, fact: Record<string, unknown>, context
   switch (kind) {
     case 'InterruptFact.InterruptCardPlayed':
       return [who, { text: ' plays ' }, ...card()];
+    // what the players chose while the window was secret, told as their plays once it closes
     case 'InterruptFact.InterruptCardReturned':
-      return [...card(), { text: ' goes back to ' }, who];
+      return [who, { text: ' plays ' }, ...card(), { text: ', which goes back to the hand' }];
     case 'InterruptFact.InterruptCardResolved':
-      return [who, { text: "'s " }, ...card(), { text: ' takes effect' }];
+      return [who, { text: ' plays ' }, ...card()];
     case 'InterruptFact.RollAbilityUsed':
       return [who, { text: ' uses ' }, ...ability(), { text: ' on the roll' }];
     case 'InterruptFact.RollAbilityWithdrawn':
-      return [who, { text: "'s " }, ...ability(), { text: ' waits for the next roll' }];
+      return [who, { text: ' uses ' }, ...ability()];
     case 'InterruptFact.RollAbilityResolved':
-      return [who, { text: "'s " }, ...ability(), { text: ' takes effect' }];
+      return [who, { text: ' uses ' }, ...ability()];
     default:
       return null;
   }

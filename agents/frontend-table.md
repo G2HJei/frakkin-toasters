@@ -52,10 +52,12 @@ The game page (`TablePage`) and what it draws. The rest of the frontend is in [f
   (`TITLES_ASSIGNED`), and before the first it takes the table's titles.
 - A choice is told by the event it picked, under the player who picked it (a tiebreak nobody was asked about under the
   current player, `KEPT_BY_CURRENT_PLAYER`), a pass by what it passed on ("doesn't move"). Left out: the passes on the
-  cards every player is asked about, the scopes that only ask, an event about no player that changed nothing. An event
-  whose facts say everything (the steps, a skill check's mechanics, a roll, a result) is told by them, each under the
-  player it is about. The reveal of the cards played before a skill check names them by who played them (the fact's
-  `revealed`).
+  cards every player is asked about, the scopes that only ask, an event about no player that changed nothing, the
+  secret answers to an interrupt window (`SECRET_ANSWERS`). An event whose facts say everything (the steps, a skill
+  check's mechanics, a roll, a result) is told by them, each under the player it is about. The reveal of the cards
+  played before a skill check names them by who played them (the fact's `revealed`), and the close of an interrupt
+  window tells each card and ability as its player's play ("plays Strategic Planning 4", "plays ..., which goes back to
+  the hand", "uses FTL Operator", also when it waits for the next roll), a card a tiebreak sends back on its own line.
 - An only answer the server took has the answers' pass icon in white in front ("automatic" on hover); a tag names the
   card or ability a line comes from when its words don't. The images after the words leave out what the words show
   already and the token that leads the line. A ship the table no longer shows (a raider back in the supply) is named by

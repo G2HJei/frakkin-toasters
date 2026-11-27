@@ -205,8 +205,18 @@ const STORY = new Set([
   'TitleFact.CagAssigned',
   'TitleFact.QuorumCardPutInPlay',
   'InterruptFact.InterruptCardResolved',
+  'InterruptFact.InterruptCardReturned',
   'InterruptFact.RollAbilityResolved',
+  'InterruptFact.RollAbilityWithdrawn',
 ]);
+
+// The answers to an interrupt window, secret while it is open: its close tells what each player played.
+const SECRET_ANSWERS = new Set(['PlayInterruptCardEvent', 'UseRollAbilityEvent']);
+
+// An interrupt card that goes back to the hand in a tiebreak, told on its own line as the window's other cards are.
+function returnsInterruptCard(one: Sentence): boolean {
+  return one.facts.some((fact) => factKind(fact) === 'InterruptFact.InterruptCardReturned');
+}
 
 /** Whether a fact changes the table: a ship that is destroyed, damaged or launched does. */
 export function isStoryFact(fact: FactProjection): boolean {
@@ -418,6 +428,9 @@ function scopeLines(entry: ScopeLog, index: number, chosenBy: number | null, sco
   const key = `scope-${entry.scopeId}-${index}`;
   const base = { entry, automatic: entry.automatic };
 
+  if (SECRET_ANSWERS.has(kind)) {
+    return [];
+  }
   // a player who discards nothing does nothing
   if ((kind === 'DiscardSkillCardsEvent' || kind === 'DiscardQuorumCardsEvent') && details && ((details.cards as unknown[] | null) ?? []).length === 0) {
     return [];
@@ -470,8 +483,11 @@ function scopeLines(entry: ScopeLog, index: number, chosenBy: number | null, sco
   const named = namedCards(details);
   const source = unnamedSource(kind, details, words, context);
   const nested = sentences.filter(
-    (one) => !repeats(one, line, named, actor, context) && !usesSource(one, source, actor, context) && !activationMove(one, details, line) && !(shownFaceUp && shows(one)),
+    (one) =>
+      !returnsInterruptCard(one) && !repeats(one, line, named, actor, context) && !usesSource(one, source, actor, context) && !activationMove(one, details, line) && !(shownFaceUp && shows(one)),
   );
+  const returned = sentences.filter(returnsInterruptCard);
+  const apart = new Set(returned.flatMap((one) => one.facts));
   return [
     {
       ...base,
@@ -482,8 +498,9 @@ function scopeLines(entry: ScopeLog, index: number, chosenBy: number | null, sco
       words: line,
       source,
       facts: storyFirst(nested).map((one) => sentenceParts(one, actor, context)),
-      art: unique([...recordArt(details), ...facts.flatMap(lineArt)]).filter((ref) => !(DAMAGE_CHOSEN.has(kind) && ref.key.startsWith('GalacticaDamage/'))),
+      art: unique([...recordArt(details), ...facts.filter((fact) => !apart.has(fact)).flatMap(lineArt)]).filter((ref) => !(DAMAGE_CHOSEN.has(kind) && ref.key.startsWith('GalacticaDamage/'))),
     },
+    ...returned.map((one, at) => toldLine(one, `${key}-returned-${at}`, base, context)),
   ];
 }
 

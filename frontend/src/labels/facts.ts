@@ -59,7 +59,7 @@ const QUIET = new Set([
   'PlayerFact.CivilianShipForgotten',
   'ShipFact.BasestarDamageCleared',
   'InterruptFact.InterruptWindowOpened',
-  // "uses Hotshot" says it: the ability's use is recorded once more when the window resolves it and on the roll
+  // "uses Hotshot" says it: the window records the ability's use with it, and once more on the roll
   'InterruptFact.RollAbilityResolved',
   'GameFact.DieRollAbilityUsed',
   'InterruptFact.InterruptWindowClosed',
@@ -105,7 +105,7 @@ interface DeckMove {
 
 type Move =
   | DeckMove
-  | { t: 'gained' | 'lost' | 'seen' | 'playedBefore' | 'played'; who: number | null; cards: Cards }
+  | { t: 'gained' | 'lost' | 'seen' | 'playedBefore' | 'played' | 'interruptResolved' | 'interruptReturned'; who: number | null; cards: Cards }
   | { t: 'placed'; pile: string | null; cards: Cards }
   | { t: 'checkDrawn' }
   | { t: 'removed'; who: number | null; cards: Cards }
@@ -155,6 +155,12 @@ function moveOf(fact: FactProjection): Move {
       return { t: 'seen', who, cards: cardsOf(fact, field('cards'), cardType(deck), deck, null) };
     case 'GameFact.SkillCardPlayed':
       return { t: 'played', who, cards: cardsOf(fact, field('card'), SKILL_CARD, null, 'SKILL') };
+    case 'InterruptFact.InterruptCardResolved':
+    case 'InterruptFact.InterruptCardReturned': {
+      const played = field('card') as { playerNumber: number; card: unknown } | null;
+      const t = kind === 'InterruptFact.InterruptCardResolved' ? 'interruptResolved' : 'interruptReturned';
+      return { t, who: played?.playerNumber ?? who, cards: cardsOf(fact, played?.card, SKILL_CARD, null, 'SKILL') };
+    }
     case 'GameFact.CrisisCardPlayed':
       return { t: 'crisis', cards: cardsOf(fact, field('card'), cardType('CRISIS'), 'CRISIS', null) };
     case 'SkillCheckFact.CardsPlaced':
@@ -342,6 +348,18 @@ function pair(moves: Move[], facts: FactProjection[], at: number, out: Draft[], 
     case 'played':
       out.push(draft('plays', [facts[at]], { who: move.who, cards: move.cards }));
       return 1;
+    // the cards of an interrupt window, played face down, are told as played once it closes: into the discard pile,
+    // or back to the hand where another card stands instead
+    case 'interruptResolved': {
+      const discarded = next?.t === 'discarded' && next.cards.count === move.cards.count;
+      out.push(draft('plays', facts.slice(at, at + (discarded ? 2 : 1)), { who: move.who, cards: discarded ? known(move.cards, next.cards) : move.cards }));
+      return discarded ? 2 : 1;
+    }
+    case 'interruptReturned': {
+      const gained = next?.t === 'gained' && next.who === move.who;
+      out.push(draft('playsBack', facts.slice(at, at + (gained ? 2 : 1)), { who: move.who, cards: gained ? known(move.cards, next.cards) : move.cards }));
+      return gained ? 2 : 1;
+    }
     case 'playedBefore':
       out.push(draft('playsBefore', [facts[at]], { who: move.who, cards: move.cards }));
       return 1;
@@ -519,6 +537,8 @@ function sentence(one: Draft, context: FactContext): Sentence {
       return make(words(name(one.who), ` discards `, cards), one.who, true);
     case 'plays':
       return make(words(name(one.who), ` plays `, cards), one.who, true);
+    case 'playsBack':
+      return make(words(name(one.who), ` plays `, cards, `, which ${many ? 'go' : 'goes'} back to the hand`), one.who);
     case 'putsIn':
       return make(words(name(one.who), ` puts `, cards, ' into the skill check'), one.who, true);
     case 'playsBefore':
@@ -581,7 +601,8 @@ function sentence(one: Draft, context: FactContext): Sentence {
 }
 
 
-// The player a fact is about: the one it names first, by number or by character.
+// The player a fact is about: the one it names first, by number or by character, or who played the interrupt card or
+// the ability it holds.
 function subjectOf(fact: FactProjection, context: FactContext): number | null {
   if (fact.kind === 'Hidden') {
     return fact.playerNumber;
@@ -589,6 +610,10 @@ function subjectOf(fact: FactProjection, context: FactContext): number | null {
   const shown = fact.fact as unknown as Record<string, unknown> | null;
   if (typeof shown?.playerNumber === 'number') {
     return shown.playerNumber;
+  }
+  const played = (shown?.card ?? shown?.ability) as { playerNumber?: unknown } | null | undefined;
+  if (typeof played === 'object' && typeof played?.playerNumber === 'number') {
+    return played.playerNumber;
   }
   return typeof shown?.character === 'string' ? (context.playerOf?.(shown.character) ?? null) : null;
 }
