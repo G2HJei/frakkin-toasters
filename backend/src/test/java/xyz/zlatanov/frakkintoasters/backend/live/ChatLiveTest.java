@@ -80,12 +80,11 @@ class ChatLiveTest {
     @Test
     void aNewConnectionGetsTheLastMessages() {
         val game = startedGame();
+        // two sockets race to the server: the second is sent once the first is stored, which it is before it reaches anyone
         clients.get(0).say("So say we all");
+        clients.forEach(client -> client.nextChat("chat"));
         clients.get(3).say("Popcorn");
-        clients.forEach(client -> {
-            client.nextChat("chat");
-            client.nextChat("chat");
-        });
+        clients.forEach(client -> client.nextChat("chat"));
 
         clients.get(1).connect(game);
 
