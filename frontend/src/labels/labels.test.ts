@@ -440,6 +440,15 @@ describe('labels', () => {
           ['fuel', 'Resource/FUEL', 'bad'],
           ['population', 'Resource/POPULATION', 'good'],
         ]);
+        expect(parts(EVENT_TEMPLATES.GasGiantEvent, { playerNumber: 1 }, 'GasGiantEvent').slice(1)).toEqual([
+          [' ', null, null],
+          ['destroys a ', null, 'bad'],
+          ['', 'ShipType/VIPER', 'bad'],
+          ['viper', null, 'bad'],
+          [' to ', null, null],
+          ['gain 1 ', null, 'good'],
+          ['fuel', 'Resource/FUEL', 'good'],
+        ]);
         expect(parts(EVENT_TEMPLATES.ActivateRaiderEvent, { raiderShipId: 1016 }, 'ActivateRaiderEvent')[0]).toEqual(['Raider #1016', 'ShipType/RAIDER', null]);
         expect(parts(EVENT_TEMPLATES.CylonPowerPlaceCenturionEvent, { playerNumber: 1 }, 'CylonPowerPlaceCenturionEvent').slice(1)).toEqual([
           [' places a ', null, null],
@@ -490,6 +499,8 @@ describe('labels', () => {
       expect(optionLabel(single(section), NO_CONTEXT)).toBe('Choose the top option of Riots No Jump');
       expect(partsText(optionEventParts({ kind: 'BrigEvent', playerNumber: 1 }, names))).toBe('Try to leave the Brig');
       expect(optionLabel(single({ kind: 'EnactProductionQuotasEvent', playerNumber: 1 }), NO_CONTEXT)).toBe('Play Enact Production Quotas');
+      // the log says what the Admiral did: "William Adama destroys a viper to gain 1 fuel"
+      expect(partsText(optionEventParts({ kind: 'GasGiantEvent', playerNumber: 1 }, names))).toBe('Destroy a viper to gain 1 fuel');
     });
 
     it('keeps the sentence of an event about nobody', () => {

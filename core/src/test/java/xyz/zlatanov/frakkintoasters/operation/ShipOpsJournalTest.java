@@ -92,10 +92,10 @@ class ShipOpsJournalTest extends TestHarness {
         ops.ship(civ.id()).destroy();
 
         val expected = new java.util.ArrayList<xyz.zlatanov.frakkintoasters.engine.journal.fact.Fact>();
+        expected.add(new ShipMoved(civ.id(), GALACTICA_SPACE, REMOVED, null));
         if (civ.fuelCost() > 0) expected.add(new ResourceDecreased(Resource.FUEL, civ.fuelCost()));
         if (civ.moraleCost() > 0) expected.add(new ResourceDecreased(Resource.MORALE, civ.moraleCost()));
         if (civ.populationCost() > 0) expected.add(new ResourceDecreased(Resource.POPULATION, civ.populationCost()));
-        expected.add(new ShipMoved(civ.id(), GALACTICA_SPACE, REMOVED, null));
         assertEquals(expected, journal.facts());
     }
 }

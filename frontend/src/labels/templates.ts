@@ -346,7 +346,7 @@ export const EVENT_TEMPLATES: Record<string, string> = {
   ResetJumpPreparationEvent: 'The jump preparation track goes back to the start',
   PlaceDestinationCardOnTopEvent: '{playerNumber} puts {card} back on top of the Destination deck',
   PlaceDestinationCardAtBottomEvent: '{playerNumber} puts {card} at the bottom of the Destination deck',
-  GasGiantEvent: '{playerNumber} may trade a {!ShipType:VIPER}viper for {Resource:FUEL|lower}',
+  GasGiantEvent: '{playerNumber} <-destroys a {!ShipType:VIPER}viper> to <+gain 1 {Resource:FUEL|lower}>',
   GasCloudEvent: '{playerNumber} looks at the top Crisis Cards',
   GasCloudPlaceEvent: '{playerNumber} puts {cards} back on the Crisis deck',
   RagnarAnchorageEvent: 'Ships are <+repaired> at Ragnar Anchorage',

@@ -297,8 +297,8 @@ describe('the log', () => {
         event: 'DrawAndDestroyCivilianShipsEvent',
         details: { kind: 'DrawAndDestroyCivilianShipsEvent', count },
         facts: [
-          ...losses.map(([resource, amount]) => ({ kind: 'Shown', fact: { kind: 'BoardFact.ResourceDecreased', resource, amount } })),
           ...(shipId ? [{ kind: 'Shown', fact: { kind: 'ShipFact.ShipMoved', shipId, from: 'CIVILIAN_DECK', to: 'REMOVED', location: null } }] : []),
+          ...losses.map(([resource, amount]) => ({ kind: 'Shown', fact: { kind: 'BoardFact.ResourceDecreased', resource, amount } })),
         ],
       }) as LogEntry;
     const body = renderLog([
@@ -312,11 +312,11 @@ describe('the log', () => {
 
     // each ship once with its own losses, not "2 civilian ships" and then "1 civilian ship"
     expect(rows(body)).toEqual([
+      [null, 'Civilian ship #2005 is drawn and destroyed'],
       [null, 'The fleet loses 1 fuel'],
       [null, 'The fleet loses 1 population'],
-      [null, 'Civilian ship #2005 is drawn and destroyed'],
-      [null, 'The fleet loses 1 morale'],
       [null, 'Civilian ship #2003 is drawn and destroyed'],
+      [null, 'The fleet loses 1 morale'],
     ]);
   });
 

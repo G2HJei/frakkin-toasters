@@ -166,11 +166,12 @@ public class ShipOps extends GameOps {
         destroyCivilianShip(civilianShip, GALACTICA_SPACE);
     }
 
+    // The ship goes first, then what it carried: the log tells the losses after the ship they come from.
     private void destroyCivilianShip(CivilianShip civilianShip, ShipZone from) {
+        record(new ShipMoved(shipId, from, REMOVED, null));
         decrease(FUEL, civilianShip.fuelCost());
         decrease(MORALE, civilianShip.moraleCost());
         decrease(POPULATION, civilianShip.populationCost());
-        record(new ShipMoved(shipId, from, REMOVED, null));
     }
 
     private void decrease(xyz.zlatanov.frakkintoasters.state.board.Resource resource, int amount) {
