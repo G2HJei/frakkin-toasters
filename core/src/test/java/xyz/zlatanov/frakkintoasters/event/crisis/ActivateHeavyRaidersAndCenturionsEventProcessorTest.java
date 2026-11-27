@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
+import xyz.zlatanov.frakkintoasters.engine.journal.fact.BoardFact.BoardingPartyAdvanced;
 import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.event.board.AdvancePursuitTrackEvent;
 import xyz.zlatanov.frakkintoasters.event.ship.PlaceShipOnCylonFleetBoardEvent;
@@ -45,6 +46,13 @@ class ActivateHeavyRaidersAndCenturionsEventProcessorTest extends EventTestHarne
         boardGalactica(centurion);
         execute(event);
         assertEquals(POSITION_1, galacticaBoard.boardingPartyTrack().get(centurion));
+    }
+
+    @Test
+    void shouldNotAdvanceAnEmptyBoardingPartyTrack() {
+        place(GALACTICA_SPACE_2_OCLOCK, heavyRaider);
+        execute(event);
+        assertTrue(journal.facts().stream().noneMatch(BoardingPartyAdvanced.class::isInstance));
     }
 
     @Test

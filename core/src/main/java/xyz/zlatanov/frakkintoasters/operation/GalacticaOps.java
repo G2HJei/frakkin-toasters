@@ -126,7 +126,9 @@ public class GalacticaOps extends BattlestarOps {
     }
 
     public void advanceBoardingParty() {
-        record(new BoardingPartyAdvanced());
+        if (!galacticaBoard().boardingPartyTrack().isEmpty()) {
+            record(new BoardingPartyAdvanced());
+        }
     }
 
     public void destroyCenturion(int centurionId) {
