@@ -222,12 +222,13 @@ describe('labels', () => {
   });
 
   it('counts the repaired ships of a type, and names a ship alone of its type', () => {
-    const types: LabelContext = { ...names, shipName: (id) => (id > 70 ? `Viper Mk VII #${id}` : `Viper #${id}`), shipType: (id) => (id > 70 ? 'VIPER_MARK_VII' : 'VIPER') };
+    const types: LabelContext = { ...names, shipName: (id) => (id > 70 ? 'Viper Mk VII' : 'Viper'), shipType: (id) => (id > 70 ? 'VIPER_MARK_VII' : 'VIPER') };
     const repairs = (viperIds: number[]) => eventLabel({ kind: 'RepairEvent', playerNumber: 1, card: { type: 'REPAIR', value: 1 }, viperIds }, types);
 
     expect(repairs([1, 2])).toBe('William Adama plays Repair 1 and repairs 2 vipers');
-    expect(repairs([1])).toBe('William Adama plays Repair 1 and repairs Viper #1');
-    expect(repairs([1, 71])).toBe('William Adama plays Repair 1 and repairs Viper #1 and Viper Mk VII #71');
+    expect(repairs([1])).toBe('William Adama plays Repair 1 and repairs Viper');
+    expect(repairs([1, 71])).toBe('William Adama plays Repair 1 and repairs Viper and Viper Mk VII');
+    expect(repairs([1, 2, 71, 72])).toBe('William Adama plays Repair 1 and repairs 2 vipers and 2 viper Mk VIIs');
     expect(repairs([])).toBe('William Adama plays Repair 1 and repairs a location');
     expect(eventLabel({ kind: 'ResourcesForGalacticaEvent', playerNumber: 2, location: null, viperIds: [3, 4] }, types)).toBe('Laura Roslin plays Resources for Galactica and 2 vipers');
   });
@@ -235,14 +236,14 @@ describe('labels', () => {
   it('counts the Cylon ships a card or an ability destroys', () => {
     const types: LabelContext = {
       ...names,
-      shipName: (id) => (id > 1020 ? `Heavy Raider #${id}` : `Raider #${id}`),
+      shipName: (id) => (id > 1020 ? 'Heavy Raider' : 'Raider'),
       shipType: (id) => (id > 1020 ? 'HEAVY_RAIDER' : 'RAIDER'),
     };
     const brutalForce = (shipIds: number[]) => eventLabel({ kind: 'AuthorizationOfBrutalForceEvent', playerNumber: 2, shipIds }, types);
     const sacrifice = (shipIds: number[]) => eventLabel({ kind: 'SacrificeEvent', playerNumber: 3, shipIds }, types);
 
     expect(brutalForce([1016, 1017, 1018])).toBe('Laura Roslin plays Authorization of Brutal Force on 3 raiders');
-    expect(brutalForce([1021])).toBe('Laura Roslin plays Authorization of Brutal Force on Heavy Raider #1021');
+    expect(brutalForce([1021])).toBe('Laura Roslin plays Authorization of Brutal Force on Heavy Raider');
     expect(sacrifice([1016, 1017])).toBe('Kara "Starbuck" Thrace goes to Sickbay to destroy 2 raiders');
     expect(sacrifice([1021, 1022])).toBe('Kara "Starbuck" Thrace goes to Sickbay to destroy 2 heavy raiders');
   });
@@ -255,8 +256,8 @@ describe('labels', () => {
 
     expect(primacy(null, false)).toEqual({ words: 'William Adama places a basestar in front of Galactica', source: 'Primacy' });
     expect(primacy(null, true).words).toBe('William Adama places a basestar in front of Galactica, then places 3 raiders in front and a civilian ship behind');
-    expect(primacy(1001, false).words).toBe('William Adama takes ship #1001 off the board');
-    expect(primacy(1001, true).words).toBe('William Adama takes ship #1001 off the board, then places 3 raiders in front and a civilian ship behind');
+    expect(primacy(1001, false).words).toBe('William Adama takes a ship off the board');
+    expect(primacy(1001, true).words).toBe('William Adama takes a ship off the board, then places 3 raiders in front and a civilian ship behind');
     // words that name the ability leave the tag out
     expect(unnamedSource('PrimacyEvent', { kind: 'PrimacyEvent', playerNumber: 1 }, [{ text: 'William Adama uses Primacy' }], names)).toBeNull();
   });
@@ -387,7 +388,7 @@ describe('labels', () => {
         ...names,
         iconOf: (enumName, constant) => ({ key: `${enumName}/${String(constant)}`, url: '', shape: 'icon' }),
         shipType: (id) => (id === 1016 ? 'RAIDER' : null),
-        shipName: (id) => (id === 1016 ? 'Raider #1016' : `ship #${id}`),
+        shipName: (id) => (id === 1016 ? 'Raider' : 'a ship'),
       };
       // each part's words, icon and tone
       const parts = (template: string, value: Record<string, unknown>, record: string) =>
@@ -449,7 +450,7 @@ describe('labels', () => {
           ['gain 1 ', null, 'good'],
           ['fuel', 'Resource/FUEL', 'good'],
         ]);
-        expect(parts(EVENT_TEMPLATES.ActivateRaiderEvent, { raiderShipId: 1016 }, 'ActivateRaiderEvent')[0]).toEqual(['Raider #1016', 'ShipType/RAIDER', null]);
+        expect(parts(EVENT_TEMPLATES.ActivateRaiderEvent, { raiderShipId: 1016 }, 'ActivateRaiderEvent')[0]).toEqual(['Raider', 'ShipType/RAIDER', null]);
         expect(parts(EVENT_TEMPLATES.CylonPowerPlaceCenturionEvent, { playerNumber: 1 }, 'CylonPowerPlaceCenturionEvent').slice(1)).toEqual([
           [' places a ', null, null],
           ['', 'Token/CENTURION', null],

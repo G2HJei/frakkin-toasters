@@ -112,7 +112,7 @@ describe('the reference', () => {
     expect(screen.getByRole('tab', { name: 'Out of the game 3' })).toHaveAttribute('aria-selected', 'true');
     expect(document.querySelector('.reference-grid.sheets img')?.getAttribute('alt')).toBe('Saul Tigh');
     const ships = [...document.querySelectorAll('.reference-ships li')];
-    expect(ships.map((row) => row.querySelector('span')?.textContent)).toEqual(['Civilian ship #2012', 'Raptor #11']);
+    expect(ships.map((row) => row.querySelector('span')?.textContent)).toEqual(['Civilian ship', 'Raptor']);
     expect(ships[0].querySelector('.cargo')).not.toBeNull();
     expect(ships[1].querySelector('.cargo')).toBeNull();
   });

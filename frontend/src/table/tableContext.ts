@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import { constantLabel, NO_CONTEXT, type LabelContext } from '../labels/describe';
+import { constantLabel, NO_CONTEXT, shortName, type LabelContext } from '../labels/describe';
 import type { GameProjection, PlayerProjection, ShipProjection, SkillCard } from '../wire/types';
 
 // whether the user who holds a seat is there, or nobody holds it; unknown in a sandbox
@@ -19,6 +19,8 @@ export interface TableContext extends LabelContext {
   seatState(playerNumber: number): SeatState | null;
   players(): { number: number; label: string }[];
   ship(id: number): ShipProjection | null;
+  // where a ship is, which tells it from another of its type: its space area, the Reserves, a centurion's step
+  shipPlace(id: number): string | null;
   // the Skill Cards of the draw piles, which a sandbox sees
   deckSkillCards(): SkillCard[];
 }
@@ -43,12 +45,25 @@ export function tableContext(
     ...(game?.cylonFleet?.ships ?? []),
     ...(game?.destroyedShips ?? []),
   ];
+  const centurions = game?.galactica?.boardingParty ?? [];
   // a centurion on the Boarding Party track is no ShipType
-  const shipType = (id: number) =>
-    allShips.find((candidate) => candidate.id === id)?.type ?? ((game?.galactica?.boardingParty ?? []).some((centurion) => centurion.id === id) ? 'CENTURION' : null);
+  const shipType = (id: number) => allShips.find((candidate) => candidate.id === id)?.type ?? (centurions.some((centurion) => centurion.id === id) ? 'CENTURION' : null);
+  // the id means nothing on the table, so a ship is its type
   const shipName = (id: number) => {
     const type = shipType(id);
-    return type ? `${constantLabel('ShipType', type)} #${id}` : `ship #${id}`;
+    return type ? constantLabel('ShipType', type) : 'a ship';
+  };
+  const shipPlace = (id: number) => {
+    const has = (ships: ShipProjection[] | null | undefined) => (ships ?? []).some((candidate) => candidate.id === id);
+    const located = allShips.find((candidate) => candidate.id === id)?.location;
+    const centurion = centurions.find((candidate) => candidate.id === id)?.position;
+    if (located) {
+      return constantLabel('Location', located);
+    }
+    if (centurion) {
+      return `Boarding Party, ${constantLabel('BoardingParty', centurion).toLowerCase()}`;
+    }
+    return has(game?.galactica?.reserves) ? 'Reserves' : has(game?.galactica?.damagedVipers) ? 'Damaged' : null;
   };
   return {
     game,
@@ -58,6 +73,7 @@ export function tableContext(
     shipName,
     shipType,
     ship: (id) => allShips.find((candidate) => candidate.id === id) ?? null,
+    shipPlace,
     userName: (playerNumber) => userNames[playerNumber] ?? null,
     seatState: (playerNumber) => seatStates[playerNumber] ?? null,
     players: () => players.map((player) => ({ number: player.number, label: playerName(player.number) })),
@@ -77,11 +93,21 @@ export const Table = createContext<TableContext>({
   seatState: () => null,
   players: () => [],
   ship: () => null,
+  shipPlace: () => null,
   deckSkillCards: () => [],
 });
 
 export function useTable(): TableContext {
   return useContext(Table);
+}
+
+// What sets a ship apart from the others of its type: its pilot and its damage tokens.
+export function shipMarks(ship: ShipProjection): string[] {
+  const damage = ship.damage ?? [];
+  return [
+    ...(ship.pilot ? [shortName(constantLabel('Character', ship.pilot))] : []),
+    ...(damage.length > 0 ? [damage.map((token) => constantLabel('BasestarDamage', token)).join(', ')] : []),
+  ];
 }
 
 /**

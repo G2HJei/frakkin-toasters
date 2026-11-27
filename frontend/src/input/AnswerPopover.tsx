@@ -1,9 +1,10 @@
 import { useRef } from 'react';
 import { usePlaceNear } from '../art/nearPointer';
-import { useTable } from '../table/tableContext';
+import { Table, useTable } from '../table/tableContext';
 import { Groups } from './AnswerPanel';
 import { moves, narrow, type Answer, type Move } from './answers';
 import { useSelection } from './selection';
+import { shipsApart, shipsOf } from './shipsApart';
 
 export function AnswerPopover({ onMove }: { onMove(move: Move, event: Answer | null): void }) {
   const table = useTable();
@@ -33,7 +34,9 @@ export function AnswerPopover({ onMove }: { onMove(move: Move, event: Answer | n
         </button>
       </div>
       {/* a group opens here, next to the click */}
-      <Groups moves={left} onMove={send} onOpen={(kind) => useSelection.getState().pick({ type: 'kind', kind }, anchor)} />
+      <Table.Provider value={shipsApart(table, shipsOf(left))}>
+        <Groups moves={left} onMove={send} onOpen={(kind) => useSelection.getState().pick({ type: 'kind', kind }, anchor)} />
+      </Table.Provider>
     </div>
   );
 }

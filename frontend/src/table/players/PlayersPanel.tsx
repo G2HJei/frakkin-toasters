@@ -7,6 +7,7 @@ import type { HiddenCards, PlayerProjection, QuorumCardInPlay, SkillCard, SkillH
 import { faceDown, useRevealHandlers, type RevealSection } from '../reveal';
 import { knowingPlayer, useTable, type SeatState } from '../tableContext';
 import { sortSkillCards } from '../skillCards';
+import { CargoIcons } from '../board/resources';
 import { signed, useChanges } from '../changes';
 import { useReference } from '../reference/ReferenceDrawer';
 import { anchorOf, hintOf, useAnswering } from '../../input/boardAnswers';
@@ -368,7 +369,15 @@ function Learned({ player }: { player: PlayerProjection }) {
   }
   const sections: RevealSection[] = [
     { title: 'Loyalty Cards looked at', cards: seen.map((look) => ({ art: cardArt('LoyaltyCard', look.card), label: `${table.playerName(look.ownerPlayerNumber)}: ${constantLabel('LoyaltyCard', look.card)}` })), hidden: true },
-    { title: 'Civilian ships looked at', cards: known.map((id) => ({ art: null, label: `Civilian ship #${id}` })), hidden: true },
+    {
+      title: 'Civilian ships looked at',
+      // where the ship is tells which one, as the id means nothing on the table
+      cards: known.map((id) => {
+        const cargo = table.ship(id)?.cargo;
+        return { art: null, label: [constantLabel('ShipType', 'CIVILIAN'), table.shipPlace(id)].filter((part) => part !== null).join(' · '), icon: cargo ? <CargoIcons cargo={cargo} /> : undefined };
+      }),
+      hidden: true,
+    },
   ];
   return (
     <Hidden id={`learned-${player.number}`} title={`${table.playerName(player.number)} knows`} sections={sections} className="learned-row">

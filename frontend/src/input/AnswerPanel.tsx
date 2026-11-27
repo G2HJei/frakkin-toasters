@@ -6,7 +6,7 @@ import {actionArt, isNoOp, moveArt, partValueArt, staysOnEachAnswer} from './ans
 import {ArtSlot, NextIcon} from './ArtSlot';
 import {constantLabel, optionEventParts, skillCardLabel, typeLabel, valueLabel} from '../labels/describe';
 import {partArt, Words} from '../art/Words';
-import {useTable} from '../table/tableContext';
+import {Table, useTable} from '../table/tableContext';
 import {sortedPositions} from '../table/skillCards';
 import {characterType, enumValues, recordNamed, type TypeRef} from '../wire/schema';
 import type {Pick, SkillCard} from '../wire/types';
@@ -47,6 +47,7 @@ import {
   sizes
 } from './parts';
 import {useSelection} from './selection';
+import {shipsApart, shipsOf} from './shipsApart';
 
 export interface AnswerPanelProps {
     onMove(move: Move, event: Answer | null): void;
@@ -67,7 +68,10 @@ export function AnswerPanel({onMove}: AnswerPanelProps) {
         onMove(move, event);
     };
     const constraints = input?.kind === 'Decide' ? (input.constraints ?? []).filter((constraint) => constraint !== null) : [];
+    // the answers listed, or the pick open, name their ships apart
+    const apart = shipsApart(table, shipsOf(picking ? [picking] : left));
     return (
+        <Table.Provider value={apart}>
         <div className="answers" role="group" aria-label="answers">
             {constraints.length > 0 &&
                 <p className="constraint">{constraints.map((constraint) => constantLabel('EventConstraint', constraint)).join(', ')}</p>}
@@ -88,6 +92,7 @@ export function AnswerPanel({onMove}: AnswerPanelProps) {
                 <Groups moves={left} onMove={send}/>
             )}
         </div>
+        </Table.Provider>
     );
 }
 

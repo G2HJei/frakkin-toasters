@@ -15,7 +15,7 @@ import {
   playerPart,
   shipMove,
   shipMovesParts,
-  shipPart,
+  countedShips,
   SKILL_COLORS,
   withoutSubject,
   type LabelContext,
@@ -587,7 +587,7 @@ function sentence(one: Draft, context: FactContext): Sentence {
       // a hidden card's kind names its deck already
       return make(words(cards, one.deck && one.cards?.list ? words(' from ', deckParts(one.deck)) : [], ` ${many ? 'go' : 'goes'} into the skill check`), null);
     case 'seesShips':
-      return make(words(name(one.who), ` looks at `, joinParts((one.seen ?? []).map((ship) => [shipPart(ship, context, true)]))), one.who);
+      return make(words(name(one.who), ` looks at `, countedShips(one.seen ?? [], context, true)), one.who);
     case 'drawnAndDiscarded':
       return make(words(cards, ` ${many ? 'are' : 'is'} drawn from `, deckParts(one.deck), ' and discarded'), null);
     case 'ship': {

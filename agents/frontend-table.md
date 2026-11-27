@@ -35,7 +35,7 @@ The game page (`TablePage`) and what it draws. The rest of the frontend is in [f
   player's Loyalty Cards, that player's Loyalty pile lies in a halo in the green blue of what only the viewer knows
   (`--known`; `knowingPlayer`: the viewer, the asked player in a sandbox), and hovering it lists "Loyalty Cards looked
   at": every look, whether he still holds the card or not, never which of his face down cards it was. A sandbox keeps
-  each player's looks out of sight until hovered (`Learned`).
+  each player's looks out of sight until hovered (`Learned`; a civilian ship by where it is, with its cargo).
 - A player is named by his character everywhere (`playerName`), "Player n" before he has one; the user in the seat shows
   only on his mat (`userName`, from the room's seats), with a dot for whether he is connected, "away" when he isn't and
   "vacant seat" when nobody holds it (`seatState`, `SeatPresence`). The input panel says so under the pause when the
@@ -65,8 +65,10 @@ The game page (`TablePage`) and what it draws. The rest of the frontend is in [f
   tiebreak sends back on its own line.
 - An only answer the server took has the answers' pass icon in white in front ("automatic" on hover); a tag names the
   card or ability a line comes from when its words don't. The images after the words leave out what the words show
-  already and the token that leads the line. A ship the table no longer shows (a raider back in the supply) is named by
-  the type a typed field of the log gave it (`raiderShipId`, ...).
+  already and the token that leads the line. A ship is named by its type, never its id (it means nothing on the table),
+  and ships that moved alike are counted ("2 raiders move to Space 7 o'clock", `countedShipParts`). A ship the table no
+  longer shows (a raider back in the supply) is named by the type a typed field of the log gave it (`raiderShipId`,
+  ...), and "a ship" without one.
 - Facts stay hidden, but a sandbox shows them under each line with the "Facts" switch (floating over the log's top
   right, in the place of the chat's switch): the ones that change the table first (`isStoryFact`; a ship destroyed, damaged or launched counts), without
   the ones the words say already. What the fleet gains or loses is never only under a line: it gets a line of its own
@@ -166,7 +168,11 @@ player's own cards face up). A space area lights as the whole sector its printed
 glows from its outer side and fades out towards the centre the areas converge on, cut off at the Galactica or basestar
 model (a clip of the board minus `SHIP_OUTLINES`, so a click there reaches the location under it). A player target lights his standee and his mat. A click picks the target: the only move
 left is sent, a shape opens its picker in the panel, and several stay in the panel and in `AnswerPopover` next to the
-click (e.g. a viper's activations, a card's targets). Hovering a lit target (a location, the "Act" chip, a standee, a
+click (e.g. a viper's activations, a card's targets). The answers name a ship by its type, and where two in a list
+(the panel's answers, an open pick, the popover, a player's anytime answers) would read the same, by where it is
+("Raider · Space 7 o'clock"), then its pilot and damage; ships still alike are interchangeable. A civilian ship the
+deciding player looked at shows its cargo ("Civilian ship · 1 population, 1 morale"). `input/shipsApart.ts` gives that
+list's `Table` context these names. Hovering a lit target (a location, the "Act" chip, a standee, a
 ship, a `Playable` card) says at once what clicking does (`TargetHint`, `hintOf`: the move it sends or "n answers"),
 as a popover over the preview of what is under the pointer (see [Hover](#hover)); a standee in a lit location shows the
 location's, the innermost lit target its own. A group's row in the panel picks its kind, so the board lights its

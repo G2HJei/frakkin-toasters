@@ -48,6 +48,8 @@ export interface Part {
   title?: string;
   // the Skill Card color it names, a type of cards or its deck, which the log shows in that color
   skillColor?: string | null;
+  // the type of the ship it names, which counts ships of one name: "2 raiders"
+  shipType?: string | null;
 }
 
 // The Skill Card colors, which are their decks' names too.
@@ -112,6 +114,16 @@ export function constantLabel(enumName: string, value: string | null | undefined
     return '—';
   }
   return CONSTANT_LABELS[enumName]?.[value] ?? humanizeConstant(value);
+}
+
+// A nickname in quotes, otherwise the last name: what fits on a token.
+export function shortName(label: string): string {
+  const nickname = /"([^"]+)"/.exec(label);
+  if (nickname) {
+    return nickname[1];
+  }
+  const words = label.trim().split(' ');
+  return words[words.length - 1];
 }
 
 export function typeLabel(name: string): string {
@@ -282,18 +294,22 @@ function holdersNamed(part: Part, context: LabelContext): Part[] {
   return merged(pieces.map((piece, index) => (index % 2 === 1 ? holderPart(HOLDER_TITLES[piece], context) : { ...part, text: piece })));
 }
 
+// a ship of no type the words know
+const UNKNOWN_SHIP = 'a ship';
+
 function shipLabel(id: number, context: LabelContext): string {
-  return context.shipName?.(id) ?? `ship #${id}`;
+  return context.shipName?.(id) ?? UNKNOWN_SHIP;
 }
 
 /**
- * A ship by its id, with its type's icon where its type is known: "Raider #1016". A civilian ship the table doesn't
- * show is "Civilian ship #2007".
+ * A ship by its type, never its id (it means nothing on the table), with the type's icon: "Raider". A civilian ship
+ * the table doesn't show is "Civilian ship", any other ship of no known type "a ship".
  */
 export function shipPart(id: number, context: LabelContext, civilian = false): Part {
-  const type = context.shipType?.(id) ?? (civilian ? 'CIVILIAN' : null);
-  const text = shipLabel(id, context);
-  return withIcon({ text: civilian ? text.replace(/^ship #/, 'Civilian ship #') : text }, type ? context.iconOf?.('ShipType', type) : null);
+  const known = context.shipType?.(id) ?? null;
+  const type = known ?? (civilian ? 'CIVILIAN' : null);
+  const text = !known && civilian ? constantLabel('ShipType', 'CIVILIAN') : shipLabel(id, context);
+  return withIcon({ text, shipType: type }, type ? context.iconOf?.('ShipType', type) : null);
 }
 
 // The Skill Card colors a draw takes: "1 Leadership and 2 Piloting cards".
@@ -320,7 +336,7 @@ export function cardLabel(card: unknown): string {
     return skillCardLabel(card as SkillCardLike);
   }
   if (card && typeof card === 'object' && 'id' in card) {
-    return `Civilian ship #${(card as { id: number }).id}`;
+    return constantLabel('ShipType', 'CIVILIAN');
   }
   return JSON.stringify(card);
 }
@@ -493,6 +509,10 @@ function placeholderParts(match: RegExpMatchArray, fill: Fill, before: Part[]): 
       return [{ text: text.trim() === '' ? 'The ' : 'the ' }, ...parts];
     }
   }
+  // "A ship is destroyed"
+  if (parts[0]?.text.startsWith(UNKNOWN_SHIP) && partsText(before).trim() === '') {
+    return capitalizedParts(parts);
+  }
   return parts;
 }
 
@@ -508,8 +528,7 @@ function commonNoun(enumName: string, constant: string): string {
 }
 
 // Constants counted by kind, each kind as a common noun in the plural its count asks for, with its icon in front:
-// "2 vipers", "a viper and an assault raptor". Ships are counted by their type where two or more have it, and a ship
-// alone keeps its name: "2 vipers and Viper Mk VII #71".
+// "2 vipers", "a viper and an assault raptor". Ships are counted by their name (`countedShipParts`).
 function countedParts(values: unknown[], type: TypeRef | undefined, context: LabelContext): Part[] {
   const of = typeof type?.of === 'object' && type.of ? type.of : type;
   if (of?.role === 'ship') {
@@ -528,16 +547,30 @@ function countedParts(values: unknown[], type: TypeRef | undefined, context: Lab
   return merged(joinParts(kinds));
 }
 
-function countedShips(ids: number[], context: LabelContext): Part[] {
-  const byType = new Map<string, number[]>();
-  for (const id of ids) {
-    // a ship of no known type is a kind of its own
-    const type = context.shipType?.(id) ?? `#${id}`;
-    byType.set(type, [...(byType.get(type) ?? []), id]);
+export function countedShips(ids: number[], context: LabelContext, civilian = false): Part[] {
+  return countedShipParts(ids.map((id) => shipPart(id, context, civilian)));
+}
+
+/**
+ * Ships by their names (`shipPart`), where two or more read the same as the plural of their type, with what the name
+ * says after the type: "2 vipers", "2 raiders · Space 7 o'clock". A ship alone keeps its name: "2 vipers and Viper Mk
+ * VII".
+ */
+export function countedShipParts(ships: Part[]): Part[] {
+  const byName = new Map<string, { part: Part; count: number }>();
+  for (const part of ships) {
+    const seen = byName.get(part.text);
+    byName.set(part.text, { part: seen?.part ?? part, count: (seen?.count ?? 0) + 1 });
   }
-  const items = [...byType].flatMap(([type, ships]) =>
-    ships.length > 1 ? [[{ text: `${ships.length} ` }, withIcon({ text: `${commonNoun('ShipType', type)}s` }, context.iconOf?.('ShipType', type))]] : ships.map((id) => [shipPart(id, context)]),
-  );
+  const items = [...byName.values()].map(({ part, count }) => {
+    if (count === 1) {
+      return [part];
+    }
+    const type = part.shipType ?? null;
+    const label = type ? constantLabel('ShipType', type) : null;
+    const rest = label && part.text.startsWith(label) ? part.text.substring(label.length) : '';
+    return [{ text: `${count} ` }, { ...part, text: `${type ? commonNoun('ShipType', type) : 'ship'}s${rest}` }];
+  });
   return merged(joinParts(items));
 }
 
@@ -794,12 +827,14 @@ export function factLabel(fact: FactProjection | null | undefined, context: Labe
 
 const IN_SPACE = new Set(['GALACTICA_SPACE', 'CYLON_FLEET_SPACE', 'BOARDING_PARTY']);
 
-// "ship #2007" for a civilian ship the table doesn't show is "Civilian ship #2007"
+// a ship of no known type in a field about civilian ships, which the table doesn't show, is a civilian ship
 function civilianNamed(parts: Part[], civilian: boolean, context: LabelContext): Part[] {
   if (!civilian) {
     return parts;
   }
-  return parts.map((part) => (/^ship #/.test(part.text) ? withIcon({ ...part, text: part.text.replace(/^ship #/, 'Civilian ship #') }, part.icon ?? context.iconOf?.('ShipType', 'CIVILIAN')) : part));
+  return parts.map((part) =>
+    part.text === UNKNOWN_SHIP ? withIcon({ ...part, text: constantLabel('ShipType', 'CIVILIAN'), shipType: 'CIVILIAN' }, part.icon ?? context.iconOf?.('ShipType', 'CIVILIAN')) : part,
+  );
 }
 
 /**
@@ -871,8 +906,9 @@ export function shipMove(fact: Record<string, unknown>, context: LabelContext): 
   }
 }
 
+// "2 raiders move to Space 7 o'clock"
 export function shipMovesParts(ships: Part[], move: ShipMove): Part[] {
-  return merged([...joinParts(ships.map((ship) => [ship])), ...markedParts(` ${ships.length === 1 ? move.one : move.many}`), ...move.tail]);
+  return capitalizedParts(merged([...countedShipParts(ships), ...markedParts(` ${ships.length === 1 ? move.one : move.many}`), ...move.tail]));
 }
 
 // The cards of a hidden fact by their kind: "2 Skill Cards (1 Politics, 1 Tactics)", "a Loyalty Card".

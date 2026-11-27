@@ -337,7 +337,7 @@ export function deckCardArt(card: unknown, kind: string | null): ArtRef | null {
   }
   if (card && typeof card === 'object' && 'id' in card) {
     const ship = shipArt('CIVILIAN');
-    return ship ? { ...ship, key: `${ship.key}#${(card as { id: number }).id}`, label: `Civilian ship #${(card as { id: number }).id}` } : null;
+    return ship ? { ...ship, key: `${ship.key}#${(card as { id: number }).id}`, label: 'Civilian ship' } : null;
   }
   return typeof card === 'string' && kind ? enumArt(kind, card) : null;
 }

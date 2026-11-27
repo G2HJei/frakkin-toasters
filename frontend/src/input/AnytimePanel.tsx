@@ -1,7 +1,8 @@
-import { useTable } from '../table/tableContext';
+import { Table, useTable } from '../table/tableContext';
 import { Groups } from './AnswerPanel';
 import { anytimeMoves } from './answers';
 import type { EventValue } from './eventModel';
+import { shipsApart, shipsOf } from './shipsApart';
 
 export interface AnytimePanelProps {
   onSubmit(event: EventValue): void;
@@ -24,7 +25,9 @@ export function AnytimePanel({ onSubmit }: AnytimePanelProps) {
           {/* a sandbox acts for every seat */}
           {sandbox && <p className="pool-name">{table.playerName(player)}</p>}
           {/* the picks don't narrow these: a group opens here */}
-          <Groups moves={moves} onMove={(move) => move.event && onSubmit(move.event)} openInPlace />
+          <Table.Provider value={shipsApart(table, shipsOf(moves), table.game?.players?.find((candidate) => candidate.number === player) ?? null)}>
+            <Groups moves={moves} onMove={(move) => move.event && onSubmit(move.event)} openInPlace />
+          </Table.Provider>
         </div>
       ))}
     </section>

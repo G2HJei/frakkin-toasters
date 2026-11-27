@@ -317,7 +317,7 @@ function OutOfTheGame() {
                             return (
                                 <li key={ship.id}>
                                     {art && <ArtImg art={art}/>}
-                                    <span>{constantLabel('ShipType', ship.type)} #{ship.id}</span>
+                                    <span>{constantLabel('ShipType', ship.type)}</span>
                                     {ship.cargo && <CargoIcons cargo={ship.cargo}/>}
                                 </li>
                             );

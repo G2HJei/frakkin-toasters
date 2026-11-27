@@ -414,7 +414,7 @@ function withLearnedShips(context: FactContext, learned: Map<number, string>): F
     shipType: (id) => shown(id) ?? learned.get(id) ?? null,
     shipName: (id) => {
       const type = learned.get(id);
-      return !shown(id) && type ? `${constantLabel('ShipType', type)} #${id}` : (context.shipName?.(id) ?? `ship #${id}`);
+      return !shown(id) && type ? constantLabel('ShipType', type) : (context.shipName?.(id) ?? 'a ship');
     },
   };
 }

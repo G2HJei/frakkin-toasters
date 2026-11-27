@@ -312,10 +312,10 @@ describe('the log', () => {
 
     // each ship once with its own losses, not "2 civilian ships" and then "1 civilian ship"
     expect(rows(body)).toEqual([
-      [null, 'Civilian ship #2005 is drawn and destroyed'],
+      [null, 'Civilian ship is drawn and destroyed'],
       [null, 'The fleet loses 1 fuel'],
       [null, 'The fleet loses 1 population'],
-      [null, 'Civilian ship #2003 is drawn and destroyed'],
+      [null, 'Civilian ship is drawn and destroyed'],
       [null, 'The fleet loses 1 morale'],
     ]);
   });
@@ -372,8 +372,8 @@ describe('the log', () => {
     const body = renderLog([raider(1, 31), raider(2, 32)]);
 
     // the table doesn't show them, but the activations named them as raiders
-    expect(rows(body)).toEqual([[null, "Raider #31 and Raider #32 move to Space 7 o'clock"]]);
-    expect([...body.querySelectorAll('.event .part-icon')].map((icon) => icon.getAttribute('data-icon'))).toEqual(['ShipType/RAIDER', 'ShipType/RAIDER']);
+    expect(rows(body)).toEqual([[null, "2 raiders move to Space 7 o'clock"]]);
+    expect([...body.querySelectorAll('.event .part-icon')].map((icon) => icon.getAttribute('data-icon'))).toEqual(['ShipType/RAIDER']);
   });
 
   it('shows every line, and lights what a line touched on a click', () => {
@@ -410,7 +410,7 @@ describe('the log', () => {
     } as LogEntry;
     const body = renderLog([destroyed]);
 
-    expect(lines(body)).toEqual(['ship #34 is destroyed']);
+    expect(lines(body)).toEqual(['A ship is destroyed']);
     expect(body.querySelector('.event .tone-good')?.textContent).toBe('destroyed');
   });
 

@@ -63,7 +63,8 @@ the player it names ("Choose the top option of Riots").
   - A location the words mention is a constant (`{Location:BRIG}`) so it shows its card; so is a Quorum Card
     (`{QuorumCard:PROBATION}`) and a type of Skill Cards (`{SkillCardColor:TREACHERY}`, shown in its color).
     `labels.test.ts` checks it, the words of `{a?b:c}` too.
-  - `{field|damage}` words Galactica's damage tokens, `{field|count}` counts ships by kind ("2 vipers").
+  - `{field|damage}` words Galactica's damage tokens, `{field|count}` counts ships by name ("2 vipers").
+  - A ship is its type, never its id (`shipPart`, the context's `shipName`): "Raider", "a ship" when its type is unknown.
   - `{Holder:PRESIDENT}` names a title by the player who held it then (his portrait in front, the title's card on hover:
     `holderPart`, the log's `titleHolder`); a line about a change of the title names it by its insignia,
     `{Title:PRESIDENT}` (checked by `labels.test.ts`).
@@ -109,7 +110,7 @@ option of a choice, and an option that asks a decision first into one per answer
   answer has one. `input/answerArt.ts` picks them: what the answer names (`recordArt` with a `ValueArt`: a player as
   his portrait, a title as its insignia with the card as preview, an ability as its character's portrait, a deck as its
   back, a Skill Card color as a back in it, a die result as the face, a resource as the board's icon
-  (`resourceIconArt`), ships by id, a location as the map pin with its card as preview (`locationPinArt`, a nuke's
+  (`resourceIconArt`), a ship by its type (`table.ship(id)`), a location as the map pin with its card as preview (`locationPinArt`, a nuke's
   target too; not on a move, whose step icon says where), a viper's move as the Movement step), the event's `@Source` and the Quorum or
   Mutiny Card it plays, a location's action at its pin, what its kind does where its fields don't say (`KIND_ART`: the
   deck a draw takes from, the Skill Card back for a random discard or the Destiny deck, the title a Title Card action

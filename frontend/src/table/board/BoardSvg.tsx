@@ -18,14 +18,14 @@ import {
 } from '../../art/images';
 import { InTarget, previewHandlers, SvgArt, TargetHint } from '../../art/Art';
 import { BOARD_LABELS, CRITICAL_DAMAGE_EXPLAINED, CRITICAL_DAMAGE_LABEL, LOSS_REDUCTION_CARD, lossReductionExplained, type BoardLabel } from '../../labels/board';
-import { cardLabel, constantLabel } from '../../labels/describe';
+import { cardLabel, constantLabel, shortName } from '../../labels/describe';
 import type { CivilianShip, Character, DeckProjection, GameProjection, Location, ShipProjection } from '../../wire/types';
 import { PlayerMatOf } from '../players/PlayersPanel';
 import { anchorOf, hintOf, useAnswering } from '../../input/boardAnswers';
 import { useFlash } from '../flash';
 import type { Target } from '../../input/answers';
 import { useRevealHandlers, type RevealCard, type RevealSection } from '../reveal';
-import { knowingPlayer, useTable } from '../tableContext';
+import { knowingPlayer, shipMarks, useTable } from '../tableContext';
 import boardUrl from './board.jpg';
 import boardingPartyUrl from './boarding-party.png';
 import {
@@ -1083,7 +1083,7 @@ function Piles({ placed }: { placed: PlacedGroup[] }) {
         const cargo: RevealSection[] =
           known.length === 0
             ? []
-            : [{ title: 'Lost if destroyed', cards: known.map((ship) => ({ art: null, label: `Civilian ship #${ship.id}`, icon: <CargoIcons cargo={ship.cargo!} /> })), hidden: table.sandbox }];
+            : [{ title: 'Lost if destroyed', cards: known.map((ship) => ({ art: null, label: constantLabel('ShipType', 'CIVILIAN'), icon: <CargoIcons cargo={ship.cargo!} /> })), hidden: table.sandbox }];
         return (
           <RevealGroup key={group.ships[0].id} id={`cargo-${group.ships[0].id}`} title={group.ships.length > 1 ? 'Civilian ships' : 'Civilian ship'} sections={cargo}>
             <g className={`ship-group ship-${group.type.toLowerCase()}`}>
@@ -1151,14 +1151,9 @@ function CountedPile({ type, count, x, y, size }: { type: string; count: number;
   );
 }
 
+// the type, never the id, which means nothing on the table: "Viper · Starbuck"
 export function boardShipLabel(ship: ShipProjection): string {
-  return [
-    `${constantLabel('ShipType', ship.type)} #${ship.id}`,
-    ship.pilot ? shortName(constantLabel('Character', ship.pilot)) : null,
-    (ship.damage ?? []).length > 0 ? (ship.damage ?? []).map((damage) => constantLabel('BasestarDamage', damage)).join(', ') : null,
-  ]
-    .filter((part) => part !== null)
-    .join(' · ');
+  return [constantLabel('ShipType', ship.type), ...shipMarks(ship)].join(' · ');
 }
 
 /**
@@ -1202,14 +1197,4 @@ function Count({ x, y, value, size = 36, align = 'start', accent = false, classN
 function RevealGroup({ id, title, sections, children }: { id: string; title: string; sections: RevealSection[]; children: ReactNode }) {
   const handlers = useRevealHandlers(id, title, sections);
   return <g {...handlers}>{children}</g>;
-}
-
-// A nickname in quotes, otherwise the last name: what fits on a token.
-export function shortName(label: string): string {
-  const nickname = /"([^"]+)"/.exec(label);
-  if (nickname) {
-    return nickname[1];
-  }
-  const words = label.trim().split(' ');
-  return words[words.length - 1];
 }

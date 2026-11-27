@@ -473,4 +473,23 @@ describe('the answers', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Back' }));
     expect(screen.getAllByRole('button', { name: /Armory|Admiral/ })).toHaveLength(2);
   });
+
+  it('name the ships to pick by their type, and by where they are where two read the same', () => {
+    const ship = (id: number, type: string, location: string) => ({ id, type, location, pilot: null, damage: [], cargo: null });
+    const brutalForce = { kind: 'AuthorizationOfBrutalForceEvent', playerNumber: 1, shipIds: [1016] };
+    const pick = { kind: 'ShipPick', component: 'shipIds', shipIds: [1016, 1017, 1021], min: 1, max: 3 };
+    renderPanel({
+      ...game({ kind: 'Decide', player: 1, action: 'AuthorizationOfBrutalForceEvent', constraints: [], answers: { events: [], shapes: [{ example: brutalForce, pick }] } }),
+      galactica: {
+        ships: [ship(1016, 'RAIDER', 'GALACTICA_SPACE_7_OCLOCK'), ship(1017, 'RAIDER', 'GALACTICA_SPACE_9_OCLOCK'), ship(1021, 'HEAVY_RAIDER', 'GALACTICA_SPACE_7_OCLOCK')],
+        reserves: [],
+        damagedVipers: [],
+        boardingParty: [],
+      },
+    } as unknown as GameProjection);
+
+    fireEvent.click(screen.getByRole('button', { name: /Authorization of Brutal Force/ }));
+    const tiles = [...document.querySelectorAll('.picker .card-pick')].map((tile) => tile.getAttribute('aria-label'));
+    expect(tiles).toEqual(["Raider · Space 7 o'clock", "Raider · Space 9 o'clock", 'Heavy Raider']);
+  });
 });

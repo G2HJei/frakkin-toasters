@@ -2,13 +2,13 @@ import {fireEvent, render} from '@testing-library/react';
 import {afterEach, describe, expect, it, vi} from 'vitest';
 import {AnsweringContext, NO_OFFER, type Offer} from '../../input/boardAnswers';
 import type {Move} from '../../input/answers';
-import {BoardSvg, groupShips, shortName} from './BoardSvg';
+import {BoardSvg, groupShips} from './BoardSvg';
 import {ArtPreview, usePreview} from '../../art/Art';
 import {RevealLayer, useReveal} from '../reveal';
 import {Table, tableContext} from '../tableContext';
 import type {GameProjection, LogEntry, ShipProjection} from '../../wire/types';
 import {BOARD_LABELS, type BoardLabel} from '../../labels/board';
-import {constantLabel} from '../../labels/describe';
+import {constantLabel, shortName} from '../../labels/describe';
 import {
     BOARD_HEIGHT,
     BOARD_WIDTH,
@@ -164,10 +164,10 @@ describe('the board', () => {
         const board = renderBoard();
 
         const viper = board.querySelector('[data-location="GALACTICA_SPACE_5_OCLOCK"] [data-ship="3"]');
-        expect(viper?.getAttribute('aria-label')).toBe('Viper #3 · Starbuck');
+        expect(viper?.getAttribute('aria-label')).toBe('Viper · Starbuck');
         expect(viper?.querySelector('[data-art="ShipType/VIPER"]')).not.toBeNull();
         expect(viper?.querySelector('[data-art="Character/piloting-token/KARA_STARBUCK_THRACE"]')).not.toBeNull();
-        expect(board.querySelector('[data-location="CYLON_FLEET_SPACE_2"] [data-ship="1019"]')?.getAttribute('aria-label')).toBe('Raider #1019');
+        expect(board.querySelector('[data-location="CYLON_FLEET_SPACE_2"] [data-ship="1019"]')?.getAttribute('aria-label')).toBe('Raider');
         expect(board.querySelector('[data-slot="reserves"] [data-ship="4"]')).not.toBeNull();
         expect(board.querySelector('[data-supply="RAIDER"] .count')?.textContent).toBe('12');
     });
@@ -475,7 +475,7 @@ describe('the board', () => {
 
         fireEvent.mouseEnter(board.querySelector('[data-reveal="cargo-30"]')!);
         const lines = [...document.querySelectorAll('.reveal-pop ol.pile li')];
-        expect(lines.map((line) => line.textContent)).toEqual(['11Civilian ship #30', 'nothingCivilian ship #31']);
+        expect(lines.map((line) => line.textContent)).toEqual(['11Civilian ship', 'nothingCivilian ship']);
         expect(lines[0].querySelector('.cargo')?.getAttribute('aria-label')).toBe('1 population, 1 fuel');
         expect([...lines[0].querySelectorAll('.cargo-amount')].map((amount) => amount.getAttribute('data-resource'))).toEqual(['population', 'fuel']);
         expect(document.querySelector('.reveal-pop .sandbox-only')).not.toBeNull();
@@ -509,7 +509,7 @@ describe('the board', () => {
         expect(halo('GALACTICA_SPACE_3_OCLOCK')).not.toBeNull();
         expect(halo('GALACTICA_SPACE_9_OCLOCK')).toBeNull();
         fireEvent.mouseEnter(board.querySelector('[data-reveal="cargo-30"]')!);
-        expect([...document.querySelectorAll('.reveal-pop ol.pile li')].map((line) => line.textContent)).toEqual(['11Civilian ship #30']);
+        expect([...document.querySelectorAll('.reveal-pop ol.pile li')].map((line) => line.textContent)).toEqual(['11Civilian ship']);
 
         // an observer looked at none
         const observer = renderBoard(undefined, {...looked, viewer: {kind: 'Observer'}} as unknown as GameProjection);
@@ -531,7 +531,7 @@ describe('the board', () => {
         } as unknown as GameProjection, true);
 
         fireEvent.mouseEnter(board.querySelector('[data-reveal="deck-CIVILIAN_SHIPS"]')!);
-        expect(document.querySelector('.reveal-pop ol.pile li')?.textContent).toBe('Civilian ship #40: 1 population, 1 morale');
+        expect(document.querySelector('.reveal-pop ol.pile li')?.textContent).toBe('Civilian ship: 1 population, 1 morale');
     });
 
     it('tucks the destinations under the objective, the later ones under the earlier, each showing a strip', () => {
@@ -705,7 +705,7 @@ describe('the board', () => {
         expect(viper.querySelector('desc')?.textContent).toBe('2 answers');
         // the images in it name themselves without a tooltip
         expect(viper.querySelector('title')).toBeNull();
-        expect(viper.querySelector('image')?.getAttribute('aria-label')).toBe('Viper #3 · Starbuck');
+        expect(viper.querySelector('image')?.getAttribute('aria-label')).toBe('Viper · Starbuck');
         fireEvent.click(viper);
         expect(onTarget).toHaveBeenLastCalledWith({type: 'ship', id: 3}, expect.anything());
 
