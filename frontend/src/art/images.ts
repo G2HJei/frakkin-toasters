@@ -10,14 +10,14 @@ import { stepIconSvg, type TurnStep } from '../table/turn/StepIcon';
 import { glyphSvg, type GlyphName } from './Glyph';
 
 // only the folders: the full-size board scan at the root isn't for the browser (the table's board is board.jpg)
-const FILES = import.meta.glob<string>('./*/**/*.{png,jpg,gif,svg}', {
+const FILES = import.meta.glob<string>('./*/**/*.{webp,svg}', {
   base: '../../../materials-sorted',
   eager: true,
   query: '?url',
   import: 'default',
 });
 
-// "./CrisisCard/WATER_SABOTAGED.png" -> "CrisisCard/WATER_SABOTAGED"
+// "./CrisisCard/WATER_SABOTAGED.webp" -> "CrisisCard/WATER_SABOTAGED"
 const URLS = new Map<string, string>(Object.entries(FILES).map(([path, url]) => [path.replace(/^\.\//, '').replace(/\.\w+$/, ''), url]));
 
 export function artPaths(): string[] {

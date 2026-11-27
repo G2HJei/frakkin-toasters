@@ -16,7 +16,7 @@ def sources = [file('src'), file('index.html'), file('package.json'), file('pack
                file('tsconfig.json')]
 // the images the app shows (src/art), and the rulebooks its references open (src/labels/rules.ts)
 def materials = fileTree(rootProject.file('materials-sorted')) {
-    include '**/*.png', '**/*.jpg', '**/*.gif', 'bsg-rules/*.pdf'
+    include '**/*.webp', '**/*.svg', 'bsg-rules/*.pdf'
 }
 
 tasks.register('npmBuild', NpmTask) {
