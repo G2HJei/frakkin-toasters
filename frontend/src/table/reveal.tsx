@@ -2,7 +2,7 @@
 // can't see (a hand, a draw pile, the face-down cards of a skill check). The table looks the same in a sandbox and in a
 // live game; only hovering shows more. The popover lives in one fixed layer, so no panel clips it, and shows the cards
 // as large as their images.
-import { useRef, type ReactNode } from 'react';
+import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { create } from 'zustand';
 import { ArtImg } from '../art/Art';
 import type { ArtRef } from '../art/images';
@@ -26,6 +26,8 @@ export interface RevealSection {
 
 interface Open {
   id: string;
+  // the element that opened it, which alone knows its piles: another element can show the same id
+  owner: string;
   title: string;
   sections: RevealSection[];
   // where the pointer entered the element; the popover stays there, so the pointer can move onto it
@@ -36,6 +38,7 @@ interface RevealState {
   open: Open | null;
   closing: ReturnType<typeof setTimeout> | null;
   show(open: Open): void;
+  refresh(owner: string, title: string, sections: RevealSection[]): void;
   hideSoon(id: string): void;
   keep(): void;
   hide(): void;
@@ -50,6 +53,18 @@ export const useReveal = create<RevealState>((set, get) => ({
       clearTimeout(closing);
     }
     set({ open, closing: null });
+  },
+  // the game changed under the pointer: the open popover shows the piles as they are now, and closes once they're empty
+  refresh: (owner, title, sections) => {
+    const open = get().open;
+    if (open?.owner !== owner) {
+      return;
+    }
+    if (sections.length === 0) {
+      get().hide();
+      return;
+    }
+    set({ open: { ...open, title, sections } });
   },
   // a moment to move the pointer onto the popover, to scroll it
   hideSoon: (id) => {
@@ -83,12 +98,21 @@ export function visibleSections(sections: RevealSection[], sandbox: boolean): Re
 export function useRevealHandlers(id: string, title: string, sections: RevealSection[]) {
   const table = useTable();
   const shown = visibleSections(sections, table.sandbox);
+  const owner = useId();
+  const open = useReveal((state) => state.open?.owner === owner);
+  // the popover keeps what the element showed when the pointer entered it, so each render of the open element hands it
+  // the new piles, e.g. a live update that lands while the pointer rests on the deck
+  useEffect(() => {
+    if (open) {
+      useReveal.getState().refresh(owner, title, shown);
+    }
+  });
   if (shown.length === 0) {
     return {};
   }
   return {
     onMouseEnter: (event: React.MouseEvent<Element>) =>
-      useReveal.getState().show({ id, title, sections: shown, pointer: { x: event.clientX, y: event.clientY } }),
+      useReveal.getState().show({ id, owner, title, sections: shown, pointer: { x: event.clientX, y: event.clientY } }),
     onMouseLeave: () => useReveal.getState().hideSoon(id),
     'data-reveal': id,
   };

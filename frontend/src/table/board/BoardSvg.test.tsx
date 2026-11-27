@@ -671,6 +671,33 @@ describe('the board', () => {
         expect(document.querySelector('.reveal-pop .sandbox-only')).not.toBeNull();
     });
 
+    it('keeps an open popover up to date with a game that changes under the pointer', () => {
+        const withPile = (drawPile: string[]) => ({
+            ...game,
+            viewer: {kind: 'Sandbox'},
+            decks: [{deck: 'CRISIS', size: drawPile.length, discardSize: 0, discarded: [], drawPile}],
+        } as unknown as GameProjection);
+        const board = (projection: GameProjection) => (
+            <Table.Provider value={tableContext(projection, true, null)}>
+                <AnsweringContext.Provider value={{offer: NO_OFFER, onTarget: vi.fn()}}>
+                    <BoardSvg/>
+                    <RevealLayer/>
+                </AnsweringContext.Provider>
+            </Table.Provider>
+        );
+        const {container, rerender} = render(board(withPile(['FOOD_SHORTAGE'])));
+        fireEvent.mouseEnter(container.querySelector('[data-reveal="deck-CRISIS"]')!);
+        expect(document.querySelector('.reveal-pop ol.pile li img')?.getAttribute('alt')).toBe('Food Shortage');
+
+        // a card put on top while the pointer rests on the deck
+        rerender(board(withPile(['RIOTS_NO_JUMP', 'FOOD_SHORTAGE'])));
+        expect([...document.querySelectorAll('.reveal-pop ol.pile li img')].map((card) => card.getAttribute('alt'))).toEqual(['Riots No Jump', 'Food Shortage']);
+
+        // the last card drawn: nothing left to show
+        rerender(board(withPile([])));
+        expect(document.querySelector('.reveal-pop')).toBeNull();
+    });
+
     it('lights up the locations, ships and standees an input can be answered with, and the Act chip', () => {
         const move = {
             option: null,
