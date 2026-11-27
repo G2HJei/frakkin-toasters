@@ -15,8 +15,6 @@ gradlew.bat
 
 # Claude
 .claude/
-/gradle/
-/gradlew
 /bsg-rules/
 /*.drawio.bkp
 

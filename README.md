@@ -127,8 +127,9 @@ and the socket to 8080). Log in by name, start a sandbox with a seed, and play.
 
 The `dev` profile has a login by name (`POST /api/dev/login`), so no client secrets are needed. Without it, set
 `FRAKKIN_LOGIN_GOOGLE_CLIENTID` / `..._CLIENTSECRET` and `FRAKKIN_LOGIN_DISCORD_CLIENTID` / `..._CLIENTSECRET`. The
-`Dockerfile` builds one image; its header lists the settings a deployment gives (the database, the logins and
-`TOKEN_SECRET`).
+`Dockerfile` packs the built jar into one image (`./gradlew :backend:bootJar` first); its header lists the settings a
+deployment gives (the database, the logins and `TOKEN_SECRET`). The CI (`.github/workflows/ci.yml`) builds and tests
+every push and deploys master to the VPS; its header lists the secrets the deploy reads.
 
 - `npm test` in `frontend/` runs the unit tests, and `npm run e2e` the Playwright specs against the running app
   (`npx playwright install chromium` once).

@@ -98,3 +98,10 @@ stores its journal in Postgres and pushes to every viewer what he may see. It ad
   link. `LiveGameTest`, `SandboxLiveTest` and `GameSessionsTest` play `ScriptedTurns`
   beside an engine in memory, which asks for every answer, so they turn `frakkin.take-only-answers` off;
   `OnlyAnswersTest` plays with it on.
+- CI and deploy (`.github/workflows/ci.yml`, its header lists the secrets): `build` runs `./gradlew build` and keeps
+  the jar, `e2e` plays `npm run e2e` against that jar with the `dev` profile and a Postgres service on 5433, and on
+  master `deploy` uploads the same jar with the `Dockerfile` (which packs a built jar, it doesn't build one) to the
+  VPS over ssh and runs `deploy/deploy.sh` there: it builds the image, runs it on the host's network (the VPS's
+  Postgres is at localhost) with `~/frakkin-toasters/app.env.next`, waits for `/api/login/providers`, and keeps the
+  settings as `app.env` once the app answers; otherwise it starts the previous image with the previous `app.env` and
+  fails. The wrapper (`gradlew`, `gradle/wrapper/`) is in git for the runners.

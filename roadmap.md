@@ -37,8 +37,8 @@ What stands between this and "a group of friends can play a whole game online" i
 the session, but the replays and a place to run it:
 
 1. **A finished game can't be stepped through** (E): the read-only link shows its end and its log, no slider yet.
-2. **Nothing runs it for real players** (F). No CI, no staging or production, no backups, no frozen journal format, no
-   privacy notice.
+2. **Nothing runs it for real players** (F). The CI deploys master to the VPS, but there is no staging, no HTTPS, no
+   backups, no frozen journal format, no privacy notice.
 
 ## Principles for the milestones
 
@@ -170,8 +170,9 @@ Where it differs from the plan:
 
 ### F. Ship it (ops and compliance)
 
-- **CI**: GitHub Actions: `./gradlew build` (Testcontainers needs Docker, available on hosted runners), the e2e job
-  against the built jar with the `dev` profile, the nightly fuzzer from A, the `FormatLockTest`. There is no CI today.
+- **CI**: GitHub Actions (`.github/workflows/ci.yml`): `./gradlew build` (Testcontainers on the hosted runner's
+  Docker, the `FormatLockTest` with it), the e2e job against the built jar with the `dev` profile, and on master the
+  deploy of that jar to the VPS (`deploy/deploy.sh`). Still missing: the nightly fuzzer from A.
 - **Environments**: a staging and a production, self-hosted on a single small VPS (open question 6), `TOKEN_SECRET`
   set, Google and Discord client ids, HTTPS and the allowed origins, a reverse proxy that supports web sockets with
   idle timeouts above the heartbeat. A single node is
@@ -209,7 +210,7 @@ F (CI, ops, compliance) runs alongside D; its staging is the gate for inviting p
 ```
 
 A to D are done, in that order: A made the engine sound, B gave A its answers, C its inputs and D its sessions. F was
-to start alongside C and hasn't (there is no CI yet, the heartbeat came with D), so it starts now, the CI first. The rule for
+to start alongside C and started after D (the heartbeat came with D), with the CI and the deploy to the VPS. The rule for
 "playable" is the exit line of D plus F's staging.
 
 ---

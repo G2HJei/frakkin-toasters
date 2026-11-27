@@ -32,7 +32,7 @@ the session around a game (seats that change hands, votes, presence, chat, notif
 player count leave only `NO_END` games that are a valid stall: every human in the "Brig", where nobody draws a Crisis
 Card), legal-move hints, the table's inputs (`playthrough.spec.ts` plays a game to an ending through the answers), and
 sessions that survive real people (`SessionExitTest`: a game across restores with a seat handed over, to its results).
-Next: milestones E (replays) and F (CI, hosting) of `roadmap.md`. `choices.md` records the choices made where the cards
+Next: milestones E (replays) and F (hosting; the CI and the deploy to the VPS are done) of `roadmap.md`. `choices.md` records the choices made where the cards
 and rules are silent.
 
 ## Build Commands
@@ -139,7 +139,7 @@ applies the facts again. The projections cut the game per viewer, the backend se
 | [interrupts.md](agents/interrupts.md) | interrupt windows and cards, die rolls |
 | [combat.md](agents/combat.md) | attacks, damage, Pegasus' destruction, the nuke, the CAG's actions, placing and activating Cylon ships |
 | [character-abilities.md](agents/character-abilities.md) | the 99 character abilities, by where they hook in |
-| [backend.md](agents/backend.md) | codec and format lock, `GameSessions`, logins, lobby, live socket, sandbox, regression journals, migrations |
+| [backend.md](agents/backend.md) | codec and format lock, `GameSessions`, logins, lobby, live socket, sandbox, regression journals, migrations, CI and deploy |
 | [frontend.md](agents/frontend.md) | frontend build, wire schema, labels, answers, pages, e2e |
 | [frontend-table.md](agents/frontend-table.md) | the table: layout, log, animations, board, board answers, hover, reference, art |
 | [testing.md](agents/testing.md) | harnesses, fixtures, which engine test covers what, the fuzzer |
