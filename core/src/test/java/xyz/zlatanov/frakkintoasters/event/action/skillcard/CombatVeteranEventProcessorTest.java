@@ -34,19 +34,19 @@ class CombatVeteranEventProcessorTest extends EventTestHarness<CombatVeteranEven
     void aViperFromTheReservesIsLaunchedFirst() {
         int launched = galacticaBoard.reserves().stream().filter(Viper.class::isInstance).findFirst().orElseThrow().id();
 
-        execute(new CombatVeteranEvent(1, COMBAT_VETERAN_3, launch(VIPER, GALACTICA_SPACE_4_OCLOCK)));
+        execute(new CombatVeteranEvent(1, COMBAT_VETERAN_3, launch(VIPER, GALACTICA_SPACE_5_OCLOCK)));
 
-        assertFollowup(all(new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_4_OCLOCK),
+        assertFollowup(all(new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_5_OCLOCK),
                 new ViperActivationRoundEvent(1, launched, 2, false)));
     }
 
     @Test
     void aViperInSpaceIsActivatedThreeTimes() {
-        Viper unmanned = viperAt(GALACTICA_SPACE_6_OCLOCK);
+        Viper unmanned = viperAt(GALACTICA_SPACE_7_OCLOCK);
 
-        execute(new CombatVeteranEvent(1, COMBAT_VETERAN_3, move(unmanned.id(), GALACTICA_SPACE_8_OCLOCK)));
+        execute(new CombatVeteranEvent(1, COMBAT_VETERAN_3, move(unmanned.id(), GALACTICA_SPACE_9_OCLOCK)));
 
-        assertEquals(GALACTICA_SPACE_8_OCLOCK, locate(unmanned));
+        assertEquals(GALACTICA_SPACE_9_OCLOCK, locate(unmanned));
         assertFollowup(new ViperActivationRoundEvent(1, unmanned.id(), 2, false));
     }
 
@@ -55,10 +55,10 @@ class CombatVeteranEventProcessorTest extends EventTestHarness<CombatVeteranEven
     void notAPilotedViper() {
         player(2).character(LEE_APOLLO_ADAMA);
         moveTo(HANGAR_DECK, LEE_APOLLO_ADAMA);
-        Viper piloted = viperAt(GALACTICA_SPACE_6_OCLOCK);
+        Viper piloted = viperAt(GALACTICA_SPACE_7_OCLOCK);
         ops.player(2).pilot(piloted.id());
 
-        assertInvalid(new CombatVeteranEvent(1, COMBAT_VETERAN_3, move(piloted.id(), GALACTICA_SPACE_8_OCLOCK)));
+        assertInvalid(new CombatVeteranEvent(1, COMBAT_VETERAN_3, move(piloted.id(), GALACTICA_SPACE_9_OCLOCK)));
     }
 
     @Test

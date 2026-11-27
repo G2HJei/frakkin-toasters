@@ -288,7 +288,7 @@ class FactApplierTest {
     @Test
     void turnStartedForgetsTheDieRollAndTheInterruptCardsOfTheTurn() {
         apply(new DieRollStarted());
-        apply(new RaidersWillMiss(GALACTICA_SPACE_4_OCLOCK, 4));
+        apply(new RaidersWillMiss(GALACTICA_SPACE_5_OCLOCK, 4));
         val played = new PlayedInterruptCard(2, majorVictory, null);
         apply(new InterruptWindowOpened(new AfterBasestarOrCenturionDestroyed()));
         apply(new InterruptCardPlayed(played));
@@ -574,14 +574,14 @@ class FactApplierTest {
 
     @Test
     void raidersMissUntilTheCountRunsOut() {
-        apply(new RaidersWillMiss(GALACTICA_SPACE_4_OCLOCK, 2));
-        apply(new RaidersWillMiss(GALACTICA_SPACE_6_OCLOCK, 1));
+        apply(new RaidersWillMiss(GALACTICA_SPACE_5_OCLOCK, 2));
+        apply(new RaidersWillMiss(GALACTICA_SPACE_7_OCLOCK, 1));
 
-        apply(new RaiderMissed(GALACTICA_SPACE_4_OCLOCK));
-        apply(new RaiderMissed(GALACTICA_SPACE_6_OCLOCK));
-        assertEquals(Map.of(GALACTICA_SPACE_4_OCLOCK, 1), game.turn().raidersToMiss());
+        apply(new RaiderMissed(GALACTICA_SPACE_5_OCLOCK));
+        apply(new RaiderMissed(GALACTICA_SPACE_7_OCLOCK));
+        assertEquals(Map.of(GALACTICA_SPACE_5_OCLOCK, 1), game.turn().raidersToMiss());
 
-        apply(new RaiderMissed(GALACTICA_SPACE_4_OCLOCK));
+        apply(new RaiderMissed(GALACTICA_SPACE_5_OCLOCK));
         assertEquals(Map.of(), game.turn().raidersToMiss());
     }
 
@@ -748,10 +748,10 @@ class FactApplierTest {
     void shipMovedFromTheCylonSupplyToSpace() {
         val raider = game.cylonShips().raiders().getLast();
 
-        apply(new ShipMoved(raider.id(), CYLON_SUPPLY, GALACTICA_SPACE, GALACTICA_SPACE_8_OCLOCK));
+        apply(new ShipMoved(raider.id(), CYLON_SUPPLY, GALACTICA_SPACE, GALACTICA_SPACE_9_OCLOCK));
 
         assertFalse(game.cylonShips().raiders().contains(raider));
-        assertEquals(GALACTICA_SPACE_8_OCLOCK, game.boards().galactica().locate(raider));
+        assertEquals(GALACTICA_SPACE_9_OCLOCK, game.boards().galactica().locate(raider));
     }
 
     @Test
@@ -761,8 +761,8 @@ class FactApplierTest {
         apply(new ShipMoved(heavyRaider.id(), CYLON_SUPPLY, CYLON_FLEET_SPACE, CYLON_FLEET_SPACE_3));
         assertEquals(CYLON_FLEET_SPACE_3, game.boards().cylonFleet().locate(heavyRaider));
 
-        apply(new ShipMoved(heavyRaider.id(), CYLON_FLEET_SPACE, GALACTICA_SPACE, GALACTICA_SPACE_6_OCLOCK));
-        assertEquals(GALACTICA_SPACE_6_OCLOCK, game.boards().galactica().locate(heavyRaider));
+        apply(new ShipMoved(heavyRaider.id(), CYLON_FLEET_SPACE, GALACTICA_SPACE, GALACTICA_SPACE_7_OCLOCK));
+        assertEquals(GALACTICA_SPACE_7_OCLOCK, game.boards().galactica().locate(heavyRaider));
 
         apply(new ShipMoved(heavyRaider.id(), GALACTICA_SPACE, CYLON_SUPPLY, null));
         assertTrue(game.cylonShips().heavyRaiders().contains(heavyRaider));
@@ -785,9 +785,9 @@ class FactApplierTest {
     void shipMovedBetweenTheCivilianDeckAndSpace() {
         val civ = game.decks().civilianShips().cards().getFirst();
 
-        apply(new ShipMoved(civ.id(), CIVILIAN_DECK, GALACTICA_SPACE, GALACTICA_SPACE_2_OCLOCK));
+        apply(new ShipMoved(civ.id(), CIVILIAN_DECK, GALACTICA_SPACE, GALACTICA_SPACE_3_OCLOCK));
         assertFalse(game.decks().civilianShips().cards().contains(civ));
-        assertEquals(GALACTICA_SPACE_2_OCLOCK, game.boards().galactica().locate(civ));
+        assertEquals(GALACTICA_SPACE_3_OCLOCK, game.boards().galactica().locate(civ));
 
         apply(new ShipMoved(civ.id(), GALACTICA_SPACE, CIVILIAN_DECK, null));
         assertEquals(civ, game.decks().civilianShips().cards().getFirst());
@@ -811,12 +811,12 @@ class FactApplierTest {
 
     @Test
     void shipMovedWithinSpaceChangesTheLocation() {
-        apply(new ShipMoved(1, RESERVES, GALACTICA_SPACE, GALACTICA_SPACE_4_OCLOCK));
+        apply(new ShipMoved(1, RESERVES, GALACTICA_SPACE, GALACTICA_SPACE_5_OCLOCK));
 
-        apply(new ShipMoved(1, GALACTICA_SPACE, GALACTICA_SPACE, GALACTICA_SPACE_10_OCLOCK));
+        apply(new ShipMoved(1, GALACTICA_SPACE, GALACTICA_SPACE, GALACTICA_SPACE_11_OCLOCK));
 
         assertEquals(1, game.boards().galactica().shipsInSpace().size());
-        assertEquals(GALACTICA_SPACE_10_OCLOCK, game.boards().galactica().shipsInSpace().values().iterator().next());
+        assertEquals(GALACTICA_SPACE_11_OCLOCK, game.boards().galactica().shipsInSpace().values().iterator().next());
     }
 
     @Test
@@ -826,7 +826,7 @@ class FactApplierTest {
 
     @Test
     void pilotChangedSetsAndClearsThePilot() {
-        apply(new ShipMoved(1, RESERVES, GALACTICA_SPACE, GALACTICA_SPACE_4_OCLOCK));
+        apply(new ShipMoved(1, RESERVES, GALACTICA_SPACE, GALACTICA_SPACE_5_OCLOCK));
 
         apply(new PilotChanged(1, LOUANNE_KAT_KATRAINE));
         assertEquals(LOUANNE_KAT_KATRAINE, game.boards().galactica().shipInSpace(1, HumanFighter.class).pilot());
@@ -838,7 +838,7 @@ class FactApplierTest {
     @Test
     void basestarDamageAttachedAndCleared() {
         val basestar = game.cylonShips().basestars().getLast();
-        apply(new ShipMoved(basestar.id(), CYLON_SUPPLY, GALACTICA_SPACE, GALACTICA_SPACE_8_OCLOCK));
+        apply(new ShipMoved(basestar.id(), CYLON_SUPPLY, GALACTICA_SPACE, GALACTICA_SPACE_9_OCLOCK));
 
         apply(new BasestarDamageAttached(basestar.id(), BasestarDamage.STRUCTURAL_DAMAGE));
         assertEquals(List.of(BasestarDamage.STRUCTURAL_DAMAGE), basestar.damage());

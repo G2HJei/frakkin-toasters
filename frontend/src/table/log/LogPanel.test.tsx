@@ -344,12 +344,12 @@ describe('the log', () => {
   });
 
   it('tells a choice by the event it picked, under the player who picked it', () => {
-    const area = { kind: 'ActivateRaiderAreaEvent', area: 'GALACTICA_SPACE_8_OCLOCK', raiderShipIds: [] };
+    const area = { kind: 'ActivateRaiderAreaEvent', area: 'GALACTICA_SPACE_9_OCLOCK', raiderShipIds: [] };
     const choice = { kind: 'ChoiceLog', scopeId: 3, chooser: 1, option: { kind: 'Single', event: area } } as LogEntry;
     const picked = { ...scope(4), parentId: 3, event: 'ActivateRaiderAreaEvent', details: area } as LogEntry;
     const body = renderLog([choice, picked]);
 
-    expect(rows(body)).toEqual([['William Adama', "activates the raiders at Space 8 o'clock"]]);
+    expect(rows(body)).toEqual([['William Adama', "activates the raiders at Space 9 o'clock"]]);
   });
 
   it('leaves out a pass on a card every player is asked about, and says what other passes passed on', () => {
@@ -367,12 +367,12 @@ describe('the log', () => {
         ...scope(scopeId),
         event: 'ActivateRaiderEvent',
         details: { kind: 'ActivateRaiderEvent', raiderShipId: shipId },
-        facts: [{ kind: 'Shown', fact: { kind: 'ShipFact.ShipMoved', shipId, from: 'GALACTICA_SPACE', to: 'GALACTICA_SPACE', location: 'GALACTICA_SPACE_6_OCLOCK' } }],
+        facts: [{ kind: 'Shown', fact: { kind: 'ShipFact.ShipMoved', shipId, from: 'GALACTICA_SPACE', to: 'GALACTICA_SPACE', location: 'GALACTICA_SPACE_7_OCLOCK' } }],
       }) as LogEntry;
     const body = renderLog([raider(1, 31), raider(2, 32)]);
 
     // the table doesn't show them, but the activations named them as raiders
-    expect(rows(body)).toEqual([[null, "Raider #31 and Raider #32 move to Space 6 o'clock"]]);
+    expect(rows(body)).toEqual([[null, "Raider #31 and Raider #32 move to Space 7 o'clock"]]);
     expect([...body.querySelectorAll('.event .part-icon')].map((icon) => icon.getAttribute('data-icon'))).toEqual(['ShipType/RAIDER', 'ShipType/RAIDER']);
   });
 

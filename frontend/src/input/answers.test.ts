@@ -26,7 +26,7 @@ const actionAnswers = {
     { kind: 'PresidentsOfficeEvent', playerNumber: 3 },
     { kind: 'ExecutiveOrderEvent', playerNumber: 3, card: card('EXECUTIVE_ORDER', 1), targetPlayerNumber: 1 },
     { kind: 'ExecutiveOrderEvent', playerNumber: 3, card: card('EXECUTIVE_ORDER', 1), targetPlayerNumber: 2 },
-    { kind: 'LaunchNukeEvent', playerNumber: 3, area: 'GALACTICA_SPACE_12_OCLOCK' },
+    { kind: 'LaunchNukeEvent', playerNumber: 3, area: 'GALACTICA_SPACE_1_OCLOCK' },
   ],
   shapes: [],
 } as unknown as LegalAnswers;
@@ -40,7 +40,7 @@ const actionStep = {
 
 const viperAnswers = {
   events: [1, 2].flatMap((fighter) => [
-    { kind: 'ActivateViperEvent', playerNumber: 4, activation: { launchShipType: null, launchLocation: null, humanFighterId: fighter, moveLocation: 'GALACTICA_SPACE_2_OCLOCK', attackCylonShipId: null, escortCivilianShipId: null } },
+    { kind: 'ActivateViperEvent', playerNumber: 4, activation: { launchShipType: null, launchLocation: null, humanFighterId: fighter, moveLocation: 'GALACTICA_SPACE_3_OCLOCK', attackCylonShipId: null, escortCivilianShipId: null } },
     { kind: 'ActivateViperEvent', playerNumber: 4, activation: { launchShipType: null, launchLocation: null, humanFighterId: fighter, moveLocation: null, attackCylonShipId: 30, escortCivilianShipId: null } },
   ]),
   shapes: [],
@@ -97,7 +97,7 @@ describe('what a move names', () => {
   it('reaches into a viper activation', () => {
     const [toArea, attack] = moves({ kind: 'Decide', player: 4, action: 'ActivateViperEvent', constraints: [], answers: viperAnswers, topic: null });
 
-    expect(targetsOf(toArea).map(targetKey)).toEqual(['kind:ActivateViperEvent', 'ship:1', 'location:GALACTICA_SPACE_2_OCLOCK']);
+    expect(targetsOf(toArea).map(targetKey)).toEqual(['kind:ActivateViperEvent', 'ship:1', 'location:GALACTICA_SPACE_3_OCLOCK']);
     expect(targetsOf(attack).map(targetKey)).toEqual(['kind:ActivateViperEvent', 'ship:1', 'ship:30']);
   });
 
@@ -121,7 +121,7 @@ describe('narrowing', () => {
   it('keeps the moves that name every pick', () => {
     expect(narrow(vipers, [{ type: 'ship', id: 2 }])).toHaveLength(2);
     expect(narrow(vipers, [{ type: 'ship', id: 2 }, { type: 'ship', id: 30 }])).toEqual([vipers[3]]);
-    expect(narrow(vipers, [{ type: 'location', location: 'GALACTICA_SPACE_2_OCLOCK' }])).toEqual([vipers[0], vipers[2]]);
+    expect(narrow(vipers, [{ type: 'location', location: 'GALACTICA_SPACE_3_OCLOCK' }])).toEqual([vipers[0], vipers[2]]);
     expect(narrow(vipers, [])).toBe(vipers);
   });
 });

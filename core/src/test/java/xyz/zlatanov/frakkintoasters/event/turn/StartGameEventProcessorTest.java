@@ -59,11 +59,11 @@ class StartGameEventProcessorTest extends EventTestHarness<StartGameEvent> {
     // Rule A3.4: two vipers below Galactica, two civilian ships behind it, a basestar and three raiders in front of it.
     @Test
     void theShipsAreSetUp() {
-        assertShipCount(GALACTICA_SPACE_4_OCLOCK, Viper.class, 1);
-        assertShipCount(GALACTICA_SPACE_6_OCLOCK, Viper.class, 1);
-        assertShipCount(GALACTICA_SPACE_2_OCLOCK, CivilianShip.class, 2);
-        assertShipCount(GALACTICA_SPACE_8_OCLOCK, Basestar.class, 1);
-        assertShipCount(GALACTICA_SPACE_8_OCLOCK, Raider.class, 3);
+        assertShipCount(GALACTICA_SPACE_5_OCLOCK, Viper.class, 1);
+        assertShipCount(GALACTICA_SPACE_7_OCLOCK, Viper.class, 1);
+        assertShipCount(GALACTICA_SPACE_3_OCLOCK, CivilianShip.class, 2);
+        assertShipCount(GALACTICA_SPACE_9_OCLOCK, Basestar.class, 1);
+        assertShipCount(GALACTICA_SPACE_9_OCLOCK, Raider.class, 3);
         assertSetupQueued();
     }
 

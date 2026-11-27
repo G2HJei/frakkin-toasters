@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_3_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.board.Resource.*;
 
 /**
@@ -68,7 +68,7 @@ class LossReductionOpsTest extends TestHarness {
     void aDestroyedCivilianShipIsALoss() {
         ops.reduceNextLoss(POPULATION);
         civilianShips.nextCard(new CivilianShip(-1, 1, 0, 2));
-        place(GALACTICA_SPACE_2_OCLOCK, civilianShip());
+        place(GALACTICA_SPACE_3_OCLOCK, civilianShip());
 
         ops.ship(-1).destroy();
 

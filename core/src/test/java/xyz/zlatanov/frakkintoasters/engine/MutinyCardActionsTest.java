@@ -114,14 +114,14 @@ class MutinyCardActionsTest {
     @Test
     void panicPlacesACivilianShipThenActivatesAnUnmannedViper() {
         start(all(setUp(), give(PANIC), single(new ActionStepEvent()), CYLONS_WIN));
-        val civilianShips = galactica().shipsIn(GALACTICA_SPACE_2_OCLOCK, CivilianShip.class).size();
+        val civilianShips = galactica().shipsIn(GALACTICA_SPACE_3_OCLOCK, CivilianShip.class).size();
 
         act(1);
         play(engine -> engine.submit(1, new PanicEvent(1)));
-        assertEquals(civilianShips + 1, galactica().shipsIn(GALACTICA_SPACE_2_OCLOCK, CivilianShip.class).size());
-        play(engine -> engine.submit(1, new ActivateUnmannedViperEvent(1, ViperActivation.launch(VIPER, GALACTICA_SPACE_6_OCLOCK))));
+        assertEquals(civilianShips + 1, galactica().shipsIn(GALACTICA_SPACE_3_OCLOCK, CivilianShip.class).size());
+        play(engine -> engine.submit(1, new ActivateUnmannedViperEvent(1, ViperActivation.launch(VIPER, GALACTICA_SPACE_7_OCLOCK))));
 
-        assertEquals(1, galactica().shipsIn(GALACTICA_SPACE_6_OCLOCK, xyz.zlatanov.frakkintoasters.state.ship.Viper.class).size());
+        assertEquals(1, galactica().shipsIn(GALACTICA_SPACE_7_OCLOCK, xyz.zlatanov.frakkintoasters.state.ship.Viper.class).size());
         assertEquals(new Finished(CYLONS), engine.status(1));
     }
 
@@ -130,7 +130,7 @@ class MutinyCardActionsTest {
         start(all(setUp(), give(UNAUTHORIZED_USAGE), single(new ActionStepEvent()), CYLONS_WIN));
 
         act(1);
-        play(engine -> engine.submit(1, new UnauthorizedUsageEvent(1, GALACTICA_SPACE_10_OCLOCK)));
+        play(engine -> engine.submit(1, new UnauthorizedUsageEvent(1, GALACTICA_SPACE_11_OCLOCK)));
 
         assertEquals(0, engine.view().nukes());
         assertTrue(game().removedComponents().contains(UNAUTHORIZED_USAGE));

@@ -22,8 +22,8 @@ class QuarantineEventProcessorTest extends EventTestHarness<QuarantineEvent> {
 
     @Test
     void looksAtEveryCivilianShipThenChoosesOne() {
-        val first = civilianShipAt(GALACTICA_SPACE_2_OCLOCK).id();
-        val second = civilianShipAt(GALACTICA_SPACE_4_OCLOCK).id();
+        val first = civilianShipAt(GALACTICA_SPACE_3_OCLOCK).id();
+        val second = civilianShipAt(GALACTICA_SPACE_5_OCLOCK).id();
 
         execute(new QuarantineEvent(1));
 

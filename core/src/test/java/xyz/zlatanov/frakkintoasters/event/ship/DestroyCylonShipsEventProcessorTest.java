@@ -11,26 +11,26 @@ class DestroyCylonShipsEventProcessorTest extends EventTestHarness<DestroyCylonS
 
     @Test
     void shouldDestroyAllTheCylonShipsInTheArea() {
-        raiderAt(GALACTICA_SPACE_4_OCLOCK);
-        heavyRaiderAt(GALACTICA_SPACE_4_OCLOCK);
-        basestarAt(GALACTICA_SPACE_4_OCLOCK);
+        raiderAt(GALACTICA_SPACE_5_OCLOCK);
+        heavyRaiderAt(GALACTICA_SPACE_5_OCLOCK);
+        basestarAt(GALACTICA_SPACE_5_OCLOCK);
 
-        execute(new DestroyCylonShipsEvent(GALACTICA_SPACE_4_OCLOCK));
+        execute(new DestroyCylonShipsEvent(GALACTICA_SPACE_5_OCLOCK));
 
-        assertNoShips(GALACTICA_SPACE_4_OCLOCK);
+        assertNoShips(GALACTICA_SPACE_5_OCLOCK);
     }
 
     @Test
     void shouldLeaveOtherShipsAndOtherAreasAlone() {
-        val raider = raiderAt(GALACTICA_SPACE_6_OCLOCK);
-        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
-        civilianShipAt(GALACTICA_SPACE_4_OCLOCK);
+        val raider = raiderAt(GALACTICA_SPACE_7_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_5_OCLOCK);
+        civilianShipAt(GALACTICA_SPACE_5_OCLOCK);
 
-        execute(new DestroyCylonShipsEvent(GALACTICA_SPACE_4_OCLOCK));
+        execute(new DestroyCylonShipsEvent(GALACTICA_SPACE_5_OCLOCK));
 
-        assertEquals(GALACTICA_SPACE_6_OCLOCK, locate(raider));
-        assertEquals(GALACTICA_SPACE_4_OCLOCK, locate(viper));
-        assertShipCount(GALACTICA_SPACE_4_OCLOCK, 2);
+        assertEquals(GALACTICA_SPACE_7_OCLOCK, locate(raider));
+        assertEquals(GALACTICA_SPACE_5_OCLOCK, locate(viper));
+        assertShipCount(GALACTICA_SPACE_5_OCLOCK, 2);
     }
 
     @Test

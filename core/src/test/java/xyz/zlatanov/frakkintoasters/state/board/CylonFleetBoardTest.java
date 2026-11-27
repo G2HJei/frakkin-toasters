@@ -33,12 +33,12 @@ class CylonFleetBoardTest {
     @Test
     void shouldMoveEachCylonSpaceAreaToTheMatchingAreaOfTheMainBoard() {
         assertEquals(Map.of(
-                CYLON_FLEET_SPACE_7_8, GALACTICA_SPACE_8_OCLOCK, // in front
-                CYLON_FLEET_SPACE_4, GALACTICA_SPACE_6_OCLOCK, // the viper launch icon side
-                CYLON_FLEET_SPACE_2, GALACTICA_SPACE_4_OCLOCK,
-                CYLON_FLEET_SPACE_5_6, GALACTICA_SPACE_10_OCLOCK, // the other side
-                CYLON_FLEET_SPACE_3, GALACTICA_SPACE_12_OCLOCK,
-                CYLON_FLEET_SPACE_1, GALACTICA_SPACE_2_OCLOCK), // behind
+                CYLON_FLEET_SPACE_7_8, GALACTICA_SPACE_9_OCLOCK, // in front
+                CYLON_FLEET_SPACE_4, GALACTICA_SPACE_7_OCLOCK, // the viper launch icon side
+                CYLON_FLEET_SPACE_2, GALACTICA_SPACE_5_OCLOCK,
+                CYLON_FLEET_SPACE_5_6, GALACTICA_SPACE_11_OCLOCK, // the other side
+                CYLON_FLEET_SPACE_3, GALACTICA_SPACE_1_OCLOCK,
+                CYLON_FLEET_SPACE_1, GALACTICA_SPACE_3_OCLOCK), // behind
                 CylonFleetBoard.MOVE_TO_GALACTICA_MAP);
     }
 }

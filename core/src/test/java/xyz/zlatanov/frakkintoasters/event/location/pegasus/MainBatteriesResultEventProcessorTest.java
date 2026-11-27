@@ -35,10 +35,10 @@ class MainBatteriesResultEventProcessorTest extends EventTestHarness<MainBatteri
     @Test
     void shouldFollowupWithCivilianShipDestruction() {
         val civilian = civilianShip();
-        place(GALACTICA_SPACE_2_OCLOCK, civilian);
+        place(GALACTICA_SPACE_3_OCLOCK, civilian);
         rolled(1);
 
-        execute(new MainBatteriesResultEvent(GALACTICA_SPACE_2_OCLOCK));
+        execute(new MainBatteriesResultEvent(GALACTICA_SPACE_3_OCLOCK));
 
         assertFollowup(new DestroyCivilianShipEvent(civilian.id()));
     }
@@ -47,11 +47,11 @@ class MainBatteriesResultEventProcessorTest extends EventTestHarness<MainBatteri
     void shouldChooseACivilianShipInTheSpaceArea() {
         val civilian1 = civilianShip();
         val civilian2 = civilianShip();
-        place(GALACTICA_SPACE_2_OCLOCK, civilian1, civilian2);
-        civilianShipAt(GALACTICA_SPACE_4_OCLOCK);
+        place(GALACTICA_SPACE_3_OCLOCK, civilian1, civilian2);
+        civilianShipAt(GALACTICA_SPACE_5_OCLOCK);
         rolled(1);
 
-        execute(new MainBatteriesResultEvent(GALACTICA_SPACE_2_OCLOCK));
+        execute(new MainBatteriesResultEvent(GALACTICA_SPACE_3_OCLOCK));
 
         val first = civilian1.id() < civilian2.id() ? civilian1 : civilian2;
         val second = first == civilian1 ? civilian2 : civilian1;
@@ -61,27 +61,27 @@ class MainBatteriesResultEventProcessorTest extends EventTestHarness<MainBatteri
     @Test
     void shouldDoNothingWhenNoCivilianShipsToDestroy() {
         rolled(1);
-        execute(new MainBatteriesResultEvent(GALACTICA_SPACE_2_OCLOCK));
+        execute(new MainBatteriesResultEvent(GALACTICA_SPACE_3_OCLOCK));
     }
 
     @Test
     void shouldDestroyOnlyViperPresent() {
-        val testViper = viperAt(GALACTICA_SPACE_4_OCLOCK);
+        val testViper = viperAt(GALACTICA_SPACE_5_OCLOCK);
         rolled(2);
 
-        execute(new MainBatteriesResultEvent(GALACTICA_SPACE_4_OCLOCK));
+        execute(new MainBatteriesResultEvent(GALACTICA_SPACE_5_OCLOCK));
 
         assertFollowup(new DamageHumanFighterEvent(testViper.id()));
     }
 
     @Test
     void shouldChooseAViperInTheSpaceArea() {
-        val viper1 = viperAt(GALACTICA_SPACE_4_OCLOCK);
-        val viper2 = viperAt(GALACTICA_SPACE_4_OCLOCK);
-        viperAt(GALACTICA_SPACE_6_OCLOCK);
+        val viper1 = viperAt(GALACTICA_SPACE_5_OCLOCK);
+        val viper2 = viperAt(GALACTICA_SPACE_5_OCLOCK);
+        viperAt(GALACTICA_SPACE_7_OCLOCK);
         rolled(3);
 
-        execute(new MainBatteriesResultEvent(GALACTICA_SPACE_4_OCLOCK));
+        execute(new MainBatteriesResultEvent(GALACTICA_SPACE_5_OCLOCK));
 
         val first = viper1.id() < viper2.id() ? viper1 : viper2;
         val second = first == viper1 ? viper2 : viper1;
@@ -91,57 +91,57 @@ class MainBatteriesResultEventProcessorTest extends EventTestHarness<MainBatteri
     @Test
     void shouldDoNothingWhenNoVipers() {
         rolled(2);
-        execute(new MainBatteriesResultEvent(GALACTICA_SPACE_4_OCLOCK));
+        execute(new MainBatteriesResultEvent(GALACTICA_SPACE_5_OCLOCK));
     }
 
     @Test
     void shouldDoNothingWhenNoRaiders() {
         rolled(4);
-        execute(new MainBatteriesResultEvent(GALACTICA_SPACE_6_OCLOCK));
+        execute(new MainBatteriesResultEvent(GALACTICA_SPACE_7_OCLOCK));
     }
 
     @Test
     void shouldDoNothingWhenNoRaidersOnHighRoll() {
         rolled(8);
-        execute(new MainBatteriesResultEvent(GALACTICA_SPACE_8_OCLOCK));
+        execute(new MainBatteriesResultEvent(GALACTICA_SPACE_9_OCLOCK));
     }
 
     @Test
     void shouldFollowupWithDestroy2RaidersEvent() {
-        place(GALACTICA_SPACE_6_OCLOCK, raider1, raider2);
+        place(GALACTICA_SPACE_7_OCLOCK, raider1, raider2);
         rolled(4);
 
-        execute(new MainBatteriesResultEvent(GALACTICA_SPACE_6_OCLOCK));
+        execute(new MainBatteriesResultEvent(GALACTICA_SPACE_7_OCLOCK));
 
         assertFollowup(new DestroyRaidersEvent(Set.of(raider1.id(), raider2.id())));
     }
 
     @Test
     void shouldFollowupWithDestroyRaidersEventWhenOnlyOneIsPresent() {
-        place(GALACTICA_SPACE_6_OCLOCK, raider1);
+        place(GALACTICA_SPACE_7_OCLOCK, raider1);
         rolled(5);
 
-        execute(new MainBatteriesResultEvent(GALACTICA_SPACE_6_OCLOCK));
+        execute(new MainBatteriesResultEvent(GALACTICA_SPACE_7_OCLOCK));
 
         assertFollowup(new DestroyRaidersEvent(Set.of(raider1.id())));
     }
 
     @Test
     void shouldDestroy2Of3Raiders() {
-        place(GALACTICA_SPACE_6_OCLOCK, raider1, raider2, raider3);
+        place(GALACTICA_SPACE_7_OCLOCK, raider1, raider2, raider3);
         rolled(6);
 
-        execute(new MainBatteriesResultEvent(GALACTICA_SPACE_6_OCLOCK));
+        execute(new MainBatteriesResultEvent(GALACTICA_SPACE_7_OCLOCK));
 
         assertFollowup(new DestroyRaidersEvent(lowestIds(2, raider1, raider2, raider3)));
     }
 
     @Test
     void shouldFollowupWithDestroy4RaidersEvent() {
-        place(GALACTICA_SPACE_8_OCLOCK, raider1, raider2, raider3, raider4);
+        place(GALACTICA_SPACE_9_OCLOCK, raider1, raider2, raider3, raider4);
         rolled(7);
 
-        execute(new MainBatteriesResultEvent(GALACTICA_SPACE_8_OCLOCK));
+        execute(new MainBatteriesResultEvent(GALACTICA_SPACE_9_OCLOCK));
 
         assertFollowup(new DestroyRaidersEvent(Set.of(raider1.id(), raider2.id(), raider3.id(), raider4.id())));
 
@@ -150,20 +150,20 @@ class MainBatteriesResultEventProcessorTest extends EventTestHarness<MainBatteri
     @Test
     void shouldDestroy4Of5Raiders() {
         val raider5 = raider();
-        place(GALACTICA_SPACE_8_OCLOCK, raider1, raider2, raider3, raider4, raider5);
+        place(GALACTICA_SPACE_9_OCLOCK, raider1, raider2, raider3, raider4, raider5);
         rolled(8);
 
-        execute(new MainBatteriesResultEvent(GALACTICA_SPACE_8_OCLOCK));
+        execute(new MainBatteriesResultEvent(GALACTICA_SPACE_9_OCLOCK));
 
         assertFollowup(new DestroyRaidersEvent(lowestIds(4, raider1, raider2, raider3, raider4, raider5)));
     }
 
     @Test
     void shouldFollowWithDestroyRaidersEventWithTwoRaiders() {
-        place(GALACTICA_SPACE_8_OCLOCK, raider1, raider2);
+        place(GALACTICA_SPACE_9_OCLOCK, raider1, raider2);
         rolled(7);
 
-        execute(new MainBatteriesResultEvent(GALACTICA_SPACE_8_OCLOCK));
+        execute(new MainBatteriesResultEvent(GALACTICA_SPACE_9_OCLOCK));
 
         assertFollowup(new DestroyRaidersEvent(Set.of(raider1.id(), raider2.id())));
 

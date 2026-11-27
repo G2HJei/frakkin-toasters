@@ -6,7 +6,7 @@ import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 
 import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.rollDie;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_3_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.PEGASUS_CIC;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.HELENA_CAIN;
 
@@ -18,7 +18,7 @@ class PegasusCicEventProcessorTest extends EventTestHarness<PegasusCicEvent> {
     void setUp() {
         player(1).character(HELENA_CAIN);
         moveTo(PEGASUS_CIC, HELENA_CAIN);
-        basestar = basestarAt(GALACTICA_SPACE_2_OCLOCK);
+        basestar = basestarAt(GALACTICA_SPACE_3_OCLOCK);
     }
 
     @Test

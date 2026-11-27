@@ -22,9 +22,9 @@ class PlaceCylonShipOpsTest extends TestHarness {
     void shouldTakeTheShipFromTheSupply() {
         val raider = cylonShips.next(Raider.class).orElseThrow();
 
-        ops.galactica().placeRaider(GALACTICA_SPACE_8_OCLOCK);
+        ops.galactica().placeRaider(GALACTICA_SPACE_9_OCLOCK);
 
-        assertEquals(List.of(new ShipMoved(raider.id(), CYLON_SUPPLY, GALACTICA_SPACE, GALACTICA_SPACE_8_OCLOCK)),
+        assertEquals(List.of(new ShipMoved(raider.id(), CYLON_SUPPLY, GALACTICA_SPACE, GALACTICA_SPACE_9_OCLOCK)),
                 journal.facts());
     }
 
@@ -34,9 +34,9 @@ class PlaceCylonShipOpsTest extends TestHarness {
         val lowest = raiderAt(CYLON_FLEET_SPACE_2);
         emptyTheRaiderSupply();
 
-        ops.galactica().placeRaider(GALACTICA_SPACE_8_OCLOCK);
+        ops.galactica().placeRaider(GALACTICA_SPACE_9_OCLOCK);
 
-        assertEquals(List.of(new ShipMoved(lowest.id(), CYLON_FLEET_SPACE, GALACTICA_SPACE, GALACTICA_SPACE_8_OCLOCK)),
+        assertEquals(List.of(new ShipMoved(lowest.id(), CYLON_FLEET_SPACE, GALACTICA_SPACE, GALACTICA_SPACE_9_OCLOCK)),
                 journal.facts());
         assertNoShips(CYLON_FLEET_SPACE_2);
         assertShipCount(CYLON_FLEET_SPACE_5_6, 1);
@@ -49,9 +49,9 @@ class PlaceCylonShipOpsTest extends TestHarness {
         val raider = raiderAt(CYLON_FLEET_SPACE_4);
         emptyTheRaiderSupply();
 
-        ops.galactica().placeRaider(GALACTICA_SPACE_8_OCLOCK);
+        ops.galactica().placeRaider(GALACTICA_SPACE_9_OCLOCK);
 
-        assertEquals(List.of(new ShipMoved(raider.id(), CYLON_FLEET_SPACE, GALACTICA_SPACE, GALACTICA_SPACE_8_OCLOCK)),
+        assertEquals(List.of(new ShipMoved(raider.id(), CYLON_FLEET_SPACE, GALACTICA_SPACE, GALACTICA_SPACE_9_OCLOCK)),
                 journal.facts());
     }
 
@@ -60,7 +60,7 @@ class PlaceCylonShipOpsTest extends TestHarness {
     void shouldPlaceNothingWhenThereIsNoShipOfTheTypeLeft() {
         emptyTheRaiderSupply();
 
-        ops.galactica().placeRaider(GALACTICA_SPACE_8_OCLOCK);
+        ops.galactica().placeRaider(GALACTICA_SPACE_9_OCLOCK);
 
         assertEquals(List.of(), journal.facts());
     }
@@ -68,14 +68,14 @@ class PlaceCylonShipOpsTest extends TestHarness {
     // A basestar launches its raiders the same way.
     @Test
     void shouldLaunchRaidersFromTheCylonFleetBoardWhenTheSupplyIsOut() {
-        val basestar = basestarAt(GALACTICA_SPACE_10_OCLOCK);
+        val basestar = basestarAt(GALACTICA_SPACE_11_OCLOCK);
         raiderAt(CYLON_FLEET_SPACE_3);
         raiderAt(CYLON_FLEET_SPACE_7_8);
         emptyTheRaiderSupply();
 
         ops.ship(basestar.id()).launchRaiders(3);
 
-        assertShipCount(GALACTICA_SPACE_10_OCLOCK, Raider.class, 2);
+        assertShipCount(GALACTICA_SPACE_11_OCLOCK, Raider.class, 2);
         assertNoShips(CYLON_FLEET_SPACE_3);
         assertNoShips(CYLON_FLEET_SPACE_7_8);
     }

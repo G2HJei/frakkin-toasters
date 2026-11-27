@@ -10,7 +10,7 @@ import xyz.zlatanov.frakkintoasters.event.jump.ReturnAssaultRaptorEvent;
 import xyz.zlatanov.frakkintoasters.event.ship.ReturnVipersToReservesEvent;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_6_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_7_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.card.DestinationCard.*;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.LEE_APOLLO_ADAMA;
@@ -34,7 +34,7 @@ class JumpingTheFleetEventProcessorTest extends EventTestHarness<JumpingTheFleet
     void thePlayersOfAssaultRaptorsChooseToRemain() {
         player(1).character(KARA_STARBUCK_THRACE);
         player(2).character(LEE_APOLLO_ADAMA);
-        val piloted = assaultRaptorAt(GALACTICA_SPACE_6_OCLOCK);
+        val piloted = assaultRaptorAt(GALACTICA_SPACE_7_OCLOCK);
         piloted.pilot(LEE_APOLLO_ADAMA);
 
         execute(new JumpingTheFleetEvent());

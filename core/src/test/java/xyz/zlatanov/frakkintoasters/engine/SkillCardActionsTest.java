@@ -165,7 +165,7 @@ class SkillCardActionsTest {
 
         act(1);
         play(engine -> engine.submit(1, new HangarDeckEvent(1)));
-        play(engine -> engine.submit(1, new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_4_OCLOCK, KARA_STARBUCK_THRACE, null)));
+        play(engine -> engine.submit(1, new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_5_OCLOCK, KARA_STARBUCK_THRACE, null)));
 
         assertWaitingFor(new AwaitingChoice(1, Set.of(
                 single(new PlayerDecisionEvent<>(1, ActivateViperEvent.class)),
@@ -291,19 +291,19 @@ class SkillCardActionsTest {
                 .filter(Viper.class::isInstance).findFirst().orElseThrow().id();
 
         act(1);
-        play(engine -> engine.submit(1, new CombatVeteranEvent(1, COMBAT_VETERAN_3, launch(VIPER, GALACTICA_SPACE_4_OCLOCK))));
+        play(engine -> engine.submit(1, new CombatVeteranEvent(1, COMBAT_VETERAN_3, launch(VIPER, GALACTICA_SPACE_5_OCLOCK))));
         assertWaitingFor(new AwaitingChoice(1, Set.of(
-                all(new GrantedViperActivationEvent(1, move(launched, GALACTICA_SPACE_2_OCLOCK)),
+                all(new GrantedViperActivationEvent(1, move(launched, GALACTICA_SPACE_3_OCLOCK)),
                         new ViperActivationRoundEvent(1, launched, 1, false)),
-                all(new GrantedViperActivationEvent(1, move(launched, GALACTICA_SPACE_6_OCLOCK)),
+                all(new GrantedViperActivationEvent(1, move(launched, GALACTICA_SPACE_7_OCLOCK)),
                         new ViperActivationRoundEvent(1, launched, 1, false)),
                 single(new NoOpEvent(1)))));
-        choose(1, all(new GrantedViperActivationEvent(1, move(launched, GALACTICA_SPACE_6_OCLOCK)),
+        choose(1, all(new GrantedViperActivationEvent(1, move(launched, GALACTICA_SPACE_7_OCLOCK)),
                 new ViperActivationRoundEvent(1, launched, 1, false)));
-        choose(1, single(new GrantedViperActivationEvent(1, move(launched, GALACTICA_SPACE_8_OCLOCK))));
+        choose(1, single(new GrantedViperActivationEvent(1, move(launched, GALACTICA_SPACE_9_OCLOCK))));
 
         assertEquals(new Finished(CYLONS), engine.status(1));
-        assertEquals(GALACTICA_SPACE_8_OCLOCK, engine.view().boards().galactica().shipsInSpace().entrySet().stream()
+        assertEquals(GALACTICA_SPACE_9_OCLOCK, engine.view().boards().galactica().shipsInSpace().entrySet().stream()
                 .filter(entry -> entry.getKey().id() == launched).findFirst().orElseThrow().getValue());
     }
 
@@ -311,17 +311,17 @@ class SkillCardActionsTest {
     @Test
     void maximumFirepowerAttacksUntilThePlayerStops() {
         start(all(setUp(KARA_STARBUCK_THRACE),
-                all(new GiveSkillCardEvent(1, MAXIMUM_FIREPOWER_3), new PlaceRaiderEvent(GALACTICA_SPACE_4_OCLOCK),
-                        new PlaceRaiderEvent(GALACTICA_SPACE_4_OCLOCK)),
+                all(new GiveSkillCardEvent(1, MAXIMUM_FIREPOWER_3), new PlaceRaiderEvent(GALACTICA_SPACE_5_OCLOCK),
+                        new PlaceRaiderEvent(GALACTICA_SPACE_5_OCLOCK)),
                 single(new ActionStepEvent()), CYLONS_WIN));
 
         act(1);
         play(engine -> engine.submit(1, new HangarDeckEvent(1)));
-        play(engine -> engine.submit(1, new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_4_OCLOCK, KARA_STARBUCK_THRACE, null)));
+        play(engine -> engine.submit(1, new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_5_OCLOCK, KARA_STARBUCK_THRACE, null)));
         act(1);
         play(engine -> engine.submit(1, new MaximumFirepowerEvent(1, MAXIMUM_FIREPOWER_3)));
         val viper = engine.view().boards().galactica().pilotedFighter(KARA_STARBUCK_THRACE).orElseThrow().id();
-        val raider = engine.view().boards().galactica().shipsIn(GALACTICA_SPACE_4_OCLOCK, Raider.class).getFirst().id();
+        val raider = engine.view().boards().galactica().shipsIn(GALACTICA_SPACE_5_OCLOCK, Raider.class).getFirst().id();
         choose(1, all(new GrantedViperActivationEvent(1, attack(viper, raider)), new ViperActivationRoundEvent(1, viper, 3, true)));
         if (engine.pendingInput().isPresent()) {
             pass(1); // a raider is left to attack: the player stops
@@ -387,13 +387,13 @@ class SkillCardActionsTest {
     void unorthodoxPlanFiresGalacticaFromElsewhere() {
         start(all(setUp(WILLIAM_ADAMA),
                 all(new GiveSkillCardEvent(1, UNORTHODOX_PLAN_3), new DamageLocationEvent(WEAPONS_CONTROL),
-                        new PlaceRaiderEvent(GALACTICA_SPACE_8_OCLOCK)),
+                        new PlaceRaiderEvent(GALACTICA_SPACE_9_OCLOCK)),
                 single(new ActionStepEvent()), CYLONS_WIN));
 
         act(1);
         play(engine -> engine.submit(1, new UnorthodoxPlanEvent(1, UNORTHODOX_PLAN_3, WEAPONS_CONTROL)));
         assertWaitingFor(new AwaitingDecision(new PlayerDecisionEvent<>(1, WeaponsControlEvent.class, ANYWHERE_EVEN_IF_DAMAGED)));
-        val raider = engine.view().boards().galactica().shipsIn(GALACTICA_SPACE_8_OCLOCK, Raider.class).getFirst().id();
+        val raider = engine.view().boards().galactica().shipsIn(GALACTICA_SPACE_9_OCLOCK, Raider.class).getFirst().id();
         play(engine -> engine.submit(1, new WeaponsControlEvent(1, raider)));
 
         assertEquals(new Finished(CYLONS), engine.status(1));
@@ -417,16 +417,16 @@ class SkillCardActionsTest {
     void communicationsMovesACivilianShip() {
         start(all(setUp(WILLIAM_ADAMA), all(new SetUpGalacticaEvent(), new MoveCharacterEvent(WILLIAM_ADAMA, COMMUNICATIONS)),
                 single(new ActionStepEvent()), CYLONS_WIN));
-        val ships = engine.view().boards().galactica().shipsIn(GALACTICA_SPACE_2_OCLOCK, CivilianShip.class).stream()
+        val ships = engine.view().boards().galactica().shipsIn(GALACTICA_SPACE_3_OCLOCK, CivilianShip.class).stream()
                 .map(CivilianShip::id).toList();
 
         act(1);
         play(engine -> engine.submit(1, new CommunicationsEvent(1, ships.get(0), ships.get(1))));
-        choose(1, single(new MoveCivilianShipEvent(ships.get(0), GALACTICA_SPACE_4_OCLOCK)));
+        choose(1, single(new MoveCivilianShipEvent(ships.get(0), GALACTICA_SPACE_5_OCLOCK)));
         pass(1);
 
         assertEquals(new Finished(CYLONS), engine.status(1));
-        assertEquals(List.of(ships.get(0)), engine.view().boards().galactica().shipsIn(GALACTICA_SPACE_4_OCLOCK, CivilianShip.class)
+        assertEquals(List.of(ships.get(0)), engine.view().boards().galactica().shipsIn(GALACTICA_SPACE_5_OCLOCK, CivilianShip.class)
                 .stream().map(CivilianShip::id).toList());
     }
 
@@ -441,7 +441,7 @@ class SkillCardActionsTest {
 
         assertEquals(new Finished(CYLONS), engine.status(1));
         val galactica = engine.view().boards().galactica();
-        assertEquals(2, galactica.shipsIn(GALACTICA_SPACE_8_OCLOCK, Basestar.class).size());
+        assertEquals(2, galactica.shipsIn(GALACTICA_SPACE_9_OCLOCK, Basestar.class).size());
         assertEquals(3, galactica.shipsInSpace(Raider.class).size());
         assertEquals(List.of(POLITICS), engine.view().player(1).skillCards().cards().stream()
                 .map(card -> card.type().color()).toList());

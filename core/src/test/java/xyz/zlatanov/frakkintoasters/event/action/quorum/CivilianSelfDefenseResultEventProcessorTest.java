@@ -8,14 +8,14 @@ import xyz.zlatanov.frakkintoasters.event.ship.DestroyCivilianShipEvent;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_3_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.card.QuorumCard.CIVILIAN_SELF_DEFENSE;
 
 class CivilianSelfDefenseResultEventProcessorTest extends EventTestHarness<CivilianSelfDefenseResultEvent> {
 
     @Test
     void onTwoTheCivilianShipIsDestroyed() {
-        val ship = civilianShipAt(GALACTICA_SPACE_2_OCLOCK).id();
+        val ship = civilianShipAt(GALACTICA_SPACE_3_OCLOCK).id();
         rolled(2);
 
         execute(new CivilianSelfDefenseResultEvent(ship));
@@ -26,7 +26,7 @@ class CivilianSelfDefenseResultEventProcessorTest extends EventTestHarness<Civil
 
     @Test
     void higherTheShipIsSafe() {
-        val ship = civilianShipAt(GALACTICA_SPACE_2_OCLOCK).id();
+        val ship = civilianShipAt(GALACTICA_SPACE_3_OCLOCK).id();
         rolled(3);
 
         execute(new CivilianSelfDefenseResultEvent(ship));

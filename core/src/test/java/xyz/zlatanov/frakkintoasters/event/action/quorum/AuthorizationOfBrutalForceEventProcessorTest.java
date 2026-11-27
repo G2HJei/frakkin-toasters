@@ -14,8 +14,8 @@ import java.util.Set;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.rollDie;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_8_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_3_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_9_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.card.QuorumCard.AUTHORIZATION_OF_BRUTAL_FORCE;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.LAURA_ROSLIN;
 
@@ -31,10 +31,10 @@ class AuthorizationOfBrutalForceEventProcessorTest extends EventTestHarness<Auth
     // The raiders may come from different areas.
     @Test
     void threeRaidersAreDestroyed() {
-        val a = raiderAt(GALACTICA_SPACE_2_OCLOCK).id();
-        val b = raiderAt(GALACTICA_SPACE_2_OCLOCK).id();
-        val c = raiderAt(GALACTICA_SPACE_8_OCLOCK).id();
-        raiderAt(GALACTICA_SPACE_8_OCLOCK);
+        val a = raiderAt(GALACTICA_SPACE_3_OCLOCK).id();
+        val b = raiderAt(GALACTICA_SPACE_3_OCLOCK).id();
+        val c = raiderAt(GALACTICA_SPACE_9_OCLOCK).id();
+        raiderAt(GALACTICA_SPACE_9_OCLOCK);
 
         execute(new AuthorizationOfBrutalForceEvent(1, List.of(a, b, c)));
 
@@ -44,7 +44,7 @@ class AuthorizationOfBrutalForceEventProcessorTest extends EventTestHarness<Auth
 
     @Test
     void allTheRaidersWhenFewerAreLeft() {
-        val a = raiderAt(GALACTICA_SPACE_2_OCLOCK).id();
+        val a = raiderAt(GALACTICA_SPACE_3_OCLOCK).id();
 
         execute(new AuthorizationOfBrutalForceEvent(1, List.of(a)));
 
@@ -54,16 +54,16 @@ class AuthorizationOfBrutalForceEventProcessorTest extends EventTestHarness<Auth
 
     @Test
     void notFewerRaidersThanItCould() {
-        val a = raiderAt(GALACTICA_SPACE_2_OCLOCK).id();
-        val b = raiderAt(GALACTICA_SPACE_2_OCLOCK).id();
-        raiderAt(GALACTICA_SPACE_2_OCLOCK);
+        val a = raiderAt(GALACTICA_SPACE_3_OCLOCK).id();
+        val b = raiderAt(GALACTICA_SPACE_3_OCLOCK).id();
+        raiderAt(GALACTICA_SPACE_3_OCLOCK);
 
         assertInvalid(new AuthorizationOfBrutalForceEvent(1, List.of(a, b)));
     }
 
     @Test
     void oneHeavyRaider() {
-        val heavyRaider = heavyRaiderAt(GALACTICA_SPACE_2_OCLOCK).id();
+        val heavyRaider = heavyRaiderAt(GALACTICA_SPACE_3_OCLOCK).id();
 
         execute(new AuthorizationOfBrutalForceEvent(1, List.of(heavyRaider)));
 
@@ -84,8 +84,8 @@ class AuthorizationOfBrutalForceEventProcessorTest extends EventTestHarness<Auth
 
     @Test
     void notAHeavyRaiderWithARaider() {
-        val raider = raiderAt(GALACTICA_SPACE_2_OCLOCK).id();
-        val heavyRaider = heavyRaiderAt(GALACTICA_SPACE_2_OCLOCK).id();
+        val raider = raiderAt(GALACTICA_SPACE_3_OCLOCK).id();
+        val heavyRaider = heavyRaiderAt(GALACTICA_SPACE_3_OCLOCK).id();
 
         assertInvalid(new AuthorizationOfBrutalForceEvent(1, List.of(raider, heavyRaider)));
     }

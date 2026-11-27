@@ -7,15 +7,15 @@ import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_8_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_3_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_9_OCLOCK;
 
 class DestroyCivilianShipsEventProcessorTest extends EventTestHarness<DestroyCivilianShipsEvent> {
 
     @Test
     void shouldLetTheCurrentPlayerChooseTheShip() {
-        val first = civilianShipAt(GALACTICA_SPACE_2_OCLOCK);
-        val second = civilianShipAt(GALACTICA_SPACE_8_OCLOCK);
+        val first = civilianShipAt(GALACTICA_SPACE_3_OCLOCK);
+        val second = civilianShipAt(GALACTICA_SPACE_9_OCLOCK);
 
         execute(new DestroyCivilianShipsEvent(1));
 
@@ -25,8 +25,8 @@ class DestroyCivilianShipsEventProcessorTest extends EventTestHarness<DestroyCiv
     // One at a time: the second choice depends on the first.
     @Test
     void shouldChooseAgainForTheNextShip() {
-        val first = civilianShipAt(GALACTICA_SPACE_2_OCLOCK);
-        val second = civilianShipAt(GALACTICA_SPACE_8_OCLOCK);
+        val first = civilianShipAt(GALACTICA_SPACE_3_OCLOCK);
+        val second = civilianShipAt(GALACTICA_SPACE_9_OCLOCK);
 
         execute(new DestroyCivilianShipsEvent(2));
 

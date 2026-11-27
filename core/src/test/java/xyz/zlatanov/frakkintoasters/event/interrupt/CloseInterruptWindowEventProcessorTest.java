@@ -86,8 +86,8 @@ class CloseInterruptWindowEventProcessorTest extends EventTestHarness<CloseInter
 
     @Test
     void shouldResolveRunInterferenceInEachPilotsSpaceArea() {
-        pilotWithRaiders(2, GALACTICA_SPACE_4_OCLOCK, 5);
-        pilotWithRaiders(3, GALACTICA_SPACE_6_OCLOCK, 2);
+        pilotWithRaiders(2, GALACTICA_SPACE_5_OCLOCK, 5);
+        pilotWithRaiders(3, GALACTICA_SPACE_7_OCLOCK, 2);
         ops.interrupts().openWindow(new BeforeRaidersActivate());
         play(2, RUN_INTERFERENCE, null);
         play(3, RUN_INTERFERENCE, null);
@@ -95,13 +95,13 @@ class CloseInterruptWindowEventProcessorTest extends EventTestHarness<CloseInter
         execute(new CloseInterruptWindowEvent());
 
         // "The first 4 raiders", out of those that activate there
-        assertEquals(Map.of(GALACTICA_SPACE_4_OCLOCK, 4, GALACTICA_SPACE_6_OCLOCK, 2), game.turn().raidersToMiss());
+        assertEquals(Map.of(GALACTICA_SPACE_5_OCLOCK, 4, GALACTICA_SPACE_7_OCLOCK, 2), game.turn().raidersToMiss());
     }
 
     @Test
     void shouldConflictRunInterferenceInTheSameSpaceArea() {
-        pilotWithRaiders(2, GALACTICA_SPACE_4_OCLOCK, 1);
-        pilotWithRaiders(3, GALACTICA_SPACE_4_OCLOCK, 1);
+        pilotWithRaiders(2, GALACTICA_SPACE_5_OCLOCK, 1);
+        pilotWithRaiders(3, GALACTICA_SPACE_5_OCLOCK, 1);
         ops.interrupts().openWindow(new BeforeRaidersActivate());
         play(2, RUN_INTERFERENCE, null);
         play(3, RUN_INTERFERENCE, null);
@@ -121,7 +121,7 @@ class CloseInterruptWindowEventProcessorTest extends EventTestHarness<CloseInter
 
     @Test
     void shouldRerollWithEvasiveManoeuvresAndSubtract2ForAPilotedViper() {
-        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_5_OCLOCK);
         ops.player(3).pilot(viper.id());
         rolled(7);
         val window = new AfterViperAttacked(viper.id());
@@ -135,7 +135,7 @@ class CloseInterruptWindowEventProcessorTest extends EventTestHarness<CloseInter
 
     @Test
     void shouldSubtract2OnceForTwoRerolls() {
-        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_5_OCLOCK);
         ops.player(3).pilot(viper.id());
         rolled(7);
         ops.playOnDieRoll(EVASIVE_MANOEUVRES, -2);
@@ -150,7 +150,7 @@ class CloseInterruptWindowEventProcessorTest extends EventTestHarness<CloseInter
 
     @Test
     void shouldRerollWithEvasiveManoeuvresWithoutSubtractingForAnUnmannedViper() {
-        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_5_OCLOCK);
         rolled(7);
         open(new AfterViperAttacked(viper.id()), 2, EVASIVE_MANOEUVRES, null);
 
@@ -199,7 +199,7 @@ class CloseInterruptWindowEventProcessorTest extends EventTestHarness<CloseInter
     // One reroll a window: the ability stays unused, for the window that opens again on the new roll.
     @Test
     void shouldRerollOnceAWindow() {
-        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_5_OCLOCK);
         rolled(7);
         open(new AfterViperAttacked(viper.id()), 2, EVASIVE_MANOEUVRES, null);
         ops.interrupts().useAbility(new UsedRollAbility(1, ECO_OFFICER, null, null));

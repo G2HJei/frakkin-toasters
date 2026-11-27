@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_4_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_5_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.STRUCTURAL_DAMAGE;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.BEST_OF_THE_BEST;
 
@@ -22,41 +22,41 @@ class AttackCylonShipResultEventProcessorTest extends EventTestHarness<AttackCyl
     @ParameterizedTest
     @CsvSource({"2, 1", "3, 0"})
     void shouldDestroyARaiderOn3OrHigher(int roll, int raidersLeft) {
-        val raider = raiderAt(GALACTICA_SPACE_4_OCLOCK);
+        val raider = raiderAt(GALACTICA_SPACE_5_OCLOCK);
         rolled(roll);
 
         execute(new AttackCylonShipResultEvent(null, raider.id()));
 
-        assertShipCount(GALACTICA_SPACE_4_OCLOCK, raidersLeft);
+        assertShipCount(GALACTICA_SPACE_5_OCLOCK, raidersLeft);
     }
 
     // The roll's "Hotshot" discard drew a second Mutiny Card and sent the pilot to the "Brig", his viper with him
     // (F-3bdf77).
     @Test
     void shouldMissWhenTheFighterLeftSpaceBeforeTheResult() {
-        val raider = raiderAt(GALACTICA_SPACE_4_OCLOCK);
+        val raider = raiderAt(GALACTICA_SPACE_5_OCLOCK);
         rolled(8);
 
         execute(new AttackCylonShipResultEvent(viper().id(), raider.id()));
 
-        assertShipCount(GALACTICA_SPACE_4_OCLOCK, 1);
+        assertShipCount(GALACTICA_SPACE_5_OCLOCK, 1);
     }
 
     @ParameterizedTest
     @CsvSource({"6, 1", "7, 0"})
     void shouldDestroyAHeavyRaiderOn7OrHigher(int roll, int heavyRaidersLeft) {
-        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
-        val heavyRaider = heavyRaiderAt(GALACTICA_SPACE_4_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_5_OCLOCK);
+        val heavyRaider = heavyRaiderAt(GALACTICA_SPACE_5_OCLOCK);
         rolled(roll);
 
         execute(new AttackCylonShipResultEvent(viper.id(), heavyRaider.id()));
 
-        assertShipCount(GALACTICA_SPACE_4_OCLOCK, 1 + heavyRaidersLeft);
+        assertShipCount(GALACTICA_SPACE_5_OCLOCK, 1 + heavyRaidersLeft);
     }
 
     @Test
     void shouldDamageABasestarWithGalacticaOn5OrHigher() {
-        val basestar = basestarAt(GALACTICA_SPACE_4_OCLOCK);
+        val basestar = basestarAt(GALACTICA_SPACE_5_OCLOCK);
         rolled(5);
 
         execute(new AttackCylonShipResultEvent(null, basestar.id()));
@@ -66,7 +66,7 @@ class AttackCylonShipResultEventProcessorTest extends EventTestHarness<AttackCyl
 
     @Test
     void shouldMissABasestarWithGalacticaBelow5() {
-        val basestar = basestarAt(GALACTICA_SPACE_4_OCLOCK);
+        val basestar = basestarAt(GALACTICA_SPACE_5_OCLOCK);
         rolled(4);
 
         execute(new AttackCylonShipResultEvent(null, basestar.id()));
@@ -74,8 +74,8 @@ class AttackCylonShipResultEventProcessorTest extends EventTestHarness<AttackCyl
 
     @Test
     void shouldDamageABasestarWithAViperOn8() {
-        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
-        val basestar = basestarAt(GALACTICA_SPACE_4_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_5_OCLOCK);
+        val basestar = basestarAt(GALACTICA_SPACE_5_OCLOCK);
         rolled(8);
 
         execute(new AttackCylonShipResultEvent(viper.id(), basestar.id()));
@@ -85,8 +85,8 @@ class AttackCylonShipResultEventProcessorTest extends EventTestHarness<AttackCyl
 
     @Test
     void shouldMissABasestarWithAViperBelow8() {
-        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
-        val basestar = basestarAt(GALACTICA_SPACE_4_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_5_OCLOCK);
+        val basestar = basestarAt(GALACTICA_SPACE_5_OCLOCK);
         rolled(7);
 
         execute(new AttackCylonShipResultEvent(viper.id(), basestar.id()));
@@ -94,8 +94,8 @@ class AttackCylonShipResultEventProcessorTest extends EventTestHarness<AttackCyl
 
     @Test
     void shouldDamageABasestarWithAnAssaultRaptorOn7OrHigher() {
-        val assaultRaptor = assaultRaptorAt(GALACTICA_SPACE_4_OCLOCK);
-        val basestar = basestarAt(GALACTICA_SPACE_4_OCLOCK);
+        val assaultRaptor = assaultRaptorAt(GALACTICA_SPACE_5_OCLOCK);
+        val basestar = basestarAt(GALACTICA_SPACE_5_OCLOCK);
         rolled(7);
 
         execute(new AttackCylonShipResultEvent(assaultRaptor.id(), basestar.id()));
@@ -106,8 +106,8 @@ class AttackCylonShipResultEventProcessorTest extends EventTestHarness<AttackCyl
     // "Structural Damage": "all attacks against the basestar gain +2 to their die rolls"
     @Test
     void shouldAdd2AgainstABasestarWithStructuralDamage() {
-        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
-        val basestar = basestarAt(GALACTICA_SPACE_4_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_5_OCLOCK);
+        val basestar = basestarAt(GALACTICA_SPACE_5_OCLOCK);
         basestar.damage(STRUCTURAL_DAMAGE);
         rolled(6);
 
@@ -119,9 +119,9 @@ class AttackCylonShipResultEventProcessorTest extends EventTestHarness<AttackCyl
     // "Instead of rolling the attack, roll a die and destroy that many raiders in the viper's space area."
     @Test
     void shouldDestroyAsManyRaidersAsTheRollWithBestOfTheBest() {
-        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
-        val basestar = basestarAt(GALACTICA_SPACE_4_OCLOCK);
-        val raiderIds = Stream.of(raiderAt(GALACTICA_SPACE_4_OCLOCK), raiderAt(GALACTICA_SPACE_4_OCLOCK), raiderAt(GALACTICA_SPACE_4_OCLOCK))
+        val viper = viperAt(GALACTICA_SPACE_5_OCLOCK);
+        val basestar = basestarAt(GALACTICA_SPACE_5_OCLOCK);
+        val raiderIds = Stream.of(raiderAt(GALACTICA_SPACE_5_OCLOCK), raiderAt(GALACTICA_SPACE_5_OCLOCK), raiderAt(GALACTICA_SPACE_5_OCLOCK))
                 .map(Ship::id)
                 .sorted()
                 .toList();

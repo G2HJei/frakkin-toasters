@@ -88,7 +88,7 @@ describe('the images', () => {
 
     expect(missing).toEqual([]);
     expect(locationArt('BASESTAR_BRIDGE')?.preview).toHaveLength(3);
-    expect(locationArt('GALACTICA_SPACE_12_OCLOCK')).toBeNull();
+    expect(locationArt('GALACTICA_SPACE_1_OCLOCK')).toBeNull();
   });
 
   it('finds a Skill Card by its type and value, and a type by its lowest value', () => {

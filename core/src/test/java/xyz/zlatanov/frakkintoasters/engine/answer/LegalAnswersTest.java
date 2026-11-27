@@ -257,9 +257,9 @@ class LegalAnswersTest extends TestHarness {
         player(1).character(LAURA_ROSLIN);
         president(LAURA_ROSLIN);
         presidentHand.addOnTop(QuorumCard.AUTHORIZATION_OF_BRUTAL_FORCE);
-        val raiders = List.of(raiderAt(GALACTICA_SPACE_2_OCLOCK).id(), raiderAt(GALACTICA_SPACE_2_OCLOCK).id(),
-                raiderAt(GALACTICA_SPACE_8_OCLOCK).id(), raiderAt(GALACTICA_SPACE_8_OCLOCK).id());
-        val heavyRaider = heavyRaiderAt(GALACTICA_SPACE_10_OCLOCK).id();
+        val raiders = List.of(raiderAt(GALACTICA_SPACE_3_OCLOCK).id(), raiderAt(GALACTICA_SPACE_3_OCLOCK).id(),
+                raiderAt(GALACTICA_SPACE_9_OCLOCK).id(), raiderAt(GALACTICA_SPACE_9_OCLOCK).id());
+        val heavyRaider = heavyRaiderAt(GALACTICA_SPACE_11_OCLOCK).id();
 
         val answers = answers(1, AuthorizationOfBrutalForceEvent.class);
 

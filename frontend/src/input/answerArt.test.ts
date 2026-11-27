@@ -79,20 +79,20 @@ describe("an answer's images", () => {
 
     expect(pin).toMatchObject({ key: 'Glyph/LOCATION/COMMAND', shape: 'icon', label: 'Command' });
     expect(pin.preview).toHaveLength(1);
-    expect(art({ kind: 'PlaceCivilianShipEvent', playerNumber: 1, location: 'GALACTICA_SPACE_2_OCLOCK' })).toEqual([
+    expect(art({ kind: 'PlaceCivilianShipEvent', playerNumber: 1, location: 'GALACTICA_SPACE_3_OCLOCK' })).toEqual([
       'ShipType/CIVILIAN',
-      'Glyph/LOCATION/GALACTICA_SPACE_2_OCLOCK',
+      'Glyph/LOCATION/GALACTICA_SPACE_3_OCLOCK',
     ]);
     // a nuke's target at the pin
-    expect(art({ kind: 'LaunchNukeEvent', playerNumber: 1, area: 'GALACTICA_SPACE_2_OCLOCK' })).toEqual(['Token/NUKE', 'Glyph/LOCATION/GALACTICA_SPACE_2_OCLOCK']);
+    expect(art({ kind: 'LaunchNukeEvent', playerNumber: 1, area: 'GALACTICA_SPACE_3_OCLOCK' })).toEqual(['Token/NUKE', 'Glyph/LOCATION/GALACTICA_SPACE_3_OCLOCK']);
     // a viper's move by the Movement step, its launch at the pin
     const withShips = { ...table, ship: (id: number) => ({ id, type: 'VIPER' }) as unknown as ShipProjection };
-    const activation = { launchShipType: null, launchLocation: null, humanFighterId: 3, moveLocation: 'GALACTICA_SPACE_4_OCLOCK', attackCylonShipId: null, escortCivilianShipId: null };
+    const activation = { launchShipType: null, launchLocation: null, humanFighterId: 3, moveLocation: 'GALACTICA_SPACE_5_OCLOCK', attackCylonShipId: null, escortCivilianShipId: null };
     expect(keys(moveArt(answer({ kind: 'ActivateViperEvent', playerNumber: 1, activation }), withShips))).toEqual(['ShipType/VIPER', 'StepIcon/MOVEMENT']);
-    const launch = { ...activation, launchShipType: 'VIPER', launchLocation: 'GALACTICA_SPACE_4_OCLOCK', humanFighterId: null, moveLocation: null };
+    const launch = { ...activation, launchShipType: 'VIPER', launchLocation: 'GALACTICA_SPACE_5_OCLOCK', humanFighterId: null, moveLocation: null };
     expect(keys(moveArt(answer({ kind: 'ActivateViperEvent', playerNumber: 1, activation: launch }), withShips))).toEqual([
       'ShipType/VIPER',
-      'Glyph/LOCATION/GALACTICA_SPACE_4_OCLOCK',
+      'Glyph/LOCATION/GALACTICA_SPACE_5_OCLOCK',
     ]);
   });
 

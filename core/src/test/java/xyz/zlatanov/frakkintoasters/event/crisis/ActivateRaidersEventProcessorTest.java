@@ -30,38 +30,38 @@ class ActivateRaidersEventProcessorTest extends EventTestHarness<ActivateRaiders
 
     @Test
     void shouldLaunchTwoRaidersFromEachBasestarWhenNoRaidersOnBoard() {
-        basestarAt(GALACTICA_SPACE_8_OCLOCK);
+        basestarAt(GALACTICA_SPACE_9_OCLOCK);
         execute(event);
-        assertShipCount(GALACTICA_SPACE_8_OCLOCK, Raider.class, 2);
+        assertShipCount(GALACTICA_SPACE_9_OCLOCK, Raider.class, 2);
     }
 
     // "Disabled Hangar": the basestar may not launch raiders (rule 11.7.3).
     @Test
     void shouldNotLaunchFromABasestarWithADisabledHangar() {
-        basestarAt(GALACTICA_SPACE_8_OCLOCK).damage(DISABLED_HANGAR_BAY);
-        basestarAt(GALACTICA_SPACE_2_OCLOCK);
+        basestarAt(GALACTICA_SPACE_9_OCLOCK).damage(DISABLED_HANGAR_BAY);
+        basestarAt(GALACTICA_SPACE_3_OCLOCK);
 
         execute(event);
 
-        assertShipCount(GALACTICA_SPACE_8_OCLOCK, Raider.class, 0);
-        assertShipCount(GALACTICA_SPACE_2_OCLOCK, Raider.class, 2);
+        assertShipCount(GALACTICA_SPACE_9_OCLOCK, Raider.class, 0);
+        assertShipCount(GALACTICA_SPACE_3_OCLOCK, Raider.class, 2);
     }
 
     @Test
     void shouldLaunchTwoRaidersFromEachOfMultipleBasestars() {
-        basestarAt(GALACTICA_SPACE_8_OCLOCK);
-        basestarAt(GALACTICA_SPACE_2_OCLOCK);
+        basestarAt(GALACTICA_SPACE_9_OCLOCK);
+        basestarAt(GALACTICA_SPACE_3_OCLOCK);
 
         execute(event);
 
-        assertShipCount(GALACTICA_SPACE_8_OCLOCK, Raider.class, 2);
-        assertShipCount(GALACTICA_SPACE_2_OCLOCK, Raider.class, 2);
+        assertShipCount(GALACTICA_SPACE_9_OCLOCK, Raider.class, 2);
+        assertShipCount(GALACTICA_SPACE_3_OCLOCK, Raider.class, 2);
     }
 
     @Test
     void shouldActivateRaidersOneByOneAfterRunInterference() {
-        val raider1 = raiderAt(GALACTICA_SPACE_2_OCLOCK);
-        val raider2 = raiderAt(GALACTICA_SPACE_6_OCLOCK);
+        val raider1 = raiderAt(GALACTICA_SPACE_3_OCLOCK);
+        val raider2 = raiderAt(GALACTICA_SPACE_7_OCLOCK);
 
         execute(new ActivateRaidersEvent());
 
@@ -73,13 +73,13 @@ class ActivateRaidersEventProcessorTest extends EventTestHarness<ActivateRaiders
     // "Negotiation": no Cylon ship launches or activates for the rest of the turn.
     @Test
     void nothingWhileTheShipsAreHeld() {
-        basestarAt(GALACTICA_SPACE_8_OCLOCK);
-        raiderAt(GALACTICA_SPACE_2_OCLOCK);
+        basestarAt(GALACTICA_SPACE_9_OCLOCK);
+        raiderAt(GALACTICA_SPACE_3_OCLOCK);
         ops.holdCylonShips();
 
         execute(new ActivateRaidersEvent());
 
-        assertShipCount(GALACTICA_SPACE_8_OCLOCK, Raider.class, 0);
-        assertShipCount(GALACTICA_SPACE_2_OCLOCK, Raider.class, 1);
+        assertShipCount(GALACTICA_SPACE_9_OCLOCK, Raider.class, 0);
+        assertShipCount(GALACTICA_SPACE_3_OCLOCK, Raider.class, 1);
     }
 }

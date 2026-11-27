@@ -150,10 +150,10 @@ public final class ScriptedScenario {
         val galactica = game.boards().galactica();
         val viperIds = galactica.shipsInSpace(Viper.class).stream().map(Ship::id).sorted().toList();
         ops.player(1).pilot(viperIds.get(0));
-        ops.ship(viperIds.get(0)).moveTo(GALACTICA_SPACE_10_OCLOCK);
+        ops.ship(viperIds.get(0)).moveTo(GALACTICA_SPACE_11_OCLOCK);
         ops.ship(viperIds.get(0)).damage();
         ops.galactica().buildAssaultRaptor();
-        val launched = ops.galactica().launchHumanFighter(ShipType.VIPER, GALACTICA_SPACE_12_OCLOCK, null);
+        val launched = ops.galactica().launchHumanFighter(ShipType.VIPER, GALACTICA_SPACE_1_OCLOCK, null);
         ops.ship(launched).destroy();
         ops.player(2).pilot(viperIds.get(1));
         ops.ship(viperIds.get(1)).land(HANGAR_DECK);
@@ -163,7 +163,7 @@ public final class ScriptedScenario {
         ops.ship(basestar).launchRaiders(3);
         ops.ship(basestar).launchHeavyRaider();
         val raider = galactica.shipsInSpace(Raider.class).getFirst().id();
-        ops.ship(raider).moveTo(GALACTICA_SPACE_2_OCLOCK);
+        ops.ship(raider).moveTo(GALACTICA_SPACE_3_OCLOCK);
         ops.ship(raider).destroy();
         val heavyRaider = galactica.shipsInSpace(HeavyRaider.class).getFirst().id();
         ops.ship(heavyRaider).boardGalactica();
@@ -172,8 +172,8 @@ public final class ScriptedScenario {
         ops.ship(civilians.get(0)).destroy();
         ops.player(2).lookAtShip(civilians.get(1));
         ops.ship(civilians.get(1)).escort(); // player 2 forgets it
-        ops.galactica().placeCivilianShip(GALACTICA_SPACE_6_OCLOCK);
-        ops.galactica().placeRaider(GALACTICA_SPACE_6_OCLOCK);
+        ops.galactica().placeCivilianShip(GALACTICA_SPACE_7_OCLOCK);
+        ops.galactica().placeRaider(GALACTICA_SPACE_7_OCLOCK);
         ops.ship(basestar).destroy();
 
         for (int i = 0; i < 4; i++) {
@@ -203,7 +203,7 @@ public final class ScriptedScenario {
         ops.cylonFleet().advancePursuit();
         ops.cylonFleet().moveShipsToGalactica(CYLON_FLEET_SPACE_2);
         ops.ship(galactica.shipsInSpace(Basestar.class).getFirst().id()).damage(); // stays alive with its damage
-        val newViper = ops.galactica().launchHumanFighter(ShipType.VIPER, GALACTICA_SPACE_6_OCLOCK, null);
+        val newViper = ops.galactica().launchHumanFighter(ShipType.VIPER, GALACTICA_SPACE_7_OCLOCK, null);
         ops.player(1).pilot(newViper); // stays alive with its pilot
 
         ops.player(3).infiltrateGalactica(BRIG);
@@ -238,8 +238,8 @@ public final class ScriptedScenario {
         ops.interrupts().resolve(usedAbility);
         ops.interrupts().closeWindow();
         ops.replaceDieRoll(6, true);
-        ops.interrupts().raidersWillMiss(GALACTICA_SPACE_6_OCLOCK, 2);
-        ops.interrupts().raiderMissed(GALACTICA_SPACE_6_OCLOCK);
+        ops.interrupts().raidersWillMiss(GALACTICA_SPACE_7_OCLOCK, 2);
+        ops.interrupts().raiderMissed(GALACTICA_SPACE_7_OCLOCK);
 
         ops.player(3).endInfiltration();
         ops.player(1).loseMiracleTokens();

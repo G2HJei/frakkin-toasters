@@ -19,12 +19,12 @@ import static xyz.zlatanov.frakkintoasters.state.track.Pursuit.START;
 
 public class CylonFleetBoard implements Board, SpaceLocationsBoard, CylonFleetBoardView {
     public static final Map<Location, Location> MOVE_TO_GALACTICA_MAP = Map.of(
-            CYLON_FLEET_SPACE_1, GALACTICA_SPACE_2_OCLOCK,
-            CYLON_FLEET_SPACE_2, GALACTICA_SPACE_4_OCLOCK,
-            CYLON_FLEET_SPACE_3, GALACTICA_SPACE_12_OCLOCK,
-            CYLON_FLEET_SPACE_4, GALACTICA_SPACE_6_OCLOCK,
-            CYLON_FLEET_SPACE_5_6, GALACTICA_SPACE_10_OCLOCK,
-            CYLON_FLEET_SPACE_7_8, GALACTICA_SPACE_8_OCLOCK);
+            CYLON_FLEET_SPACE_1, GALACTICA_SPACE_3_OCLOCK,
+            CYLON_FLEET_SPACE_2, GALACTICA_SPACE_5_OCLOCK,
+            CYLON_FLEET_SPACE_3, GALACTICA_SPACE_1_OCLOCK,
+            CYLON_FLEET_SPACE_4, GALACTICA_SPACE_7_OCLOCK,
+            CYLON_FLEET_SPACE_5_6, GALACTICA_SPACE_11_OCLOCK,
+            CYLON_FLEET_SPACE_7_8, GALACTICA_SPACE_9_OCLOCK);
 
     // the space area of the Cylon Fleet board that a space area of the main game board corresponds to (rule 11.4)
     public static final Map<Location, Location> MOVE_TO_FLEET_MAP = MOVE_TO_GALACTICA_MAP.entrySet().stream()

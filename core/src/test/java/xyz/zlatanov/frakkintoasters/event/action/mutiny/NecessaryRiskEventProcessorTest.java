@@ -31,9 +31,9 @@ class NecessaryRiskEventProcessorTest extends EventTestHarness<NecessaryRiskEven
 
     @Test
     void foodThenCylonShipsInTheChosenArea() {
-        execute(new NecessaryRiskEvent(1, GALACTICA_SPACE_4_OCLOCK));
+        execute(new NecessaryRiskEvent(1, GALACTICA_SPACE_5_OCLOCK));
 
-        assertFollowup(all(gain(FOOD, 1), new PlaceShipsEvent(1, 3, 0, GALACTICA_SPACE_4_OCLOCK),
+        assertFollowup(all(gain(FOOD, 1), new PlaceShipsEvent(1, 3, 0, GALACTICA_SPACE_5_OCLOCK),
                 new RemoveMutinyCardFromGameEvent(NECESSARY_RISK)));
     }
 

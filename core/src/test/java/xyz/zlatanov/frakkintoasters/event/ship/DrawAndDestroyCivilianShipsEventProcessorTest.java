@@ -7,7 +7,7 @@ import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_3_OCLOCK;
 
 class DrawAndDestroyCivilianShipsEventProcessorTest extends EventTestHarness<DrawAndDestroyCivilianShipsEvent> {
 
@@ -40,7 +40,7 @@ class DrawAndDestroyCivilianShipsEventProcessorTest extends EventTestHarness<Dra
     // board to destroy." (rule 13.6)
     @Test
     void shouldLetTheCurrentPlayerChooseWhenNoneIsLeftToDraw() {
-        civilianShipAt(GALACTICA_SPACE_2_OCLOCK);
+        civilianShipAt(GALACTICA_SPACE_3_OCLOCK);
         while (game.decks().civilianShipsLeft() > 0) {
             civilianShips.draw();
         }

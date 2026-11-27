@@ -33,7 +33,7 @@ function choice(options: unknown[], answers: unknown[]): InputProjection {
 const order = (target: number) => ({ kind: 'ExecutiveOrderEvent', playerNumber: 1, card: card('EXECUTIVE_ORDER', 2), targetPlayerNumber: target });
 const actionStep = choice(
   [decision('ActionEvent'), noOp],
-  [{ option: 0, answers: { events: [{ kind: 'ResearchLabEvent', playerNumber: 1, skillCardColor: 'TACTICS' }, order(2), order(3), { kind: 'LaunchNukeEvent', playerNumber: 1, area: 'GALACTICA_SPACE_2_OCLOCK' }], shapes: [] } }],
+  [{ option: 0, answers: { events: [{ kind: 'ResearchLabEvent', playerNumber: 1, skillCardColor: 'TACTICS' }, order(2), order(3), { kind: 'LaunchNukeEvent', playerNumber: 1, area: 'GALACTICA_SPACE_3_OCLOCK' }], shapes: [] } }],
 );
 
 const activation = (fighter: number, moveLocation: string | null, attack: number | null) => ({
@@ -46,7 +46,7 @@ const viperDecision = {
   player: 1,
   action: 'ActivateViperEvent',
   constraints: [],
-  answers: { events: [activation(1, 'GALACTICA_SPACE_2_OCLOCK', null), activation(1, null, 30), activation(2, 'GALACTICA_SPACE_2_OCLOCK', null)], shapes: [] },
+  answers: { events: [activation(1, 'GALACTICA_SPACE_3_OCLOCK', null), activation(1, null, 30), activation(2, 'GALACTICA_SPACE_3_OCLOCK', null)], shapes: [] },
 } as unknown as InputProjection;
 
 const keys = (map: Map<string, unknown>) => [...map.keys()].sort();
@@ -97,18 +97,18 @@ describe('the board', () => {
   it("lights a viper's activations: its fighters, where they go and what they attack", () => {
     const all = moves(viperDecision);
 
-    expect(keys(offerOf(all, []).targets)).toEqual(['location:GALACTICA_SPACE_2_OCLOCK', 'ship:1', 'ship:2', 'ship:30']);
+    expect(keys(offerOf(all, []).targets)).toEqual(['location:GALACTICA_SPACE_3_OCLOCK', 'ship:1', 'ship:2', 'ship:30']);
     // a fighter keeps its own activations, which a popover lists
     expect(afterPick(all, [], { type: 'ship', id: 1 }).left).toHaveLength(2);
-    expect(keys(offerOf(all, [{ type: 'ship', id: 1 }]).targets)).toEqual(['location:GALACTICA_SPACE_2_OCLOCK', 'ship:30']);
+    expect(keys(offerOf(all, [{ type: 'ship', id: 1 }]).targets)).toEqual(['location:GALACTICA_SPACE_3_OCLOCK', 'ship:30']);
     expect(afterPick(all, [{ type: 'ship', id: 1 }], { type: 'ship', id: 30 }).send).toEqual(all[1]);
   });
 
   it('lights the space areas a choice of the raider activation order names', () => {
     const area = (location: string) => ({ kind: 'Single', event: { kind: 'ActivateRaiderAreaEvent', area: location } });
-    const order = choice([area('GALACTICA_SPACE_2_OCLOCK'), area('GALACTICA_SPACE_8_OCLOCK')], []);
+    const order = choice([area('GALACTICA_SPACE_3_OCLOCK'), area('GALACTICA_SPACE_9_OCLOCK')], []);
 
-    expect(keys(offerOf(moves(order), []).targets)).toEqual(['location:GALACTICA_SPACE_2_OCLOCK', 'location:GALACTICA_SPACE_8_OCLOCK']);
+    expect(keys(offerOf(moves(order), []).targets)).toEqual(['location:GALACTICA_SPACE_3_OCLOCK', 'location:GALACTICA_SPACE_9_OCLOCK']);
   });
 
   it('lights nothing for a viewer who is not asked', () => {

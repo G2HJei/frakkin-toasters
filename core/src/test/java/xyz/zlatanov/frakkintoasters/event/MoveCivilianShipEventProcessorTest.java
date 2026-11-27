@@ -12,22 +12,22 @@ class MoveCivilianShipEventProcessorTest extends EventTestHarness<MoveCivilianSh
     // "Communications": a civilian ship moves to an adjacent space area.
     @Test
     void aShipMovesToAnAdjacentArea() {
-        CivilianShip ship = civilianShipAt(GALACTICA_SPACE_2_OCLOCK);
+        CivilianShip ship = civilianShipAt(GALACTICA_SPACE_3_OCLOCK);
 
-        execute(new MoveCivilianShipEvent(ship.id(), GALACTICA_SPACE_4_OCLOCK));
+        execute(new MoveCivilianShipEvent(ship.id(), GALACTICA_SPACE_5_OCLOCK));
 
-        assertEquals(GALACTICA_SPACE_4_OCLOCK, locate(ship));
+        assertEquals(GALACTICA_SPACE_5_OCLOCK, locate(ship));
     }
 
     @Test
     void notFurther() {
-        CivilianShip ship = civilianShipAt(GALACTICA_SPACE_2_OCLOCK);
+        CivilianShip ship = civilianShipAt(GALACTICA_SPACE_3_OCLOCK);
 
-        assertInvalid(new MoveCivilianShipEvent(ship.id(), GALACTICA_SPACE_6_OCLOCK));
+        assertInvalid(new MoveCivilianShipEvent(ship.id(), GALACTICA_SPACE_7_OCLOCK));
     }
 
     @Test
     void onlyACivilianShipInSpace() {
-        assertInvalid(new MoveCivilianShipEvent(999, GALACTICA_SPACE_4_OCLOCK));
+        assertInvalid(new MoveCivilianShipEvent(999, GALACTICA_SPACE_5_OCLOCK));
     }
 }

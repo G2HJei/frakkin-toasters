@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
 
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_8_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_9_OCLOCK;
 
 class PlaceCivilianShipsInFrontEventProcessorTest extends EventTestHarness<PlaceCivilianShipsInFrontEvent> {
 
@@ -13,7 +13,7 @@ class PlaceCivilianShipsInFrontEventProcessorTest extends EventTestHarness<Place
     void shouldPlaceTheCivilianShipInFrontOfGalactica() {
         execute(new PlaceCivilianShipsInFrontEvent(1));
 
-        assertShipCount(GALACTICA_SPACE_8_OCLOCK, CivilianShip.class, 1);
+        assertShipCount(GALACTICA_SPACE_9_OCLOCK, CivilianShip.class, 1);
     }
 
     @Test

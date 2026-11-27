@@ -1,8 +1,8 @@
 package xyz.zlatanov.frakkintoasters.event.player;
 
 import static xyz.zlatanov.frakkintoasters.state.character.Character.SHARON_ATHENA_AGATHON;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_6_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_3_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_7_OCLOCK;
 import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +30,7 @@ class LaunchViperEventProcessorTest extends EventTestHarness<LaunchViperEvent> {
 
     @Test
     void shouldNotAllowIllegalLocation() {
-        assertInvalid(new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_2_OCLOCK));
+        assertInvalid(new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_3_OCLOCK));
     }
 
     @Test
@@ -40,30 +40,30 @@ class LaunchViperEventProcessorTest extends EventTestHarness<LaunchViperEvent> {
 
     @Test
     void shouldNotAllowCylonShipsAndRaptors() {
-        assertInvalid(new LaunchViperEvent(1, RAPTOR, GALACTICA_SPACE_4_OCLOCK));
+        assertInvalid(new LaunchViperEvent(1, RAPTOR, GALACTICA_SPACE_5_OCLOCK));
     }
 
     @Test
     void shouldNotAllowNonPilotCharacters() {
         player(3).character(GAIUS_BALTAR);
-        assertInvalid(new LaunchViperEvent(3, VIPER, GALACTICA_SPACE_4_OCLOCK, GAIUS_BALTAR, null));
+        assertInvalid(new LaunchViperEvent(3, VIPER, GALACTICA_SPACE_5_OCLOCK, GAIUS_BALTAR, null));
     }
 
     @Test
     void shouldNotLaunchAnotherPlayersCharacter() {
         moveTo(HANGAR_DECK, KARA_STARBUCK_THRACE);
-        assertInvalid(new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_4_OCLOCK, KARA_STARBUCK_THRACE, null));
+        assertInvalid(new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_5_OCLOCK, KARA_STARBUCK_THRACE, null));
     }
 
     @Test
     void shouldNotAllowNoPilotWithConstraint() {
-        assertInvalid(new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_6_OCLOCK, null, null, true));
+        assertInvalid(new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_7_OCLOCK, null, null, true));
     }
 
     @Test
     void shouldLaunchViper() {
-        execute(new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_4_OCLOCK));
-        assertShipCount(GALACTICA_SPACE_4_OCLOCK, Viper.class, 1);
+        execute(new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_5_OCLOCK));
+        assertShipCount(GALACTICA_SPACE_5_OCLOCK, Viper.class, 1);
     }
 
     // An unmanned viper from the "Reserves": Lee "Apollo" Adama may pilot it ("Alert Viper Pilot").
@@ -72,39 +72,39 @@ class LaunchViperEventProcessorTest extends EventTestHarness<LaunchViperEvent> {
         player(3).character(LEE_APOLLO_ADAMA);
         moveTo(COMMAND, LEE_APOLLO_ADAMA);
 
-        execute(new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_4_OCLOCK));
+        execute(new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_5_OCLOCK));
 
-        val viperId = galacticaBoard.shipsIn(GALACTICA_SPACE_4_OCLOCK, Viper.class).getFirst().id();
+        val viperId = galacticaBoard.shipsIn(GALACTICA_SPACE_5_OCLOCK, Viper.class).getFirst().id();
         assertFollowup(one(new AlertViperPilotEvent(3, viperId), new NoOpEvent(3)));
     }
 
     @Test
     void shouldNotLaunchAShipTypeMissingFromTheReserves() {
-        assertInvalid(new LaunchViperEvent(1, VIPER_MARK_VII, GALACTICA_SPACE_6_OCLOCK));
+        assertInvalid(new LaunchViperEvent(1, VIPER_MARK_VII, GALACTICA_SPACE_7_OCLOCK));
     }
 
     @Test
     void shouldLaunchViperMarkVII() {
         galacticaBoard.addToReserves(new ViperMarkVII(0));
-        execute(new LaunchViperEvent(1, VIPER_MARK_VII, GALACTICA_SPACE_6_OCLOCK));
-        assertShipCount(GALACTICA_SPACE_6_OCLOCK, ViperMarkVII.class, 1);
+        execute(new LaunchViperEvent(1, VIPER_MARK_VII, GALACTICA_SPACE_7_OCLOCK));
+        assertShipCount(GALACTICA_SPACE_7_OCLOCK, ViperMarkVII.class, 1);
     }
 
     @Test
     void shouldLaunchAssaultRaptor() {
         galacticaBoard.addToReserves(new AssaultRaptor(0));
-        execute(new LaunchViperEvent(1, ASSAULT_RAPTOR, GALACTICA_SPACE_6_OCLOCK));
-        assertShipCount(GALACTICA_SPACE_6_OCLOCK, AssaultRaptor.class, 1);
+        execute(new LaunchViperEvent(1, ASSAULT_RAPTOR, GALACTICA_SPACE_7_OCLOCK));
+        assertShipCount(GALACTICA_SPACE_7_OCLOCK, AssaultRaptor.class, 1);
     }
 
     @Test
     void shouldLaunchViperWithPilot() {
         moveTo(HANGAR_DECK, LEE_ADAMA);
 
-        execute(new LaunchViperEvent(1, ASSAULT_RAPTOR, GALACTICA_SPACE_6_OCLOCK, LEE_ADAMA, null));
+        execute(new LaunchViperEvent(1, ASSAULT_RAPTOR, GALACTICA_SPACE_7_OCLOCK, LEE_ADAMA, null));
 
-        assertEquals(GALACTICA_SPACE_6_OCLOCK, locate(LEE_ADAMA));
-        assertEquals(LEE_ADAMA, galacticaBoard.shipsIn(GALACTICA_SPACE_6_OCLOCK, AssaultRaptor.class).getFirst().pilot());
+        assertEquals(GALACTICA_SPACE_7_OCLOCK, locate(LEE_ADAMA));
+        assertEquals(LEE_ADAMA, galacticaBoard.shipsIn(GALACTICA_SPACE_7_OCLOCK, AssaultRaptor.class).getFirst().pilot());
     }
 
 
@@ -112,28 +112,28 @@ class LaunchViperEventProcessorTest extends EventTestHarness<LaunchViperEvent> {
     void shouldLandUnmannedViperToPilotIt() {
         moveTo(HANGAR_DECK, LEE_ADAMA);
         launchAllHumanFighters();
-        val viper = galacticaBoard.shipsIn(GALACTICA_SPACE_10_OCLOCK, Viper.class).getFirst();
+        val viper = galacticaBoard.shipsIn(GALACTICA_SPACE_11_OCLOCK, Viper.class).getFirst();
 
-        execute(new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_6_OCLOCK, LEE_ADAMA, viper.id()));
+        execute(new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_7_OCLOCK, LEE_ADAMA, viper.id()));
 
-        assertEquals(GALACTICA_SPACE_6_OCLOCK, locate(LEE_ADAMA));
-        assertEquals(LEE_ADAMA, galacticaBoard.shipsIn(GALACTICA_SPACE_6_OCLOCK, Viper.class).getFirst().pilot());
-        assertEquals(GALACTICA_SPACE_6_OCLOCK, locate(viper));
+        assertEquals(GALACTICA_SPACE_7_OCLOCK, locate(LEE_ADAMA));
+        assertEquals(LEE_ADAMA, galacticaBoard.shipsIn(GALACTICA_SPACE_7_OCLOCK, Viper.class).getFirst().pilot());
+        assertEquals(GALACTICA_SPACE_7_OCLOCK, locate(viper));
     }
 
     @Test
     void shouldNotTakeAPilotedViper() {
         moveTo(HANGAR_DECK, LEE_ADAMA);
         launchAllHumanFighters();
-        val piloted = galacticaBoard.shipsIn(GALACTICA_SPACE_10_OCLOCK, Viper.class).getFirst();
+        val piloted = galacticaBoard.shipsIn(GALACTICA_SPACE_11_OCLOCK, Viper.class).getFirst();
         piloted.pilot(KARA_STARBUCK_THRACE);
 
-        assertInvalid(new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_6_OCLOCK, LEE_ADAMA, piloted.id()));
+        assertInvalid(new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_7_OCLOCK, LEE_ADAMA, piloted.id()));
     }
 
     @Test
     void shouldRequireHumanFighterToLandOnlyToPilotIt() {
-        assertInvalid(new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_4_OCLOCK, LEE_ADAMA, 1));
+        assertInvalid(new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_5_OCLOCK, LEE_ADAMA, 1));
     }
 
     @Test
@@ -141,7 +141,7 @@ class LaunchViperEventProcessorTest extends EventTestHarness<LaunchViperEvent> {
         moveTo(HANGAR_DECK, LEE_ADAMA);
         launchAllHumanFighters();
         val damagedViperId = galacticaBoard.removeFromDamagedShips(ViperMarkVII.class).orElseThrow().id();
-        assertInvalid(new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_4_OCLOCK, LEE_ADAMA, damagedViperId));
+        assertInvalid(new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_5_OCLOCK, LEE_ADAMA, damagedViperId));
     }
 
     private void launchAllHumanFighters() {
@@ -150,7 +150,7 @@ class LaunchViperEventProcessorTest extends EventTestHarness<LaunchViperEvent> {
                 .orElseGet(() -> galacticaBoard.removeFromReserves(AssaultRaptor.class)
                         .orElse(null));
         if (humanFighter != null) {
-            galacticaBoard.place(GALACTICA_SPACE_10_OCLOCK, humanFighter);
+            galacticaBoard.place(GALACTICA_SPACE_11_OCLOCK, humanFighter);
             launchAllHumanFighters();
         }
     }
@@ -158,9 +158,9 @@ class LaunchViperEventProcessorTest extends EventTestHarness<LaunchViperEvent> {
     // A character flies one ship at a time (F-704290).
     @Test
     void notAPilotWhoIsFlyingAlready() {
-        viperAt(GALACTICA_SPACE_2_OCLOCK).pilot(LEE_ADAMA);
+        viperAt(GALACTICA_SPACE_3_OCLOCK).pilot(LEE_ADAMA);
 
-        assertInvalid(new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_6_OCLOCK, LEE_ADAMA, null));
+        assertInvalid(new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_7_OCLOCK, LEE_ADAMA, null));
     }
 
     // A Cylon Leader who isn't Infiltrating is a Cylon player, who flies none of the humans' ships (F-ad8366).
@@ -168,6 +168,6 @@ class LaunchViperEventProcessorTest extends EventTestHarness<LaunchViperEvent> {
     void notACylonPlayer() {
         player(3).character(SHARON_ATHENA_AGATHON);
 
-        assertInvalid(new LaunchViperEvent(3, VIPER, GALACTICA_SPACE_6_OCLOCK, SHARON_ATHENA_AGATHON, null));
+        assertInvalid(new LaunchViperEvent(3, VIPER, GALACTICA_SPACE_7_OCLOCK, SHARON_ATHENA_AGATHON, null));
     }
 }

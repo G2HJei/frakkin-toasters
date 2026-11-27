@@ -14,8 +14,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_4_OCLOCK;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_6_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_5_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_7_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
 
@@ -105,9 +105,9 @@ class OpenInterruptWindowEventProcessorTest extends EventTestHarness<OpenInterru
     void shouldAskForRunInterferenceOnlyAPilotWithRaidersInHisSpaceArea() {
         player(3).skillCards().addOnTop(runInterference);
         player(2).skillCards().addOnTop(runInterference);
-        ops.player(3).pilot(viperAt(GALACTICA_SPACE_4_OCLOCK).id());
-        raiderAt(GALACTICA_SPACE_4_OCLOCK);
-        raiderAt(GALACTICA_SPACE_6_OCLOCK);
+        ops.player(3).pilot(viperAt(GALACTICA_SPACE_5_OCLOCK).id());
+        raiderAt(GALACTICA_SPACE_5_OCLOCK);
+        raiderAt(GALACTICA_SPACE_7_OCLOCK);
 
         execute(new OpenInterruptWindowEvent(new BeforeRaidersActivate()));
 
@@ -117,8 +117,8 @@ class OpenInterruptWindowEventProcessorTest extends EventTestHarness<OpenInterru
     @Test
     void shouldNotAskForRunInterferenceWithoutRaidersInThePilotsSpaceArea() {
         player(3).skillCards().addOnTop(runInterference);
-        ops.player(3).pilot(viperAt(GALACTICA_SPACE_4_OCLOCK).id());
-        raiderAt(GALACTICA_SPACE_6_OCLOCK);
+        ops.player(3).pilot(viperAt(GALACTICA_SPACE_5_OCLOCK).id());
+        raiderAt(GALACTICA_SPACE_7_OCLOCK);
 
         execute(new OpenInterruptWindowEvent(new BeforeRaidersActivate()));
 

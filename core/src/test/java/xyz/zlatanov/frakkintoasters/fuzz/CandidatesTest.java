@@ -75,8 +75,8 @@ class CandidatesTest extends TestHarness {
     @Test
     void aListOfShipsTakesThemFromAnyArea() {
         holdAuthorizationOfBrutalForce();
-        val raiders = Set.of(raiderAt(GALACTICA_SPACE_2_OCLOCK).id(), raiderAt(GALACTICA_SPACE_8_OCLOCK).id(),
-                raiderAt(GALACTICA_SPACE_12_OCLOCK).id());
+        val raiders = Set.of(raiderAt(GALACTICA_SPACE_3_OCLOCK).id(), raiderAt(GALACTICA_SPACE_9_OCLOCK).id(),
+                raiderAt(GALACTICA_SPACE_1_OCLOCK).id());
 
         val answer = (AuthorizationOfBrutalForceEvent) AnswerFinder.find(game,
                 new PlayerDecisionEvent<>(1, AuthorizationOfBrutalForceEvent.class), new Random(1), findings::add)

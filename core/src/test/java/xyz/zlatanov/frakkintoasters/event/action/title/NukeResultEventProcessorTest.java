@@ -14,15 +14,15 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_4_OCLOCK;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_6_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_5_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_7_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.SICKBAY;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.WILLIAM_ADAMA;
 
 class NukeResultEventProcessorTest extends EventTestHarness<NukeResultEvent> {
 
-    private static final NukeResultEvent AT_4_OCLOCK = new NukeResultEvent(1, GALACTICA_SPACE_4_OCLOCK);
+    private static final NukeResultEvent AT_5_OCLOCK = new NukeResultEvent(1, GALACTICA_SPACE_5_OCLOCK);
 
     @BeforeEach
     void setUp() {
@@ -34,21 +34,21 @@ class NukeResultEventProcessorTest extends EventTestHarness<NukeResultEvent> {
     @ParameterizedTest
     @ValueSource(ints = {1, 3, 6})
     void withoutABasestarTheNukeHasNoEffect(int roll) {
-        val raider = raiderAt(GALACTICA_SPACE_4_OCLOCK);
+        val raider = raiderAt(GALACTICA_SPACE_5_OCLOCK);
         rolled(roll);
 
-        execute(AT_4_OCLOCK);
+        execute(AT_5_OCLOCK);
 
-        assertShipCount(GALACTICA_SPACE_4_OCLOCK, 1);
-        assertEquals(GALACTICA_SPACE_4_OCLOCK, locate(raider));
+        assertShipCount(GALACTICA_SPACE_5_OCLOCK, 1);
+        assertEquals(GALACTICA_SPACE_5_OCLOCK, locate(raider));
     }
 
     @Test
     void theBasestarThereIsHit() {
-        val basestar = basestarAt(GALACTICA_SPACE_4_OCLOCK);
+        val basestar = basestarAt(GALACTICA_SPACE_5_OCLOCK);
         rolled(4);
 
-        execute(AT_4_OCLOCK);
+        execute(AT_5_OCLOCK);
 
         assertFollowup(new NukeBasestarEvent(1, basestar.id(), 4));
     }
@@ -56,41 +56,41 @@ class NukeResultEventProcessorTest extends EventTestHarness<NukeResultEvent> {
     // With more than one basestar there, the player who launched the nuke chooses (rule 11.6.1).
     @Test
     void theLauncherChoosesTheBasestar() {
-        val first = basestarAt(GALACTICA_SPACE_4_OCLOCK);
-        val second = basestarAt(GALACTICA_SPACE_4_OCLOCK);
+        val first = basestarAt(GALACTICA_SPACE_5_OCLOCK);
+        val second = basestarAt(GALACTICA_SPACE_5_OCLOCK);
         rolled(2);
 
-        execute(AT_4_OCLOCK);
+        execute(AT_5_OCLOCK);
 
         assertFollowup(one(new NukeBasestarEvent(1, first.id(), 2), new NukeBasestarEvent(1, second.id(), 2)));
     }
 
     @Test
     void aSevenWithoutABasestarStillDestroysThreeRaiders() {
-        val raiders = threeOfFourRaidersAt4Oclock();
+        val raiders = threeOfFourRaidersAt5Oclock();
         rolled(7);
 
-        execute(AT_4_OCLOCK);
+        execute(AT_5_OCLOCK);
 
         assertFollowup(new DestroyRaidersEvent(raiders));
     }
 
     @Test
     void anEightDestroysEveryShipThere() {
-        basestarAt(GALACTICA_SPACE_4_OCLOCK);
-        raiderAt(GALACTICA_SPACE_4_OCLOCK);
-        heavyRaiderAt(GALACTICA_SPACE_4_OCLOCK);
-        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
+        basestarAt(GALACTICA_SPACE_5_OCLOCK);
+        raiderAt(GALACTICA_SPACE_5_OCLOCK);
+        heavyRaiderAt(GALACTICA_SPACE_5_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_5_OCLOCK);
         ops.player(2).pilot(viper.id());
-        viperAt(GALACTICA_SPACE_4_OCLOCK);
-        civilianShipAt(GALACTICA_SPACE_4_OCLOCK);
-        val elsewhere = raiderAt(GALACTICA_SPACE_6_OCLOCK);
+        viperAt(GALACTICA_SPACE_5_OCLOCK);
+        civilianShipAt(GALACTICA_SPACE_5_OCLOCK);
+        val elsewhere = raiderAt(GALACTICA_SPACE_7_OCLOCK);
         rolled(8);
 
-        execute(AT_4_OCLOCK);
+        execute(AT_5_OCLOCK);
 
-        assertShipCount(GALACTICA_SPACE_4_OCLOCK, 0);
-        assertEquals(GALACTICA_SPACE_6_OCLOCK, locate(elsewhere));
+        assertShipCount(GALACTICA_SPACE_5_OCLOCK, 0);
+        assertEquals(GALACTICA_SPACE_7_OCLOCK, locate(elsewhere));
         assertEquals(SICKBAY, locate(KARA_STARBUCK_THRACE)); // the pilot of a destroyed viper
         assertEquals(2, game.removedComponents().items().stream()
                 .filter(xyz.zlatanov.frakkintoasters.state.ship.Viper.class::isInstance).count());
@@ -98,8 +98,8 @@ class NukeResultEventProcessorTest extends EventTestHarness<NukeResultEvent> {
     }
 
     // Raiders are all alike: the ones with the lowest ids go.
-    private Set<Integer> threeOfFourRaidersAt4Oclock() {
-        return java.util.stream.Stream.generate(() -> raiderAt(GALACTICA_SPACE_4_OCLOCK).id())
+    private Set<Integer> threeOfFourRaidersAt5Oclock() {
+        return java.util.stream.Stream.generate(() -> raiderAt(GALACTICA_SPACE_5_OCLOCK).id())
                 .limit(4)
                 .sorted()
                 .limit(3)
@@ -108,11 +108,11 @@ class NukeResultEventProcessorTest extends EventTestHarness<NukeResultEvent> {
 
     @Test
     void anEightWithoutABasestarOpensNoWindow() {
-        raiderAt(GALACTICA_SPACE_4_OCLOCK);
+        raiderAt(GALACTICA_SPACE_5_OCLOCK);
         rolled(8);
 
-        execute(AT_4_OCLOCK);
+        execute(AT_5_OCLOCK);
 
-        assertShipCount(GALACTICA_SPACE_4_OCLOCK, 0);
+        assertShipCount(GALACTICA_SPACE_5_OCLOCK, 0);
     }
 }

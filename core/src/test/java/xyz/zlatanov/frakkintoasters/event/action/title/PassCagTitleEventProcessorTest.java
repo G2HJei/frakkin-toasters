@@ -17,15 +17,15 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.BRIG;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_4_OCLOCK;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_6_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_5_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_7_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.card.LoyaltyCard.CYLON_REDUCE_MORALE;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.VIPER;
 
 class PassCagTitleEventProcessorTest extends EventTestHarness<PassCagTitleEvent> {
 
-    private static final ViperActivation LAUNCH = ViperActivation.launch(VIPER, GALACTICA_SPACE_4_OCLOCK);
+    private static final ViperActivation LAUNCH = ViperActivation.launch(VIPER, GALACTICA_SPACE_5_OCLOCK);
 
     @BeforeEach
     void setUp() {
@@ -41,14 +41,14 @@ class PassCagTitleEventProcessorTest extends EventTestHarness<PassCagTitleEvent>
     void theCagActivatesAViperThenPassesTheTitle() {
         execute(new PassCagTitleEvent(1, LAUNCH, 2));
 
-        assertFollowup(all(new MakeCagEvent(WILLIAM_ADAMA), new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_4_OCLOCK)));
+        assertFollowup(all(new MakeCagEvent(WILLIAM_ADAMA), new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_5_OCLOCK)));
     }
 
     @Test
     void anUnmannedViperInSpaceCanBeTheOne() {
-        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_5_OCLOCK);
 
-        execute(new PassCagTitleEvent(1, ViperActivation.move(viper.id(), GALACTICA_SPACE_6_OCLOCK), 3));
+        execute(new PassCagTitleEvent(1, ViperActivation.move(viper.id(), GALACTICA_SPACE_7_OCLOCK), 3));
 
         assertFollowup(new MakeCagEvent(LAURA_ROSLIN));
     }
@@ -84,10 +84,10 @@ class PassCagTitleEventProcessorTest extends EventTestHarness<PassCagTitleEvent>
 
     @Test
     void theActivationHasToBeAnUnmannedViper() {
-        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_5_OCLOCK);
         ops.player(2).pilot(viper.id());
 
-        assertInvalid(new PassCagTitleEvent(1, ViperActivation.move(viper.id(), GALACTICA_SPACE_6_OCLOCK), 3));
+        assertInvalid(new PassCagTitleEvent(1, ViperActivation.move(viper.id(), GALACTICA_SPACE_7_OCLOCK), 3));
     }
 
     @Test

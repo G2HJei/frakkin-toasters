@@ -21,10 +21,10 @@ import static xyz.zlatanov.frakkintoasters.state.view.GalacticaBoardView.VIPER_L
 public class ActivateHeavyRaidersAndCenturionsEventProcessor extends EventProcessor<ActivateHeavyRaidersAndCenturionsEvent> {
 
     private static final Map<Location, Location> NEXT_STEP_TOWARD_LAUNCH = Map.of(
-            GALACTICA_SPACE_12_OCLOCK, GALACTICA_SPACE_2_OCLOCK,
-            GALACTICA_SPACE_2_OCLOCK, GALACTICA_SPACE_4_OCLOCK,
-            GALACTICA_SPACE_8_OCLOCK, GALACTICA_SPACE_6_OCLOCK,
-            GALACTICA_SPACE_10_OCLOCK, GALACTICA_SPACE_8_OCLOCK);
+            GALACTICA_SPACE_1_OCLOCK, GALACTICA_SPACE_3_OCLOCK,
+            GALACTICA_SPACE_3_OCLOCK, GALACTICA_SPACE_5_OCLOCK,
+            GALACTICA_SPACE_9_OCLOCK, GALACTICA_SPACE_7_OCLOCK,
+            GALACTICA_SPACE_11_OCLOCK, GALACTICA_SPACE_9_OCLOCK);
 
     @Override
     public Followup process() {

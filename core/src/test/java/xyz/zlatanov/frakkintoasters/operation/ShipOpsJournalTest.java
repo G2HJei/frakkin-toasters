@@ -24,7 +24,7 @@ class ShipOpsJournalTest extends TestHarness {
 
     @Test
     void aHeavyRaiderBoardingTurnsIntoACenturionOnTheBoardingPartyTrack() {
-        val heavyRaider = heavyRaiderAt(GALACTICA_SPACE_4_OCLOCK);
+        val heavyRaider = heavyRaiderAt(GALACTICA_SPACE_5_OCLOCK);
         val centurion = cylonShips.nextCenturion().orElseThrow();
 
         ops.ship(heavyRaider.id()).boardGalactica();
@@ -49,7 +49,7 @@ class ShipOpsJournalTest extends TestHarness {
 
     @Test
     void destroyingARaiderSendsItBackToTheSupply() {
-        val raider = raiderAt(GALACTICA_SPACE_6_OCLOCK);
+        val raider = raiderAt(GALACTICA_SPACE_7_OCLOCK);
 
         ops.ship(raider.id()).destroy();
 
@@ -58,7 +58,7 @@ class ShipOpsJournalTest extends TestHarness {
 
     @Test
     void destroyingADamagedBasestarReturnsItsDamageCardsBeforeTheShip() {
-        val basestar = basestarAt(GALACTICA_SPACE_2_OCLOCK);
+        val basestar = basestarAt(GALACTICA_SPACE_3_OCLOCK);
         basestar.damage(STRUCTURAL_DAMAGE);
 
         ops.ship(basestar.id()).destroy();
@@ -73,7 +73,7 @@ class ShipOpsJournalTest extends TestHarness {
 
     @Test
     void damagingAPilotedViperClearsThePilotAndSendsThemToSickbay() {
-        val viper = viperAt(GALACTICA_SPACE_2_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_3_OCLOCK);
         game.player(1).character(LOUANNE_KAT_KATRAINE);
         viper.pilot(LOUANNE_KAT_KATRAINE);
 
@@ -87,7 +87,7 @@ class ShipOpsJournalTest extends TestHarness {
 
     @Test
     void destroyingACivilianShipLogsTheResourcesLostAndTheRemoval() {
-        val civ = civilianShipAt(GALACTICA_SPACE_2_OCLOCK);
+        val civ = civilianShipAt(GALACTICA_SPACE_3_OCLOCK);
 
         ops.ship(civ.id()).destroy();
 

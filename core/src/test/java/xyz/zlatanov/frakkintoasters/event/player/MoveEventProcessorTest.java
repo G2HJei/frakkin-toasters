@@ -127,19 +127,19 @@ class MoveEventProcessorTest extends EventTestHarness<MoveEvent> {
     @Test
     void shouldNotAllowMovingToSpace() {
         moveTo(ADMIRALS_QUARTERS, KARA_STARBUCK_THRACE);
-        assertInvalid(new MoveEvent(1, GALACTICA_SPACE_6_OCLOCK, skillCard));
+        assertInvalid(new MoveEvent(1, GALACTICA_SPACE_7_OCLOCK, skillCard));
     }
 
     @Test
     void shouldMoveInSpaceWhilePiloting() {
-        assaultRaptorAt(GALACTICA_SPACE_2_OCLOCK).pilot(KARA_STARBUCK_THRACE);
-        execute(new MoveEvent(1, GALACTICA_SPACE_4_OCLOCK, null));
-        assertEquals(GALACTICA_SPACE_4_OCLOCK, locate(KARA_STARBUCK_THRACE));
+        assaultRaptorAt(GALACTICA_SPACE_3_OCLOCK).pilot(KARA_STARBUCK_THRACE);
+        execute(new MoveEvent(1, GALACTICA_SPACE_5_OCLOCK, null));
+        assertEquals(GALACTICA_SPACE_5_OCLOCK, locate(KARA_STARBUCK_THRACE));
     }
 
     @Test
     void shouldLandWhilePiloting() {
-        val karasViper = viperAt(GALACTICA_SPACE_2_OCLOCK).pilot(KARA_STARBUCK_THRACE);
+        val karasViper = viperAt(GALACTICA_SPACE_3_OCLOCK).pilot(KARA_STARBUCK_THRACE);
         player(1).gainSkillCards(skillCard);
 
         execute(new MoveEvent(1, PRESIDENTS_OFFICE, skillCard));
@@ -152,24 +152,24 @@ class MoveEventProcessorTest extends EventTestHarness<MoveEvent> {
 
     public static Stream<Arguments> adjacencyTests() {
         return Stream.of(
-                argumentSet("viper to same space", new Viper(1), GALACTICA_SPACE_2_OCLOCK, false),
-                argumentSet("viper to space 4", new Viper(2), GALACTICA_SPACE_4_OCLOCK, true),
-                argumentSet("viper to space 6", new Viper(3), GALACTICA_SPACE_6_OCLOCK, false),
-                argumentSet("viper to space 8", new Viper(4), GALACTICA_SPACE_8_OCLOCK, false),
-                argumentSet("viper to space 10", new Viper(5), GALACTICA_SPACE_10_OCLOCK, false),
-                argumentSet("viper to space 12", new Viper(6), GALACTICA_SPACE_12_OCLOCK, true),
-                argumentSet("Assault raptor to same space", new AssaultRaptor(7), GALACTICA_SPACE_2_OCLOCK, false),
-                argumentSet("Assault raptor to space 4", new AssaultRaptor(8), GALACTICA_SPACE_4_OCLOCK, true),
-                argumentSet("Assault raptor to space 6", new AssaultRaptor(9), GALACTICA_SPACE_6_OCLOCK, false),
-                argumentSet("Assault raptor to space 8", new AssaultRaptor(10), GALACTICA_SPACE_8_OCLOCK, false),
-                argumentSet("Assault raptor to space 10", new AssaultRaptor(11), GALACTICA_SPACE_10_OCLOCK, false),
-                argumentSet("Assault raptor to space 12", new AssaultRaptor(12), GALACTICA_SPACE_12_OCLOCK, true),
-                argumentSet("Viper Mk7 to same space", new ViperMarkVII(13), GALACTICA_SPACE_2_OCLOCK, false),
-                argumentSet("Viper Mk7 to space 4", new ViperMarkVII(14), GALACTICA_SPACE_4_OCLOCK, true),
-                argumentSet("Viper Mk7 to space 6", new ViperMarkVII(15), GALACTICA_SPACE_6_OCLOCK, true),
-                argumentSet("Viper Mk7 to space 8", new ViperMarkVII(16), GALACTICA_SPACE_8_OCLOCK, false),
-                argumentSet("Viper Mk7 to space 10", new ViperMarkVII(17), GALACTICA_SPACE_10_OCLOCK, true),
-                argumentSet("Viper Mk7 to space 12", new ViperMarkVII(18), GALACTICA_SPACE_12_OCLOCK, true)
+                argumentSet("viper to same space", new Viper(1), GALACTICA_SPACE_3_OCLOCK, false),
+                argumentSet("viper to space 4", new Viper(2), GALACTICA_SPACE_5_OCLOCK, true),
+                argumentSet("viper to space 6", new Viper(3), GALACTICA_SPACE_7_OCLOCK, false),
+                argumentSet("viper to space 8", new Viper(4), GALACTICA_SPACE_9_OCLOCK, false),
+                argumentSet("viper to space 10", new Viper(5), GALACTICA_SPACE_11_OCLOCK, false),
+                argumentSet("viper to space 12", new Viper(6), GALACTICA_SPACE_1_OCLOCK, true),
+                argumentSet("Assault raptor to same space", new AssaultRaptor(7), GALACTICA_SPACE_3_OCLOCK, false),
+                argumentSet("Assault raptor to space 4", new AssaultRaptor(8), GALACTICA_SPACE_5_OCLOCK, true),
+                argumentSet("Assault raptor to space 6", new AssaultRaptor(9), GALACTICA_SPACE_7_OCLOCK, false),
+                argumentSet("Assault raptor to space 8", new AssaultRaptor(10), GALACTICA_SPACE_9_OCLOCK, false),
+                argumentSet("Assault raptor to space 10", new AssaultRaptor(11), GALACTICA_SPACE_11_OCLOCK, false),
+                argumentSet("Assault raptor to space 12", new AssaultRaptor(12), GALACTICA_SPACE_1_OCLOCK, true),
+                argumentSet("Viper Mk7 to same space", new ViperMarkVII(13), GALACTICA_SPACE_3_OCLOCK, false),
+                argumentSet("Viper Mk7 to space 4", new ViperMarkVII(14), GALACTICA_SPACE_5_OCLOCK, true),
+                argumentSet("Viper Mk7 to space 6", new ViperMarkVII(15), GALACTICA_SPACE_7_OCLOCK, true),
+                argumentSet("Viper Mk7 to space 8", new ViperMarkVII(16), GALACTICA_SPACE_9_OCLOCK, false),
+                argumentSet("Viper Mk7 to space 10", new ViperMarkVII(17), GALACTICA_SPACE_11_OCLOCK, true),
+                argumentSet("Viper Mk7 to space 12", new ViperMarkVII(18), GALACTICA_SPACE_1_OCLOCK, true)
         );
     }
 
@@ -177,7 +177,7 @@ class MoveEventProcessorTest extends EventTestHarness<MoveEvent> {
     @MethodSource("adjacencyTests")
     void shouldValidateMovementAdjacency(HumanFighter ship, Location destination, boolean isValid) {
         ship.pilot(KARA_STARBUCK_THRACE);
-        place(GALACTICA_SPACE_2_OCLOCK, ship);
+        place(GALACTICA_SPACE_3_OCLOCK, ship);
         val event = new MoveEvent(1, destination, null);
         if (isValid) {
             assertDoesNotThrow(() -> execute(event));
@@ -241,7 +241,7 @@ class MoveEventProcessorTest extends EventTestHarness<MoveEvent> {
     // A fighter flies around Galactica only (F-86ead5).
     @Test
     void shouldNotFlyToTheCylonFleetBoard() {
-        viperAt(GALACTICA_SPACE_2_OCLOCK).pilot(KARA_STARBUCK_THRACE);
+        viperAt(GALACTICA_SPACE_3_OCLOCK).pilot(KARA_STARBUCK_THRACE);
 
         assertInvalid(new MoveEvent(1, CYLON_FLEET_SPACE_1, null));
     }

@@ -36,9 +36,9 @@ class ActivateHeavyRaidersAndCenturionsEventProcessorTest extends EventTestHarne
 
     @Test
     void shouldMoveHeavyRaiderTowardsNearestLaunchIcon() {
-        place(GALACTICA_SPACE_2_OCLOCK, heavyRaider);
+        place(GALACTICA_SPACE_3_OCLOCK, heavyRaider);
         execute(event);
-        assertEquals(GALACTICA_SPACE_4_OCLOCK, locate(heavyRaider));
+        assertEquals(GALACTICA_SPACE_5_OCLOCK, locate(heavyRaider));
     }
 
     @Test
@@ -50,7 +50,7 @@ class ActivateHeavyRaidersAndCenturionsEventProcessorTest extends EventTestHarne
 
     @Test
     void shouldNotAdvanceAnEmptyBoardingPartyTrack() {
-        place(GALACTICA_SPACE_2_OCLOCK, heavyRaider);
+        place(GALACTICA_SPACE_3_OCLOCK, heavyRaider);
         execute(event);
         assertTrue(journal.facts().stream().noneMatch(BoardingPartyAdvanced.class::isInstance));
     }
@@ -58,33 +58,33 @@ class ActivateHeavyRaidersAndCenturionsEventProcessorTest extends EventTestHarne
     @Test
     void shouldSpawnNewHeavyRaiderIfNoneOnBoard() {
         execute(event);
-        assertShipCount(GALACTICA_SPACE_8_OCLOCK, HeavyRaider.class, 1);
+        assertShipCount(GALACTICA_SPACE_9_OCLOCK, HeavyRaider.class, 1);
     }
 
     // "Disabled Hangar": the basestar may not launch heavy raiders (rule 11.7.3).
     @Test
     void shouldNotLaunchAHeavyRaiderFromABasestarWithADisabledHangar() {
-        galacticaBoard.shipsIn(GALACTICA_SPACE_8_OCLOCK, Basestar.class).getFirst().damage(DISABLED_HANGAR_BAY);
+        galacticaBoard.shipsIn(GALACTICA_SPACE_9_OCLOCK, Basestar.class).getFirst().damage(DISABLED_HANGAR_BAY);
 
         execute(event);
 
-        assertShipCount(GALACTICA_SPACE_8_OCLOCK, HeavyRaider.class, 0);
+        assertShipCount(GALACTICA_SPACE_9_OCLOCK, HeavyRaider.class, 0);
     }
 
     @Test
     void shouldMoveBothHeavyRaidersAndCenturions() {
-        place(GALACTICA_SPACE_2_OCLOCK, heavyRaider);
+        place(GALACTICA_SPACE_3_OCLOCK, heavyRaider);
         boardGalactica(centurion);
 
         execute(event);
 
-        assertEquals(GALACTICA_SPACE_4_OCLOCK, locate(heavyRaider));
+        assertEquals(GALACTICA_SPACE_5_OCLOCK, locate(heavyRaider));
         assertEquals(POSITION_1, galacticaBoard.boardingPartyTrack().get(centurion));
     }
 
     @Test
     void shouldConvertHeavyRaiderAtLaunchIconIntoCenturion() {
-        place(GALACTICA_SPACE_4_OCLOCK, heavyRaider);
+        place(GALACTICA_SPACE_5_OCLOCK, heavyRaider);
         val centurionsAvailable = cylonShips.centurions().size();
 
         execute(event);
@@ -101,11 +101,11 @@ class ActivateHeavyRaidersAndCenturionsEventProcessorTest extends EventTestHarne
         while (!cylonShips.centurions().isEmpty()) {
             boardGalactica(centurion());
         }
-        place(GALACTICA_SPACE_6_OCLOCK, heavyRaider);
+        place(GALACTICA_SPACE_7_OCLOCK, heavyRaider);
 
         execute(event);
 
-        assertEquals(GALACTICA_SPACE_6_OCLOCK, locate(heavyRaider));
+        assertEquals(GALACTICA_SPACE_7_OCLOCK, locate(heavyRaider));
     }
 
     @Test
@@ -138,11 +138,11 @@ class ActivateHeavyRaidersAndCenturionsEventProcessorTest extends EventTestHarne
     // "Negotiation": no Cylon ship launches or activates for the rest of the turn.
     @Test
     void nothingWhileTheShipsAreHeld() {
-        basestarAt(GALACTICA_SPACE_8_OCLOCK);
+        basestarAt(GALACTICA_SPACE_9_OCLOCK);
         ops.holdCylonShips();
 
         execute(new ActivateHeavyRaidersAndCenturionsEvent());
 
-        assertShipCount(GALACTICA_SPACE_8_OCLOCK, HeavyRaider.class, 0);
+        assertShipCount(GALACTICA_SPACE_9_OCLOCK, HeavyRaider.class, 0);
     }
 }

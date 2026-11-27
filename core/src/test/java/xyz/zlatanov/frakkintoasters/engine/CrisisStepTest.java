@@ -116,7 +116,7 @@ class CrisisStepTest {
         // board and the Pursuit marker moves onto a civilian ship), then the new card is drawn.
         assertEquals(ACTIVATE_CYLON_SHIPS, engine.view().turn().step());
         assertWaitingFor(new AwaitingDecision(new PlayerDecisionEvent<>(3, PlaceCivilianShipEvent.class)));
-        play(engine -> engine.submit(3, new PlaceCivilianShipEvent(3, xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_12_OCLOCK)));
+        play(engine -> engine.submit(3, new PlaceCivilianShipEvent(3, xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_1_OCLOCK)));
 
         assertEquals(CRISIS, engine.view().turn().step());
         assertEquals(List.of(FULFILLER_OF_PROPHECY, RIOTS_NO_JUMP), engine.view().turn().crisisCards());

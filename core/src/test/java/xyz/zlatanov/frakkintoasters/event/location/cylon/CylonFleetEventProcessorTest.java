@@ -19,8 +19,8 @@ import java.util.stream.Stream;
 
 import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.DISABLED_HANGAR_BAY;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.CYLON_FLEET;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_4_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_3_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_5_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.CAVIL;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.HEAVY_RAIDER;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.RAIDER;
@@ -36,30 +36,30 @@ class CylonFleetEventProcessorTest extends EventTestHarness<CylonFleetEvent> {
 
     @Test
     void shouldLaunch2RaidersAndHeavyRaiderFromSingleBasestar() {
-        basestarAt(GALACTICA_SPACE_2_OCLOCK);
+        basestarAt(GALACTICA_SPACE_3_OCLOCK);
         execute(new CylonFleetEvent(1, null));
-        assertCylonShips(GALACTICA_SPACE_2_OCLOCK);
+        assertCylonShips(GALACTICA_SPACE_3_OCLOCK);
     }
 
     @Test
     void shouldLaunch2RaidersAndHeavyRaiderFromEachBasestar() {
-        basestarAt(GALACTICA_SPACE_2_OCLOCK);
-        basestarAt(GALACTICA_SPACE_4_OCLOCK);
+        basestarAt(GALACTICA_SPACE_3_OCLOCK);
+        basestarAt(GALACTICA_SPACE_5_OCLOCK);
 
         execute(new CylonFleetEvent(1, null));
 
-        assertCylonShips(GALACTICA_SPACE_2_OCLOCK, GALACTICA_SPACE_4_OCLOCK);
+        assertCylonShips(GALACTICA_SPACE_3_OCLOCK, GALACTICA_SPACE_5_OCLOCK);
     }
 
     // "Disabled Hangar": the basestar launches neither raiders nor heavy raiders (rule 11.7.3).
     @Test
     void shouldNotLaunchFromABasestarWithADisabledHangar() {
-        basestarAt(GALACTICA_SPACE_2_OCLOCK).damage(DISABLED_HANGAR_BAY);
+        basestarAt(GALACTICA_SPACE_3_OCLOCK).damage(DISABLED_HANGAR_BAY);
 
         execute(new CylonFleetEvent(1, null));
 
-        assertShipCount(GALACTICA_SPACE_2_OCLOCK, Raider.class, 0);
-        assertShipCount(GALACTICA_SPACE_2_OCLOCK, HeavyRaider.class, 0);
+        assertShipCount(GALACTICA_SPACE_3_OCLOCK, Raider.class, 0);
+        assertShipCount(GALACTICA_SPACE_3_OCLOCK, HeavyRaider.class, 0);
     }
 
     @Test
@@ -97,7 +97,7 @@ class CylonFleetEventProcessorTest extends EventTestHarness<CylonFleetEvent> {
     // Its activations would do nothing, so the location has no action.
     @Test
     void noActionWhileTheShipsAreHeld() {
-        basestarAt(GALACTICA_SPACE_2_OCLOCK);
+        basestarAt(GALACTICA_SPACE_3_OCLOCK);
         ops.holdCylonShips();
 
         assertInvalid(new CylonFleetEvent(1, null));

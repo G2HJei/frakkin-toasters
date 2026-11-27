@@ -14,10 +14,10 @@ describe('what a log entry touched', () => {
       actor: 1,
       event: 'MoveEvent',
       details: { kind: 'MoveEvent', playerNumber: 1, destination: 'ARMORY', discardCard: null },
-      facts: [shown({ kind: 'PlayerFact.CharacterMoved', character: 'WILLIAM_ADAMA', to: 'ARMORY' }), shown({ kind: 'ShipFact.ShipMoved', shipId: 7, from: 'RESERVES', to: 'GALACTICA_SPACE', location: 'GALACTICA_SPACE_6_OCLOCK' })],
+      facts: [shown({ kind: 'PlayerFact.CharacterMoved', character: 'WILLIAM_ADAMA', to: 'ARMORY' }), shown({ kind: 'ShipFact.ShipMoved', shipId: 7, from: 'RESERVES', to: 'GALACTICA_SPACE', location: 'GALACTICA_SPACE_7_OCLOCK' })],
     } as unknown as LogEntry;
 
-    expect(entryTargets(entry, game).sort()).toEqual(['location:ARMORY', 'location:GALACTICA_SPACE_6_OCLOCK', 'player:1', 'ship:7']);
+    expect(entryTargets(entry, game).sort()).toEqual(['location:ARMORY', 'location:GALACTICA_SPACE_7_OCLOCK', 'player:1', 'ship:7']);
   });
 
   it("is a choice's options", () => {

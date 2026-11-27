@@ -43,7 +43,7 @@ class PrimacyEventProcessorTest extends EventTestHarness<PrimacyEvent> {
     void takesABasestarOffTheBoardWhenAllAreInPlay() {
         val basestars = new ArrayList<Basestar>();
         while (cylonShips.available(BASESTAR) > 0) {
-            basestars.add(basestarAt(GALACTICA_SPACE_8_OCLOCK));
+            basestars.add(basestarAt(GALACTICA_SPACE_9_OCLOCK));
         }
 
         execute(new PrimacyEvent(1, basestars.getFirst().id(), false));
@@ -53,7 +53,7 @@ class PrimacyEventProcessorTest extends EventTestHarness<PrimacyEvent> {
 
     @Test
     void cantTakeABasestarOffWhileOneIsLeftToPlace() {
-        val placed = basestarAt(GALACTICA_SPACE_8_OCLOCK);
+        val placed = basestarAt(GALACTICA_SPACE_9_OCLOCK);
 
         assertInvalid(new PrimacyEvent(1, placed.id(), false));
     }
@@ -70,7 +70,7 @@ class PrimacyEventProcessorTest extends EventTestHarness<PrimacyEvent> {
     @Test
     void placesABasestarEvenWithTheSupplyOut() {
         while (cylonShips.available(BASESTAR) > 0) {
-            basestarAt(GALACTICA_SPACE_8_OCLOCK);
+            basestarAt(GALACTICA_SPACE_9_OCLOCK);
         }
 
         execute(new PrimacyEvent(1, null, false));

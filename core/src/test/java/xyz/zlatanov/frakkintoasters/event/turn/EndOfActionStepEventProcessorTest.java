@@ -41,8 +41,8 @@ class EndOfActionStepEventProcessorTest extends EventTestHarness<EndOfActionStep
     @Test
     void katInTheSameSpaceAreaGoesToSickbay() {
         moveTo(HANGAR_DECK, LOUANNE_KAT_KATRAINE);
-        ops.player(1).pilot(viperAt(GALACTICA_SPACE_4_OCLOCK).id());
-        ops.noteStartLocation(GALACTICA_SPACE_4_OCLOCK);
+        ops.player(1).pilot(viperAt(GALACTICA_SPACE_5_OCLOCK).id());
+        ops.noteStartLocation(GALACTICA_SPACE_5_OCLOCK);
 
         execute(new EndOfActionStepEvent());
 

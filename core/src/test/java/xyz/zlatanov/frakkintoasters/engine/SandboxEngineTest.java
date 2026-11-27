@@ -102,9 +102,9 @@ class SandboxEngineTest {
                 game -> new PutDestinyCardOnTopEvent(game.decks().<SkillCard>deck(DeckId.PILOTING).cards().get(2)),
                 game -> new GiveSkillCardToPlayerEvent(2, game.decks().<SkillCard>deck(DeckId.ENGINEERING).cards().get(1)),
                 game -> new MoveCharacterEvent(WILLIAM_ADAMA, ARMORY),
-                game -> new PlaceShipEvent(ShipType.BASESTAR, GALACTICA_SPACE_2_OCLOCK),
-                game -> new PlaceShipEvent(ShipType.HEAVY_RAIDER, GALACTICA_SPACE_8_OCLOCK),
-                game -> new PlaceShipEvent(ShipType.CIVILIAN, GALACTICA_SPACE_10_OCLOCK),
+                game -> new PlaceShipEvent(ShipType.BASESTAR, GALACTICA_SPACE_3_OCLOCK),
+                game -> new PlaceShipEvent(ShipType.HEAVY_RAIDER, GALACTICA_SPACE_9_OCLOCK),
+                game -> new PlaceShipEvent(ShipType.CIVILIAN, GALACTICA_SPACE_11_OCLOCK),
                 game -> new ChangeResourceEvent(Resource.FOOD, -3),
                 game -> new SetJumpPreparationEvent(JumpPreparation.MINUS_3),
                 game -> new DamageLocationEvent(ARMORY),
@@ -156,7 +156,7 @@ class SandboxEngineTest {
         val size = engine.journal().size();
 
         assertThrows(InvalidActionException.class, () -> engine.inject(new ChangeResourceEvent(Resource.FUEL, 20)));
-        assertThrows(InvalidActionException.class, () -> engine.inject(new DamageLocationEvent(GALACTICA_SPACE_2_OCLOCK)));
+        assertThrows(InvalidActionException.class, () -> engine.inject(new DamageLocationEvent(GALACTICA_SPACE_3_OCLOCK)));
         assertEquals(size, engine.journal().size());
         val asked = engine.pendingInput().orElseThrow().player();
         assertThrows(InvalidActionException.class, () -> engine.submit(asked, new ChangeResourceEvent(Resource.FUEL, 1)));

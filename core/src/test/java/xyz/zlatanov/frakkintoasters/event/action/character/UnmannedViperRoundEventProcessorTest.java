@@ -17,7 +17,7 @@ class UnmannedViperRoundEventProcessorTest extends EventTestHarness<UnmannedVipe
     void setUp() {
         player(1).character(LEE_APOLLO_ADAMA);
         moveTo(HANGAR_DECK, LEE_APOLLO_ADAMA);
-        viperAt(GALACTICA_SPACE_6_OCLOCK);
+        viperAt(GALACTICA_SPACE_7_OCLOCK);
     }
 
     @Test

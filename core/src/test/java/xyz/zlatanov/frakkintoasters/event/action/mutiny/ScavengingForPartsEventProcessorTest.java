@@ -32,7 +32,7 @@ class ScavengingForPartsEventProcessorTest extends EventTestHarness<ScavengingFo
 
     @Test
     void damageGalacticaThenTheCivilianShipGoesBack() {
-        val ship = civilianShipAt(GALACTICA_SPACE_2_OCLOCK);
+        val ship = civilianShipAt(GALACTICA_SPACE_3_OCLOCK);
 
         execute(new ScavengingForPartsEvent(1, ship.id()));
 
@@ -49,7 +49,7 @@ class ScavengingForPartsEventProcessorTest extends EventTestHarness<ScavengingFo
 
     @Test
     void aCivilianShipInSpaceHasToBeChosen() {
-        civilianShipAt(GALACTICA_SPACE_2_OCLOCK);
+        civilianShipAt(GALACTICA_SPACE_3_OCLOCK);
 
         assertInvalid(new ScavengingForPartsEvent(1, null));
     }

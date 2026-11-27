@@ -6,15 +6,15 @@ import xyz.zlatanov.frakkintoasters.event.Followup;
 import xyz.zlatanov.frakkintoasters.state.board.Location;
 import xyz.zlatanov.frakkintoasters.state.board.LocationsArea;
 
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_8_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_3_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_9_OCLOCK;
 
 public class PlaceShipsEventProcessor extends EventProcessor<PlaceShipsEvent> {
 
     // In front of Galactica is where the Cylons start the game and where "Dradis Contact" places raiders, behind it is
     // where the civilian ships start and "Bait" places one.
-    public static final Location IN_FRONT = GALACTICA_SPACE_8_OCLOCK;
-    public static final Location BEHIND   = GALACTICA_SPACE_2_OCLOCK;
+    public static final Location IN_FRONT = GALACTICA_SPACE_9_OCLOCK;
+    public static final Location BEHIND   = GALACTICA_SPACE_3_OCLOCK;
 
     @Override
     protected boolean isValid() {

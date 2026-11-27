@@ -21,14 +21,14 @@ class GrantedViperActivationEventProcessorTest extends EventTestHarness<GrantedV
     void setUp() {
         player(1).character(KARA_STARBUCK_THRACE);
         moveTo(HANGAR_DECK, KARA_STARBUCK_THRACE);
-        unmanned = viperAt(GALACTICA_SPACE_6_OCLOCK);
+        unmanned = viperAt(GALACTICA_SPACE_7_OCLOCK);
     }
 
     @Test
     void anUnmannedViperMoves() {
-        execute(new GrantedViperActivationEvent(1, move(unmanned.id(), GALACTICA_SPACE_8_OCLOCK)));
+        execute(new GrantedViperActivationEvent(1, move(unmanned.id(), GALACTICA_SPACE_9_OCLOCK)));
 
-        assertEquals(GALACTICA_SPACE_8_OCLOCK, locate(unmanned));
+        assertEquals(GALACTICA_SPACE_9_OCLOCK, locate(unmanned));
     }
 
     // Never one another player is piloting (rule 11.1).
@@ -38,12 +38,12 @@ class GrantedViperActivationEventProcessorTest extends EventTestHarness<GrantedV
         moveTo(HANGAR_DECK, LEE_APOLLO_ADAMA);
         ops.player(2).pilot(unmanned.id());
 
-        assertInvalid(new GrantedViperActivationEvent(1, move(unmanned.id(), GALACTICA_SPACE_8_OCLOCK)));
+        assertInvalid(new GrantedViperActivationEvent(1, move(unmanned.id(), GALACTICA_SPACE_9_OCLOCK)));
     }
 
     // The viper is in space already.
     @Test
     void notALaunch() {
-        assertInvalid(new GrantedViperActivationEvent(1, launch(VIPER, GALACTICA_SPACE_4_OCLOCK)));
+        assertInvalid(new GrantedViperActivationEvent(1, launch(VIPER, GALACTICA_SPACE_5_OCLOCK)));
     }
 }

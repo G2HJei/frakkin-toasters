@@ -32,8 +32,8 @@ class ClippedWingsEventProcessorTest extends EventTestHarness<ClippedWingsEvent>
 
     @Test
     void theVipersComeBackRepairedThenTwoTreachery() {
-        viperAt(GALACTICA_SPACE_12_OCLOCK);
-        val damaged = viperAt(GALACTICA_SPACE_2_OCLOCK);
+        viperAt(GALACTICA_SPACE_1_OCLOCK);
+        val damaged = viperAt(GALACTICA_SPACE_3_OCLOCK);
         ops.ship(damaged.id()).damage();
 
         execute(new ClippedWingsEvent(1));

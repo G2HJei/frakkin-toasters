@@ -493,7 +493,7 @@ export const OPTION_TEMPLATES: Record<string, string> = {
 
 /**
  * The words of an event that names no player, when a player picked it in a choice and the log names him above it:
- * "Laura Roslin · activates the raiders at Space 8 o'clock".
+ * "Laura Roslin · activates the raiders at Space 9 o'clock".
  */
 export const CHOSEN_TEMPLATES: Record<string, string> = {
   ResolveSkillCheckAbilityEvent: 'resolves {type}',

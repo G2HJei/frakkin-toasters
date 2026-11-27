@@ -14,11 +14,11 @@ class ActivateRaiderAreaEventProcessorTest extends EventTestHarness<ActivateRaid
     // The raiders of the chosen area activate, then the current player chooses among the areas left.
     @Test
     void theRaidersOfTheAreaActivateThenTheOthers() {
-        val raider1 = raiderAt(GALACTICA_SPACE_2_OCLOCK);
-        val raider2 = raiderAt(GALACTICA_SPACE_6_OCLOCK);
-        val raider3 = raiderAt(GALACTICA_SPACE_6_OCLOCK);
+        val raider1 = raiderAt(GALACTICA_SPACE_3_OCLOCK);
+        val raider2 = raiderAt(GALACTICA_SPACE_7_OCLOCK);
+        val raider3 = raiderAt(GALACTICA_SPACE_7_OCLOCK);
 
-        execute(new ActivateRaiderAreaEvent(GALACTICA_SPACE_6_OCLOCK, List.of(raider1.id(), raider2.id(), raider3.id())));
+        execute(new ActivateRaiderAreaEvent(GALACTICA_SPACE_7_OCLOCK, List.of(raider1.id(), raider2.id(), raider3.id())));
 
         assertFollowup(all(
                 new ActivateRaiderEvent(raider2.id()),
@@ -28,17 +28,17 @@ class ActivateRaiderAreaEventProcessorTest extends EventTestHarness<ActivateRaid
 
     @Test
     void theLastAreaEndsTheActivation() {
-        val raider = raiderAt(GALACTICA_SPACE_2_OCLOCK);
+        val raider = raiderAt(GALACTICA_SPACE_3_OCLOCK);
 
-        execute(new ActivateRaiderAreaEvent(GALACTICA_SPACE_2_OCLOCK, List.of(raider.id())));
+        execute(new ActivateRaiderAreaEvent(GALACTICA_SPACE_3_OCLOCK, List.of(raider.id())));
 
         assertFollowup(new ActivateRaiderEvent(raider.id()));
     }
 
     @Test
     void notAnAreaWithoutRaidersOfTheActivation() {
-        val raider = raiderAt(GALACTICA_SPACE_2_OCLOCK);
+        val raider = raiderAt(GALACTICA_SPACE_3_OCLOCK);
 
-        assertInvalid(new ActivateRaiderAreaEvent(GALACTICA_SPACE_6_OCLOCK, List.of(raider.id())));
+        assertInvalid(new ActivateRaiderAreaEvent(GALACTICA_SPACE_7_OCLOCK, List.of(raider.id())));
     }
 }

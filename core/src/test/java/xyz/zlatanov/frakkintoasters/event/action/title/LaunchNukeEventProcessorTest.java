@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.rollDie;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.BRIG;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.COMMAND;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_4_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_5_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.LAURA_ROSLIN;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.WILLIAM_ADAMA;
 
@@ -24,15 +24,15 @@ class LaunchNukeEventProcessorTest extends EventTestHarness<LaunchNukeEvent> {
     // A space area without ships is a legal target too: the nuke then has no effect (rule 11.6.1).
     @Test
     void theAdmiralSpendsANukeAndRolls() {
-        execute(new LaunchNukeEvent(1, GALACTICA_SPACE_4_OCLOCK));
+        execute(new LaunchNukeEvent(1, GALACTICA_SPACE_5_OCLOCK));
 
         assertEquals(1, game.nukes());
-        assertFollowup(rollDie(new NukeResultEvent(1, GALACTICA_SPACE_4_OCLOCK)));
+        assertFollowup(rollDie(new NukeResultEvent(1, GALACTICA_SPACE_5_OCLOCK)));
     }
 
     @Test
     void onlyTheAdmiral() {
-        assertInvalid(new LaunchNukeEvent(2, GALACTICA_SPACE_4_OCLOCK));
+        assertInvalid(new LaunchNukeEvent(2, GALACTICA_SPACE_5_OCLOCK));
     }
 
     @Test
@@ -40,7 +40,7 @@ class LaunchNukeEventProcessorTest extends EventTestHarness<LaunchNukeEvent> {
         ops.discardNuke();
         ops.discardNuke();
 
-        assertInvalid(new LaunchNukeEvent(1, GALACTICA_SPACE_4_OCLOCK));
+        assertInvalid(new LaunchNukeEvent(1, GALACTICA_SPACE_5_OCLOCK));
     }
 
     @Test
@@ -58,8 +58,8 @@ class LaunchNukeEventProcessorTest extends EventTestHarness<LaunchNukeEvent> {
     void alsoFromTheBrig() {
         moveTo(BRIG, WILLIAM_ADAMA);
 
-        execute(new LaunchNukeEvent(1, GALACTICA_SPACE_4_OCLOCK));
+        execute(new LaunchNukeEvent(1, GALACTICA_SPACE_5_OCLOCK));
 
-        assertFollowup(rollDie(new NukeResultEvent(1, GALACTICA_SPACE_4_OCLOCK)));
+        assertFollowup(rollDie(new NukeResultEvent(1, GALACTICA_SPACE_5_OCLOCK)));
     }
 }

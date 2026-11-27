@@ -11,7 +11,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_3_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.*;
 
 class DamageBasestarEventProcessorTest extends EventTestHarness<DamageBasestarEvent> {
@@ -20,7 +20,7 @@ class DamageBasestarEventProcessorTest extends EventTestHarness<DamageBasestarEv
 
     @BeforeEach
     void setUp() {
-        basestar = basestarAt(GALACTICA_SPACE_2_OCLOCK);
+        basestar = basestarAt(GALACTICA_SPACE_3_OCLOCK);
     }
 
     @Test
@@ -65,6 +65,6 @@ class DamageBasestarEventProcessorTest extends EventTestHarness<DamageBasestarEv
         assertFollowup(new OpenInterruptWindowEvent(new AfterBasestarOrCenturionDestroyed()));
         assertTrue(basestar.damage().isEmpty());
         assertEquals(4, basestarDamageDeck.cards().size()); // the tokens go back into the pile
-        assertTrue(galacticaBoard.shipsIn(GALACTICA_SPACE_2_OCLOCK).isEmpty());
+        assertTrue(galacticaBoard.shipsIn(GALACTICA_SPACE_3_OCLOCK).isEmpty());
     }
 }

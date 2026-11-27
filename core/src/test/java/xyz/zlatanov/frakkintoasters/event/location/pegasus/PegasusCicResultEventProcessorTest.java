@@ -8,7 +8,7 @@ import xyz.zlatanov.frakkintoasters.event.ship.DamagePegasusEvent;
 import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_3_OCLOCK;
 
 class PegasusCicResultEventProcessorTest extends EventTestHarness<PegasusCicResultEvent> {
 
@@ -16,7 +16,7 @@ class PegasusCicResultEventProcessorTest extends EventTestHarness<PegasusCicResu
 
     @BeforeEach
     void setUp() {
-        basestar = basestarAt(GALACTICA_SPACE_2_OCLOCK);
+        basestar = basestarAt(GALACTICA_SPACE_3_OCLOCK);
     }
 
     @Test

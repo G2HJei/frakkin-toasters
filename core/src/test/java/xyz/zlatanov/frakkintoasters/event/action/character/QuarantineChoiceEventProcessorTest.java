@@ -21,12 +21,12 @@ class QuarantineChoiceEventProcessorTest extends EventTestHarness<QuarantineChoi
 
     @Test
     void aNewShipTakesThePlaceOfTheChosenOne() {
-        val chosen = civilianShipAt(GALACTICA_SPACE_4_OCLOCK);
+        val chosen = civilianShipAt(GALACTICA_SPACE_5_OCLOCK);
         val shipsLeft = game.decks().civilianShipsLeft();
 
         execute(new QuarantineChoiceEvent(1, chosen.id()));
 
-        assertShipCount(GALACTICA_SPACE_4_OCLOCK, CivilianShip.class, 1);
+        assertShipCount(GALACTICA_SPACE_5_OCLOCK, CivilianShip.class, 1);
         assertTrue(galacticaBoard.shipsInSpace(CivilianShip.class).stream().noneMatch(ship -> ship.id() == chosen.id()));
         assertEquals(shipsLeft, game.decks().civilianShipsLeft());
     }

@@ -28,7 +28,7 @@ class GrantEventProcessorTest extends EventTestHarness<GrantEvent> {
     void aGrantedActionIsOfferedWhenItRuns() {
         player(1).character(KARA_STARBUCK_THRACE);
         moveTo(HANGAR_DECK, KARA_STARBUCK_THRACE);
-        ops.player(1).pilot(viperAt(GALACTICA_SPACE_4_OCLOCK).id());
+        ops.player(1).pilot(viperAt(GALACTICA_SPACE_5_OCLOCK).id());
         player(1).gainSkillCards(new SkillCard(6, BUILD_NUKE));
 
         execute(new GrantEvent(1, ACTION, GrantedBy.HANGAR_DECK));

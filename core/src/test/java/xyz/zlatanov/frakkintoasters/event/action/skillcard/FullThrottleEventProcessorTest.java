@@ -23,16 +23,16 @@ class FullThrottleEventProcessorTest extends EventTestHarness<FullThrottleEvent>
         player(1).character(KARA_STARBUCK_THRACE);
         moveTo(HANGAR_DECK, KARA_STARBUCK_THRACE);
         player(1).gainSkillCards(FULL_THROTTLE_1);
-        own = viperAt(GALACTICA_SPACE_4_OCLOCK);
+        own = viperAt(GALACTICA_SPACE_5_OCLOCK);
         ops.player(1).pilot(own.id());
     }
 
     // Any space area, then 1 attack there if the player wants.
     @Test
     void theViperMovesAnyDistanceThenMayAttack() {
-        execute(new FullThrottleEvent(1, FULL_THROTTLE_1, GALACTICA_SPACE_10_OCLOCK));
+        execute(new FullThrottleEvent(1, FULL_THROTTLE_1, GALACTICA_SPACE_11_OCLOCK));
 
-        assertEquals(GALACTICA_SPACE_10_OCLOCK, locate(own));
+        assertEquals(GALACTICA_SPACE_11_OCLOCK, locate(own));
         assertFollowup(new ViperActivationRoundEvent(1, own.id(), 1, true));
     }
 
@@ -41,13 +41,13 @@ class FullThrottleEventProcessorTest extends EventTestHarness<FullThrottleEvent>
     void theViperMayStay() {
         execute(new FullThrottleEvent(1, FULL_THROTTLE_1, null));
 
-        assertEquals(GALACTICA_SPACE_4_OCLOCK, locate(own));
+        assertEquals(GALACTICA_SPACE_5_OCLOCK, locate(own));
         assertFollowup(new ViperActivationRoundEvent(1, own.id(), 1, true));
     }
 
     @Test
     void notToItsOwnArea() {
-        assertInvalid(new FullThrottleEvent(1, FULL_THROTTLE_1, GALACTICA_SPACE_4_OCLOCK));
+        assertInvalid(new FullThrottleEvent(1, FULL_THROTTLE_1, GALACTICA_SPACE_5_OCLOCK));
     }
 
     @Test

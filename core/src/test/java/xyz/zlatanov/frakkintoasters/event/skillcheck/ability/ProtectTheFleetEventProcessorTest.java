@@ -42,22 +42,22 @@ class ProtectTheFleetEventProcessorTest extends EventTestHarness<ProtectTheFleet
         val assRaptor = new AssaultRaptor(-1);
         galacticaBoard.addToReserves(assRaptor);
 
-        execute(ProtectTheFleetEvent.launch(1, ASSAULT_RAPTOR, GALACTICA_SPACE_6_OCLOCK));
+        execute(ProtectTheFleetEvent.launch(1, ASSAULT_RAPTOR, GALACTICA_SPACE_7_OCLOCK));
 
-        assertFollowup(one(new LaunchViperEvent(1, ASSAULT_RAPTOR, GALACTICA_SPACE_6_OCLOCK)));
+        assertFollowup(one(new LaunchViperEvent(1, ASSAULT_RAPTOR, GALACTICA_SPACE_7_OCLOCK)));
     }
 
     @Test
     void shouldMoveHumanFighter() {
-        val viper = viperMarkVIIAt(GALACTICA_SPACE_4_OCLOCK);
-        execute(ProtectTheFleetEvent.move(1, viper.id(), GALACTICA_SPACE_2_OCLOCK));
-        assertEquals(GALACTICA_SPACE_2_OCLOCK, locate(viper));
+        val viper = viperMarkVIIAt(GALACTICA_SPACE_5_OCLOCK);
+        execute(ProtectTheFleetEvent.move(1, viper.id(), GALACTICA_SPACE_3_OCLOCK));
+        assertEquals(GALACTICA_SPACE_3_OCLOCK, locate(viper));
     }
 
     @Test
     void shouldAttackBasestar() {
-        val viper = viperAt(GALACTICA_SPACE_10_OCLOCK);
-        val bs = basestarAt(GALACTICA_SPACE_10_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_11_OCLOCK);
+        val bs = basestarAt(GALACTICA_SPACE_11_OCLOCK);
 
         execute(ProtectTheFleetEvent.attack(1, viper.id(), bs.id()));
 
@@ -66,8 +66,8 @@ class ProtectTheFleetEventProcessorTest extends EventTestHarness<ProtectTheFleet
 
     @Test
     void shouldAttackARaider() {
-        val viper = viperAt(GALACTICA_SPACE_10_OCLOCK);
-        val raider = raiderAt(GALACTICA_SPACE_10_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_11_OCLOCK);
+        val raider = raiderAt(GALACTICA_SPACE_11_OCLOCK);
 
         execute(ProtectTheFleetEvent.attack(1, viper.id(), raider.id()));
 
@@ -76,63 +76,63 @@ class ProtectTheFleetEventProcessorTest extends EventTestHarness<ProtectTheFleet
 
     @Test
     void shouldEscortCivilianShip() {
-        val viper = viperAt(GALACTICA_SPACE_2_OCLOCK);
-        val civ = civilianShipAt(GALACTICA_SPACE_2_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_3_OCLOCK);
+        val civ = civilianShipAt(GALACTICA_SPACE_3_OCLOCK);
 
         execute(ProtectTheFleetEvent.escort(1, viper.id(), civ.id()));
 
-        assertTrue(galacticaBoard.shipsIn(GALACTICA_SPACE_2_OCLOCK, CivilianShip.class).isEmpty());
+        assertTrue(galacticaBoard.shipsIn(GALACTICA_SPACE_3_OCLOCK, CivilianShip.class).isEmpty());
     }
 
     @Test
     void shouldNeed3PilotingStrengthInTheCheck() {
         skillCheck.nonMatchingPile().remove(new SkillCard(3, MAXIMUM_FIREPOWER));
         skillCheck.nonMatchingPile().addOnTop(new SkillCard(2, MAXIMUM_FIREPOWER));
-        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_5_OCLOCK);
 
-        assertInvalid(ProtectTheFleetEvent.move(1, viper.id(), GALACTICA_SPACE_2_OCLOCK));
+        assertInvalid(ProtectTheFleetEvent.move(1, viper.id(), GALACTICA_SPACE_3_OCLOCK));
     }
 
     @Test
     void shouldActivateAnUnmannedViper() {
-        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_5_OCLOCK);
         viper.pilot(KARA_STARBUCK_THRACE);
 
-        assertInvalid(ProtectTheFleetEvent.move(1, viper.id(), GALACTICA_SPACE_2_OCLOCK));
+        assertInvalid(ProtectTheFleetEvent.move(1, viper.id(), GALACTICA_SPACE_3_OCLOCK));
     }
 
     @Test
     void shouldMoveToAnAdjacentSpaceArea() {
-        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
-        assertInvalid(ProtectTheFleetEvent.move(1, viper.id(), GALACTICA_SPACE_12_OCLOCK));
+        val viper = viperAt(GALACTICA_SPACE_5_OCLOCK);
+        assertInvalid(ProtectTheFleetEvent.move(1, viper.id(), GALACTICA_SPACE_1_OCLOCK));
     }
 
     @Test
     void shouldAttackACylonShipInTheSameSpaceArea() {
-        val viper = viperAt(GALACTICA_SPACE_8_OCLOCK);
-        val bs = basestarAt(GALACTICA_SPACE_10_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_9_OCLOCK);
+        val bs = basestarAt(GALACTICA_SPACE_11_OCLOCK);
 
         assertInvalid(ProtectTheFleetEvent.attack(1, viper.id(), bs.id()));
     }
 
     @Test
     void shouldEscortACivilianShipInTheSameSpaceArea() {
-        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
-        val civ = civilianShipAt(GALACTICA_SPACE_2_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_5_OCLOCK);
+        val civ = civilianShipAt(GALACTICA_SPACE_3_OCLOCK);
 
         assertInvalid(ProtectTheFleetEvent.escort(1, viper.id(), civ.id()));
     }
 
     @Test
     void shouldLaunchAShipTypeInTheReserves() {
-        assertInvalid(ProtectTheFleetEvent.launch(1, VIPER_MARK_VII, GALACTICA_SPACE_6_OCLOCK));
+        assertInvalid(ProtectTheFleetEvent.launch(1, VIPER_MARK_VII, GALACTICA_SPACE_7_OCLOCK));
     }
 
     @Test
     void shouldNameOnlyOneActivation() {
-        val viper = viperAt(GALACTICA_SPACE_2_OCLOCK);
-        val civ = civilianShipAt(GALACTICA_SPACE_2_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_3_OCLOCK);
+        val civ = civilianShipAt(GALACTICA_SPACE_3_OCLOCK);
 
-        assertInvalid(new ProtectTheFleetEvent(1, new ViperActivation(null, null, viper.id(), GALACTICA_SPACE_4_OCLOCK, null, civ.id())));
+        assertInvalid(new ProtectTheFleetEvent(1, new ViperActivation(null, null, viper.id(), GALACTICA_SPACE_5_OCLOCK, null, civ.id())));
     }
 }

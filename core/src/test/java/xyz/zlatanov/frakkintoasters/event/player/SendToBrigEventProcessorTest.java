@@ -47,7 +47,7 @@ class SendToBrigEventProcessorTest extends EventTestHarness<SendToBrigEvent> {
 
     @Test
     void shouldLandPilotedViper() {
-        val viper = viperAt(GALACTICA_SPACE_2_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_3_OCLOCK);
         ops.player(2).pilot(viper.id());
 
         execute(new SendToBrigEvent(2));

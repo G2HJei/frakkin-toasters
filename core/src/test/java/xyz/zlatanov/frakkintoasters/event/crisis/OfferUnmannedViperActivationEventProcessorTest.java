@@ -10,7 +10,7 @@ import xyz.zlatanov.frakkintoasters.state.ship.HumanFighter;
 import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_3_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.HANGAR_DECK;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
 
@@ -47,7 +47,7 @@ class OfferUnmannedViperActivationEventProcessorTest extends EventTestHarness<Of
     // A pilot activates his own viper.
     @Test
     void nothingForACagWhoIsPiloting() {
-        viperAt(GALACTICA_SPACE_2_OCLOCK).pilot(KARA_STARBUCK_THRACE);
+        viperAt(GALACTICA_SPACE_3_OCLOCK).pilot(KARA_STARBUCK_THRACE);
 
         execute(new OfferUnmannedViperActivationEvent(1));
     }

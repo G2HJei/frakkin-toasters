@@ -18,9 +18,9 @@ class MainBatteriesEventProcessorTest extends EventTestHarness<MainBatteriesEven
 
     @Test
     void shouldRollForTheChosenSpaceArea() {
-        execute(new MainBatteriesEvent(1, GALACTICA_SPACE_2_OCLOCK));
+        execute(new MainBatteriesEvent(1, GALACTICA_SPACE_3_OCLOCK));
 
-        assertFollowup(rollDie(new MainBatteriesResultEvent(GALACTICA_SPACE_2_OCLOCK)));
+        assertFollowup(rollDie(new MainBatteriesResultEvent(GALACTICA_SPACE_3_OCLOCK)));
     }
 
     @Test

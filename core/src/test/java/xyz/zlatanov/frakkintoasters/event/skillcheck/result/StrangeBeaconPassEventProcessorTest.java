@@ -12,19 +12,19 @@ class StrangeBeaconPassEventProcessorTest extends EventTestHarness<StrangeBeacon
 
     @Test
     void shouldLetTheCurrentPlayerChooseAnAreaWithCylonShips() {
-        raiderAt(GALACTICA_SPACE_4_OCLOCK);
-        basestarAt(GALACTICA_SPACE_8_OCLOCK);
-        viperAt(GALACTICA_SPACE_6_OCLOCK);
+        raiderAt(GALACTICA_SPACE_5_OCLOCK);
+        basestarAt(GALACTICA_SPACE_9_OCLOCK);
+        viperAt(GALACTICA_SPACE_7_OCLOCK);
 
         execute(new StrangeBeaconPassEvent());
 
-        assertFollowup(one(new DestroyCylonShipsEvent(GALACTICA_SPACE_4_OCLOCK),
-                new DestroyCylonShipsEvent(GALACTICA_SPACE_8_OCLOCK)));
+        assertFollowup(one(new DestroyCylonShipsEvent(GALACTICA_SPACE_5_OCLOCK),
+                new DestroyCylonShipsEvent(GALACTICA_SPACE_9_OCLOCK)));
     }
 
     @Test
     void shouldAskNobodyWithoutCylonShips() {
-        viperAt(GALACTICA_SPACE_6_OCLOCK);
+        viperAt(GALACTICA_SPACE_7_OCLOCK);
 
         execute(new StrangeBeaconPassEvent());
     }

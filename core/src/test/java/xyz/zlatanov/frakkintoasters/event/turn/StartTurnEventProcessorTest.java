@@ -83,7 +83,7 @@ class StartTurnEventProcessorTest extends EventTestHarness<StartTurnEvent> {
     @Test
     void starbuckStartingHerTurnInAViperUsesExpertPilot() {
         player(1).character(KARA_STARBUCK_THRACE);
-        ops.player(1).pilot(viperAt(xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_4_OCLOCK).id());
+        ops.player(1).pilot(viperAt(xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_5_OCLOCK).id());
 
         execute(new StartTurnEvent());
 

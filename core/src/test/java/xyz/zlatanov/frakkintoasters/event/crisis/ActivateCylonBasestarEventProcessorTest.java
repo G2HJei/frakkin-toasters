@@ -6,7 +6,7 @@ import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.event.AttackGalacticaEvent;
 import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_8_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_9_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.DISABLED_WEAPONS;
 import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.STRUCTURAL_DAMAGE;
 
@@ -16,7 +16,7 @@ class ActivateCylonBasestarEventProcessorTest extends EventTestHarness<ActivateC
 
     @BeforeEach
     void setUp() {
-        basestar = basestarAt(GALACTICA_SPACE_8_OCLOCK);
+        basestar = basestarAt(GALACTICA_SPACE_9_OCLOCK);
     }
 
     @Test

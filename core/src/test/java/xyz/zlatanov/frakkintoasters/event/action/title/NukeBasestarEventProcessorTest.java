@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_4_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_5_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.WILLIAM_ADAMA;
 
 class NukeBasestarEventProcessorTest extends EventTestHarness<NukeBasestarEvent> {
@@ -33,7 +33,7 @@ class NukeBasestarEventProcessorTest extends EventTestHarness<NukeBasestarEvent>
     @ParameterizedTest
     @ValueSource(ints = {1, 2})
     void aLowRollDamagesTheBasestarTwice(int roll) {
-        val basestar = basestarAt(GALACTICA_SPACE_4_OCLOCK);
+        val basestar = basestarAt(GALACTICA_SPACE_5_OCLOCK);
 
         execute(new NukeBasestarEvent(1, basestar.id(), roll));
 
@@ -43,21 +43,21 @@ class NukeBasestarEventProcessorTest extends EventTestHarness<NukeBasestarEvent>
     @ParameterizedTest
     @ValueSource(ints = {3, 6})
     void aMiddleRollDestroysTheBasestar(int roll) {
-        val basestar = basestarAt(GALACTICA_SPACE_4_OCLOCK);
-        raiderAt(GALACTICA_SPACE_4_OCLOCK);
+        val basestar = basestarAt(GALACTICA_SPACE_5_OCLOCK);
+        raiderAt(GALACTICA_SPACE_5_OCLOCK);
 
         execute(new NukeBasestarEvent(1, basestar.id(), roll));
 
-        assertShipCount(GALACTICA_SPACE_4_OCLOCK, Basestar.class, 0);
-        assertShipCount(GALACTICA_SPACE_4_OCLOCK, 1);
+        assertShipCount(GALACTICA_SPACE_5_OCLOCK, Basestar.class, 0);
+        assertShipCount(GALACTICA_SPACE_5_OCLOCK, 1);
         assertFollowup(MAJOR_VICTORY_WINDOW);
     }
 
     @Test
     void aSevenDestroysTheBasestarAndThreeRaiders() {
-        val basestar = basestarAt(GALACTICA_SPACE_4_OCLOCK);
+        val basestar = basestarAt(GALACTICA_SPACE_5_OCLOCK);
         // raiders are all alike: the ones with the lowest ids go
-        val raiders = Stream.generate(() -> raiderAt(GALACTICA_SPACE_4_OCLOCK).id())
+        val raiders = Stream.generate(() -> raiderAt(GALACTICA_SPACE_5_OCLOCK).id())
                 .limit(4)
                 .sorted()
                 .limit(3)
@@ -65,13 +65,13 @@ class NukeBasestarEventProcessorTest extends EventTestHarness<NukeBasestarEvent>
 
         execute(new NukeBasestarEvent(1, basestar.id(), 7));
 
-        assertShipCount(GALACTICA_SPACE_4_OCLOCK, Basestar.class, 0);
+        assertShipCount(GALACTICA_SPACE_5_OCLOCK, Basestar.class, 0);
         assertFollowup(all(new DestroyRaidersEvent(raiders), MAJOR_VICTORY_WINDOW));
     }
 
     @Test
     void onlyABasestar() {
-        val raider = raiderAt(GALACTICA_SPACE_4_OCLOCK);
+        val raider = raiderAt(GALACTICA_SPACE_5_OCLOCK);
 
         assertInvalid(new NukeBasestarEvent(1, raider.id(), 4));
     }
@@ -84,14 +84,14 @@ class NukeBasestarEventProcessorTest extends EventTestHarness<NukeBasestarEvent>
     // An 8 destroys the whole space area, without a choice of basestar.
     @Test
     void notAnEight() {
-        val basestar = basestarAt(GALACTICA_SPACE_4_OCLOCK);
+        val basestar = basestarAt(GALACTICA_SPACE_5_OCLOCK);
 
         assertInvalid(new NukeBasestarEvent(1, basestar.id(), 8));
     }
 
     @Test
     void notBelowOne() {
-        val basestar = basestarAt(GALACTICA_SPACE_4_OCLOCK);
+        val basestar = basestarAt(GALACTICA_SPACE_5_OCLOCK);
 
         assertInvalid(new NukeBasestarEvent(1, basestar.id(), 0));
     }

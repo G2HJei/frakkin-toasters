@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.Team.CYLONS;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_4_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_5_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.VIPER;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.*;
@@ -130,8 +130,8 @@ class InterruptWindowTest {
     void evasiveManoeuvresRerollsARaidersAttack() {
         start(all(setUp(),
                 all(new GiveSkillCardEvent(2, EVASIVE_MANOEUVRES_1),
-                        new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_4_OCLOCK),
-                        new PlaceRaiderEvent(GALACTICA_SPACE_4_OCLOCK),
+                        new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_5_OCLOCK),
+                        new PlaceRaiderEvent(GALACTICA_SPACE_5_OCLOCK),
                         new ActivateRaidersEvent()),
                 CYLONS_WIN));
 

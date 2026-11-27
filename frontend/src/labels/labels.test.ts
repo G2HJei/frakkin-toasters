@@ -125,31 +125,31 @@ describe('labels', () => {
   it('counts the random Skill Cards a player discards, reddens an execution and puts the insignia before the CAG title', () => {
     const icons: LabelContext = { ...names, iconOf: (enumName, constant) => (enumName === 'Title' ? { key: `TitleIcon/${String(constant)}`, url: '', shape: 'title' } : null) };
     const executed = eventParts({ kind: 'ExecuteEvent', playerNumber: 1, withoutMoraleLoss: false }, names);
-    const activation = { launchShipType: 'VIPER', launchLocation: 'GALACTICA_SPACE_8_OCLOCK', humanFighterId: null, moveLocation: null, attackCylonShipId: null, escortCivilianShipId: null };
+    const activation = { launchShipType: 'VIPER', launchLocation: 'GALACTICA_SPACE_9_OCLOCK', humanFighterId: null, moveLocation: null, attackCylonShipId: null, escortCivilianShipId: null };
     const passed = eventParts({ kind: 'PassCagTitleEvent', playerNumber: 3, activation, targetPlayerNumber: 2 }, icons);
 
     expect(eventLabel({ kind: 'DiscardRandomSkillCardsEvent', playerNumber: 2, count: 2 }, names)).toBe('Laura Roslin discards 2 random Skill Cards');
     expect(eventLabel({ kind: 'DiscardRandomSkillCardsEvent', playerNumber: 2, count: 1 }, names)).toBe('Laura Roslin discards 1 random Skill Card');
     expect(partsText(executed)).toBe('William Adama is executed');
     expect(executed.filter((part) => part.tone === 'bad').map((part) => part.text)).toEqual(['executed']);
-    expect(partsText(passed)).toBe('Kara "Starbuck" Thrace launches a Viper to Space 8 o\'clock and passes the CAG title to Laura Roslin');
+    expect(partsText(passed)).toBe('Kara "Starbuck" Thrace launches a Viper to Space 9 o\'clock and passes the CAG title to Laura Roslin');
     expect(passed.find((part) => part.text === 'CAG')?.icon?.key).toBe('TitleIcon/CAG');
   });
 
   it("puts a ship's icon in front of the words that name its kind", () => {
     const icons: LabelContext = { ...names, iconOf: (enumName, constant) => (enumName === 'ShipType' ? { key: `ShipType/${String(constant)}`, url: '', shape: 'ship' } : null) };
-    const raiders = eventParts({ kind: 'BasestarBridgeShipsEvent', playerNumber: 4, shipType: 'RAIDER', location: 'GALACTICA_SPACE_8_OCLOCK' }, icons);
-    const basestar = eventParts({ kind: 'BasestarBridgeShipsEvent', playerNumber: 4, shipType: 'BASESTAR', location: 'GALACTICA_SPACE_8_OCLOCK' }, icons);
-    const civilian = eventParts({ kind: 'PlaceCivilianShipEvent', playerNumber: 3, location: 'GALACTICA_SPACE_4_OCLOCK' }, icons);
+    const raiders = eventParts({ kind: 'BasestarBridgeShipsEvent', playerNumber: 4, shipType: 'RAIDER', location: 'GALACTICA_SPACE_9_OCLOCK' }, icons);
+    const basestar = eventParts({ kind: 'BasestarBridgeShipsEvent', playerNumber: 4, shipType: 'BASESTAR', location: 'GALACTICA_SPACE_9_OCLOCK' }, icons);
+    const civilian = eventParts({ kind: 'PlaceCivilianShipEvent', playerNumber: 3, location: 'GALACTICA_SPACE_5_OCLOCK' }, icons);
     // the words after each icon
     const iconed = (parts: Part[]) => parts.flatMap((part, index) => (part.icon ? [`${part.icon.key} ${parts[index + 1]?.text ?? ''}`] : []));
 
-    expect(partsText(raiders)).toBe("Player 4 places 3 raiders at Space 8 o'clock");
-    expect(iconed(raiders)).toEqual(["ShipType/RAIDER raiders at Space 8 o'clock"]);
-    expect(partsText(basestar)).toBe("Player 4 places a basestar at Space 8 o'clock");
-    expect(iconed(basestar)).toEqual(["ShipType/BASESTAR basestar at Space 8 o'clock"]);
-    expect(partsText(civilian)).toBe('Kara "Starbuck" Thrace places a civilian ship at Space 4 o\'clock');
-    expect(iconed(civilian)).toEqual(["ShipType/CIVILIAN civilian ship at Space 4 o'clock"]);
+    expect(partsText(raiders)).toBe("Player 4 places 3 raiders at Space 9 o'clock");
+    expect(iconed(raiders)).toEqual(["ShipType/RAIDER raiders at Space 9 o'clock"]);
+    expect(partsText(basestar)).toBe("Player 4 places a basestar at Space 9 o'clock");
+    expect(iconed(basestar)).toEqual(["ShipType/BASESTAR basestar at Space 9 o'clock"]);
+    expect(partsText(civilian)).toBe('Kara "Starbuck" Thrace places a civilian ship at Space 5 o\'clock');
+    expect(iconed(civilian)).toEqual(["ShipType/CIVILIAN civilian ship at Space 5 o'clock"]);
   });
 
   it('names a Quorum Card its template names, so the log shows it on hover', () => {
@@ -167,12 +167,12 @@ describe('labels', () => {
 
   it('counts the ships of a kind, each kind with its icon', () => {
     const icons: LabelContext = { ...names, iconOf: (enumName, constant) => (enumName === 'ShipType' ? { key: `ShipType/${String(constant)}`, url: '', shape: 'ship' } : null) };
-    const launches = (shipTypes: string[]) => eventParts({ kind: 'LaunchReservesEvent', playerNumber: 3, card: { type: 'LAUNCH_RESERVES', value: 5 }, area: 'GALACTICA_SPACE_8_OCLOCK', shipTypes }, icons);
+    const launches = (shipTypes: string[]) => eventParts({ kind: 'LaunchReservesEvent', playerNumber: 3, card: { type: 'LAUNCH_RESERVES', value: 5 }, area: 'GALACTICA_SPACE_9_OCLOCK', shipTypes }, icons);
 
-    expect(partsText(launches(['VIPER', 'VIPER']))).toBe('Kara "Starbuck" Thrace plays Launch Reserves 5 and launches 2 vipers to Space 8 o\'clock');
+    expect(partsText(launches(['VIPER', 'VIPER']))).toBe('Kara "Starbuck" Thrace plays Launch Reserves 5 and launches 2 vipers to Space 9 o\'clock');
     expect(launches(['VIPER', 'VIPER']).filter((part) => part.icon).map((part) => `${part.icon?.key} ${part.text}`)).toEqual(['ShipType/VIPER vipers']);
-    expect(partsText(launches(['VIPER']))).toBe('Kara "Starbuck" Thrace plays Launch Reserves 5 and launches a viper to Space 8 o\'clock');
-    expect(partsText(launches(['VIPER', 'ASSAULT_RAPTOR']))).toBe('Kara "Starbuck" Thrace plays Launch Reserves 5 and launches a viper and an assault raptor to Space 8 o\'clock');
+    expect(partsText(launches(['VIPER']))).toBe('Kara "Starbuck" Thrace plays Launch Reserves 5 and launches a viper to Space 9 o\'clock');
+    expect(partsText(launches(['VIPER', 'ASSAULT_RAPTOR']))).toBe('Kara "Starbuck" Thrace plays Launch Reserves 5 and launches a viper and an assault raptor to Space 9 o\'clock');
   });
 
   describe('a title', () => {
@@ -345,7 +345,7 @@ describe('labels', () => {
   });
 
   it('falls back to the humanized constant and type', () => {
-    expect(humanizeConstant('GALACTICA_SPACE_12_OCLOCK')).toBe("Galactica Space 12 o'clock");
+    expect(humanizeConstant('GALACTICA_SPACE_1_OCLOCK')).toBe("Galactica Space 1 o'clock");
     expect(humanizeConstant('FTL_CONTROL')).toBe('FTL Control');
     expect(humanizeType('ResolveCrisisCardEvent')).toBe('Resolve crisis card');
     expect(humanizeType('DeckFact.CardsDrawn')).toBe('Cards drawn');

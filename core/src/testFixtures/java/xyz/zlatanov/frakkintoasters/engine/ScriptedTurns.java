@@ -26,7 +26,7 @@ import java.util.function.Function;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.event.crisis.ChooseCrisisSectionEvent.Section.TOP;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_12_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_1_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.RESEARCH_LAB;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.*;
 import static xyz.zlatanov.frakkintoasters.state.crisis.CrisisCard.DETENTE;
@@ -96,7 +96,7 @@ public final class ScriptedTurns {
                 single(new ReligiousVisionsEvent(second.apply(game), DETENTE, RIOTS_NO_JUMP))));
         inputs.add(game -> letItResolve(game, DETENTE));
         inputs.add(game -> crisisTop(game, DETENTE));
-        inputs.add(game -> submit(game.playerNumber(game.cag()), p -> new PlaceCivilianShipEvent(p, GALACTICA_SPACE_12_OCLOCK)));
+        inputs.add(game -> submit(game.playerNumber(game.cag()), p -> new PlaceCivilianShipEvent(p, GALACTICA_SPACE_1_OCLOCK)));
         inputs.add(game -> draw(third.apply(game), Map.of(TACTICS, 2, PILOTING, 2, LEADERSHIP, 1)));
         inputs.add(game -> pass(third.apply(game)));
         inputs.add(game -> pass(third.apply(game)));

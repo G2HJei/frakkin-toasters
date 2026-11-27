@@ -4,8 +4,8 @@
 // the tracks, the resources, the deck rack and the reserves. The free starfield for the little that has no printed slot
 // is below. A test checks that every Location of the schema has a place here.
 //
-// Galactica's bow points left: the area in front of it (8 o'clock, where Cylon ships appear) is the strip at the bow,
-// the one behind it (2 o'clock, where civilian ships appear) the strip at the stern, the others clockwise. The Cylon
+// Galactica's bow points left: the area in front of it (9 o'clock, where Cylon ships appear) is the strip at the bow,
+// the one behind it (3 o'clock, where civilian ships appear) the strip at the stern, the others clockwise. The Cylon
 // Fleet board's areas sit around the basestar at the clock positions of the Galactica areas they lead to.
 import type { BoardLabel } from '../../labels/board';
 import type { Location } from '../../wire/types';

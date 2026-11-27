@@ -5,7 +5,7 @@ import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.state.ship.Raider;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_3_OCLOCK;
 
 class PlaceRaidersBehindEventProcessorTest extends EventTestHarness<PlaceRaidersBehindEvent> {
 
@@ -14,7 +14,7 @@ class PlaceRaidersBehindEventProcessorTest extends EventTestHarness<PlaceRaiders
     void shouldPlaceTheRaidersBehindGalactica() {
         execute(new PlaceRaidersBehindEvent(3));
 
-        assertShipCount(GALACTICA_SPACE_2_OCLOCK, Raider.class, 3);
+        assertShipCount(GALACTICA_SPACE_3_OCLOCK, Raider.class, 3);
     }
 
     @Test

@@ -20,15 +20,15 @@ class PlaceCivilianShipEventProcessorTest extends EventTestHarness<PlaceCivilian
 
     @Test
     void shouldPlaceTheTopCivilianShip() {
-        execute(new PlaceCivilianShipEvent(1, GALACTICA_SPACE_8_OCLOCK));
-        assertEquals(1, galacticaBoard.shipsIn(GALACTICA_SPACE_8_OCLOCK, CivilianShip.class).size());
+        execute(new PlaceCivilianShipEvent(1, GALACTICA_SPACE_9_OCLOCK));
+        assertEquals(1, galacticaBoard.shipsIn(GALACTICA_SPACE_9_OCLOCK, CivilianShip.class).size());
     }
 
     // "The CAG must, if able, place the civilian ship in a space area that does not already have a civilian ship in it."
     @Test
     void shouldNotPlaceNextToAnotherCivilianShipWhileAnAreaIsFree() {
-        ops.galactica().placeCivilianShip(GALACTICA_SPACE_8_OCLOCK);
-        assertInvalid(new PlaceCivilianShipEvent(1, GALACTICA_SPACE_8_OCLOCK));
+        ops.galactica().placeCivilianShip(GALACTICA_SPACE_9_OCLOCK);
+        assertInvalid(new PlaceCivilianShipEvent(1, GALACTICA_SPACE_9_OCLOCK));
     }
 
     // "If all space areas contain a civilian ship, the CAG may place the new civilian ship in any space area."
@@ -38,9 +38,9 @@ class PlaceCivilianShipEventProcessorTest extends EventTestHarness<PlaceCivilian
             ops.galactica().placeCivilianShip(area);
         }
 
-        execute(new PlaceCivilianShipEvent(1, GALACTICA_SPACE_8_OCLOCK));
+        execute(new PlaceCivilianShipEvent(1, GALACTICA_SPACE_9_OCLOCK));
 
-        assertEquals(2, galacticaBoard.shipsIn(GALACTICA_SPACE_8_OCLOCK, CivilianShip.class).size());
+        assertEquals(2, galacticaBoard.shipsIn(GALACTICA_SPACE_9_OCLOCK, CivilianShip.class).size());
     }
 
     @Test
@@ -51,6 +51,6 @@ class PlaceCivilianShipEventProcessorTest extends EventTestHarness<PlaceCivilian
     @Test
     void shouldNotPlaceWhenNoCivilianShipIsLeft() {
         civilianShips.clear();
-        assertInvalid(new PlaceCivilianShipEvent(1, GALACTICA_SPACE_8_OCLOCK));
+        assertInvalid(new PlaceCivilianShipEvent(1, GALACTICA_SPACE_9_OCLOCK));
     }
 }

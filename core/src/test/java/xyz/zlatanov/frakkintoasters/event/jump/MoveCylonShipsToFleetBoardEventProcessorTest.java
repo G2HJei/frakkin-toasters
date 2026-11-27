@@ -16,10 +16,10 @@ class MoveCylonShipsToFleetBoardEventProcessorTest extends EventTestHarness<Move
     // Fleet game board."
     @Test
     void cylonShipsMoveToTheCorrespondingSpaceAreas() {
-        val raider = raiderAt(GALACTICA_SPACE_2_OCLOCK);
-        val basestar = basestarAt(GALACTICA_SPACE_8_OCLOCK);
-        val heavyRaider = heavyRaiderAt(GALACTICA_SPACE_12_OCLOCK);
-        val civilian = civilianShipAt(GALACTICA_SPACE_2_OCLOCK);
+        val raider = raiderAt(GALACTICA_SPACE_3_OCLOCK);
+        val basestar = basestarAt(GALACTICA_SPACE_9_OCLOCK);
+        val heavyRaider = heavyRaiderAt(GALACTICA_SPACE_1_OCLOCK);
+        val civilian = civilianShipAt(GALACTICA_SPACE_3_OCLOCK);
 
         execute(new MoveCylonShipsToFleetBoardEvent());
 
@@ -27,14 +27,14 @@ class MoveCylonShipsToFleetBoardEventProcessorTest extends EventTestHarness<Move
         assertEquals(CYLON_FLEET_SPACE_7_8, cylonFleetBoard.locate(basestar));
         assertEquals(CYLON_FLEET_SPACE_3, cylonFleetBoard.locate(heavyRaider));
         // "Do not remove any civilian ships from the main game board."
-        assertEquals(GALACTICA_SPACE_2_OCLOCK, galacticaBoard.locate(civilian));
+        assertEquals(GALACTICA_SPACE_3_OCLOCK, galacticaBoard.locate(civilian));
         assertTrue(galacticaBoard.shipsInSpace(Raider.class).isEmpty());
     }
 
     // "All basestar damage tokens on basestars are removed and randomly mixed into the pile of unused damage tokens."
     @Test
     void basestarDamageGoesBackIntoThePile() {
-        val basestar = basestarAt(GALACTICA_SPACE_8_OCLOCK);
+        val basestar = basestarAt(GALACTICA_SPACE_9_OCLOCK);
         ops.ship(basestar.id()).damage();
         val damage = galacticaBoard.shipsInSpace(Basestar.class).getFirst().damage();
         assertEquals(1, damage.size());

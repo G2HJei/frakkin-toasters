@@ -119,13 +119,13 @@ class RevealPersonalGoalEventProcessorTest extends EventTestHarness<RevealPerson
             // a clean damaged vipers box
         }
         for (var i = 0; i < 3; i++) {
-            ops.ship(viperAt(GALACTICA_SPACE_2_OCLOCK).id()).damage();
+            ops.ship(viperAt(GALACTICA_SPACE_3_OCLOCK).id()).damage();
         }
-        ops.ship(viperAt(GALACTICA_SPACE_4_OCLOCK).id()).destroy();
-        ops.ship(assaultRaptorAt(GALACTICA_SPACE_4_OCLOCK).id()).destroy();
+        ops.ship(viperAt(GALACTICA_SPACE_5_OCLOCK).id()).destroy();
+        ops.ship(assaultRaptorAt(GALACTICA_SPACE_5_OCLOCK).id()).destroy();
         assertInvalid(new RevealPersonalGoalEvent(1, NOT_CYLON_SACRIFICE, List.of()));
 
-        ops.ship(viperAt(GALACTICA_SPACE_6_OCLOCK).id()).destroy();
+        ops.ship(viperAt(GALACTICA_SPACE_7_OCLOCK).id()).destroy();
 
         assertTrue(RevealPersonalGoalEventProcessor.canReveal(game, player(1), NOT_CYLON_SACRIFICE));
     }
@@ -134,12 +134,12 @@ class RevealPersonalGoalEventProcessorTest extends EventTestHarness<RevealPerson
     void standAndFightNeedsTenRaiders() {
         holds(NOT_CYLON_STAND_AND_FIGHT);
         for (var i = 0; i < 9; i++) {
-            raiderAt(GALACTICA_SPACE_2_OCLOCK);
+            raiderAt(GALACTICA_SPACE_3_OCLOCK);
         }
-        heavyRaiderAt(GALACTICA_SPACE_2_OCLOCK); // not a raider
+        heavyRaiderAt(GALACTICA_SPACE_3_OCLOCK); // not a raider
         assertInvalid(new RevealPersonalGoalEvent(1, NOT_CYLON_STAND_AND_FIGHT, List.of()));
 
-        raiderAt(GALACTICA_SPACE_8_OCLOCK);
+        raiderAt(GALACTICA_SPACE_9_OCLOCK);
 
         assertTrue(RevealPersonalGoalEventProcessor.canReveal(game, player(1), NOT_CYLON_STAND_AND_FIGHT));
     }

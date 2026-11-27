@@ -14,7 +14,7 @@ class AttackCylonShipEventProcessorTest extends EventTestHarness<AttackCylonShip
 
     @Test
     void shouldRollForGalacticasAttack() {
-        val raider = raiderAt(GALACTICA_SPACE_10_OCLOCK);
+        val raider = raiderAt(GALACTICA_SPACE_11_OCLOCK);
 
         execute(AttackCylonShipEvent.byGalactica(raider.id()));
 
@@ -23,8 +23,8 @@ class AttackCylonShipEventProcessorTest extends EventTestHarness<AttackCylonShip
 
     @Test
     void shouldRollForAnUnmannedVipersAttack() {
-        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
-        val basestar = basestarAt(GALACTICA_SPACE_4_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_5_OCLOCK);
+        val basestar = basestarAt(GALACTICA_SPACE_5_OCLOCK);
 
         execute(AttackCylonShipEvent.byFighter(viper.id(), basestar.id()));
 
@@ -35,9 +35,9 @@ class AttackCylonShipEventProcessorTest extends EventTestHarness<AttackCylonShip
     @Test
     void shouldRollWithBestOfTheBestBeforeAPilotedVipersAttack() {
         player(1).character(KARA_STARBUCK_THRACE);
-        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_5_OCLOCK);
         ops.player(1).pilot(viper.id());
-        val heavyRaider = heavyRaiderAt(GALACTICA_SPACE_4_OCLOCK);
+        val heavyRaider = heavyRaiderAt(GALACTICA_SPACE_5_OCLOCK);
 
         execute(AttackCylonShipEvent.byFighter(viper.id(), heavyRaider.id()));
 
@@ -47,20 +47,20 @@ class AttackCylonShipEventProcessorTest extends EventTestHarness<AttackCylonShip
 
     @Test
     void shouldAttackACylonShipInTheFightersSpaceArea() {
-        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
-        val raider = raiderAt(GALACTICA_SPACE_6_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_5_OCLOCK);
+        val raider = raiderAt(GALACTICA_SPACE_7_OCLOCK);
 
         assertInvalid(AttackCylonShipEvent.byFighter(viper.id(), raider.id()));
     }
 
     @Test
     void shouldAttackOnlyCylonShips() {
-        assertInvalid(AttackCylonShipEvent.byGalactica(civilianShipAt(GALACTICA_SPACE_4_OCLOCK).id()));
+        assertInvalid(AttackCylonShipEvent.byGalactica(civilianShipAt(GALACTICA_SPACE_5_OCLOCK).id()));
     }
 
     @Test
     void shouldAttackWithAFighterInSpace() {
-        val raider = raiderAt(GALACTICA_SPACE_4_OCLOCK);
+        val raider = raiderAt(GALACTICA_SPACE_5_OCLOCK);
 
         assertInvalid(AttackCylonShipEvent.byFighter(viper().id(), raider.id()));
     }

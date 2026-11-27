@@ -16,8 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static xyz.zlatanov.frakkintoasters.event.Followup.NONE;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_6_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_3_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_7_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.BRENDAN_HOTDOG_COSTANZA;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.LAURA_ROSLIN;
 
@@ -29,13 +29,13 @@ class EscortEventProcessorTest extends EventTestHarness<EscortEvent> {
     void setUp() {
         player(1).character(BRENDAN_HOTDOG_COSTANZA);
         player(2).character(LAURA_ROSLIN);
-        civilianShip = civilianShipAt(GALACTICA_SPACE_2_OCLOCK);
+        civilianShip = civilianShipAt(GALACTICA_SPACE_3_OCLOCK);
     }
 
     // The undamaged vipers: one of each kind from the "Reserves", and every one in space.
     @Test
     void hotDogIsAskedBeforeTheShipIsDestroyed() {
-        val inSpace = viperAt(GALACTICA_SPACE_6_OCLOCK);
+        val inSpace = viperAt(GALACTICA_SPACE_7_OCLOCK);
         val vipers = EscortEventProcessor.vipers(game);
         assertTrue(vipers.contains(inSpace.id()));
 
@@ -48,7 +48,7 @@ class EscortEventProcessorTest extends EventTestHarness<EscortEvent> {
 
     @Test
     void aViperIsDestroyedInstead() {
-        val viper = viperAt(GALACTICA_SPACE_6_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_7_OCLOCK);
 
         execute(new EscortEvent(1, civilianShip.id(), viper.id()));
 
@@ -60,7 +60,7 @@ class EscortEventProcessorTest extends EventTestHarness<EscortEvent> {
 
     @Test
     void notWithoutTheMiracleToken() {
-        val viper = viperAt(GALACTICA_SPACE_6_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_7_OCLOCK);
         ops.player(1).loseMiracleTokens();
 
         assertEquals(NONE, EscortEventProcessor.offer(game, civilianShip.id()));
@@ -76,7 +76,7 @@ class EscortEventProcessorTest extends EventTestHarness<EscortEvent> {
 
     @Test
     void notAShipAlreadyGone() {
-        val viper = viperAt(GALACTICA_SPACE_6_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_7_OCLOCK);
 
         assertInvalid(new EscortEvent(1, civilianShip().id(), viper.id()));
     }

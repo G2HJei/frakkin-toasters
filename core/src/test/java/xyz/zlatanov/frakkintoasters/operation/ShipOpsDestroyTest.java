@@ -16,37 +16,37 @@ class ShipOpsDestroyTest extends TestHarness {
 
     @Test
     void shouldDestroyRaider() {
-        val raider = raiderAt(GALACTICA_SPACE_6_OCLOCK);
+        val raider = raiderAt(GALACTICA_SPACE_7_OCLOCK);
 
         ops.ship(raider.id()).destroy();
 
-        assertNoShips(GALACTICA_SPACE_6_OCLOCK);
+        assertNoShips(GALACTICA_SPACE_7_OCLOCK);
         assertTrue(cylonShips.raiders().contains(raider));
     }
 
     @Test
     void shouldDestroyHeavyRaider() {
-        val heavyRaider = heavyRaiderAt(GALACTICA_SPACE_4_OCLOCK);
+        val heavyRaider = heavyRaiderAt(GALACTICA_SPACE_5_OCLOCK);
 
         ops.ship(heavyRaider.id()).destroy();
 
-        assertNoShips(GALACTICA_SPACE_4_OCLOCK);
+        assertNoShips(GALACTICA_SPACE_5_OCLOCK);
         assertTrue(cylonShips.heavyRaiders().contains(heavyRaider));
     }
 
     @Test
     void shouldDestroyBasestar() {
-        val basestar = basestarAt(GALACTICA_SPACE_2_OCLOCK);
+        val basestar = basestarAt(GALACTICA_SPACE_3_OCLOCK);
 
         ops.ship(basestar.id()).destroy();
 
-        assertNoShips(GALACTICA_SPACE_2_OCLOCK);
+        assertNoShips(GALACTICA_SPACE_3_OCLOCK);
         assertTrue(cylonShips.basestars().contains(basestar));
     }
 
     @Test
     void shouldReturnBasestarDamageToTheDeckAndRepairTheBasestar() {
-        val basestar = basestarAt(GALACTICA_SPACE_2_OCLOCK);
+        val basestar = basestarAt(GALACTICA_SPACE_3_OCLOCK);
         val fullDeckSize = basestarDamageDeck.size();
         basestarDamageDeck.nextCard(STRUCTURAL_DAMAGE);
         basestar.damage(basestarDamageDeck.draw());
@@ -59,31 +59,31 @@ class ShipOpsDestroyTest extends TestHarness {
 
     @Test
     void shouldDestroyAssaultRaptor() {
-        val assRaptor = assaultRaptorAt(GALACTICA_SPACE_12_OCLOCK);
+        val assRaptor = assaultRaptorAt(GALACTICA_SPACE_1_OCLOCK);
 
         ops.ship(assRaptor.id()).destroy();
 
-        assertNoShips(GALACTICA_SPACE_12_OCLOCK);
+        assertNoShips(GALACTICA_SPACE_1_OCLOCK);
         assertTrue(game.removedComponents().contains(assRaptor));
     }
 
     @Test
     void shouldDestroyViper() {
-        val viper = viperAt(GALACTICA_SPACE_10_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_11_OCLOCK);
 
         ops.ship(viper.id()).destroy();
 
-        assertNoShips(GALACTICA_SPACE_10_OCLOCK);
+        assertNoShips(GALACTICA_SPACE_11_OCLOCK);
         assertTrue(game.removedComponents().contains(viper));
     }
 
     @Test
     void shouldDestroyViperMarkVII() {
-        val viperMk7 = viperMarkVIIAt(GALACTICA_SPACE_10_OCLOCK);
+        val viperMk7 = viperMarkVIIAt(GALACTICA_SPACE_11_OCLOCK);
 
         ops.ship(viperMk7.id()).destroy();
 
-        assertNoShips(GALACTICA_SPACE_10_OCLOCK);
+        assertNoShips(GALACTICA_SPACE_11_OCLOCK);
         assertTrue(game.removedComponents().contains(viperMk7));
     }
 
@@ -97,7 +97,7 @@ class ShipOpsDestroyTest extends TestHarness {
     @Test
     void shouldDestroyAssaultRaptorAndSendItsPilotToSickbay() {
         player(1).character(LOUANNE_KAT_KATRAINE);
-        val assRaptor = assaultRaptorAt(GALACTICA_SPACE_8_OCLOCK)
+        val assRaptor = assaultRaptorAt(GALACTICA_SPACE_9_OCLOCK)
                 .pilot(LOUANNE_KAT_KATRAINE);
 
         ops.ship(assRaptor.id()).destroy();
@@ -109,7 +109,7 @@ class ShipOpsDestroyTest extends TestHarness {
     void shouldDestroyCivilianShipInSpace() {
         val civShipId = -1;
         civilianShips.nextCard(new CivilianShip(civShipId, 1, 2, 3));
-        place(GALACTICA_SPACE_2_OCLOCK, civilianShip());
+        place(GALACTICA_SPACE_3_OCLOCK, civilianShip());
 
         ops.ship(-1).destroy();
 

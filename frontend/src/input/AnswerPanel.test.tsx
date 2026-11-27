@@ -443,11 +443,11 @@ describe('the answers', () => {
     const nuke = (area: string) => ({ kind: 'LaunchNukeEvent', playerNumber: 1, area });
     const order = { kind: 'ExecutiveOrderEvent', playerNumber: 1, card: card('EXECUTIVE_ORDER', 2), targetPlayerNumber: 2 };
     const images = (element: Element) => [...element.querySelectorAll('img')].map((image) => image.getAttribute('data-art'));
-    const events = [nuke('GALACTICA_SPACE_2_OCLOCK'), nuke('GALACTICA_SPACE_4_OCLOCK'), order];
+    const events = [nuke('GALACTICA_SPACE_3_OCLOCK'), nuke('GALACTICA_SPACE_5_OCLOCK'), order];
     renderPanel(game({ kind: 'Decide', player: 1, action: 'ActionEvent', constraints: [], answers: { events, shapes: [] } }));
 
     // no targets yet: the nukes are one row, with what every one shows and the step still to come
-    expect(screen.queryByRole('button', { name: /2 o'clock/ })).toBeNull();
+    expect(screen.queryByRole('button', { name: /3 o'clock/ })).toBeNull();
     const row = screen.getByRole('button', { name: 'Launch a nuke' });
     expect(images(row)).toEqual(['Token/NUKE']);
     expect(row.querySelector('.next-icon')).not.toBeNull();
@@ -456,7 +456,7 @@ describe('the answers', () => {
     fireEvent.click(row);
     expect(useSelection.getState().picked).toEqual([{ type: 'kind', kind: 'LaunchNukeEvent' }]);
     expect(screen.queryByRole('button', { name: /Executive Order/ })).toBeNull();
-    expect(images(screen.getByRole('button', { name: /2 o'clock/ }))).toEqual(['Glyph/LOCATION/GALACTICA_SPACE_2_OCLOCK']);
+    expect(images(screen.getByRole('button', { name: /3 o'clock/ }))).toEqual(['Glyph/LOCATION/GALACTICA_SPACE_3_OCLOCK']);
     fireEvent.click(screen.getByRole('button', { name: 'Back' }));
     expect(screen.getByRole('button', { name: 'Launch a nuke' })).toBeInTheDocument();
   });

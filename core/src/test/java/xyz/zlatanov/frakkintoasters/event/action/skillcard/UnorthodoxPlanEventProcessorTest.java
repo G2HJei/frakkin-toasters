@@ -30,7 +30,7 @@ class UnorthodoxPlanEventProcessorTest extends EventTestHarness<UnorthodoxPlanEv
     // From elsewhere, and even when it is damaged.
     @Test
     void weaponsControlFromElsewhereWhileDamaged() {
-        raiderAt(GALACTICA_SPACE_8_OCLOCK);
+        raiderAt(GALACTICA_SPACE_9_OCLOCK);
         ops.sandbox().damage(WEAPONS_CONTROL);
 
         execute(new UnorthodoxPlanEvent(1, UNORTHODOX_PLAN_3, WEAPONS_CONTROL));
@@ -40,7 +40,7 @@ class UnorthodoxPlanEventProcessorTest extends EventTestHarness<UnorthodoxPlanEv
 
     @Test
     void communicationsWithACivilianShipInSpace() {
-        civilianShipAt(GALACTICA_SPACE_2_OCLOCK);
+        civilianShipAt(GALACTICA_SPACE_3_OCLOCK);
 
         execute(new UnorthodoxPlanEvent(1, UNORTHODOX_PLAN_3, COMMUNICATIONS));
 
@@ -74,7 +74,7 @@ class UnorthodoxPlanEventProcessorTest extends EventTestHarness<UnorthodoxPlanEv
         player(2).character(LAURA_ROSLIN);
         moveTo(PRESIDENTS_OFFICE, LAURA_ROSLIN);
         player(2).gainSkillCards(UNORTHODOX_PLAN_3, new SkillCard(1, CONSOLIDATE_POWER));
-        raiderAt(GALACTICA_SPACE_2_OCLOCK);
+        raiderAt(GALACTICA_SPACE_3_OCLOCK);
 
         assertFalse(UnorthodoxPlanEventProcessor.canPlay(game, player(2)));
         assertInvalid(new UnorthodoxPlanEvent(2, UNORTHODOX_PLAN_3, WEAPONS_CONTROL));

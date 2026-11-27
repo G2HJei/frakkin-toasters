@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.ADMIRALS_QUARTERS;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.FTL_CONTROL;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_6_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_7_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.RESEARCH_LAB;
 import static xyz.zlatanov.frakkintoasters.state.board.Resource.FOOD;
 import static xyz.zlatanov.frakkintoasters.state.board.Resource.MORALE;
@@ -211,7 +211,7 @@ class GameProjectionTest extends TestHarness {
     @Test
     void theCargoOfACivilianShipShowsToThePlayersWhoLookedAtIt() {
         civilianShips.nextCard(new CivilianShip(2001, 1, 0, 2));
-        ops.galactica().placeCivilianShip(GALACTICA_SPACE_6_OCLOCK);
+        ops.galactica().placeCivilianShip(GALACTICA_SPACE_7_OCLOCK);
         ops.player(1).lookAtShip(2001);
 
         assertEquals(new Cargo(1, 0, 2), civilianShip(HOLDER).cargo());
@@ -318,7 +318,7 @@ class GameProjectionTest extends TestHarness {
         quorumDeck.nextCard(QuorumCard.values()[0]);
         ops.titles().drawQuorumCard();
         civilianShips.nextCard(new CivilianShip(2001, 1, 0, 2));
-        ops.galactica().placeCivilianShip(GALACTICA_SPACE_6_OCLOCK);
+        ops.galactica().placeCivilianShip(GALACTICA_SPACE_7_OCLOCK);
         ops.player(2).receiveSkillCard(PLANNING);
         ops.interrupts().openWindow(new BeforeDieRoll());
         val played = new PlayedInterruptCard(2, PLANNING, null);

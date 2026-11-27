@@ -4,14 +4,14 @@ import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
 import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
 
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_3_OCLOCK;
 
 class BaitEventProcessorTest extends EventTestHarness<BaitEvent> {
 
     @Test
     void shouldPlaceCivilianShipBehindGalactica() {
         execute(new BaitEvent());
-        assertShipCount(GALACTICA_SPACE_2_OCLOCK, CivilianShip.class, 1);
+        assertShipCount(GALACTICA_SPACE_3_OCLOCK, CivilianShip.class, 1);
     }
 
     // No civilian ship is left to place (F-896a90).
@@ -21,6 +21,6 @@ class BaitEventProcessorTest extends EventTestHarness<BaitEvent> {
 
         execute(new BaitEvent());
 
-        assertShipCount(GALACTICA_SPACE_2_OCLOCK, CivilianShip.class, 0);
+        assertShipCount(GALACTICA_SPACE_3_OCLOCK, CivilianShip.class, 0);
     }
 }

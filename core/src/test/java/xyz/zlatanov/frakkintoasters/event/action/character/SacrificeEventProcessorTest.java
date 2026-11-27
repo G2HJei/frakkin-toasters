@@ -18,7 +18,7 @@ import static xyz.zlatanov.frakkintoasters.state.character.Character.LOUANNE_KAT
 
 class SacrificeEventProcessorTest extends EventTestHarness<SacrificeEvent> {
 
-    private static final xyz.zlatanov.frakkintoasters.state.board.Location AREA = GALACTICA_SPACE_4_OCLOCK;
+    private static final xyz.zlatanov.frakkintoasters.state.board.Location AREA = GALACTICA_SPACE_5_OCLOCK;
 
     @BeforeEach
     void setUp() {
@@ -67,7 +67,7 @@ class SacrificeEventProcessorTest extends EventTestHarness<SacrificeEvent> {
 
     @Test
     void notShipsOfAnotherArea() {
-        val elsewhere = raiderAt(GALACTICA_SPACE_6_OCLOCK).id();
+        val elsewhere = raiderAt(GALACTICA_SPACE_7_OCLOCK).id();
         raiderAt(AREA);
 
         assertInvalid(new SacrificeEvent(1, List.of(elsewhere)));

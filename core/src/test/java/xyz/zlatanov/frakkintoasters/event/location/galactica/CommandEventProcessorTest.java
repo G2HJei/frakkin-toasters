@@ -14,7 +14,7 @@ import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.Followup.one;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.ADMIRALS_QUARTERS;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.COMMAND;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_4_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_5_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.SAUL_TIGH;
 
@@ -67,7 +67,7 @@ class CommandEventProcessorTest extends EventTestHarness<CommandEvent> {
     // Without a viper to launch or an unmanned one in space, the decision would have no answer.
     @Test
     void shouldActivateNothingWithoutAnUnmannedViper() {
-        viperAt(GALACTICA_SPACE_4_OCLOCK).pilot(KARA_STARBUCK_THRACE);
+        viperAt(GALACTICA_SPACE_5_OCLOCK).pilot(KARA_STARBUCK_THRACE);
         galacticaBoard.reserves().stream()
                 .filter(HumanFighter.class::isInstance)
                 .toList()

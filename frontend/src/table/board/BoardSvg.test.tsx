@@ -50,12 +50,12 @@ const game = {
         locations: [
             location('RESEARCH_LAB', ['WILLIAM_ADAMA']),
             location('ARMORY', [], true),
-            ...['2', '4', '8', '10', '12'].map((hour) => location(`GALACTICA_SPACE_${hour}_OCLOCK`)),
+            ...['3', '5', '9', '11', '1'].map((hour) => location(`GALACTICA_SPACE_${hour}_OCLOCK`)),
         ],
         ships: [{
             id: 3,
             type: 'VIPER',
-            location: 'GALACTICA_SPACE_4_OCLOCK',
+            location: 'GALACTICA_SPACE_5_OCLOCK',
             pilot: 'KARA_STARBUCK_THRACE',
             damage: [],
             cargo: null
@@ -163,7 +163,7 @@ describe('the board', () => {
     it("draws each ship in its space area, with its pilot's token, and the reserves and the Cylon supply in their slots", () => {
         const board = renderBoard();
 
-        const viper = board.querySelector('[data-location="GALACTICA_SPACE_4_OCLOCK"] [data-ship="3"]');
+        const viper = board.querySelector('[data-location="GALACTICA_SPACE_5_OCLOCK"] [data-ship="3"]');
         expect(viper?.getAttribute('aria-label')).toBe('Viper #3 · Starbuck');
         expect(viper?.querySelector('[data-art="ShipType/VIPER"]')).not.toBeNull();
         expect(viper?.querySelector('[data-art="Character/piloting-token/KARA_STARBUCK_THRACE"]')).not.toBeNull();
@@ -424,18 +424,18 @@ describe('the board', () => {
         fireEvent.mouseEnter(board.querySelector('[data-character="WILLIAM_ADAMA"] image')!);
         expect(usePreview.getState().art?.key).toBe('Character/player-token/WILLIAM_ADAMA');
         // a space area has no card
-        expect(board.querySelector('[data-location="GALACTICA_SPACE_4_OCLOCK"] .location-hotspot')).toBeNull();
+        expect(board.querySelector('[data-location="GALACTICA_SPACE_5_OCLOCK"] .location-hotspot')).toBeNull();
     });
 
     it('lays the ships of a space area in its middle, the Cylon ships first, each as large as anywhere on its board', () => {
         const ships = [
-            inSpace(20, 'VIPER', 'GALACTICA_SPACE_8_OCLOCK'),
-            inSpace(21, 'RAIDER', 'GALACTICA_SPACE_8_OCLOCK'),
-            inSpace(22, 'RAIDER', 'GALACTICA_SPACE_8_OCLOCK'),
-            inSpace(23, 'BASESTAR', 'GALACTICA_SPACE_8_OCLOCK'),
-            inSpace(24, 'VIPER', 'GALACTICA_SPACE_12_OCLOCK'),
-            inSpace(25, 'VIPER', 'GALACTICA_SPACE_10_OCLOCK'),
-            inSpace(26, 'VIPER', 'GALACTICA_SPACE_10_OCLOCK'),
+            inSpace(20, 'VIPER', 'GALACTICA_SPACE_9_OCLOCK'),
+            inSpace(21, 'RAIDER', 'GALACTICA_SPACE_9_OCLOCK'),
+            inSpace(22, 'RAIDER', 'GALACTICA_SPACE_9_OCLOCK'),
+            inSpace(23, 'BASESTAR', 'GALACTICA_SPACE_9_OCLOCK'),
+            inSpace(24, 'VIPER', 'GALACTICA_SPACE_1_OCLOCK'),
+            inSpace(25, 'VIPER', 'GALACTICA_SPACE_11_OCLOCK'),
+            inSpace(26, 'VIPER', 'GALACTICA_SPACE_11_OCLOCK'),
         ];
         const board = renderBoard(undefined, {
             ...game,
@@ -443,28 +443,28 @@ describe('the board', () => {
         } as unknown as GameProjection);
 
         // a lone ship in the middle of its area
-        const [lone] = shipBoxes(board, 'GALACTICA_SPACE_12_OCLOCK');
-        const area = LAYOUT.GALACTICA_SPACE_12_OCLOCK;
+        const [lone] = shipBoxes(board, 'GALACTICA_SPACE_1_OCLOCK');
+        const area = LAYOUT.GALACTICA_SPACE_1_OCLOCK;
         expect(lone.x + lone.width / 2).toBeCloseTo(area.x + area.width / 2);
         expect(lone.y + lone.height / 2).toBeCloseTo(area.y + area.height / 2);
 
         // the basestar first, then the raiders, then the viper, the whole lot in the middle of the strip
-        const strip = shipBoxes(board, 'GALACTICA_SPACE_8_OCLOCK');
+        const strip = shipBoxes(board, 'GALACTICA_SPACE_9_OCLOCK');
         expect(strip.map((ship) => ship.art)).toEqual(['ShipType/BASESTAR', 'ShipType/RAIDER', 'ShipType/RAIDER', 'ShipType/VIPER']);
-        const narrow = LAYOUT.GALACTICA_SPACE_8_OCLOCK;
+        const narrow = LAYOUT.GALACTICA_SPACE_9_OCLOCK;
         const top = Math.min(...strip.map((ship) => ship.y));
         const bottom = Math.max(...strip.map((ship) => ship.y + ship.height));
         expect(Math.abs(top - narrow.y - (narrow.y + narrow.height - bottom))).toBeLessThan(10);
 
         // a viper is as large alone, piled and in the narrow strip
-        const vipers = [lone, ...shipBoxes(board, 'GALACTICA_SPACE_10_OCLOCK'), strip[3]];
+        const vipers = [lone, ...shipBoxes(board, 'GALACTICA_SPACE_11_OCLOCK'), strip[3]];
         expect(new Set(vipers.map((viper) => `${viper.width}×${viper.height}`)).size).toBe(1);
     });
 
     it("shows what a civilian ship costs when destroyed on hover, in a sandbox, and to no one who doesn't know it", () => {
         const civilians = [
-            inSpace(30, 'CIVILIAN', 'GALACTICA_SPACE_2_OCLOCK', {cargo: {fuel: 1, morale: 0, population: 1}}),
-            inSpace(31, 'CIVILIAN', 'GALACTICA_SPACE_2_OCLOCK', {cargo: {fuel: 0, morale: 0, population: 0}}),
+            inSpace(30, 'CIVILIAN', 'GALACTICA_SPACE_3_OCLOCK', {cargo: {fuel: 1, morale: 0, population: 1}}),
+            inSpace(31, 'CIVILIAN', 'GALACTICA_SPACE_3_OCLOCK', {cargo: {fuel: 0, morale: 0, population: 0}}),
         ];
         const sandbox = {
             ...game,
@@ -493,9 +493,9 @@ describe('the board', () => {
 
     it('lays a halo under a pile of civilian ships that holds one the viewer looked at, and still shows its cost on hover', () => {
         const civilians = [
-            inSpace(30, 'CIVILIAN', 'GALACTICA_SPACE_2_OCLOCK', {cargo: {fuel: 1, morale: 0, population: 1}}),
-            inSpace(31, 'CIVILIAN', 'GALACTICA_SPACE_2_OCLOCK'),
-            inSpace(32, 'CIVILIAN', 'GALACTICA_SPACE_8_OCLOCK'),
+            inSpace(30, 'CIVILIAN', 'GALACTICA_SPACE_3_OCLOCK', {cargo: {fuel: 1, morale: 0, population: 1}}),
+            inSpace(31, 'CIVILIAN', 'GALACTICA_SPACE_3_OCLOCK'),
+            inSpace(32, 'CIVILIAN', 'GALACTICA_SPACE_9_OCLOCK'),
         ];
         const looked = {
             ...game,
@@ -506,8 +506,8 @@ describe('the board', () => {
         const board = renderBoard(undefined, looked);
 
         const halo = (location: string) => board.querySelector(`[data-location="${location}"] .known-halo`);
-        expect(halo('GALACTICA_SPACE_2_OCLOCK')).not.toBeNull();
-        expect(halo('GALACTICA_SPACE_8_OCLOCK')).toBeNull();
+        expect(halo('GALACTICA_SPACE_3_OCLOCK')).not.toBeNull();
+        expect(halo('GALACTICA_SPACE_9_OCLOCK')).toBeNull();
         fireEvent.mouseEnter(board.querySelector('[data-reveal="cargo-30"]')!);
         expect([...document.querySelectorAll('.reveal-pop ol.pile li')].map((line) => line.textContent)).toEqual(['11Civilian ship #30']);
 
@@ -569,7 +569,7 @@ describe('the board', () => {
         const vipers = Array.from({length: 3}, (_, index) => ({
             id: 10 + index,
             type: 'VIPER',
-            location: 'GALACTICA_SPACE_4_OCLOCK',
+            location: 'GALACTICA_SPACE_5_OCLOCK',
             pilot: ['LEE_ADAMA', 'KARA_STARBUCK_THRACE', 'KARL_HELO_AGATHON'][index],
             damage: [],
             cargo: null
@@ -579,8 +579,8 @@ describe('the board', () => {
             galactica: {...game.galactica!, ships: vipers}
         } as unknown as GameProjection);
 
-        const tube = LAUNCH_TUBES.GALACTICA_SPACE_4_OCLOCK!;
-        for (const viper of board.querySelectorAll('[data-location="GALACTICA_SPACE_4_OCLOCK"] [data-art="ShipType/VIPER"]')) {
+        const tube = LAUNCH_TUBES.GALACTICA_SPACE_5_OCLOCK!;
+        for (const viper of board.querySelectorAll('[data-location="GALACTICA_SPACE_5_OCLOCK"] [data-art="ShipType/VIPER"]')) {
             const left = Number(viper.getAttribute('x'));
             const right = left + Number(viper.getAttribute('width'));
             expect(right <= tube.x || left >= tube.x + tube.width).toBe(true);
@@ -770,20 +770,20 @@ describe('the board', () => {
         const move = {
             option: null,
             followup: null,
-            event: {kind: 'LaunchNukeEvent', playerNumber: 1, area: 'GALACTICA_SPACE_8_OCLOCK'},
+            event: {kind: 'LaunchNukeEvent', playerNumber: 1, area: 'GALACTICA_SPACE_9_OCLOCK'},
             submits: true,
             pick: null
         } as Move;
         const offer: Offer = {
-            targets: new Map([['location:GALACTICA_SPACE_8_OCLOCK', [move]], ['location:CYLON_FLEET_SPACE_2', [move]]]),
+            targets: new Map([['location:GALACTICA_SPACE_9_OCLOCK', [move]], ['location:CYLON_FLEET_SPACE_2', [move]]]),
             acts: new Map(),
             picked: new Set(),
         };
         const onTarget = vi.fn();
         const board = renderBoard(offer, game, false, onTarget);
 
-        const area = board.querySelector('[data-location="GALACTICA_SPACE_8_OCLOCK"]')!;
-        expect(area.querySelector('.sector-fill')?.getAttribute('points')).toBe(SPACE_SECTORS.GALACTICA_SPACE_8_OCLOCK);
+        const area = board.querySelector('[data-location="GALACTICA_SPACE_9_OCLOCK"]')!;
+        expect(area.querySelector('.sector-fill')?.getAttribute('points')).toBe(SPACE_SECTORS.GALACTICA_SPACE_9_OCLOCK);
         expect(area.querySelector('.space-sector')?.getAttribute('clip-path')).toBe('url(#ship-cut-galactica)');
         expect(board.querySelector('[data-location="CYLON_FLEET_SPACE_2"] .space-sector')?.getAttribute('clip-path')).toBe('url(#ship-cut-basestar)');
         expect(board.querySelector('#ship-cut-galactica path')?.getAttribute('d')).toContain(SHIP_OUTLINES.galactica);
@@ -795,10 +795,10 @@ describe('the board', () => {
         expect(opacities[0]).toBe(1);
         expect(opacities[opacities.length - 1]).toBe(0);
         expect(area.querySelector('.frame')).toBeNull();
-        expect(board.querySelector('[data-location="GALACTICA_SPACE_4_OCLOCK"] .space-sector')).toBeNull();
+        expect(board.querySelector('[data-location="GALACTICA_SPACE_5_OCLOCK"] .space-sector')).toBeNull();
 
         fireEvent.click(area.querySelector('.sector-fill')!);
-        expect(onTarget).toHaveBeenLastCalledWith({type: 'location', location: 'GALACTICA_SPACE_8_OCLOCK'}, expect.anything());
+        expect(onTarget).toHaveBeenLastCalledWith({type: 'location', location: 'GALACTICA_SPACE_9_OCLOCK'}, expect.anything());
     });
 
     it("draws each space area's sector around the middle of the box its ships lie in, its corners on the board", () => {

@@ -11,7 +11,7 @@ import xyz.zlatanov.frakkintoasters.state.skill.SkillCheck;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_4_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_5_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.DOGFIGHT;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardType.MAJOR_VICTORY;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCheckType.ADMIRALS_QUARTERS;
@@ -33,7 +33,7 @@ class DogfightEventProcessorTest extends EventTestHarness<DogfightEvent> {
 
     @Test
     void shouldRemoveCardAndDamageViperInSpace() {
-        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_5_OCLOCK);
 
         execute(new DogfightEvent(1, viper.id(), MAJOR_VICTORY_4));
 

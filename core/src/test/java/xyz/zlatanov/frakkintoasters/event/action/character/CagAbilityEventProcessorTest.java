@@ -17,7 +17,7 @@ class CagAbilityEventProcessorTest extends EventTestHarness<CagAbilityEvent> {
 
     @Test
     void activatesUpToSixUnmannedVipers() {
-        viperAt(GALACTICA_SPACE_6_OCLOCK);
+        viperAt(GALACTICA_SPACE_7_OCLOCK);
 
         execute(new CagAbilityEvent(1));
 

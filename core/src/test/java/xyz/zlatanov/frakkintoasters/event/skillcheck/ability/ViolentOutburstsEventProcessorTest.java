@@ -56,17 +56,17 @@ class ViolentOutburstsEventProcessorTest extends EventTestHarness<ViolentOutburs
 
     @Test
     void shouldLandPilotedViper() {
-        assertLandedInReserves(viperAt(GALACTICA_SPACE_2_OCLOCK));
+        assertLandedInReserves(viperAt(GALACTICA_SPACE_3_OCLOCK));
     }
 
     @Test
     void shouldLandPilotedViperMarkVII() {
-        assertLandedInReserves(viperMarkVIIAt(GALACTICA_SPACE_2_OCLOCK));
+        assertLandedInReserves(viperMarkVIIAt(GALACTICA_SPACE_3_OCLOCK));
     }
 
     @Test
     void shouldLandPilotedAssaultRaptor() {
-        assertLandedInReserves(assaultRaptorAt(GALACTICA_SPACE_2_OCLOCK));
+        assertLandedInReserves(assaultRaptorAt(GALACTICA_SPACE_3_OCLOCK));
     }
 
     private void assertLandedInReserves(HumanFighter fighter) {

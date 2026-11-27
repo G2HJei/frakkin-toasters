@@ -14,7 +14,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.frakkintoasters.event.constraint.EventConstraint.*;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.COMMAND;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_6_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_7_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.VIPER;
 import static xyz.zlatanov.frakkintoasters.state.skill.SkillCardColor.POLITICS;
@@ -51,7 +51,7 @@ class ConstrainedEventTest {
 
     @Test
     void aViperLaunchMapsItsConstraintOntoTheFlag() {
-        val launch = new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_6_OCLOCK, KARA_STARBUCK_THRACE, null, true);
+        val launch = new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_7_OCLOCK, KARA_STARBUCK_THRACE, null, true);
 
         assertTrue(launch.withConstraints(List.of(MUST_LAUNCH_IN_VIPER)).mustLaunchInViper());
         assertFalse(launch.withConstraints(List.of()).mustLaunchInViper());

@@ -3,7 +3,7 @@
 const SMALL = new Set(['of', 'the', 'a', 'an', 'and', 'or', 'to', 'in', 'on', 'at', 'for', 'with', 'from', 'by']);
 const UPPER = new Set(['ftl', 'cag', 'cic', 'ii', 'iii']);
 
-/** `KARA_STARBUCK_THRACE` → `Kara Starbuck Thrace`, `GALACTICA_SPACE_12_OCLOCK` → `Galactica Space 12 O'clock`. */
+/** `KARA_STARBUCK_THRACE` → `Kara Starbuck Thrace`, `GALACTICA_SPACE_1_OCLOCK` → `Galactica Space 1 O'clock`. */
 export function humanizeConstant(constant: string): string {
   return constant
     .toLowerCase()

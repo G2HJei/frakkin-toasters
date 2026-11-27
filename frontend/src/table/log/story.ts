@@ -424,7 +424,7 @@ function addLine(turns: TurnStory[], line: LogLine) {
   const lines = steps[steps.length - 1].lines;
   const previous = lines[lines.length - 1];
   if (previous && previous.actor === line.actor && previous.ships && line.ships && sameShipMove(previous.ships.move, line.ships.move)) {
-    // "Raider #1016, Raider #1017 and Raider #1018 move to Space 6 o'clock", one activation each
+    // "Raider #1016, Raider #1017 and Raider #1018 move to Space 7 o'clock", one activation each
     const ships = { ...previous.ships, names: [...previous.ships.names, ...line.ships.names] };
     lines[lines.length - 1] = { ...previous, ships, words: shipMovesParts(ships.names, ships.move), art: [...previous.art, ...line.art] };
   } else {

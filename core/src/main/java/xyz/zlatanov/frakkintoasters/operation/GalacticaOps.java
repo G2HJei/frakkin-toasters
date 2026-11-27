@@ -68,13 +68,13 @@ public class GalacticaOps extends BattlestarOps {
                 .filter(s -> s.getClass() == Viper.class)
                 .limit(2)
                 .toList();
-        record(new ShipMoved(vipers.get(0).id(), RESERVES, GALACTICA_SPACE, GALACTICA_SPACE_4_OCLOCK));
-        record(new ShipMoved(vipers.get(1).id(), RESERVES, GALACTICA_SPACE, GALACTICA_SPACE_6_OCLOCK));
-        placeCivilianShip(GALACTICA_SPACE_2_OCLOCK);
-        placeCivilianShip(GALACTICA_SPACE_2_OCLOCK);
-        takeFromSupply(Basestar.class, GALACTICA_SPACE_8_OCLOCK);
+        record(new ShipMoved(vipers.get(0).id(), RESERVES, GALACTICA_SPACE, GALACTICA_SPACE_5_OCLOCK));
+        record(new ShipMoved(vipers.get(1).id(), RESERVES, GALACTICA_SPACE, GALACTICA_SPACE_7_OCLOCK));
+        placeCivilianShip(GALACTICA_SPACE_3_OCLOCK);
+        placeCivilianShip(GALACTICA_SPACE_3_OCLOCK);
+        takeFromSupply(Basestar.class, GALACTICA_SPACE_9_OCLOCK);
         for (int i = 0; i < 3; i++) {
-            takeFromSupply(Raider.class, GALACTICA_SPACE_8_OCLOCK);
+            takeFromSupply(Raider.class, GALACTICA_SPACE_9_OCLOCK);
         }
     }
 

@@ -14,27 +14,27 @@ class ActivateRaiderAreasEventProcessorTest extends EventTestHarness<ActivateRai
 
     @Test
     void theCurrentPlayerChoosesTheFirstSpaceArea() {
-        val raider1 = raiderAt(GALACTICA_SPACE_2_OCLOCK);
-        val raider2 = raiderAt(GALACTICA_SPACE_6_OCLOCK);
+        val raider1 = raiderAt(GALACTICA_SPACE_3_OCLOCK);
+        val raider2 = raiderAt(GALACTICA_SPACE_7_OCLOCK);
         val raiders = List.of(raider1.id(), raider2.id());
 
         execute(new ActivateRaiderAreasEvent(raiders));
 
         assertFollowup(one(
-                new ActivateRaiderAreaEvent(GALACTICA_SPACE_2_OCLOCK, raiders),
-                new ActivateRaiderAreaEvent(GALACTICA_SPACE_6_OCLOCK, raiders)));
+                new ActivateRaiderAreaEvent(GALACTICA_SPACE_3_OCLOCK, raiders),
+                new ActivateRaiderAreaEvent(GALACTICA_SPACE_7_OCLOCK, raiders)));
     }
 
     // With one area there is nothing to choose.
     @Test
     void oneSpaceAreaActivatesAtOnce() {
-        val raider1 = raiderAt(GALACTICA_SPACE_2_OCLOCK);
-        val raider2 = raiderAt(GALACTICA_SPACE_2_OCLOCK);
+        val raider1 = raiderAt(GALACTICA_SPACE_3_OCLOCK);
+        val raider2 = raiderAt(GALACTICA_SPACE_3_OCLOCK);
         val raiders = List.of(raider1.id(), raider2.id());
 
         execute(new ActivateRaiderAreasEvent(raiders));
 
-        assertFollowup(new ActivateRaiderAreaEvent(GALACTICA_SPACE_2_OCLOCK, raiders));
+        assertFollowup(new ActivateRaiderAreaEvent(GALACTICA_SPACE_3_OCLOCK, raiders));
     }
 
     // A raider destroyed in the meantime doesn't activate.

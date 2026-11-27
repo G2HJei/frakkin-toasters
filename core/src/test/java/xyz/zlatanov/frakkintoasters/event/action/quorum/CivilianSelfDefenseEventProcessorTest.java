@@ -12,8 +12,8 @@ import java.util.Set;
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
 import static xyz.zlatanov.frakkintoasters.event.Followup.single;
 import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.rollDie;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_8_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_3_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_9_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.card.QuorumCard.CIVILIAN_SELF_DEFENSE;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.LAURA_ROSLIN;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.HEAVY_RAIDER;
@@ -29,15 +29,15 @@ class CivilianSelfDefenseEventProcessorTest extends EventTestHarness<CivilianSel
         player(1).character(LAURA_ROSLIN);
         president(LAURA_ROSLIN);
         presidentHand.addOnTop(CIVILIAN_SELF_DEFENSE);
-        civilianShip = civilianShipAt(GALACTICA_SPACE_2_OCLOCK).id();
+        civilianShip = civilianShipAt(GALACTICA_SPACE_3_OCLOCK).id();
     }
 
     // Only the raiders in the civilian ship's area, 3 at most.
     @Test
     void raidersBesideTheShipAreDestroyed() {
-        val a = raiderAt(GALACTICA_SPACE_2_OCLOCK).id();
-        val b = raiderAt(GALACTICA_SPACE_2_OCLOCK).id();
-        raiderAt(GALACTICA_SPACE_8_OCLOCK);
+        val a = raiderAt(GALACTICA_SPACE_3_OCLOCK).id();
+        val b = raiderAt(GALACTICA_SPACE_3_OCLOCK).id();
+        raiderAt(GALACTICA_SPACE_9_OCLOCK);
 
         execute(new CivilianSelfDefenseEvent(1, civilianShip, RAIDER));
 
@@ -47,7 +47,7 @@ class CivilianSelfDefenseEventProcessorTest extends EventTestHarness<CivilianSel
 
     @Test
     void aHeavyRaiderBesideTheShip() {
-        val heavyRaider = heavyRaiderAt(GALACTICA_SPACE_2_OCLOCK).id();
+        val heavyRaider = heavyRaiderAt(GALACTICA_SPACE_3_OCLOCK).id();
 
         execute(new CivilianSelfDefenseEvent(1, civilianShip, HEAVY_RAIDER));
 
@@ -57,14 +57,14 @@ class CivilianSelfDefenseEventProcessorTest extends EventTestHarness<CivilianSel
 
     @Test
     void notWithoutThatShipBesideIt() {
-        raiderAt(GALACTICA_SPACE_8_OCLOCK);
+        raiderAt(GALACTICA_SPACE_9_OCLOCK);
 
         assertInvalid(new CivilianSelfDefenseEvent(1, civilianShip, RAIDER));
     }
 
     @Test
     void onlyRaidersOrHeavyRaiders() {
-        raiderAt(GALACTICA_SPACE_2_OCLOCK);
+        raiderAt(GALACTICA_SPACE_3_OCLOCK);
 
         assertInvalid(new CivilianSelfDefenseEvent(1, civilianShip, VIPER));
     }

@@ -48,7 +48,7 @@ class FinishCylonRevealEventProcessorTest extends EventTestHarness<FinishCylonRe
     // "If he was piloting a viper it is returned to the Reserves."
     @Test
     void shouldReturnTheViperOfAPilot() {
-        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_5_OCLOCK);
         ops.player(2).pilot(viper.id());
 
         execute(new FinishCylonRevealEvent(2, false));

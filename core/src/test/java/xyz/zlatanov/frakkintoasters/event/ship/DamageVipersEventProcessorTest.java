@@ -6,8 +6,8 @@ import xyz.zlatanov.frakkintoasters.EventTestHarness;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.*;
 import static xyz.zlatanov.frakkintoasters.event.ship.DamageVipersEvent.Area.*;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_4_OCLOCK;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_6_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_5_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_7_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
 
 class DamageVipersEventProcessorTest extends EventTestHarness<DamageVipersEvent> {
@@ -15,7 +15,7 @@ class DamageVipersEventProcessorTest extends EventTestHarness<DamageVipersEvent>
     // One at a time: the viper that is chosen, then the rest of the effect.
     @Test
     void shouldDamageOneViperAtATime() {
-        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_5_OCLOCK);
 
         execute(new DamageVipersEvent(2, SPACE));
 
@@ -27,12 +27,12 @@ class DamageVipersEventProcessorTest extends EventTestHarness<DamageVipersEvent>
     @Test
     void shouldOfferOneFighterOfEachKind() {
         player(1).character(KARA_STARBUCK_THRACE);
-        val piloted = viperAt(GALACTICA_SPACE_4_OCLOCK);
+        val piloted = viperAt(GALACTICA_SPACE_5_OCLOCK);
         ops.player(1).pilot(piloted.id());
-        val unmanned = viperAt(GALACTICA_SPACE_4_OCLOCK);
-        val alike = viperAt(GALACTICA_SPACE_4_OCLOCK);
-        val elsewhere = viperAt(GALACTICA_SPACE_6_OCLOCK);
-        val assaultRaptor = assaultRaptorAt(GALACTICA_SPACE_6_OCLOCK);
+        val unmanned = viperAt(GALACTICA_SPACE_5_OCLOCK);
+        val alike = viperAt(GALACTICA_SPACE_5_OCLOCK);
+        val elsewhere = viperAt(GALACTICA_SPACE_7_OCLOCK);
+        val assaultRaptor = assaultRaptorAt(GALACTICA_SPACE_7_OCLOCK);
 
         execute(new DamageVipersEvent(1, SPACE));
 
@@ -47,7 +47,7 @@ class DamageVipersEventProcessorTest extends EventTestHarness<DamageVipersEvent>
     // The player taking an action chooses (rule 11.3.2.2).
     @Test
     void shouldLetTheActingPlayerChoose() {
-        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_5_OCLOCK);
         ops.actingPlayer(2);
 
         execute(new DamageVipersEvent(1, SPACE));
@@ -63,7 +63,7 @@ class DamageVipersEventProcessorTest extends EventTestHarness<DamageVipersEvent>
 
     @Test
     void shouldStopWhenAllAreDamaged() {
-        viperAt(GALACTICA_SPACE_4_OCLOCK);
+        viperAt(GALACTICA_SPACE_5_OCLOCK);
 
         execute(new DamageVipersEvent(0, SPACE));
     }

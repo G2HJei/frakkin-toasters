@@ -6,10 +6,10 @@ import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 import xyz.zlatanov.frakkintoasters.state.ship.CivilianShip;
 import xyz.zlatanov.frakkintoasters.state.ship.Raider;
 
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_4_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_3_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_5_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.CYLON_FLEET_SPACE_4;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_8_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_9_OCLOCK;
 
 class PlaceShipsEventProcessorTest extends EventTestHarness<PlaceShipsEvent> {
 
@@ -18,19 +18,19 @@ class PlaceShipsEventProcessorTest extends EventTestHarness<PlaceShipsEvent> {
     void shouldPlaceTheShipsInFrontOfAndBehindGalactica() {
         execute(new PlaceShipsEvent(1, 3, 2));
 
-        assertShipCount(GALACTICA_SPACE_8_OCLOCK, Basestar.class, 1);
-        assertShipCount(GALACTICA_SPACE_8_OCLOCK, Raider.class, 3);
-        assertShipCount(GALACTICA_SPACE_2_OCLOCK, CivilianShip.class, 2);
+        assertShipCount(GALACTICA_SPACE_9_OCLOCK, Basestar.class, 1);
+        assertShipCount(GALACTICA_SPACE_9_OCLOCK, Raider.class, 3);
+        assertShipCount(GALACTICA_SPACE_3_OCLOCK, CivilianShip.class, 2);
     }
 
     // e.g. "Necessary Risk": the Cylon ships go to the chosen space area, the civilian ships still behind Galactica
     @Test
     void shouldPlaceTheCylonShipsInTheChosenArea() {
-        execute(new PlaceShipsEvent(1, 3, 1, GALACTICA_SPACE_4_OCLOCK));
+        execute(new PlaceShipsEvent(1, 3, 1, GALACTICA_SPACE_5_OCLOCK));
 
-        assertShipCount(GALACTICA_SPACE_4_OCLOCK, Basestar.class, 1);
-        assertShipCount(GALACTICA_SPACE_4_OCLOCK, Raider.class, 3);
-        assertShipCount(GALACTICA_SPACE_2_OCLOCK, CivilianShip.class, 1);
+        assertShipCount(GALACTICA_SPACE_5_OCLOCK, Basestar.class, 1);
+        assertShipCount(GALACTICA_SPACE_5_OCLOCK, Raider.class, 3);
+        assertShipCount(GALACTICA_SPACE_3_OCLOCK, CivilianShip.class, 1);
     }
 
     @Test
@@ -42,8 +42,8 @@ class PlaceShipsEventProcessorTest extends EventTestHarness<PlaceShipsEvent> {
     void shouldPlaceNothingWhenNothingIsAsked() {
         execute(new PlaceShipsEvent(0, 0, 0));
 
-        assertNoShips(GALACTICA_SPACE_8_OCLOCK);
-        assertNoShips(GALACTICA_SPACE_2_OCLOCK);
+        assertNoShips(GALACTICA_SPACE_9_OCLOCK);
+        assertNoShips(GALACTICA_SPACE_3_OCLOCK);
     }
 
     // Out of basestars in the supply: the one on the Cylon Fleet board (rule 11.4.2).
@@ -56,7 +56,7 @@ class PlaceShipsEventProcessorTest extends EventTestHarness<PlaceShipsEvent> {
 
         execute(new PlaceShipsEvent(1, 0, 0));
 
-        assertShipCount(GALACTICA_SPACE_8_OCLOCK, Basestar.class, 1);
+        assertShipCount(GALACTICA_SPACE_9_OCLOCK, Basestar.class, 1);
         assertNoShips(CYLON_FLEET_SPACE_4);
     }
 
@@ -69,7 +69,7 @@ class PlaceShipsEventProcessorTest extends EventTestHarness<PlaceShipsEvent> {
 
         execute(new PlaceShipsEvent(1, 0, 0));
 
-        assertNoShips(GALACTICA_SPACE_8_OCLOCK);
+        assertNoShips(GALACTICA_SPACE_9_OCLOCK);
     }
 
     @Test
@@ -80,6 +80,6 @@ class PlaceShipsEventProcessorTest extends EventTestHarness<PlaceShipsEvent> {
 
         execute(new PlaceShipsEvent(0, 0, 2));
 
-        assertShipCount(GALACTICA_SPACE_2_OCLOCK, CivilianShip.class, 1);
+        assertShipCount(GALACTICA_SPACE_3_OCLOCK, CivilianShip.class, 1);
     }
 }

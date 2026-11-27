@@ -19,7 +19,7 @@ class WeaponsControlEventProcessorTest extends EventTestHarness<WeaponsControlEv
 
     @Test
     void shouldAttackWithGalactica() {
-        val heavyRaider = heavyRaiderAt(GALACTICA_SPACE_4_OCLOCK);
+        val heavyRaider = heavyRaiderAt(GALACTICA_SPACE_5_OCLOCK);
 
         execute(new WeaponsControlEvent(1, heavyRaider.id()));
 
@@ -28,7 +28,7 @@ class WeaponsControlEventProcessorTest extends EventTestHarness<WeaponsControlEv
 
     @Test
     void shouldNotBeUsedWhileDamaged() {
-        val raider = raiderAt(GALACTICA_SPACE_2_OCLOCK);
+        val raider = raiderAt(GALACTICA_SPACE_3_OCLOCK);
         galacticaBoard.damage(WEAPONS_CONTROL);
         assertInvalid(new WeaponsControlEvent(1, raider.id()));
     }

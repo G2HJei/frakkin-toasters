@@ -9,8 +9,8 @@ import xyz.zlatanov.frakkintoasters.event.ship.PlaceShipOnCylonFleetBoardEvent;
 import xyz.zlatanov.frakkintoasters.state.ship.Basestar;
 
 import static xyz.zlatanov.frakkintoasters.event.Followup.all;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_2_OCLOCK;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_8_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_3_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_9_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.damage.BasestarDamage.DISABLED_WEAPONS;
 import static xyz.zlatanov.frakkintoasters.state.ship.ShipType.BASESTAR;
 
@@ -34,15 +34,15 @@ class ActivateCylonBasestarsEventProcessorTest extends EventTestHarness<Activate
 
     @Test
     void shouldFollowupWithSingleBasestarActivation() {
-        place(GALACTICA_SPACE_8_OCLOCK, basestar1);
+        place(GALACTICA_SPACE_9_OCLOCK, basestar1);
         execute(new ActivateCylonBasestarsEvent());
         assertFollowup(new ActivateCylonBasestarEvent(basestar1.id()));
     }
 
     @Test
     void shouldActivateBasestarsOneByOne() {
-        place(GALACTICA_SPACE_2_OCLOCK, basestar1);
-        place(GALACTICA_SPACE_8_OCLOCK, basestar2);
+        place(GALACTICA_SPACE_3_OCLOCK, basestar1);
+        place(GALACTICA_SPACE_9_OCLOCK, basestar2);
 
         execute(new ActivateCylonBasestarsEvent());
 
@@ -54,7 +54,7 @@ class ActivateCylonBasestarsEventProcessorTest extends EventTestHarness<Activate
     @Test
     void shouldDelegateToBasestarActivationWhenOnlyBasestarHasDisabledWeapons() {
         basestar1.damage(DISABLED_WEAPONS);
-        place(GALACTICA_SPACE_8_OCLOCK, basestar1);
+        place(GALACTICA_SPACE_9_OCLOCK, basestar1);
 
         execute(new ActivateCylonBasestarsEvent());
 
@@ -64,7 +64,7 @@ class ActivateCylonBasestarsEventProcessorTest extends EventTestHarness<Activate
     // "Negotiation": no Cylon ship launches or activates for the rest of the turn.
     @Test
     void nothingWhileTheShipsAreHeld() {
-        place(GALACTICA_SPACE_8_OCLOCK, basestar1);
+        place(GALACTICA_SPACE_9_OCLOCK, basestar1);
         ops.holdCylonShips();
 
         execute(new ActivateCylonBasestarsEvent());

@@ -4,13 +4,13 @@ import org.junit.jupiter.api.Test;
 import xyz.zlatanov.frakkintoasters.EventTestHarness;
 
 import static xyz.zlatanov.frakkintoasters.event.FollowupUtils.rollDie;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_4_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_5_OCLOCK;
 
 class AttackGalacticaEventProcessorTest extends EventTestHarness<AttackGalacticaEvent> {
 
     @Test
     void shouldRollForTheAttack() {
-        int basestarId = basestarAt(GALACTICA_SPACE_4_OCLOCK).id();
+        int basestarId = basestarAt(GALACTICA_SPACE_5_OCLOCK).id();
 
         execute(new AttackGalacticaEvent(basestarId));
 
@@ -19,7 +19,7 @@ class AttackGalacticaEventProcessorTest extends EventTestHarness<AttackGalactica
 
     @Test
     void shouldAttackWithARaiderOrABasestar() {
-        assertInvalid(new AttackGalacticaEvent(heavyRaiderAt(GALACTICA_SPACE_4_OCLOCK).id()));
+        assertInvalid(new AttackGalacticaEvent(heavyRaiderAt(GALACTICA_SPACE_5_OCLOCK).id()));
     }
 
     @Test

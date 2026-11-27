@@ -45,7 +45,7 @@ class BasestarBridgeShipsEventProcessorTest extends EventTestHarness<BasestarBri
 
     @Test
     void shouldPlaceOnTheCylonFleetBoardOnly() {
-        assertInvalid(new BasestarBridgeShipsEvent(1, RAIDER, GALACTICA_SPACE_2_OCLOCK));
+        assertInvalid(new BasestarBridgeShipsEvent(1, RAIDER, GALACTICA_SPACE_3_OCLOCK));
     }
 
     @Test

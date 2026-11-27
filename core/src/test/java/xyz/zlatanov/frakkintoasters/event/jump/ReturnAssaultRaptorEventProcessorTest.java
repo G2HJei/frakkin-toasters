@@ -7,7 +7,7 @@ import xyz.zlatanov.frakkintoasters.EventTestHarness;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_6_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_7_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.HANGAR_DECK;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.LEE_APOLLO_ADAMA;
 
@@ -21,7 +21,7 @@ class ReturnAssaultRaptorEventProcessorTest extends EventTestHarness<ReturnAssau
 
     @Test
     void thePilotGoesToTheHangarDeckAndTheRaptorToTheReserves() {
-        val raptor = assaultRaptorAt(GALACTICA_SPACE_6_OCLOCK);
+        val raptor = assaultRaptorAt(GALACTICA_SPACE_7_OCLOCK);
         raptor.pilot(LEE_APOLLO_ADAMA);
 
         execute(new ReturnAssaultRaptorEvent(2, raptor.id()));
@@ -33,7 +33,7 @@ class ReturnAssaultRaptorEventProcessorTest extends EventTestHarness<ReturnAssau
     // The current player decides about an unmanned one, the pilot about a piloted one.
     @Test
     void anUnmannedRaptorIsReturnedByTheCurrentPlayer() {
-        val raptor = assaultRaptorAt(GALACTICA_SPACE_6_OCLOCK);
+        val raptor = assaultRaptorAt(GALACTICA_SPACE_7_OCLOCK);
 
         execute(new ReturnAssaultRaptorEvent(game.turn().currentPlayerNumber(), raptor.id()));
 
@@ -42,7 +42,7 @@ class ReturnAssaultRaptorEventProcessorTest extends EventTestHarness<ReturnAssau
 
     @Test
     void onlyThePilotDecides() {
-        val raptor = assaultRaptorAt(GALACTICA_SPACE_6_OCLOCK);
+        val raptor = assaultRaptorAt(GALACTICA_SPACE_7_OCLOCK);
         raptor.pilot(LEE_APOLLO_ADAMA);
 
         assertInvalid(new ReturnAssaultRaptorEvent(1, raptor.id()));
@@ -50,6 +50,6 @@ class ReturnAssaultRaptorEventProcessorTest extends EventTestHarness<ReturnAssau
 
     @Test
     void onlyAssaultRaptorsInSpace() {
-        assertInvalid(new ReturnAssaultRaptorEvent(2, viperAt(GALACTICA_SPACE_6_OCLOCK).id()));
+        assertInvalid(new ReturnAssaultRaptorEvent(2, viperAt(GALACTICA_SPACE_7_OCLOCK).id()));
     }
 }

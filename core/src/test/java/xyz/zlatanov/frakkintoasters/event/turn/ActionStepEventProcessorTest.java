@@ -38,7 +38,7 @@ class ActionStepEventProcessorTest extends EventTestHarness<ActionStepEvent> {
     void aPilotMayActivateTheirViper() {
         player(1).character(KARA_STARBUCK_THRACE);
         moveTo(HANGAR_DECK, KARA_STARBUCK_THRACE);
-        ops.player(1).pilot(viperAt(GALACTICA_SPACE_4_OCLOCK).id());
+        ops.player(1).pilot(viperAt(GALACTICA_SPACE_5_OCLOCK).id());
 
         execute(new ActionStepEvent());
 
@@ -51,7 +51,7 @@ class ActionStepEventProcessorTest extends EventTestHarness<ActionStepEvent> {
     void aPilotWithAnActionCardMayPlayItInstead() {
         player(1).character(KARA_STARBUCK_THRACE);
         moveTo(HANGAR_DECK, KARA_STARBUCK_THRACE);
-        ops.player(1).pilot(viperAt(GALACTICA_SPACE_4_OCLOCK).id());
+        ops.player(1).pilot(viperAt(GALACTICA_SPACE_5_OCLOCK).id());
         player(1).gainSkillCards(BUILD_NUKE_6);
 
         execute(new ActionStepEvent());
@@ -131,7 +131,7 @@ class ActionStepEventProcessorTest extends EventTestHarness<ActionStepEvent> {
         player(1).character(KARA_STARBUCK_THRACE);
         president(KARA_STARBUCK_THRACE);
         moveTo(HANGAR_DECK, KARA_STARBUCK_THRACE);
-        ops.player(1).pilot(viperAt(GALACTICA_SPACE_4_OCLOCK).id());
+        ops.player(1).pilot(viperAt(GALACTICA_SPACE_5_OCLOCK).id());
 
         execute(new ActionStepEvent());
 
@@ -183,7 +183,7 @@ class ActionStepEventProcessorTest extends EventTestHarness<ActionStepEvent> {
     @Test
     void expertPilotGivesStarbuckASecondAction() {
         player(1).character(KARA_STARBUCK_THRACE);
-        ops.player(1).pilot(viperAt(GALACTICA_SPACE_4_OCLOCK).id());
+        ops.player(1).pilot(viperAt(GALACTICA_SPACE_5_OCLOCK).id());
         ops.player(1).useAbility(xyz.zlatanov.frakkintoasters.state.character.CharacterAbility.EXPERT_PILOT);
 
         execute(new ActionStepEvent());

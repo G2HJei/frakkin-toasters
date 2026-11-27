@@ -10,7 +10,7 @@ import xyz.zlatanov.frakkintoasters.state.ship.Ship;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_4_OCLOCK;
+import static xyz.zlatanov.frakkintoasters.state.board.Location.GALACTICA_SPACE_5_OCLOCK;
 import static xyz.zlatanov.frakkintoasters.state.board.Location.SICKBAY;
 import static xyz.zlatanov.frakkintoasters.state.character.Character.KARA_STARBUCK_THRACE;
 
@@ -25,9 +25,9 @@ class AttackViperResultEventProcessorTest extends EventTestHarness<AttackViperRe
             "ASSAULT_RAPTOR, 6, NONE", "ASSAULT_RAPTOR, 7, DESTROYED"})
     void shouldResolveTheAttackTable(String fighterType, int roll, Outcome outcome) {
         val fighter = switch (fighterType) {
-            case "VIPER" -> viperAt(GALACTICA_SPACE_4_OCLOCK);
-            case "MARK_VII" -> viperMarkVIIAt(GALACTICA_SPACE_4_OCLOCK);
-            default -> assaultRaptorAt(GALACTICA_SPACE_4_OCLOCK);
+            case "VIPER" -> viperAt(GALACTICA_SPACE_5_OCLOCK);
+            case "MARK_VII" -> viperMarkVIIAt(GALACTICA_SPACE_5_OCLOCK);
+            default -> assaultRaptorAt(GALACTICA_SPACE_5_OCLOCK);
         };
         rolled(roll);
 
@@ -42,7 +42,7 @@ class AttackViperResultEventProcessorTest extends EventTestHarness<AttackViperRe
     @Test
     void shouldSendThePilotToSickbay() {
         player(1).character(KARA_STARBUCK_THRACE);
-        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_5_OCLOCK);
         ops.player(1).pilot(viper.id());
         rolled(5);
 
@@ -53,6 +53,6 @@ class AttackViperResultEventProcessorTest extends EventTestHarness<AttackViperRe
     }
 
     private boolean inSpace(Ship ship) {
-        return galacticaBoard.shipsIn(GALACTICA_SPACE_4_OCLOCK).contains(ship);
+        return galacticaBoard.shipsIn(GALACTICA_SPACE_5_OCLOCK).contains(ship);
     }
 }

@@ -228,7 +228,7 @@ class TurnLoopTest {
     private void placeACivilianShip() {
         val cag = engine.view().playerNumber(engine.view().cag());
         assertWaitingFor(awaiting(cag, PlaceCivilianShipEvent.class));
-        play(engine -> engine.submit(cag, new PlaceCivilianShipEvent(cag, GALACTICA_SPACE_12_OCLOCK)));
+        play(engine -> engine.submit(cag, new PlaceCivilianShipEvent(cag, GALACTICA_SPACE_1_OCLOCK)));
     }
 
     private void play(Consumer<GameEngine> input) {

@@ -22,14 +22,14 @@ class ViperActivationRoundEventProcessorTest extends EventTestHarness<ViperActiv
     void setUp() {
         player(1).character(KARA_STARBUCK_THRACE);
         moveTo(HANGAR_DECK, KARA_STARBUCK_THRACE);
-        own = viperAt(GALACTICA_SPACE_4_OCLOCK);
+        own = viperAt(GALACTICA_SPACE_5_OCLOCK);
         ops.player(1).pilot(own.id());
     }
 
     // Each attack is followed by the next round, and the player may stop instead.
     @Test
     void theAttacksOfTheRound() {
-        Raider raider = raiderAt(GALACTICA_SPACE_4_OCLOCK);
+        Raider raider = raiderAt(GALACTICA_SPACE_5_OCLOCK);
 
         execute(new ViperActivationRoundEvent(1, own.id(), 4, true));
 
@@ -41,7 +41,7 @@ class ViperActivationRoundEventProcessorTest extends EventTestHarness<ViperActiv
 
     @Test
     void theLastRoundQueuesNoOther() {
-        Raider raider = raiderAt(GALACTICA_SPACE_4_OCLOCK);
+        Raider raider = raiderAt(GALACTICA_SPACE_5_OCLOCK);
 
         execute(new ViperActivationRoundEvent(1, own.id(), 1, true));
 
@@ -58,12 +58,12 @@ class ViperActivationRoundEventProcessorTest extends EventTestHarness<ViperActiv
     // An unmanned viper moves 1 space area (rule 11.1.1).
     @Test
     void anUnmannedViperMoves() {
-        Viper unmanned = viperAt(GALACTICA_SPACE_6_OCLOCK);
+        Viper unmanned = viperAt(GALACTICA_SPACE_7_OCLOCK);
 
         execute(new ViperActivationRoundEvent(1, unmanned.id(), 1, false));
 
-        assertFollowup(one(single(new GrantedViperActivationEvent(1, move(unmanned.id(), GALACTICA_SPACE_4_OCLOCK))),
-                single(new GrantedViperActivationEvent(1, move(unmanned.id(), GALACTICA_SPACE_8_OCLOCK))),
+        assertFollowup(one(single(new GrantedViperActivationEvent(1, move(unmanned.id(), GALACTICA_SPACE_5_OCLOCK))),
+                single(new GrantedViperActivationEvent(1, move(unmanned.id(), GALACTICA_SPACE_9_OCLOCK))),
                 single(new NoOpEvent(1))));
     }
 
@@ -72,7 +72,7 @@ class ViperActivationRoundEventProcessorTest extends EventTestHarness<ViperActiv
     void notAnotherPlayersViper() {
         player(2).character(LEE_APOLLO_ADAMA);
         moveTo(HANGAR_DECK, LEE_APOLLO_ADAMA);
-        Viper theirs = viperAt(GALACTICA_SPACE_6_OCLOCK);
+        Viper theirs = viperAt(GALACTICA_SPACE_7_OCLOCK);
         ops.player(2).pilot(theirs.id());
 
         execute(new ViperActivationRoundEvent(1, theirs.id(), 1, false));

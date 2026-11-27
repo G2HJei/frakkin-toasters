@@ -13,19 +13,19 @@ class ReturnVipersToReservesEventProcessorTest extends EventTestHarness<ReturnVi
 
     @Test
     void shouldReturnUnmannedVipers() {
-        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_5_OCLOCK);
 
         execute(new ReturnVipersToReservesEvent());
 
         assertTrue(galacticaBoard.reserves().contains(viper));
-        assertNoShips(GALACTICA_SPACE_4_OCLOCK);
+        assertNoShips(GALACTICA_SPACE_5_OCLOCK);
     }
 
     // "All characters who were piloting vipers are placed in the "Hangar Deck.""
     @Test
     void shouldPlacePilotsOnTheHangarDeck() {
         player(1).character(KARA_STARBUCK_THRACE);
-        val viper = viperAt(GALACTICA_SPACE_6_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_7_OCLOCK);
         ops.player(1).pilot(viper.id());
 
         execute(new ReturnVipersToReservesEvent());
@@ -37,7 +37,7 @@ class ReturnVipersToReservesEventProcessorTest extends EventTestHarness<ReturnVi
     // Assault raptors count as vipers (rule 11.3.2.2).
     @Test
     void shouldReturnAssaultRaptorsToo() {
-        val raptor = assaultRaptorAt(GALACTICA_SPACE_4_OCLOCK);
+        val raptor = assaultRaptorAt(GALACTICA_SPACE_5_OCLOCK);
 
         execute(new ReturnVipersToReservesEvent());
 
@@ -47,23 +47,23 @@ class ReturnVipersToReservesEventProcessorTest extends EventTestHarness<ReturnVi
     // When the fleet jumps the players of assault raptors may choose to remain in their space area (rule 12.1.1).
     @Test
     void shouldLeaveAssaultRaptorsToTheirPlayersWhenTheFleetJumps() {
-        val raptor = assaultRaptorAt(GALACTICA_SPACE_4_OCLOCK);
-        val viper = viperAt(GALACTICA_SPACE_6_OCLOCK);
+        val raptor = assaultRaptorAt(GALACTICA_SPACE_5_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_7_OCLOCK);
 
         execute(new ReturnVipersToReservesEvent(true));
 
-        assertEquals(GALACTICA_SPACE_4_OCLOCK, locate(raptor));
+        assertEquals(GALACTICA_SPACE_5_OCLOCK, locate(raptor));
         assertTrue(galacticaBoard.reserves().contains(viper));
     }
 
     @Test
     void shouldLeaveOtherShipsAlone() {
-        val civilianShip = civilianShipAt(GALACTICA_SPACE_2_OCLOCK);
-        val raider = raiderAt(GALACTICA_SPACE_4_OCLOCK);
+        val civilianShip = civilianShipAt(GALACTICA_SPACE_3_OCLOCK);
+        val raider = raiderAt(GALACTICA_SPACE_5_OCLOCK);
 
         execute(new ReturnVipersToReservesEvent());
 
-        assertEquals(GALACTICA_SPACE_2_OCLOCK, locate(civilianShip));
-        assertEquals(GALACTICA_SPACE_4_OCLOCK, locate(raider));
+        assertEquals(GALACTICA_SPACE_3_OCLOCK, locate(civilianShip));
+        assertEquals(GALACTICA_SPACE_5_OCLOCK, locate(raider));
     }
 }

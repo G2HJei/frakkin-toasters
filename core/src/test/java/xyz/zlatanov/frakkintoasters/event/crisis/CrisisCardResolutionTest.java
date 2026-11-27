@@ -159,8 +159,8 @@ class CrisisCardResolutionTest extends TestHarness {
 
     @Test
     void shouldReturnTheVipersAndAdvanceThePursuit() {
-        val unmanned = viperAt(GALACTICA_SPACE_4_OCLOCK);
-        val piloted = viperAt(GALACTICA_SPACE_6_OCLOCK);
+        val unmanned = viperAt(GALACTICA_SPACE_5_OCLOCK);
+        val piloted = viperAt(GALACTICA_SPACE_7_OCLOCK);
         ops.player(CAG).pilot(piloted.id());
         resolve(DETENTE, TOP);
         assertTrue(galacticaBoard.reserves().contains(unmanned));
@@ -172,9 +172,9 @@ class CrisisCardResolutionTest extends TestHarness {
     @Test
     void shouldPlaceShipsInFrontOfAndBehindGalactica() {
         resolve(TRACKED_BY_RADIATION, TOP);
-        assertShipCount(GALACTICA_SPACE_8_OCLOCK, xyz.zlatanov.frakkintoasters.state.ship.Basestar.class, 1);
-        assertShipCount(GALACTICA_SPACE_8_OCLOCK, xyz.zlatanov.frakkintoasters.state.ship.Raider.class, 3);
-        assertShipCount(GALACTICA_SPACE_2_OCLOCK, CivilianShip.class, 2);
+        assertShipCount(GALACTICA_SPACE_9_OCLOCK, xyz.zlatanov.frakkintoasters.state.ship.Basestar.class, 1);
+        assertShipCount(GALACTICA_SPACE_9_OCLOCK, xyz.zlatanov.frakkintoasters.state.ship.Raider.class, 3);
+        assertShipCount(GALACTICA_SPACE_3_OCLOCK, CivilianShip.class, 2);
     }
 
     @Test
@@ -275,7 +275,7 @@ class CrisisCardResolutionTest extends TestHarness {
 
     @Test
     void shouldLandTheCurrentPlayerWhenSentToSickbay() {
-        val viper = viperAt(GALACTICA_SPACE_2_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_3_OCLOCK);
         ops.player(CURRENT).pilot(viper.id());
         resolve(RESCUE_MISSION_RAIDER, TOP);
         assertEquals(9, galacticaBoard.morale());

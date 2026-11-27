@@ -22,13 +22,13 @@ class MaximumFirepowerEventProcessorTest extends EventTestHarness<MaximumFirepow
         player(1).character(KARA_STARBUCK_THRACE);
         moveTo(HANGAR_DECK, KARA_STARBUCK_THRACE);
         player(1).gainSkillCards(MAXIMUM_FIREPOWER_3);
-        own = viperAt(GALACTICA_SPACE_4_OCLOCK);
+        own = viperAt(GALACTICA_SPACE_5_OCLOCK);
     }
 
     @Test
     void theViperAttacksUpToFourTimes() {
         ops.player(1).pilot(own.id());
-        raiderAt(GALACTICA_SPACE_4_OCLOCK);
+        raiderAt(GALACTICA_SPACE_5_OCLOCK);
 
         execute(new MaximumFirepowerEvent(1, MAXIMUM_FIREPOWER_3));
 
@@ -37,7 +37,7 @@ class MaximumFirepowerEventProcessorTest extends EventTestHarness<MaximumFirepow
 
     @Test
     void onlyWhilePiloting() {
-        raiderAt(GALACTICA_SPACE_4_OCLOCK);
+        raiderAt(GALACTICA_SPACE_5_OCLOCK);
 
         assertInvalid(new MaximumFirepowerEvent(1, MAXIMUM_FIREPOWER_3));
     }
@@ -45,7 +45,7 @@ class MaximumFirepowerEventProcessorTest extends EventTestHarness<MaximumFirepow
     @Test
     void notWithoutATarget() {
         ops.player(1).pilot(own.id());
-        raiderAt(GALACTICA_SPACE_6_OCLOCK);
+        raiderAt(GALACTICA_SPACE_7_OCLOCK);
 
         assertInvalid(new MaximumFirepowerEvent(1, MAXIMUM_FIREPOWER_3));
     }

@@ -45,9 +45,9 @@ class BasestarBridgeAbilityResultEventProcessorTest extends EventTestHarness<Bas
     // tokens and choose 1 to resolve."
     @Test
     void shouldDrawTwoDamageTokensWhenTheRollIsBelowTheRaiders() {
-        raiderAt(GALACTICA_SPACE_2_OCLOCK);
-        raiderAt(GALACTICA_SPACE_2_OCLOCK);
-        raiderAt(GALACTICA_SPACE_4_OCLOCK);
+        raiderAt(GALACTICA_SPACE_3_OCLOCK);
+        raiderAt(GALACTICA_SPACE_3_OCLOCK);
+        raiderAt(GALACTICA_SPACE_5_OCLOCK);
         rolled(2);
         galacticaDamage.nextCard(ARMORY, COMMAND);
         val size = galacticaDamage.size();
@@ -62,8 +62,8 @@ class BasestarBridgeAbilityResultEventProcessorTest extends EventTestHarness<Bas
 
     @Test
     void shouldDrawNoDamageTokenWhenTheRollIsNotBelowTheRaiders() {
-        raiderAt(GALACTICA_SPACE_2_OCLOCK);
-        raiderAt(GALACTICA_SPACE_2_OCLOCK);
+        raiderAt(GALACTICA_SPACE_3_OCLOCK);
+        raiderAt(GALACTICA_SPACE_3_OCLOCK);
         rolled(2);
 
         execute(new BasestarBridgeAbilityResultEvent(1, GALACTICA_DAMAGE));

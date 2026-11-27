@@ -235,7 +235,7 @@ class SelectCharacterEventProcessorTest extends EventTestHarness<SelectCharacter
     @Test
     void shouldPlaceApolloOnTheHangarDeckWithoutAViperInTheReserves() {
         for (int i = 0; i < 6; i++) {
-            ops.galactica().launchHumanFighter(VIPER, GALACTICA_SPACE_4_OCLOCK, null);
+            ops.galactica().launchHumanFighter(VIPER, GALACTICA_SPACE_5_OCLOCK, null);
         }
 
         execute(select(LEE_APOLLO_ADAMA));

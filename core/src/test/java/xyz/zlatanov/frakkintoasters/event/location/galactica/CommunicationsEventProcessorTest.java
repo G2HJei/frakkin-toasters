@@ -38,19 +38,19 @@ class CommunicationsEventProcessorTest extends EventTestHarness<CommunicationsEv
 
     @Test
     void shouldProceedWithRevealingCivilianShips() {
-        galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, civ1);
-        galacticaBoard.place(GALACTICA_SPACE_6_OCLOCK, civ2);
+        galacticaBoard.place(GALACTICA_SPACE_3_OCLOCK, civ1);
+        galacticaBoard.place(GALACTICA_SPACE_7_OCLOCK, civ2);
 
         execute(new CommunicationsEvent(1, id1, id2));
 
         assertFollowup(
                 all(
                         one(new NoOpEvent(1),
-                                new MoveCivilianShipEvent(id1, GALACTICA_SPACE_12_OCLOCK),
-                                new MoveCivilianShipEvent(id1, GALACTICA_SPACE_4_OCLOCK)),
+                                new MoveCivilianShipEvent(id1, GALACTICA_SPACE_1_OCLOCK),
+                                new MoveCivilianShipEvent(id1, GALACTICA_SPACE_5_OCLOCK)),
                         one(new NoOpEvent(1),
-                                new MoveCivilianShipEvent(id2, GALACTICA_SPACE_4_OCLOCK),
-                                new MoveCivilianShipEvent(id2, GALACTICA_SPACE_8_OCLOCK))
+                                new MoveCivilianShipEvent(id2, GALACTICA_SPACE_5_OCLOCK),
+                                new MoveCivilianShipEvent(id2, GALACTICA_SPACE_9_OCLOCK))
                 )
         );
         assertEquals(Set.of(id1, id2),
@@ -59,12 +59,12 @@ class CommunicationsEventProcessorTest extends EventTestHarness<CommunicationsEv
 
     @Test
     void shouldRevealTheOnlyCivilianShipInSpace() {
-        galacticaBoard.place(GALACTICA_SPACE_4_OCLOCK, civ1);
+        galacticaBoard.place(GALACTICA_SPACE_5_OCLOCK, civ1);
         execute(new CommunicationsEvent(1, null, id1));
         assertFollowup(all(
                 one(new NoOpEvent(1),
-                        new MoveCivilianShipEvent(id1, GALACTICA_SPACE_2_OCLOCK),
-                        new MoveCivilianShipEvent(id1, GALACTICA_SPACE_6_OCLOCK))));
+                        new MoveCivilianShipEvent(id1, GALACTICA_SPACE_3_OCLOCK),
+                        new MoveCivilianShipEvent(id1, GALACTICA_SPACE_7_OCLOCK))));
     }
 
     @Test
@@ -74,15 +74,15 @@ class CommunicationsEventProcessorTest extends EventTestHarness<CommunicationsEv
 
     @Test
     void shouldLookAt2CivilianShipsWhenThereAreThatMany() {
-        galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, civ1);
-        galacticaBoard.place(GALACTICA_SPACE_6_OCLOCK, civ2);
+        galacticaBoard.place(GALACTICA_SPACE_3_OCLOCK, civ1);
+        galacticaBoard.place(GALACTICA_SPACE_7_OCLOCK, civ2);
         assertInvalid(new CommunicationsEvent(1, id1, null));
     }
 
     @Test
     void shouldNotLookAtTheSameCivilianShipTwice() {
-        galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, civ1);
-        galacticaBoard.place(GALACTICA_SPACE_6_OCLOCK, civ2);
+        galacticaBoard.place(GALACTICA_SPACE_3_OCLOCK, civ1);
+        galacticaBoard.place(GALACTICA_SPACE_7_OCLOCK, civ2);
         assertInvalid(new CommunicationsEvent(1, id1, id1));
     }
 
@@ -92,23 +92,23 @@ class CommunicationsEventProcessorTest extends EventTestHarness<CommunicationsEv
         player(2).character(ANASTASIA_DEE_DUALLA);
         moveTo(COMMUNICATIONS, ANASTASIA_DEE_DUALLA);
         val civ3 = civilianShip();
-        galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, civ1);
-        galacticaBoard.place(GALACTICA_SPACE_6_OCLOCK, civ2);
-        galacticaBoard.place(GALACTICA_SPACE_4_OCLOCK, civ3);
+        galacticaBoard.place(GALACTICA_SPACE_3_OCLOCK, civ1);
+        galacticaBoard.place(GALACTICA_SPACE_7_OCLOCK, civ2);
+        galacticaBoard.place(GALACTICA_SPACE_5_OCLOCK, civ3);
 
         execute(new CommunicationsEvent(2, null, null));
 
         // by id: the ships were made in reverse
         assertFollowup(all(
                 one(new NoOpEvent(2),
-                        new MoveCivilianShipEvent(civ3.id(), GALACTICA_SPACE_2_OCLOCK),
-                        new MoveCivilianShipEvent(civ3.id(), GALACTICA_SPACE_6_OCLOCK)),
+                        new MoveCivilianShipEvent(civ3.id(), GALACTICA_SPACE_3_OCLOCK),
+                        new MoveCivilianShipEvent(civ3.id(), GALACTICA_SPACE_7_OCLOCK)),
                 one(new NoOpEvent(2),
-                        new MoveCivilianShipEvent(id2, GALACTICA_SPACE_4_OCLOCK),
-                        new MoveCivilianShipEvent(id2, GALACTICA_SPACE_8_OCLOCK)),
+                        new MoveCivilianShipEvent(id2, GALACTICA_SPACE_5_OCLOCK),
+                        new MoveCivilianShipEvent(id2, GALACTICA_SPACE_9_OCLOCK)),
                 one(new NoOpEvent(2),
-                        new MoveCivilianShipEvent(id1, GALACTICA_SPACE_12_OCLOCK),
-                        new MoveCivilianShipEvent(id1, GALACTICA_SPACE_4_OCLOCK))));
+                        new MoveCivilianShipEvent(id1, GALACTICA_SPACE_1_OCLOCK),
+                        new MoveCivilianShipEvent(id1, GALACTICA_SPACE_5_OCLOCK))));
         assertEquals(Set.of(id1, id2, civ3.id()), player(2).revealedCivilianShipIds());
         assertTrue(game.turn().hasUsed(2, EFFICIENT));
     }
@@ -117,24 +117,24 @@ class CommunicationsEventProcessorTest extends EventTestHarness<CommunicationsEv
     void deeNeedNotNameTwoShips() {
         player(2).character(ANASTASIA_DEE_DUALLA);
         moveTo(COMMUNICATIONS, ANASTASIA_DEE_DUALLA);
-        galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, civ1);
-        galacticaBoard.place(GALACTICA_SPACE_6_OCLOCK, civ2);
+        galacticaBoard.place(GALACTICA_SPACE_3_OCLOCK, civ1);
+        galacticaBoard.place(GALACTICA_SPACE_7_OCLOCK, civ2);
 
         execute(new CommunicationsEvent(2, id1, null));
 
         assertEquals(Set.of(id1, id2), player(2).revealedCivilianShipIds());
         assertFollowup(all(
                 one(new NoOpEvent(2),
-                        new MoveCivilianShipEvent(id2, GALACTICA_SPACE_4_OCLOCK),
-                        new MoveCivilianShipEvent(id2, GALACTICA_SPACE_8_OCLOCK)),
+                        new MoveCivilianShipEvent(id2, GALACTICA_SPACE_5_OCLOCK),
+                        new MoveCivilianShipEvent(id2, GALACTICA_SPACE_9_OCLOCK)),
                 one(new NoOpEvent(2),
-                        new MoveCivilianShipEvent(id1, GALACTICA_SPACE_12_OCLOCK),
-                        new MoveCivilianShipEvent(id1, GALACTICA_SPACE_4_OCLOCK))));
+                        new MoveCivilianShipEvent(id1, GALACTICA_SPACE_1_OCLOCK),
+                        new MoveCivilianShipEvent(id1, GALACTICA_SPACE_5_OCLOCK))));
     }
 
     @Test
     void shouldOnlyLookAtCivilianShipsInSpace() {
-        galacticaBoard.place(GALACTICA_SPACE_2_OCLOCK, civ1);
+        galacticaBoard.place(GALACTICA_SPACE_3_OCLOCK, civ1);
         assertInvalid(new CommunicationsEvent(1, id2, null));
     }
 }

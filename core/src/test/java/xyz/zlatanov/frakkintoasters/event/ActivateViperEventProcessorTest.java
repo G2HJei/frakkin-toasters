@@ -20,17 +20,17 @@ class ActivateViperEventProcessorTest extends EventTestHarness<ActivateViperEven
 
     @Test
     void shouldMoveThePilotsViper() {
-        val viper = pilot(GALACTICA_SPACE_4_OCLOCK);
+        val viper = pilot(GALACTICA_SPACE_5_OCLOCK);
 
-        execute(new ActivateViperEvent(1, ViperActivation.move(viper, GALACTICA_SPACE_2_OCLOCK)));
+        execute(new ActivateViperEvent(1, ViperActivation.move(viper, GALACTICA_SPACE_3_OCLOCK)));
 
-        assertEquals(GALACTICA_SPACE_2_OCLOCK, galacticaBoard.locate(galacticaBoard.pilotedFighter(KARA_STARBUCK_THRACE).orElseThrow()));
+        assertEquals(GALACTICA_SPACE_3_OCLOCK, galacticaBoard.locate(galacticaBoard.pilotedFighter(KARA_STARBUCK_THRACE).orElseThrow()));
     }
 
     @Test
     void shouldAttackWithThePilotsViper() {
-        val viper = pilot(GALACTICA_SPACE_4_OCLOCK);
-        val raider = raiderAt(GALACTICA_SPACE_4_OCLOCK);
+        val viper = pilot(GALACTICA_SPACE_5_OCLOCK);
+        val raider = raiderAt(GALACTICA_SPACE_5_OCLOCK);
 
         execute(new ActivateViperEvent(1, ViperActivation.attack(viper, raider.id())));
 
@@ -39,8 +39,8 @@ class ActivateViperEventProcessorTest extends EventTestHarness<ActivateViperEven
 
     @Test
     void shouldEscortWithThePilotsViper() {
-        val viper = pilot(GALACTICA_SPACE_4_OCLOCK);
-        val civilianShip = civilianShipAt(GALACTICA_SPACE_4_OCLOCK);
+        val viper = pilot(GALACTICA_SPACE_5_OCLOCK);
+        val civilianShip = civilianShipAt(GALACTICA_SPACE_5_OCLOCK);
 
         execute(new ActivateViperEvent(1, ViperActivation.escort(viper, civilianShip.id())));
 
@@ -49,17 +49,17 @@ class ActivateViperEventProcessorTest extends EventTestHarness<ActivateViperEven
 
     @Test
     void shouldNotActivateAnUnmannedViperAsAPilot() {
-        pilot(GALACTICA_SPACE_4_OCLOCK);
-        val unmanned = viperAt(GALACTICA_SPACE_4_OCLOCK);
+        pilot(GALACTICA_SPACE_5_OCLOCK);
+        val unmanned = viperAt(GALACTICA_SPACE_5_OCLOCK);
 
-        assertInvalid(new ActivateViperEvent(1, ViperActivation.move(unmanned.id(), GALACTICA_SPACE_2_OCLOCK)));
+        assertInvalid(new ActivateViperEvent(1, ViperActivation.move(unmanned.id(), GALACTICA_SPACE_3_OCLOCK)));
     }
 
     @Test
     void shouldNotLaunchAsAPilot() {
-        pilot(GALACTICA_SPACE_4_OCLOCK);
+        pilot(GALACTICA_SPACE_5_OCLOCK);
 
-        assertInvalid(new ActivateViperEvent(1, ViperActivation.launch(VIPER, GALACTICA_SPACE_6_OCLOCK)));
+        assertInvalid(new ActivateViperEvent(1, ViperActivation.launch(VIPER, GALACTICA_SPACE_7_OCLOCK)));
     }
 
     /* anyone else activates an unmanned viper, e.g. at "Command" */
@@ -68,44 +68,44 @@ class ActivateViperEventProcessorTest extends EventTestHarness<ActivateViperEven
     void shouldLaunchAnUnmannedViper() {
         player(1).character(SAUL_TIGH);
 
-        execute(new ActivateViperEvent(1, ViperActivation.launch(VIPER, GALACTICA_SPACE_6_OCLOCK)));
+        execute(new ActivateViperEvent(1, ViperActivation.launch(VIPER, GALACTICA_SPACE_7_OCLOCK)));
 
-        assertFollowup(new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_6_OCLOCK));
+        assertFollowup(new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_7_OCLOCK));
     }
 
     @Test
     void shouldMoveAMarkVIITwoSpaceAreas() {
         player(1).character(SAUL_TIGH);
-        val markVII = viperMarkVIIAt(GALACTICA_SPACE_4_OCLOCK);
+        val markVII = viperMarkVIIAt(GALACTICA_SPACE_5_OCLOCK);
 
-        execute(new ActivateViperEvent(1, ViperActivation.move(markVII.id(), GALACTICA_SPACE_12_OCLOCK)));
+        execute(new ActivateViperEvent(1, ViperActivation.move(markVII.id(), GALACTICA_SPACE_1_OCLOCK)));
 
-        assertEquals(GALACTICA_SPACE_12_OCLOCK, locate(markVII));
+        assertEquals(GALACTICA_SPACE_1_OCLOCK, locate(markVII));
     }
 
     @Test
     void shouldMoveAViperToAnAdjacentSpaceArea() {
         player(1).character(SAUL_TIGH);
-        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_5_OCLOCK);
 
-        assertInvalid(new ActivateViperEvent(1, ViperActivation.move(viper.id(), GALACTICA_SPACE_12_OCLOCK)));
+        assertInvalid(new ActivateViperEvent(1, ViperActivation.move(viper.id(), GALACTICA_SPACE_1_OCLOCK)));
     }
 
     @Test
     void shouldNotActivateAnotherPlayersViper() {
         player(1).character(SAUL_TIGH);
-        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK).pilot(KARA_STARBUCK_THRACE);
+        val viper = viperAt(GALACTICA_SPACE_5_OCLOCK).pilot(KARA_STARBUCK_THRACE);
 
-        assertInvalid(new ActivateViperEvent(1, ViperActivation.move(viper.id(), GALACTICA_SPACE_2_OCLOCK)));
+        assertInvalid(new ActivateViperEvent(1, ViperActivation.move(viper.id(), GALACTICA_SPACE_3_OCLOCK)));
     }
 
     @Test
     void shouldNameOneActivation() {
         player(1).character(SAUL_TIGH);
-        val viper = viperAt(GALACTICA_SPACE_4_OCLOCK);
-        val raider = raiderAt(GALACTICA_SPACE_4_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_5_OCLOCK);
+        val raider = raiderAt(GALACTICA_SPACE_5_OCLOCK);
 
-        assertInvalid(new ActivateViperEvent(1, new ViperActivation(null, null, viper.id(), GALACTICA_SPACE_2_OCLOCK, raider.id(), null)));
+        assertInvalid(new ActivateViperEvent(1, new ViperActivation(null, null, viper.id(), GALACTICA_SPACE_3_OCLOCK, raider.id(), null)));
     }
 
     @Test

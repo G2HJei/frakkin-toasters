@@ -32,10 +32,10 @@ class UnauthorizedUsageEventProcessorTest extends EventTestHarness<UnauthorizedU
 
     @Test
     void everyNukeIsSpentOnTheLaunch() {
-        execute(new UnauthorizedUsageEvent(1, GALACTICA_SPACE_8_OCLOCK));
+        execute(new UnauthorizedUsageEvent(1, GALACTICA_SPACE_9_OCLOCK));
 
         assertEquals(0, game.nukes());
-        assertFollowup(all(rollDie(new NukeResultEvent(1, GALACTICA_SPACE_8_OCLOCK)),
+        assertFollowup(all(rollDie(new NukeResultEvent(1, GALACTICA_SPACE_9_OCLOCK)),
                 single(new RemoveMutinyCardFromGameEvent(UNAUTHORIZED_USAGE))));
     }
 
@@ -44,7 +44,7 @@ class UnauthorizedUsageEventProcessorTest extends EventTestHarness<UnauthorizedU
         ops.discardNuke();
         ops.discardNuke();
 
-        assertInvalid(new UnauthorizedUsageEvent(1, GALACTICA_SPACE_8_OCLOCK));
+        assertInvalid(new UnauthorizedUsageEvent(1, GALACTICA_SPACE_9_OCLOCK));
     }
 
     @Test

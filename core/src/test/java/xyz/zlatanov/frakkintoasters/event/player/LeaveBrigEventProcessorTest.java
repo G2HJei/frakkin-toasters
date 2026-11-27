@@ -46,7 +46,7 @@ class LeaveBrigEventProcessorTest extends EventTestHarness<LeaveBrigEvent> {
 
     @ParameterizedTest
     @EnumSource(value = Location.class, names = {"BRIG", "SICKBAY", "RESURRECTION_SHIP", "CAPRICA",
-            "GALACTICA_SPACE_4_OCLOCK"})
+            "GALACTICA_SPACE_5_OCLOCK"})
     void shouldRejectIneligibleDestination(Location destination) {
         assertInvalid(new LeaveBrigEvent(1, destination));
     }

@@ -27,7 +27,7 @@ class PlaceShipOnCylonFleetBoardEventProcessorTest extends EventTestHarness<Plac
 
         assertNoShips(CYLON_FLEET_SPACE_7_8);
         assertShipCount(CYLON_FLEET_SPACE_1, 1);
-        assertShipCount(GALACTICA_SPACE_8_OCLOCK, 2); // area 7-8 is in front of Galactica (rule 11.4)
+        assertShipCount(GALACTICA_SPACE_9_OCLOCK, 2); // area 7-8 is in front of Galactica (rule 11.4)
     }
 
     // "He then moves all ships of all types in that space area" (rule 11.4.1.2).

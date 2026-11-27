@@ -139,7 +139,7 @@ launch tubes) and adds the free starfield (`SLOTS`).
   the "Research Lab" and the "Brig" (`SLOTS.criticalDamage`), its ends in the hazard stripes of the printed frames;
   hovering it explains that 6 destroy Galactica.
 - Ships fly in the middle of their space areas, the Cylon ships first, a ship as large in every area of its board, alone
-  or piled (the bow's strip is 8 o'clock, the stern's 2 o'clock; the launch tubes stay free).
+  or piled (the bow's strip is 9 o'clock, the stern's 3 o'clock; the launch tubes stay free).
 - Resources are a row of gauges where nothing is printed (`RESOURCES`, `resources.tsx`): its icon (`icons/`, flat
   one-colour SVGs) and a pip per unit (up to 15, centred on the jump track's line); the red zone's pips are a muted red
   that turns bright and glows while the amount is in it; hovering shows name and amount. While "Preventive Policy"

@@ -55,15 +55,15 @@ class TitleCardActionsTest {
     @Test
     void theAdmiralLaunchesANukeAtASpaceArea() {
         start(all(setUp(WILLIAM_ADAMA), single(new MakeAdmiralEvent(WILLIAM_ADAMA)),
-                single(new PlaceShipEvent(BASESTAR, GALACTICA_SPACE_4_OCLOCK)), single(new ActionStepEvent()), CYLONS_WIN));
+                single(new PlaceShipEvent(BASESTAR, GALACTICA_SPACE_5_OCLOCK)), single(new ActionStepEvent()), CYLONS_WIN));
 
         act(1);
-        play(engine -> engine.submit(1, new LaunchNukeEvent(1, GALACTICA_SPACE_4_OCLOCK)));
+        play(engine -> engine.submit(1, new LaunchNukeEvent(1, GALACTICA_SPACE_5_OCLOCK)));
 
         assertEquals(new Finished(CYLONS), engine.status(1));
         assertEquals(1, engine.view().nukes());
         // the seed decides the roll: from 3 the basestar is destroyed, below it is damaged twice
-        val basestars = engine.view().boards().galactica().shipsIn(GALACTICA_SPACE_4_OCLOCK, Basestar.class);
+        val basestars = engine.view().boards().galactica().shipsIn(GALACTICA_SPACE_5_OCLOCK, Basestar.class);
         if (engine.view().turn().dieRoll().result() >= 3) {
             assertEquals(List.of(), basestars);
         } else {
@@ -78,7 +78,7 @@ class TitleCardActionsTest {
 
         act(1);
         play(engine -> engine.submit(1,
-                new PassCagTitleEvent(1, ViperActivation.launch(VIPER, GALACTICA_SPACE_4_OCLOCK), 2)));
+                new PassCagTitleEvent(1, ViperActivation.launch(VIPER, GALACTICA_SPACE_5_OCLOCK), 2)));
 
         assertEquals(new Finished(CYLONS), engine.status(1));
         assertEquals(WILLIAM_ADAMA, engine.view().cag());
@@ -94,9 +94,9 @@ class TitleCardActionsTest {
 
         act(1);
         play(engine -> engine.submit(1, new HangarDeckEvent(1)));
-        play(engine -> engine.submit(1, new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_4_OCLOCK, KARA_STARBUCK_THRACE, null)));
+        play(engine -> engine.submit(1, new LaunchViperEvent(1, VIPER, GALACTICA_SPACE_5_OCLOCK, KARA_STARBUCK_THRACE, null)));
         act(1);
-        play(engine -> engine.submit(1, new CagPilotActionEvent(1, ViperActivation.launch(VIPER, GALACTICA_SPACE_6_OCLOCK))));
+        play(engine -> engine.submit(1, new CagPilotActionEvent(1, ViperActivation.launch(VIPER, GALACTICA_SPACE_7_OCLOCK))));
 
         assertTrue(engine.view().turn().hasUsed(1, CAG_PILOT_ACTION));
         assertEquals(new AwaitingChoice(1, Set.of(
@@ -104,11 +104,11 @@ class TitleCardActionsTest {
                 single(new PlayerDecisionEvent<>(1, ActionEvent.class)),
                 single(new NoOpEvent(1)))), engine.pendingInput().orElseThrow());
         act(1);
-        val again = new CagPilotActionEvent(1, ViperActivation.launch(VIPER, GALACTICA_SPACE_4_OCLOCK));
+        val again = new CagPilotActionEvent(1, ViperActivation.launch(VIPER, GALACTICA_SPACE_5_OCLOCK));
         assertThrows(InvalidActionException.class, () -> engine.submit(1, again));
         val unmanned = unmannedFightersInSpace().getFirst().id();
         play(engine -> engine.submit(1,
-                new PassCagTitleEvent(1, ViperActivation.move(unmanned, GALACTICA_SPACE_8_OCLOCK), 3)));
+                new PassCagTitleEvent(1, ViperActivation.move(unmanned, GALACTICA_SPACE_9_OCLOCK), 3)));
 
         assertEquals(new Finished(CYLONS), engine.status(1));
         assertEquals(LAURA_ROSLIN, engine.view().cag());

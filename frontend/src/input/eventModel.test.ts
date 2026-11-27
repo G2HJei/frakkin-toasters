@@ -21,7 +21,7 @@ describe('the event model', () => {
     const discard = { ...emptyEvent('DiscardSkillCardsEvent', 3), cards: [{ value: 2, type: 'EXECUTIVE_ORDER' }] };
     const activation = {
       ...emptyEvent('ActivateViperEvent', 1),
-      activation: { launchShipType: null, launchLocation: null, humanFighterId: 4, moveLocation: 'GALACTICA_SPACE_2_OCLOCK', attackCylonShipId: null, escortCivilianShipId: null },
+      activation: { launchShipType: null, launchLocation: null, humanFighterId: 4, moveLocation: 'GALACTICA_SPACE_3_OCLOCK', attackCylonShipId: null, escortCivilianShipId: null },
     };
 
     expect(toWire(discard)).toEqual({ kind: 'DiscardSkillCardsEvent', playerNumber: 3, cards: [{ value: 2, type: 'EXECUTIVE_ORDER' }], discardLimit: null });

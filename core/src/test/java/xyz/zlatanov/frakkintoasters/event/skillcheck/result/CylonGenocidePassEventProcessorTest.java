@@ -14,15 +14,15 @@ class CylonGenocidePassEventProcessorTest extends EventTestHarness<CylonGenocide
 
     @Test
     void shouldDestroyAllCylonShipsOnMainGameBoard() {
-        val raider = raiderAt(GALACTICA_SPACE_2_OCLOCK);
-        val heavyRaider = heavyRaiderAt(GALACTICA_SPACE_4_OCLOCK);
-        val basestar = basestarAt(GALACTICA_SPACE_12_OCLOCK);
+        val raider = raiderAt(GALACTICA_SPACE_3_OCLOCK);
+        val heavyRaider = heavyRaiderAt(GALACTICA_SPACE_5_OCLOCK);
+        val basestar = basestarAt(GALACTICA_SPACE_1_OCLOCK);
 
         execute(new CylonGenocidePassEvent());
 
-        assertNoShips(GALACTICA_SPACE_2_OCLOCK);
-        assertNoShips(GALACTICA_SPACE_4_OCLOCK);
-        assertNoShips(GALACTICA_SPACE_12_OCLOCK);
+        assertNoShips(GALACTICA_SPACE_3_OCLOCK);
+        assertNoShips(GALACTICA_SPACE_5_OCLOCK);
+        assertNoShips(GALACTICA_SPACE_1_OCLOCK);
         assertTrue(cylonShips.raiders().contains(raider));
         assertTrue(cylonShips.heavyRaiders().contains(heavyRaider));
         assertTrue(cylonShips.basestars().contains(basestar));
@@ -30,13 +30,13 @@ class CylonGenocidePassEventProcessorTest extends EventTestHarness<CylonGenocide
 
     @Test
     void shouldNotDestroyHumanShips() {
-        val viper = viperAt(GALACTICA_SPACE_6_OCLOCK);
-        val civilianShip = civilianShipAt(GALACTICA_SPACE_6_OCLOCK);
-        raiderAt(GALACTICA_SPACE_6_OCLOCK);
+        val viper = viperAt(GALACTICA_SPACE_7_OCLOCK);
+        val civilianShip = civilianShipAt(GALACTICA_SPACE_7_OCLOCK);
+        raiderAt(GALACTICA_SPACE_7_OCLOCK);
 
         execute(new CylonGenocidePassEvent());
 
-        assertEquals(Set.of(viper, civilianShip), Set.copyOf(galacticaBoard.shipsIn(GALACTICA_SPACE_6_OCLOCK)));
+        assertEquals(Set.of(viper, civilianShip), Set.copyOf(galacticaBoard.shipsIn(GALACTICA_SPACE_7_OCLOCK)));
     }
 
     @Test
