@@ -896,6 +896,22 @@ details[open] > summary::before {
   width: min(calc(100cqh * 2003 / 2317), calc(100cqw - 676px));
 }
 
+/* a wide screen (TablePage's useWide): the log in a column of its own left of the turn, the chat under the turn. The
+   columns grow up to the widths their panels fill, and the rest goes into margins outside them */
+.table-main.wide {
+  grid-template-columns: minmax(340px, 560px) minmax(340px, 520px) auto minmax(300px, 440px);
+  justify-content: center;
+}
+
+.table-main.wide > .board {
+  width: min(calc(100cqh * 2003 / 2317), calc(100cqw - 1028px));
+}
+
+.table-side.log-column > .log {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
 /* a narrow screen: the board across the width, the panels under it */
 @media (max-width: 1100px) {
   #root:has(> .table-page) {
@@ -1922,12 +1938,19 @@ details[open] > summary::before {
   color: color-mix(in srgb, var(--treachery) 55%, #f0c08a);
 }
 
-/* the players' mats: no panel around them, each mat has the cut corners and the edge */
+/* the players' mats: no panel around them, each mat has the cut corners and the edge. One column beside the board;
+   under it, across the width, as many as fit */
 
 .players .mats {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
+}
+
+@media (max-width: 1100px) {
+  .players .mats {
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  }
 }
 
 .table-page .mat {

@@ -62,6 +62,24 @@ describe('the players', () => {
     expect(inPlayOf(2)).toEqual([expect.stringMatching(/accept prophecy/i)]);
   });
 
+  it("lays the viewer's own mat first, then the others in turn order from his", () => {
+    const four = {
+      ...game,
+      players: [1, 2, 3, 4].map((number) => ({ ...game.players![0], number })),
+    } as unknown as GameProjection;
+    const order = (viewer: object) =>
+      Array.from(
+        render(
+          <Table.Provider value={tableContext({ ...four, viewer } as unknown as GameProjection, false, null)}>
+            <PlayersPanel />
+          </Table.Provider>,
+        ).container.querySelectorAll('.mat'),
+      ).map((mat) => mat.getAttribute('data-player'));
+
+    expect(order({ kind: 'PlayerViewer', playerNumber: 3 })).toEqual(['3', '4', '1', '2']);
+    expect(order({ kind: 'Observer' })).toEqual(['1', '2', '3', '4']);
+  });
+
   it('shows a hand the viewer may see face up, by the cards\' images', () => {
     const panel = renderPanel();
     const own = panel.querySelector('[data-player="1"]');

@@ -15,9 +15,11 @@ export interface ChatPanelProps {
   // the last message the viewer had seen when he opened the chat: the red line goes under it
   seenBefore: number | null;
   send(text: string): boolean;
+  // the box takes the focus when the switch opened the chat, not where it shows from the start
+  autoFocus?: boolean;
 }
 
-export function ChatPanel({ toggle, writes, seenBefore, send }: ChatPanelProps) {
+export function ChatPanel({ toggle, writes, seenBefore, send, autoFocus = false }: ChatPanelProps) {
   const table = useTable();
   const messages = useChatStore((state) => state.messages);
   const rejected = useChatStore((state) => state.rejected);
@@ -27,7 +29,11 @@ export function ChatPanel({ toggle, writes, seenBefore, send }: ChatPanelProps) 
   const firstUnseen = seenBefore === null ? null : (messages.find((line) => line.id > seenBefore)?.id ?? null);
 
   useEffect(() => {
-    input.current?.focus();
+    if (autoFocus) {
+      input.current?.focus();
+    }
+    // only when it opens
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const submit = () => {

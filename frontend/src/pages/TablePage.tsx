@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { Link, useParams } from 'react-router';
 import { useMe, useRoom, type Room } from '../api/queries';
 import { AnytimePanel } from '../input/AnytimePanel';
@@ -113,7 +113,8 @@ function LiveTable({ gameId, room, myId, userNames, seatStates }: LiveTableProps
 
   const sandbox = game?.viewer?.kind === 'Sandbox';
   const asked = game?.input?.kind === 'Decide' || game?.input?.kind === 'Choose' ? game.input.player : null;
-  const { chat, logSeen, chatSeenBefore, unread, decided, markLogSeen } = useTalk(gameId, myId, sandbox);
+  const wide = useWide();
+  const { chat, logSeen, chatSeenBefore, unread, decided, markLogSeen } = useTalk(gameId, myId, sandbox, wide);
   const context = useMemo(() => tableContext(game, sandbox, asked, userNames, seatStates), [game, sandbox, asked, userNames, seatStates]);
   const send = (message: ClientMessage) => socket.current?.send(message);
   const all = useMemo(() => moves(game?.input), [game]);
@@ -186,6 +187,10 @@ function LiveTable({ gameId, room, myId, userNames, seatStates }: LiveTableProps
     }
   }, [game, name]);
 
+  // a wide screen has no switch: the log has a column of its own, and the chat shows under the turn
+  const toggle = wide ? null : <ChatToggle chat={chat} unread={unread} />;
+  const log = <LogPanel toggle={toggle} seenBefore={sandbox ? null : logSeen} onSeen={markLogSeen} />;
+
   return (
     <Table.Provider value={context}>
       <AnsweringContext.Provider value={answering}>
@@ -201,7 +206,8 @@ function LiveTable({ gameId, room, myId, userNames, seatStates }: LiveTableProps
               <p className="muted connecting">Connecting…</p>
             )
           ) : (
-            <div className="table-main">
+            <div className={`table-main ${wide ? 'wide' : ''}`.trim()}>
+              {wide && <div className="table-side log-column">{log}</div>}
               <div className="table-side left">
                 {/* the turn and the decision in one panel, red while the game waits for the viewer */}
                 <div className={`turn-input ${yourMove ? 'your-move' : ''}`.trim()}>
@@ -217,13 +223,14 @@ function LiveTable({ gameId, room, myId, userNames, seatStates }: LiveTableProps
                 {/* the log, or the chat in its place, takes what the panels above leave */}
                 {chat.shown ? (
                   <ChatPanel
-                    toggle={<ChatToggle chat={chat} unread={unread} />}
+                    toggle={toggle}
                     writes={writes(room, myId)}
                     seenBefore={chatSeenBefore}
                     send={(text: string) => !!send({ type: 'say', text })}
+                    autoFocus={!wide}
                   />
                 ) : (
-                  <LogPanel toggle={<ChatToggle chat={chat} unread={unread} />} seenBefore={sandbox ? null : logSeen} onSeen={markLogSeen} />
+                  !wide && log
                 )}
               </div>
               <div className={`board ${yourMove ? 'your-move' : ''}`.trim()}>
@@ -284,12 +291,27 @@ function ChatToggle({ chat, unread }: { chat: ChatSwitch; unread: number }) {
   );
 }
 
+// The board is as high as the screen and as wide as its picture then. Where that leaves this much of the screen's width
+// beside it, the log gets a column of its own (styles.css: .table-main.wide, whose columns' least widths, gaps and
+// padding take 1040px of it).
+const WIDE_SIDES = 1180;
+const BOARD_RATIO = 2003 / 2317;
+
+function onResize(changed: () => void) {
+  window.addEventListener('resize', changed);
+  return () => window.removeEventListener('resize', changed);
+}
+
+function useWide(): boolean {
+  return useSyncExternalStore(onResize, () => window.innerWidth - window.innerHeight * BOARD_RATIO >= WIDE_SIDES);
+}
+
 /**
  * Where the viewer left off, kept per game and user in this browser. The log's red line goes above the first entry
  * after his last decision: it moves on with the game that follows his next one. The chat's goes under the last message
  * he had seen when he opened it, and everything in it is seen while it is open. A sandbox has neither.
  */
-function useTalk(gameId: string, myId: string | undefined, sandbox: boolean) {
+function useTalk(gameId: string, myId: string | undefined, sandbox: boolean, wide: boolean) {
   const logLength = useGameStore((state) => state.log.length);
   const version = useGameStore((state) => state.version);
   const messages = useChatStore((state) => state.messages);
@@ -297,7 +319,17 @@ function useTalk(gameId: string, myId: string | undefined, sandbox: boolean) {
   const [logSeen, setLogSeen] = useState<number | null>(() => readLastSeen(key('log')));
   const [chatSeen, setChatSeen] = useState<number | null>(() => readLastSeen(key('chat')));
   const [chatSeenBefore, setChatSeenBefore] = useState<number | null>(null);
-  const [shown, setShown] = useState(false);
+  const [switched, setSwitched] = useState(false);
+  // a wide screen shows the chat beside the log, a narrower one in its place while the switch says so
+  const shown = (switched || wide) && !sandbox;
+  // the red line goes under the last message seen when the chat opens, either way
+  const [wasShown, setWasShown] = useState(false);
+  if (shown !== wasShown) {
+    setWasShown(shown);
+    if (shown) {
+      setChatSeenBefore(chatSeen);
+    }
+  }
   const seenOnNextGame = useRef(false);
 
   const markLogSeen = () => {
@@ -332,15 +364,7 @@ function useTalk(gameId: string, myId: string | undefined, sandbox: boolean) {
 
   const unread = shown || sandbox ? 0 : messages.filter((line) => line.id > (chatSeen ?? 0) && line.userId !== myId).length;
   return {
-    chat: {
-      shown: shown && !sandbox,
-      show: (value: boolean) => {
-        if (value && !shown) {
-          setChatSeenBefore(chatSeen);
-        }
-        setShown(value);
-      },
-    },
+    chat: { shown, show: setSwitched },
     logSeen,
     chatSeenBefore,
     unread,

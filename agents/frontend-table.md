@@ -6,8 +6,11 @@ The game page (`TablePage`) and what it draws. The rest of the frontend is in [f
 
 - Layout: no bar over it, the board in the middle as high as the screen (`.table-main` is a size container, the
   board's width follows its height), and a column on each side that scrolls on its own. Under 1100px the board goes
-  across the width and the panels under it. The styles are the "table" section of `styles.css`: the board's palette,
-  cut corners (`.cf`, `--chamfer`) and the printed-label look.
+  across the width and the panels under it. Where the board leaves 1180px beside it (`useWide` in `TablePage`: the
+  screen's width less the board's, which no media query can say), the log gets a column of its own left of the turn
+  and the chat shows under the turn, without the switch (`.table-main.wide`); its columns stop growing at 560px (log),
+  520px (turn) and 440px (mats), and the rest goes into margins outside them. The styles are the "table" section of
+  `styles.css`: the board's palette, cut corners (`.cf`, `--chamfer`) and the printed-label look.
 - Left column: one panel for the game, the turn and the decision, the "At any time" panel while there is something to
   do, then the log. The panel's top is `TurnPanel`: its tab names the game, with the connection beside it while it isn't
   open; one row with the turn's number ("T4") and the current character in a banner (70%), red while he acts, otherwise
@@ -23,7 +26,8 @@ The game page (`TablePage`) and what it draws. The rest of the frontend is in [f
 - Right column: the sandbox's tools in a sandbox, or the seats of a standard game (`table/session/SessionPanel`, open
   while a seat is vacant or a vote is open: each seat's character and user, "Take this seat" for whoever holds none,
   votes to hand a seat over or to abandon with their tally, the host's "Hand over", "Ban" and "Abandon the game", which
-  pass at once, "Leave my seat", "Leave the table"), above the players' mats (`PlayersPanel`): title badges with the
+  pass at once, "Leave my seat", "Leave the table"), above the players' mats (`PlayersPanel`, in one column, under the
+  board as many as fit; the viewer's own first, then the others in turn order from his): title badges with the
   insignia cut out of the card (`table/players/icons/`, the card as their preview), the nukes beside the Admiral, and
   right of the portrait a strip with a cell per card of the sheet's skill set in its colors (split along the diagonal for
   "either"), for everyone but a revealed Cylon, who draws 2 of any colors. Another player's hand is one Skill Card back
@@ -75,7 +79,9 @@ The game page (`TablePage`) and what it draws. The rest of the frontend is in [f
 
 The "Chat" switch floats over the top right of the log and of the chat, where a sandbox has its "Facts" switch
 (`ChatToggle` in `TablePage`): it puts the chat in the log's place and reads "Logs" to go back, in the same look either
-way (unlike "Facts", it is no switch that lights up), and it counts what came since the chat was last open. `table/chat/ChatPanel.tsx` takes the log's place and sizing: one chat for everyone at the
+way (unlike "Facts", it is no switch that lights up), and it counts what came since the chat was last open. A wide
+screen has no switch: the chat stays open under the turn, the log in its own column. `table/chat/ChatPanel.tsx` takes
+the log's place and sizing (its box takes the focus only when the switch opened it): one chat for everyone at the
 table; a message shows its writer's portrait (the character of the seat he held), his name, the character or
 "observer", and the time. The box is one line high, without a button: Enter sends (500 characters at most),
 Shift+Enter breaks the line; whoever only watches a

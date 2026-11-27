@@ -19,10 +19,13 @@ import { characterSkillSet, characterType } from '../../wire/schema';
 export function PlayersPanel() {
   const table = useTable();
   const players = table.game?.players ?? [];
+  // the viewer's own mat first, then the others in turn order from his
+  const you = players.findIndex((player) => viewerIs(table.game, player.number));
+  const ordered = you > 0 ? [...players.slice(you), ...players.slice(0, you)] : players;
   return (
     <section className="players" aria-label="players">
       <div className="mats">
-        {players.map((player) => (
+        {ordered.map((player) => (
           <PlayerMat key={player.number} player={player} />
         ))}
       </div>
