@@ -540,9 +540,11 @@ function noOpWords(parent: string | null, details: Record<string, unknown> | nul
   }
 }
 
-// The images a fact names beside its line; a shuffled deck's order is no picture of what happened.
+// The images a fact names beside its line; a shuffled deck's order is no picture of what happened, and a card played
+// on a roll is pictured by its play, with its value.
 function lineArt(fact: FactProjection): ArtRef[] {
-  return factKind(fact) === 'DeckFact.DeckShuffled' ? [] : factArt(fact);
+  const kind = factKind(fact);
+  return kind === 'DeckFact.DeckShuffled' || kind === 'GameFact.DieRollCardPlayed' ? [] : factArt(fact);
 }
 
 function shows(one: Sentence): boolean {

@@ -566,8 +566,7 @@ describe('the log', () => {
       const body = renderLog([turnStarted(1, 4), ...answers, closed], players);
 
       expect(rows(body)).toEqual([
-        ['Helena Cain', 'plays Strategic Planning 4'],
-        [null, 'Strategic Planning changes the roll by 2'],
+        ['Helena Cain', 'plays Strategic Planning 4, changing the roll by +2'],
         ['Louanne "Kat" Katraine', 'uses Hotshot'],
       ]);
     });
@@ -600,8 +599,7 @@ describe('the log', () => {
       expect(rows(body)).toEqual([
         ['William Adama', "keeps Helena Cain's Strategic Planning 4"],
         ['William Adama', 'plays Strategic Planning 3, which goes back to the hand'],
-        ['Helena Cain', 'plays Strategic Planning 4'],
-        [null, 'Strategic Planning changes the roll by 2'],
+        ['Helena Cain', 'plays Strategic Planning 4, which changes the roll by +2'],
         ['Felix Gaeta', 'uses FTL Operator'],
       ]);
     });

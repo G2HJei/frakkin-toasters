@@ -193,6 +193,7 @@ interface Draft {
   facts: FactProjection[];
   ships?: { names: Part[]; move: ShipMove };
   seen?: number[];
+  modifier?: number;
 }
 
 const draft = (verb: string, facts: FactProjection[], fields: Partial<Draft> = {}): Draft => ({ verb, who: null, target: null, deck: null, cards: null, decks: [], facts, ...fields });
@@ -352,8 +353,16 @@ function pair(moves: Move[], facts: FactProjection[], at: number, out: Draft[], 
     // or back to the hand where another card stands instead
     case 'interruptResolved': {
       const discarded = next?.t === 'discarded' && next.cards.count === move.cards.count;
-      out.push(draft('plays', facts.slice(at, at + (discarded ? 2 : 1)), { who: move.who, cards: discarded ? known(move.cards, next.cards) : move.cards }));
-      return discarded ? 2 : 1;
+      const cards = discarded ? known(move.cards, next.cards) : move.cards;
+      const end = at + (discarded ? 2 : 1);
+      // what a card played on a roll changes it by follows it: "plays Strategic Planning 4, which changes the roll by 2"
+      const roll = rollModifier(facts[end], cards);
+      if (roll !== null) {
+        out.push(draft('playsOnRoll', facts.slice(at, end + 1), { who: move.who, cards, modifier: roll }));
+        return end + 1 - at;
+      }
+      out.push(draft('plays', facts.slice(at, end), { who: move.who, cards }));
+      return end - at;
     }
     case 'interruptReturned': {
       const gained = next?.t === 'gained' && next.who === move.who;
@@ -393,6 +402,16 @@ function pair(moves: Move[], facts: FactProjection[], at: number, out: Draft[], 
       return 1;
     }
   }
+}
+
+// The modifier of a "GameFact.DieRollCardPlayed" for the interrupt card just resolved, null when the fact is another.
+function rollModifier(fact: FactProjection | undefined, cards: Cards): number | null {
+  if (!fact || fact.kind !== 'Shown' || factKind(fact) !== 'GameFact.DieRollCardPlayed') {
+    return null;
+  }
+  const played = fact.fact as unknown as { card: string; modifier: number };
+  const card = cards.list?.[0] as { type?: string } | undefined;
+  return !card || card.type === played.card ? played.modifier : null;
 }
 
 // The cards of a move told by several facts: the list where one of them shows it, the colors where one counts them.
@@ -537,6 +556,9 @@ function sentence(one: Draft, context: FactContext): Sentence {
       return make(words(name(one.who), ` discards `, cards), one.who, true);
     case 'plays':
       return make(words(name(one.who), ` plays `, cards), one.who, true);
+    // "Best of the Best" changes no roll, nor does "Evasive Manoeuvres" for an unpiloted viper
+    case 'playsOnRoll':
+      return make(words(name(one.who), ` plays `, cards, one.modifier ? `, changing the roll by ${one.modifier > 0 ? '+' : ''}${one.modifier}` : ''), one.who, true);
     case 'playsBack':
       return make(words(name(one.who), ` plays `, cards, `, which ${many ? 'go' : 'goes'} back to the hand`), one.who);
     case 'putsIn':
