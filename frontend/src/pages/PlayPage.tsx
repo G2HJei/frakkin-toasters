@@ -135,6 +135,7 @@ function GameList({ title, empty, games, tools, action }: GameListProps) {
                   <span>{game.name}</span>
                 )}
                 <span className={`status-chip ${game.status.toLowerCase()}`}>{game.status.toLowerCase()}</span>
+                {game.waitingForMe && game.mode === 'STANDARD' && <span className="badge alert">your move</span>}
               </div>
               <div className="game-facts muted">
                 {game.players} players · host {game.hostName}
@@ -144,7 +145,6 @@ function GameList({ title, empty, games, tools, action }: GameListProps) {
                 {!game.openable ? ' · saved by another version' : ''}
               </div>
               <div className="game-actions">
-                {game.waitingForMe && game.mode === 'STANDARD' && <span className="badge">your move</span>}
                 {game.vacantSeats > 0 && (
                   <span className="badge alert">{game.vacantSeats === 1 ? 'a seat is vacant' : `${game.vacantSeats} seats are vacant`}</span>
                 )}
