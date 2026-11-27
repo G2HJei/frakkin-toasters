@@ -831,6 +831,10 @@ export function shipMove(fact: Record<string, unknown>, context: LabelContext): 
   if ((IN_SPACE.has(from ?? '') || from === 'RESERVES') && (to === 'REMOVED' || to === 'CYLON_SUPPLY' || to === 'CENTURION_SUPPLY')) {
     return move(`is <${lost}destroyed>`, `are <${lost}destroyed>`);
   }
+  if (from === 'CIVILIAN_DECK' && to === 'REMOVED') {
+    // rule 13.6
+    return move(`is drawn and <${lost}destroyed>`, `are drawn and <${lost}destroyed>`);
+  }
   switch (to) {
     case 'DAMAGED':
       return move(`is <${lost}damaged>`, `are <${lost}damaged>`);

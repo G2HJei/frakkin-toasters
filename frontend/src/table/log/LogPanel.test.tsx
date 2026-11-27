@@ -201,7 +201,7 @@ describe('the log', () => {
         { kind: 'Shown', fact: { kind: 'GameFact.TurnLimitUsed', playerNumber: 1, limit: 'CAG_PILOT_ACTION' } },
         { kind: 'Shown', fact: { kind: 'PlayerFact.CardsSeen', playerNumber: 1, deck: 'CRISIS', cards: ['RIOTS_NO_JUMP'] } },
         { kind: 'Shown', fact: { kind: 'PlayerFact.CharacterMoved', character: 'WILLIAM_ADAMA', to: 'ARMORY' } },
-        { kind: 'Shown', fact: { kind: 'BoardFact.ResourceDecreased', resource: 'FOOD', amount: 1 } },
+        { kind: 'Shown', fact: { kind: 'BoardFact.PursuitAdvanced' } },
       ],
     } as LogEntry;
     const entries = [turnStarted(1, 1), step(2, 'MOVEMENT'), move, step(8, 'ACTION')];
@@ -216,7 +216,7 @@ describe('the log', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Facts' }));
 
     // the move says what its line says, the turn limit keeps the books
-    expect([...body.querySelectorAll('.facts li')].map((fact) => fact.textContent)).toEqual(['The fleet loses 1 food', 'looks at Riots No Jump']);
+    expect([...body.querySelectorAll('.facts li')].map((fact) => fact.textContent)).toEqual(['The Cylon pursuit advances', 'looks at Riots No Jump']);
     // the destination's card shows on hover
     expect(body.querySelector('.event .named')?.textContent).toBe('Armory');
   });
@@ -226,7 +226,7 @@ describe('the log', () => {
       ...scope(2),
       event: 'DrawMutinyCardEvent',
       details: { kind: 'DrawMutinyCardEvent', playerNumber: 1 },
-      facts: [{ kind: 'Shown', fact: { kind: 'BoardFact.ResourceDecreased', resource: 'FOOD', amount: 1 } }],
+      facts: [{ kind: 'Shown', fact: { kind: 'BoardFact.PursuitAdvanced' } }],
     } as LogEntry;
 
     const game = renderLog([lost]);
@@ -243,7 +243,7 @@ describe('the log', () => {
     fireEvent.click(toggle);
 
     expect(toggle).toHaveAttribute('aria-pressed', 'true');
-    expect([...sandbox.querySelectorAll('.facts li')].map((fact) => fact.textContent)).toEqual(['The fleet loses 1 food']);
+    expect([...sandbox.querySelectorAll('.facts li')].map((fact) => fact.textContent)).toEqual(['The Cylon pursuit advances']);
 
     fireEvent.click(toggle);
 
@@ -268,6 +268,56 @@ describe('the log', () => {
     renderWithToggle(true);
     expect(screen.getByRole('button', { name: 'Facts' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Chat' })).toBeNull();
+  });
+
+  it('tells what the fleet loses with a line of its own, outside a sandbox too', () => {
+    const executed = {
+      ...scope(2),
+      event: 'ExecuteEvent',
+      details: { kind: 'ExecuteEvent', playerNumber: 1, withoutMoraleLoss: false },
+      facts: [
+        { kind: 'Shown', fact: { kind: 'BoardFact.ResourceDecreased', resource: 'MORALE', amount: 1 } },
+        { kind: 'Shown', fact: { kind: 'BoardFact.PursuitAdvanced' } },
+      ],
+    } as LogEntry;
+
+    const body = renderLog([executed]);
+
+    expect(rows(body)).toEqual([
+      ['William Adama', 'is executed'],
+      [null, 'The fleet loses 1 morale'],
+    ]);
+    expect(body.querySelector('.facts')).toBeNull();
+  });
+
+  it('tells each civilian ship drawn and destroyed with what the fleet loses for it', () => {
+    const drawn = (scopeId: number, count: number, shipId: number | null, losses: [string, number][]) =>
+      ({
+        ...scope(scopeId),
+        event: 'DrawAndDestroyCivilianShipsEvent',
+        details: { kind: 'DrawAndDestroyCivilianShipsEvent', count },
+        facts: [
+          ...losses.map(([resource, amount]) => ({ kind: 'Shown', fact: { kind: 'BoardFact.ResourceDecreased', resource, amount } })),
+          ...(shipId ? [{ kind: 'Shown', fact: { kind: 'ShipFact.ShipMoved', shipId, from: 'CIVILIAN_DECK', to: 'REMOVED', location: null } }] : []),
+        ],
+      }) as LogEntry;
+    const body = renderLog([
+      drawn(2, 2, 2005, [
+        ['FUEL', 1],
+        ['POPULATION', 1],
+      ]),
+      drawn(3, 1, 2003, [['MORALE', 1]]),
+      drawn(4, 0, null, []),
+    ]);
+
+    // each ship once with its own losses, not "2 civilian ships" and then "1 civilian ship"
+    expect(rows(body)).toEqual([
+      [null, 'The fleet loses 1 fuel'],
+      [null, 'The fleet loses 1 population'],
+      [null, 'Civilian ship #2005 is drawn and destroyed'],
+      [null, 'The fleet loses 1 morale'],
+      [null, 'Civilian ship #2003 is drawn and destroyed'],
+    ]);
   });
 
   it("names the player in front of each of his lines, and nobody in front of the game's", () => {
@@ -599,7 +649,7 @@ describe('the log', () => {
       expect(rows(body)).toEqual([
         ['William Adama', "keeps Helena Cain's Strategic Planning 4"],
         ['William Adama', 'plays Strategic Planning 3, which goes back to the hand'],
-        ['Helena Cain', 'plays Strategic Planning 4, which changes the roll by +2'],
+        ['Helena Cain', 'plays Strategic Planning 4, changing the roll by +2'],
         ['Felix Gaeta', 'uses FTL Operator'],
       ]);
     });

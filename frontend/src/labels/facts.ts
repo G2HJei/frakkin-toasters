@@ -355,7 +355,7 @@ function pair(moves: Move[], facts: FactProjection[], at: number, out: Draft[], 
       const discarded = next?.t === 'discarded' && next.cards.count === move.cards.count;
       const cards = discarded ? known(move.cards, next.cards) : move.cards;
       const end = at + (discarded ? 2 : 1);
-      // what a card played on a roll changes it by follows it: "plays Strategic Planning 4, which changes the roll by 2"
+      // what a card played on a roll changes it by follows it: "plays Strategic Planning 4, changing the roll by +2"
       const roll = rollModifier(facts[end], cards);
       if (roll !== null) {
         out.push(draft('playsOnRoll', facts.slice(at, end + 1), { who: move.who, cards, modifier: roll }));

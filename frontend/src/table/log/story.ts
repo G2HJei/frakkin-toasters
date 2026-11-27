@@ -120,6 +120,8 @@ const TOLD = new Set([
   'DestroyRaidersEvent',
   'DestroyRaptorEvent',
   'DestroyCivilianShipEvent',
+  // one ship per scope, each queuing the rest: its words would count 2, then 1 more
+  'DrawAndDestroyCivilianShipsEvent',
   'MoveCivilianShipEvent',
   'ShuffleCivilianShipIntoDeckEvent',
   'SendToBrigEvent',
@@ -218,12 +220,27 @@ function returnsInterruptCard(one: Sentence): boolean {
   return one.facts.some((fact) => factKind(fact) === 'InterruptFact.InterruptCardReturned');
 }
 
+const RESOURCES = new Set(['BoardFact.ResourceDecreased', 'BoardFact.ResourceIncreased', 'GameFact.LossReduced']);
+
+// What the fleet gains or loses is told on its own line, as the facts under a line are a sandbox's only: "is
+// executed", then "The fleet loses 1 morale".
+function changesResource(one: Sentence): boolean {
+  return one.facts.some((fact) => RESOURCES.has(factKind(fact)));
+}
+
+// Told on a line of its own after the line of its scope.
+function toldApart(one: Sentence): boolean {
+  return returnsInterruptCard(one) || changesResource(one);
+}
+
 /** Whether a fact changes the table: a ship that is destroyed, damaged or launched does. */
 export function isStoryFact(fact: FactProjection): boolean {
   const kind = factKind(fact);
   if (kind === 'ShipFact.ShipMoved' && fact.kind === 'Shown') {
     const ship = fact.fact as unknown as { from: string | null; to: string | null };
-    return ship.to !== ship.from && ship.to !== 'CYLON_FLEET_SPACE' && ship.from !== 'HUMAN_SUPPLY' && ship.from !== 'CIVILIAN_DECK';
+    // a civilian ship drawn from the deck is destroyed, one placed from it only appears
+    const placed = ship.from === 'CIVILIAN_DECK' && ship.to !== 'REMOVED';
+    return ship.to !== ship.from && ship.to !== 'CYLON_FLEET_SPACE' && ship.from !== 'HUMAN_SUPPLY' && !placed;
   }
   return STORY.has(kind);
 }
@@ -482,12 +499,12 @@ function scopeLines(entry: ScopeLog, index: number, chosenBy: number | null, sco
   const line = actor !== null && !chosen ? (withoutSubject(words, context.playerName(actor)) ?? words) : words;
   const named = namedCards(details);
   const source = unnamedSource(kind, details, words, context);
+  const said = (one: Sentence) => repeats(one, line, named, actor, context);
   const nested = sentences.filter(
-    (one) =>
-      !returnsInterruptCard(one) && !repeats(one, line, named, actor, context) && !usesSource(one, source, actor, context) && !activationMove(one, details, line) && !(shownFaceUp && shows(one)),
+    (one) => !toldApart(one) && !said(one) && !usesSource(one, source, actor, context) && !activationMove(one, details, line) && !(shownFaceUp && shows(one)),
   );
-  const returned = sentences.filter(returnsInterruptCard);
-  const apart = new Set(returned.flatMap((one) => one.facts));
+  const ownLines = sentences.filter((one) => toldApart(one) && !said(one));
+  const apart = new Set(ownLines.flatMap((one) => one.facts));
   return [
     {
       ...base,
@@ -500,7 +517,7 @@ function scopeLines(entry: ScopeLog, index: number, chosenBy: number | null, sco
       facts: storyFirst(nested).map((one) => sentenceParts(one, actor, context)),
       art: unique([...recordArt(details), ...facts.filter((fact) => !apart.has(fact)).flatMap(lineArt)]).filter((ref) => !(DAMAGE_CHOSEN.has(kind) && ref.key.startsWith('GalacticaDamage/'))),
     },
-    ...returned.map((one, at) => toldLine(one, `${key}-returned-${at}`, base, context)),
+    ...ownLines.map((one, at) => toldLine(one, `${key}-apart-${at}`, base, context)),
   ];
 }
 

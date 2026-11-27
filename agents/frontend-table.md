@@ -56,7 +56,7 @@ The game page (`TablePage`) and what it draws. The rest of the frontend is in [f
   secret answers to an interrupt window (`SECRET_ANSWERS`). An event whose facts say everything (the steps, a skill
   check's mechanics, a roll, a result) is told by them, each under the player it is about. The reveal of the cards
   played before a skill check names them by who played them (the fact's `revealed`), and the close of an interrupt
-  window tells each card and ability as its player's play ("plays Strategic Planning 4, which changes the roll by +2",
+  window tells each card and ability as its player's play ("plays Strategic Planning 4, changing the roll by +2",
   "plays ..., which goes back to the hand", "uses FTL Operator", also when it waits for the next roll), a card a
   tiebreak sends back on its own line.
 - An only answer the server took has the answers' pass icon in white in front ("automatic" on hover); a tag names the
@@ -65,7 +65,8 @@ The game page (`TablePage`) and what it draws. The rest of the frontend is in [f
   the type a typed field of the log gave it (`raiderShipId`, ...).
 - Facts stay hidden, but a sandbox shows them under each line with the "Facts" switch (floating over the log's top
   right, in the place of the chat's switch): the ones that change the table first (`isStoryFact`; a ship destroyed, damaged or launched counts), without
-  the ones the words say already.
+  the ones the words say already. What the fleet gains or loses is never only under a line: it gets a line of its own
+  after it ("is executed", then "The fleet loses 1 morale"), as an interrupt card a tiebreak sends back does.
 - A click on a line lights what it names on the board for a moment (`table/flash.ts`, `entryTargets`, `useFlash`). The
   log follows the newest entry until the user scrolls up (`useFollowBottom`: only a scroll up leaves the end, since a
   scroll event arrives a frame late); the arrow at its bottom right follows again, amber while new entries came below.
