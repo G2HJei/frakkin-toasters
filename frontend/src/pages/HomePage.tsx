@@ -147,8 +147,8 @@ export function HomePage() {
                 ) : (
                     <>
                         <div>
-                            <p className="cta-kicker">Report for duty</p>
-                            <p className="cta-text"> Register and take a seat. </p>
+                            <p className="cta-kicker">Are you alive?</p>
+                            <p className="cta-text"> Prove it. Register and take a seat. </p>
                         </div>
                         <div className="cta-buttons">
                             <Link className="button primary" to="/login">
