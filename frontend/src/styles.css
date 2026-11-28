@@ -4479,6 +4479,10 @@ button.avatar-button {
     max-width: 640px;
 }
 
+.site .page.about > * {
+    margin-inline: auto;
+}
+
 .page-head {
     margin: 28px 0 20px;
 }
@@ -5028,7 +5032,6 @@ button.avatar-button {
 }
 
 .prose p {
-    max-width: 78ch;
     margin: 0 0 10px;
 }
 
@@ -5039,7 +5042,6 @@ button.avatar-button {
 .prose ol {
     display: grid;
     gap: 10px;
-    max-width: 80ch;
     margin: 0;
     padding-left: 1.4rem;
 }
@@ -5051,7 +5053,6 @@ button.avatar-button {
 }
 
 .prose dl {
-    max-width: 80ch;
     margin: 0;
 }
 
