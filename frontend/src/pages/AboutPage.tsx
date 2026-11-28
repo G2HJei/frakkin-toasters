@@ -3,7 +3,7 @@ import {Link, useLocation} from 'react-router';
 import {REPOSITORY_URL} from './Site';
 
 const FANTASY_FLIGHT_URL = 'https://www.fantasyflightgames.com';
-const UPDATED = '26 November 2026';
+const UPDATED = '28 November 2026';
 
 export function AboutPage() {
     const {hash} = useLocation();
@@ -90,11 +90,12 @@ export function AboutPage() {
                 <dl>
                     <dt>What we store</dt>
                     <dd>
-                        Your account: which provider you log in with (Google or Discord) and its id for your account,
-                        your display name and your settings. Nothing else of your Google or Discord profile, neither
-                        your email address nor your picture. Your games: the games you host, join or watch, every move
-                        in them, your seats and votes, your chat messages and the problems you report, with their times.
-                        Your login session.
+                        Your account: your email address (the one Google or Discord gives for your account, or the one
+                        you log in with), which provider you log in with (Google or Discord) and its id for your
+                        account, your display name and your settings. Nothing else of your Google or Discord profile,
+                        not your picture either. The login code we email you, until it is used or expires. Your games:
+                        the games you host, join or watch, every move in them, your seats and votes, your chat messages
+                        and the problems you report, with their times. Your login session.
                     </dd>
                     <dt>Why</dt>
                     <dd>
@@ -105,7 +106,7 @@ export function AboutPage() {
                     <dd>
                         Logged in users see your display name in the user list, the lobbies and the games. The players
                         and observers of a game see its moves and chat; the rules decide what each of them sees of the
-                        hidden cards.
+                        hidden cards. Nobody else sees your email address.
                     </dd>
                     <dt>Cookies and browser storage</dt>
                     <dd>
@@ -114,7 +115,9 @@ export function AboutPage() {
                         chat. Notifications of your move come from your own browser, and only if you allow them.
                     </dd>
                     <dt>Login providers</dt>
-                    <dd>Google and Discord handle your login under their own privacy policies.</dd>
+                    <dd>Google and Discord handle your login under their own privacy policies. A login code goes to
+                        your email address through our mail provider.
+                    </dd>
                     <dt>How long</dt>
                     <dd>As long as your account exists. A game stays with its moves and chat, so that its players can
                         look back on it.

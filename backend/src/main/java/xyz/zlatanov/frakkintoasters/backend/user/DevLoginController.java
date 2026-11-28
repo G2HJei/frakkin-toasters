@@ -38,7 +38,7 @@ public class DevLoginController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A name has 1 to 40 characters");
         }
         var name = login.name().strip();
-        var user = users.login("dev", name, name);
+        var user = users.login("dev", name, null, name);
         SecurityConfiguration.logIn(user.id(), request, response, contexts);
         return user;
     }

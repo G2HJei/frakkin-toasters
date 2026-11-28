@@ -24,6 +24,14 @@ export function ProfilePage() {
           <span className="field-name">Name</span>
           <input value={shown} maxLength={40} onChange={(event) => setName(event.target.value)} aria-label="name" />
         </label>
+        {me.data?.email && (
+          <div className="field">
+            <span className="field-name">Email</span>
+            <span>
+              {me.data.email} <span className="muted small">· you log in with it, and nobody else sees it</span>
+            </span>
+          </div>
+        )}
         <div className="form-actions">
           <button type="submit" className="primary" disabled={update.isPending || !shown.trim()}>
             Save

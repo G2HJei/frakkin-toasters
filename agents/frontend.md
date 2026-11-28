@@ -157,12 +157,14 @@ and at 480px and less a game's actions go under its name and the dev profile's "
 - Anyone: `HomePage` (`/`: a line from the series, the way in (register or log in, or Play when logged in), parts of
   `board.jpg` cut out by `viewBox` with what each offers, the site's features, character sheets), `AboutPage`
   (`/about`: what the site is, `#terms` and `#privacy`; registering confirms the user owns the game), `LoginPage`
-  (a login lands on `/play`).
+  (each provider's button led by the provider's mark on a white tile, `public/icons/<provider>.svg` from its brand kit,
+  shown once it loads; then the email login: the address, then the code mailed to it; a provider login that came back
+  says why, `?error=unverified-email`; a login lands on `/play`).
 - Logged in (a 401 goes to the login page): `PlayPage` (`/play`, the lobby: my games with hosting, my sandboxes with
   a new one, each of mine with "Open" to its tab, open lobbies, games to watch with their vacant seats, and `LobbyChat`: everyone's chat at the top, above my games,
   polled every 10 s while the tab shows (`useLobbyChat`), the viewer's own name in amber, a one-line box where Enter sends, no button), `UsersPage`
   (`/users`, `GET /api/users`),
-  `ProfilePage` (`/profile`, the name), `NewSandboxPage`, and in a game's tab `RoomPage` (seats and observers with a
+  `ProfilePage` (`/profile`, the name, and the email read only), `NewSandboxPage`, and in a game's tab `RoomPage` (seats and observers with a
   dot for who is there, join, leave, start; the host removes or bans a user and cancels the game).
 
 The table page shows why it doesn't open a game: saved by another version, cancelled by the host, or a running game the

@@ -8,6 +8,8 @@
 #   TOKEN_SECRET                                       hashes the state tokens the clients echo
 #   FRAKKIN_LOGIN_GOOGLE_CLIENTID, ..._CLIENTSECRET    the Google login
 #   FRAKKIN_LOGIN_DISCORD_CLIENTID, ..._CLIENTSECRET   the Discord login
+#   SPRING_MAIL_HOST, _PORT, _USERNAME, _PASSWORD      the SMTP server of the login codes, which turns the email login on
+#   FRAKKIN_MAILFROM                                   the sender of the codes
 #   FRAKKIN_ALLOWEDORIGINS                             other origins the game socket accepts, if any
 FROM eclipse-temurin:21-jre
 WORKDIR /app

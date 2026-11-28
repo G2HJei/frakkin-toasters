@@ -4,6 +4,8 @@ import { api, ApiError } from './http';
 export interface Me {
   id: string;
   name: string;
+  // the address the user logs in with, shown to nobody else; none for the dev login's users
+  email: string | null;
   settings: Record<string, unknown>;
 }
 
@@ -15,6 +17,8 @@ export interface ListedUser {
 export interface Logins {
   providers: string[];
   devLogin: boolean;
+  // the login by a code sent to an email address
+  email: boolean;
 }
 
 export type GameStatus = 'LOBBY' | 'RUNNING' | 'FINISHED';
@@ -157,6 +161,20 @@ export function useDevLogin() {
   const client = useQueryClient();
   return useMutation({
     mutationFn: (name: string) => api<Me>('POST', '/api/dev/login', { name }),
+    onSuccess: () => client.invalidateQueries(),
+  });
+}
+
+export function useRequestLoginCode() {
+  return useMutation({
+    mutationFn: (email: string) => api<null>('POST', '/api/login/email', { email }),
+  });
+}
+
+export function useEmailLogin() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (login: { email: string; code: string }) => api<Me>('POST', '/api/login/email/verify', login),
     onSuccess: () => client.invalidateQueries(),
   });
 }

@@ -20,6 +20,15 @@ spring:
   threads:
     virtual:
       enabled: true
+  # The login codes go by SMTP once spring.mail.host is set (with port, username, password and frakkin.mail-from).
+  mail:
+    properties:
+      "[mail.smtp.starttls.enable]": true
+      "[mail.smtp.starttls.required]": true
+      # a mail server that doesn't answer fails the request rather than holding it
+      "[mail.smtp.connectiontimeout]": 10000
+      "[mail.smtp.timeout]": 10000
+      "[mail.smtp.writetimeout]": 10000
 
 server:
   # Behind a proxy that terminates HTTPS (nginx on the VPS), the OAuth callback URLs and the game socket's same-origin

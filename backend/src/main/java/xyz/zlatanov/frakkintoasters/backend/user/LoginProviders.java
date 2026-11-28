@@ -9,6 +9,8 @@ import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @ConfigurationProperties("frakkin.login")
 public record LoginProviders(Client google, Client discord) {
@@ -26,7 +28,7 @@ public record LoginProviders(Client google, Client discord) {
             registrations.add(CommonOAuth2Provider.GOOGLE.getBuilder("google")
                     .clientId(google.clientId())
                     .clientSecret(google.clientSecret())
-                    .scope("openid") // the subject is all we keep
+                    .scope("openid", "email") // the subject and the email are all we keep
                     .build());
         }
         // Spring has no preset for Discord.
@@ -37,7 +39,7 @@ public record LoginProviders(Client google, Client discord) {
                     .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
                     .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                     .redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
-                    .scope("identify")
+                    .scope("identify", "email")
                     .authorizationUri("https://discord.com/oauth2/authorize")
                     .tokenUri("https://discord.com/api/oauth2/token")
                     .userInfoUri("https://discord.com/api/users/@me")
@@ -46,5 +48,21 @@ public record LoginProviders(Client google, Client discord) {
                     .build());
         }
         return registrations;
+    }
+
+    /**
+     * The email of a provider's user, only once the provider verified it: the login joins the user with that email, so an
+     * unverified one would open someone else's account.
+     */
+    public static Optional<String> verifiedEmail(String registrationId, Map<String, Object> attributes) {
+        val verified = switch (registrationId) {
+            case "google" -> attributes.get("email_verified");
+            case "discord" -> attributes.get("verified");
+            default -> null;
+        };
+        if (!Boolean.TRUE.equals(verified) && !"true".equals(verified)) {
+            return Optional.empty();
+        }
+        return attributes.get("email") instanceof String email && !email.isBlank() ? Optional.of(email) : Optional.empty();
     }
 }

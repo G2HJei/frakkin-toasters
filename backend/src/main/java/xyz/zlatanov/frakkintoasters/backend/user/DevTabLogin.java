@@ -46,7 +46,7 @@ public class DevTabLogin extends OncePerRequestFilter {
             response.sendError(HttpStatus.BAD_REQUEST.value(), "A name has 1 to 40 characters");
             return;
         }
-        val user = users.login("dev", name.strip(), name.strip());
+        val user = users.login("dev", name.strip(), null, name.strip());
         val context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(new AppUserAuthentication(user.id()));
         val before = SecurityContextHolder.getContext();

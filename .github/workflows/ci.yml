@@ -14,6 +14,11 @@
 #   TOKEN_SECRET                     a long random string, e.g. openssl rand -hex 32
 #   FRAKKIN_LOGIN_GOOGLE_CLIENTID, FRAKKIN_LOGIN_GOOGLE_CLIENTSECRET     optional, the Google login
 #   FRAKKIN_LOGIN_DISCORD_CLIENTID, FRAKKIN_LOGIN_DISCORD_CLIENTSECRET   optional, the Discord login
+#   SPRING_MAIL_HOST, SPRING_MAIL_PORT optional, the SMTP server that sends the login codes (STARTTLS, e.g. port 587):
+#                                    with a host the email login is on
+#   SPRING_MAIL_USERNAME, SPRING_MAIL_PASSWORD   its login
+#   FRAKKIN_MAILFROM                 the sender of the codes, e.g. "Frakkin Toasters <login@example.com>"; needed with
+#                                    a host
 # and these variables:
 #   APP_PORT                         optional, the port the app listens on at the VPS, 8080 by default
 #   SPRING_PROFILES_ACTIVE           optional; "dev" adds the login by name, which lets anyone in as anyone
@@ -201,12 +206,17 @@ jobs:
           FRAKKIN_LOGIN_GOOGLE_CLIENTSECRET: ${{ secrets.FRAKKIN_LOGIN_GOOGLE_CLIENTSECRET }}
           FRAKKIN_LOGIN_DISCORD_CLIENTID: ${{ secrets.FRAKKIN_LOGIN_DISCORD_CLIENTID }}
           FRAKKIN_LOGIN_DISCORD_CLIENTSECRET: ${{ secrets.FRAKKIN_LOGIN_DISCORD_CLIENTSECRET }}
+          SPRING_MAIL_HOST: ${{ secrets.SPRING_MAIL_HOST }}
+          SPRING_MAIL_PORT: ${{ secrets.SPRING_MAIL_PORT }}
+          SPRING_MAIL_USERNAME: ${{ secrets.SPRING_MAIL_USERNAME }}
+          SPRING_MAIL_PASSWORD: ${{ secrets.SPRING_MAIL_PASSWORD }}
+          FRAKKIN_MAILFROM: ${{ secrets.FRAKKIN_MAILFROM }}
         run: |
           {
             echo "SERVER_PORT=$APP_PORT"
             for name in SPRING_PROFILES_ACTIVE DATABASE_URL DATABASE_USER DATABASE_PASSWORD TOKEN_SECRET \
                 FRAKKIN_LOGIN_GOOGLE_CLIENTID FRAKKIN_LOGIN_GOOGLE_CLIENTSECRET \
-                FRAKKIN_LOGIN_DISCORD_CLIENTID FRAKKIN_LOGIN_DISCORD_CLIENTSECRET; do
+                FRAKKIN_LOGIN_DISCORD_CLIENTID FRAKKIN_LOGIN_DISCORD_CLIENTSECRET                 SPRING_MAIL_HOST SPRING_MAIL_PORT SPRING_MAIL_USERNAME SPRING_MAIL_PASSWORD FRAKKIN_MAILFROM; do
               if [ -n "${!name}" ]; then printf '%s=%s\n' "$name" "${!name}"; fi
             done
           } | vps 'mkdir -p ~/frakkin-toasters && umask 077 && cat > ~/frakkin-toasters/app.env.next'

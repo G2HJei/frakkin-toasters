@@ -23,7 +23,9 @@ class SchemaTest {
 
     @Test
     void theTablesHaveTheColumnsOfThePlan() {
-        assertEquals(List.of("id uuid NO", "name text NO", "settings jsonb NO"), columns("app_user"));
+        assertEquals(List.of("id uuid NO", "name text NO", "settings jsonb NO", "email text YES"), columns("app_user"));
+        assertEquals(List.of("user_id uuid NO", "code_hash text NO", "created_at timestamp with time zone NO",
+                "expires_at timestamp with time zone NO", "attempts integer NO"), columns("login_code"));
         assertEquals(List.of("provider text NO", "subject text NO", "user_id uuid NO"), columns("user_identity"));
         assertEquals(List.of(
                 "id uuid NO",
@@ -62,10 +64,12 @@ class SchemaTest {
     void theKeysAreThoseOfThePlan() {
         assertEquals(List.of(
                         "app_user PRIMARY KEY id",
+                        "app_user UNIQUE email",
                         "chat_message PRIMARY KEY id",
                         "game_ban PRIMARY KEY game_bundle_id,user_id",
                         "game_bundle PRIMARY KEY id",
                         "journal_entry PRIMARY KEY game_bundle_id,sequence",
+                        "login_code PRIMARY KEY user_id",
                         "participant PRIMARY KEY game_bundle_id,user_id",
                         "participant UNIQUE game_bundle_id,player_number",
                         "problem_report PRIMARY KEY id",
@@ -79,7 +83,8 @@ class SchemaTest {
                                 JOIN information_schema.key_column_usage kcu ON kcu.constraint_name = tc.constraint_name
                                 WHERE tc.table_schema = 'public' AND tc.constraint_type IN ('PRIMARY KEY', 'UNIQUE')
                                   AND tc.table_name IN ('app_user', 'user_identity', 'game_bundle', 'participant', 'journal_entry',
-                                                        'seat_holder', 'game_ban', 'vote', 'chat_message', 'problem_report')
+                                                        'seat_holder', 'game_ban', 'vote', 'chat_message', 'problem_report',
+                                                        'login_code')
                                 GROUP BY tc.table_name, tc.constraint_type, tc.constraint_name
                                 ORDER BY 1""")
                         .query(String.class)
@@ -92,6 +97,7 @@ class SchemaTest {
                         "game_bundle.host_user_id -> app_user",
                         "game_bundle.rematch_id -> game_bundle",
                         "journal_entry.game_bundle_id -> game_bundle",
+                        "login_code.user_id -> app_user",
                         "participant.game_bundle_id -> game_bundle",
                         "participant.user_id -> app_user",
                         "problem_report.game_bundle_id -> game_bundle",
@@ -109,7 +115,8 @@ class SchemaTest {
                                      ON ccu.constraint_name = tc.constraint_name
                                 WHERE tc.table_schema = 'public' AND tc.constraint_type = 'FOREIGN KEY'
                                   AND tc.table_name IN ('app_user', 'user_identity', 'game_bundle', 'participant', 'journal_entry',
-                                                        'seat_holder', 'game_ban', 'vote', 'chat_message', 'problem_report')
+                                                        'seat_holder', 'game_ban', 'vote', 'chat_message', 'problem_report',
+                                                        'login_code')
                                 ORDER BY 1""")
                         .query(String.class)
                         .list());

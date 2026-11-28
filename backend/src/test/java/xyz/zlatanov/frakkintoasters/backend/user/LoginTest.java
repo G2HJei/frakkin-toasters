@@ -9,6 +9,8 @@ import xyz.zlatanov.frakkintoasters.backend.BackendTest;
 import xyz.zlatanov.frakkintoasters.backend.journal.JournalCodec;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -27,15 +29,50 @@ class LoginTest extends BackendTest {
     @Test
     void aFirstLoginCreatesTheUserAndALaterOneFindsHim() {
         val subject = UUID.randomUUID().toString();
+        val email = "starbuck-" + subject + "@example.com";
 
-        val first = users.login("google", subject, "Starbuck");
-        val second = users.login("google", subject, "Apollo");
+        val first = users.login("google", subject, email, "Starbuck");
+        val second = users.login("google", subject, email, "Apollo");
 
         assertEquals(first, second);
         assertEquals("Starbuck", second.name());
+        assertEquals(email, second.email());
         assertEquals(1, jdbc.sql("SELECT count(*) FROM user_identity WHERE subject = :subject")
                 .param("subject", subject).query(Integer.class).single());
-        assertNotEquals(first.id(), users.login("discord", subject, "Starbuck").id()); // another provider's subject
+        assertNotEquals(first.id(), users.login("discord", subject, null, "Starbuck").id()); // another provider's subject
+    }
+
+    @Test
+    void theSameEmailIsOneUserWhicheverWayHeLogsIn() {
+        val suffix = UUID.randomUUID().toString();
+        val email = "Kara-" + suffix + "@Example.com";
+
+        val google = users.login("google", "g-" + suffix, email, "Starbuck");
+        val discord = users.login("discord", "d-" + suffix, email.toUpperCase(), "Kara");
+
+        assertEquals(google.id(), discord.id());
+        assertEquals(email.toLowerCase(), google.email());
+        assertEquals(google.id(), users.byEmail(email, "Pilot").id());
+        assertEquals(2, jdbc.sql("SELECT count(*) FROM user_identity WHERE user_id = :id")
+                .param("id", google.id()).query(Integer.class).single());
+        // a later email at the provider leaves the account as it is
+        assertEquals(email.toLowerCase(), users.login("google", "g-" + suffix, "other-" + email, "Starbuck").email());
+    }
+
+    @Test
+    void onlyAnEmailTheProviderVerifiedCounts() {
+        assertEquals(Optional.of("kara@example.com"),
+                LoginProviders.verifiedEmail("google", Map.of("email", "kara@example.com", "email_verified", true)));
+        assertEquals(Optional.of("kara@example.com"),
+                LoginProviders.verifiedEmail("discord", Map.of("email", "kara@example.com", "verified", true)));
+        assertEquals(Optional.empty(),
+                LoginProviders.verifiedEmail("google", Map.of("email", "kara@example.com", "email_verified", false)));
+        assertEquals(Optional.empty(),
+                LoginProviders.verifiedEmail("discord", Map.of("email", "kara@example.com", "verified", false)));
+        assertEquals(Optional.empty(), LoginProviders.verifiedEmail("discord", Map.of("verified", true)));
+        // Google's verified flag belongs to Google
+        assertEquals(Optional.empty(),
+                LoginProviders.verifiedEmail("discord", Map.of("email", "kara@example.com", "email_verified", true)));
     }
 
     @Test
@@ -46,7 +83,8 @@ class LoginTest extends BackendTest {
         mvc.perform(get("/ws/games/" + UUID.randomUUID())).andExpect(status().isUnauthorized());
         mvc.perform(get("/api/login/providers"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.devLogin").value(true));
+                .andExpect(jsonPath("$.devLogin").value(true))
+                .andExpect(jsonPath("$.email").value(true)); // the dev profile's codes go to the log
     }
 
     @Test
@@ -106,6 +144,11 @@ class LoginTest extends BackendTest {
         val providers = new LoginProviders(new LoginProviders.Client("id", "secret"), null);
 
         assertThrows(IllegalStateException.class, () -> new DevLoginController(users, null, providers));
+    }
+
+    @Test
+    void theDevLoginCantBeOnWithAMailServer() {
+        assertThrows(IllegalStateException.class, () -> new DevLoginMail("smtp.example.com"));
     }
 
     // Spring Session finds the session by its SESSION cookie.

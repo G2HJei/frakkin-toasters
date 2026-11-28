@@ -17,6 +17,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
 import java.util.Base64;
@@ -36,18 +37,45 @@ class LoginCookieTest {
     @Autowired
     JdbcClient jdbc;
 
+    @Autowired
+    DevLoginMail mail;
+
     @Test
     void aLoginIsKeptOnTheDeviceFor30Days() throws Exception {
-        val days30 = Duration.ofDays(30).toSeconds();
         val cookies = new CookieManager(null, CookiePolicy.ACCEPT_ALL);
         val http = HttpClient.newBuilder().cookieHandler(cookies).build();
         http.send(HttpRequest.newBuilder(uri("/api/login/providers")).build(), BodyHandlers.discarding());
 
-        val login = http.send(HttpRequest.newBuilder(uri("/api/dev/login"))
+        val login = post(http, cookies, "/api/dev/login",
+                "{\"name\":\"Dualla " + UUID.randomUUID().toString().substring(0, 6) + "\"}");
+
+        assertKeptFor30Days(login, cookies);
+    }
+
+    @Test
+    void anEmailLoginIsKeptAsLong() throws Exception {
+        val email = "dee-" + UUID.randomUUID().toString().substring(0, 8) + "@example.com";
+        val cookies = new CookieManager(null, CookiePolicy.ACCEPT_ALL);
+        val http = HttpClient.newBuilder().cookieHandler(cookies).build();
+        http.send(HttpRequest.newBuilder(uri("/api/login/providers")).build(), BodyHandlers.discarding());
+
+        assertEquals(204, post(http, cookies, "/api/login/email", "{\"email\":\"" + email + "\"}").statusCode());
+        val login = post(http, cookies, "/api/login/email/verify",
+                "{\"email\":\"" + email + "\",\"code\":\"" + mail.lastCode(email).orElseThrow() + "\"}");
+
+        assertKeptFor30Days(login, cookies);
+    }
+
+    private HttpResponse<Void> post(HttpClient http, CookieManager cookies, String path, String body) throws Exception {
+        return http.send(HttpRequest.newBuilder(uri(path))
                 .header("Content-Type", "application/json")
                 .header("X-XSRF-TOKEN", cookie(cookies, "XSRF-TOKEN"))
-                .POST(BodyPublishers.ofString("{\"name\":\"Dualla " + UUID.randomUUID().toString().substring(0, 6) + "\"}"))
+                .POST(BodyPublishers.ofString(body))
                 .build(), BodyHandlers.discarding());
+    }
+
+    private void assertKeptFor30Days(HttpResponse<Void> login, CookieManager cookies) {
+        val days30 = Duration.ofDays(30).toSeconds();
         val header = login.headers().allValues("Set-Cookie").stream()
                 .filter(value -> value.startsWith("SESSION="))
                 .findFirst()

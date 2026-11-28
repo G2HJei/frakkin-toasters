@@ -15,9 +15,18 @@ stores its journal in Postgres and pushes to every viewer what he may see. It ad
   then the projections (with the engine's `pendingScope()`) to the `ProjectionSink`, under the lock. A viewer for whom nothing visible changed gets nothing.
   Every engine it starts or restores takes only answers while `frakkin.take-only-answers` is on (the default, see
   [Engine](engine.md#engine)). `JournalStore`, `GameBundles` (with `mode` and `seed`: a seeded game restores with its seed).
-- `user/` - logins through Google and Discord (`LoginProviders`, only those with a client id), the `dev` profile's
-  login by name (`POST /api/dev/login`, refused together with a real provider), `AppUserAuthentication` in the HTTP
-  session, which Spring Session keeps in Postgres so a login survives a restart, and which lasts 30 days on the device
+- `user/` - logins through Google and Discord (`LoginProviders`, only those with a client id) and by email. The email
+  is the account (`app_user.email`, lowercased, unique; none for the dev users): a provider's first login joins the user
+  with its email, which the providers hand over only once verified (`verifiedEmail`; otherwise the login goes back to
+  `/login?error=unverified-email`), and a later change of it at the provider leaves the account alone.
+  - The email login (`EmailLogin`, on with a `LoginMail`: `SmtpLoginMail` once `spring.mail.host` is set, from
+    `frakkin.mail-from`, or the `dev` profile's `DevLoginMail`, which logs the code and keeps it for the tests):
+    `POST /api/login/email {email}` creates the user of a new address at once and mails a 6-digit code, the one live
+    code of the user in `login_code` (HMAC-SHA256 with `frakkin.token-secret`, 10 minutes, 5 tries); `POST
+    /api/login/email/verify {email, code}` logs in. A code per address every 60 s, 5 an hour per address and 10 per IP
+    (in memory), a 429 beyond. A mail that can't be sent takes its code back (503).
+  - The `dev` profile's login by name (`POST /api/dev/login`, refused together with a real provider or SMTP).
+  - `AppUserAuthentication` in the HTTP session, which Spring Session keeps in Postgres so a login survives a restart, and which lasts 30 days on the device
   (`spring.session.timeout` and `server.servlet.session.cookie.max-age`; MockMvc's mock servlet context doesn't apply
   the cookie's settings, so `LoginCookieTest` checks them on a real server; a provider's login lands on `/play`),
   `GET`/`PUT /api/me`, `GET /api/users` (every user's id and name, by name). CSRF through the

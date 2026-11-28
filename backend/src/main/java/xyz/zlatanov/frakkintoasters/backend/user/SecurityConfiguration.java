@@ -63,7 +63,7 @@ public class SecurityConfiguration {
                 .securityContext(context -> context.securityContextRepository(contexts))
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/api/dev/login").permitAll()
-                        .requestMatchers("/api/login/providers").permitAll()
+                        .requestMatchers("/api/login/**").permitAll()
                         .requestMatchers("/api/schema").permitAll()
                         .requestMatchers("/api/**", "/ws/**").authenticated()
                         .anyRequest().permitAll())
@@ -93,7 +93,17 @@ public class SecurityConfiguration {
                     .clientRegistrationRepository(new InMemoryClientRegistrationRepository(registrations))
                     .successHandler((request, response, authentication) -> {
                         val token = (OAuth2AuthenticationToken) authentication;
-                        val user = users.login(token.getAuthorizedClientRegistrationId(), token.getName(), defaultName());
+                        val provider = token.getAuthorizedClientRegistrationId();
+                        val email = LoginProviders.verifiedEmail(provider, token.getPrincipal().getAttributes());
+                        if (email.isEmpty()) {
+                            // the filter kept the provider's login in the session: nobody is logged in after all
+                            val empty = SecurityContextHolder.createEmptyContext();
+                            SecurityContextHolder.setContext(empty);
+                            contexts.saveContext(empty, request, response);
+                            response.sendRedirect("/login?error=unverified-email");
+                            return;
+                        }
+                        val user = users.login(provider, token.getName(), email.get(), defaultName());
                         logIn(user.id(), request, response, contexts);
                         // to the games, as the dev login goes
                         response.sendRedirect("/play");
@@ -113,8 +123,8 @@ public class SecurityConfiguration {
         contexts.saveContext(context, request, response);
     }
 
-    // Nothing of the provider's profile is kept, so a new user gets a name to change in his settings.
-    private static String defaultName() {
+    // A user's email is shown to nobody else, so a new user gets a name to change in his settings.
+    static String defaultName() {
         return "Pilot " + (1000 + (int) (Math.random() * 9000));
     }
 }

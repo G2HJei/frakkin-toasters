@@ -14,14 +14,15 @@ import java.util.List;
 public class LoginController {
 
     private final LoginProviders providers;
+    private final EmailLogin     emailLogin;
     private final Environment    environment;
 
-    public record Logins(List<String> providers, boolean devLogin) {
+    public record Logins(List<String> providers, boolean devLogin, boolean email) {
     }
 
     @GetMapping("/api/login/providers")
     public Logins logins() {
         return new Logins(providers.registrations().stream().map(ClientRegistration::getRegistrationId).toList(),
-                environment.acceptsProfiles(Profiles.of("dev")));
+                environment.acceptsProfiles(Profiles.of("dev")), emailLogin.enabled());
     }
 }
