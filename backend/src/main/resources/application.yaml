@@ -6,6 +6,7 @@ spring:
     username: ${DATABASE_USER:frakkin_toasters}
     password: ${DATABASE_PASSWORD:frakkin_toasters}
   session:
+    timeout: 30d
     jdbc:
       # Flyway's V3 creates the tables.
       initialize-schema: never
@@ -24,6 +25,10 @@ server:
   # Behind a proxy that terminates HTTPS (nginx on the VPS), the OAuth callback URLs and the game socket's same-origin
   # check need the scheme the browser used. Tomcat takes X-Forwarded-* only from internal addresses, like the proxy's.
   forward-headers-strategy: native
+  servlet:
+    session:
+      cookie:
+        max-age: 30d
 
 frakkin:
   # Hashes the sequence of a game into the token a client echoes. Set it in production.

@@ -17,7 +17,9 @@ stores its journal in Postgres and pushes to every viewer what he may see. It ad
   [Engine](engine.md#engine)). `JournalStore`, `GameBundles` (with `mode` and `seed`: a seeded game restores with its seed).
 - `user/` - logins through Google and Discord (`LoginProviders`, only those with a client id), the `dev` profile's
   login by name (`POST /api/dev/login`, refused together with a real provider), `AppUserAuthentication` in the HTTP
-  session, which Spring Session keeps in Postgres so a login survives a restart (a provider's login lands on `/play`),
+  session, which Spring Session keeps in Postgres so a login survives a restart, and which lasts 30 days on the device
+  (`spring.session.timeout` and `server.servlet.session.cookie.max-age`; MockMvc's mock servlet context doesn't apply
+  the cookie's settings, so `LoginCookieTest` checks them on a real server; a provider's login lands on `/play`),
   `GET`/`PUT /api/me`, `GET /api/users` (every user's id and name, by name). CSRF through the
   `XSRF-TOKEN` cookie and the `X-XSRF-TOKEN` header.
 - Dev simulation (`dev` profile only, refused with a real provider like the dev login): `DevTabLogin` makes a request
