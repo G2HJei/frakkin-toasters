@@ -1,7 +1,7 @@
 import type {ReactNode} from 'react';
 import {Link} from 'react-router';
 import {useMe} from '../api/queries';
-import {characterSheetArt, deckBackArt, dieArt, tokenArt, type ArtRef} from '../art/images';
+import {type ArtRef, characterSheetArt, deckBackArt, dieArt, tokenArt} from '../art/images';
 import boardUrl from '../table/board/board.jpg';
 import {REPOSITORY_URL} from './Site';
 
@@ -127,7 +127,6 @@ export function HomePage() {
                 <div className="hero-content">
                     <img className="hero-logo" src="/logo.svg" alt=""/>
                     <h1 className="hero-brand">Frakkin Toasters</h1>
-                    <p className="hero-tagline">The Battlestar Galactica board game, at one table in the browser.</p>
                     <figure className="quote">
                         <blockquote>All of this has happened before, and all of this will happen again.</blockquote>
                         <figcaption>The Book of Pythia</figcaption>
